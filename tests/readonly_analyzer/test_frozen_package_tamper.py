@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+import runpy
 import subprocess
+import sys
 from pathlib import Path
 from uuid import UUID
 
@@ -67,6 +69,16 @@ def _run_salvage(manifest: Path, repository_root: Path, *extra: str) -> subproce
     )
 
 
+def _git(repository_root: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(repository_root), *args],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
 def test_reader_rejects_changed_member(tmp_path: Path) -> None:
     package = write_valid_package(tmp_path / "pkg", RUN)
     member = package / "quality_minutes/records.ndjson"
@@ -112,3 +124,80 @@ def test_private_salvage_mode_requires_source_objects(tmp_path: Path) -> None:
     completed = _run_salvage(manifest, tmp_path, "--require-source-objects")
     assert completed.returncode != 0
     assert "required source objects are unavailable" in completed.stderr
+
+
+def test_source_verification_reads_actual_blob_payload(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    manifest, _ = _write_public_salvage_fixture(tmp_path)
+    source = tmp_path / "private/example.py"
+    source.parent.mkdir()
+    source.write_bytes(b"synthetic source bytes\n")
+    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "add", "private/example.py")
+    _git(
+        tmp_path,
+        "-c", "user.name=Fixture",
+        "-c", "user.email=fixture@example.test",
+        "commit", "-qm", "synthetic source fixture",
+    )
+    head = _git(tmp_path, "rev-parse", "HEAD")
+    blob_sha = _git(tmp_path, "rev-parse", "HEAD:private/example.py")
+    rows = yaml.safe_load(manifest.read_text(encoding="utf-8"))
+    rows["source_head"] = head
+    rows["items"][0]["source_blob_sha"] = blob_sha
+    manifest.write_text(yaml.safe_dump(rows), encoding="utf-8")
+    verifier = runpy.run_path(str(VERIFY_SALVAGE))
+    main = verifier["main"]
+    main.__globals__["EXPECTED_HEAD"] = head
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [str(VERIFY_SALVAGE), "--manifest", str(manifest), "--repository-root", str(tmp_path),
+         "--require-source-objects"],
+    )
+    assert main() == 0
+    assert "source_objects=verified" in capsys.readouterr().out
+
+    # The commit and tree still resolve this object ID after its loose payload is removed.
+    object_path = tmp_path / ".git/objects" / blob_sha[:2] / blob_sha[2:]
+    assert object_path.is_file()
+    object_path.unlink()
+    with pytest.raises(SystemExit, match="required source objects are unavailable"):
+        main()
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [str(VERIFY_SALVAGE), "--manifest", str(manifest), "--repository-root", str(tmp_path)],
+    )
+    assert main() == 0
+    assert "source_objects=unavailable" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("mutation", ["wrong_pr", "wrong_head", "unknown_root", "missing_field", "wrong_type"])
+def test_salvage_rejects_manifest_outside_closed_schema(tmp_path: Path, mutation: str) -> None:
+    manifest, _ = _write_public_salvage_fixture(tmp_path)
+    rows = yaml.safe_load(manifest.read_text(encoding="utf-8"))
+    if mutation == "wrong_pr":
+        rows["source_pr"] = 210
+    elif mutation == "wrong_head":
+        rows["source_head"] = "0" * 40
+        rows["items"][0]["rule"] += SOURCE_HEAD
+    elif mutation == "unknown_root":
+        rows["unexpected"] = True
+    elif mutation == "missing_field":
+        del rows["items"][0]["target_sha256"]
+    else:
+        rows["items"][0]["source_blob_sha"] = 42
+    manifest.write_text(yaml.safe_dump(rows), encoding="utf-8")
+    completed = _run_salvage(manifest, tmp_path)
+    assert completed.returncode != 0
+    assert "invalid salvage manifest" in completed.stderr
+
+
+def test_salvage_rejects_malformed_yaml(tmp_path: Path) -> None:
+    manifest, _ = _write_public_salvage_fixture(tmp_path)
+    manifest.write_text("source_pr: [\n", encoding="utf-8")
+    completed = _run_salvage(manifest, tmp_path)
+    assert completed.returncode != 0
+    assert "invalid salvage manifest" in completed.stderr

@@ -32,7 +32,8 @@ found no remaining Critical or Important issue.
 ## F2 — contracts
 
 - [x] Author the [F2 implementation plan](../../../docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md) for review.
-- [ ] Review and approve the F2 plan before implementation.
+- [x] Complete scoped independent plan re-review at `50f16225c23f5fde046b483321f86bb7d6bbf4f1`: all ten findings addressed; no new Critical or Important issue.
+- [ ] Obtain human review and approval of the F2 plan before implementation.
 - [ ] Freeze OpenAPI, JSON Schemas, reason codes, and state graphs.
 - [ ] Add exact BUY/SELL vectors and invalid-input contract tests.
 - [ ] Add payment atomic-unit and idempotency vectors.

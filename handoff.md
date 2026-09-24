@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 plan review repair). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24 (F2 independent plan review closure). Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f2-contracts` (stacked on verified F1).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -15,17 +15,20 @@ ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
 
 The [F2 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md)
-now exists and awaits plan review/approval. Its six tasks cover closed JSON
+now exists and awaits human plan approval. Its six tasks cover closed JSON
 Schemas/OpenAPI, public reasons, separate request/quote/payment state graphs,
 exact BUY/SELL vectors, and payment atomic-unit/idempotency/auth obligations.
 Initial independent review of plan commit `66fe042` identified six Important
 and four Minor findings. The planning repair addresses portable schema
 patterns/base URIs, discriminated request status, no-broadcast expiry,
 joint delivery/finality guards, authorization-aware retention, raw ZIP/header
-correlation, concrete vector shapes, and conditional continuity. These fixes
-are pending independent re-review and plan approval; F2 is not implemented.
-Next: re-review the repaired plan, then obtain approval before task-by-task
-implementation. Runtime acceptance remains unrun or externally blocked; F1
+correlation, concrete vector shapes, and conditional continuity. Scoped
+independent re-review approved all ten findings as addressed, with no new
+Critical or Important issue, specifically against reviewed plan commit
+`50f16225c23f5fde046b483321f86bb7d6bbf4f1`. The reviewed plan is unchanged by
+this closure. Human plan approval remains pending; F2 implementation has not
+started. Next: obtain human approval before task-by-task implementation.
+Runtime acceptance remains unrun or externally blocked; F1
 payment/finality and Trivy blockers remain unchanged.
 
 Planning verification: `git diff --check`, authoring-placeholder scan and
@@ -37,6 +40,8 @@ is claimed by this planning step.
 The repair's 11 JSON snippets parse; all nine primitive patterns reject the
 four tested trailing line terminators (LF, CRLF, U+2028 and U+2029). These are
 plan-snippet checks, not implemented API or payment acceptance.
+Documentation-only review closure also passed `git diff --check` and
+`make graph`, with the same seven inherited declared conflicts.
 
 The full delivery sequence is contracts → verifiable report → API/ledger →
 testnet settlement → UI/operations → acceptance. The canonical specification

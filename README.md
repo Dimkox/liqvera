@@ -97,6 +97,25 @@ container builds and the full clean-machine README/demo acceptance were not
 run during F1 closure. Public salvage verifies pinned target bytes and reports
 `source_objects=unavailable`; private-source verification is not claimed.
 
+## F3 MVP prototype
+
+The in-progress F3 branch includes an intentionally unhardened, fixture-only
+prototype of the future report flow:
+
+```bash
+make mvp
+```
+
+It captures the built-in public-data fixture, builds a simulated BTC report,
+and writes `.mvp/output/report.json` plus `.mvp/output/evidence.zip`. Optional
+`MVP_SIDE` and `MVP_QUANTITY` environment variables default to `BUY` and
+`0.15`. Each run replaces only `.mvp/package` and `.mvp/output`.
+
+This prototype is **SIMULATED** and **UNVERIFIED**. Payments and live
+verification are not implemented. It does not establish F3 completion,
+runtime acceptance, report chargeability, testnet settlement, or permission
+for live exchange mutations.
+
 The optional public compatibility probe is separate from offline verification:
 
 ```bash

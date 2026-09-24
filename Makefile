@@ -1,4 +1,4 @@
-.PHONY: verify verify-packages graph salvage artifacts wheels product demo prod
+.PHONY: verify verify-packages graph salvage artifacts wheels product demo mvp prod
 
 PYTHON ?= python3
 
@@ -34,6 +34,10 @@ demo:
 	PYTHONPATH=$(CURDIR)/packages/contracts/src:$(CURDIR)/packages/public-capture/src:$(CURDIR)/packages/readonly-analyzer/src \
 		MEE_FROZEN_PACKAGE=$(CURDIR)/.stage-a/package \
 		$(PYTHON) -B -c "from mee_readonly_analyzer.__main__ import main; raise SystemExit(main())"
+
+mvp:
+	PYTHONPATH=$(CURDIR)/packages/contracts/src:$(CURDIR)/packages/public-capture/src:$(CURDIR)/packages/readonly-analyzer/src:$(CURDIR)/packages/evidence-report/src \
+		$(PYTHON) -B scripts/run-f3-mvp.py
 
 prod: product
 	docker compose -f compose.stage-a.yml run --rm --no-deps prepare-data

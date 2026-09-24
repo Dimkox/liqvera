@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24T17:32:53Z. Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24T18:02:00Z. Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f1-impl`.
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -8,32 +8,15 @@ Branch: `feat/mezo-evidence-f1-impl`.
 
 ## Current state and next action
 
-Final-review transport repair is in progress. The earlier SHA-bound closure
-evidence below is historical until the new implementation commit is verified
-and the closure documents are refreshed. The overall change remains
-`implementing`; no payment or release gate has changed.
-
-The repair privately bounds consumed HTTP framing to 64 KiB, each framing
-line to 8 KiB, and decoded response data to 2 MiB. Chunk extensions, trailers,
-and malformed CRLF are rejected. A 12-second synchronous total deadline
-covers connection, TLS handshake, headers, body, and chunk termination;
-network reads require POSIX `setitimer`, the main thread, and no existing
-active real-time alarm, otherwise they fail closed before I/O. The prior
-signal handler is restored and the temporary timer cleared on every exit.
-No background transport worker is created. The live probe passes, including
-Mezo's legitimate chunked bytecode response, with both payment blockers.
-Before the repair commit, focused tests passed 107 cases, Ruff passed, and
-`make verify` passed 641 tests plus 85 subtests. Fresh verification against
-the new implementation SHA is the next step before closure evidence refresh.
-
 F1 is **complete-with-blockers**. The overall Mezo change is `implementing`;
 F2–F7 remain open. The accepted
 [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md) fixes only runtime,
 ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
 
-Next: create a separate F2 contracts plan from the approved design, then
-review OpenAPI/JSON Schemas, reason codes, state graphs, exact BUY/SELL
+Next: independent re-review of the final transport repair and refreshed
+closure evidence, then create a separate F2 contracts plan from the approved
+design and review OpenAPI/JSON Schemas, reason codes, state graphs, exact BUY/SELL
 vectors, and payment atomic-unit/idempotency vectors before implementation.
 The full delivery sequence is contracts → verifiable report → API/ledger →
 testnet settlement → UI/operations → acceptance. The canonical specification
@@ -43,14 +26,16 @@ compatibility pointer. Preserve inherited `mee-*` names.
 No active `.grok-stack/runtime/active-route.json` exists in this public
 worktree. `grok_status.py` reports null route/change and no receipt gaps,
 which is not factory approval. No factory receipt was created or claimed.
-Tasks 1–4 passed independent controller review; Task 5 closure must receive
-its own independent review.
+Tasks 1–4 passed their earlier independent controller review. Final whole-branch
+review found an additional transport-bound/deadline defect; the repair and
+refreshed evidence below still require independent re-review.
 
 ## Verified F1 implementation
 
 Evidence is bound to literal implementation SHA
-`68dafdba76ee5aaf9dc2d5c28719f26f849bf1f6`, captured before Task 5
-documentation edits. See
+`0fceafe94e581e28cfb3861b97d041e6399b257a`, captured before the refreshed
+closure documentation edits. The implementation worktree was clean before
+and after the fresh checks at 17:59:23Z–18:01:38Z. See
 [F1 verification](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-verification.md)
 and [compatibility result](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-compatibility.json).
 
@@ -58,19 +43,20 @@ Fresh commands on 2026-09-24:
 
 | Command | Exit | Result |
 | --- | ---: | --- |
-| `PATH="$PWD/.venv/bin:$PATH" make verify` | 0 | 623 tests, 85 subtests; Stage A verification passed |
+| `PATH="$PWD/.venv/bin:$PATH" make verify` | 0 | 641 tests, 85 subtests; Stage A verification passed |
 | `PATH="$PWD/.venv/bin:$PATH" python -B scripts/grok_verify.py --mode pr --no-record` | 1 | Only Trivy failed; all other applicable checks passed; coverage explicitly skipped by runner policy |
 | `trivy config --exit-code 1 .` | 1 | Exactly two LOW DS-0026 missing-HEALTHCHECK findings |
 | `PATH="$PWD/.venv/bin:$PATH" python -B scripts/check-mezo-compatibility.py --lock docs/compatibility/mezo-evidence-v1.json` | 0 | COMPATIBILITY_PASS_PAYMENT_BLOCKED |
 | `.venv/bin/python -m pip check` | 0 | No broken requirements |
+| `PATH="$PWD/.venv/bin:$PATH" python -B -m pytest tests/compatibility/test_mezo_compatibility.py -q` | 0 | 107 focused tests |
 
-Python 3.12.3, pytest 9.1.1, Hatchling 1.32.4, npm 11.19.0.
+Python 3.12.3, pytest 9.1.1, Hatchling 1.32.4. npm is not used by the probe.
 Seven inherited declared graph conflicts remain; the precommit graph check
 permits their explicit declaration and does not resolve them.
-Closure documentation checks also passed: the exact architecture inventory,
-focused Ruff checks, and `git diff --check` all exited 0. The two new
-documents have explicit DOCUMENTATION bindings. Final post-commit checks
-are recorded in the Task 5 implementation report for controller review.
+The exact architecture inventory, focused Ruff checks, and `git diff --check`
+passed against the implementation SHA. Existing DOCUMENTATION bindings are
+unchanged. Final closure checks and both fix-wave commits are recorded in
+the Task 4 implementation report for controller review.
 
 ## Active blockers and limits
 
@@ -93,6 +79,9 @@ are recorded in the Task 5 implementation report for controller review.
   F7 must rerun acceptance against its final commit.
 - Public endpoints and SDK registry availability can change; later external
   unavailability must become `BLOCKED_EXTERNAL`, not an inferred pass.
+- The live transport requires POSIX `setitimer`, the main thread, and no
+  active caller real-time timer; unsupported contexts fail closed before I/O.
+  It is a synchronous CLI probe, not a background transport service.
 
 No payment, signature, private-source verification, factory receipt,
 deployment, push, merge, tag, or release occurred during F1 closure. Mainnet,
@@ -126,7 +115,17 @@ is preserved separately from the current results.
   HTTP framing. The approved repair uses four literal registry URLs,
   disabled proxies, redirect refusal, identity encoding, bounded reads, and
   strict Content-Length validation. 89 focused tests passed; final full
-  suite has 623 tests and 85 subtests. No npm subprocess/cache remains.
+  suite at that point had 623 tests and 85 subtests. No npm subprocess/cache remains.
+- Final review repair, `0fceafe`: the public bytecode endpoint legitimately
+  uses chunked transfer. A private strict response reader now limits decoded
+  data to 2 MiB, framing to 64 KiB, and each framing line to 8 KiB; it rejects
+  chunk extensions, all trailers, and malformed/missing CRLF. One 12-second
+  total deadline covers connection/TLS, headers, body, and chunk termination,
+  restores the prior signal handler, and creates no background worker.
+  Real-wire regression RED was 10 failed/89 passed; the final focused suite
+  has 107 tests and the full suite has 641 tests plus 85 subtests. The renewed
+  live probe passed with byte-identical sanitized evidence and mandatory
+  payment blockers. No release or payment gate changed.
 
 The live probe confirms Mezo Testnet 31611, MUSD 18 decimals, x402 v2 exact,
 SDK family 2.16.0, and BTC book sides with 20 levels each. It stores no raw

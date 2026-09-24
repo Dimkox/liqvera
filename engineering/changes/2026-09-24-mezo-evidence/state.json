@@ -6,7 +6,7 @@
   "route_status": "absent_in_public_clone",
   "status": "implementing",
   "created_at": "2026-09-24T15:46:33Z",
-  "updated_at": "2026-09-24T17:32:53Z",
+  "updated_at": "2026-09-24T18:02:00Z",
   "history": [
     {
       "from": null,
@@ -25,6 +25,12 @@
       "to": "implementing",
       "at": "2026-09-24T17:32:53Z",
       "reason": "F1 implementation and compatibility package complete-with-blockers at 68dafdba76ee5aaf9dc2d5c28719f26f849bf1f6; make verify passes, BLOCKED_TRIVY_HEALTHCHECK_POLICY remains, payment readiness is false with PAY_TO_MISSING and FINALITY_RULE_UNVERIFIED; F2 contracts plan is next and F2-F7 remain open"
+    },
+    {
+      "from": "implementing",
+      "to": "implementing",
+      "at": "2026-09-24T18:02:00Z",
+      "reason": "Final transport repair at 0fceafe94e581e28cfb3861b97d041e6399b257a bounds wire framing and total request time; fresh make verify passes 641 tests and 85 subtests, live compatibility passes with PAY_TO_MISSING and FINALITY_RULE_UNVERIFIED, and BLOCKED_TRIVY_HEALTHCHECK_POLICY remains. SHA-bound evidence refreshed; independent re-review is pending and F2-F7 remain open."
     }
   ]
 }

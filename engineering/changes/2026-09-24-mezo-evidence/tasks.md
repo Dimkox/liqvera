@@ -17,14 +17,17 @@
 - [x] Run complete baseline verification and classify every residual failure.
 - [x] Record the narrow accepted ADR and compatibility lock.
 - [x] Update `handoff.md` and commit F1 independently.
+- [x] Repair final-review wire framing/deadline finding and refresh SHA-bound evidence.
 
 F1 status: **complete-with-blockers**. Evidence is in
 `evidence/f1-verification.md`, bound to implementation commit
-`68dafdba76ee5aaf9dc2d5c28719f26f849bf1f6`.
+`0fceafe94e581e28cfb3861b97d041e6399b257a`.
 `make verify` passes; `grok_verify` still fails with
 `BLOCKED_TRIVY_HEALTHCHECK_POLICY`. The compatibility package is complete
 but payment readiness remains false: `PAY_TO_MISSING` and
 `FINALITY_RULE_UNVERIFIED`. No F2–F7 completion is implied.
+The renewed suite passes 641 tests and 85 subtests; independent re-review
+of the final transport repair and refreshed closure documents is pending.
 
 ## F2 — contracts
 

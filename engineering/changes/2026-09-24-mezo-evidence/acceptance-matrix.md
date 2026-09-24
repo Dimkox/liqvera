@@ -2,7 +2,7 @@
 
 Status values are `NOT_RUN`, `PASS`, `FAIL`, or `BLOCKED_EXTERNAL`. The F1
 observations below are bound to implementation commit
-`68dafdba76ee5aaf9dc2d5c28719f26f849bf1f6` in
+`0fceafe94e581e28cfb3861b97d041e6399b257a` in
 [F1 evidence](evidence/f1-verification.md). F7 must repeat acceptance against
 the final implementation; no F1 result is final-product acceptance.
 
@@ -17,7 +17,7 @@ the final implementation; no F1 result is final-product acceptance.
 | A15–A20 | Concurrency, idempotency, crash, expiry | F4–F5 | NOT_RUN |
 | A21–A25 | Authorization, artifact loss, RPC/facilitator, redaction | F4–F5 | NOT_RUN |
 | A26 | Container/network isolation | F6 | NOT_RUN |
-| A27 | Stage A verdict and fixture suite | F1/F7 | PASS for F1: 623 tests and 85 subtests pass; verdict/CLI tests preserve INSUFFICIENT_EVIDENCE and exclude GO |
+| A27 | Stage A verdict and fixture suite | F1/F7 | PASS for F1: 641 tests and 85 subtests pass; verdict/CLI tests preserve INSUFFICIENT_EVIDENCE and exclude GO |
 | A28 | Clean README install, build, offline demo | F1/F7 | NOT_RUN as a full acceptance scenario; Task 3 installed the pinned environment and F1 verifies installed wheels, but no fresh clean-machine README/demo run is claimed |
 | A29 | Anonymous public clone and provenance | F1/F7 | NOT_RUN against F1: F0 publication evidence is retained in PROVENANCE.md; F1 public salvage verifies target bytes only, source_objects=unavailable; no new anonymous publication check |
 | A30 | Wallet/browser recovery | F6–F7 | NOT_RUN |

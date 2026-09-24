@@ -14,10 +14,10 @@ complete-with-blockers: publication inventory, public salvage verification,
 the pinned Python development toolchain, and the public compatibility lock
 are implemented. [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md)
 accepts only the runtime and payment boundary. The overall change remains
-`implementing`; the next step is a separate F2 contracts plan.
+`implementing`; after final re-review, the next step is a separate F2 contracts plan.
 
-At implementation commit `68dafdba76ee5aaf9dc2d5c28719f26f849bf1f6`,
-`make verify` passed with 623 tests and 85 subtests. The command
+At implementation commit `0fceafe94e581e28cfb3861b97d041e6399b257a`,
+`make verify` passed with 641 tests and 85 subtests. The command
 `grok_verify.py --mode pr --no-record` exited 1 due to two pre-existing LOW
 Trivy `DS-0026` findings in the one-shot Stage A Dockerfiles
 (`BLOCKED_TRIVY_HEALTHCHECK_POLICY`). No scanner exception or artificial
@@ -89,6 +89,13 @@ The optional public compatibility probe is separate from offline verification:
 PATH="$PWD/.venv/bin:$PATH" python -B scripts/check-mezo-compatibility.py \
   --lock docs/compatibility/mezo-evidence-v1.json
 ```
+
+The live probe requires POSIX real-time timer support, the main thread, and
+no existing active real-time alarm; unsupported contexts fail closed before
+network I/O. Each request has one 12-second total deadline, a 2 MiB decoded
+body limit, a separate 64 KiB framing limit, and an 8 KiB line limit. Chunk
+extensions, trailers, malformed framing, redirects, and ambient proxies are
+refused. The timer and previous signal handler are restored on every exit.
 
 ## Boundaries
 

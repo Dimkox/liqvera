@@ -96,3 +96,26 @@ blob payload, а текстовый parser мог принять неверны�
 ошибкой. Регрессионный тест использует только синтетический локальный Git fixture,
 не приватные объекты. Публичный результат выше остаётся проверкой целевых
 байтов, а не подтверждением происхождения из исходного репозитория.
+
+## F1 Task 3 — воспроизводимая среда разработки
+
+Корневой `dev` extra теперь содержит тот же `hatchling==1.32.4`, что и
+`build-system.requires`; `.venv/` исключён из Git, а тест синхронизации
+привязан к `test:runtime-boundaries`. Чистая установка `-e '.[dev]'` сначала
+обнаружила несовместимые исходные pins: `eth-account==0.14.0` и
+`hyperliquid-python-sdk==0.24.0`, который требует `eth-account<0.14.0`.
+Корневой pin исправлен на точный `eth-account==0.13.7`, совместимость пары
+проверена resolver и регрессионным тестом. `pip check` не выявил нарушенных
+зависимостей; установленный Hatchling имеет версию 1.32.4.
+
+`PATH="$PWD/.venv/bin:$PATH" make verify` прошёл: 534 tests passed, 85 subtests
+passed, без прежних wheel-build errors и предупреждений pytest о неизвестных
+настройках. Graph check по-прежнему печатает известные declared conflicts;
+`make salvage` подтверждает target bytes и сообщает
+`source_objects=unavailable`. Следующее действие F1 — Task 4: sanitized Mezo
+compatibility lock и read-only probe.
+
+Дополнительный `grok_verify.py --mode pr` прошёл по pytest, Ruff, Bandit,
+secret scan и остальным применимым профилям, но общий результат остаётся
+`FAIL`: Trivy требует HEALTHCHECK в двух прежних Stage A Dockerfile (по одному
+LOW `DS-0026`). Эти файлы не входят в Task 3 и не изменялись.

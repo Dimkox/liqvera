@@ -14520,6 +14520,9 @@ repository_inventory:
   - path: tests/installed/test_stage_a_product.py
     node: test:runtime-boundaries
     path_class: TEST_SOURCE
+  - path: tests/installed/test_root_development_toolchain.py
+    node: test:runtime-boundaries
+    path_class: TEST_SOURCE
   - path: tests/installed/test_three_fresh_environments.py
     node: test:stage-a-artifacts
     path_class: TEST_SOURCE

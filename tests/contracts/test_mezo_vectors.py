@@ -164,6 +164,32 @@ def test_final_review_reencoded_identity_cannot_claim_resolution(review_vectors,
         check_payment(vector)
 
 
+@pytest.mark.parametrize("mutation", ["flag", "scenario"])
+def test_followup_reencoding_scenario_and_claim_are_equivalent(review_vectors, mutation):
+    vector = copy.deepcopy(review_vectors["reencoded-authorization"])
+    if mutation == "flag":
+        claims = strict_json(vector["input"]["candidate_claims_json"])
+        claims["same_authorization_different_encoding"] = False
+        vector["input"]["candidate_claims_json"] = json.dumps(claims)
+    else:
+        vector["input"]["scenario"] = "exact_units"
+    with pytest.raises(AssertionError):
+        check_payment(vector)
+
+
+@pytest.mark.parametrize("relation,delta", [("before", -1), ("equal", 0), ("after", 1)])
+def test_followup_long_fraction_preserves_exact_order(relation, delta):
+    # A schema-valid fraction exceeds Python's decimal-string-to-int limit.
+    digits = "1" * 4300 + str(1 + delta)
+    actual = utc_instant("2026-09-24T12:02:00." + digits + "Z")
+    whole = utc_instant("2026-09-24T12:02:00Z")
+    numerator = (10 ** 4301 - 1) // 9
+    boundary = whole + Fraction(numerator, 10 ** 4301)
+    assert actual - boundary == Fraction(delta, 10 ** 4301), relation
+    assert (actual < boundary, actual == boundary, actual > boundary) == (
+        delta < 0, delta == 0, delta > 0)
+
+
 @pytest.mark.parametrize("mutation", ["wrong_version", "missing_version", "extra_field"])
 def test_records_rejects_invalid_on_disk_envelope(tmp_path, monkeypatch, mutation):
     c = support()
@@ -443,8 +469,9 @@ def check_payment(vector):
     )
     claims = strict_json(source["candidate_claims_json"])
     c.validate({"$ref": "#/$defs/candidate_claims"}, claims, document="vectors.schema.json")
+    assert (source["scenario"] == "reencoded_authorization") is claims[
+        "same_authorization_different_encoding"]
     if claims["same_authorization_different_encoding"]:
-        assert source["scenario"] == "reencoded_authorization"
         assert vector["future_assertions"] == ["sdk_identity_deduplicates_reencoding"]
         assert expected["code"] == "AUTHORIZATION_IDENTITY_UNVERIFIED"
         assert expected["http_status"] == 503
@@ -529,7 +556,7 @@ def utc_instant(timestamp):
     instant = datetime.fromisoformat(whole)
     seconds = (instant.toordinal() * 86400 + instant.hour * 3600
                + instant.minute * 60 + instant.second)
-    return Fraction(seconds) + (Fraction(int(fraction), 10 ** len(fraction)) if dot else 0)
+    return Fraction(seconds) + (Fraction(Decimal("0." + fraction)) if dot else 0)
 
 
 def check_recovery(vector):

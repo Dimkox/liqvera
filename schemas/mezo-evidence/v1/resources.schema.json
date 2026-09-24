@@ -114,8 +114,8 @@
     "capabilities": {
       "type": "object", "additionalProperties": false,
       "oneOf": [
-        {"properties": {"payment_ready": {"const": false}}},
-        {"properties": {"payment_ready": {"const": true}, "blockers": {"maxItems": 0}}}
+        {"properties": {"payment_ready": {"const": false}, "blockers": {"minItems": 1}}},
+        {"properties": {"payment_ready": {"const": true}, "source_mode": {"const": "live-public"}, "blockers": {"maxItems": 0}}}
       ],
       "required": ["schema", "request_id", "instrument_id", "instrument_label", "network", "asset", "decimals", "price_musd", "amount_atomic", "source_mode", "limitations", "payment_ready", "blockers"],
       "properties": {
@@ -148,7 +148,11 @@
       "oneOf": [
         {"properties": {"ready": {"const": false}}, "oneOf": [
           {"properties": {"payment_ready": {"const": false}}},
-          {"properties": {"payment_ready": {"const": true}, "blockers": {"maxItems": 0}}}
+          {"properties": {"payment_ready": {"const": true}, "blockers": {"maxItems": 0}}, "oneOf": [
+            {"properties": {"storage_ready": {"const": false}}},
+            {"properties": {"storage_ready": {"const": true}, "configuration_ready": {"const": false}}},
+            {"properties": {"storage_ready": {"const": true}, "configuration_ready": {"const": true}, "integration_ready": {"const": false}}}
+          ]}
         ]},
         {"properties": {"ready": {"const": true}, "storage_ready": {"const": true}, "configuration_ready": {"const": true}, "integration_ready": {"const": true}, "payment_ready": {"const": true}, "blockers": {"maxItems": 0}}}
       ],

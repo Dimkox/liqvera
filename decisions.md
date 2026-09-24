@@ -143,3 +143,7 @@ Whole-branch review requires evidence GET to expose a private 202 JSON recovery 
 ## 2026-09-24 — Exact instants and schema numbers preserve interoperable boundaries
 
 Compare UTC instants as integer seconds plus an exact fractional remainder, preserving every admitted fractional digit instead of relying on lexical order or microsecond truncation. Draft 2020-12 integer checks accept finite integral float/Decimal representations while retaining exact comparisons and rejecting boolean/nonfinite/fractional inputs; monetary schemas remain string-only. Closed resource schemas permit a future ready state only without blockers, and overall readiness requires all gates.
+
+## 2026-09-24 — Readiness is a complete state projection
+
+The canonical specification prohibits fictitious readiness and sale of fixture data, so capabilities must explain blocked payment readiness and may report ready only for live-public data without blockers. Overall readiness equals its gates and blocker emptiness in both directions, encoded with disjoint branches to support simultaneous failed gates. Truth-table tests preserve future legitimate readiness while rejecting contradictory projections.

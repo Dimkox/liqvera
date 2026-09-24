@@ -94,3 +94,7 @@ Whole-branch review found evidence recovery statuses absent from OpenAPI, expire
 ## 2026-09-24 — Host-language representations replaced contract semantics
 
 The bounded checker used Python int identity for JSON Schema integer membership, and recovery tests ordered UTC strings lexically. The root cause was conflating implementation representation with mathematical JSON values and temporal instants. Integral float/Decimal regressions, exact numeric precision-boundary checks and mixed/sub-microsecond timestamp regressions now preserve the contract semantics.
+
+## 2026-09-24 — One-way predicates and a hidden conversion limit left edge gaps
+
+Scoped review showed that scenario flags and readiness declarations were constrained in only one direction, while exact timestamp conversion still passed its entire fractional string through Python's limited int parser. The root cause was testing representative positive/negative cases without complete truth tables or an input beyond the host conversion limit. Bidirectional scenario binding, exhaustive readiness combinations and exact Decimal-to-Fraction tests with 4,301 digits now cover those gaps without weakening the timestamp schema.

@@ -1,6 +1,7 @@
 """Contract examples for immutable reports and safe public resources."""
 
 from copy import deepcopy
+from itertools import product
 
 import mezo_evidence_support as c
 import pytest
@@ -305,6 +306,38 @@ def test_final_review_overall_readiness_requires_every_gate(gate):
     changed[gate] = False
     with pytest.raises(c.ContractError):
         validate_resource("readiness", changed)
+
+
+@pytest.mark.parametrize("source,payment_ready,blocked", list(product(
+    ("fixture", "live-public"), (False, True), (False, True))))
+def test_followup_capabilities_truth_table(source, payment_ready, blocked):
+    changed = deepcopy(EXAMPLES["capabilities"])
+    changed.update(source_mode=source, payment_ready=payment_ready,
+                   blockers=["PAY_TO_MISSING"] if blocked else [])
+    allowed = (payment_ready and not blocked and source == "live-public"
+               or not payment_ready and blocked)
+    if allowed:
+        validate_resource("capabilities", changed)
+    else:
+        with pytest.raises(c.ContractError):
+            validate_resource("capabilities", changed)
+
+
+@pytest.mark.parametrize("gates,ready,blocked", list(product(
+    list(product((False, True), repeat=4)), (False, True), (False, True))))
+def test_followup_readiness_truth_table(gates, ready, blocked):
+    storage, configuration, integration, payment = gates
+    changed = deepcopy(EXAMPLES["readiness"])
+    changed.update(storage_ready=storage, configuration_ready=configuration,
+                   integration_ready=integration, payment_ready=payment, ready=ready,
+                   blockers=["PAY_TO_MISSING"] if blocked else [])
+    # Current payment readiness already requires no unresolved blocker.
+    allowed = ready == (all(gates) and not blocked) and not (payment and blocked)
+    if allowed:
+        validate_resource("readiness", changed)
+    else:
+        with pytest.raises(c.ContractError):
+            validate_resource("readiness", changed)
 
 
 @pytest.mark.parametrize("section,key,value", [

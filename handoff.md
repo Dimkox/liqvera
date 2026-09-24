@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 consolidated review fixes; scoped re-review pending). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24 (F2 final follow-up implemented; re-review pending). Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f2-contracts` (stacked on verified F1).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -47,9 +47,36 @@ The approved plan now reflects those corrections; simulated offline reports
 remain valid and no runtime layer or SDK identity rule was introduced.
 
 F2 remains **scoped re-review pending**, not complete. Next: independent
-scoped re-review of the consolidated repair.
+scoped re-review of the final follow-up.
 The F2 evidence document retains the earlier integration draft until review
 has passed; its fingerprints and counts do not cover the subsequent repair.
+
+Scoped review of `fd672f89c6bde8d1b1170b2e7a8c631ebed4d793` found three
+remaining edge cases. The final follow-up now binds the reencoding scenario
+and flag in both directions, preserves exact timestamp fractions beyond
+Python's decimal-string integer conversion limit, and closes readiness truth
+tables in both directions. Capabilities require an explanation when blocked
+and cannot report payment readiness for fixture data; overall readiness must
+equal all gates plus no blockers. The targeted regressions went from eight
+failures to 77 passes. Final follow-up verification is recorded below; scoped
+re-review is pending. The evidence draft remains untouched and runtime
+acceptance stays NOT_RUN.
+
+Final follow-up verification on 2026-09-24: targeted RED exited 1 with eight
+failures, 69 passes and 118 deselected (5.23s); GREEN exited 0 with 77 passes
+and 118 deselected (5.19s). Both affected modules passed 195 tests in 189.25s;
+all six F2 modules passed 445 in 195.59s. `make verify` passed 1086 tests and
+85 subtests in 328.48s; bare pytest passed the same counts in 329.68s. Graph
+(the same seven inherited conflicts), Ruff and diff checks exited 0. Grok
+`--mode pr --no-record` exited 1 only for Trivy; every other applicable check
+passed, with coverage explicitly skipped by existing runner policy. Direct
+Trivy exited 1 for exactly the two inherited LOW DS-0026 Dockerfile findings.
+The stable pre-verification-record staged tree was
+`8fb46171a70190217b60170eb50967da52955f40`; its graph/schema/test index
+fingerprint is
+`a5654aacb56cce7d1087f6df000ea14dba97c6fa0d17da2920aa366b607cc84a`.
+Subsequent changes only record results in continuity prose. No new failure,
+factory receipt, runtime acceptance or external mutation is claimed.
 
 Consolidated repair verification on 2026-09-24: the new focused regressions
 first failed as expected (23 failed, 16 passed, 219 deselected), then passed

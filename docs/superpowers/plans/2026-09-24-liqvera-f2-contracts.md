@@ -477,10 +477,16 @@ Quote previews always describe an eligible original snapshot, including when
 the quote later expires or enters recovery. Free errors/status resources
 carry rejection explanations; the general offline report schema still permits
 SIMULATED. In capabilities and readiness, payment_ready=true requires no
-blockers. Overall ready=true additionally requires every storage/configuration/
-integration/payment gate to be true; a future ready state with empty blockers
-must remain representable. Encode these cross-field constraints with supported
-oneOf/properties/const/maxItems assertions under the closed resource objects.
+blockers. Overall ready exactly equals the conjunction of every storage/
+configuration/integration/payment gate and blocker emptiness; all gates true
+with no blockers cannot report ready=false. Capabilities use blockers as their
+complete explanation: payment_ready=false requires a nonempty blocker list,
+and payment_ready=true additionally requires source_mode=live-public. Fixture
+mode remains blocked even when its data is arithmetically valid. A future
+live-public ready state with empty blockers must remain representable. Encode
+these constraints with supported oneOf/properties/const/minItems/maxItems
+assertions under closed resource objects; use disjoint branches so multiple
+failed gates do not create ambiguous oneOf matches.
 
 - [ ] **Step 5: Run focused GREEN and common checks; commit.** Record the added
   read-only report-request status resource as a bounded resolution of the
@@ -935,7 +941,9 @@ x402/EIP-2612/Permit2 payload. Its parsed object has exactly `network`, `asset`,
 five are strings except intentionally rejected numeric amount cases; the last
 four are booleans. Reject any other key. This encodes a future assertion about
 SDK-verified claims without inventing cryptographic wire fields or nonce data.
-When same_authorization_different_encoding is true, the unresolved projection
+The reencoded_authorization scenario and same_authorization_different_encoding
+flag must imply each other; disabling the flag cannot preserve claimed replay
+coverage. For that scenario, the unresolved projection
 must remain 503 AUTHORIZATION_IDENTITY_UNVERIFIED with zero attempts,
 settlements and entitlements, no paid body, and exactly the future assertion
 sdk_identity_deduplicates_reencoding. It cannot assert a resolved replay
@@ -944,8 +952,12 @@ identity or silently accept a duplicate charge.
 Compare RFC3339 UTC timestamps as instants, not lexically. Preserve every
 fractional digit admitted by the timestamp schema by using exact rational
 seconds; datetime's microsecond truncation cannot choose an expiry boundary.
+Construct the fraction through an exact Decimal value rather than converting
+its full digit string with int(), whose interpreter digit limit is narrower
+than the timestamp schema. Retain the schema's existing precision contract.
 Test immediately before, exactly at and after expiry using mixed fractional
-forms, including sub-microsecond differences and confirmation after expiry.
+forms, including sub-microsecond differences, 4,301-digit fractional parts,
+and confirmation after expiry.
 
 Concrete representative inputs/expected values follow; wrap each pair in the
 common record envelope with the stated id/kind/owner/acceptance_ids,

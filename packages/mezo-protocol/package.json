@@ -1,0 +1,31 @@
+{
+  "name": "@liqvera/mezo-protocol",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pinned Mezo Testnet and MUSD protocol metadata for Liqvera",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "vendor",
+    "LICENSE.upstream",
+    "NOTICE.md",
+    "README.md",
+    "source-lock.json"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./source-lock.json": "./source-lock.json",
+    "./vendor/MUSD.matsnet.json": "./vendor/MUSD.matsnet.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "5.9.2"
+  }
+}

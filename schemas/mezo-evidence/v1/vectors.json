@@ -1,0 +1,4503 @@
+{
+  "schema": "mee-evidence-vectors/v1",
+  "vectors": [
+    {
+      "id": "quantity-zero-scale",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.00000000\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-negative-integer",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"-1\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-trailing-space",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15 \",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-arabic-digits",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"٠.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-trailing-newline",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\\n\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "invalid-side-hold",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"HOLD\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "invalid-instrument-venue-case",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"Hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "UNSUPPORTED_INSTRUMENT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "invalid-instrument-product",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perp\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "UNSUPPORTED_INSTRUMENT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "invalid-payer-19-bytes",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "invalid-payer-nonhex",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xgggggggggggggggggggggggggggggggggggggggg\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "invalid-payer-prefix",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0Xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-client_source",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"client_source\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "buy-two-levels",
+      "kind": "sweep",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A02"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "side": "BUY",
+        "quantity_base": "0.15",
+        "source_mode": "fixture",
+        "bids": [
+          [
+            "99900",
+            "0.10"
+          ],
+          [
+            "99800",
+            "0.10"
+          ]
+        ],
+        "asks": [
+          [
+            "100000",
+            "0.10"
+          ],
+          [
+            "100100",
+            "0.10"
+          ]
+        ]
+      },
+      "expected": {
+        "notional_quote": {
+          "numerator": "15005",
+          "denominator": "1"
+        },
+        "vwap": {
+          "numerator": "300100",
+          "denominator": "3"
+        },
+        "worst_price": {
+          "numerator": "100100",
+          "denominator": "1"
+        },
+        "price_impact_bps": {
+          "numerator": "10",
+          "denominator": "3"
+        },
+        "filled_quantity": "0.15",
+        "consumed_levels": 2,
+        "snapshot_status": "SIMULATED",
+        "chargeable_quote": false,
+        "display": {
+          "notional_quote": "15005",
+          "vwap": "100033.3333333333333333333333",
+          "worst_price": "100100",
+          "price_impact_bps": "3.333333333333333333333333333"
+        },
+        "display_rounding_examples": [
+          {
+            "exact": {
+              "numerator": "2000000000000000000000000001",
+              "denominator": "2000000000000000000000000000"
+            },
+            "display": "1"
+          },
+          {
+            "exact": {
+              "numerator": "2000000000000000000000000003",
+              "denominator": "2000000000000000000000000000"
+            },
+            "display": "1.000000000000000000000000002"
+          }
+        ]
+      },
+      "future_assertions": [
+        "report_builder_matches_exact_sweep",
+        "fixture_is_not_live_sale",
+        "canonical_report_bytes_reproduce"
+      ]
+    },
+    {
+      "id": "sell-two-levels",
+      "kind": "sweep",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A03"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "side": "SELL",
+        "quantity_base": "0.15",
+        "source_mode": "fixture",
+        "bids": [
+          [
+            "100000",
+            "0.10"
+          ],
+          [
+            "99900",
+            "0.10"
+          ]
+        ],
+        "asks": [
+          [
+            "100100",
+            "0.10"
+          ],
+          [
+            "100200",
+            "0.10"
+          ]
+        ]
+      },
+      "expected": {
+        "notional_quote": {
+          "numerator": "14995",
+          "denominator": "1"
+        },
+        "vwap": {
+          "numerator": "299900",
+          "denominator": "3"
+        },
+        "worst_price": {
+          "numerator": "99900",
+          "denominator": "1"
+        },
+        "price_impact_bps": {
+          "numerator": "10",
+          "denominator": "3"
+        },
+        "filled_quantity": "0.15",
+        "consumed_levels": 2,
+        "snapshot_status": "SIMULATED",
+        "chargeable_quote": false,
+        "display": {
+          "notional_quote": "14995",
+          "vwap": "99966.66666666666666666666667",
+          "worst_price": "99900",
+          "price_impact_bps": "3.333333333333333333333333333"
+        },
+        "display_rounding_examples": [
+          {
+            "exact": {
+              "numerator": "2000000000000000000000000001",
+              "denominator": "2000000000000000000000000000"
+            },
+            "display": "1"
+          },
+          {
+            "exact": {
+              "numerator": "2000000000000000000000000003",
+              "denominator": "2000000000000000000000000000"
+            },
+            "display": "1.000000000000000000000000002"
+          }
+        ]
+      },
+      "future_assertions": [
+        "report_builder_matches_exact_sweep",
+        "fixture_is_not_live_sale",
+        "canonical_report_bytes_reproduce"
+      ]
+    },
+    {
+      "id": "sell-one-level",
+      "kind": "sweep",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A03"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "side": "SELL",
+        "quantity_base": "0.1",
+        "source_mode": "fixture",
+        "bids": [
+          [
+            "100000",
+            "0.10"
+          ],
+          [
+            "99900",
+            "0.10"
+          ]
+        ],
+        "asks": [
+          [
+            "100100",
+            "0.10"
+          ],
+          [
+            "100200",
+            "0.10"
+          ]
+        ]
+      },
+      "expected": {
+        "notional_quote": {
+          "numerator": "10000",
+          "denominator": "1"
+        },
+        "vwap": {
+          "numerator": "100000",
+          "denominator": "1"
+        },
+        "worst_price": {
+          "numerator": "100000",
+          "denominator": "1"
+        },
+        "price_impact_bps": {
+          "numerator": "0",
+          "denominator": "1"
+        },
+        "filled_quantity": "0.1",
+        "consumed_levels": 1,
+        "snapshot_status": "SIMULATED",
+        "chargeable_quote": false,
+        "display": {
+          "notional_quote": "10000",
+          "vwap": "100000",
+          "worst_price": "100000",
+          "price_impact_bps": "0"
+        },
+        "display_rounding_examples": [
+          {
+            "exact": {
+              "numerator": "2000000000000000000000000001",
+              "denominator": "2000000000000000000000000000"
+            },
+            "display": "1"
+          },
+          {
+            "exact": {
+              "numerator": "2000000000000000000000000003",
+              "denominator": "2000000000000000000000000000"
+            },
+            "display": "1.000000000000000000000000002"
+          }
+        ]
+      },
+      "future_assertions": [
+        "report_builder_matches_exact_sweep",
+        "fixture_is_not_live_sale",
+        "canonical_report_bytes_reproduce"
+      ]
+    },
+    {
+      "id": "sell-exact-depth",
+      "kind": "sweep",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A03"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "side": "SELL",
+        "quantity_base": "0.2",
+        "source_mode": "fixture",
+        "bids": [
+          [
+            "100000",
+            "0.10"
+          ],
+          [
+            "99900",
+            "0.10"
+          ]
+        ],
+        "asks": [
+          [
+            "100100",
+            "0.10"
+          ],
+          [
+            "100200",
+            "0.10"
+          ]
+        ]
+      },
+      "expected": {
+        "notional_quote": {
+          "numerator": "19990",
+          "denominator": "1"
+        },
+        "vwap": {
+          "numerator": "99950",
+          "denominator": "1"
+        },
+        "worst_price": {
+          "numerator": "99900",
+          "denominator": "1"
+        },
+        "price_impact_bps": {
+          "numerator": "5",
+          "denominator": "1"
+        },
+        "filled_quantity": "0.2",
+        "consumed_levels": 2,
+        "snapshot_status": "SIMULATED",
+        "chargeable_quote": false,
+        "display": {
+          "notional_quote": "19990",
+          "vwap": "99950",
+          "worst_price": "99900",
+          "price_impact_bps": "5"
+        },
+        "display_rounding_examples": [
+          {
+            "exact": {
+              "numerator": "2000000000000000000000000001",
+              "denominator": "2000000000000000000000000000"
+            },
+            "display": "1"
+          },
+          {
+            "exact": {
+              "numerator": "2000000000000000000000000003",
+              "denominator": "2000000000000000000000000000"
+            },
+            "display": "1.000000000000000000000000002"
+          }
+        ]
+      },
+      "future_assertions": [
+        "report_builder_matches_exact_sweep",
+        "fixture_is_not_live_sale",
+        "canonical_report_bytes_reproduce"
+      ]
+    },
+    {
+      "id": "quantity-zero",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-negative",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"-0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-nan-string",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"NaN\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-infinity-string",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"Infinity\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-exponent",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"1e-2\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-whitespace",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\" 0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-empty",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-unicode-digits",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"０.１５\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-overprecision",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.150000000\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-overflow",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"92233720368.54775808\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-bool",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":true,\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-null",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":null,\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-json-number",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":0.15,\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-json-nan",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":NaN,\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "quantity-json-infinity",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":Infinity,\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "malformed-json",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "duplicate-body-key",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"side\":\"SELL\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "body-array",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "[]"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "body-null",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "null"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "missing-instrument_id",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "missing-side",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "missing-quantity_base",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "missing-expected_payer",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "invalid-expected_payer-zero",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0x0000000000000000000000000000000000000000\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "invalid-expected_payer-short",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "invalid-side-case",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"buy\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "invalid-instrument_id-case",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:btc:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "UNSUPPORTED_INSTRUMENT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-source",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"source\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-source_mode",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"source_mode\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-url",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"url\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-mapping",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"mapping\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-filepath",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"filepath\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-chain",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"chain\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-chain_id",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"chain_id\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-price",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"price\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-price_musd",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"price_musd\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-payTo",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"payTo\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-pay_to",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"pay_to\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-digest",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"digest\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-report_sha256",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"report_sha256\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "forbidden-scope",
+      "kind": "invalid_request",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\",\"scope\":\"client-controlled\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_INPUT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "invalid_request_never_creates_quote"
+      ]
+    },
+    {
+      "id": "source-age-boundary",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "source-age-boundary",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":5000,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 200,
+        "code": null,
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "source-age-outside",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "source-age-outside",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":5001,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "STALE_SOURCE",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "future-boundary",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "future-boundary",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":-1000,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 200,
+        "code": null,
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "future-outside",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "future-outside",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":-1001,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "CLOCK_SKEW",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "metadata-age-boundary",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "metadata-age-boundary",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":86400000,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 200,
+        "code": null,
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "metadata-age-outside",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A06"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "metadata-age-outside",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":86400001,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "IDENTITY_UNVERIFIED",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "validity-start-inside",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "validity-start-inside",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":1,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 200,
+        "code": null,
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "validity-start-equal",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "validity-start-equal",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":0,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 200,
+        "code": null,
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "validity-start-outside",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A06"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "validity-start-outside",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":101,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "IDENTITY_UNVERIFIED",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "validity-end-inside",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "validity-end-inside",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":199,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 200,
+        "code": null,
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "validity-end-equal",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "validity-end-equal",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":200,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 200,
+        "code": null,
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "validity-end-outside",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A06"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "validity-end-outside",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":201,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "IDENTITY_UNVERIFIED",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "crossed-book",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "crossed-book",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"100001\",\"0.1\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "CROSSED_BOOK",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "locked-book",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "locked-book",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"100000\",\"0.1\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "CROSSED_BOOK",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "unsorted-bids",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "unsorted-bids",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99800\",\"0.1\"],[\"99900\",\"0.1\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_DATASET",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "unsorted-asks",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "unsorted-asks",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100100\",\"0.1\"],[\"100000\",\"0.1\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_DATASET",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "duplicate-bids",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "duplicate-bids",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.1\"],[\"99900\",\"0.1\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_DATASET",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "duplicate-asks",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "duplicate-asks",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.1\"],[\"100000\",\"0.1\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_DATASET",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "negative-size",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "negative-size",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"-0.1\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_DATASET",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "zero-price",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "zero-price",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"0\",\"0.1\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_DATASET",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "nonfinite-price-string",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "nonfinite-price-string",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"Infinity\",\"0.1\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_DATASET",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "nonfinite-size-string",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "nonfinite-size-string",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"NaN\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_DATASET",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "wrong-requested-instrument",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong-requested-instrument",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:ETH:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "UNSUPPORTED_INSTRUMENT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "wrong-returned-instrument",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong-returned-instrument",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:ETH:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "IDENTITY_MISMATCH",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "wrong-unit",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A06"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong-unit",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"contract\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "IDENTITY_UNVERIFIED",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "wrong-multiplier",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A06"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong-multiplier",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"10\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "IDENTITY_UNVERIFIED",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "missing-source-hash",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A06"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "missing-source-hash",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":null,\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "IDENTITY_UNVERIFIED",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "fictitious-source-hash",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A06"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "fictitious-source-hash",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "IDENTITY_UNVERIFIED",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "nonfinite-price-json",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "nonfinite-price-json",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[NaN,\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "INVALID_DATASET",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "live-upstream-outage",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A07"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "live-upstream-outage",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"live-public\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":false,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 503,
+        "code": "SOURCE_UNAVAILABLE",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "live_outage_never_uses_fixture"
+      ]
+    },
+    {
+      "id": "buy-insufficient-depth",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "buy-insufficient-depth",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.21\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "DEPTH_INSUFFICIENT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "insufficient_depth_never_sells_partial"
+      ]
+    },
+    {
+      "id": "sell-insufficient-depth",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A04"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "sell-insufficient-depth",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"100000\",\"0.10\"],[\"99900\",\"0.10\"]],\"asks\":[[\"100100\",\"0.10\"],[\"100200\",\"0.10\"]],\"side\":\"SELL\",\"quantity_base\":\"0.21\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "DEPTH_INSUFFICIENT",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "insufficient_depth_never_sells_partial"
+      ]
+    },
+    {
+      "id": "canonical-retry",
+      "kind": "idempotency",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A15",
+        "A16"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "READY",
+        "parallelism": 2,
+        "calls": [
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15000000\",\"expected_payer\":\"0xABABABABABABABABABABABABABABABABABABABAB\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          }
+        ]
+      },
+      "expected": {
+        "http_statuses": [
+          201,
+          201
+        ],
+        "logical_requests": 1,
+        "builds": 1,
+        "quotes": 1,
+        "same_object": true,
+        "cross_scope_access": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "canonical_retries_one_quote",
+        "idempotency_body_conflict"
+      ]
+    },
+    {
+      "id": "twenty-parallel-retries",
+      "kind": "idempotency",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A15",
+        "A16"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "READY",
+        "parallelism": 20,
+        "calls": [
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          }
+        ]
+      },
+      "expected": {
+        "http_statuses": [
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201,
+          201
+        ],
+        "logical_requests": 1,
+        "builds": 1,
+        "quotes": 1,
+        "same_object": true,
+        "cross_scope_access": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "twenty_concurrent_retries_one_quote"
+      ]
+    },
+    {
+      "id": "preparing-retries",
+      "kind": "idempotency",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A15",
+        "A16"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "PREPARING",
+        "parallelism": 2,
+        "calls": [
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          }
+        ]
+      },
+      "expected": {
+        "http_statuses": [
+          202,
+          202
+        ],
+        "logical_requests": 1,
+        "builds": 1,
+        "quotes": 0,
+        "same_object": true,
+        "cross_scope_access": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "canonical_retries_one_quote"
+      ]
+    },
+    {
+      "id": "isolated-scope-same-key",
+      "kind": "idempotency",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A15",
+        "A16"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "READY",
+        "parallelism": 2,
+        "calls": [
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-b",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          }
+        ]
+      },
+      "expected": {
+        "http_statuses": [
+          201,
+          201
+        ],
+        "logical_requests": 2,
+        "builds": 2,
+        "quotes": 2,
+        "same_object": false,
+        "cross_scope_access": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "idempotency_scope_isolation"
+      ]
+    },
+    {
+      "id": "changed-side",
+      "kind": "idempotency",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A15",
+        "A16"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "READY",
+        "parallelism": 2,
+        "calls": [
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"SELL\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          }
+        ]
+      },
+      "expected": {
+        "http_statuses": [
+          201,
+          409
+        ],
+        "logical_requests": 1,
+        "builds": 1,
+        "quotes": 1,
+        "same_object": true,
+        "cross_scope_access": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "idempotency_body_conflict"
+      ]
+    },
+    {
+      "id": "changed-quantity_base",
+      "kind": "idempotency",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A15",
+        "A16"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "READY",
+        "parallelism": 2,
+        "calls": [
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.16\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          }
+        ]
+      },
+      "expected": {
+        "http_statuses": [
+          201,
+          409
+        ],
+        "logical_requests": 1,
+        "builds": 1,
+        "quotes": 1,
+        "same_object": true,
+        "cross_scope_access": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "idempotency_body_conflict"
+      ]
+    },
+    {
+      "id": "changed-expected_payer",
+      "kind": "idempotency",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A15",
+        "A16"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "READY",
+        "parallelism": 2,
+        "calls": [
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xefefefefefefefefefefefefefefefefefefefef\"}"
+          }
+        ]
+      },
+      "expected": {
+        "http_statuses": [
+          201,
+          409
+        ],
+        "logical_requests": 1,
+        "builds": 1,
+        "quotes": 1,
+        "same_object": true,
+        "cross_scope_access": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "idempotency_body_conflict"
+      ]
+    },
+    {
+      "id": "changed-instrument_id",
+      "kind": "idempotency",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A15",
+        "A16"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "READY",
+        "parallelism": 2,
+        "calls": [
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          },
+          {
+            "scope": "scope-a",
+            "key": "request-1",
+            "request_json": "{\"instrument_id\":\"hyperliquid:ETH:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"0.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+          }
+        ]
+      },
+      "expected": {
+        "http_statuses": [
+          201,
+          409
+        ],
+        "logical_requests": 1,
+        "builds": 1,
+        "quotes": 1,
+        "same_object": true,
+        "cross_scope_access": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "idempotency_body_conflict"
+      ]
+    },
+    {
+      "id": "musd-exact-atomic-units",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A12"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "exact_units",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000000000000000\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 503,
+        "code": "AUTHORIZATION_IDENTITY_UNVERIFIED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "atomic_amount_matches_all_layers"
+      ]
+    },
+    {
+      "id": "wrong-mainnet",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong_network",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31612\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000000000000000\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "wrong-network",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong_network",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:1\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000000000000000\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "wrong-token",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong_token",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0xefefefefefefefefefefefefefefefefefefefef\",\"amount_atomic\":\"10000000000000000\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "amount-minus-one",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong_amount",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"9999999999999999\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "amount-plus-one",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong_amount",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000000000000001\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "six-decimal-amount",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong_amount",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "numeric-amount",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong_amount",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":10000,\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "wrong-receiver",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong_receiver",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000000000000000\",\"pay_to\":\"0xefefefefefefefefefefefefefefefefefefefef\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "payer-changed-after-quote",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "wrong_payer",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000000000000000\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xefefefefefefefefefefefefefefefefefefefef\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "wrong-signature",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "invalid_signature",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000000000000000\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":false,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "expired-authorization",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "expired_authorization",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000000000000000\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":true,\"authorization_reused\":false,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "PAYMENT_REJECTED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "reused-authorization",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "reused_authorization",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000000000000000\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":true,\"same_authorization_different_encoding\":false}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 409,
+        "code": "AUTHORIZATION_REUSED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "invalid_authorization_never_entitles"
+      ]
+    },
+    {
+      "id": "reencoded-authorization",
+      "kind": "payment",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "reencoded_authorization",
+        "price_musd": "0.01",
+        "decimals": 18,
+        "terms": {
+          "version": "mee-evidence-terms/v1",
+          "network": "eip155:31611",
+          "chain_id": 31611,
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "amount_atomic": "10000000000000000",
+          "price_musd": "0.01",
+          "pay_to": "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "expected_payer": "0xabababababababababababababababababababab",
+          "expires_at": "2026-09-24T12:02:00Z"
+        },
+        "candidate_claims_json": "{\"network\":\"eip155:31611\",\"asset\":\"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\",\"amount_atomic\":\"10000000000000000\",\"pay_to\":\"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"payer\":\"0xabababababababababababababababababababab\",\"signature_valid\":true,\"authorization_expired\":false,\"authorization_reused\":false,\"same_authorization_different_encoding\":true}",
+        "identity_binding_status": "UNRESOLVED_F5"
+      },
+      "expected": {
+        "http_status": 503,
+        "code": "AUTHORIZATION_IDENTITY_UNVERIFIED",
+        "amount_atomic": "10000000000000000",
+        "entitlement_count": 0,
+        "paid_body": false,
+        "settlement_calls": 0,
+        "distinct_attempts": 0
+      },
+      "future_assertions": [
+        "sdk_identity_deduplicates_reencoding"
+      ]
+    },
+    {
+      "id": "missing-quote",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "missing",
+        "resource": "quote",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 401,
+        "code": "UNAUTHORIZED",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "other_scope-quote",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "other_scope",
+        "resource": "quote",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 404,
+        "code": "NOT_FOUND",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "sibling_scope_never_reads_body"
+      ]
+    },
+    {
+      "id": "guessed_id-quote",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "guessed_id",
+        "resource": "quote",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 404,
+        "code": "NOT_FOUND",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "sibling_scope_never_reads_body"
+      ]
+    },
+    {
+      "id": "public_tx_hash-quote",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "public_tx_hash",
+        "resource": "quote",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 404,
+        "code": "NOT_FOUND",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "sibling_scope_never_reads_body"
+      ]
+    },
+    {
+      "id": "missing-report",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "missing",
+        "resource": "report",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 401,
+        "code": "UNAUTHORIZED",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "sibling-scope-report",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "other_scope",
+        "resource": "report",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 404,
+        "code": "NOT_FOUND",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "sibling_scope_never_reads_body"
+      ]
+    },
+    {
+      "id": "guessed_id-report",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "guessed_id",
+        "resource": "report",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 404,
+        "code": "NOT_FOUND",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "sibling_scope_never_reads_body"
+      ]
+    },
+    {
+      "id": "public_tx_hash-report",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "public_tx_hash",
+        "resource": "report",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 404,
+        "code": "NOT_FOUND",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "sibling_scope_never_reads_body"
+      ]
+    },
+    {
+      "id": "missing-evidence",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "missing",
+        "resource": "evidence",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 401,
+        "code": "UNAUTHORIZED",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "other_scope-evidence",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "other_scope",
+        "resource": "evidence",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 404,
+        "code": "NOT_FOUND",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "sibling_scope_never_reads_body"
+      ]
+    },
+    {
+      "id": "guessed_id-evidence",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "guessed_id",
+        "resource": "evidence",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 404,
+        "code": "NOT_FOUND",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "sibling_scope_never_reads_body"
+      ]
+    },
+    {
+      "id": "public_tx_hash-evidence",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "public_tx_hash",
+        "resource": "evidence",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 404,
+        "code": "NOT_FOUND",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "sibling_scope_never_reads_body"
+      ]
+    },
+    {
+      "id": "unpaid-report",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A10"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "report",
+        "entitlement_present": false,
+        "quote_state": "READY",
+        "attempt_state": "RECEIVED",
+        "finality_verified": false,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 402,
+        "code": "PAYMENT_REQUIRED",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "unpaid_read_returns_sdk_402"
+      ]
+    },
+    {
+      "id": "paid-report",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "report",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 200,
+        "code": null,
+        "paid_body": true,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "quote-review-report",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "report",
+        "entitlement_present": true,
+        "quote_state": "MANUAL_REVIEW",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 202,
+        "code": "MANUAL_REVIEW",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "attempt-review-report",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "report",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "MANUAL_REVIEW",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 202,
+        "code": "MANUAL_REVIEW",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "finality-unverified-report",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "report",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": false,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 202,
+        "code": "PAYMENT_UNCERTAIN",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "chain-conflict-report",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "report",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": true
+      },
+      "expected": {
+        "http_status": 202,
+        "code": "MANUAL_REVIEW",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "unpaid-evidence",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A10"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "evidence",
+        "entitlement_present": false,
+        "quote_state": "READY",
+        "attempt_state": "RECEIVED",
+        "finality_verified": false,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 402,
+        "code": "PAYMENT_REQUIRED",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "unpaid_read_returns_sdk_402"
+      ]
+    },
+    {
+      "id": "paid-evidence",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "evidence",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 200,
+        "code": null,
+        "paid_body": true,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "quote-review-evidence",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "evidence",
+        "entitlement_present": true,
+        "quote_state": "MANUAL_REVIEW",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 202,
+        "code": "MANUAL_REVIEW",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "attempt-review-evidence",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "evidence",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "MANUAL_REVIEW",
+        "finality_verified": true,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 202,
+        "code": "MANUAL_REVIEW",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "finality-unverified-evidence",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "evidence",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": false,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 202,
+        "code": "PAYMENT_UNCERTAIN",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "chain-conflict-evidence",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "evidence",
+        "entitlement_present": true,
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "finality_verified": true,
+        "chain_inconsistency": true
+      },
+      "expected": {
+        "http_status": 202,
+        "code": "MANUAL_REVIEW",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
+      "id": "verify-without-confirmation",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "verify_only",
+        "quote_state": "PAYMENT_PENDING",
+        "attempt_state": "VERIFIED",
+        "now": "2026-09-24T12:01:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": false,
+        "finality_verified": false,
+        "chain_inconsistency": false,
+        "tx_hash": null,
+        "matching_transfer_count": 0,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "PAYMENT_PENDING",
+        "attempt_state": "VERIFIED",
+        "http_status": 202,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "verify_alone_never_delivers"
+      ]
+    },
+    {
+      "id": "timeout-without-hash",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A19"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "timeout_without_hash",
+        "quote_state": "PAYMENT_PENDING",
+        "attempt_state": "SUBMITTING",
+        "now": "2026-09-24T12:01:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": false,
+        "finality_verified": false,
+        "chain_inconsistency": false,
+        "tx_hash": null,
+        "matching_transfer_count": 0,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "PAYMENT_UNCERTAIN",
+        "attempt_state": "UNKNOWN",
+        "http_status": 202,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "unknown_never_resubmits"
+      ]
+    },
+    {
+      "id": "ambiguous-identical-transfers",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A19"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "ambiguous_transfers",
+        "quote_state": "PAYMENT_UNCERTAIN",
+        "attempt_state": "UNKNOWN",
+        "now": "2026-09-24T12:01:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": false,
+        "finality_verified": false,
+        "chain_inconsistency": false,
+        "tx_hash": null,
+        "matching_transfer_count": 3,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "PAYMENT_UNCERTAIN",
+        "attempt_state": "UNKNOWN",
+        "http_status": 202,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "receipt_log_bound_to_authorization",
+        "unknown_never_resubmits"
+      ]
+    },
+    {
+      "id": "crash-after-durable-attempt-before-submit",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A17"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "crash_before_submit",
+        "quote_state": "PAYMENT_PENDING",
+        "attempt_state": "SUBMITTING",
+        "now": "2026-09-24T12:01:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": true,
+        "finality_verified": false,
+        "chain_inconsistency": false,
+        "tx_hash": null,
+        "matching_transfer_count": 0,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "READY",
+        "attempt_state": "REJECTED",
+        "http_status": 409,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "crash_recovery_never_double_charges"
+      ]
+    },
+    {
+      "id": "crash-after-broadcast",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A17"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "crash_after_broadcast",
+        "quote_state": "PAYMENT_PENDING",
+        "attempt_state": "SUBMITTING",
+        "now": "2026-09-24T12:01:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": false,
+        "finality_verified": false,
+        "chain_inconsistency": false,
+        "tx_hash": "0xabababababababababababababababababababababababababababababababab",
+        "matching_transfer_count": 0,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "PAYMENT_UNCERTAIN",
+        "attempt_state": "UNKNOWN",
+        "http_status": 202,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "crash_recovery_never_double_charges",
+        "unknown_never_resubmits"
+      ]
+    },
+    {
+      "id": "crash-after-chain-before-commit",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A17"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "crash_after_chain_success",
+        "quote_state": "PAYMENT_PENDING",
+        "attempt_state": "SUBMITTING",
+        "now": "2026-09-24T12:01:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": false,
+        "finality_verified": true,
+        "chain_inconsistency": false,
+        "tx_hash": "0xabababababababababababababababababababababababababababababababab",
+        "matching_transfer_count": 1,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "http_status": 200,
+        "paid_body": true,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "crash_recovery_never_double_charges",
+        "receipt_log_bound_to_authorization"
+      ]
+    },
+    {
+      "id": "lost-http-response-after-commit",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A18"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "lost_response",
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "now": "2026-09-24T12:01:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": false,
+        "finality_verified": true,
+        "chain_inconsistency": false,
+        "tx_hash": "0xabababababababababababababababababababababababababababababababab",
+        "matching_transfer_count": 1,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "http_status": 200,
+        "paid_body": true,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "lost_response_reuses_entitlement"
+      ]
+    },
+    {
+      "id": "expired-before-submitting",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A20"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "expiry_before_submit",
+        "quote_state": "PAYMENT_PENDING",
+        "attempt_state": "VERIFIED",
+        "now": "2026-09-24T12:02:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": true,
+        "finality_verified": false,
+        "chain_inconsistency": false,
+        "tx_hash": null,
+        "matching_transfer_count": 0,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "EXPIRED",
+        "attempt_state": "REJECTED",
+        "http_status": 410,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "expiry_blocks_new_payment_only"
+      ]
+    },
+    {
+      "id": "submitted-before-confirmed-after-expiry",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A20"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "confirmation_after_expiry",
+        "quote_state": "PAYMENT_PENDING",
+        "attempt_state": "SUBMITTING",
+        "now": "2026-09-24T12:03:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": false,
+        "finality_verified": true,
+        "chain_inconsistency": false,
+        "tx_hash": "0xabababababababababababababababababababababababababababababababab",
+        "matching_transfer_count": 1,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "http_status": 200,
+        "paid_body": true,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "late_confirmation_delivers_original"
+      ]
+    },
+    {
+      "id": "unknown-retained-after-expiry",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A20"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "unknown_after_expiry",
+        "quote_state": "PAYMENT_UNCERTAIN",
+        "attempt_state": "UNKNOWN",
+        "now": "2026-10-25T12:00:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": false,
+        "finality_verified": false,
+        "chain_inconsistency": false,
+        "tx_hash": null,
+        "matching_transfer_count": 0,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "PAYMENT_UNCERTAIN",
+        "attempt_state": "UNKNOWN",
+        "http_status": 202,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "unknown_never_resubmits",
+        "expiry_blocks_new_payment_only"
+      ]
+    },
+    {
+      "id": "historical-paid-repeat-read",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A14"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "repeat_paid_read",
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "now": "2026-09-25T12:00:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": false,
+        "finality_verified": true,
+        "chain_inconsistency": false,
+        "tx_hash": "0xabababababababababababababababababababababababababababababababab",
+        "matching_transfer_count": 1,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "http_status": 200,
+        "paid_body": true,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "paid_repeat_read_never_settles",
+        "current_confirmation_required_for_delivery"
+      ]
+    },
+    {
+      "id": "review-withholds-repeat-read",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A14",
+        "A24"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "chain_inconsistency",
+        "quote_state": "PAID",
+        "attempt_state": "CONFIRMED",
+        "now": "2026-09-24T12:03:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": false,
+        "finality_verified": false,
+        "chain_inconsistency": true,
+        "tx_hash": null,
+        "matching_transfer_count": 1,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "MANUAL_REVIEW",
+        "attempt_state": "MANUAL_REVIEW",
+        "http_status": 202,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": true,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "current_confirmation_required_for_delivery",
+        "unknown_never_resubmits"
+      ]
+    },
+    {
+      "id": "authorization-outlives-retention",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11",
+        "A17"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "retention_check",
+        "quote_state": "EXPIRED",
+        "attempt_state": "REJECTED",
+        "now": "2026-10-25T12:00:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": true,
+        "finality_verified": false,
+        "chain_inconsistency": false,
+        "tx_hash": null,
+        "matching_transfer_count": 0,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "EXPIRED",
+        "attempt_state": "REJECTED",
+        "http_status": 410,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": false,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "retention_covers_authorization_validity",
+        "deletion_cannot_enable_replay"
+      ]
+    },
+    {
+      "id": "authorization-validity-unresolved",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11",
+        "A17"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "retention_check",
+        "quote_state": "EXPIRED",
+        "attempt_state": "REJECTED",
+        "now": "2026-10-25T12:00:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": true,
+        "finality_verified": false,
+        "chain_inconsistency": false,
+        "tx_hash": null,
+        "matching_transfer_count": 0,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": null,
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "EXPIRED",
+        "attempt_state": "REJECTED",
+        "http_status": 410,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": false,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "retention_covers_authorization_validity",
+        "deletion_cannot_enable_replay"
+      ]
+    },
+    {
+      "id": "post-validity-replay-not-proven",
+      "kind": "recovery",
+      "owner": "F5",
+      "acceptance_ids": [
+        "A11",
+        "A17"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "event": "retention_check",
+        "quote_state": "EXPIRED",
+        "attempt_state": "REJECTED",
+        "now": "2026-12-25T12:00:00Z",
+        "quote_expires_at": "2026-09-24T12:02:00Z",
+        "authoritative_no_broadcast_proof": true,
+        "finality_verified": false,
+        "chain_inconsistency": false,
+        "tx_hash": null,
+        "matching_transfer_count": 0,
+        "ledger_created_at": "2026-09-24T12:00:00Z",
+        "ledger_days": 30,
+        "authorization_valid_until": "2026-11-24T12:00:00Z",
+        "replay_impossible_proven": false
+      },
+      "expected": {
+        "quote_state": "EXPIRED",
+        "attempt_state": "REJECTED",
+        "http_status": 410,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "original_digest_preserved": true,
+        "retain_artifacts": false,
+        "retain_ledger": true,
+        "retain_scope_binding": true,
+        "retain_dedup_association": true
+      },
+      "future_assertions": [
+        "retention_covers_authorization_validity",
+        "deletion_cannot_enable_replay"
+      ]
+    },
+    {
+      "id": "artifact-missing-before-payment",
+      "kind": "artifact",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A22"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "before_payment",
+        "defect": "missing_bytes",
+        "expected_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "readback_digest": null,
+        "source_mode": "live-public"
+      },
+      "expected": {
+        "http_status": 503,
+        "code": "STORAGE_UNAVAILABLE",
+        "chargeable_quote": false,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "recovery_required": false
+      },
+      "future_assertions": [
+        "missing_artifact_prevents_payment"
+      ]
+    },
+    {
+      "id": "paid-artifact-corruption",
+      "kind": "artifact",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A22"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "after_payment",
+        "defect": "corrupt_bytes",
+        "expected_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "readback_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "source_mode": "live-public"
+      },
+      "expected": {
+        "http_status": 503,
+        "code": "ARTIFACT_INTEGRITY_FAILURE",
+        "chargeable_quote": false,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "recovery_required": true
+      },
+      "future_assertions": [
+        "paid_artifact_loss_requires_recovery_without_charge"
+      ]
+    },
+    {
+      "id": "fictitious-report-provenance",
+      "kind": "artifact",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A06"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "phase": "report_validation",
+        "defect": "fictitious_provenance",
+        "expected_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "readback_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source_mode": "live-public"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "IDENTITY_UNVERIFIED",
+        "chargeable_quote": false,
+        "paid_body": false,
+        "additional_settlement_calls": 0,
+        "recovery_required": false
+      },
+      "future_assertions": [
+        "report_provenance_required"
+      ]
+    }
+  ]
+}

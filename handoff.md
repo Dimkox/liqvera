@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 complete; F3 implementation plan in review). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24 (F2 complete; F3 fixture MVP implementation next). Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f3-report` (stacked on verified F2).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -15,23 +15,26 @@ ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
 
 The [F3 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f3-evidence-report.md)
-is authored and awaiting independent/human review. It freezes an additive
-`mee-evidence-report` distribution, exact Hyperliquid metadata/L2 capture,
-canonical report bytes, deterministic ZIP_STORED bundles, archive-first offline
-verification, exactly 39 F3-owned vector executions, and separate SHA-bound F3
-runtime results. No F3 product code or live acceptance has been implemented by
-this planning commit. Discovery-only live observations are not acceptance.
-`PAY_TO_MISSING`, `FINALITY_RULE_UNVERIFIED`, funded buyer/signature/receipt and
-SDK identity gaps, A13–A14 `BLOCKED_EXTERNAL`, and inherited Trivy findings are
-unchanged.
+now defines a three-task fixture-only MVP. The next implementation reads an
+existing frozen Stage A package, reuses the exact BUY/SELL sweep, writes a
+schema-shaped `SIMULATED` `report.json`, and creates a simple deterministic ZIP
+containing that report plus the unchanged `sealed-input/` tree. The ZIP is a
+prototype: unverified, non-chargeable, unsuitable for untrusted input, and not
+canonical F3 completion.
 
-F3 planning verification recomputed the exact 156/39 vector inventory and its
-`4 sweep + 34 dataset_rejection + 1 artifact` split, both fixed request-body
-hashes, and the immutable mapping-review file hash. Markdown fences and 21
-local links across the changed documents passed; staged/unstaged diff checks
-passed. `make graph` passed with the same seven inherited declared conflicts.
-This documentation-only step ran no product suite, Grok receipt, live capture,
-payment, deployment, release, or push.
+The MVP explicitly excludes live capture, hardened offline verification,
+production runtime schema validation, identity approval, A08/A09, runtime
+results, and acceptance claims. Payments, gateway, database, UI,
+factory/architecture-graph integration, deployment, and release are deferred.
+No F3 product code is implemented by this planning commit. F2 closure, all 156
+`NOT_RUN` vector statuses, `PAY_TO_MISSING`, `FINALITY_RULE_UNVERIFIED`, funded
+buyer/signature/receipt and SDK identity gaps, A13–A14 `BLOCKED_EXTERNAL`, and
+inherited Trivy findings remain unchanged.
+
+This documentation-only pivot changes implementation scope, not evidence. It
+ran no product suite, graph/factory validation, Grok receipt, live request,
+payment, deployment, release, or push. The only checks for this planning commit
+are the requested diff check and repository-status inspection.
 
 The owner approved the repaired [F2 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md)
 after its independent re-review at `50f16225c23f5fde046b483321f86bb7d6bbf4f1`
@@ -65,8 +68,8 @@ mathematically integral JSON number validation, and coherent readiness gates.
 The approved plan now reflects those corrections; simulated offline reports
 remain valid and no runtime layer or SDK identity rule was introduced.
 
-F2 is **static-contract complete**. Next: F3 report building, canonical
-serialization, immutable evidence bundles and hardened offline verification.
+F2 is **static-contract complete**. Next: the fixture-only F3 MVP report CLI
+and deterministic prototype bundle described above.
 The [final F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md)
 binds implementation `3729bdc131ca4ac971ab04e735da2e113d68ad71`, tree
 `155d7fb44f5953f814f5463c381dde14932a8ab3`, and fingerprint

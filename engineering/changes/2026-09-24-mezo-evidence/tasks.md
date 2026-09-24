@@ -74,17 +74,17 @@ or factory receipt.
 
 ## F3 — evidence report
 
-- [x] Author the [F3 implementation plan](../../../docs/superpowers/plans/2026-09-24-liqvera-f3-evidence-report.md) for review.
-- [ ] Complete independent plan review and obtain human approval before product implementation.
-- [ ] Replace synthetic timing and placeholder live identity evidence.
-- [ ] Implement report builder, canonical serialization, manifest, and bundle.
-- [ ] Implement hardened offline verifier and tamper tests.
+- [x] Narrow the [F3 implementation plan](../../../docs/superpowers/plans/2026-09-24-liqvera-f3-evidence-report.md) to the user-approved fixture MVP.
+- [ ] Implement the exact BUY/SELL `SIMULATED` report kernel over an existing frozen fixture package.
+- [ ] Add the fixture-only CLI and deterministic prototype ZIP containing `report.json` plus `sealed-input/`.
+- [ ] Run focused/Stage A regressions and record the prototype boundary.
 
-F3 status: **planning in review**. The plan defines seven TDD-first tasks with
-one write owner, a dependency DAG, exact 39-vector execution, additive A08/A09
-obligations, installed-wheel/socket-denied verification, and a separate opt-in
-live-source gate. No F3 runtime, payment, deployment, release, or acceptance is
-claimed. F2 closure and all existing blockers remain unchanged.
+F3 status: **MVP implementation next**. The three-task TDD plan produces only a
+fixture-derived, unverified, non-chargeable prototype. Hardened verification,
+runtime schema validation, live capture, identity approval, A08/A09, runtime
+results, and acceptance claims are deferred. Payments, gateway, database, UI,
+factory/graph integration, deployment, and release are also deferred. F2
+closure, all 156 `NOT_RUN` vector statuses, and existing blockers are unchanged.
 
 ## F4 — API and ledger
 

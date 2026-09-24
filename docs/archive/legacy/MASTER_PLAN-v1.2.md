@@ -1,106 +1,106 @@
 # Master Project TODO & Research
 ## Multi-Exchange Execution OS + Private Solana Intelligence Terminal
 
-**Версия:** 1.2  
-**Дата:** 6 августа 2026  
-**Предыдущая версия:** 1.1 (6 августа 2026)  
-**Статус:** живой мастер-документ  
-**Назначение:** единая точка правды по проекту, исследованиям, архитектуре, конкурентам и задачам
+**Version:** 1.2\
+**Date:** August 6, 2026\
+**Previous version:** 1.1 (August 6, 2026)\
+**Status:** living master document\
+**Purpose:** a single source of truth for the project, research, architecture, competitors, and tasks
 
 ---
 
-# Changelog 1.1 → 1.2 (6 августа 2026)
+# Changelog 1.1 → 1.2 (August 6, 2026)
 
-- **Совмещены два контура в одном продукте / репозитории:**
-  1. Cross-exchange perpetual execution & risk engine (HL, Lighter, Variational, CEX) — уже bootstrapped.
-  2. Private Solana Intelligence & Execution Terminal (Observe→Shadow→Paper→Live, Wallet DNA, Copy Score, Anti-Copy) — полный backlog в `docs/SOLANA_TERMINAL_TODO.md`.
+- **Two subsystems combined in one product / repository:**
+  1. Cross-exchange perpetual execution & risk engine (HL, Lighter, Variational, CEX) — already bootstrapped.
+  2. Private Solana Intelligence & Execution Terminal (Observe→Shadow→Paper→Live, Wallet DNA, Copy Score, Anti-Copy) — full backlog in `docs/SOLANA_TERMINAL_TODO.md`.
 - Product charter Solana: `docs/solana-product-charter.md`.
 - ADR-0001 Solana scope & non-goals: `docs/adr/0001-solana-scope-and-non-goals.md`.
-- Solana — **Wave A–E** (core intelligence + gated copy/execution); cross-venue perps — **Wave F** / XVN-* после G7 Solana *или* параллельно на уже готовых HL/Lighter adapters.
-- Non-goals Solana зафиксированы жёстко (нет wash volume, holder farming, custody чужих средств, SaaS).
-- Signer isolation обязателен для любого Live (Solana и perps).
+- Solana — **Wave A–E** (core intelligence + gated copy/execution); cross-venue perps — **Wave F** / XVN-* after Solana G7 *or* in parallel on the already completed HL/Lighter adapters.
+- Solana non-goals are fixed hard boundaries (no wash volume, holder farming, custody of others' funds, or SaaS).
+- Signer isolation is mandatory for any Live mode (Solana and perps).
 
-# Changelog 1.0 → 1.1 (6 августа 2026)
+# Changelog 1.0 → 1.1 (August 6, 2026)
 
-- Верифицирована стратегическая гипотеза (продукт = execution OS, а не frontend).
-- Подтверждена интеграция Lighter в Wallet in Telegram (апрель 2026).
-- Зафиксированы официальные latency/fee tiers Lighter Standard / Premium / Plus.
-- Проведён архитектурный аудит VOOI funding-bot-example и perp-cli.
-- Подтверждено существование kSHIB на Hyperliquid; **multiplier подтверждён live meta (1 unit = 1000 SHIB, szDecimals=0)**.
-- Уточнён статус Variational (SDK есть, full trading API gated).
-- Обновлены секции 5, 6, 12, 13, 16, 20.
-- Добавлен Decision D-009.
-- Отмечены выполненные research-пункты.
+- Verified the strategic hypothesis (product = execution OS, not frontend).
+- Confirmed Lighter integration in Wallet in Telegram (April 2026).
+- Recorded official Lighter Standard / Premium / Plus latency/fee tiers.
+- Completed an architectural audit of VOOI funding-bot-example and perp-cli.
+- Confirmed the existence of kSHIB on Hyperliquid; **the multiplier is confirmed by live meta (1 unit = 1000 SHIB, szDecimals=0)**.
+- Clarified Variational status (SDK exists, full trading API is gated).
+- Updated sections 5, 6, 12, 13, 16, and 20.
+- Added Decision D-009.
+- Marked completed research items.
 
 ---
 
-# 0. Краткий вывод
+# 0. Brief conclusion
 
-Проект — **единый Multi-Exchange Execution OS** с двумя операционными контурами в одном репозитории:
+The project is a **unified Multi-Exchange Execution OS** with two operational subsystems in one repository:
 
-### Контур A — Solana Intelligence & Gated Execution (Wave A–E)
+### Subsystem A — Solana Intelligence & Gated Execution (Wave A–E)
 
-Приватный аналитико-торговый терминал:
+A private analytics and trading terminal:
 
 - near-real-time ingest Solana mainnet;
 - decode Pump.fun / Raydium / Meteora / Orca / Jupiter / SPL;
 - Wallet DNA, Token Risk, strategy classification, **Copy Score**, hard **NON_COPYABLE**;
-- режимы **Observe → Shadow → Paper → Live** без пропусков;
+- **Observe → Shadow → Paper → Live** modes without skipping steps;
 - isolated signer; Jupiter V2 primary;
 - private Web UI (VPN).
 
-Полный backlog: [`docs/SOLANA_TERMINAL_TODO.md`](docs/SOLANA_TERMINAL_TODO.md).  
+Full backlog: [`docs/SOLANA_TERMINAL_TODO.md`](docs/SOLANA_TERMINAL_TODO.md).\
 Charter: [`docs/solana-product-charter.md`](docs/solana-product-charter.md).  
 ADR: [`docs/adr/0001-solana-scope-and-non-goals.md`](docs/adr/0001-solana-scope-and-non-goals.md).
 
-### Контур B — Cross-exchange Perp Execution (уже в коде + Wave F)
+### Subsystem B — Cross-exchange Perp Execution (already in code + Wave F)
 
-> **Execution and risk engine для дельта-нейтральной торговли между DEX и CEX.**
+> **Execution and risk engine for delta-neutral trading between DEX and CEX.**
 
-Площадки:
+Venues:
 
-- Hyperliquid — adapter + market data + trading (dry-run/live path) **готовы**;
-- Lighter — market data + trading adapter **готовы**; shadow scanner HL↔Lighter **готов**;
-- Variational — после official API;
+- Hyperliquid — adapter + market data + trading (dry-run/live path) **complete**;
+- Lighter — market data + trading adapter **complete**; HL↔Lighter shadow scanner **complete**;
+- Variational — after the official API;
 - Bybit / MEXC / HTX — CEX hedge legs;
 - Extended — later DEX.
 
-Moat **не** в количестве коннекторов (commoditized), а в:
+The moat is **not** connector count (commoditized), but:
 
-- двухногом исполнении + reconciliation + partial fill + residual hedge;
-- нормализации инструментов (kSHIB = 1000 SHIB);
-- net P&L после всех fees/latency;
-- для Solana — в отказе копировать некопируемое и в честном follower PnL.
+- two-leg execution + reconciliation + partial fill + residual hedge;
+- instrument normalization (kSHIB = 1000 SHIB);
+- net P&L after all fees/latency;
+- for Solana, refusing to copy non-copyable strategies and reporting honest follower PnL.
 
-**Статус (6 авг 2026):** гипотеза execution-OS подтверждена; HL/Lighter bootstrap в repo; Solana backlog вписан в тот же MASTER_PLAN как primary product surface для intelligence + copy.
+**Status (August 6, 2026):** the execution-OS hypothesis is confirmed; HL/Lighter bootstrap is in the repo; the Solana backlog is included in the same MASTER_PLAN as the primary product surface for intelligence + copy.
 
 ---
 
-# 1. Предыстория проекта
+# 1. Project background
 
-## 1.1. Исходная идея
+## 1.1. Original idea
 
-Первоначальная идея:
+The original idea:
 
-- мобильный доступ к perp DEX без официальных приложений;
-- Telegram Mini App вместо Kotlin/Android;
+- mobile access to perp DEX without official apps;
+- Telegram Mini App instead of Kotlin/Android;
 - worldwide distribution;
-- приоритет tier-2/3 GEO;
-- монетизация через builder fees и referrals;
-- первоначальные площадки: Extended, Reya, Ostium.
+- priority for tier-2/3 GEO;
+- monetization through builder fees and referrals;
+- initial venues: Extended, Reya, Ostium.
 
-Причины выбора Telegram Mini App:
+Reasons for choosing a Telegram Mini App:
 
-- дешевле native-разработки;
-- не нужен Google Play review;
-- быстрые обновления;
-- прямая воронка из Telegram;
-- удобные push-уведомления через бота;
-- меньше зависимости от блокировок магазинов приложений.
+- cheaper than native development;
+- no Google Play review required;
+- rapid updates;
+- a direct funnel from Telegram;
+- convenient push notifications through the bot;
+- less dependence on app-store restrictions.
 
-## 1.2. Исходная техническая база
+## 1.2. Initial technical foundation
 
-Было проведено глубокое техническое исследование:
+Extensive technical research was conducted:
 
 ### Extended
 
@@ -110,14 +110,14 @@ Moat **не** в количестве коннекторов (commoditized), а 
 - Stark curve;
 - builder fee;
 - referral program;
-- официальный Python SDK;
+- official Python SDK;
 - Rust crypto library;
 - JS WASM wrapper;
-- тест-векторы;
-- квантование;
+- test vectors;
+- quantization;
 - expiration;
 - signed i64 conversion;
-- builder fee в order hash.
+- builder fee in the order hash.
 
 ### Reya
 
@@ -125,70 +125,70 @@ Moat **не** в количестве коннекторов (commoditized), а 
 - ABI-encoded order inputs;
 - packed nonce;
 - separate cancellation signature;
-- remote config из-за Evolution migration.
+- remote config due to the Evolution migration.
 
 ### Ostium
 
 - Arbitrum contracts;
 - Python SDK;
 - RWA perps;
-- отдельные особенности limit/stop.
+- specific limit/stop behavior.
 
-## 1.3. Существующий Hyperliquid-бот
+## 1.3. Existing Hyperliquid bot
 
-Позже выяснилось, что уже существует работающий бот:
+It later emerged that a working bot already existed:
 
-- подключён к Hyperliquid;
-- является адаптированным клоном HTX futures grid-бота;
-- совершил более $10 000 собственного объёма;
-- видит динамические рынки;
-- видит `DOGE-USDC`;
-- видит `kSHIB`;
-- частично умеет торговать.
+- connected to Hyperliquid;
+- an adapted clone of an HTX futures grid bot;
+- generated more than $10,000 in the owner's trading volume;
+- sees dynamic markets;
+- sees `DOGE-USDC`;
+- sees `kSHIB`;
+- has partial trading capability.
 
-Это изменило приоритеты.
+This changed the priorities.
 
-Hyperliquid стал не новой интеграцией, а:
+Hyperliquid became the following rather than a new integration:
 
-- исходным адаптером;
-- тестовой площадкой;
-- источником реального order lifecycle;
-- полигоном для refactor;
-- первой ногой будущего арбитража.
+- the initial adapter;
+- a test venue;
+- a source of a real order lifecycle;
+- a refactoring testbed;
+- the first leg of future arbitrage.
 
 ---
 
-# 2. Почему мы изменили стратегию
+# 2. Why we changed strategy
 
-## 2.1. Мобильный клиент перестал быть уникальным
+## 2.1. A mobile client was no longer unique
 
-За время исследования появились или были обнаружены:
+During the research, the following appeared or were discovered:
 
-- официальные mobile apps;
+- official mobile apps;
 - Hyperliquid clients;
 - Lighter mobile;
-- Wallet in Telegram с Lighter;
+- Wallet in Telegram with Lighter;
 - Liquid;
 - goodcryptoX;
 - Dexari;
 - Apex Mini App;
-- другие специализированные клиенты.
+- other specialized clients.
 
-Следовательно, оффер «DEX в телефоне» недостаточен.
+Therefore, “DEX on your phone” is an insufficient offering.
 
-## 2.2. Lighter уже встроен в Telegram
+## 2.2. Lighter is already integrated into Telegram
 
-Критический конкурентный факт (подтверждён 6 авг 2026):
+A critical competitive fact (confirmed August 6, 2026):
 
-- Lighter доступен внутри Wallet in Telegram с 2 апреля 2026;
-- 50+ рынков, до 50x leverage, native experience;
-- сам факт «Lighter in Telegram» уже не является преимуществом.
+- Lighter has been available inside Wallet in Telegram since April 2, 2026;
+- 50+ markets, up to 50x leverage, native experience;
+- the mere fact of “Lighter in Telegram” is no longer an advantage.
 
-Следовательно, Lighter должен быть execution venue, а не центром маркетинга.
+Therefore, Lighter should be an execution venue, not the center of marketing.
 
-## 2.3. Multi-DEX aggregation уже существует
+## 2.3. Multi-DEX aggregation already exists
 
-Обнаружены и аудированы продукты:
+Products discovered and audited:
 
 - Liquid (Paradigm-backed);
 - goodcryptoX;
@@ -196,13 +196,13 @@ Hyperliquid стал не новой интеграцией, а:
 - perp-cli (hypurrquant);
 - Hummingbot;
 - PD AIO SDK;
-- другие frameworks.
+- other frameworks.
 
-Следовательно, оффер «один интерфейс для нескольких perp DEX» тоже недостаточен.
+Therefore, “one interface for several perp DEX” is also an insufficient offering.
 
-## 2.4. Funding scanner уже commoditized
+## 2.4. Funding scanners are already commoditized
 
-На GitHub существует большое количество:
+GitHub has a large number of:
 
 - funding scanners;
 - Telegram alerts;
@@ -210,11 +210,11 @@ Hyperliquid стал не новой интеграцией, а:
 - exchange adapters;
 - basic bots.
 
-Следовательно, scanner — функция, но не moat.
+Therefore, a scanner is a feature, not a moat.
 
-## 2.5. Главная сложность — execution correctness
+## 2.5. The main difficulty is execution correctness
 
-Исследование Hummingbot и других проектов показало реальный failure mode:
+Research into Hummingbot and other projects showed a real failure mode:
 
 ```text
 close order sent
@@ -225,38 +225,38 @@ close order sent
 → reversed exposure
 ```
 
-(Документированный race condition в Hummingbot Hyperliquid perpetual, issue #7295.)
+(Documented race condition in Hummingbot Hyperliquid perpetual, issue #7295.)
 
-Значит, самая сложная и ценная часть продукта:
+Thus, the hardest and most valuable part of the product is:
 
-- не увидеть spread;
-- не отправить REST request;
-- а правильно определить состояние после timeout, reject, late fill и restart.
+- not spotting a spread;
+- not sending a REST request;
+- but correctly determining the state after timeout, reject, late fill, and restart.
 
 ---
 
-# 3. Текущая формулировка продукта
+# 3. Current product definition
 
-## 3.1. Что строим
+## 3.1. What we are building
 
-> **Execution OS для торговли perp-инструментами между несколькими DEX и CEX.**
+> **An execution OS for trading perp instruments across multiple DEX and CEX.**
 
-Telegram Mini App является:
+The Telegram Mini App is:
 
-- панелью управления;
-- интерфейсом портфеля;
-- экраном opportunities;
-- системой уведомлений;
-- подтверждением действий.
+- a control panel;
+- a portfolio interface;
+- an opportunities screen;
+- a notification system;
+- a means of confirming actions.
 
-Backend является настоящим продуктом.
+The backend is the actual product.
 
-## 3.2. Основные режимы
+## 3.2. Core modes
 
 ### Unified portfolio
 
-- балансы;
-- позиции;
+- balances;
+- positions;
 - funding;
 - realized/unrealized P&L;
 - margin;
@@ -264,24 +264,24 @@ Backend является настоящим продуктом.
 
 ### Funding arbitrage
 
-- long на одной площадке;
-- short на другой;
-- net funding после fees и exit cost.
+- long on one venue;
+- short on another;
+- net funding after fees and exit cost.
 
 ### Price/basis arbitrage
 
-- сравнение executable VWAP;
+- executable VWAP comparison;
 - simultaneous or hedge-first execution;
-- закрытие при convergence.
+- closing on convergence.
 
 ### DEX ↔ CEX hedge
 
-- DEX как источник opportunity;
-- CEX как ликвидная hedge leg.
+- DEX as the opportunity source;
+- CEX as the liquid hedge leg.
 
 ### RFQ arbitrage
 
-После Variational API:
+After the Variational API:
 
 ```text
 Variational RFQ
@@ -294,28 +294,28 @@ Variational RFQ
 
 
 
-## 3.0. Единый продукт (v1.2)
+## 3.0. Unified product (v1.2)
 
-Один репозиторий `multi-exchange-engine` обслуживает:
+One `multi-exchange-engine` repository serves:
 
-| Контур | Стек (MVP) | Режим Live |
+| Subsystem | Stack (MVP) | Live mode |
 |--------|------------|------------|
-| Solana intelligence + copy | Rust modular monolith + isolated signer + TS UI | только после G0–G6 |
-| Perp cross-venue (HL/Lighter/…) | Python adapters (уже) → позже unified venue traits | dry-run → Paper → tiny Live |
+| Solana intelligence + copy | Rust modular monolith + isolated signer + TS UI | only after G0–G6 |
+| Perp cross-venue (HL/Lighter/…) | Python adapters (already present) → unified venue traits later | dry-run → Paper → tiny Live |
 
-Общие принципы:
+Shared principles:
 
 - risk/execution correctness > UI;
-- Observe/Shadow/Paper перед Live;
-- signer / keys вне analytics и UI;
+- Observe/Shadow/Paper before Live;
+- signer / keys outside analytics and UI;
 - instrument registry + precision quantization;
-- reconciliation = source of truth по позициям.
+- reconciliation = source of truth for positions.
 
-Solana non-goals (wash, farming, custody, SaaS) — **жёсткие**.  
-Perp non-goals: не строить moat на «ещё одном агрегаторе UI».
+Solana non-goals (wash, farming, custody, SaaS) are **hard boundaries**.\
+Perp non-goals: do not build a moat around “yet another UI aggregator.”
 
 
-# 4. Текущий приоритет площадок
+# 4. Current venue priorities
 
 1. Hyperliquid
 2. Lighter
@@ -329,90 +329,90 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 
 ### Hyperliquid
 
-Уже есть работающий код и собственный объём.
+Working code and the owner's trading volume already exist.
 
 ### Lighter
 
-- документированный API;
+- documented API;
 - WebSocket;
 - API keys (index 0–3 reserved frontend);
 - partner attribution;
 - Standard / Premium / Plus account model;
 - Standard: 0 fees + 200–300 ms latency;
-- подходит для funding и не ультракоротких opportunities.
+- suitable for funding and opportunities that are not ultra-short-lived.
 
 ### Bybit
 
-- сильный API;
-- хорошая ликвидность;
-- удобная hedge leg;
+- strong API;
+- good liquidity;
+- convenient hedge leg;
 - CEX benchmark.
 
 ### Variational
 
-- официальный Python SDK;
-- API access gated (Pro not live, waitlist, trading API в roadmap);
+- official Python SDK;
+- API access gated (Pro not live, waitlist, trading API on the roadmap);
 - RFQ model;
-- важный strategic differentiator.
+- important strategic differentiator.
 
 ### MEXC
 
-- много альтов;
-- потенциальные price dislocations;
-- полезная hedge leg;
-- сложнее качество рынков.
+- many altcoins;
+- potential price dislocations;
+- useful hedge leg;
+- more challenging market quality.
 
 ### Extended
 
 - builder fee;
-- низкая конкуренция;
-- Stark integration уже исследована;
-- но не первый execution priority.
+- low competition;
+- Stark integration already researched;
+- but not the first execution priority.
 
 ---
 
-# 5. Что уже проверено
+# 5. What has already been verified
 
-## 5.1. По текущему проекту
+## 5.1. For the current project
 
-- Hyperliquid подключён.
-- Бот совершает сделки.
-- Наторговано более $10 000 собственного объёма.
-- Market discovery работает как минимум частично.
-- Видны `DOGE-USDC` и `kSHIB`.
-- Существующий код содержит HTX/grid-наследие.
-- Требуется refactor до использования с пользовательскими деньгами.
+- Hyperliquid is connected.
+- The bot executes trades.
+- More than $10,000 of the owner's volume has been traded.
+- Market discovery works at least partially.
+- `DOGE-USDC` and `kSHIB` are visible.
+- The existing code contains HTX/grid legacy elements.
+- Refactoring is required before use with user funds.
 
-## 5.2. По Lighter (обновлено 6 авг)
+## 5.2. Lighter (updated August 6)
 
-- есть официальный API;
-- есть WebSocket;
-- есть API keys (до 256 на account, index 0–3 reserved);
-- есть отдельный nonce на key;
-- есть partner attribution;
-- есть Standard/Premium/Plus account model;
+- an official API exists;
+- WebSocket exists;
+- API keys exist (up to 256 per account, indexes 0–3 reserved);
+- a separate nonce per key exists;
+- partner attribution exists;
+- a Standard/Premium/Plus account model exists;
 - **Standard Account (verified):**
   - Fees: 0 / 0
   - Taker latency: 300 ms
   - Maker / Cancel latency: 200 ms
 - Premium: fees + staking discounts + lower latency;
-- подходит для funding и не ультракоротких opportunities.
+- suitable for funding and opportunities that are not ultra-short-lived.
 
-## 5.3. По Variational (обновлено 6 авг)
+## 5.3. Variational (updated August 6)
 
-- существует официальный Python SDK (`variational-research/variational-sdk-python`);
-- API access требует обращения к команде;
-- торговая модель RFQ;
-- public API / SDK не равны полноценному trading access;
+- an official Python SDK exists (`variational-research/variational-sdk-python`);
+- API access requires contacting the team;
+- RFQ trading model;
+- public API / SDK does not equal full trading access;
 - Pro not live (waitlist);
-- trading API в roadmap 2026;
-- reverse engineering private API не должен быть production-путём.
+- trading API is on the 2026 roadmap;
+- reverse engineering a private API must not be the production path.
 
-## 5.4. По конкурентам (обновлено 6 авг)
+## 5.4. Competitors (updated August 6)
 
 ### VOOI
 
-Аудировано:
+Audited:
 
 - unified API;
 - Lighter + Hyperliquid (+ Aster);
@@ -425,11 +425,11 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 - margin routing;
 - live bug fixes.
 
-Структура fundbot: api / execution / position / risk / strategy / reporting.
+Fundbot structure: api / execution / position / risk / strategy / reporting.
 
 ### perp-cli (hypurrquant)
 
-Аудировано:
+Audited:
 
 - Hyperliquid + Lighter + Pacifica + Aster;
 - dual-leg execution (`arb exec`);
@@ -439,32 +439,32 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 - TWAP / grid / DCA;
 - MCP server (18 tools);
 - Telegram/Discord alerts;
-- большое количество тестов;
-- Korean QA след;
+- a large number of tests;
+- evidence of Korean QA;
 - Lighter API key index default = 4.
 
 ### Hummingbot
 
-Подтверждено наличие зрелой infrastructure framework и реальных race-condition issues (double fill on close retry).
+A mature infrastructure framework and real race-condition issues (double fill on close retry) were confirmed.
 
 ### Closed-source competitors
 
-- Wallet in Telegram + Lighter (live с апреля 2026);
+- Wallet in Telegram + Lighter (live since April 2026);
 - Liquid (Paradigm, HL + Lighter + Ostium);
-- goodcryptoX (мобильные боты HL + Lighter + CEX);
+- goodcryptoX (mobile bots for HL + Lighter + CEX);
 - Dexari (Hyperliquid mobile).
 
 ---
 
-# 6. Что требует проверки
+# 6. What needs verification
 
-## 6.1. Текущий Hyperliquid-бот
+## 6.1. Current Hyperliquid bot
 
-Нужно доказать:
+The following must be proven:
 
-- корректный `clientOrderId`;
+- correct `clientOrderId`;
 - idempotency;
-- обработку late fills;
+- late-fill handling;
 - partial fills;
 - reduce-only;
 - reconnect;
@@ -473,23 +473,23 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 - builder/referral fields;
 - multiplier handling;
 - fee attribution;
-- отсутствие повторного order submission.
+- no duplicate order submission.
 
-## 6.2. `kSHIB` (обновлено 6 авг — live meta)
+## 6.2. `kSHIB` (updated August 6 — live meta)
 
-- [x] Рынок существует на Hyperliquid.
+- [x] The market exists on Hyperliquid.
 - [x] Contract model = 1 unit of underlying (linear).
-- [x] `szDecimals` = **0** (live `meta` 6 авг 2026).
+- [x] `szDecimals` = **0** (live `meta` on August 6, 2026).
 - [x] Canonical: **1 unit kSHIB = 1000 SHIB** (mid ≈ 0.00492 ≈ 1000 × spot SHIB).
-- [x] Quantity — только целые числа.
-- [ ] Price / quantity normalization в Instrument Registry.
-- [ ] Matching с Bybit / MEXC / Lighter instruments (1000SHIB / SHIB1000 и т.п.).
+- [x] Quantity is integers only.
+- [ ] Price / quantity normalization in the Instrument Registry.
+- [ ] Matching with Bybit / MEXC / Lighter instruments (1000SHIB / SHIB1000, etc.).
 
-**Статус:** multiplier подтверждён. Рынок можно включать в shadow scanner после mapping-тестов. Для live paired execution — только после полной нормализации и cross-venue verification.
+**Status:** the multiplier is confirmed. The market can be included in the shadow scanner after mapping tests. Live paired execution is allowed only after full normalization and cross-venue verification.
 
 ## 6.3. Lighter
 
-Нужно проверить практически:
+The following must be tested in practice:
 
 - [ ] testnet/mainnet onboarding;
 - [ ] API key lifecycle;
@@ -502,11 +502,11 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 - [ ] rejected transaction behavior;
 - [ ] duplicate event behavior.
 
-Официальные latency цифры уже зафиксированы (см. 5.2).
+The official latency figures have already been recorded (see 5.2).
 
 ## 6.4. Variational
 
-Нужно получить:
+The following must be obtained:
 
 - [ ] API key;
 - [ ] partner contact;
@@ -522,7 +522,7 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 
 ## 6.5. Competitor research
 
-Глубокое исследование ещё не завершено по:
+In-depth research is not yet complete for:
 
 - [ ] APK analysis (lawful static only);
 - [ ] web bundle analysis;
@@ -537,7 +537,7 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 
 # 7. Competitive conclusions
 
-## 7.1. Что больше не является moat
+## 7.1. What is no longer a moat
 
 - Telegram Mini App;
 - Lighter integration;
@@ -548,9 +548,9 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 - grid;
 - DCA;
 - TWAP;
-- стандартные CEX adapters.
+- standard CEX adapters.
 
-## 7.2. Потенциальный moat
+## 7.2. Potential moat
 
 ### Execution correctness
 
@@ -583,11 +583,11 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 
 ### Variational RFQ
 
-Официальный ранний доступ может дать временное преимущество.
+Official early access may provide a temporary advantage.
 
 ### Korean distribution
 
-- корейский UX;
+- Korean UX;
 - terminology;
 - acquisition;
 - support;
@@ -608,7 +608,7 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 
 # 8. Build vs Buy
 
-## Можно использовать готовое
+## Existing components that can be reused
 
 - public market data clients;
 - standard exchange SDK;
@@ -620,7 +620,7 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 - logging/metrics stack;
 - basic REST clients.
 
-## Можно использовать как benchmark
+## What can be used as a benchmark
 
 - VOOI examples (funding bot + signals);
 - perp-cli;
@@ -629,7 +629,7 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 - CCXT;
 - Freqtrade.
 
-## Нельзя полностью отдавать наружу
+## What cannot be fully outsourced
 
 - order state machine;
 - reconciliation;
@@ -644,28 +644,28 @@ Perp non-goals: не строить moat на «ещё одном агрегат
 
 ## VOOI shortcut
 
-Возможный быстрый MVP:
+A possible fast MVP:
 
-- использовать VOOI API для Lighter + Hyperliquid;
-- поверх сделать Korean UX и strategy layer.
+- use the VOOI API for Lighter + Hyperliquid;
+- build Korean UX and a strategy layer on top.
 
-Риски:
+Risks:
 
-- зависимость от конкурента;
+- dependence on a competitor;
 - fee;
 - lock-in;
 - order flow exposure;
-- VOOI может сам выйти в Корею;
-- слабый moat.
+- VOOI may enter Korea itself;
+- weak moat.
 
-Рекомендация (подтверждена 6 авг):
+Recommendation (confirmed August 6):
 
-- benchmark и прототип — да;
-- единственная production dependency — нет.
+- benchmark and prototype — yes;
+- sole production dependency — no.
 
 ---
 
-# 9. Целевая архитектура
+# 9. Target architecture
 
 ```text
 Telegram Mini App / Web
@@ -777,7 +777,7 @@ FAILED
 MANUAL_INTERVENTION
 ```
 
-Главное правило:
+Main rule:
 
 ```text
 request uncertain
@@ -792,52 +792,52 @@ request uncertain
 
 # 11. Master TODO
 
-## 11.0. Solana Terminal (полный backlog)
+## 11.0. Solana Terminal (full backlog)
 
-Исполняемый backlog Solana-контура вынесен в отдельный документ (тот же repo):
+The executable backlog for the Solana subsystem is in a separate document (same repo):
 
-- **[`docs/SOLANA_TERMINAL_TODO.md`](docs/SOLANA_TERMINAL_TODO.md)** — фазы 0–13, P0/SOL/DEC/TOK/WAL/…, гейты G0–G9, первые 20 коммитов.
+- **[`docs/SOLANA_TERMINAL_TODO.md`](docs/SOLANA_TERMINAL_TODO.md)** — phases 0–13, P0/SOL/DEC/TOK/WAL/…, gates G0–G9, first 20 commits.
 - Charter / ADR: `docs/solana-product-charter.md`, `docs/adr/0001-solana-scope-and-non-goals.md`.
 
-Порядок: **Wave A (данные)** → B (intelligence) → C (Shadow/Paper) → D (execution) → E (ops) → **Wave F (XVN cross-venue, HL/Lighter уже частично готовы)**.
+Order: **Wave A (data)** → B (intelligence) → C (Shadow/Paper) → D (execution) → E (ops) → **Wave F (XVN cross-venue, HL/Lighter already partly complete)**.
 
-До первых 20 Solana-коммитов (TODO §14) не начинать Live UI и native arb.
+Do not start Live UI or native arbitrage before the first 20 Solana commits (TODO §14).
 
-Ниже — исходный Master TODO по perp-контуру (Lighter/HL), который остаётся в силе.
+Below is the original Master TODO for the perp subsystem (Lighter/HL), which remains in effect.
 
 
 ## P0 — Repository and audit
 
-- [ ] Создать clean repository.
-- [ ] Составить file map текущего HTX/Hyperliquid бота.
-- [ ] Выделить HTX-specific assumptions.
-- [ ] Выделить grid strategy.
-- [ ] Выделить Hyperliquid adapter.
-- [ ] Зафиксировать current behavior integration tests.
-- [ ] Зафиксировать DOGE market test.
-- [ ] Зафиксировать kSHIB discovery test.
+- [ ] Create a clean repository.
+- [ ] Create a file map of the current HTX/Hyperliquid bot.
+- [ ] Isolate HTX-specific assumptions.
+- [ ] Extract the grid strategy.
+- [ ] Extract the Hyperliquid adapter.
+- [ ] Capture current behavior in integration tests.
+- [ ] Establish the DOGE market test.
+- [ ] Establish the kSHIB discovery test.
 
 ## P0 — Numeric correctness
 
-- [ ] Перейти на Decimal/fixed-point.
-- [ ] Запретить float для денег.
-- [ ] Добавить finite validation.
-- [ ] Добавить tick/step rounding tests.
-- [ ] Добавить min-notional tests.
-- [ ] Добавить multiplier tests.
-- [x] Подтвердить kSHIB multiplier (live meta: 1 unit = 1000 SHIB, szDecimals=0).
+- [ ] Switch to Decimal/fixed-point.
+- [ ] Ban float for money.
+- [ ] Add finite validation.
+- [ ] Add tick/step rounding tests.
+- [ ] Add min-notional tests.
+- [ ] Add multiplier tests.
+- [x] Confirm the kSHIB multiplier (live meta: 1 unit = 1000 SHIB, szDecimals=0).
 
 ## P0 — Order lifecycle
 
-- [ ] Реализовать `clientOrderId`.
-- [ ] Реализовать idempotency keys.
-- [ ] Хранить raw request hash.
-- [ ] Хранить venue order ID.
-- [ ] Хранить fill IDs.
-- [ ] Реализовать late-fill resolution.
-- [ ] Реализовать duplicate-fill protection.
-- [ ] Реализовать unknown-state workflow.
-- [ ] Реализовать restart reconciliation.
+- [ ] Implement `clientOrderId`.
+- [ ] Implement idempotency keys.
+- [ ] Store the raw request hash.
+- [ ] Store the venue order ID.
+- [ ] Store fill IDs.
+- [ ] Implement late-fill resolution.
+- [ ] Implement duplicate-fill protection.
+- [ ] Implement the unknown-state workflow.
+- [ ] Implement restart reconciliation.
 
 ## P0 — Risk
 
@@ -1017,13 +1017,13 @@ request uncertain
 
 ## GitHub audit
 
-- [x] Full file-tree audit VOOI funding bot (структура + reconciliation patterns).
+- [x] Full file-tree audit of the VOOI funding bot (structure + reconciliation patterns).
 - [ ] Full file-tree audit VOOI signals bot.
 - [x] Full file-tree audit perp-cli (features + dual-leg + safety).
-- [ ] Extract state machines (детальнее).
+- [ ] Extract state machines (in more detail).
 - [ ] Extract error taxonomy.
 - [ ] Extract adapter interface.
-- [ ] Extract reconciliation logic (глубже в код).
+- [ ] Extract reconciliation logic (deeper into the code).
 - [ ] Extract multiplier handling.
 - [ ] Run tests where permitted.
 - [ ] Audit PD AIO SDK.
@@ -1064,9 +1064,9 @@ Only lawful static analysis of publicly obtainable client artifacts.
 
 ---
 
-# 13. Следующие 30 дней
+# 13. Next 30 days
 
-## Week 1 (прогресс на 6 авг)
+## Week 1 (progress as of August 6)
 
 - [x] Audit current competitive landscape (hypothesis verified).
 - [x] Confirm Lighter in Telegram + latency tiers.
@@ -1114,7 +1114,7 @@ Working Hyperliquid adapter
 
 ---
 
-# 14. Следующие 90 дней
+# 14. Next 90 days
 
 ## Month 2
 
@@ -1151,14 +1151,14 @@ Production-capable two-leg engine
 
 # 15. Decision Log
 
-### D-010 (2026-08-06) — Единый репозиторий: Solana Terminal + Perp Execution OS
+### D-010 (2026-08-06) — Unified repository: Solana Terminal + Perp Execution OS
 
-**Решение:** Solana Intelligence & Execution Terminal **не** отдельный продукт/репо.  
-Весь backlog (`docs/SOLANA_TERMINAL_TODO.md`) и charter/ADR вписаны в `multi-exchange-engine`.  
-Perp adapters (HL, Lighter) остаются Wave F / XVN и уже частично реализованы.  
-Live Solana только после G0–G6; cross-venue Live — G8–G9.
+**Decision:** Solana Intelligence & Execution Terminal is **not** a separate product/repo.\
+The entire backlog (`docs/SOLANA_TERMINAL_TODO.md`) and charter/ADR are incorporated into `multi-exchange-engine`.\
+Perp adapters (HL, Lighter) remain Wave F / XVN and are already partly implemented.\
+Solana Live only after G0–G6; cross-venue Live — G8–G9.
 
-**Причина:** один risk/execution mindset, один operator, избежание split-brain.
+**Reason:** one risk/execution mindset, one operator, avoiding split-brain.
 
 
 ## D-001: Telegram Mini App instead of Android-first
@@ -1171,7 +1171,7 @@ Live Solana только после G0–G6; cross-venue Live — G8–G9.
 
 **Decision:** backend execution OS is core.  
 **Reason:** mobile and multi-DEX frontends already exist.  
-**Status:** accepted (verified 6 авг).
+**Status:** accepted (verified August 6).
 
 ## D-003: Hyperliquid is base adapter
 
@@ -1211,9 +1211,9 @@ Live Solana только после G0–G6; cross-venue Live — G8–G9.
 
 ## D-009: VOOI / perp-cli as benchmark only (NEW)
 
-**Decision:** использовать как reference и test-case source, не как production dependency.  
-**Reason:** lock-in, fee, order-flow exposure, риск конкурентного выхода в Корею.  
-**Status:** accepted (6 авг 2026).
+**Decision:** use as a reference and test-case source, not as a production dependency.\
+**Reason:** lock-in, fee, order-flow exposure, risk of a competitor entering Korea.\
+**Status:** accepted (August 6, 2026).
 
 ---
 
@@ -1221,118 +1221,118 @@ Live Solana только после G0–G6; cross-venue Live — G8–G9.
 
 ## Product
 
-- Кто первый пользователь: retail farmer, semi-pro trader или internal strategy?
-- Нужен manual terminal или только strategies?
-- Какая модель оплаты: subscription, partner fee, builder fee или profit share?
-- Какой minimum deposit?
+- Who is the first user: a retail farmer, a semi-pro trader, or an internal strategy?
+- Is a manual terminal needed, or only strategies?
+- What is the payment model: subscription, partner fee, builder fee, or profit share?
+- What is the minimum deposit?
 
 ## Technical
 
-- На каком языке текущий bot?
-- Можно ли безопасно refactor без rewrite?
-- Каков точный multiplier `kSHIB`? → **1 unit = 1000 SHIB, szDecimals=0** (подтверждено 6 авг).
-- Standard Lighter latency (300 ms taker) достаточна для целевых opportunities?
-- Нужен ли Premium Lighter?
-- Какие venue events могут приходить out of order?
-- Какой source of truth для каждого adapter?
+- What language is the current bot written in?
+- Can it be safely refactored without a rewrite?
+- What is the exact `kSHIB` multiplier? → **1 unit = 1000 SHIB, szDecimals=0** (confirmed August 6).
+- Is Standard Lighter latency (300 ms taker) sufficient for the target opportunities?
+- Is Premium Lighter needed?
+- Which venue events may arrive out of order?
+- What is the source of truth for each adapter?
 
 ## Variational
 
-- Дадут ли API key?
-- Есть ли sandbox?
-- Разрешён ли multi-venue hedge?
-- Можно ли получать executable RFQ?
-- Как устроен quote expiry?
-- Есть ли partner fee?
+- Will they provide an API key?
+- Is there a sandbox?
+- Is multi-venue hedging permitted?
+- Can executable RFQs be obtained?
+- How does quote expiry work?
+- Is there a partner fee?
 
 ## Korea
 
-- Какой legal classification у frontend/execution service?
-- Можно ли рекламировать derivatives?
-- Какие GEO правила нужны?
-- Насколько Telegram достаточен для acquisition?
-- Нужен ли Kakao/Naver acquisition layer?
-- Есть ли спрос на self-hosted API-key bot?
+- What is the legal classification of the frontend/execution service?
+- Can derivatives be advertised?
+- What GEO rules are needed?
+- How sufficient is Telegram for acquisition?
+- Is a Kakao/Naver acquisition layer needed?
+- Is there demand for a self-hosted API-key bot?
 
 ## Business
 
-- Достаточно ли 1 bps?
-- Какой CAC?
-- Какой volume retention?
-- Каков average capital?
-- Сколько стоит support?
-- Какой риск platform dependency?
+- Is 1 bps enough?
+- What is the CAC?
+- What is the volume retention?
+- What is the average capital?
+- How much does support cost?
+- What is the platform dependency risk?
 
 ---
 
-# 17. Go / No-Go критерии
+# 17. Go / No-Go criteria
 
 ## Gate 1: Lighter adapter
 
-Go, если:
+Go if:
 
-- market data стабилен;
+- market data is stable;
 - 100 test order lifecycles;
 - zero unknown unresolved state;
-- restart recovery работает.
+- restart recovery works.
 
 ## Gate 2: Shadow economics
 
-Go, если:
+Go if:
 
-- opportunities сохраняются после realistic latency (включая 200–300 ms Standard Lighter);
-- net edge положительный после всех fees;
-- capacity достаточна.
+- opportunities persist after realistic latency (including 200–300 ms Standard Lighter);
+- net edge is positive after all fees;
+- capacity is sufficient.
 
-No-Go, если прибыль существует только на last price или при нулевой задержке.
+No-Go if profit exists only at the last price or with zero latency.
 
 ## Gate 3: Live canary
 
-Go, если:
+Go if:
 
 - zero lost fills;
-- residual hedge работает;
-- slippage соответствует модели;
-- daily loss контролируется.
+- residual hedging works;
+- slippage matches the model;
+- daily loss is controlled.
 
 ## Gate 4: Korean beta
 
-Go, если:
+Go if:
 
-- onboarding понятен;
-- пользователи подключают accounts;
-- manual paired trade завершается;
-- нет критических security incidents.
+- onboarding is understandable;
+- users connect accounts;
+- a manual paired trade completes;
+- there are no critical security incidents.
 
 ## Gate 5: Variational
 
-Полная интеграция только при официальном API access.
+Full integration only with official API access.
 
 ---
 
 # 18. Definition of Done MVP
 
-- [ ] Hyperliquid и Lighter реализуют единый adapter interface.
-- [ ] DOGE корректно сопоставляется.
-- [x] kSHIB multiplier подтверждён (1 unit = 1000 SHIB, szDecimals=0); mapping + cross-venue verification still required.
-- [ ] Есть локальные стаканы.
-- [ ] Есть funding scanner.
-- [ ] Есть executable VWAP.
-- [ ] Shadow mode собрал минимум 7 дней.
-- [ ] Есть two-leg state machine.
-- [ ] Есть partial-fill handling.
-- [ ] Есть residual hedge.
-- [ ] Есть reconciliation.
-- [ ] Есть kill switch.
-- [ ] Выполнено 100 малых paired executions.
+- [ ] Hyperliquid and Lighter implement a shared adapter interface.
+- [ ] DOGE is mapped correctly.
+- [x] kSHIB multiplier confirmed (1 unit = 1000 SHIB, szDecimals=0); mapping + cross-venue verification still required.
+- [ ] Local order books exist.
+- [ ] A funding scanner exists.
+- [ ] Executable VWAP exists.
+- [ ] Shadow mode has collected at least 7 days.
+- [ ] A two-leg state machine exists.
+- [ ] Partial-fill handling exists.
+- [ ] Residual hedging exists.
+- [ ] Reconciliation exists.
+- [ ] A kill switch exists.
+- [ ] 100 small paired executions completed.
 - [ ] Lost fills = 0.
 - [ ] Unresolved position mismatch = 0.
-- [ ] Bybit доступен как hedge leg.
-- [ ] Telegram Mini App показывает portfolio и opportunities.
-- [ ] Korean locale работает.
-- [ ] Variational отображается только в доступном режиме.
-- [ ] Все fees раскрываются пользователю.
-- [ ] Withdrawal permissions не используются.
+- [ ] Bybit is available as a hedge leg.
+- [ ] Telegram Mini App shows the portfolio and opportunities.
+- [ ] Korean locale works.
+- [ ] Variational is displayed only in the available mode.
+- [ ] All fees are disclosed to the user.
+- [ ] Withdrawal permissions are not used.
 
 ---
 
@@ -1384,7 +1384,7 @@ Go, если:
 - Korean product positioning review;
 - **Lighter Standard/Premium latency & fee tiers (official docs)**;
 - **Wallet in Telegram + Lighter integration (live since Apr 2026)**;
-- **Strategic hypothesis verification (6 авг 2026)**;
+- **Strategic hypothesis verification (August 6, 2026)**;
 - **kSHIB existence on Hyperliquid confirmed**;
 - **kSHIB multiplier confirmed (1 unit = 1000 SHIB, szDecimals=0)**.
 
@@ -1404,29 +1404,29 @@ Go, если:
 - Korean local app repository map;
 - production architecture comparison;
 - comprehensive license matrix;
-- execution state-machine comparison (детальный extract);
+- execution state-machine comparison (detailed extraction);
 - Variational outreach result.
 
 ---
 
 # 21. Final strategic statement
 
-Проект не должен конкурировать как:
+The project should not compete as:
 
-- ещё один мобильный терминал;
-- ещё один Hyperliquid клиент;
-- ещё один Lighter Mini App;
-- ещё один funding scanner.
+- yet another mobile terminal;
+- yet another Hyperliquid client;
+- yet another Lighter Mini App;
+- yet another funding scanner.
 
-Проект должен конкурировать как:
+The project should compete as:
 
-> **Korean-first cross-exchange execution company, которая умеет безопасно открывать, контролировать и закрывать дельта-нейтральные позиции между DEX и CEX.**
+> **A Korean-first cross-exchange execution company that can safely open, monitor, and close delta-neutral positions between DEX and CEX.**
 
-Telegram — канал управления.
+Telegram is the control channel.
 
-Lighter, Hyperliquid, Variational, Bybit и MEXC — площадки.
+Lighter, Hyperliquid, Variational, Bybit, and MEXC are venues.
 
-Настоящий продукт:
+The actual product:
 
 - state machine;
 - risk engine;

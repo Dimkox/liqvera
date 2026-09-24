@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24T18:02:00Z. Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24T18:27:54Z. Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f1-impl`.
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -14,10 +14,9 @@ F2–F7 remain open. The accepted
 ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
 
-Next: independent re-review of the final transport repair and refreshed
-closure evidence, then create a separate F2 contracts plan from the approved
-design and review OpenAPI/JSON Schemas, reason codes, state graphs, exact BUY/SELL
-vectors, and payment atomic-unit/idempotency vectors before implementation.
+Next: create a separate F2 contracts plan from the approved design and review
+OpenAPI/JSON Schemas, reason codes, state graphs, exact BUY/SELL vectors, and
+payment atomic-unit/idempotency vectors before implementation.
 The full delivery sequence is contracts → verifiable report → API/ledger →
 testnet settlement → UI/operations → acceptance. The canonical specification
 is `docs/planning/LIQVERA_FACTORY_TZ.md`; its legacy filename remains a
@@ -26,16 +25,15 @@ compatibility pointer. Preserve inherited `mee-*` names.
 No active `.grok-stack/runtime/active-route.json` exists in this public
 worktree. `grok_status.py` reports null route/change and no receipt gaps,
 which is not factory approval. No factory receipt was created or claimed.
-Tasks 1–4 passed their earlier independent controller review. Final whole-branch
-review found an additional transport-bound/deadline defect; the repair and
-refreshed evidence below still require independent re-review.
+Tasks 1–5 and the final whole-branch transport repair passed independent
+review. No Critical or Important finding remains open from F1.
 
 ## Verified F1 implementation
 
 Evidence is bound to literal implementation SHA
 `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`, captured before the refreshed
-closure documentation edits. The implementation worktree was clean before
-and after the fresh checks at 17:59:23Z–18:01:38Z. See
+closure documentation edits. The rewritten implementation commit passed a
+clean detached-worktree verification before 18:25:49Z. See
 [F1 verification](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-verification.md)
 and [compatibility result](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-compatibility.json).
 
@@ -54,9 +52,8 @@ Python 3.12.3, pytest 9.1.1, Hatchling 1.32.4. npm is not used by the probe.
 Seven inherited declared graph conflicts remain; the precommit graph check
 permits their explicit declaration and does not resolve them.
 The exact architecture inventory, focused Ruff checks, and `git diff --check`
-passed against the implementation SHA. Existing DOCUMENTATION bindings are
-unchanged. Final closure checks and both fix-wave commits are recorded in
-the Task 4 implementation report for controller review.
+passed against the implementation tree. Existing DOCUMENTATION bindings are
+unchanged. Final review found no remaining Critical or Important issue.
 
 ## Active blockers and limits
 

@@ -4,26 +4,26 @@ Status: done — TOFU source-only landing completed as PR #24 at `c07f251f844d90
 
 ## Story
 
-As an внутренний оператор/исследователь,
-I want привязать validation к точному открытому same-repository PR head и к контроллеру из default branch,
-so that payload, произвольный commit, fork или workflow из PR не могли выбрать проверяемый source или получить validation authority.
+As an internal operator/researcher,
+I want to bind validation to the exact open same-repository PR head and to the controller from the default branch,
+so that a payload, arbitrary commit, fork, or PR workflow cannot select the source to be validated or obtain validation authority.
 
-## Цель и граница результата
+## Goal and outcome boundary
 
-Story создаёт только trusted source-identity и source-materialization controller. Он разрешает PR identity через GitHub API, получает exact authenticated archive, проверяет archive/tree identity и выпускает schema-valid source-materialization observation. Он **не выполняет ни одной команды из untrusted source** и не создаёт validation/cleanup/release/promotion/deployment receipt.
+This Story creates only a trusted source-identity and source-materialization controller. It resolves PR identity through the GitHub API, obtains the exact authenticated archive, verifies archive/tree identity, and emits a schema-valid source-materialization observation. It **executes no commands from untrusted source** and creates no validation/cleanup/release/promotion/deployment receipt.
 
-Disposable rootless sandbox, validation image и исполнение untrusted tests принадлежат Story 1.2. Story 1.3 остаётся заблокированной до двух отдельных доказательств: owner-approved `TRANSITIONAL_BOOTSTRAP` receipt для Stories 1.1-1.2 и successful self-validation receipt нового controller/sandbox.
+The disposable rootless sandbox, validation image, and execution of untrusted tests belong to Story 1.2. Story 1.3 remains blocked until two separate pieces of evidence exist: an owner-approved `TRANSITIONAL_BOOTSTRAP` receipt for Stories 1.1-1.2 and a successful self-validation receipt from the new controller/sandbox.
 
-## Actors, ownership и approval points
+## Actors, ownership and approval points
 
-| Роль | Ответственность |
+| Role | Responsibility |
 |---|---|
-| Owner | После freeze реализации публикует GitHub-authenticated OWNER PR issue comment, привязанный к exact `commit_id`; затем вручную допускает exact approved controller change как одноразовое исключение. GitHub не позволяет автору PR одобрить собственный PR, поэтому Pull Request Review authority для bootstrap PR технически невозможен. |
-| DevOps/SRE implementer | Реализует controller, archive verifier, closed schemas, fixtures, workflow и graph updates. |
-| Default-branch controller | Единственный authority для PR lookup, exact identity и archive materialization; controller code берётся только из `github.sha` default-branch dispatch. |
-| Claw runner | Выполняет только trusted controller/bootstrap scope на `[self-hosted, claw]`; не получает deploy/promotion/private/live authority. |
-| Independent source-trust reviewer | Проверяет identity, archive, credential cleanup, workflow pinning и отсутствие исполнения untrusted source; автор реализации не может быть verifier. |
-| Graph/governance reviewer | Проверяет changed-node closure, ownership, eight-conflict transition и отсутствие fabricated realized receipts. |
+| Owner | After the implementation freeze, publishes a GitHub-authenticated OWNER PR issue comment bound to the exact `commit_id`; then manually admits the exact approved controller change as a one-time exception. GitHub does not allow a PR author to approve their own PR, so Pull Request Review authority for the bootstrap PR is technically impossible. |
+| DevOps/SRE implementer | Implements the controller, archive verifier, closed schemas, fixtures, workflow, and graph updates. |
+| Default-branch controller | The sole authority for PR lookup, exact identity, and archive materialization; controller code comes only from the `github.sha` of the default-branch dispatch. |
+| Claw runner | Executes only the trusted controller/bootstrap scope on `[self-hosted, claw]`; receives no deploy/promotion/private/live authority. |
+| Independent source-trust reviewer | Verifies identity, archive, credential cleanup, workflow pinning, and absence of untrusted-source execution; the implementation author cannot be the verifier. |
+| Graph/governance reviewer | Verifies changed-node closure, ownership, the eight-conflict transition, and absence of fabricated realized receipts. |
 
 ### Two distinct approvals
 

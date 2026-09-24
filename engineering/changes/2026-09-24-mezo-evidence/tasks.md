@@ -27,7 +27,7 @@ F1 status: **complete-with-blockers**. Evidence is in
 but payment readiness remains false: `PAY_TO_MISSING` and
 `FINALITY_RULE_UNVERIFIED`. No F2–F7 completion is implied.
 The renewed suite passes 641 tests and 85 subtests; independent re-review
-of the final transport repair and refreshed closure documents is pending.
+found no remaining Critical or Important issue.
 
 ## F2 — contracts
 

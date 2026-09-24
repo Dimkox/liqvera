@@ -1,15 +1,15 @@
-# VOOI: индекс результатов статического реверс-инжиниринга
+# VOOI: index of static reverse-engineering findings
 
-Дата снимка: **2026-08-10**. Анализ ограничен официальными публичными поверхностями, документацией и закреплёнными ревизиями репозиториев `vooi-app`; авторизация, подключение кошелька, торговые и денежные операции не выполнялись.
+Snapshot date: **2026-08-10**. Analysis is limited to official public surfaces, documentation, and pinned revisions of `vooi-app` repositories; authentication, wallet connection, trading, and financial operations were not performed.
 
-## Состав отчёта
+## Report contents
 
-1. [`architecture/01-client-surfaces-and-clients.md`](architecture/01-client-surfaces-and-clients.md) — Ultra, Pro, Light, Telegram Mini App, MCP и четыре официальных программных клиента.
-2. [`architecture/02-api-and-auth.md`](architecture/02-api-and-auth.md) — восстановленная схема взаимодействия, API surface, SSE, onboarding/signing, transfer/withdraw и venue abstraction.
-3. [`architecture/03-risks-and-integration.md`](architecture/03-risks-and-integration.md) — границы достоверности, риски и безопасный путь интеграции в Multi-Exchange Engine.
+1. [`architecture/01-client-surfaces-and-clients.md`](architecture/01-client-surfaces-and-clients.md) — Ultra, Pro, Light, Telegram Mini App, MCP, and four official programmatic clients.
+2. [`architecture/02-api-and-auth.md`](architecture/02-api-and-auth.md) — reconstructed interaction model, API surface, SSE, onboarding/signing, transfer/withdraw, and venue abstraction.
+3. [`architecture/03-risks-and-integration.md`](architecture/03-risks-and-integration.md) — confidence boundaries, risks, and a safe integration path for Multi-Exchange Engine.
 
-## Главный вывод
+## Main finding
 
-VOOI предоставляет единый API-first execution layer поверх нескольких perp-venue, но его сгенерированный SDK объединяет публичные market-data чтения, приватное состояние, торговлю, изменение параметров счёта, broker approval, transfers и withdrawals. Поэтому потенциальный адаптер Multi-Exchange Engine должен начинаться только с отдельного read-only shadow-контура и явного allowlist маршрутов. Все mutation/funds-moving пути в текущем исследовательском пакете помечены `forbidden` или `strictly_forbidden`.
+VOOI provides a unified API-first execution layer over several perp venues, but its generated SDK combines public market-data reads, private state, trading, account parameter changes, broker approval, transfers, and withdrawals. A potential Multi-Exchange Engine adapter must therefore start only with a separate read-only shadow boundary and an explicit route allowlist. All mutation/funds-moving paths in the current research package are marked `forbidden` or `strictly_forbidden`.
 
-Полная машинно-читаемая карта находится в `data/api-surface-*.csv`; инвентарь клиентов и закреплённые SHA — в `clients.lock.json`.
+The complete machine-readable map is in `data/api-surface-*.csv`; the client inventory and pinned SHAs are in `clients.lock.json`.

@@ -14,7 +14,7 @@ complete-with-blockers: publication inventory, public salvage verification,
 the pinned Python development toolchain, and the public compatibility lock
 are implemented. [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md)
 accepts only the runtime and payment boundary. The overall change remains
-`implementing`; after final re-review, the next step is a separate F2 contracts plan.
+`implementing`; the next step is a separate F2 contracts plan.
 
 At implementation commit `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`,
 `make verify` passed with 641 tests and 85 subtests. The command

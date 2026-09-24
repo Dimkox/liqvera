@@ -57,15 +57,15 @@ these checks and record `BLOCKED_EXTERNAL` rather than rely on F1 observations.
 - Final transport repair at `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`
   bounds framing independently of decoded data, rejects chunk extensions/
   trailers and malformed CRLF, and enforces one total request deadline.
-  Fresh checks at 2026-09-24T17:59:23Z–18:01:38Z passed 641 tests plus
-  85 subtests and the live probe. POSIX timer/main-thread/inactive-caller-timer
-  preconditions fail closed; the final repair still requires independent re-review.
+  Rewritten-SHA checks passed 641 tests plus 85 subtests and the live probe.
+  POSIX timer/main-thread/inactive-caller-timer preconditions fail closed;
+  independent review found the repair complete.
 - Task 4 fix round 1 replaced npm-view with controller-approved fixed registry
   URLs after installed npm failed the redirect-refusal experiment. All public
   reads now share disabled proxies, redirect refusal, identity encoding, and
   bounded framing validation. The repeated live probe passed with unchanged
-  sanitized evidence. Tasks 1–4 passed independent controller review before
-  Task 5; final transport and closure re-review remains pending.
+  sanitized evidence. Tasks 1–5 and the final transport repair passed
+  independent review.
 - Task 4 verified the locked public Hyperliquid/Mezo/facilitator/npm boundary;
   no `BLOCKED_EXTERNAL` remains from this probe. Initial local npm isolation
   failure was corrected and rerun successfully, without weakening any lock.

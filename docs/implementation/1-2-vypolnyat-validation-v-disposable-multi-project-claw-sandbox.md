@@ -1,12 +1,12 @@
-# Story 1.2: Выполнять validation в disposable multi-project Claw sandbox
+# Story 1.2: Run validation in a disposable multi-project Claw sandbox
 
 Status: in-progress
 
 ## Story
 
-As an внутренний оператор/исследователь,
-I want запускать exact materialized source в изолированном rootless sandbox с verified cleanup,
-so that Claw можно полноценно использовать для повторяемых realtime-тестов без production, cross-project или credential authority.
+As an internal operator/researcher,
+I want to run the exact materialized source in an isolated rootless sandbox with verified cleanup,
+so that Claw can be fully used for repeatable realtime tests without production, cross-project, or credential authority.
 
 ## Current execution checkpoint — 2026-08-13
 
@@ -23,73 +23,73 @@ be supplied and verified separately under `OCIAPATH-001..005`. Story 1.2 stays
 source is reviewed and landed, a separately approved D0 update succeeds, fresh
 inventory is accepted and a new D1 approval reaches its required terminal gate.
 
-## Предпосылка и граница authority
+## Prerequisite and authority boundary
 
-Story 1.1 установлена вручную как `TOFU_SOURCE_INSTALL` в `origin/main` commit
-`c07f251f844d90ed2ce5c08b49a52169bc231364` через PR #24 и GitHub-authenticated
-OWNER issue comment `5264583724`. Это доказательство разрешило установку source с
-`authority=NONE`; оно не является validation receipt и не разрешает Story 1.3.
+Story 1.1 was manually installed as `TOFU_SOURCE_INSTALL` in `origin/main` commit
+`c07f251f844d90ed2ce5c08b49a52169bc231364` through PR #24 and GitHub-authenticated
+OWNER issue comment `5264583724`. This evidence authorized source installation with
+`authority=NONE`; it is not a validation receipt and does not authorize Story 1.3.
 
 PR #24 approval body SHA-256:
 `36b583744f7c46dee34bc713a35c978799fa58923ef7db873c1f32dd375785b3`.
-Его nonce истёк без controller-side consumption и имеет terminal status
-`RETIRED_UNUSED`. Он является историческим landing evidence и **никогда** не может быть
+Its nonce expired without controller-side consumption and has terminal status
+`RETIRED_UNUSED`. It is historical landing evidence and can **never** be
 consumed/replayed Story 1.2.
 
-Story 1.2 начинается от bootstrap source `c07f251...`, но этот commit не является
-Phase B controller. После Phase A landing controller SHA/tree/workflow blob динамически
-читаются из `origin/main`, независимо проверяются и freeze-ятся как Phase B inputs. PR
-source поступает только из проверенного Story 1.1 archive/materialization интерфейса.
-Untrusted source никогда не управляет
-Podman argv, mounts, image, network, receipt writer, cleanup или nonce store.
+Story 1.2 starts from bootstrap source `c07f251...`, but this commit is not the
+Phase B controller. After Phase A landing, the controller SHA/tree/workflow blob are dynamically
+read from `origin/main`, independently verified, and frozen as Phase B inputs. PR
+source comes only from the verified Story 1.1 archive/materialization interface.
+Untrusted source never controls
+Podman argv, mounts, image, network, receipt writer, cleanup, or nonce store.
 
-Story выполняется четырьмя последовательными PR-подфазами. Их нельзя совмещать:
+The Story is carried out in four sequential PR subphases. They cannot be combined:
 
-1. **Phase A — `TOFU_SANDBOX_CONTROLLER_INSTALL`:** новый owner-approved PR от bootstrap
-   base `c07f251...` устанавливает
-   только trusted sandbox controller, fused archive materializer/extractor, policy,
-   receipt verifiers, nonce ledger и reconciler. Новый exact OWNER comment имеет свой
-   exact path set, expiry и nonce. Landing остаётся source-only с `authority=NONE`; PR-код
-   не исполняется.
-   Owner отдельно authorizes test-host provisioning root-owned helper/service/timer/sudoers
-   с exact package hashes и rollback. Landing остаётся source-only.
-2. **Phase B — minimal probe PR:** exact Phase A controller identity динамически читается
-   из уже обновлённого `origin/main`, freeze-ится и валидирует отдельный minimal probe PR
-   валидирует отдельный минимальный same-repository probe PR на dedicated Claw runner,
-   consumes именно Phase A nonce и выпускает validation/cleanup/self-validation receipts.
-   Phase B head после run никогда не изменяется ради admission.
-3. **Phase C1 — immutable evidence-proposal PR:** отдельный PR содержит только immutable
-   external Phase B run URL/receipt hashes и proposal metadata. Он lands с
-   `authority=NONE`, не admits receipts, не transitions conflicts и не помечает legacy
+1. **Phase A — `TOFU_SANDBOX_CONTROLLER_INSTALL`:** a new owner-approved PR from bootstrap
+   base `c07f251...` installs
+   only the trusted sandbox controller, fused archive materializer/extractor, policy,
+   receipt verifiers, nonce ledger, and reconciler. The new exact OWNER comment has its own
+   exact path set, expiry, and nonce. Landing remains source-only with `authority=NONE`; PR code
+   is not executed.
+   The Owner separately authorizes test-host provisioning of the root-owned helper/service/timer/sudoers
+   with exact package hashes and rollback. Landing remains source-only.
+2. **Phase B — minimal probe PR:** the exact Phase A controller identity is dynamically read
+   from the already updated `origin/main` and frozen. The controller
+   validates a separate minimal same-repository probe PR on a dedicated Claw runner,
+   consumes the Phase A nonce specifically, and emits validation/cleanup/self-validation receipts.
+   The Phase B head is never changed after the run for admission.
+3. **Phase C1 — immutable evidence-proposal PR:** a separate PR contains only immutable
+   external Phase B run URL/receipt hashes and proposal metadata. It lands with
+   `authority=NONE`, does not admit receipts, transition conflicts, or mark the legacy
    workflow `SUPERSEDED`.
-4. **Phase C2 — evidence-admission PR:** отдельный PR связывает admission с уже
-   существующим authenticated Phase C1 merge commit SHA/tree/API payload hash, выводит
-   trusted cutoff из его `commit.committer.date` и после независимого review узко admits
-   `SELF_VALIDATION`, transitions exact conflicts и помечает legacy workflow `SUPERSEDED`.
+4. **Phase C2 — evidence-admission PR:** a separate PR binds admission to the already
+   existing authenticated Phase C1 merge commit SHA/tree/API payload hash, derives the
+   trusted cutoff from its `commit.committer.date`, and after independent review narrowly admits
+   `SELF_VALIDATION`, transitions exact conflicts, and marks the legacy workflow `SUPERSEDED`.
 
-Первый successful Phase B self-validation должен одновременно доказать controller,
-workflow, source, sandbox, validation и cleanup identities. До принятия этого receipt:
+The first successful Phase B self-validation must simultaneously prove controller,
+workflow, source, sandbox, validation, and cleanup identities. Until this receipt is admitted:
 
-- `authority=NONE` сохраняется;
-- trusted policy time и realized receipt admission запрещены;
-- Story 1.3, build, scan, promotion, release и deploy заблокированы;
-- legacy `.github/workflows/verify-a2-pr-on-claw.yml` не является evidence path.
+- `authority=NONE` is preserved;
+- trusted policy time and realized receipt admission are forbidden;
+- Story 1.3, build, scan, promotion, release, and deploy are blocked;
+- the legacy `.github/workflows/verify-a2-pr-on-claw.yml` is not an evidence path.
 
-## Actors, ownership и approval points
+## Actors, ownership and approval points
 
 | Actor | Responsibility |
 |---|---|
-| Owner | Утверждает Story 1.2 contract и отдельно authorizes первый follow-up dispatch; не подменяет receipt review. |
-| Story 1.2 implementer | Реализует controller-owned sandbox policy, runner, schemas, writers/verifiers и TDD fixtures. |
-| Default-branch controller | Разрешает exact PR/archive identity, атомарно consuming bootstrap nonce, формирует закрытый argv и проверяет receipts. |
-| Dedicated Claw runner | Exact affinity: labels `[self-hosted, claw, claw-engine-runner]` и `RUNNER_NAME=claw-engine-runner`; запускает rootless Podman только в project/run/attempt namespace. Любой другой runner fail closed. |
-| Untrusted validation image/process | Читает exact source read-only и пишет только bounded result files в выделенный output mount. Не получает controller/nonce/credential roots. |
-| Independent DevOps/security reviewer | Проверяет rootless/isolation/mount/network/secret/cleanup failure semantics на exact SHA. |
-| Graph/governance reviewer | Проверяет node closure, receipt trust context, nonce single-use и отсутствие Story 1.3 authority до self-validation success. |
+| Owner | Approves the Story 1.2 contract and separately authorizes the first follow-up dispatch; does not replace receipt review. |
+| Story 1.2 implementer | Implements controller-owned sandbox policy, runner, schemas, writers/verifiers, and TDD fixtures. |
+| Default-branch controller | Resolves exact PR/archive identity, atomically consumes the bootstrap nonce, constructs a closed argv, and verifies receipts. |
+| Dedicated Claw runner | Exact affinity: labels `[self-hosted, claw, claw-engine-runner]` and `RUNNER_NAME=claw-engine-runner`; runs rootless Podman only in the project/run/attempt namespace. Any other runner fails closed. |
+| Untrusted validation image/process | Reads exact source read-only and writes only bounded result files to the designated output mount. Receives no controller/nonce/credential roots. |
+| Independent DevOps/security reviewer | Verifies rootless/isolation/mount/network/secret/cleanup failure semantics at the exact SHA. |
+| Graph/governance reviewer | Verifies node closure, receipt trust context, nonce single use, and absence of Story 1.3 authority before self-validation success. |
 
-Approval points: architecture/contract approval перед implementation; owner authorization
-первого exact follow-up run; независимые DevOps/security и graph/governance YES перед
-admission; отдельная будущая deployment authorization вне этой Story.
+Approval points: architecture/contract approval before implementation; owner authorization
+of the first exact follow-up run; independent DevOps/security and graph/governance YES before
+admission; separate future deployment authorization outside this Story.
 
 ## Stable requirements
 
@@ -493,7 +493,7 @@ remain RED for unrelated declared conflicts, but `trusted-controller-authority`,
 
 ## References
 
-- [Source: docs/planning/epics.md#Story-12-Выполнять-validation-в-disposable-multi-project-Claw-sandbox]
+- [Source: docs/planning/epics.md#story-12-run-validation-in-a-disposable-multi-project-claw-sandbox]
 - [Source: docs/superpowers/plans/2026-08-11-m6-claw-release-and-mee-a2-deployment.md#Task-1-Enforce-the-Claw-workflow-and-sandbox-contract]
 - [Source: docs/superpowers/specs/2026-08-11-unified-strategy-evidence-graph-design.md#57-CI-and-Claw-requirements]
 - [Source: docs/implementation/1-1-bootstrap-trusted-default-branch-pr-identity-controller.md]

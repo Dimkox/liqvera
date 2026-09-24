@@ -1,14 +1,12 @@
-# Liqvera — документация
+# Liqvera — documentation
 
-## Продукт и конкурс
+## Product and buildathon
 
 **Market reports you can verify.**
 
-Рыночные отчёты, которые можно проверить.
+Built for [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
 
-Создано для [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
-
-Отдельный репозиторий подготовлен на основе технического snapshot. Начать с [ТЗ](planning/LIQVERA_FACTORY_TZ.md), [актуального handoff](../handoff.md) и [PROVENANCE](../PROVENANCE.md). Остальные разделы этого индекса относятся к унаследованной технической основе; они не доказывают реализацию Mezo API или оплаты.
+This standalone repository was prepared from a technical snapshot. Start with the [specification](planning/LIQVERA_FACTORY_TZ.md), [current handoff](../handoff.md), and [PROVENANCE](../PROVENANCE.md). The remaining sections of this index describe the inherited technical baseline; they do not establish that the Mezo API or payments are implemented.
 
 [Repository README](../README.md) · [Master Plan pointer](../MASTER_PLAN.md) · [Security](../SECURITY.md) · [Research index](research/README.md) · [Market demand and JTBD](research/user-needs/README.md) · [Kakao/Korea launch gate](research/MASTER_RESEARCH.md#kakaotalk-south-korea-launch-gate-2026-08-18)
 

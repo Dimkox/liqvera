@@ -1,64 +1,64 @@
-# VOOI: результаты статического реверс-инжиниринга
+# VOOI: static reverse-engineering findings
 
-Дата снимка: **2026-08-10**
-Метод: анализ официальных web surfaces, документации и открытых репозиториев
-организации `vooi-app`; без авторизованных запросов и без исполнения торгового
-кода.
+Snapshot date: **2026-08-10**
+Method: analysis of official web surfaces, documentation, and public repositories
+of the `vooi-app` organization; without authenticated requests or execution of trading
+code.
 
-## 1. Карта клиентских поверхностей
+## 1. Client surface map
 
 ### VOOI Ultra
 
-`https://ultra.vooi.io/` — текущий основной продукт. На момент проверки live
-footer показывал `VOOI Ultra Beta v1.0.1`. Интерфейс содержит:
+`https://ultra.vooi.io/` is the current primary product. At the time of inspection, the live
+footer showed `VOOI Ultra Beta v1.0.1`. The interface includes:
 
-- одиночную позицию long/short;
+- a single long/short position;
 - hedge placement;
-- позиции, ордера, историю ордеров и сделок;
-- отдельные arbitrage positions/history;
-- API-token console и MCP onboarding;
-- публичные market pages и Arbitrage Desk.
+- positions, orders, order history, and trade history;
+- separate arbitrage positions/history;
+- an API-token console and MCP onboarding;
+- public market pages and Arbitrage Desk.
 
-Публичный changelog фиксирует `Arbitrage Desk v1.0.0` от 2026-07-23, тогда как
-live terminal уже показывал `v1.0.1`. Это обычный признак того, что footer и
-changelog обновляются независимо.
+The public changelog records `Arbitrage Desk v1.0.0` dated 2026-07-23, while
+the live terminal already showed `v1.0.1`. This is a typical sign that the footer and
+changelog are updated independently.
 
 ### VOOI Pro
 
-`https://pro.vooi.io/` продолжает работать и показывает `VOOI Pro v1.12.0`.
-Терминал имеет market/limit/stop-limit form, chart/orderbook, позиции, ордера и
-history. Официальные release notes датируют v1.12.0 2025-12-18. Продукт выглядит
-как предыдущая профессиональная ветка, но не как основной новый API-first
+`https://pro.vooi.io/` remains operational and shows `VOOI Pro v1.12.0`.
+The terminal has a market/limit/stop-limit form, chart/orderbook, positions, orders, and
+history. Official release notes date v1.12.0 to 2025-12-18. The product appears
+to be the previous professional branch, rather than the primary new API-first
 surface.
 
 ### VOOI Light
 
-`https://app.vooi.io/` показывает `VOOI Light v2.5.0`, но прямо сообщает, что
-VOOI Light shut down. Остались migration/sign-in, staking, send и claim
-surfaces. Для новой интеграции Light следует считать историческим источником,
-а не активной торговой целью.
+`https://app.vooi.io/` shows `VOOI Light v2.5.0`, but explicitly states that
+VOOI Light shut down. Migration/sign-in, staking, send, and claim
+surfaces remain. For a new integration, Light should be treated as a historical source,
+rather than an active trading target.
 
 ### Telegram Mini App
 
-Официальная точка входа: `https://t.me/VooiAppBot/vooi`. Это Telegram WebApp,
-а не APK. Release notes сообщают о запуске mini-app версии торгового терминала
-2024-10-01. Публично проверяемого отдельного source repository для Mini App не
-найдено.
+Official entry point: `https://t.me/VooiAppBot/vooi`. This is a Telegram WebApp,
+not an APK. Release notes report the launch of a mini-app version of the trading terminal on
+2024-10-01. No publicly verifiable separate source repository for the Mini App was
+found.
 
 ### VOOI Perps MCP
 
-Удалённый Streamable HTTP endpoint:
+Remote Streamable HTTP endpoint:
 
 ```text
 https://perps-api.vooi.io/mcp
 ```
 
-Официальный `vooi-app/mcp` содержит только конфигурационные примеры и MIT
-license. Серверная реализация MCP в этом repository отсутствует. Onboarding
-через Ultra требует Bearer token и предлагает конфиги для Claude, Codex,
-Cursor и других MCP clients.
+The official `vooi-app/mcp` contains only configuration examples and an MIT
+license. This repository contains no MCP server implementation. Onboarding
+through Ultra requires a Bearer token and offers configurations for Claude, Codex,
+Cursor, and other MCP clients.
 
-## 2. Официальные открытые программные клиенты
+## 2. Official public programmatic clients
 
 ### `vooi-app/vooi-signals-bot-example`
 
@@ -68,30 +68,30 @@ Pinned commit:
 bb81ee0d5e48246f63b25f39a552622cc23af97d
 ```
 
-Архитектура:
+Architecture:
 
 1. Telegram ingestion.
-2. Разбор сообщений и LLM-assisted signal parsing.
-3. Нормализация/resolve market.
-4. VOOI REST calls через async `httpx.AsyncClient`.
+2. Message parsing and LLM-assisted signal parsing.
+3. Normalization/market resolution.
+4. VOOI REST calls through async `httpx.AsyncClient`.
 5. SSE listener.
 6. PostgreSQL/Alembic persistence.
 7. Order lifecycle, reconciliation, TP/SL and safety watchers.
 8. Audit/alerting.
 
-Наблюдавшиеся свойства клиента:
+Observed client properties:
 
-- base URL по умолчанию `https://perps-api.vooi.io`;
+- default base URL `https://perps-api.vooi.io`;
 - `Authorization: Bearer ...`;
 - JSON request/response boundary;
-- retry для 429 и выбранных 5xx;
-- `Retry-After` плюс exponential backoff;
+- retry for 429 and selected 5xx responses;
+- `Retry-After` plus exponential backoff;
 - correlation identifiers;
-- редактирование Authorization в логах;
-- отдельная конфигурация risk/circuit-breaker параметров.
+- Authorization redaction in logs;
+- separate configuration of risk/circuit-breaker parameters.
 
-Это наиболее показательный Python reference для transaction lifecycle, но он
-умеет ставить реальные ордера и не должен импортироваться в shadow-only
+This is the most illustrative Python reference for the transaction lifecycle, but it
+can place real orders and must not be imported into the shadow-only
 runtime.
 
 ### `vooi-app/vooi-funding-bot-example`
@@ -102,17 +102,17 @@ Pinned commit:
 c3ceab29e80bb26fd6bde128280cb5da5428f3f1
 ```
 
-Python-клиент для delta-neutral funding arbitrage. В repository присутствуют:
+A Python client for delta-neutral funding arbitrage. The repository includes:
 
-- большой MVP coordinator;
+- a large MVP coordinator;
 - SSE module;
 - strategy, risk, position, reporting and execution boundaries;
 - read-only `probe` package;
 - Docker packaging and tests;
 - dry-run configuration.
 
-License — MIT с дополнительным trading disclaimer. Сам repository предупреждает,
-что бот может размещать реальные ордера, и рекомендует сначала
+The license is MIT with an additional trading disclaimer. The repository itself warns
+that the bot can place real orders and recommends starting with
 `BOT_DRY_RUN=true`.
 
 ### `vooi-app/vooi-mm-bot-example`
@@ -125,20 +125,20 @@ Pinned commit:
 
 TypeScript/Node.js >=18 market-making client:
 
-- generated SDK от `@hey-api/openapi-ts`;
+- generated SDK from `@hey-api/openapi-ts`;
 - explicit Bearer Authorization header;
 - market resolver;
 - SSE reconnect/backoff;
-- two-sided maker quotes на primary leg;
+- two-sided maker quotes on the primary leg;
 - hedge leg;
 - margin preflight;
 - shutdown cleanup;
 - read-only `check` and `markets` commands.
 
-Pinned revision отказался от Bun и перешёл на Node/`tsx`: commit message
-сообщает, что VOOI API edge отклонял запросы Bun HTTP stack, тогда как Node
-работал. Это наблюдение конкретной версии, а не универсальное утверждение о
-всех будущих Bun releases.
+The pinned revision dropped Bun and switched to Node/`tsx`: the commit message
+states that the VOOI API edge rejected requests from the Bun HTTP stack, while Node
+worked. This is an observation about a specific version, not a universal claim about
+all future Bun releases.
 
 ### `vooi-app/mcp`
 
@@ -148,6 +148,6 @@ Pinned commit:
 9a5fc1aba5411a0c6e29822628b5ea834889caa7
 ```
 
-README/config repository. Он документирует remote MCP URL и Bearer header, но
-не содержит server code, tool handlers или exchange adapters.
+README/config repository. It documents the remote MCP URL and Bearer header but
+contains no server code, tool handlers, or exchange adapters.
 

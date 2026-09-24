@@ -1,235 +1,235 @@
-# Private Solana Intelligence & Execution Terminal — подробный `to-do.md`
+# Private Solana Intelligence & Execution Terminal — detailed `to-do.md`
 
-> **Назначение:** единый исполнимый backlog для приватного аналитико‑торгового терминала на Solana с мониторингом токенов и кошельков, классификацией стратегий, Shadow Mode, симуляцией копирования, управлением собственными кошельками и контролируемым исполнением сделок.  
-> **Формат:** модульный монолит для первого релиза, отдельный signer-процесс, приватный Web UI.  
-> **Дата фиксации плана:** 2026-08-06.  
-> **Основной пользователь:** один владелец системы; публичный SaaS, биллинг и мультиарендность не входят в первый контур.
+> **Purpose:** a single executable backlog for a private Solana analytics and trading terminal with token and wallet monitoring, strategy classification, Shadow Mode, copy simulation, management of the owner's wallets, and controlled trade execution.\
+> **Format:** a modular monolith for the first release, a separate signer process, and a private Web UI.\
+> **Plan baseline date:** 2026-08-06.\
+> **Primary user:** one system owner; public SaaS, billing, and multitenancy are outside the initial scope.
 
 ---
 
-## Как пользоваться этим файлом
+## How to use this file
 
-- Выполнять задачи строго по зависимостям, а не по визуальному порядку интерфейса.
-- Один checkbox — один проверяемый результат, который можно принять или отклонить отдельно.
-- После каждой задачи запускать указанные тесты и фиксировать изменение отдельным коммитом.
-- Живое исполнение не включать, пока не пройдены гейты `G0`–`G6`.
-- Любой новый источник данных сначала подключать в read-only и Shadow Mode, затем Paper, и только после этого разрешать ему формировать реальные `OrderIntent`.
-- Все числовые пороги ниже являются начальными рабочими значениями. Их менять только через версионируемые конфиги и после replay-калибровки.
+- Execute tasks strictly according to dependencies, not the visual order of the interface.
+- One checkbox represents one verifiable result that can be accepted or rejected separately.
+- After each task, run the specified tests and record the change in a separate commit.
+- Do not enable live execution until gates `G0`–`G6` have passed.
+- Connect every new data source in read-only and Shadow Mode first, then Paper, and only then allow it to generate real `OrderIntent` values.
+- All numeric thresholds below are initial working values. Change them only through versioned configurations and after replay calibration.
 
-### Легенда
+### Legend
 
-| Обозначение | Значение |
+| Notation | Meaning |
 |---|---|
-| `P0` | блокирует MVP |
-| `P1` | требуется для контролируемого Live |
-| `P2` | расширение после стабильного MVP |
-| `G0…G9` | обязательный go/no-go гейт |
+| `P0` | blocks the MVP |
+| `P1` | required for controlled Live |
+| `P2` | expansion after a stable MVP |
+| `G0…G9` | mandatory go/no-go gate |
 | `DoD` | Definition of Done |
-| `Observe` | сбор и анализ без торгового намерения |
-| `Shadow` | расчёт сделки без подписи и отправки |
-| `Paper` | виртуальное исполнение по наблюдаемой ликвидности |
-| `Live` | реальная подписанная транзакция |
+| `Observe` | collection and analysis without a trading intent |
+| `Shadow` | trade calculation without signing or submission |
+| `Paper` | virtual execution against observed liquidity |
+| `Live` | a real signed transaction |
 
 ---
 
-# 1. Зафиксированный scope
+# 1. Fixed scope
 
-## 1.1. Цель продукта
+## 1.1. Product goal
 
-Собрать один приватный инструмент, который:
+Build one private tool that:
 
-1. Получает события Solana почти в реальном времени.
-2. Декодирует Pump.fun/PumpSwap, Raydium, Meteora, Orca, Jupiter-маршруты и стандартные SPL/Token-2022 операции.
-3. Восстанавливает понятные действия: покупка, продажа, перевод, открытие/закрытие позиции, миграция пула, изменение ликвидности.
-4. Строит `Wallet DNA`, PnL, поведенческую классификацию и `Copy Score`.
-5. Автоматически отличает воспроизводимый low-frequency трейдинг от HFT, арбитража, market making, LP-операций и подозрительной синтетической активности.
-6. Позволяет сначала наблюдать кошелёк, затем прогнать Shadow/Paper replay и только после этого включить Live.
-7. Исполняет сделки через контролируемый pipeline `quote → simulation → risk decision → sign → submit → reconcile`.
-8. Разделяет ручные позиции, копитрейдинг, экспериментальные стратегии и будущие cross-venue стратегии по независимым портфелям.
-9. Показывает полную цепочку задержек и объясняет, почему сделка выполнена, пропущена или заблокирована.
-10. Сохраняет ключи вне БД, `.env`, логов и пользовательского интерфейса.
+1. Receives Solana events in near real time.
+2. Decodes Pump.fun/PumpSwap, Raydium, Meteora, Orca, Jupiter routes, and standard SPL/Token-2022 operations.
+3. Reconstructs understandable actions: buy, sell, transfer, position opening/closing, pool migration, and liquidity changes.
+4. Builds `Wallet DNA`, PnL, behavioral classification, and `Copy Score`.
+5. Automatically distinguishes reproducible low-frequency trading from HFT, arbitrage, market making, LP operations, and suspicious synthetic activity.
+6. Allows a wallet to be observed first, followed by Shadow/Paper replay, and only then enables Live.
+7. Executes trades through a controlled pipeline: `quote → simulation → risk decision → sign → submit → reconcile`.
+8. Separates manual positions, copy trading, experimental strategies, and future cross-venue strategies into independent portfolios.
+9. Shows the full latency chain and explains why a trade was executed, skipped, or blocked.
+10. Keeps keys outside the database, `.env`, logs, and user interface.
 
-## 1.2. Что входит в MVP
+## 1.2. MVP scope
 
 - Solana mainnet read-only ingest.
-- История и live-события по выбранным токенам, пулам и кошелькам.
-- Нормализованные swaps и позиции.
-- Token page: цена, ликвидность, объём, holders, creator/funder graph, risk flags.
+- History and live events for selected tokens, pools, and wallets.
+- Normalized swaps and positions.
+- Token page: price, liquidity, volume, holders, creator/funder graph, risk flags.
 - Wallet page: realized/unrealized PnL, win rate, expectancy, drawdown, trade timeline, Wallet DNA.
-- Классификация кошельков и жёсткий `NON_COPYABLE` для HFT/арбитража/непонятных маршрутов.
-- Copy Score и объяснение его компонентов.
-- Shadow Mode и event-time replay.
+- Wallet classification and a hard `NON_COPYABLE` designation for HFT/arbitrage/unclear routes.
+- Copy Score and an explanation of its components.
+- Shadow Mode and event-time replay.
 - Paper portfolio.
-- Live spot swaps для одного собственного портфеля после гейтов.
-- Jupiter Swap V2 как основной агрегатор; прямой Raydium adapter как резервный и исследовательский маршрут.
-- TP/SL, частичный выход, trailing, time stop, liquidity stop.
-- Приватный Web UI через Tailscale/WireGuard.
-- Telegram/desktop notifications без возможности подписывать транзакции из уведомления.
+- Live spot swaps for one owner-controlled portfolio after the gates.
+- Jupiter Swap V2 as the primary aggregator; a direct Raydium adapter as a fallback and research route.
+- TP/SL, partial exit, trailing, time stop, liquidity stop.
+- Private Web UI through Tailscale/WireGuard.
+- Telegram/desktop notifications without the ability to sign transactions from a notification.
 
-## 1.3. Что сознательно не входит
+## 1.3. Deliberate exclusions
 
-В продукт не закладываются модули, цель которых — создавать ложную рыночную картину или скрывать координацию:
+The product does not include modules intended to create a false market picture or conceal coordination:
 
 - synthetic/wash volume;
-- имитация «человеческой» торговой активности;
-- искусственное увеличение числа holders;
-- profile farming и массовое создание профилей;
-- скрытое распределение supply по связанным адресам;
-- одновременный запуск токена и скрытая закупка supply набором subwallets;
+- imitation of “human” trading activity;
+- artificial inflation of holder counts;
+- profile farming and mass profile creation;
+- concealed distribution of supply across related addresses;
+- simultaneous token launch and concealed supply purchases by a set of subwallets;
 - clone-token workflow;
-- координированный mass-dump;
-- обход графов связности кошельков;
-- управление чужими средствами или публичная мультиарендность.
+- coordinated mass-dump;
+- evasion of wallet relationship graphs;
+- management of other people's funds or public multitenancy.
 
-Допустимы defensive-детекторы этих паттернов, исторический replay и управление собственными портфелями.
+Defensive detectors for these patterns, historical replay, and management of the owner's portfolios are permitted.
 
-## 1.4. Главные выводы из исследований, превращённые в требования
+## 1.4. Key research findings converted into requirements
 
 ### DogWifTools
 
-Из конкурентного продукта полезно перенести только нейтральные примитивы:
+Only neutral primitives are useful to adopt from the competing product:
 
 - batch balance;
-- funding/sweep собственных кошельков;
-- закрытие пустых token accounts и возврат rent;
-- перевод SPL между собственными счетами;
-- быстрый RPC/WebSocket контур;
-- отдельные кошельки под разные задачи;
-- массовая ликвидация собственных позиций в явно выбранном scope.
+- funding/sweep of the owner's wallets;
+- closing empty token accounts and reclaiming rent;
+- SPL transfers between the owner's accounts;
+- a fast RPC/WebSocket pipeline;
+- separate wallets for different tasks;
+- bulk liquidation of the owner's positions within an explicitly selected scope.
 
-Не переносить архитектурные анти-паттерны:
+Do not adopt architectural anti-patterns:
 
-- private keys в обычном `config.json`;
-- просьбы отключать Defender/карантин;
-- неподписанные сборки;
-- смешение secrets, UI и trading process;
-- неограниченное создание кошельков без policy;
-- режимы, метрика успеха которых — искусственный объём или holder count.
+- private keys in a plain `config.json`;
+- requests to disable Defender/quarantine;
+- unsigned builds;
+- mixing secrets, UI, and the trading process;
+- unlimited wallet creation without a policy;
+- modes whose success metric is artificial volume or holder count.
 
 ### GMGN
 
-Взять как продуктовый ориентир:
+Use as a product reference:
 
-- token discovery и trending по коротким окнам;
+- token discovery and trending over short windows;
 - holder/insider/bundle/creator analysis;
 - Wallet Radar;
-- wallet PnL и быстрый переход от наблюдения к Shadow;
-- фильтры копирования по market cap, liquidity, token age, holder count, platform и LP-признакам;
+- wallet PnL and a quick transition from observation to Shadow;
+- copy filters by market cap, liquidity, token age, holder count, platform, and LP attributes;
 - TP/SL, batch exits, trailing;
 - live wallet alerts;
-- прозрачную страницу токена и кошелька.
+- transparent token and wallet pages.
 
-Улучшить относительно типичного GMGN-style UX:
+Improve on typical GMGN-style UX:
 
-- сначала показывать copyability и confidence, затем кнопку запуска;
-- не создавать Live-стратегию одной кнопкой без Shadow;
-- учитывать конфликт нескольких зеркал на одном активе;
-- считать follower PnL с реальной задержкой, priority fees, tips, slippage и failed transactions;
-- разделять lots и правила выхода для каждой стратегии;
-- объяснять каждую блокировку и каждое исполнение.
+- show copyability and confidence before the launch button;
+- do not create a Live strategy in one click without Shadow;
+- account for conflicts between multiple mirrors on the same asset;
+- calculate follower PnL with actual latency, priority fees, tips, slippage, and failed transactions;
+- separate lots and exit rules for each strategy;
+- explain every block and every execution.
 
-### Практика копитрейдинга из приложенной статьи
+### Copy-trading experience from the attached article
 
-- HFT-кошелёк с сотнями быстрых действий не должен считаться копируемым.
-- Multi-hop арбитраж нельзя зеркалировать постфактум; для него нужен собственный native strategy engine.
-- Low-frequency кошельки с редкими позициями лучше подходят для воспроизведения.
-- Нельзя смешивать ручные и bot-позиции в одном учётном контуре.
-- Два зеркала могут конфликтовать по одному токену; нужен position ownership и allocator.
-- Задержка должна измеряться по этапам, а не одной общей цифрой.
-- Результаты лидера нельзя выдавать за достижимые результаты follower без replay.
+- An HFT wallet with hundreds of rapid actions must not be considered copyable.
+- Multi-hop arbitrage cannot be mirrored after the fact; it requires a dedicated native strategy engine.
+- Low-frequency wallets with infrequent positions are better suited for replication.
+- Manual and bot positions must not be mixed in the same accounting scope.
+- Two mirrors can conflict on one token; position ownership and an allocator are required.
+- Latency must be measured by stage, not as one aggregate number.
+- Leader results must not be presented as achievable follower results without replay.
 
-### Исследование подозрительных токенов
+### Research into suspicious tokens
 
-Простые «галочки безопасности» недостаточны. Отдельно анализировать:
+Simple “safety checkmarks” are insufficient. Analyze separately:
 
-- контроль LP и возможность его вывода;
+- LP control and the ability to withdraw it;
 - creator/funder graph;
-- clusters holders вместо формального top-10;
-- синхронность сделок и повторяемость сумм/интервалов;
-- происхождение SOL у ранних покупателей;
-- повторное использование funder/creator addresses;
-- аномальное соотношение возраста, market cap, liquidity и органических holders;
-- sellability через quote/simulation;
-- миграции между bonding curve и DEX;
-- разрыв между видимым объёмом и количеством независимых источников капитала.
+- holder clusters instead of a nominal top-10;
+- synchronized trades and repeated amounts/intervals;
+- the origin of early buyers' SOL;
+- reuse of funder/creator addresses;
+- anomalous relationships between age, market cap, liquidity, and organic holders;
+- sellability through quote/simulation;
+- migrations between a bonding curve and a DEX;
+- the gap between apparent volume and the number of independent capital sources.
 
 ### AMM/DEX
 
-Движок обязан различать:
+The engine must distinguish:
 
 - order-book markets;
 - CPMM;
 - CLMM;
 - DLMM;
 - bonding curve;
-- `ExactIn`, `ExactOut` и hybrid fee mechanics;
-- price impact, slippage и route depth;
-- direct swap и multi-hop route.
+- `ExactIn`, `ExactOut`, and hybrid fee mechanics;
+- price impact, slippage, and route depth;
+- direct swaps and multi-hop routes.
 
-### Арбитраж
+### Arbitrage
 
-- Не пытаться делать copy-arbitrage.
-- Для будущего собственного arbitrage module использовать отдельный scanner/executor.
-- Atomic multi-hop считать отдельным типом стратегии.
-- Failed atomic route не должен оставлять промежуточную позицию, но fee/priority/tip и rejected-attempt cost учитывать в аналитике.
-- Качество RPC, размещение сервера и broadcast path измерять как часть стратегии.
+- Do not attempt copy-arbitrage.
+- Use a separate scanner/executor for a future native arbitrage module.
+- Treat atomic multi-hop as a separate strategy type.
+- A failed atomic route must not leave an intermediate position, but analytics must account for fee/priority/tip and rejected-attempt cost.
+- Measure RPC quality, server placement, and broadcast path as part of the strategy.
 
 ---
 
-# 2. Продуктовые режимы и основной flow
+# 2. Product modes and primary flow
 
-## 2.1. Четыре режима допуска
+## 2.1. Four permission modes
 
-| Режим | Подпись | Отправка | Денежный риск | Назначение |
+| Mode | Signing | Submission | Financial risk | Purpose |
 |---|---:|---:|---:|---|
-| Observe | нет | нет | нет | сбор и анализ |
-| Shadow | нет | нет | нет | расчёт реакции на реальное событие |
-| Paper | нет | нет | виртуальный | портфель и правила исполнения |
-| Live | да | да | реальный | сделки после всех гейтов |
+| Observe | no | no | none | collection and analysis |
+| Shadow | no | no | none | calculating a response to a real event |
+| Paper | no | no | virtual | portfolio and execution rules |
+| Live | yes | yes | real | trades after all gates |
 
-Переход разрешён только по цепочке:
+Forward transitions are allowed only in this sequence:
 
 ```text
 Observe -> Shadow -> Paper -> Live
 ```
 
-Обратный переход разрешён всегда. Любой критический health/risk event автоматически переводит стратегию в `PAUSED`, но не закрывает позицию без заранее определённого emergency rule.
+A backward transition is always allowed. Any critical health/risk event automatically moves the strategy to `PAUSED`, but does not close a position without a predefined emergency rule.
 
-## 2.2. Основной пользовательский путь
+## 2.2. Primary user journey
 
-1. Вставить mint или wallet address.
-2. Система догружает историю и показывает качество данных.
-3. Для токена показать risk flags, pool topology, creator/funder/holder graph, liquidity.
-4. Для кошелька показать Wallet DNA, PnL, strategy class, Copy Score.
-5. Добавить кошелёк в Observe и задать период.
-6. Запустить Shadow с несколькими профилями задержки и размера позиции.
-7. Сравнить leader PnL, theoretical follower PnL и executable follower PnL.
-8. Создать Paper strategy.
-9. Пройти минимальное число сделок и гейты качества.
-10. Привязать отдельный Live portfolio.
-11. Включить лимиты капитала, exits и kill switch.
-12. Перевести стратегию в Live вручную через двухэтапное подтверждение.
+1. Paste a mint or wallet address.
+2. The system backfills history and shows data quality.
+3. For a token, show risk flags, pool topology, creator/funder/holder graph, and liquidity.
+4. For a wallet, show Wallet DNA, PnL, strategy class, and Copy Score.
+5. Add the wallet to Observe and set a period.
+6. Run Shadow with several latency and position-size profiles.
+7. Compare leader PnL, theoretical follower PnL, and executable follower PnL.
+8. Create a Paper strategy.
+9. Complete the minimum number of trades and pass the quality gates.
+10. Link a separate Live portfolio.
+11. Enable capital limits, exits, and the kill switch.
+12. Move the strategy to Live manually through two-step confirmation.
 
 ---
 
-# 3. Архитектура
+# 3. Architecture
 
-## 3.1. Выбранный подход
+## 3.1. Selected approach
 
-Первый релиз — **модульный монолит**, а не набор микросервисов:
+The first release is a **modular monolith**, not a set of microservices:
 
-- один Rust workspace;
-- один основной backend-процесс с чёткими внутренними модулями;
-- отдельный signer-процесс;
-- отдельный frontend;
+- one Rust workspace;
+- one primary backend process with clear internal modules;
+- a separate signer process;
+- a separate frontend;
 - PostgreSQL/TimescaleDB;
-- Redis для cache, locks и коротких очередей;
-- Docker Compose на текущем Ubuntu/Docker-контуре;
-- NATS/ClickHouse добавлять только после подтверждённой нагрузки.
+- Redis for cache, locks, and short queues;
+- Docker Compose on the current Ubuntu/Docker setup;
+- add NATS/ClickHouse only after load is confirmed.
 
-Это сокращает сетевые точки отказа, но сохраняет границы, по которым ingest и execution позже можно вынести отдельно.
+This reduces network failure points while preserving boundaries that allow ingest and execution to be separated later.
 
-## 3.2. Логическая схема
+## 3.2. Logical diagram
 
 ```mermaid
 flowchart LR
@@ -257,18 +257,18 @@ flowchart LR
     OBS --- SIGN
 ```
 
-## 3.3. Критические границы
+## 3.3. Critical boundaries
 
-- `ingest` никогда не имеет доступа к private keys.
-- `analytics` не может отправлять транзакции.
-- `strategy` создаёт только `OrderIntent`.
-- `risk` может разрешить или отклонить intent, но не подписывает.
-- `execution` строит и симулирует transaction, но private key не читает.
-- `signer` подписывает только разрешённый сериализованный payload по allowlist policy.
-- `reconciler` является единственным источником финального статуса позиции.
-- UI не хранит и не отображает private key/seed.
+- `ingest` never has access to private keys.
+- `analytics` cannot submit transactions.
+- `strategy` creates only `OrderIntent` values.
+- `risk` can approve or reject an intent, but does not sign.
+- `execution` builds and simulates a transaction, but does not read the private key.
+- `signer` signs only an authorized serialized payload under an allowlist policy.
+- `reconciler` is the sole source of the final position status.
+- The UI does not store or display a private key/seed.
 
-## 3.4. Состояния исполнения
+## 3.4. Execution states
 
 ```text
 DETECTED
@@ -287,9 +287,9 @@ DETECTED
   -> RECONCILED
 ```
 
-Каждый переход сохраняется append-only и содержит:
+Each transition is stored append-only and contains:
 
-- timestamp приложения;
+- application timestamp;
 - observed slot;
 - commitment;
 - provider;
@@ -301,17 +301,17 @@ DETECTED
 
 ---
 
-# 4. Стек и структура репозитория
+# 4. Stack and repository structure
 
 ## 4.1. Backend
 
 - Rust stable, edition 2024.
 - Tokio, Axum, SQLx, Serde, Reqwest.
 - `tracing` + OpenTelemetry.
-- `thiserror` для typed errors.
-- `rust_decimal`/целочисленные atomic units; `f64` не использовать для балансов.
-- Solana SDK/client crates, закреплённые lockfile.
-- IDL/program decoders из проверяемых источников с version pinning.
+- `thiserror` for typed errors.
+- `rust_decimal`/integer atomic units; do not use `f64` for balances.
+- Solana SDK/client crates pinned by the lockfile.
+- IDL/program decoders from verifiable sources with version pinning.
 
 ## 4.2. Frontend
 
@@ -319,22 +319,22 @@ DETECTED
 - React + Vite.
 - TanStack Query/Table.
 - Lightweight Charts.
-- Zod для runtime validation.
-- WebSocket/SSE для live updates.
-- Playwright для E2E.
+- Zod for runtime validation.
+- WebSocket/SSE for live updates.
+- Playwright for E2E.
 
-## 4.3. Storage и operations
+## 4.3. Storage and operations
 
-- PostgreSQL 16+ и TimescaleDB.
+- PostgreSQL 16+ and TimescaleDB.
 - Redis 7+.
-- Object storage или локальный compressed archive для raw blocks и replay fixtures.
+- Object storage or a local compressed archive for raw blocks and replay fixtures.
 - Docker Compose.
-- Caddy/Nginx только за VPN.
+- Caddy/Nginx only behind a VPN.
 - Prometheus, Grafana, Loki, Tempo.
-- SOPS + age для bootstrap secrets; Vault/KMS — при выносе signer на отдельный host.
-- Cosign/Sigstore для release artifacts.
+- SOPS + age for bootstrap secrets; Vault/KMS when moving the signer to a separate host.
+- Cosign/Sigstore for release artifacts.
 
-## 4.4. Репозиторий
+## 4.4. Repository
 
 ```text
 private-trading-terminal/
@@ -392,9 +392,9 @@ private-trading-terminal/
 
 ---
 
-# 5. Канонические контракты и reason codes
+# 5. Canonical contracts and reason codes
 
-## 5.1. Событие рынка
+## 5.1. Market event
 
 ```rust
 pub struct MarketEvent {
@@ -412,7 +412,7 @@ pub struct MarketEvent {
 }
 ```
 
-## 5.2. Декодированный swap
+## 5.2. Decoded swap
 
 ```rust
 pub struct DecodedSwap {
@@ -434,7 +434,7 @@ pub struct DecodedSwap {
 }
 ```
 
-## 5.3. Действие кошелька
+## 5.3. Wallet action
 
 ```rust
 pub struct WalletAction {
@@ -454,7 +454,7 @@ pub struct WalletAction {
 }
 ```
 
-## 5.4. Торговое намерение
+## 5.4. Trading intent
 
 ```rust
 pub struct OrderIntent {
@@ -506,7 +506,7 @@ pub struct ExecutionReport {
 }
 ```
 
-## 5.7. Универсальные reason codes
+## 5.7. Universal reason codes
 
 ```text
 DATA_INSUFFICIENT
@@ -535,76 +535,76 @@ KILL_SWITCH_ACTIVE
 
 ---
 
-# 6. Хранилище и модель данных
+# 6. Storage and data model
 
-## 6.1. Обязательные таблицы
+## 6.1. Required tables
 
-| Таблица | Назначение | Ключ/индекс |
+| Table | Purpose | Key/index |
 |---|---|---|
 | `chain_slots` | slot, parent, commitment, status | PK `slot` |
-| `raw_transactions` | неизменённый tx/meta payload | unique `signature` |
-| `raw_notifications` | входящие WS events | `(provider, subscription_id, sequence)` |
+| `raw_transactions` | unmodified tx/meta payload | unique `signature` |
+| `raw_notifications` | incoming WS events | `(provider, subscription_id, sequence)` |
 | `instructions` | outer/inner instruction tree | `(signature, path)` |
 | `token_mints` | decimals, authorities, token program | PK `mint` |
 | `token_metadata` | name/symbol/URI/verification | `(mint, observed_at)` |
 | `pools` | venue, pair, curve type | PK `pool_address` |
 | `pool_snapshots` | reserves/ticks/bins/liquidity | hypertable `(pool, observed_at)` |
-| `swaps` | нормализованные swaps | unique `(signature, instruction_path)` |
-| `routes` | multi-hop объединение | PK `route_id` |
+| `swaps` | normalized swaps | unique `(signature, instruction_path)` |
+| `routes` | multi-hop aggregation | PK `route_id` |
 | `wallet_actions` | buy/sell/transfer/LP | `(wallet, source_slot)` |
-| `position_lots` | раздельные входы | `(portfolio_id, mint, lot_id)` |
-| `portfolio_positions` | агрегированная позиция | `(portfolio_id, mint)` |
-| `wallet_features` | временные признаки | `(wallet, window_end, feature_version)` |
+| `position_lots` | separate entries | `(portfolio_id, mint, lot_id)` |
+| `portfolio_positions` | aggregated position | `(portfolio_id, mint)` |
+| `wallet_features` | temporal features | `(wallet, window_end, feature_version)` |
 | `wallet_scores` | DNA, copy/risk scores | `(wallet, score_version, scored_at)` |
 | `token_risk_features` | creator/LP/cluster/activity | `(mint, feature_version, observed_at)` |
-| `token_risk_scores` | итог и explanation | `(mint, score_version, observed_at)` |
-| `strategies` | режим, источник, config | PK `strategy_id` |
-| `strategy_allocations` | лимит капитала | `(strategy_id, portfolio_id)` |
-| `shadow_runs` | параметры replay | PK `shadow_run_id` |
-| `shadow_orders` | виртуальные попытки | `(shadow_run_id, sequence)` |
-| `order_intents` | неизменяемые intents | unique `idempotency_key` |
-| `risk_decisions` | решение и snapshot | `(intent_id, decided_at)` |
+| `token_risk_scores` | result and explanation | `(mint, score_version, observed_at)` |
+| `strategies` | mode, source, config | PK `strategy_id` |
+| `strategy_allocations` | capital limit | `(strategy_id, portfolio_id)` |
+| `shadow_runs` | replay parameters | PK `shadow_run_id` |
+| `shadow_orders` | virtual attempts | `(shadow_run_id, sequence)` |
+| `order_intents` | immutable intents | unique `idempotency_key` |
+| `risk_decisions` | decision and snapshot | `(intent_id, decided_at)` |
 | `execution_attempts` | quote/sim/send | `(intent_id, attempt_no)` |
-| `fills` | фактические изменения баланса | `(execution_id, fill_no)` |
-| `latency_samples` | этапы pipeline | hypertable `(component, observed_at)` |
+| `fills` | actual balance changes | `(execution_id, fill_no)` |
+| `latency_samples` | pipeline stages | hypertable `(component, observed_at)` |
 | `risk_events` | limits/kill switch | `(portfolio_id, observed_at)` |
 | `alerts` | notifications | `(severity, created_at)` |
-| `audit_log` | действия пользователя/системы | append-only |
+| `audit_log` | user/system actions | append-only |
 | `provider_health` | RPC/WS/API health | hypertable |
-| `schema_versions` | версии decoders/scores | PK `component` |
+| `schema_versions` | decoder/score versions | PK `component` |
 
-## 6.2. Правила хранения
+## 6.2. Storage rules
 
-- Raw payload сохранять до декодирования.
-- Нормализованные записи никогда не перезаписывать без `decoder_version`.
-- Исправление decoder создаёт новую projection, а не тихо меняет историю.
-- Денежные значения хранить в atomic units + decimals; USD valuation хранить отдельно с price source и timestamp.
-- Все timestamps — UTC.
-- Для каждого on-chain факта хранить `slot`, `commitment`, `observed_at`, `provider`.
-- Для orphaned/reverted slot помечать derived records `reverted=true` и пересчитывать projections.
-- Raw watched-wallet/token data хранить бессрочно.
-- Общий raw stream: 30 дней в DB, затем compressed archive.
-- Normalized swaps/features/scores хранить бессрочно.
-- Debug logs: 14 дней; audit/security logs: минимум 365 дней.
+- Store the raw payload before decoding.
+- Never overwrite normalized records without `decoder_version`.
+- A decoder fix creates a new projection instead of silently changing history.
+- Store monetary values in atomic units + decimals; store USD valuation separately with price source and timestamp.
+- All timestamps are UTC.
+- Store `slot`, `commitment`, `observed_at`, and `provider` for every on-chain fact.
+- For an orphaned/reverted slot, mark derived records `reverted=true` and recalculate projections.
+- Retain raw watched-wallet/token data indefinitely.
+- General raw stream: 30 days in the DB, then a compressed archive.
+- Retain normalized swaps/features/scores indefinitely.
+- Debug logs: 14 days; audit/security logs: at least 365 days.
 
-## 6.3. Идемпотентность
+## 6.3. Idempotency
 
 - Ingest key: `provider + signature + notification_type`.
 - Instruction key: `signature + instruction_path`.
 - Swap key: `signature + instruction_path + decoder_version`.
 - Intent key: `strategy_id + source_action_id + side + market + policy_version`.
-- Execution retry не создаёт новый intent; увеличивает `attempt_no`.
-- Повторная отправка одной и той же signed transaction не должна создавать второй fill.
+- An execution retry does not create a new intent; it increments `attempt_no`.
+- Resubmitting the same signed transaction must not create a second fill.
 
 ---
 
-# 7. Scoring и классификация
+# 7. Scoring and classification
 
 ## 7.1. Wallet DNA
 
-Считать минимум по окнам `1d`, `7d`, `30d`, `90d`, `all`.
+Calculate over at least the `1d`, `7d`, `30d`, `90d`, and `all` windows.
 
-### Активность
+### Activity
 
 - trades count;
 - unique active days;
@@ -620,7 +620,7 @@ KILL_SWITCH_ACTIVE
 - turnover;
 - capital utilization.
 
-### Поведение позиции
+### Position behavior
 
 - median holding time;
 - p10/p90 holding time;
@@ -635,7 +635,7 @@ KILL_SWITCH_ACTIVE
 - entry liquidity percentile;
 - entry market-cap percentile.
 
-### Результат
+### Results
 
 - realized PnL;
 - unrealized PnL;
@@ -645,7 +645,7 @@ KILL_SWITCH_ACTIVE
 - payoff ratio;
 - max drawdown;
 - recovery factor;
-- Sharpe-like ratio для нерегулярных сделок;
+- Sharpe-like ratio for irregular trades;
 - Sortino-like ratio;
 - PnL concentration in top 1/3/5 trades;
 - loss concentration;
@@ -654,7 +654,7 @@ KILL_SWITCH_ACTIVE
 - fee share;
 - estimated slippage share.
 
-### Риск и качество данных
+### Risk and data quality
 
 - balance coverage;
 - unpriced token ratio;
@@ -668,7 +668,7 @@ KILL_SWITCH_ACTIVE
 
 ## 7.2. Strategy classifier
 
-Начальные классы:
+Initial classes:
 
 ```text
 LOW_FREQUENCY_SPOT
@@ -687,39 +687,39 @@ MIXED
 UNKNOWN
 ```
 
-Первый classifier — rules + calibrated thresholds, не ML. ML допускается только после накопления размеченного replay corpus.
+The first classifier uses rules + calibrated thresholds, not ML. ML is allowed only after a labeled replay corpus has been accumulated.
 
-### Жёсткие правила v1
+### Hard rules v1
 
-- `HFT`: median inter-trade interval < 5 секунд **или** > 120 swaps за 10 минут.
-- `ARBITRAGE`: round-trip в исходный mint внутри одной tx/route, route depth ≥ 2 и holding time ≈ 0.
-- `LOW_FREQUENCY_SPOT`: ≤ 12 новых позиций/сутки, median holding ≥ 15 минут, route depth ≤ 2.
-- `SWING`: median holding ≥ 6 часов и ≤ 30 дней.
-- `SCALPER`: median holding 10 секунд–15 минут без atomic round-trip.
-- `SUSPICIOUS_SYNTHETIC`: высокий cluster/funder synchronization score и повторяющиеся суммы/интервалы.
-- `UNKNOWN`: decoder coverage < 95% или data confidence < 0.80.
+- `HFT`: median inter-trade interval < 5 seconds **or** > 120 swaps in 10 minutes.
+- `ARBITRAGE`: round-trip to the original mint within one tx/route, route depth ≥ 2, and holding time ≈ 0.
+- `LOW_FREQUENCY_SPOT`: ≤ 12 new positions/day, median holding ≥ 15 minutes, route depth ≤ 2.
+- `SWING`: median holding ≥ 6 hours and ≤ 30 days.
+- `SCALPER`: median holding 10 seconds–15 minutes without an atomic round-trip.
+- `SUSPICIOUS_SYNTHETIC`: high cluster/funder synchronization score and repeated amounts/intervals.
+- `UNKNOWN`: decoder coverage < 95% or data confidence < 0.80.
 
 ## 7.3. Copyability hard gates
 
-Кошелёк получает `NON_COPYABLE`, если выполняется хотя бы одно:
+A wallet receives `NON_COPYABLE` if at least one of the following holds:
 
-- history < 50 closed positions или < 14 active days;
+- history < 50 closed positions or < 14 active days;
 - decoder coverage < 98%;
 - unpriced volume > 10%;
 - class `HFT`, `ARBITRAGE`, `MARKET_MAKER`, `LIQUIDITY_PROVIDER`, `SUSPICIOUS_SYNTHETIC`, `UNKNOWN`;
-- median holding < 30 секунд;
-- p50 follower replay при 500 ms отрицательный при положительном leader PnL;
+- median holding < 30 seconds;
+- p50 follower replay at 500 ms is negative while leader PnL is positive;
 - follower/leader execution similarity < 0.70;
-- требуемый размер позиции превышает 10% доступной ликвидности выбранного route;
-- PnL top-1 concentration > 70% при менее чем 100 closed positions;
+- the required position size exceeds 10% of available liquidity on the selected route;
+- PnL top-1 concentration > 70% with fewer than 100 closed positions;
 - max drawdown > 60%;
-- token-risk hard block встречается более чем в 20% entries.
+- a token-risk hard block occurs in more than 20% of entries.
 
 ## 7.4. Copy Score 0–100
 
-Считать только после hard gates:
+Calculate only after the hard gates:
 
-| Компонент | Вес |
+| Component | Weight |
 |---|---:|
 | data confidence | 10 |
 | latency survivability | 20 |
@@ -729,20 +729,20 @@ UNKNOWN
 | follower execution similarity | 15 |
 | diversification/robustness | 10 |
 
-Категории:
+Categories:
 
 - `85–100`: high suitability;
 - `70–84`: suitable with limits;
 - `55–69`: Shadow/Paper only;
 - `<55`: do not activate Live.
 
-Каждый компонент хранить отдельно. UI обязан показывать причины, а не только число.
+Store each component separately. The UI must show reasons, not just a number.
 
 ## 7.5. Token Risk Score 0–100
 
-Чем выше число, тем выше риск:
+The higher the number, the higher the risk:
 
-| Компонент | Вес |
+| Component | Weight |
 |---|---:|
 | LP control/withdrawal risk | 20 |
 | holder cluster concentration | 20 |
@@ -754,15 +754,15 @@ UNKNOWN
 
 ### Hard blocks
 
-- quote отсутствует на всех разрешённых routes;
-- simulation продажи минимального test amount стабильно отклоняется;
-- freeze authority может заморозить пользовательский token account и нет allowlist exception;
-- LP полностью контролируется связанным cluster и может быть снята немедленно;
-- mint/metadata не соответствует выбранному asset;
-- token program/extension не поддерживается execution engine;
-- creator/funder входит в локальный denylist подтверждённых rug patterns.
+- no quote is available on any permitted route;
+- simulation of selling the minimum test amount is consistently rejected;
+- the freeze authority can freeze the user's token account and there is no allowlist exception;
+- LP is fully controlled by a related cluster and can be withdrawn immediately;
+- mint/metadata does not match the selected asset;
+- the token program/extension is not supported by the execution engine;
+- the creator/funder is on the local denylist of confirmed rug patterns.
 
-### Обязательное explanation
+### Required explanation
 
 ```json
 {
@@ -780,11 +780,11 @@ UNKNOWN
 
 ---
 
-# 8. Risk engine и position ownership
+# 8. Risk engine and position ownership
 
-## 8.1. Начальные Live limits
+## 8.1. Initial Live limits
 
-Эти значения — безопасный старт для технической проверки, а не целевые размеры капитала:
+These values are a safe starting point for technical verification, not target capital sizes:
 
 - max position per token: min(`2% portfolio NAV`, `$100`);
 - max aggregate open risk: `20% NAV`;
@@ -792,21 +792,21 @@ UNKNOWN
 - max new positions/day: `10`;
 - max token price impact: `1.5%`;
 - max route slippage: `2.0%`;
-- max combined priority/tip/fee share: `1.0%` от notional;
+- max combined priority/tip/fee share: `1.0%` of notional;
 - max daily realized loss: `3% NAV`;
 - max rolling 7d drawdown: `7% NAV`;
 - max strategy drawdown: `10% allocated capital`;
 - max token risk score for Live entry: `35`;
-- max pending intents: `1` на `portfolio + mint`;
-- quote TTL: `1.5 s` для copy; `500 ms` для low-latency profile;
-- source action max age: `5 s` для scalper, `60 s` для low-frequency/swing;
-- liquidity coverage: executable depth должна быть ≥ `10x` follower notional.
+- max pending intents: `1` per `portfolio + mint`;
+- quote TTL: `1.5 s` for copy; `500 ms` for a low-latency profile;
+- source action max age: `5 s` for scalper, `60 s` for low-frequency/swing;
+- liquidity coverage: executable depth must be ≥ `10x` follower notional.
 
-Любое превышение создаёт `RiskDecision::Rejected` с конкретным reason code.
+Any breach creates `RiskDecision::Rejected` with a specific reason code.
 
 ## 8.2. Position ownership
 
-Каждый lot принадлежит ровно одному source:
+Each lot belongs to exactly one source:
 
 ```text
 MANUAL
@@ -815,18 +815,18 @@ NATIVE:<strategy_id>
 RESEARCH
 ```
 
-Правила:
+Rules:
 
-- strategy может продавать только свои lots;
-- `sell entire wallet balance` запрещён как внутренний primitive;
-- emergency close создаёт отдельный audit event и закрывает выбранные ownership groups;
-- несколько зеркал по одному mint могут иметь отдельные virtual subpositions даже при одном on-chain token account;
-- allocator резервирует доступный баланс до подписи intent;
-- reconciler распределяет фактический fill по lots детерминированно.
+- a strategy can sell only its own lots;
+- `sell entire wallet balance` is forbidden as an internal primitive;
+- an emergency close creates a separate audit event and closes the selected ownership groups;
+- multiple mirrors on one mint can have separate virtual subpositions even within one on-chain token account;
+- the allocator reserves the available balance before the intent is signed;
+- the reconciler allocates the actual fill across lots deterministically.
 
 ## 8.3. Exit policies
 
-Поддержать:
+Support:
 
 - proportional mirror sell;
 - fixed percentage sell;
@@ -842,1018 +842,1018 @@ RESEARCH
 - source-wallet exit;
 - manual emergency exit.
 
-Для каждой policy хранить activation condition, trigger source, amount calculation, max slippage, expiry, precedence, override rules и re-entry cooldown.
+For each policy, store activation condition, trigger source, amount calculation, max slippage, expiry, precedence, override rules, and re-entry cooldown.
 
 ---
 
-# 9. Детальный backlog
+# 9. Detailed backlog
 
 
-## Фаза 0 — Scope, ADR, репозиторий и воспроизводимая среда
+## Phase 0 — Scope, ADR, repository, and reproducible environment
 
-### P0-001 — Product charter и границы модулей
+### P0-001 — Product charter and module boundaries
 
-- [ ] Создать `docs/product-charter.md` и `docs/adr/0001-scope-and-non-goals.md`.
-- [ ] Перенести туда цели, режимы и non-goals из разделов 1–3.
-- [ ] Для каждого модуля описать вход, выход, владельца данных и запретные зависимости.
-- [ ] Зафиксировать signer как единственный компонент с доступом к key material.
-- **Приёмка:** нет `TBD`; analytics физически не зависит от signer implementation; Live не может обойти risk engine.
-- **Тест:** architecture dependency test в CI.
-- **Коммит:** `docs: freeze product scope`.
+- [ ] Create `docs/product-charter.md` and `docs/adr/0001-scope-and-non-goals.md`.
+- [ ] Transfer the goals, modes, and non-goals from sections 1–3 into them.
+- [ ] Describe each module's input, output, data owner, and forbidden dependencies.
+- [ ] Establish the signer as the only component with access to key material.
+- **Acceptance:** no `TBD`; analytics has no physical dependency on the signer implementation; Live cannot bypass the risk engine.
+- **Test:** architecture dependency test in CI.
+- **Commit:** `docs: freeze product scope`.
 
 ### P0-002 — Rust workspace
 
-- [ ] Создать workspace по структуре раздела 4.4.
-- [ ] Включить `rustfmt`, `clippy -D warnings`, locked dependencies и запрет `unsafe` по умолчанию.
-- [ ] Создать отдельные binaries `backend`, `signer`, `cli`.
-- [ ] Добавить health endpoints backend/signer.
-- **Приёмка:** `cargo build --workspace --locked`, `cargo test --workspace`, `cargo clippy --workspace --all-targets -- -D warnings` проходят.
-- **Коммит:** `chore: bootstrap rust workspace`.
+- [ ] Create the workspace according to the structure in section 4.4.
+- [ ] Enable `rustfmt`, `clippy -D warnings`, locked dependencies, and a default ban on `unsafe`.
+- [ ] Create separate `backend`, `signer`, and `cli` binaries.
+- [ ] Add backend/signer health endpoints.
+- **Acceptance:** `cargo build --workspace --locked`, `cargo test --workspace`, and `cargo clippy --workspace --all-targets -- -D warnings` pass.
+- **Commit:** `chore: bootstrap rust workspace`.
 
 ### P0-003 — Frontend workspace
 
-- [ ] Создать React/TypeScript strict application.
-- [ ] Маршруты: Dashboard, Tokens, Wallets, Radar, Shadow, Strategies, Portfolios, Executions, Alerts, Settings.
-- [ ] Подключить runtime schema validation, unit tests и Playwright.
-- **Приёмка:** build/typecheck/test проходят; публичный registration отсутствует.
-- **Коммит:** `chore: bootstrap private web app`.
+- [ ] Create a React/TypeScript strict application.
+- [ ] Routes: Dashboard, Tokens, Wallets, Radar, Shadow, Strategies, Portfolios, Executions, Alerts, Settings.
+- [ ] Integrate runtime schema validation, unit tests, and Playwright.
+- **Acceptance:** build/typecheck/test pass; public registration is absent.
+- **Commit:** `chore: bootstrap private web app`.
 
 ### P0-004 — Docker Compose
 
-- [ ] Поднять PostgreSQL/Timescale, Redis, backend, signer, web и observability profile.
-- [ ] Использовать private network; Web UI bind только к VPN interface.
-- [ ] Добавить healthcheck, restart policy, resource limits и named volumes.
-- [ ] Не помещать secrets в Compose и `.env.example`.
-- **Приёмка:** чистый `scripts/bootstrap.sh` поднимает green stack; DB/signer не видны снаружи.
-- **Коммит:** `chore: add local compose stack`.
+- [ ] Start PostgreSQL/Timescale, Redis, backend, signer, web, and an observability profile.
+- [ ] Use a private network; bind the Web UI only to the VPN interface.
+- [ ] Add healthcheck, restart policy, resource limits, and named volumes.
+- [ ] Do not put secrets in Compose or `.env.example`.
+- **Acceptance:** a clean `scripts/bootstrap.sh` starts a green stack; DB/signer are not externally visible.
+- **Commit:** `chore: add local compose stack`.
 
-### P0-005 — CI gates и dependency policy
+### P0-005 — CI gates and dependency policy
 
 - [ ] Format, clippy, tests, `cargo deny`, frontend lint/typecheck/build/test.
 - [ ] Secret scan, SBOM, container scan.
-- [ ] Запрет git dependency без pinned commit.
-- [ ] Release artifacts с checksums.
-- **Приёмка:** любой gate блокирует merge; SBOM генерируется автоматически.
-- **Коммит:** `ci: enforce build test and dependency gates`.
+- [ ] Ban git dependencies without a pinned commit.
+- [ ] Release artifacts with checksums.
+- **Acceptance:** every gate blocks merging; the SBOM is generated automatically.
+- **Commit:** `ci: enforce build test and dependency gates`.
 
 ### P0-006 — Typed versioned config
 
-- [ ] Создать `config/defaults.toml`, `risk.paper.toml`, `risk.live.toml`, `program-registry.toml`.
-- [ ] Отделить secret references от обычного config.
-- [ ] Добавить version, checksum и validation ranges.
-- [ ] Live startup запрещать при неизвестной версии risk config.
-- **Приёмка:** invalid field возвращает exact path/reason; critical config change инвалидирует Live approval.
-- **Коммит:** `feat: add versioned typed configuration`.
+- [ ] Create `config/defaults.toml`, `risk.paper.toml`, `risk.live.toml`, and `program-registry.toml`.
+- [ ] Separate secret references from regular configuration.
+- [ ] Add version, checksum, and validation ranges.
+- [ ] Forbid Live startup with an unknown risk config version.
+- **Acceptance:** an invalid field returns the exact path/reason; a critical config change invalidates Live approval.
+- **Commit:** `feat: add versioned typed configuration`.
 
 ### P0-007 — Core DB migrations
 
-- [ ] Создать таблицы раздела 6.
-- [ ] Включить Timescale hypertables и индексы.
-- [ ] Добавить schema version/lock.
-- [ ] Production migration — forward-only; dev допускает rebuild.
-- **Приёмка:** миграция чистой DB и повторный запуск проходят; ключевые query plans используют индексы.
-- **Коммит:** `feat: create core persistence schema`.
+- [ ] Create the tables from section 6.
+- [ ] Enable Timescale hypertables and indexes.
+- [ ] Add schema version/lock.
+- [ ] Production migrations are forward-only; development allows a rebuild.
+- **Acceptance:** migration of a clean DB and a repeated run pass; key query plans use indexes.
+- **Commit:** `feat: create core persistence schema`.
 
-### P0-008 — Error taxonomy и correlation IDs
+### P0-008 — Error taxonomy and correlation IDs
 
-- [ ] Typed error enums по компонентам.
-- [ ] Stable user-facing codes из раздела 5.7.
-- [ ] Correlation ID на входящее событие, intent и execution.
+- [ ] Typed error enums by component.
+- [ ] Stable user-facing codes from section 5.7.
+- [ ] A correlation ID for each incoming event, intent, and execution.
 - [ ] Central secret redaction.
-- **Приёмка:** API error имеет code/correlation ID; key/auth/signed tx не попадают в display/log.
-- **Коммит:** `feat: standardize errors and correlation ids`.
+- **Acceptance:** an API error has a code/correlation ID; keys/auth/signed tx do not reach display/logs.
+- **Commit:** `feat: standardize errors and correlation ids`.
 
 ### P0-009 — Immutable fixture registry
 
 - [ ] `fixtures/manifest.yaml`: source, slot range, checksum, decoder version, expected outputs.
-- [ ] Fixture не меняется без нового checksum/version.
-- [ ] Добавить CLI `fixture verify`.
-- **Приёмка:** повреждённый fixture ломает CI до replay.
-- **Коммит:** `test: add immutable fixture registry`.
+- [ ] A fixture cannot change without a new checksum/version.
+- [ ] Add the `fixture verify` CLI.
+- **Acceptance:** a corrupted fixture fails CI before replay.
+- **Commit:** `test: add immutable fixture registry`.
 
 ---
 
-## Фаза 1 — Solana ingest, commitment и raw store
+## Phase 1 — Solana ingest, commitment, and raw store
 
 ### SOL-001 — Provider-agnostic RPC client
 
-- [ ] Trait для `getTransaction`, `getBlock`, `getSignatureStatuses`, `simulateTransaction`, `sendTransaction`.
-- [ ] Timeout, bounded retry, rate-limit handling и circuit breaker.
+- [ ] A trait for `getTransaction`, `getBlock`, `getSignatureStatuses`, `simulateTransaction`, and `sendTransaction`.
+- [ ] Timeout, bounded retry, rate-limit handling, and circuit breaker.
 - [ ] Provider health: p50/p95/p99, errors, stale slot.
-- [ ] `sendTransaction` ретраить только той же signature.
-- **Приёмка:** provider меняется config-ом без recompilation; failover typed и observable.
-- **Тесты:** mock contract, timeout, 429, failover, idempotent resend.
-- **Коммит:** `feat: add provider agnostic solana rpc`.
+- [ ] Retry `sendTransaction` only with the same signature.
+- **Acceptance:** the provider can be changed through config without recompilation; failover is typed and observable.
+- **Tests:** mock contract, timeout, 429, failover, idempotent resend.
+- **Commit:** `feat: add provider agnostic solana rpc`.
 
 ### SOL-002 — Resilient WebSocket subscriptions
 
 - [ ] `logsSubscribe`, `signatureSubscribe`, `slotSubscribe`, `programSubscribe`.
-- [ ] Desired subscriptions хранить отдельно от active.
-- [ ] Reconnect с автоматическим resubscribe.
-- [ ] Gap recovery через HTTP backfill.
-- [ ] Commitment `processed/confirmed/finalized` хранить отдельно.
-- **Приёмка:** forced disconnect не теряет watched transactions; duplicates deduplicated.
-- **Коммит:** `feat: add resilient websocket subscriptions`.
+- [ ] Store desired subscriptions separately from active subscriptions.
+- [ ] Reconnect with automatic resubscribe.
+- [ ] Gap recovery through HTTP backfill.
+- [ ] Store `processed/confirmed/finalized` commitments separately.
+- **Acceptance:** forced disconnection does not lose watched transactions; duplicates are deduplicated.
+- **Commit:** `feat: add resilient websocket subscriptions`.
 
 ### SOL-003 — Raw transaction persistence
 
-- [ ] Raw notification и transaction/meta сохранять до parsing.
+- [ ] Store raw notifications and transaction/meta before parsing.
 - [ ] Provider, observed time, slot, commitment, payload hash.
-- [ ] Компрессировать большие payloads.
-- [ ] Idempotent insert и dead-letter для malformed data.
-- **Приёмка:** decoder crash не уничтожает event; replay доступен из raw store.
-- **Нагрузка:** не менее 1k events/s burst без data loss на target host.
-- **Коммит:** `feat: persist immutable raw chain events`.
+- [ ] Compress large payloads.
+- [ ] Idempotent insert and a dead-letter mechanism for malformed data.
+- **Acceptance:** a decoder crash does not destroy the event; replay is available from the raw store.
+- **Load:** at least a 1k events/s burst without data loss on the target host.
+- **Commit:** `feat: persist immutable raw chain events`.
 
 ### SOL-004 — Slot/fork reconciler
 
-- [ ] Хранить parent slot и commitment progression.
-- [ ] Помечать orphaned projections, не удалять историю.
-- [ ] Rebuild от valid checkpoint.
-- [ ] Critical alert при finalized inconsistency.
-- **Приёмка:** reverted processed event не остаётся в позиции/PnL.
-- **Коммит:** `feat: reconcile slots and forks`.
+- [ ] Store parent slot and commitment progression.
+- [ ] Mark orphaned projections; do not delete history.
+- [ ] Rebuild from a valid checkpoint.
+- [ ] Critical alert on finalized inconsistency.
+- **Acceptance:** a reverted processed event does not remain in positions/PnL.
+- **Commit:** `feat: reconcile slots and forks`.
 
 ### SOL-005 — Dynamic watch registry
 
 - [ ] Targets: wallet, mint, pool, program.
 - [ ] Priority, retention profile, enabled state, labels.
-- [ ] Add/remove без restart.
-- [ ] Pubkey validation и dedupe.
-- **Приёмка:** новый wallet начинает ingest сразу; удаление прекращает future subscription, историю сохраняет.
-- **Коммит:** `feat: add dynamic watch registry`.
+- [ ] Add/remove without a restart.
+- [ ] Pubkey validation and dedupe.
+- **Acceptance:** ingest begins immediately for a new wallet; removal stops future subscriptions and preserves history.
+- **Commit:** `feat: add dynamic watch registry`.
 
 ### SOL-006 — Resumable historical backfill
 
-- [ ] Durable cursor и paginated signatures/transactions.
+- [ ] Durable cursor and paginated signatures/transactions.
 - [ ] Separate live/backfill queues.
 - [ ] Provider concurrency budget.
-- [ ] Restart/resume без повторной logical загрузки.
-- **Приёмка:** live p95 деградирует не более чем на 20% при backfill.
-- **Коммит:** `feat: add resumable historical backfill`.
+- [ ] Restart/resume without repeating the logical load.
+- **Acceptance:** live p95 degrades by no more than 20% during backfill.
+- **Commit:** `feat: add resumable historical backfill`.
 
 ### SOL-007 — Optional low-latency feed adapter
 
-- [ ] Универсальный adapter для Geyser/ShredStream-class feed.
-- [ ] Feature flag и standard RPC fallback.
-- [ ] Сравнивать first-seen time между источниками.
-- [ ] Любое low-latency событие подтверждать RPC reconciliation.
-- **Приёмка:** система полностью работает без optional feed; disagreement создаёт alert.
-- **Коммит:** `feat: add optional low latency feed adapter`.
+- [ ] A universal adapter for a Geyser/ShredStream-class feed.
+- [ ] Feature flag and standard RPC fallback.
+- [ ] Compare first-seen time across sources.
+- [ ] Confirm every low-latency event through RPC reconciliation.
+- **Acceptance:** the system operates fully without the optional feed; disagreement creates an alert.
+- **Commit:** `feat: add optional low latency feed adapter`.
 
 ### SOL-008 — Provider benchmark harness
 
-- [ ] Измерять WS lag, HTTP latency, simulation, submit dry-run/devnet.
-- [ ] Отчёт p50/p95/p99, errors, region, config hash.
-- [ ] Redact credentials в endpoint URL.
-- **Приёмка:** можно воспроизводимо сравнить минимум два provider и fallback.
-- **Коммит:** `perf: add provider latency benchmark`.
+- [ ] Measure WS lag, HTTP latency, simulation, and submit dry-run/devnet.
+- [ ] Report p50/p95/p99, errors, region, and config hash.
+- [ ] Redact credentials in the endpoint URL.
+- **Acceptance:** at least two providers and a fallback can be compared reproducibly.
+- **Commit:** `perf: add provider latency benchmark`.
 
 ---
 
-## Фаза 2 — Декодирование и market state
+## Phase 2 — Decoding and market state
 
-### DEC-001 — Instruction tree и balance deltas
+### DEC-001 — Instruction tree and balance deltas
 
-- [ ] Разобрать outer/inner instructions и CPI path.
-- [ ] Сопоставить pre/post SOL и token balances.
-- [ ] Нормализовать wrapped SOL.
-- [ ] Отделить fee payer, trader, vault и intermediary accounts.
-- **Приёмка:** token deltas сходятся с transaction meta; unknown instruction не ломает другие branches.
-- **Коммит:** `feat: build instruction tree and balance deltas`.
+- [ ] Parse outer/inner instructions and the CPI path.
+- [ ] Match pre/post SOL and token balances.
+- [ ] Normalize wrapped SOL.
+- [ ] Separate fee payer, trader, vault, and intermediary accounts.
+- **Acceptance:** token deltas reconcile with transaction meta; an unknown instruction does not break other branches.
+- **Commit:** `feat: build instruction tree and balance deltas`.
 
-### DEC-002 — SPL Token и Token-2022
+### DEC-002 — SPL Token and Token-2022
 
 - [ ] Transfer, transferChecked, mint, burn, close account, sync native, freeze/thaw.
-- [ ] Mint/freeze authorities и Token-2022 extensions.
+- [ ] Mint/freeze authorities and Token-2022 extensions.
 - [ ] Unsupported extension → execution hard block.
-- **Приёмка:** все операции fixture имеют typed representation; ATA closure корректно отражает rent.
-- **Коммит:** `feat: decode spl token programs`.
+- **Acceptance:** all fixture operations have typed representations; ATA closure correctly reflects rent.
+- **Commit:** `feat: decode spl token programs`.
 
 ### DEC-003 — Pump.fun/PumpSwap lifecycle
 
-- [ ] Create, buy, sell, bonding curve state и migration.
+- [ ] Create, buy, sell, bonding curve state, and migration.
 - [ ] Trader, mint, SOL/token amounts, effective price.
 - [ ] Program/discriminator version pinning.
 - [ ] Unknown version → raw saved + `DECODER_UNSUPPORTED`.
-- **Приёмка:** buy/sell fixtures дают точные amounts; migration связывает pre/post market identity.
-- **Коммит:** `feat: decode pump lifecycle`.
+- **Acceptance:** buy/sell fixtures produce exact amounts; migration links pre/post market identity.
+- **Commit:** `feat: decode pump lifecycle`.
 
 ### DEC-004 — Raydium AMM v4/CPMM/CLMM
 
 - [ ] Pool init, add/remove liquidity, swap.
 - [ ] Vaults, reserves/ticks, fees.
-- [ ] Direct и routed swap.
-- [ ] LP operations не считать trader buy/sell.
-- **Приёмка:** golden corpus по каждому pool type проходит.
-- **Коммит:** `feat: decode raydium pools and swaps`.
+- [ ] Direct and routed swaps.
+- [ ] Do not count LP operations as trader buys/sells.
+- **Acceptance:** the golden corpus for each pool type passes.
+- **Commit:** `feat: decode raydium pools and swaps`.
 
 ### DEC-005 — Meteora DLMM
 
 - [ ] Swap, bin/liquidity operations, active bin, dynamic fees.
-- [ ] Не применять CPMM formula к DLMM.
-- **Приёмка:** amounts и bin transitions совпадают с transaction/meta/account state.
-- **Коммит:** `feat: decode meteora dlmm`.
+- [ ] Do not apply a CPMM formula to DLMM.
+- **Acceptance:** amounts and bin transitions match transaction/meta/account state.
+- **Commit:** `feat: decode meteora dlmm`.
 
 ### DEC-006 — Orca Whirlpool
 
-- [ ] Swaps и concentrated liquidity operations.
-- [ ] Tick arrays, fees и confidence при missing accounts.
-- **Приёмка:** swap/LP разделены; partial decode явно маркирован.
-- **Коммит:** `feat: decode orca whirlpools`.
+- [ ] Swaps and concentrated liquidity operations.
+- [ ] Tick arrays, fees, and confidence when accounts are missing.
+- **Acceptance:** swap/LP are separated; partial decoding is explicitly marked.
+- **Commit:** `feat: decode orca whirlpools`.
 
 ### DEC-007 — Route reconstruction
 
-- [ ] Группировать swaps одной transaction по flow of funds.
-- [ ] Определять input/output asset, route depth, venues, intermediates.
-- [ ] Распознавать round-trip в исходный mint.
-- **Приёмка:** `SOL→USDC→TOKEN` = одна покупка; `SOL→X→SOL` = atomic round-trip, не copy action.
-- **Коммит:** `feat: reconstruct multi hop routes`.
+- [ ] Group swaps within one transaction by flow of funds.
+- [ ] Identify input/output asset, route depth, venues, and intermediates.
+- [ ] Recognize round-trips to the original mint.
+- **Acceptance:** `SOL→USDC→TOKEN` = one buy; `SOL→X→SOL` = an atomic round-trip, not a copy action.
+- **Commit:** `feat: reconstruct multi hop routes`.
 
 ### DEC-008 — Jupiter routed transactions
 
-- [ ] Распознавать Jupiter context и AMM inner calls.
-- [ ] Объединять route в одно economic action.
-- [ ] Сохранять quoted и observed route отдельно.
-- **Приёмка:** одна Jupiter transaction не создаёт несколько follower signals.
-- **Коммит:** `feat: decode jupiter routed swaps`.
+- [ ] Recognize Jupiter context and AMM inner calls.
+- [ ] Aggregate a route into one economic action.
+- [ ] Store quoted and observed routes separately.
+- **Acceptance:** one Jupiter transaction does not create multiple follower signals.
+- **Commit:** `feat: decode jupiter routed swaps`.
 
 ### DEC-009 — Decoder coverage report
 
-- [ ] Доля decoded instructions, decoded value и classified actions.
-- [ ] Unknown program IDs и affected volume.
-- [ ] Scoring block при coverage ниже threshold.
-- **Приёмка:** Copy Score отсутствует при coverage <98%; причина видна в UI/API.
-- **Коммит:** `feat: expose decoder coverage`.
+- [ ] Proportion of decoded instructions, decoded value, and classified actions.
+- [ ] Unknown program IDs and affected volume.
+- [ ] Block scoring when coverage is below the threshold.
+- **Acceptance:** Copy Score is absent when coverage <98%; the reason is visible in UI/API.
+- **Commit:** `feat: expose decoder coverage`.
 
-### MKT-001 — Pool registry и snapshots
+### MKT-001 — Pool registry and snapshots
 
-- [ ] Canonical MarketId для pair+venue+pool.
-- [ ] Reserve/tick/bin snapshots и staleness.
+- [ ] Canonical MarketId for pair+venue+pool.
+- [ ] Reserve/tick/bin snapshots and staleness.
 - [ ] Bonding curve ↔ migrated pool link.
-- **Приёмка:** token page показывает все активные pools; stale pool не используется для capacity.
-- **Коммит:** `feat: build canonical pool registry`.
+- **Acceptance:** the token page shows all active pools; a stale pool is not used for capacity.
+- **Commit:** `feat: build canonical pool registry`.
 
-### MKT-002 — Price impact и executable depth
+### MKT-002 — Price impact and executable depth
 
 - [ ] CPMM, CLMM, DLMM, bonding curve adapters.
-- [ ] Marginal price, executable price, impact для заданного notional.
-- [ ] Local model только sanity-check; Live fill основан на quote/simulation/on-chain result.
-- **Приёмка:** formulas совпадают с fixtures в указанной погрешности.
-- **Коммит:** `feat: model pool price impact and depth`.
+- [ ] Marginal price, executable price, and impact for a given notional.
+- [ ] The local model is only a sanity check; Live fill is based on quote/simulation/on-chain result.
+- **Acceptance:** formulas match fixtures within the specified tolerance.
+- **Commit:** `feat: model pool price impact and depth`.
 
-### MKT-003 — Candles и rolling metrics
+### MKT-003 — Candles and rolling metrics
 
 - [ ] Event-time candles: 1s/5s/1m/5m/1h.
 - [ ] Volume, buys/sells, unique traders, holder delta, liquidity delta.
-- [ ] Late-event recompute только затронутых buckets.
-- **Приёмка:** одинаковый raw dataset даёт детерминированный результат.
-- **Коммит:** `feat: aggregate event time market metrics`.
+- [ ] Recompute only affected buckets for late events.
+- **Acceptance:** the same raw dataset produces a deterministic result.
+- **Commit:** `feat: aggregate event time market metrics`.
 
 ---
 
-## Фаза 3 — Token intelligence и defensive detection
+## Phase 3 — Token intelligence and defensive detection
 
 ### TOK-001 — Token profile
 
 - [ ] Mint, metadata, authorities, age, pools, price, liquidity, holders, volume.
-- [ ] Source timestamp и confidence каждого поля.
-- [ ] Market cap не считать без supply confidence.
-- **Приёмка:** API/UI различает `unknown`, stale и zero.
-- **Коммит:** `feat: build token profile`.
+- [ ] Source timestamp and confidence for every field.
+- [ ] Do not calculate market cap without supply confidence.
+- **Acceptance:** API/UI distinguishes `unknown`, stale, and zero.
+- **Commit:** `feat: build token profile`.
 
 ### TOK-002 — Creator/funder graph
 
 - [ ] Creator, initial funder, first/second/third-hop funders.
-- [ ] Directed graph переводов с bounded traversal.
-- [ ] Common-funder clustering и evidence edges.
-- **Приёмка:** любой cluster flag раскрывается до конкретных tx; traversal не блокирует live ingest.
-- **Коммит:** `feat: derive creator and funding graph`.
+- [ ] Directed transfer graph with bounded traversal.
+- [ ] Common-funder clustering and evidence edges.
+- **Acceptance:** every cluster flag can be traced to specific tx; traversal does not block live ingest.
+- **Commit:** `feat: derive creator and funding graph`.
 
-### TOK-003 — Holder snapshots и cluster concentration
+### TOK-003 — Holder snapshots and cluster concentration
 
-- [ ] Исключать pools/vaults/program accounts.
-- [ ] Связывать addresses по funding/transfer evidence.
-- [ ] Считать raw top-10 и cluster-adjusted concentration.
-- [ ] Хранить confidence и false-merge guard.
-- **Приёмка:** множество связанных wallets отображается как economic cluster, а не как независимые holders.
-- **Коммит:** `feat: calculate holder clusters`.
+- [ ] Exclude pools/vaults/program accounts.
+- [ ] Link addresses through funding/transfer evidence.
+- [ ] Calculate raw top-10 and cluster-adjusted concentration.
+- [ ] Store confidence and a false-merge guard.
+- **Acceptance:** a set of related wallets is displayed as an economic cluster, not as independent holders.
+- **Commit:** `feat: calculate holder clusters`.
 
-### TOK-004 — LP control и withdrawal risk
+### TOK-004 — LP control and withdrawal risk
 
 - [ ] Owner/position owner, lock/burn evidence, control cluster.
-- [ ] История add/remove liquidity.
+- [ ] History of add/remove liquidity.
 - [ ] Controlled liquidity percentage.
-- [ ] Critical alert на резкое удаление LP.
-- **Приёмка:** token page показывает контроль LP, а не только его сумму.
-- **Коммит:** `feat: assess liquidity control`.
+- [ ] Critical alert on a sudden LP removal.
+- **Acceptance:** the token page shows LP control, not just its amount.
+- **Commit:** `feat: assess liquidity control`.
 
 ### TOK-005 — Synthetic activity detector
 
 - [ ] Synchronization, repeated notional, regular intervals, common funding, circular flow, unique capital sources.
-- [ ] Отделить heuristic score от hard evidence.
-- [ ] Версионировать feature set.
-- **Приёмка:** score детерминирован; UI показывает top contributors; detector не формирует trades.
-- **Коммит:** `feat: detect synthetic activity patterns`.
+- [ ] Separate heuristic scores from hard evidence.
+- [ ] Version the feature set.
+- **Acceptance:** the score is deterministic; the UI shows top contributors; the detector does not generate trades.
+- **Commit:** `feat: detect synthetic activity patterns`.
 
 ### TOK-006 — Creator recurrence
 
-- [ ] Прошлые mints/pools creator/funder cluster.
+- [ ] Past mints/pools of the creator/funder cluster.
 - [ ] Lifetime, peak liquidity, LP withdrawal, terminal state.
-- [ ] Исключать exchange/hub wallets без дополнительного evidence.
-- **Приёмка:** recurring pattern имеет evidence path; high-degree infrastructure не даёт ложный hard block.
-- **Коммит:** `feat: score creator history`.
+- [ ] Exclude exchange/hub wallets unless there is additional evidence.
+- **Acceptance:** a recurring pattern has an evidence path; high-degree infrastructure does not cause a false hard block.
+- **Commit:** `feat: score creator history`.
 
 ### TOK-007 — Sellability quote/simulation probe
 
-- [ ] Read-only quotes для нескольких малых sizes.
-- [ ] Build unsigned transaction и simulate без отправки.
+- [ ] Read-only quotes for several small sizes.
+- [ ] Build an unsigned transaction and simulate it without submission.
 - [ ] Token-2022 extension checks.
-- [ ] Rate limit и short cache.
-- **Приёмка:** probe никогда не подписывает и не отправляет transaction; failure имеет category/log hash.
-- **Коммит:** `feat: add non executing sellability probe`.
+- [ ] Rate limit and short cache.
+- **Acceptance:** the probe never signs or submits a transaction; failure has a category/log hash.
+- **Commit:** `feat: add non executing sellability probe`.
 
 ### TOK-008 — Age/MC/liquidity anomaly
 
-- [ ] Сравнить age, MC, liquidity, independent capital, holder growth и volume с cohort.
-- [ ] Robust percentiles вместо одной абсолютной нормы.
-- [ ] Cohort/version хранить в score evidence.
-- **Приёмка:** anomaly объяснима; sparse cohort → low confidence, не автоматический block.
-- **Коммит:** `feat: detect token market anomalies`.
+- [ ] Compare age, MC, liquidity, independent capital, holder growth, and volume against the cohort.
+- [ ] Robust percentiles instead of one absolute norm.
+- [ ] Store cohort/version in score evidence.
+- **Acceptance:** the anomaly is explainable; a sparse cohort → low confidence, not an automatic block.
+- **Commit:** `feat: detect token market anomalies`.
 
 ### TOK-009 — Token Risk Score v1
 
-- [ ] Реализовать веса и hard blocks раздела 7.5.
-- [ ] Сохранять feature snapshot, explanation и score version.
-- [ ] Allowlist exception только с reason, expiry и audit.
-- **Приёмка:** одинаковый snapshot даёт одинаковый score; hard block нельзя снять обычным toggle.
-- **Коммит:** `feat: calculate explainable token risk score`.
+- [ ] Implement the weights and hard blocks from section 7.5.
+- [ ] Store the feature snapshot, explanation, and score version.
+- [ ] Allowlist exceptions only with a reason, expiry, and audit.
+- **Acceptance:** the same snapshot produces the same score; a hard block cannot be removed with a regular toggle.
+- **Commit:** `feat: calculate explainable token risk score`.
 
 ### TOK-010 — Token alerts
 
 - [ ] LP remove, risk jump, recurrence, liquidity collapse, holder-cluster jump, sellability fail.
-- [ ] Dedupe window, severity и evidence.
-- [ ] Critical alert вызывает pause новых entries через risk engine.
-- **Приёмка:** один факт не спамит; open positions следуют exit policy.
-- **Коммит:** `feat: alert on token risk changes`.
+- [ ] Dedupe window, severity, and evidence.
+- [ ] A critical alert pauses new entries through the risk engine.
+- **Acceptance:** one fact does not cause spam; open positions follow the exit policy.
+- **Commit:** `feat: alert on token risk changes`.
 
 
 ---
 
-## Фаза 4 — Wallet intelligence, PnL и Wallet DNA
+## Phase 4 — Wallet intelligence, PnL, and Wallet DNA
 
-### WAL-001 — Нормализация wallet actions
+### WAL-001 — Wallet action normalization
 
-- [ ] Преобразовывать routes в buy/sell/transfer/LP/round-trip actions.
-- [ ] Назначать confidence и evidence references.
-- [ ] Не превращать atomic arb в открытую позицию.
+- [ ] Convert routes into buy/sell/transfer/LP/round-trip actions.
+- [ ] Assign confidence and evidence references.
+- [ ] Do not turn atomic arbitrage into an open position.
 - [ ] Deduplicate economic action across inner hops.
-- **Приёмка:** одна multi-hop transaction создаёт одно понятное действие.
-- **Коммит:** `feat: normalize wallet actions`.
+- **Acceptance:** one multi-hop transaction creates one understandable action.
+- **Commit:** `feat: normalize wallet actions`.
 
 ### WAL-002 — Lot-based PnL ledger
 
-- [ ] FIFO как отчётный default и average-cost view для UI.
-- [ ] Учитывать base fees, priority/tip, wrapping SOL, partial exits и transfers.
-- [ ] Разделять realized, unrealized и unpriced.
-- [ ] Переводы между связанными собственными адресами не создают profit.
-- **Приёмка:** ledger сходится с balance deltas на golden fixtures.
-- **Коммит:** `feat: add wallet pnl ledger`.
+- [ ] FIFO as the reporting default and an average-cost view for the UI.
+- [ ] Account for base fees, priority/tip, wrapping SOL, partial exits, and transfers.
+- [ ] Separate realized, unrealized, and unpriced.
+- [ ] Transfers between related owner-controlled addresses do not create profit.
+- **Acceptance:** the ledger reconciles with balance deltas on golden fixtures.
+- **Commit:** `feat: add wallet pnl ledger`.
 
 ### WAL-003 — Position reconstruction
 
-- [ ] Position episodes по mint.
-- [ ] Adds, partial exits, reopen, dust и airdrops.
+- [ ] Position episodes by mint.
+- [ ] Adds, partial exits, reopen, dust, and airdrops.
 - [ ] Holding time, MAE/MFE, time to first/final exit.
-- **Приёмка:** dust transfer не закрывает позицию; re-entry создаёт новый episode.
-- **Коммит:** `feat: reconstruct wallet positions`.
+- **Acceptance:** a dust transfer does not close a position; re-entry creates a new episode.
+- **Commit:** `feat: reconstruct wallet positions`.
 
 ### WAL-004 — Performance metrics
 
-- [ ] Реализовать метрики раздела 7.1.
-- [ ] Transaction-weighted и capital-weighted views.
+- [ ] Implement the metrics from section 7.1.
+- [ ] Transaction-weighted and capital-weighted views.
 - [ ] Confidence interval/low-sample warning.
-- [ ] Не annualize нерегулярный PnL без явного label.
-- **Приёмка:** formula/version описаны в `docs/scoring/wallet-performance-v1.md`.
-- **Коммит:** `feat: calculate wallet performance metrics`.
+- [ ] Do not annualize irregular PnL without an explicit label.
+- **Acceptance:** formula/version are documented in `docs/scoring/wallet-performance-v1.md`.
+- **Commit:** `feat: calculate wallet performance metrics`.
 
 ### WAL-005 — Behavioral features
 
 - [ ] Frequency, intervals, route depth, venue mix, entry age/liquidity, sizing, exit style.
-- [ ] Окна 1d/7d/30d/90d/all.
-- [ ] Event-time recalculation для late events.
-- **Приёмка:** replay детерминирован; window boundary tests проходят.
-- **Коммит:** `feat: derive wallet behavioral features`.
+- [ ] Windows: 1d/7d/30d/90d/all.
+- [ ] Event-time recalculation for late events.
+- **Acceptance:** replay is deterministic; window boundary tests pass.
+- **Commit:** `feat: derive wallet behavioral features`.
 
 ### WAL-006 — Wallet DNA projection
 
-- [ ] Объединить performance, behavior, risk exposure и data confidence.
+- [ ] Combine performance, behavior, risk exposure, and data confidence.
 - [ ] Compact labels + raw metrics + change over time.
-- [ ] Не скрывать отрицательный recent window за all-time итогом.
-- **Приёмка:** API содержит feature version и source timestamps.
-- **Коммит:** `feat: build wallet dna`.
+- [ ] Do not hide a negative recent window behind the all-time total.
+- **Acceptance:** the API contains the feature version and source timestamps.
+- **Commit:** `feat: build wallet dna`.
 
 ### WAL-007 — Wallet Radar
 
-- [ ] Для набора до 10 tokens находить earliest buyers, highest realized profit, most bought, shared holdings.
-- [ ] Исключать low-confidence и infrastructure wallets.
-- [ ] Экспорт только в watchlist или Shadow.
-- **Приёмка:** direct Live action из Radar отсутствует; ranking formula объяснима.
-- **Коммит:** `feat: add wallet radar`.
+- [ ] For a set of up to 10 tokens, find earliest buyers, highest realized profit, most bought, and shared holdings.
+- [ ] Exclude low-confidence and infrastructure wallets.
+- [ ] Export only to a watchlist or Shadow.
+- **Acceptance:** no direct Live action from Radar; the ranking formula is explainable.
+- **Commit:** `feat: add wallet radar`.
 
 ### WAL-008 — Wallet tracking alerts
 
 - [ ] Buy, sell, new token, large size, behavior change, score downgrade.
-- [ ] Указывать source slot и detection latency.
+- [ ] Include source slot and detection latency.
 - [ ] Multi-hop dedupe.
-- **Приёмка:** alert содержит evidence link и не дублируется по hops.
-- **Коммит:** `feat: alert on tracked wallet actions`.
+- **Acceptance:** the alert contains an evidence link and is not duplicated across hops.
+- **Commit:** `feat: alert on tracked wallet actions`.
 
 ---
 
-## Фаза 5 — Strategy classifier, Anti-Copy и Copy Score
+## Phase 5 — Strategy classifier, Anti-Copy, and Copy Score
 
 ### CLS-001 — Rules classifier v1
 
-- [ ] Реализовать классы и thresholds раздела 7.2.
-- [ ] Primary/secondary label и confidence.
-- [ ] Хранить matched rules.
-- [ ] Unknown не превращать автоматически в low-frequency.
-- **Приёмка:** каждый label объясним; boundary tests на thresholds проходят.
-- **Коммит:** `feat: classify wallet strategies`.
+- [ ] Implement the classes and thresholds from section 7.2.
+- [ ] Primary/secondary label and confidence.
+- [ ] Store matched rules.
+- [ ] Do not automatically turn Unknown into low-frequency.
+- **Acceptance:** every label is explainable; threshold boundary tests pass.
+- **Commit:** `feat: classify wallet strategies`.
 
 ### CLS-002 — Anti-Copy hard gates
 
 - [ ] `COPYABLE`, `SHADOW_ONLY`, `NON_COPYABLE`.
-- [ ] Реализовать все gates раздела 7.3.
-- [ ] Evidence и reason list сохранять versioned.
-- [ ] HFT/arb/suspicious source не может создать Live signal.
-- **Приёмка:** false-copyable HFT/arb = 0 на classification corpus.
-- **Коммит:** `feat: block non reproducible strategies`.
+- [ ] Implement all gates from section 7.3.
+- [ ] Store versioned evidence and reason lists.
+- [ ] An HFT/arb/suspicious source cannot create a Live signal.
+- **Acceptance:** false-copyable HFT/arb = 0 on the classification corpus.
+- **Commit:** `feat: block non reproducible strategies`.
 
 ### CLS-003 — Execution similarity
 
 - [ ] Entry coverage, side match, size ratio, execution price, exit timing, route success.
-- [ ] Считать по нескольким latency profiles.
-- [ ] Наказывать пропущенные и failed trades.
-- **Приёмка:** metric 0–1 детерминирована; leader PnL не подменяет similarity.
-- **Коммит:** `feat: score follower execution similarity`.
+- [ ] Calculate across several latency profiles.
+- [ ] Penalize missed and failed trades.
+- **Acceptance:** the 0–1 metric is deterministic; leader PnL does not substitute for similarity.
+- **Commit:** `feat: score follower execution similarity`.
 
 ### CLS-004 — Copy Score v1
 
-- [ ] Реализовать веса раздела 7.4.
-- [ ] Считать компоненты независимо.
-- [ ] Score только после hard gates.
-- [ ] Versioned formula и complete explanation.
-- **Приёмка:** UI показывает вклад каждого компонента; snapshot+version однозначно определяют score.
-- **Коммит:** `feat: calculate explainable copy score`.
+- [ ] Implement the weights from section 7.4.
+- [ ] Calculate components independently.
+- [ ] Score only after hard gates.
+- [ ] Versioned formula and complete explanation.
+- **Acceptance:** the UI shows every component's contribution; snapshot+version uniquely determine the score.
+- **Commit:** `feat: calculate explainable copy score`.
 
 ### CLS-005 — Score drift monitor
 
-- [ ] Сравнивать 7d/30d score, class и data confidence.
+- [ ] Compare 7d/30d score, class, and data confidence.
 - [ ] Downgrade alerts.
 - [ ] Hard-gate regression → pause new entries.
-- [ ] Open positions не закрывать вне заданной exit policy.
-- **Приёмка:** regression test воспроизводит downgrade и pause.
-- **Коммит:** `feat: monitor copy score drift`.
+- [ ] Do not close open positions outside the specified exit policy.
+- **Acceptance:** the regression test reproduces downgrade and pause.
+- **Commit:** `feat: monitor copy score drift`.
 
 ---
 
-## Фаза 6 — Shadow Mode, Paper и replay
+## Phase 6 — Shadow Mode, Paper, and replay
 
 ### SHD-001 — Event-time replay core
 
-- [ ] Воспроизводить events по slot/block time/observed time.
+- [ ] Replay events by slot/block time/observed time.
 - [ ] Deterministic seeded latency.
-- [ ] Запрет look-ahead/future data.
-- [ ] Сохранять config, data и decoder hashes.
-- **Приёмка:** повтор run даёт byte-identical result; temporal leakage test проходит.
-- **Коммит:** `feat: add deterministic event time replay`.
+- [ ] Ban look-ahead/future data.
+- [ ] Store config, data, and decoder hashes.
+- **Acceptance:** rerunning produces a byte-identical result; the temporal leakage test passes.
+- **Commit:** `feat: add deterministic event time replay`.
 
 ### SHD-002 — Latency model
 
-- [ ] Профили: 0, 100, 250, 500, 1000, 2000, 5000, 30000, 50000 ms.
-- [ ] Разделить ingest, decode, decision, quote, simulation, sign, submit.
-- [ ] Поддержать empirical distribution из production metrics.
-- **Приёмка:** report показывает вклад каждого этапа и fixed-vs-empirical comparison.
-- **Коммит:** `feat: model follower latency`.
+- [ ] Profiles: 0, 100, 250, 500, 1000, 2000, 5000, 30000, 50000 ms.
+- [ ] Separate ingest, decode, decision, quote, simulation, sign, and submit.
+- [ ] Support empirical distributions from production metrics.
+- **Acceptance:** the report shows each stage's contribution and a fixed-vs-empirical comparison.
+- **Commit:** `feat: model follower latency`.
 
 ### SHD-003 — Executable quote/failure model
 
-- [ ] Pool state на момент follower action.
+- [ ] Pool state at the time of the follower action.
 - [ ] Price impact, slippage, base fee, priority/tip, quote expiry, failure.
-- [ ] Leader fill price не использовать как follower fill.
-- [ ] Размер follower позиции влияет на result.
-- **Приёмка:** известный CPMM replay сходится; failed attempts учитываются отдельно.
-- **Коммит:** `feat: simulate executable follower fills`.
+- [ ] Do not use the leader fill price as the follower fill.
+- [ ] Follower position size affects the result.
+- **Acceptance:** a known CPMM replay reconciles; failed attempts are accounted for separately.
+- **Commit:** `feat: simulate executable follower fills`.
 
 ### SHD-004 — Shadow copy runner
 
-- [ ] Sizing и exit policy применять к source actions.
-- [ ] Hard-blocked actions пропускать с reason.
+- [ ] Apply sizing and exit policy to source actions.
+- [ ] Skip hard-blocked actions with a reason.
 - [ ] Virtual lots, capital reservation, competing mirrors.
 - [ ] Leader/theoretical/executable follower reports.
-- **Приёмка:** trade-by-trade diff; runner не зависит от signer.
-- **Коммит:** `feat: add shadow copy runner`.
+- **Acceptance:** trade-by-trade diff; the runner does not depend on the signer.
+- **Commit:** `feat: add shadow copy runner`.
 
 ### SHD-005 — Live Paper portfolio
 
-- [ ] Обрабатывать live source events виртуально.
-- [ ] Использовать live quotes без подписи.
-- [ ] Тот же risk engine, lots и exits, что Live.
-- [ ] Сохранять missed/failed simulated orders.
-- **Приёмка:** Paper и Live используют один `OrderIntent` contract и различаются execution adapter.
-- **Коммит:** `feat: add live paper portfolio`.
+- [ ] Process live source events virtually.
+- [ ] Use live quotes without signing.
+- [ ] The same risk engine, lots, and exits as Live.
+- [ ] Store missed/failed simulated orders.
+- **Acceptance:** Paper and Live use one `OrderIntent` contract and differ in execution adapter.
+- **Commit:** `feat: add live paper portfolio`.
 
-### SHD-006 — Shadow API и report
+### SHD-006 — Shadow API and report
 
 - [ ] Create/start/stop/resume/compare runs.
 - [ ] Progress streaming.
 - [ ] Equity, drawdown, trade diff, latency sensitivity, costs.
-- [ ] Нельзя тихо переиспользовать config hash с другим data hash.
-- **Приёмка:** run возобновляется после restart.
-- **Коммит:** `feat: expose shadow runs`.
+- [ ] A config hash must not be silently reused with a different data hash.
+- **Acceptance:** a run resumes after restart.
+- **Commit:** `feat: expose shadow runs`.
 
 ### SHD-007 — VENTI benchmark
 
-- [ ] Создать fixture для `FRpTyMBDavKsdYN1FQZcEeZ2iwGvHaZKFSkvr5izpump`.
-- [ ] Зафиксировать доступный range transactions/pool data и checksums.
-- [ ] Восстановить spike window, swaps, liquidity и holder changes в пределах on-chain данных.
-- [ ] Прогнать latency 0–50000 ms и несколько position sizes.
-- [ ] Не принимать цифры статьи как ground truth; ground truth — on-chain fixture.
-- **Приёмка:** отчёт показывает предел воспроизводимости по latency/size и явно маркирует missing history.
-- **Коммит:** `test: add venti replay benchmark`.
+- [ ] Create a fixture for `FRpTyMBDavKsdYN1FQZcEeZ2iwGvHaZKFSkvr5izpump`.
+- [ ] Record the available range of transactions/pool data and checksums.
+- [ ] Reconstruct the spike window, swaps, liquidity, and holder changes within the available on-chain data.
+- [ ] Run latency 0–50000 ms and several position sizes.
+- [ ] Do not accept the article's figures as ground truth; the on-chain fixture is ground truth.
+- **Acceptance:** the report shows the reproducibility limit by latency/size and explicitly marks missing history.
+- **Commit:** `test: add venti replay benchmark`.
 
 ### SHD-008 — Promotion gates Paper → Live
 
-- [ ] Минимум 30 Paper closed positions и 14 дней наблюдения.
+- [ ] At least 30 Paper closed positions and 14 days of observation.
 - [ ] Copy Score ≥70, decoder coverage ≥98%, no hard blocks.
 - [ ] Positive executable expectancy after costs, Paper DD ≤10%.
-- [ ] Local approval record с config hash и expiry 24h.
-- **Приёмка:** critical config change инвалидирует approval; backend не может обойти gate.
-- **Коммит:** `feat: gate promotion from paper to live`.
+- [ ] Local approval record with config hash and 24h expiry.
+- **Acceptance:** a critical config change invalidates approval; the backend cannot bypass the gate.
+- **Commit:** `feat: gate promotion from paper to live`.
 
 ---
 
-## Фаза 7 — Портфели, lots и allocator
+## Phase 7 — Portfolios, lots, and allocator
 
 ### PRT-001 — Portfolio domain model
 
 - [ ] Types: Manual, Copy, Native, Research, Paper.
 - [ ] Lot ownership, reserved/pending/filled/released capital.
 - [ ] Atomic units only.
-- [ ] Каждый fill относится к portfolio и lot.
-- **Приёмка:** обычный strategy API не может продать lot другой strategy.
-- **Коммит:** `feat: model isolated portfolios`.
+- [ ] Each fill belongs to a portfolio and lot.
+- **Acceptance:** the regular strategy API cannot sell another strategy's lot.
+- **Commit:** `feat: model isolated portfolios`.
 
 ### PRT-002 — Capital allocator
 
 - [ ] Strategy weight, max capital, per-token overlap cap, cash buffer.
-- [ ] Reservation до quote/sign.
+- [ ] Reservation before quote/sign.
 - [ ] Conflict resolution: priority + earliest approved intent.
-- [ ] Release на timeout/failure.
-- **Приёмка:** два зеркала не тратят один balance; overlap reject объясним.
-- **Коммит:** `feat: allocate capital across strategies`.
+- [ ] Release on timeout/failure.
+- **Acceptance:** two mirrors do not spend the same balance; overlap rejection is explainable.
+- **Commit:** `feat: allocate capital across strategies`.
 
-### PRT-003 — Virtual subpositions и net exposure
+### PRT-003 — Virtual subpositions and net exposure
 
-- [ ] Один on-chain balance сопоставлять нескольким strategy lots.
-- [ ] Gross и net exposure.
-- [ ] Partial fills распределять детерминированно.
-- [ ] Negative lot balance запрещён.
-- **Приёмка:** сумма lots = reconciled balance ± dust; Manual lot защищён от Copy exit.
-- **Коммит:** `feat: track virtual strategy subpositions`.
+- [ ] Map one on-chain balance to multiple strategy lots.
+- [ ] Gross and net exposure.
+- [ ] Allocate partial fills deterministically.
+- [ ] Negative lot balances are forbidden.
+- **Acceptance:** the sum of lots = reconciled balance ± dust; the Manual lot is protected from Copy exits.
+- **Commit:** `feat: track virtual strategy subpositions`.
 
 ### PRT-004 — Portfolio reconciliation
 
 - [ ] Expected ledger vs on-chain balance.
-- [ ] Классифицировать external/manual transfers.
+- [ ] Classify external/manual transfers.
 - [ ] Unexplained mismatch → pause new entries.
-- [ ] Repair через explicit adjustment event, не переписывание history.
-- **Приёмка:** mismatch обнаруживается за один cycle и имеет evidence.
-- **Коммит:** `feat: reconcile portfolio balances`.
+- [ ] Repair through an explicit adjustment event, not by rewriting history.
+- **Acceptance:** mismatch is detected within one cycle and has evidence.
+- **Commit:** `feat: reconcile portfolio balances`.
 
 ### PRT-005 — Scoped emergency close
 
-- [ ] Preview по portfolio/strategy/mint/ownership group.
-- [ ] Quote/capacity check и staged exit при плохой depth.
-- [ ] Отдельное подтверждение.
-- [ ] Global indiscriminate sell-all не использовать.
-- **Приёмка:** preview показывает impact и affected lots; excluded groups не затрагиваются.
-- **Коммит:** `feat: plan scoped emergency exits`.
+- [ ] Preview by portfolio/strategy/mint/ownership group.
+- [ ] Quote/capacity check and staged exit when depth is poor.
+- [ ] Separate confirmation.
+- [ ] Do not use a global indiscriminate sell-all.
+- **Acceptance:** preview shows impact and affected lots; excluded groups are unaffected.
+- **Commit:** `feat: plan scoped emergency exits`.
 
 ---
 
-## Фаза 8 — Risk engine, execution router и signer
+## Phase 8 — Risk engine, execution router, and signer
 
 ### RSK-001 — Pre-trade risk
 
-- [ ] Проверки freshness, Token Risk, Copy Score/class, capital, position, impact, slippage, fees, drawdown.
+- [ ] Checks for freshness, Token Risk, Copy Score/class, capital, position, impact, slippage, fees, and drawdown.
 - [ ] Limits snapshot hash.
 - [ ] Paper/Live profiles.
-- [ ] Каждый reject имеет stable reason.
-- **Приёмка:** ни один Live intent не минует risk decision.
-- **Коммит:** `feat: enforce pre trade risk limits`.
+- [ ] Every rejection has a stable reason.
+- **Acceptance:** no Live intent bypasses a risk decision.
+- **Commit:** `feat: enforce pre trade risk limits`.
 
 ### RSK-002 — Continuous/post-trade risk
 
 - [ ] Daily loss, rolling DD, score downgrade, token risk jump, infra health, reconciliation mismatch.
-- [ ] `PAUSED` запрещает entries, но допускает exits.
-- [ ] Manual и automatic kill switch sources.
-- **Приёмка:** critical event переводит систему в exit-only за один control cycle.
-- **Коммит:** `feat: add continuous risk controls`.
+- [ ] `PAUSED` forbids entries but permits exits.
+- [ ] Manual and automatic kill switch sources.
+- **Acceptance:** a critical event moves the system to exit-only within one control cycle.
+- **Commit:** `feat: add continuous risk controls`.
 
 ### EXE-001 — Execution adapter contract
 
 - [ ] `quote`, `build`, `simulate`, `submit`, `status`.
 - [ ] Managed/custom execution capabilities.
 - [ ] Typed quote: route, impact, costs, expiry.
-- [ ] Adapter не получает key.
-- **Приёмка:** Mock/Paper/Jupiter/Raydium удовлетворяют одному contract.
-- **Коммит:** `feat: define execution adapter contract`.
+- [ ] The adapter does not receive a key.
+- **Acceptance:** Mock/Paper/Jupiter/Raydium satisfy one contract.
+- **Commit:** `feat: define execution adapter contract`.
 
 ### EXE-002 — Jupiter Swap V2 build
 
-- [ ] Получить build response и route plan.
-- [ ] Проверить mints, amount, threshold, route labels, compute/tip instructions.
-- [ ] Сравнить impact с local model.
-- [ ] Валидировать transaction до signer.
-- **Приёмка:** изменённый/unexpected response отклоняется; API key redacted.
-- **Коммит:** `feat: integrate jupiter swap v2 build`.
+- [ ] Obtain the build response and route plan.
+- [ ] Check mints, amount, threshold, route labels, and compute/tip instructions.
+- [ ] Compare impact against the local model.
+- [ ] Validate the transaction before the signer.
+- **Acceptance:** a modified/unexpected response is rejected; the API key is redacted.
+- **Commit:** `feat: integrate jupiter swap v2 build`.
 
 ### EXE-003 — Jupiter submit path
 
-- [ ] Отправлять signed transaction с соблюдением size/tip policy.
+- [ ] Submit the signed transaction in accordance with size/tip policy.
 - [ ] Submission latency/status.
-- [ ] Idempotent resubmit той же signature.
-- **Приёмка:** retry не создаёт второй intent/fill.
-- **Коммит:** `feat: add jupiter transaction submission`.
+- [ ] Idempotent resubmit of the same signature.
+- **Acceptance:** retry does not create a second intent/fill.
+- **Commit:** `feat: add jupiter transaction submission`.
 
 ### EXE-004 — Direct Raydium adapter
 
-- [ ] Quote/build для CPMM/CLMM/AMM v4.
-- [ ] Trade API для простого route; SDK/local state для pinned-pool research.
+- [ ] Quote/build for CPMM/CLMM/AMM v4.
+- [ ] Trade API for a simple route; SDK/local state for pinned-pool research.
 - [ ] Program/pool allowlist.
-- **Приёмка:** можно сравнить direct route с Jupiter; unknown program blocked.
-- **Коммит:** `feat: add raydium execution adapter`.
+- **Acceptance:** a direct route can be compared with Jupiter; unknown programs are blocked.
+- **Commit:** `feat: add raydium execution adapter`.
 
 ### EXE-005 — Route selector
 
-- [ ] Сравнивать net out after impact/fees/tip, reliability и latency.
+- [ ] Compare net out after impact/fees/tip, reliability, and latency.
 - [ ] Allow/deny venues.
-- [ ] MVP не split-ит order между independent transactions.
-- **Приёмка:** выбор объясним; лучший gross route может быть отклонён в пользу лучшего net/reliable.
-- **Коммит:** `feat: select execution routes by net value`.
+- [ ] The MVP does not split an order across independent transactions.
+- **Acceptance:** selection is explainable; the best gross route may be rejected in favor of a better net/reliable route.
+- **Commit:** `feat: select execution routes by net value`.
 
 ### EXE-006 — Simulation gate
 
-- [ ] Симулировать готовую transaction перед send.
-- [ ] Проверить logs, compute, account diffs, output threshold.
-- [ ] Повторный risk check после simulation.
+- [ ] Simulate the completed transaction before sending.
+- [ ] Check logs, compute, account diffs, and output threshold.
+- [ ] Repeat the risk check after simulation.
 - [ ] Mismatch → block.
-- **Приёмка:** Live submit без fresh successful simulation невозможен в MVP.
-- **Коммит:** `feat: require transaction simulation`.
+- **Acceptance:** Live submit without a fresh successful simulation is impossible in the MVP.
+- **Commit:** `feat: require transaction simulation`.
 
 ### SIGN-001 — Signer protocol
 
-- [ ] Unix socket или mTLS loopback.
+- [ ] Unix socket or mTLS loopback.
 - [ ] Request: tx bytes, intent/risk/config hashes, expiry.
 - [ ] Response: signature + signer audit ID.
-- [ ] Arbitrary message signing не поддерживать.
-- **Приёмка:** request без valid risk hash или с истёкшим expiry отклоняется.
-- **Коммит:** `feat: define isolated signer protocol`.
+- [ ] Do not support arbitrary message signing.
+- **Acceptance:** a request without a valid risk hash or with an elapsed expiry is rejected.
+- **Commit:** `feat: define isolated signer protocol`.
 
 ### SIGN-002 — Encrypted key registry
 
-- [ ] Encrypted key material или KMS/OS reference.
+- [ ] Encrypted key material or a KMS/OS reference.
 - [ ] Manual session unlock.
 - [ ] Zeroize sensitive buffers.
-- [ ] Seed/private key не экспортируется API.
-- **Приёмка:** disk scan не находит plaintext; после lock signer не подписывает.
-- **Коммит:** `feat: add encrypted signer key registry`.
+- [ ] Seed/private key is not exported through the API.
+- **Acceptance:** a disk scan finds no plaintext; after locking, the signer does not sign.
+- **Commit:** `feat: add encrypted signer key registry`.
 
 ### SIGN-003 — Signer policy engine
 
 - [ ] Allowlist programs, fee payer, source accounts, mints, max lamports.
-- [ ] Проверить blockhash/expiry, instruction count, compute/tip caps.
-- [ ] Transaction должен совпадать с approved intent.
-- [ ] Unexpected transfer/authority changes запрещены.
-- **Приёмка:** mutation corpus с лишней instruction полностью rejected.
-- **Коммит:** `feat: enforce signer transaction policy`.
+- [ ] Check blockhash/expiry, instruction count, and compute/tip caps.
+- [ ] The transaction must match the approved intent.
+- [ ] Unexpected transfers/authority changes are forbidden.
+- **Acceptance:** the entire mutation corpus with extra instructions is rejected.
+- **Commit:** `feat: enforce signer transaction policy`.
 
 ### EXE-007 — Priority/tip policy
 
-- [ ] Cap по congestion, notional и expected edge.
-- [ ] Max fee share из risk config.
+- [ ] Cap by congestion, notional, and expected edge.
+- [ ] Max fee share from risk config.
 - [ ] Estimated vs actual costs.
-- **Приёмка:** tiny trade с чрезмерным all-in fee rejected до sign.
-- **Коммит:** `feat: calculate bounded priority fees`.
+- **Acceptance:** a tiny trade with an excessive all-in fee is rejected before signing.
+- **Commit:** `feat: calculate bounded priority fees`.
 
 ### EXE-008 — Jito broadcast adapter
 
-- [ ] Fast send/bundle transport только для allowlisted технических intents.
+- [ ] Fast send/bundle transport only for allowlisted technical intents.
 - [ ] Standard RPC fallback.
 - [ ] Landed/rejected/tip metrics.
-- [ ] Не применять для скрытой координации multiwallet market actions.
-- **Приёмка:** adapter отключается config-ом; fallback не создаёт duplicate fill.
-- **Коммит:** `feat: add policy constrained jito broadcast`.
+- [ ] Do not use for covert coordination of multiwallet market actions.
+- **Acceptance:** the adapter can be disabled through config; fallback does not create duplicate fills.
+- **Commit:** `feat: add policy constrained jito broadcast`.
 
 ### EXE-009 — Retry policy
 
-- [ ] Различать transport error, expiry, quote invalidation, program error.
-- [ ] Same signed tx можно resubmit; новая tx требует quote/sim/risk recheck.
+- [ ] Distinguish transport error, expiry, quote invalidation, and program error.
+- [ ] The same signed tx can be resubmitted; a new tx requires quote/sim/risk recheck.
 - [ ] Max attempts/deadline.
-- **Приёмка:** program error не вызывает blind retry; idempotency сохраняется.
-- **Коммит:** `feat: add idempotent execution retries`.
+- **Acceptance:** a program error does not trigger blind retry; idempotency is preserved.
+- **Commit:** `feat: add idempotent execution retries`.
 
 ### EXE-010 — Confirmation/reconciliation worker
 
 - [ ] Processed/confirmed/finalized tracking.
-- [ ] Actual balances, fees, fills из chain meta.
-- [ ] Late landing после timeout.
+- [ ] Actual balances, fees, and fills from chain meta.
+- [ ] Late landing after timeout.
 - [ ] Portfolio projection update.
-- **Приёмка:** поздний landing не исполняется повторно; final amount не берётся из quote.
-- **Коммит:** `feat: reconcile on chain executions`.
+- **Acceptance:** late landing does not trigger re-execution; the final amount is not taken from the quote.
+- **Commit:** `feat: reconcile on chain executions`.
 
 ### EXE-011 — Lot-aware Smart Exit
 
-- [ ] Все policies раздела 8.3.
+- [ ] All policies from section 8.3.
 - [ ] State per lot/strategy.
 - [ ] Precedence: emergency > risk escalation > stop > source exit > TP/trailing.
-- [ ] Re-entry не использует старые triggers.
-- **Приёмка:** multiple buys не создают множественные неконтролируемые продажи общей позиции.
-- **Коммит:** `feat: execute lot aware exit policies`.
+- [ ] Re-entry does not use old triggers.
+- **Acceptance:** multiple buys do not create multiple uncontrolled sales of the aggregate position.
+- **Commit:** `feat: execute lot aware exit policies`.
 
 ### EXE-012 — Independent kill switch
 
 - [ ] Scope: global, portfolio, strategy, venue.
-- [ ] Signer проверяет state независимо от backend.
-- [ ] Manual action требует typed confirmation и local auth.
-- [ ] Exit-only mode поддерживается.
-- **Приёмка:** compromised backend не обходит signer switch; state survives restart.
-- **Коммит:** `feat: add independent kill switch`.
+- [ ] The signer checks the state independently of the backend.
+- [ ] Manual action requires typed confirmation and local auth.
+- [ ] Exit-only mode is supported.
+- **Acceptance:** a compromised backend cannot bypass the signer switch; state survives restart.
+- **Commit:** `feat: add independent kill switch`.
 
 
 ---
 
-## Фаза 9 — Private Web UI и UX
+## Phase 9 — Private Web UI and UX
 
 ### UI-001 — Private authenticated shell
 
 - [ ] VPN-only access + local authentication.
 - [ ] Short-lived sessions, secure cookies, CSRF protection.
-- [ ] Public registration отсутствует.
-- [ ] Mode badge Observe/Shadow/Paper/Live на каждой странице.
-- [ ] Live mutations требуют step-up auth.
-- **Приёмка:** без VPN/auth UI недоступен; session expiry проверен E2E.
-- **Коммит:** `feat: add private authenticated ui shell`.
+- [ ] Public registration is absent.
+- [ ] An Observe/Shadow/Paper/Live mode badge on every page.
+- [ ] Live mutations require step-up auth.
+- **Acceptance:** UI is inaccessible without VPN/auth; session expiry is tested E2E.
+- **Commit:** `feat: add private authenticated ui shell`.
 
 ### UI-002 — Dashboard
 
 - [ ] NAV, net/gross PnL, exposure, active strategies, risk state.
 - [ ] Provider health, decoder coverage, signer status, alerts.
-- [ ] Paper и Live визуально разделены.
-- [ ] Каждая карточка имеет timestamp/source/stale state.
-- **Приёмка:** нельзя спутать Paper результат с Live.
-- **Коммит:** `feat: add operational dashboard`.
+- [ ] Paper and Live are visually separated.
+- [ ] Every card has a timestamp/source/stale state.
+- **Acceptance:** a Paper result cannot be confused with Live.
+- **Commit:** `feat: add operational dashboard`.
 
 ### UI-003 — Token page
 
 - [ ] Chart, pools, liquidity/depth, holders, clusters, creator/funder graph.
 - [ ] Authorities, Token Risk Score, evidence, live trades.
-- [ ] Raw top holders и cluster-adjusted concentration рядом.
-- [ ] Hard blocks до trade controls.
-- [ ] Primary CTA — Observe/Shadow, не Live.
-- **Приёмка:** любой risk flag раскрывается до фактов/transactions.
-- **Коммит:** `feat: add token intelligence page`.
+- [ ] Raw top holders and cluster-adjusted concentration side by side.
+- [ ] Hard blocks before trade controls.
+- [ ] Primary CTA is Observe/Shadow, not Live.
+- **Acceptance:** every risk flag can be traced to facts/transactions.
+- **Commit:** `feat: add token intelligence page`.
 
 ### UI-004 — Wallet page
 
 - [ ] Wallet DNA, class, Copy Score, PnL windows, positions, timeline, venue mix, coverage.
 - [ ] Leader vs executable follower replay.
-- [ ] `Copy` disabled при NON_COPYABLE; Observe доступен.
-- [ ] Score components и hard gates объяснимы.
-- **Приёмка:** user видит не только PnL, но и воспроизводимость.
-- **Коммит:** `feat: add wallet intelligence page`.
+- [ ] `Copy` is disabled when NON_COPYABLE; Observe remains available.
+- [ ] Score components and hard gates are explainable.
+- **Acceptance:** the user sees reproducibility as well as PnL.
+- **Commit:** `feat: add wallet intelligence page`.
 
 ### UI-005 — Wallet Radar
 
-- [ ] До 10 tokens.
+- [ ] Up to 10 tokens.
 - [ ] Earliest, highest profit, most bought, shared holdings.
 - [ ] Export to watchlist/Shadow.
-- [ ] Configurable columns и formula disclosure.
-- **Приёмка:** direct Live action отсутствует.
-- **Коммит:** `feat: add wallet radar ui`.
+- [ ] Configurable columns and formula disclosure.
+- **Acceptance:** direct Live action is absent.
+- **Commit:** `feat: add wallet radar ui`.
 
 ### UI-006 — Shadow wizard/report
 
 - [ ] Source → period → sizing → latency → exits → risk → run.
-- [ ] До запуска показать data coverage и expected runtime volume.
+- [ ] Show data coverage and expected runtime volume before launch.
 - [ ] Report: curves, drawdown, missed trades, latency sensitivity, all-in costs.
-- [ ] Config clone создаёт новую immutable version.
-- **Приёмка:** coverage warning нельзя пропустить молча.
-- **Коммит:** `feat: add shadow workflow`.
+- [ ] A config clone creates a new immutable version.
+- **Acceptance:** the coverage warning cannot be silently skipped.
+- **Commit:** `feat: add shadow workflow`.
 
-### UI-007 — Strategy builder и lifecycle
+### UI-007 — Strategy builder and lifecycle
 
 - [ ] Observe/Shadow/Paper/Live lifecycle.
 - [ ] Sizing, filters, allocation, exits, cooldown, risk.
-- [ ] Promotion gates и evidence.
-- [ ] Live activation — двухэтапная; critical edit сбрасывает approval.
-- **Приёмка:** backend и UI оба запрещают преждевременный Live.
-- **Коммит:** `feat: add gated strategy builder`.
+- [ ] Promotion gates and evidence.
+- [ ] Live activation uses two steps; a critical edit resets approval.
+- **Acceptance:** both backend and UI forbid premature Live.
+- **Commit:** `feat: add gated strategy builder`.
 
 ### UI-008 — Execution timeline/latency
 
 - [ ] Detected→decoded→signal→quote→simulation→sign→submit→land→confirm.
 - [ ] Provider/broadcast comparison.
-- [ ] Quote/sim/fill amounts и all-in costs.
-- [ ] Failure code, retry и bottleneck.
-- **Приёмка:** raw signed tx и secrets не отображаются.
-- **Коммит:** `feat: add execution latency timeline`.
+- [ ] Quote/sim/fill amounts and all-in costs.
+- [ ] Failure code, retry, and bottleneck.
+- **Acceptance:** raw signed tx and secrets are not displayed.
+- **Commit:** `feat: add execution latency timeline`.
 
-### UI-009 — Portfolio и lot ownership
+### UI-009 — Portfolio and lot ownership
 
 - [ ] On-chain balance, virtual lots, ownership, reservations, exits.
 - [ ] Tabs Manual/Copy/Native/Research/Paper.
 - [ ] Scoped emergency close preview.
 - [ ] Reconciliation state.
-- **Приёмка:** affected lots видны до подтверждения.
-- **Коммит:** `feat: add isolated portfolio ui`.
+- **Acceptance:** affected lots are visible before confirmation.
+- **Commit:** `feat: add isolated portfolio ui`.
 
 ### UI-010 — Settings
 
 - [ ] Providers, program registry, risk config, signer status.
-- [ ] UI редактирует только non-secret config.
-- [ ] Secret вводится через отдельный signer flow и никогда не возвращается.
+- [ ] UI edits only non-secret config.
+- [ ] A secret is entered through a separate signer flow and never returned.
 - [ ] Config diff + audit comment + reload/restart indication.
-- **Приёмка:** API schema не содержит secret fields.
-- **Коммит:** `feat: add secure settings ui`.
+- **Acceptance:** the API schema contains no secret fields.
+- **Commit:** `feat: add secure settings ui`.
 
 ### UI-011 — Alerts center
 
 - [ ] Severity/source/status filters.
 - [ ] Ack, mute with expiry, evidence links.
-- [ ] Critical risk alerts нельзя permanently mute.
-- **Приёмка:** mute/ack audit-logged и survives restart.
-- **Коммит:** `feat: add alert center`.
+- [ ] Critical risk alerts cannot be permanently muted.
+- **Acceptance:** mute/ack is audit-logged and survives restart.
+- **Commit:** `feat: add alert center`.
 
 ### UI-012 — Explainability glossary
 
 - [ ] Copy Score, confidence, route depth, impact, slippage, PnL, holder cluster.
-- [ ] Tooltips с versioned docs.
-- [ ] Формулы и значения threshold.
-- **Приёмка:** каждый пользовательский term имеет определение и version.
-- **Коммит:** `docs: add in product metric glossary`.
+- [ ] Tooltips with versioned docs.
+- [ ] Formulas and threshold values.
+- **Acceptance:** every user-facing term has a definition and version.
+- **Commit:** `docs: add in product metric glossary`.
 
 ---
 
-## Фаза 10 — Observability и SLO
+## Phase 10 — Observability and SLO
 
 ### OBS-001 — Structured tracing
 
-- [ ] JSON logs с correlation/intent/execution IDs.
-- [ ] Redact auth, keys, signed tx и endpoint credentials.
-- [ ] Audit events отдельно от debug logs.
-- [ ] Trace одной сделки от source event до reconciliation.
-- **Приёмка:** canary secret отсутствует в captured logs.
-- **Коммит:** `feat: add structured redacted tracing`.
+- [ ] JSON logs with correlation/intent/execution IDs.
+- [ ] Redact auth, keys, signed tx, and endpoint credentials.
+- [ ] Audit events separately from debug logs.
+- [ ] Trace one trade from source event to reconciliation.
+- **Acceptance:** the canary secret is absent from captured logs.
+- **Commit:** `feat: add structured redacted tracing`.
 
 ### OBS-002 — Latency metrics
 
 - [ ] First-seen lag, decode, classify, quote, simulate, sign, submit, land, confirm.
-- [ ] p50/p95/p99 по provider/path.
-- [ ] Не использовать wallet/mint как high-cardinality Prometheus labels.
-- [ ] Detailed samples хранить в DB.
-- **Приёмка:** dashboard показывает bottleneck каждой execution attempt.
-- **Коммит:** `feat: measure pipeline latency`.
+- [ ] p50/p95/p99 by provider/path.
+- [ ] Do not use wallet/mint as high-cardinality Prometheus labels.
+- [ ] Store detailed samples in the DB.
+- **Acceptance:** the dashboard shows the bottleneck of each execution attempt.
+- **Commit:** `feat: measure pipeline latency`.
 
 ### OBS-003 — Business/risk metrics
 
 - [ ] Decoder coverage, Copy Score distribution, reject reasons.
 - [ ] Shadow/Paper/Live divergence.
 - [ ] PnL after costs, reconciliation mismatch, risk state.
-- [ ] Paper/Live labels разделены.
-- **Приёмка:** gross/net и Paper/Live невозможно смешать в запросе без явного dimension.
-- **Коммит:** `feat: expose trading and risk metrics`.
+- [ ] Paper/Live labels are separated.
+- **Acceptance:** gross/net and Paper/Live cannot be mixed in a query without an explicit dimension.
+- **Commit:** `feat: expose trading and risk metrics`.
 
 ### OBS-004 — Provider health scoring
 
 - [ ] Latency, error rate, stale slots, disagreements, rate limits.
-- [ ] Failover с hysteresis.
-- [ ] Health snapshot доступен execution router.
-- **Приёмка:** flapping provider не вызывает постоянные переключения.
-- **Коммит:** `feat: score provider health`.
+- [ ] Failover with hysteresis.
+- [ ] The health snapshot is available to the execution router.
+- **Acceptance:** a flapping provider does not cause constant switching.
+- **Commit:** `feat: score provider health`.
 
 ### OBS-005 — Operational alerts/runbooks
 
 - [ ] Ingest gap, decoder drop, DB lag, signer unavailable, execution failure, mismatch, kill switch.
-- [ ] Severity, owner action и runbook для каждого alert.
-- [ ] Synthetic alert test до notification channel.
-- **Приёмка:** critical alert без runbook отсутствует.
-- **Коммит:** `ops: add operational alerting`.
+- [ ] Severity, owner action, and runbook for every alert.
+- [ ] Synthetic alert test through to the notification channel.
+- **Acceptance:** there is no critical alert without a runbook.
+- **Commit:** `ops: add operational alerting`.
 
 ### OBS-006 — Tamper-evident audit log
 
 - [ ] Config changes, approvals, signer events, Live mode, kill switch, adjustments.
-- [ ] Hash chain и daily signed digest.
+- [ ] Hash chain and daily signed digest.
 - [ ] Export/verify CLI.
-- **Приёмка:** изменение старой записи ломает verification.
-- **Коммит:** `feat: add tamper evident audit log`.
+- **Acceptance:** modifying an old record breaks verification.
+- **Commit:** `feat: add tamper evident audit log`.
 
 ---
 
-## Фаза 11 — Security hardening и supply chain
+## Phase 11 — Security hardening and supply chain
 
 ### SEC-001 — Threat model
 
 - [ ] Assets: keys, signed tx, portfolio state, config, data integrity.
 - [ ] Threats: host/UI/dependency compromise, malicious RPC/API, replay, log leakage, backup theft.
-- [ ] Prevention, detection, recovery для каждого threat.
-- [ ] Отдельный сценарий compromised backend при здоровом signer.
-- **Приёмка:** все trust boundaries из architecture покрыты.
-- **Коммит:** `docs: add system threat model`.
+- [ ] Prevention, detection, and recovery for every threat.
+- [ ] A separate scenario for a compromised backend with a healthy signer.
+- **Acceptance:** all trust boundaries from the architecture are covered.
+- **Commit:** `docs: add system threat model`.
 
 ### SEC-002 — Plaintext secret ban
 
 - [ ] Pre-commit/CI secret scan.
-- [ ] Git history и container layers.
+- [ ] Git history and container layers.
 - [ ] Private key, seed, auth query patterns.
 - [ ] Documented false-positive process.
-- **Приёмка:** canary secret блокирует commit/CI; release image чистый.
-- **Коммит:** `security: enforce secret scanning`.
+- **Acceptance:** a canary secret blocks commit/CI; the release image is clean.
+- **Commit:** `security: enforce secret scanning`.
 
 ### SEC-003 — Signed/reproducible builds
 
 - [ ] Reproducible release, SHA-256, SBOM, signature/provenance.
 - [ ] Verify before deployment/update.
-- [ ] Никаких рекомендаций отключать AV/quarantine.
-- **Приёмка:** tampered binary не запускается deploy script.
-- **Коммит:** `security: sign release artifacts`.
+- [ ] No recommendations to disable AV/quarantine.
+- **Acceptance:** the deploy script does not launch a tampered binary.
+- **Commit:** `security: sign release artifacts`.
 
 ### SEC-004 — Dependency allowlist/pinning
 
 - [ ] Pin critical Solana/crypto dependencies.
-- [ ] Git dependency только с commit hash.
-- [ ] Review build scripts и transitive changes.
-- [ ] Critical update проходит full replay corpus.
-- **Приёмка:** unpinned dependency ломает CI.
-- **Коммит:** `security: pin and audit dependencies`.
+- [ ] Git dependencies only with a commit hash.
+- [ ] Review build scripts and transitive changes.
+- [ ] A critical update passes the full replay corpus.
+- **Acceptance:** an unpinned dependency fails CI.
+- **Commit:** `security: pin and audit dependencies`.
 
 ### SEC-005 — Fuzz API/transaction validation
 
 - [ ] JSON schemas, pubkeys, amounts, route plans, serialized tx.
 - [ ] Overflow, account substitution, instruction injection, payload size.
 - [ ] Signer mutation corpus.
-- **Приёмка:** нет panic/overflow; mutated tx rejected.
-- **Коммит:** `security: fuzz api and transaction validation`.
+- **Acceptance:** no panic/overflow; mutated tx is rejected.
+- **Commit:** `security: fuzz api and transaction validation`.
 
 ### SEC-006 — Encrypted backup/restore
 
-- [ ] DB, raw archive, configs, audit digest, encrypted key store раздельно.
+- [ ] Separate DB, raw archive, configs, audit digest, and encrypted key store.
 - [ ] Encrypt before leaving host, checksums, retention.
-- [ ] Restore в isolated environment каждый release.
-- [ ] Signer после restore остаётся locked.
-- **Приёмка:** Paper/read-only system восстанавливается с нуля.
-- **Коммит:** `ops: add encrypted backup and restore`.
+- [ ] Restore in an isolated environment for every release.
+- [ ] The signer remains locked after restore.
+- **Acceptance:** the Paper/read-only system can be restored from scratch.
+- **Commit:** `ops: add encrypted backup and restore`.
 
 ### SEC-007 — Host hardening
 
 - [ ] Firewall default deny, SSH keys only.
-- [ ] Non-root services, read-only FS где возможно.
-- [ ] Signer отдельный Unix user и restrictive socket permissions.
-- [ ] Security updates с controlled restart.
-- **Приёмка:** внешний scan видит только разрешённые VPN/SSH endpoints; backend не читает signer store.
-- **Коммит:** `security: harden deployment host`.
+- [ ] Non-root services, read-only FS where possible.
+- [ ] A separate Unix user for the signer and restrictive socket permissions.
+- [ ] Security updates with controlled restart.
+- **Acceptance:** an external scan sees only permitted VPN/SSH endpoints; the backend cannot read the signer store.
+- **Commit:** `security: harden deployment host`.
 
 ### SEC-008 — Incident response
 
 - [ ] Key suspicion, backend compromise, malicious dependency, RPC corruption, accounting mismatch.
 - [ ] Kill switch, isolation, rotation, snapshot, evidence, clean restore.
-- [ ] Criteria для возврата Live.
+- [ ] Criteria for returning to Live.
 - [ ] Fire drill.
-- **Приёмка:** для каждого incident есть действия первых 15 минут.
-- **Коммит:** `docs: add incident response runbook`.
+- **Acceptance:** each incident has actions for the first 15 minutes.
+- **Commit:** `docs: add incident response runbook`.
 
 ---
 
-## Фаза 12 — Tests, performance и rollout
+## Phase 12 — Tests, performance, and rollout
 
 ### TST-001 — Decoder golden corpus
 
-- [ ] Минимум 50 tx на каждый P0 decoder и 20 unknown/failure cases.
-- [ ] Expected normalized outputs и checksums.
-- [ ] Каждый production decoder bug добавляет regression fixture.
-- **Приёмка:** P0 watched-volume coverage ≥98%.
-- **Коммит:** `test: build decoder golden corpus`.
+- [ ] At least 50 tx per P0 decoder and 20 unknown/failure cases.
+- [ ] Expected normalized outputs and checksums.
+- [ ] Every production decoder bug adds a regression fixture.
+- **Acceptance:** P0 watched-volume coverage ≥98%.
+- **Commit:** `test: build decoder golden corpus`.
 
 ### TST-002 — Strategy corpus
 
-- [ ] Разметить low-frequency, swing, scalper, HFT, arb, LP, suspicious, unknown.
+- [ ] Label low-frequency, swing, scalper, HFT, arb, LP, suspicious, and unknown.
 - [ ] Evidence period/source.
-- [ ] Confusion report в CI.
-- **Приёмка:** HFT/arb false-copyable rate = 0.
-- **Коммит:** `test: add strategy classification corpus`.
+- [ ] Confusion report in CI.
+- **Acceptance:** HFT/arb false-copyable rate = 0.
+- **Commit:** `test: add strategy classification corpus`.
 
 ### TST-003 — Accounting invariants
 
@@ -1861,176 +1861,176 @@ RESEARCH
 - [ ] `sum lots = controlled balance ± dust`.
 - [ ] One intent cannot create duplicate fill.
 - [ ] Randomized crash/restart sequences.
-- **Приёмка:** 10k randomized event sequences без invariant violation.
-- **Коммит:** `test: verify portfolio accounting invariants`.
+- **Acceptance:** 10k randomized event sequences without an invariant violation.
+- **Commit:** `test: verify portfolio accounting invariants`.
 
 ### TST-004 — Paper soak
 
-- [ ] Минимум 7 суток без required restart.
-- [ ] ≥100 wallets и ≥500 tokens.
-- [ ] Одновременный historical backfill.
+- [ ] At least 7 days without a required restart.
+- [ ] ≥100 wallets and ≥500 tokens.
+- [ ] Concurrent historical backfill.
 - [ ] Latency, memory, DB growth, gaps, mismatches.
-- **Приёмка:** data loss/mismatch = 0; memory growth стабилизируется; SLO ≥99% времени.
-- **Коммит:** `test: complete paper mode soak`.
+- **Acceptance:** data loss/mismatch = 0; memory growth stabilizes; SLO met ≥99% of the time.
+- **Commit:** `test: complete paper mode soak`.
 
 ### TST-005 — Ingest/decode load
 
 - [ ] Bursts 1k/5k/10k events/s.
 - [ ] Queue lag, DB write, decode latency, dropped events.
-- [ ] Safe operating envelope и backpressure behavior.
-- **Приёмка:** target 1k events/s без data loss; p95 decode <250 ms на target host.
-- **Коммит:** `perf: benchmark ingest and decode`.
+- [ ] Safe operating envelope and backpressure behavior.
+- **Acceptance:** target 1k events/s without data loss; p95 decode <250 ms on the target host.
+- **Commit:** `perf: benchmark ingest and decode`.
 
 ### TST-006 — Execution pipeline load
 
-- [ ] Mock 10/50/100 intents/s без реальных подписей.
+- [ ] Mock 10/50/100 intents/s without real signatures.
 - [ ] Quote concurrency, simulation queue, signer throughput, idempotency.
-- [ ] Exit intents выше entries по priority.
-- **Приёмка:** saturation приводит к bounded queue/reject, не к потере intent.
-- **Коммит:** `perf: benchmark execution pipeline`.
+- [ ] Exit intents have higher priority than entries.
+- **Acceptance:** saturation leads to a bounded queue/rejection, not intent loss.
+- **Commit:** `perf: benchmark execution pipeline`.
 
 ### DEP-001 — Staging
 
-- [ ] Mainnet read-only, отдельная DB, ключей нет, mode Paper.
+- [ ] Mainnet read-only, separate DB, no keys, Paper mode.
 - [ ] Migration/health automation, VPN-only.
 - [ ] Fresh-host deploy test.
-- **Приёмка:** Live endpoints disabled; staging воспроизводим с чистого host.
-- **Коммит:** `ops: add staging deployment`.
+- **Acceptance:** Live endpoints are disabled; staging is reproducible from a clean host.
+- **Commit:** `ops: add staging deployment`.
 
 ### DEP-002 — Production
 
 - [ ] Pinned images, resource limits, volumes, backup schedule.
 - [ ] Signer locked after reboot.
-- [ ] Durable cursor и maintenance mode.
+- [ ] Durable cursor and maintenance mode.
 - [ ] Rollback rehearsal.
-- **Приёмка:** cold restart восстанавливает ingest/positions; signer не unlock автоматически.
-- **Коммит:** `ops: add production deployment`.
+- **Acceptance:** a cold restart restores ingest/positions; the signer does not unlock automatically.
+- **Commit:** `ops: add production deployment`.
 
 ### DEP-003 — Observe-only production
 
-- [ ] 14 дней live data без Paper/Live intents.
+- [ ] 14 days of live data without Paper/Live intents.
 - [ ] Provider health, gaps, coverage, storage growth.
 - [ ] Manual audit 100 transactions.
-- **Приёмка:** G2 выполнен, unresolved critical data issues отсутствуют.
-- **Коммит:** `ops: complete observe only rollout`.
+- **Acceptance:** G2 is complete; there are no unresolved critical data issues.
+- **Commit:** `ops: complete observe only rollout`.
 
 ### DEP-004 — Paper production
 
-- [ ] 14 дней Paper для 3–5 low-frequency wallets.
-- [ ] Сравнить Shadow, live Paper quote и actual market outcomes.
-- [ ] Calibration только новой config/score version.
-- **Приёмка:** candidate имеет ≥30 closed positions, positive net expectancy и no mismatch.
-- **Коммит:** `ops: complete paper rollout`.
+- [ ] 14 days of Paper for 3–5 low-frequency wallets.
+- [ ] Compare Shadow, live Paper quotes, and actual market outcomes.
+- [ ] Calibration only through a new config/score version.
+- **Acceptance:** the candidate has ≥30 closed positions, positive net expectancy, and no mismatch.
+- **Commit:** `ops: complete paper rollout`.
 
 ### DEP-005 — Limited Live canary
 
-- [ ] Одна strategy, один portfolio, limits раздела 8.1.
-- [ ] Первые 10 entries с manual final approval.
+- [ ] One strategy, one portfolio, limits from section 8.1.
+- [ ] The first 10 entries have manual final approval.
 - [ ] Parallel Paper twin.
-- [ ] Daily review и kill-switch drill.
-- **Приёмка:** 10 trades без policy breach/mismatch; fill deviation в tolerance.
-- **Коммит:** `ops: complete limited live canary`.
+- [ ] Daily review and kill-switch drill.
+- **Acceptance:** 10 trades without policy breach/mismatch; fill deviation within tolerance.
+- **Commit:** `ops: complete limited live canary`.
 
 ### DEP-006 — Bounded automation
 
-- [ ] Убрать per-trade approval, сохранить hard limits.
-- [ ] Не расширять одновременно capital и strategy count.
-- [ ] Ещё 30 closed positions до expansion.
-- **Приёмка:** no critical incident; rollback to Paper tested.
-- **Коммит:** `ops: enable bounded live automation`.
+- [ ] Remove per-trade approval; retain hard limits.
+- [ ] Do not expand capital and strategy count simultaneously.
+- [ ] Another 30 closed positions before expansion.
+- **Acceptance:** no critical incident; rollback to Paper tested.
+- **Commit:** `ops: enable bounded live automation`.
 
 ---
 
-## Фаза 13 — Cross-venue: Hyperliquid, Lighter, Variational и CEX
+## Phase 13 — Cross-venue: Hyperliquid, Lighter, Variational, and CEX
 
 ### XVN-001 — Canonical venue interfaces
 
 - [ ] `MarketDataSource`, `ExecutionVenue`, `PositionSource`, `MarginSource`.
 - [ ] Capabilities: spot/perp, market/limit, post-only, reduce-only, leverage, funding, margin.
-- [ ] Chain/venue-specific fields сохранять без нарушения общего contract.
-- **Приёмка:** unsupported capability rejected до execution.
-- **Коммит:** `feat: define cross venue contracts`.
+- [ ] Preserve chain/venue-specific fields without violating the common contract.
+- **Acceptance:** unsupported capability is rejected before execution.
+- **Commit:** `feat: define cross venue contracts`.
 
 ### XVN-002 — Instrument/symbol/precision registry
 
-- [ ] Нормализовать `DOGE/USDC`, `DOGE-USDC-PERP` и venue symbols.
+- [ ] Normalize `DOGE/USDC`, `DOGE-USDC-PERP`, and venue symbols.
 - [ ] Tick, lot, min notional, margin asset, status, version.
-- [ ] Quantization до создания order.
-- **Приёмка:** precision update не ломает открытые positions.
-- **Коммит:** `feat: add instrument registry`.
+- [ ] Quantization before order creation.
+- **Acceptance:** a precision update does not break open positions.
+- **Commit:** `feat: add instrument registry`.
 
 ### XVN-003 — Official API snapshot
 
-- [ ] Зафиксировать актуальные official docs Hyperliquid, Lighter, Variational, MEXC, Bybit, HTX.
+- [ ] Record current official docs for Hyperliquid, Lighter, Variational, MEXC, Bybit, and HTX.
 - [ ] Auth, REST/WS, order types, rate limits, testnet, account/position endpoints.
 - [ ] Date/version/checksum/capability matrix.
-- [ ] Неподтверждённое помечать `unsupported`, не угадывать.
-- **Приёмка:** полный `docs/venues/api-snapshot-2026-08.md`.
-- **Коммит:** `docs: snapshot venue api capabilities`.
+- [ ] Mark unconfirmed capabilities as `unsupported`; do not guess.
+- **Acceptance:** complete `docs/venues/api-snapshot-2026-08.md`.
+- **Commit:** `docs: snapshot venue api capabilities`.
 
 ### XVN-004 — Hyperliquid adapter
 
-- [ ] Обернуть существующий connector canonical interfaces.
+- [ ] Wrap the existing connector in canonical interfaces.
 - [ ] Idempotency, reconciliation, reduce-only, precision checks.
-- [ ] Raw venue response сохранять.
-- **Приёмка:** существующий DOGE-USDC flow проходит Paper contract tests.
-- **Коммит:** `feat: adapt hyperliquid venue connector`.
+- [ ] Store raw venue responses.
+- **Acceptance:** the existing DOGE-USDC flow passes Paper contract tests.
+- **Commit:** `feat: adapt hyperliquid venue connector`.
 
 ### XVN-005 — Lighter read-only/Paper
 
 - [ ] Market data, account state, positions, funding, orderbook.
 - [ ] Paper execution lifecycle.
 - [ ] Latency/rate-limit benchmark.
-- **Приёмка:** 24h ingest без gaps; Paper order проходит canonical states.
-- **Коммит:** `feat: add lighter paper adapter`.
+- **Acceptance:** 24h ingest without gaps; a Paper order passes through canonical states.
+- **Commit:** `feat: add lighter paper adapter`.
 
 ### XVN-006 — Variational read-only/Paper
 
-- [ ] Реализовать только возможности подтверждённого official API.
-- [ ] Market/account/position data и Paper adapter.
+- [ ] Implement only capabilities of the confirmed official API.
+- [ ] Market/account/position data and a Paper adapter.
 - [ ] Explicit capability rejects.
-- **Приёмка:** unsupported endpoint не симулируется приложением.
-- **Коммит:** `feat: add variational paper adapter`.
+- **Acceptance:** the application does not simulate an unsupported endpoint.
+- **Commit:** `feat: add variational paper adapter`.
 
 ### XVN-007 — CEX adapters
 
-- [ ] Порядок: Bybit → HTX → MEXC.
-- [ ] Read-only → Paper → tiny Live отдельно.
-- [ ] Keys с минимальными permissions; withdrawals disabled.
-- [ ] Position mode, precision и rate limits per venue.
-- **Приёмка:** independent kill switch и reconciliation для каждого venue.
-- **Коммит:** `feat: add cex venue adapters`.
+- [ ] Order: Bybit → HTX → MEXC.
+- [ ] Read-only → Paper → tiny Live separately.
+- [ ] Keys with minimal permissions; withdrawals disabled.
+- [ ] Position mode, precision, and rate limits per venue.
+- **Acceptance:** independent kill switch and reconciliation for every venue.
+- **Commit:** `feat: add cex venue adapters`.
 
 ### XVN-008 — Strategy Blueprint
 
 - [ ] Signals, entry rules, sizing, exits, capabilities, risk.
-- [ ] `Copy Wallet` и `Native Strategy` — разные signal sources.
-- [ ] Blueprint переносится только между совместимыми venues.
-- [ ] Atomic arb нельзя «скопировать» без native implementation.
-- **Приёмка:** capability mismatch объясним и блокирует deploy.
-- **Коммит:** `feat: model portable strategy blueprints`.
+- [ ] `Copy Wallet` and `Native Strategy` are different signal sources.
+- [ ] A blueprint transfers only between compatible venues.
+- [ ] Atomic arbitrage cannot be “copied” without a native implementation.
+- **Acceptance:** capability mismatch is explainable and blocks deployment.
+- **Commit:** `feat: model portable strategy blueprints`.
 
 ### XVN-009 — Cross-venue risk view
 
 - [ ] NAV, delta, leverage, funding, margin, venue exposure.
-- [ ] Stale venue status и transfer latency.
-- [ ] Не netting физически независимые balances для execution.
-- **Приёмка:** global risk видит все exposures; outage не маскирует stale data.
-- **Коммит:** `feat: add cross venue risk view`.
+- [ ] Stale venue status and transfer latency.
+- [ ] Do not net physically independent balances for execution.
+- **Acceptance:** global risk sees all exposures; an outage does not mask stale data.
+- **Commit:** `feat: add cross venue risk view`.
 
-### XVN-010 — Native atomic arbitrage как отдельный контур
+### XVN-010 — Native atomic arbitrage as a separate subsystem
 
-- [ ] Separate scanner, opportunity model, executor, capital и gates.
-- [ ] Не использовать copy engine.
-- [ ] Подключать только после G7 Solana platform.
-- [ ] Copy source arb остаётся NON_COPYABLE.
-- **Приёмка:** native arb не имеет доступа к Copy portfolio.
-- **Коммит:** `docs: separate native arbitrage from copy engine`.
+- [ ] Separate scanner, opportunity model, executor, capital, and gates.
+- [ ] Do not use the copy engine.
+- [ ] Connect only after Solana platform G7.
+- [ ] An arbitrage copy source remains NON_COPYABLE.
+- **Acceptance:** native arbitrage has no access to the Copy portfolio.
+- **Commit:** `docs: separate native arbitrage from copy engine`.
 
 
 ---
 
-# 10. API surface первого релиза
+# 10. First-release API surface
 
 ## Read APIs
 
@@ -2076,24 +2076,24 @@ POST   /api/v1/config/validate
 POST   /api/v1/config/apply
 ```
 
-Правила:
+Rules:
 
-- Любая mutation требует idempotency key.
-- Live mutation требует step-up auth и audit comment.
-- API не принимает private key, seed phrase или raw secret.
-- `promote` принимает gate evidence IDs и config hash.
-- `exit/execute` исполняет только предварительно созданный preview с коротким TTL.
-- Read API всегда возвращает `data_timestamp`, `confidence`, `schema_version` и `stale`.
+- Every mutation requires an idempotency key.
+- A Live mutation requires step-up auth and an audit comment.
+- The API does not accept a private key, seed phrase, or raw secret.
+- `promote` accepts gate evidence IDs and a config hash.
+- `exit/execute` executes only a previously created preview with a short TTL.
+- The read API always returns `data_timestamp`, `confidence`, `schema_version`, and `stale`.
 
 ---
 
-# 11. SLO и контрольные метрики
+# 11. SLO and monitoring metrics
 
 ## Data pipeline
 
-| Метрика | MVP target |
+| Metric | MVP target |
 |---|---:|
-| watched-event loss | `0` после gap recovery |
+| watched-event loss | `0` after gap recovery |
 | raw persistence success | `≥99.99%` |
 | P0 decoder coverage watched volume | `≥98%` |
 | normalized action confidence high/medium | `≥95%` |
@@ -2103,7 +2103,7 @@ POST   /api/v1/config/apply
 
 ## Execution
 
-| Метрика | Target |
+| Metric | Target |
 |---|---:|
 | decision→quote p95 | `<400 ms` |
 | quote→simulation p95 | `<700 ms` |
@@ -2116,7 +2116,7 @@ POST   /api/v1/config/apply
 
 ## Product quality
 
-| Метрика | Target |
+| Metric | Target |
 |---|---:|
 | HFT/arb classified copyable in corpus | `0` |
 | Live strategy without gates | `0` |
@@ -2127,28 +2127,28 @@ POST   /api/v1/config/apply
 
 ---
 
-# 12. Go/No-Go гейты
+# 12. Go/No-Go gates
 
 ## G0 — Design frozen
 
-- [ ] Product charter утверждён.
-- [ ] Non-goals закреплены.
-- [ ] Signer boundary утверждена.
+- [ ] Product charter approved.
+- [ ] Non-goals fixed.
+- [ ] Signer boundary approved.
 - [ ] Data contracts versioned.
 
 ## G1 — Deterministic data
 
-- [ ] Raw ingest не теряет события при reconnect.
-- [ ] Fork/commitment reconciler протестирован.
-- [ ] P0 decoder golden corpus проходит.
-- [ ] Decoder coverage report работает.
+- [ ] Raw ingest loses no events on reconnect.
+- [ ] Fork/commitment reconciler tested.
+- [ ] P0 decoder golden corpus passes.
+- [ ] Decoder coverage report works.
 
 ## G2 — Observe production
 
-- [ ] 14 дней Observe без critical gap.
+- [ ] 14 days of Observe without a critical gap.
 - [ ] ≥98% decoder coverage watched volume.
-- [ ] Provider failover и alerts проверены.
-- [ ] Backup/restore drill успешен.
+- [ ] Provider failover and alerts verified.
+- [ ] Backup/restore drill successful.
 
 ## G3 — Explainable intelligence
 
@@ -2156,61 +2156,61 @@ POST   /api/v1/config/apply
 - [ ] Wallet DNA.
 - [ ] Strategy classifier.
 - [ ] Anti-Copy.
-- [ ] Все scores содержат evidence/version/confidence.
+- [ ] All scores contain evidence/version/confidence.
 
 ## G4 — Shadow/Paper
 
-- [ ] Replay детерминирован.
-- [ ] VENTI benchmark сохранён.
+- [ ] Replay is deterministic.
+- [ ] VENTI benchmark saved.
 - [ ] ≥30 Paper closed positions candidate strategy.
-- [ ] Leader/follower divergence измерена.
-- [ ] Accounting invariants не нарушены.
+- [ ] Leader/follower divergence measured.
+- [ ] Accounting invariants hold.
 
 ## G5 — Execution safety
 
 - [ ] Quote/build/simulation validation.
 - [ ] Isolated signer.
 - [ ] Signer mutation/adversarial tests.
-- [ ] Kill switch с независимой проверкой signer.
-- [ ] Reconciliation и late-landing tests.
+- [ ] Kill switch with independent signer verification.
+- [ ] Reconciliation and late-landing tests.
 
 ## G6 — Live canary
 
-- [ ] Live limits ≤ значений раздела 8.1.
-- [ ] Один portfolio и одна strategy.
-- [ ] Первые 10 entries с manual approval.
-- [ ] Paper twin запущен параллельно.
-- [ ] Нет mismatch/policy breach.
+- [ ] Live limits ≤ values in section 8.1.
+- [ ] One portfolio and one strategy.
+- [ ] First 10 entries with manual approval.
+- [ ] Paper twin running in parallel.
+- [ ] No mismatch/policy breach.
 
 ## G7 — Bounded automation
 
 - [ ] ≥30 Live closed positions.
-- [ ] Positive net expectancy после всех fees.
-- [ ] Drawdown в пределах policy.
-- [ ] Incident/rollback drill пройден.
-- [ ] Расширяется только один параметр: capital **или** strategy count.
+- [ ] Positive net expectancy after all fees.
+- [ ] Drawdown within policy.
+- [ ] Incident/rollback drill passed.
+- [ ] Only one parameter is expanded: capital **or** strategy count.
 
 ## G8 — Cross-venue Paper
 
-- [ ] Canonical contracts приняты.
-- [ ] Official API snapshot актуален.
-- [ ] Hyperliquid/Lighter/Variational adapters прошли read-only soak.
-- [ ] CEX keys без withdrawal permission.
-- [ ] Cross-venue reconciliation работает.
+- [ ] Canonical contracts accepted.
+- [ ] Official API snapshot up to date.
+- [ ] Hyperliquid/Lighter/Variational adapters passed read-only soak.
+- [ ] CEX keys without withdrawal permission.
+- [ ] Cross-venue reconciliation works.
 
 ## G9 — Cross-venue Live
 
-- [ ] Каждый venue отдельно прошёл Paper и canary.
+- [ ] Each venue separately passed Paper and canary.
 - [ ] Independent kill switch.
-- [ ] Margin/liquidation parameters читаются live.
-- [ ] Stale venue data блокирует new entries.
-- [ ] Global risk view проверен.
+- [ ] Margin/liquidation parameters are read live.
+- [ ] Stale venue data blocks new entries.
+- [ ] Global risk view verified.
 
 ---
 
-# 13. Приоритетный порядок выполнения
+# 13. Prioritized execution order
 
-## Волна A — достоверные данные
+## Wave A — reliable data
 
 ```text
 P0-001 → P0-009
@@ -2219,9 +2219,9 @@ DEC-001 → DEC-009
 MKT-001 → MKT-003
 ```
 
-**Результат:** терминал надёжно собирает и объясняет on-chain события.
+**Result:** the terminal reliably collects and explains on-chain events.
 
-## Волна B — аналитическая ценность
+## Wave B — analytical value
 
 ```text
 TOK-001 → TOK-009
@@ -2230,9 +2230,9 @@ CLS-001 → CLS-002
 UI-001 → UI-004
 ```
 
-**Результат:** полноценные token/wallet pages, risk flags и Anti-Copy.
+**Result:** complete token/wallet pages, risk flags, and Anti-Copy.
 
-## Волна C — доказать воспроизводимость
+## Wave C — prove reproducibility
 
 ```text
 PRT-001 → PRT-003
@@ -2241,9 +2241,9 @@ CLS-003 → CLS-005
 UI-006
 ```
 
-**Результат:** Shadow/Paper и честное сравнение leader/follower.
+**Result:** Shadow/Paper and an honest leader/follower comparison.
 
-## Волна D — controlled execution
+## Wave D — controlled execution
 
 ```text
 RSK-001
@@ -2252,9 +2252,9 @@ SIGN-001 → SIGN-003
 PRT-004 → PRT-005
 ```
 
-**Результат:** policy-constrained Live execution.
+**Result:** policy-constrained Live execution.
 
-## Волна E — эксплуатация
+## Wave E — operations
 
 ```text
 OBS-001 → OBS-006
@@ -2264,19 +2264,19 @@ DEP-001 → DEP-006
 UI-007 → UI-012
 ```
 
-**Результат:** production-ready private terminal.
+**Result:** production-ready private terminal.
 
-## Волна F — расширение на DEX/CEX perps
+## Wave F — expansion to DEX/CEX perps
 
 ```text
 XVN-001 → XVN-010
 ```
 
-**Результат:** единый strategy/execution/risk layer поверх Solana, Hyperliquid, Lighter, Variational и выбранных CEX.
+**Result:** a unified strategy/execution/risk layer over Solana, Hyperliquid, Lighter, Variational, and selected CEX.
 
 ---
 
-# 14. Первые 20 атомарных коммитов
+# 14. First 20 atomic commits
 
 1. `docs: freeze product scope`
 2. `chore: bootstrap rust workspace`
@@ -2299,108 +2299,108 @@ XVN-001 → XVN-010
 19. `feat: decode raydium pools and swaps`
 20. `feat: reconstruct multi hop routes`
 
-До выполнения этих 20 коммитов не начинать Live UI, cross-venue adapters и native arbitrage.
+Do not start Live UI, cross-venue adapters, or native arbitrage before completing these 20 commits.
 
 ---
 
 # 15. Definition of Done
 
-Задача закрывается только если:
+A task is closed only if:
 
-- [ ] Код/документ соответствует указанному interface.
-- [ ] Есть positive test.
-- [ ] Есть минимум один relevant negative/failure test.
-- [ ] Errors typed и не содержат secrets.
-- [ ] Добавлены metrics/logs, если задача затрагивает runtime.
-- [ ] Обновлена schema/version документация.
-- [ ] Migration/config имеет определённое backward/forward behavior.
-- [ ] `cargo fmt`, clippy, tests и frontend checks проходят.
-- [ ] Изменение проверено на fixture/replay, если затрагивает data/trading logic.
-- [ ] Нет скрытого изменения risk limits.
-- [ ] Коммит атомарный и соответствует task ID.
-- [ ] Удалены временные debug endpoints и mock secrets.
-- [ ] Для production-impacting задачи обновлён runbook.
+- [ ] Code/document matches the specified interface.
+- [ ] There is a positive test.
+- [ ] There is at least one relevant negative/failure test.
+- [ ] Errors are typed and contain no secrets.
+- [ ] Metrics/logs are added if the task affects runtime.
+- [ ] Schema/version documentation is updated.
+- [ ] Migration/config has defined backward/forward behavior.
+- [ ] `cargo fmt`, clippy, tests, and frontend checks pass.
+- [ ] The change is verified against a fixture/replay if it affects data/trading logic.
+- [ ] There is no hidden change to risk limits.
+- [ ] The commit is atomic and matches the task ID.
+- [ ] Temporary debug endpoints and mock secrets are removed.
+- [ ] The runbook is updated for a task that affects production.
 
 ---
 
-# 16. Критические test cases
+# 16. Critical test cases
 
 ## Data
 
-- WebSocket отключился на 90 секунд, watched wallet сделал 12 tx.
-- Один event пришёл от двух providers с разными first-seen timestamps.
-- Processed transaction попала в orphaned slot.
-- Program instruction обновилась и decoder её не узнаёт.
-- Route имеет 4 hops и повторяющийся mint.
+- WebSocket disconnected for 90 seconds; the watched wallet made 12 tx.
+- One event arrived from two providers with different first-seen timestamps.
+- A processed transaction ended up in an orphaned slot.
+- A program instruction was updated and the decoder does not recognize it.
+- A route has 4 hops and a repeated mint.
 
 ## Token risk
 
-- 50 формально разных holders получают funding из двух sources.
-- LP большая, но position owner связан с creator.
-- Простые mint/holder checks проходят, activity highly synchronized.
-- Token-2022 extension неизвестна execution engine.
-- Малый sell quote проходит, крупный даёт недопустимый impact.
+- 50 nominally distinct holders receive funding from two sources.
+- LP is large, but the position owner is related to the creator.
+- Simple mint/holder checks pass; activity is highly synchronized.
+- A Token-2022 extension is unknown to the execution engine.
+- A small sell quote passes; a large one produces unacceptable impact.
 
 ## Wallet intelligence
 
-- Wallet перевёл token между собственными addresses.
+- A wallet transferred a token between its own addresses.
 - Partial sell → add → full exit.
-- 90% PnL получено одной сделкой.
-- HFT wallet генерирует 100+ swaps/minute.
-- Atomic arb возвращается в исходный mint.
-- Low-frequency wallet делает 1–2 entries/day.
+- 90% of PnL came from one trade.
+- An HFT wallet generates 100+ swaps/minute.
+- Atomic arbitrage returns to the original mint.
+- A low-frequency wallet makes 1–2 entries/day.
 
 ## Shadow/Paper
 
-- Follower quote через 500 ms хуже leader fill.
-- Follower пропустил buy из-за quote expiry.
-- Два sources хотят купить один mint при недостатке capital.
-- Source продал 20%, policy настроена на full strategy exit.
-- Manual lot и Copy lot находятся в одном token account.
+- The follower quote after 500 ms is worse than the leader fill.
+- The follower missed a buy because the quote expired.
+- Two sources want to buy the same mint with insufficient capital.
+- The source sold 20%; the policy is configured for a full strategy exit.
+- Manual and Copy lots are in the same token account.
 
 ## Execution
 
-- Jupiter response содержит unexpected instruction.
-- Quote истёк между simulation и sign.
-- Submit timed out, но transaction позднее landed.
-- Повторная отправка same signature.
+- A Jupiter response contains an unexpected instruction.
+- The quote expired between simulation and signing.
+- Submit timed out, but the transaction landed later.
+- Resubmission of the same signature.
 - Provider A unhealthy, B healthy.
 - Signer locked.
-- Kill switch включён после quote, до sign.
-- Risk score вырос после buy; exit-only должен работать.
+- The kill switch was activated after the quote, before signing.
+- The risk score increased after the buy; exit-only must work.
 
 ---
 
-# 17. Инженерные риски реализации
+# 17. Engineering implementation risks
 
-| Риск | Ранний индикатор | Митигатор |
+| Risk | Early indicator | Mitigation |
 |---|---|---|
-| decoder drift | растёт unknown volume | program versioning, raw replay, coverage alert |
-| ложный PnL из-за transfers/dust | ledger не сходится | lot ledger + invariants + reconciliation |
-| копирование некопируемого wallet | хороший leader, плохой replay | Anti-Copy hard gates |
-| quote/fill divergence | растёт execution delta | simulation, TTL, local sanity model |
-| конфликт mirrors | competing intents | allocator + lot ownership |
+| decoder drift | unknown volume grows | program versioning, raw replay, coverage alert |
+| false PnL due to transfers/dust | ledger does not reconcile | lot ledger + invariants + reconciliation |
+| copying a non-copyable wallet | good leader, poor replay | Anti-Copy hard gates |
+| quote/fill divergence | execution delta grows | simulation, TTL, local sanity model |
+| mirror conflicts | competing intents | allocator + lot ownership |
 | secret leak | secret scanner finding | isolated signer, redaction, encrypted config |
 | stale/corrupt RPC | slot lag/disagreement | multi-provider health + reconciliation |
-| оптимистичный Paper | Paper/Live twin divergence | empirical latency/failure/fee model |
+| optimistic Paper | Paper/Live twin divergence | empirical latency/failure/fee model |
 | DB overload | queue lag/WAL growth | retention, archive, backpressure, later ClickHouse |
 | premature Live UX | direct action bypass | backend lifecycle gates |
-| cross-venue scope creep | незакрытые P0 | Wave F only after G7 |
+| cross-venue scope creep | unfinished P0 tasks | Wave F only after G7 |
 | supply-chain compromise | unexpected artifact/dependency diff | signed builds, SBOM, pinned deps |
 
 ---
 
-# 18. Источники и трассировка требований
+# 18. Sources and requirements traceability
 
-## Пользовательские материалы
+## User-provided materials
 
-1. `Вставленный текст.txt` / `Вставленный текст(1).txt` — практический опыт DEX copy trading: HFT/arb non-copyability, latency, low-frequency suitability, conflicts of mirrors, separation of manual/bot positions, UX.
-2. `Вставленный текст(2).txt` — defensive-разбор токенов с контролируемой ликвидностью, связанными wallets и synthetic activity.
-3. `Вставленный текст (2).txt` — AMM/CPMM/CLMM/DLMM, fee models, price impact и slippage.
-4. `Вставленный текст (3).txt` — atomic multi-hop Solana arbitrage и важность RPC/latency.
+1. `Вставленный текст.txt` / `Вставленный текст(1).txt` — practical DEX copy-trading experience: HFT/arb non-copyability, latency, low-frequency suitability, conflicts of mirrors, separation of manual/bot positions, UX.
+2. `Вставленный текст(2).txt` — defensive analysis of tokens with controlled liquidity, related wallets, and synthetic activity.
+3. `Вставленный текст (2).txt` — AMM/CPMM/CLMM/DLMM, fee models, price impact, and slippage.
+4. `Вставленный текст (3).txt` — atomic multi-hop Solana arbitrage and the importance of RPC/latency.
 5. GMGN case mint: `FRpTyMBDavKsdYN1FQZcEeZ2iwGvHaZKFSkvr5izpump`.
 
-Цифры доходности из статей не используются как product benchmark. Они используются для выделения технических требований и выбора replay cases.
+Return figures from the articles are not used as product benchmarks. They are used to identify technical requirements and select replay cases.
 
 ## DogWifTools documentation
 
@@ -2439,9 +2439,9 @@ XVN-001 → XVN-010
 
 ---
 
-# 19. Финальная формулировка продукта
+# 19. Final product definition
 
-Не «клон volume/bundler tool», а приватная система из четырёх слоёв:
+A private system with four layers, not a “volume/bundler tool clone”:
 
 ```text
 On-chain Intelligence
@@ -2453,12 +2453,12 @@ Shadow/Paper Verification
 Policy-constrained Execution
 ```
 
-Конкурентное преимущество строится на пяти свойствах:
+Competitive advantage rests on five properties:
 
-1. система умеет сказать **«это нельзя нормально скопировать»**;
-2. показывает достижимый follower result, а не leader screenshot;
-3. разделяет позиции и capital разных strategies;
-4. объясняет risk/score/latency до trade;
-5. private key физически отделён от analytics и UI.
+1. the system can say **“this cannot be copied reliably”**;
+2. it shows an achievable follower result rather than a leader screenshot;
+3. it separates the positions and capital of different strategies;
+4. it explains risk/score/latency before the trade;
+5. the private key is physically separated from analytics and UI.
 
-Критерий завершённого первого релиза: он покрывает полезную операционную часть DogWifTools/GMGN-класса, но делает её воспроизводимой, измеримой и пригодной для дальнейшего подключения Hyperliquid, Lighter, Variational и CEX.
+First-release completion criterion: it covers the useful operational capabilities of the DogWifTools/GMGN class, while making them reproducible, measurable, and suitable for later integration with Hyperliquid, Lighter, Variational, and CEX.

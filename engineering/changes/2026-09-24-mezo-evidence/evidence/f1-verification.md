@@ -183,5 +183,5 @@ After refreshing the closure documents, at 2026-09-24T18:05:29Z–18:05:32Z:
 This file and ADR-0002 retain their exact
 `DOCUMENTATION` bindings to `document:graph-authority-handoff` in
 `architecture/architecture.yaml`; no placeholder evidence or new binding was
-introduced. Closure-only checks and both final fix-wave commit identities
-are recorded in the Task 4 implementation report for independent re-review.
+introduced. Independent final re-review found the transport repair addressed
+with no new Critical or Important breakage.

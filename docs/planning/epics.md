@@ -202,63 +202,63 @@ mobile, and customer-facing surfaces remain non-authoritative and out of scope.
 
 ## Epic List
 
-### Epic 1: Оператор получает надёжный публичный evidence package
+### Epic 1: The operator obtains a reliable public evidence package
 
-Оператор может запустить публичный capture, получить неизменяемый и целостный
-набор evidence, безопасно его запечатать, проверить, заморозить и читать через
-эквивалентные read-only интерфейсы без зависимости от будущего анализатора.
+The operator can run public capture, obtain an immutable and complete
+evidence set, safely seal, verify, freeze, and read it through
+equivalent read-only interfaces without depending on the future analyzer.
 
 **Implementation prerequisite:** Stories 1.1, 1.2 and 1.2A establish the
 trusted source controller, disposable sandbox and reversible Claw host
 transition. Story 1.3 remains blocked until their authority-NONE gates and
 required self-validation evidence complete.
 
-**Implementation prerequisite:** M0 policy/graph authority завершена до Story
-1.1. Stories 1.1-1.2 создают и self-validate trusted controller/sandbox и являются
-обязательной предпосылкой Stories 1.3-1.10; локальные или исторические runs не
-являются receipt evidence.
+**Implementation prerequisite:** M0 policy/graph authority is complete before Story
+1.1. Stories 1.1-1.2 create and self-validate the trusted controller/sandbox and are
+mandatory prerequisites for Stories 1.3-1.10; local or historical runs are not
+receipt evidence.
 
 **FRs covered:** FR15, FR16, FR17, FR25-FR36, FR38, FR39.
 
-### Epic 2: Оператор воспроизводит рынок и измеряет исполнимую cross-venue экономику
+### Epic 2: The operator reproduces the market and measures executable cross-venue economics
 
-Оператор может из проверенного evidence детерминированно восстановить
-экономически эквивалентные инструменты и fail-closed книги, а затем измерить
-полную исполнимую стоимость входа и выхода по обеим площадкам без заявления о
-жизнеспособности стратегии.
+The operator can deterministically reconstruct economically equivalent
+instruments and fail-closed books from verified evidence, then measure the
+full executable cost of entry and exit across both venues without claiming
+strategy viability.
 
 **FRs covered:** FR19-FR23.
 
-### Epic 3: Оператор оценивает frozen shadow-стратегии с полными costs и capital constraints
+### Epic 3: The operator evaluates frozen shadow strategies with full costs and capital constraints
 
-Оператор может прогнать basis и realized-funding shadow-стратегии, увидеть
-полные затраты, задержки, неудачные попытки, блокировки капитала, концентрацию
-и диагностический paired-basis trailing, не создавая ордеров и не смешивая
-карантинные стратегии с binding verdict.
+The operator can run basis and realized-funding shadow strategies, see
+full costs, delays, failed attempts, capital locks, concentration,
+and diagnostic paired-basis trailing without creating orders or mixing
+quarantined strategies into the binding verdict.
 
 **FRs covered:** FR40-FR49.
 
-### Epic 4: Оператор получает воспроизводимое Stage A решение
+### Epic 4: The operator obtains a reproducible Stage A decision
 
-Оператор получает запечатанный AnalysisRun, детерминированный replay и отчёт с
-одним из четырёх взаимоисключающих решений Stage A, полностью связанным с
-исходным evidence, конфигурацией, кодом, exact-SHA Claw gates, release/deploy
-границами и rollback evidence; решение никогда не означает разрешение live
+The operator receives a sealed AnalysisRun, deterministic replay, and a report with
+one of four mutually exclusive Stage A decisions, fully bound to
+the original evidence, configuration, code, exact-SHA Claw gates, release/deploy
+boundaries, and rollback evidence; the decision never authorizes live
 trading.
 
 **FRs covered:** FR1-FR14, FR18, FR24, FR37.
 
-## Epic 1: Оператор получает надёжный публичный evidence package
+## Epic 1: The operator obtains a reliable public evidence package
 
-Оператор может запустить публичный capture, получить неизменяемый и целостный
-набор evidence, безопасно его запечатать, проверить, заморозить и читать через
-эквивалентные read-only интерфейсы без зависимости от будущего анализатора.
+The operator can run public capture, obtain an immutable and complete
+evidence set, safely seal, verify, freeze, and read it through
+equivalent read-only interfaces without depending on the future analyzer.
 
 ### Story 1.1: Bootstrap trusted default-branch PR identity controller
 
-As an внутренний оператор/исследователь,
-I want привязать validation к точному open same-repository PR head и trusted default-branch workflow,
-So that untrusted payload или branch workflow не могли выбрать проверяемый source.
+As an internal operator/researcher,
+I want to bind validation to the exact open same-repository PR head and trusted default-branch workflow,
+So that an untrusted payload or branch workflow cannot select the source to be validated.
 
 **Acceptance Criteria:**
 
@@ -267,62 +267,62 @@ So that untrusted payload или branch workflow не могли выбрать 
 **Then** trusted code re-reads the exact unmodified comment by ID, verifies OWNER identity/association and expiry, while the legacy workflow provides no bootstrap evidence and executes no Story 1.1 controller scope
 **And** the non-authoritative observation remains `authority=NONE`; Story 1.2 owns atomic single-use consumption and no bootstrap evidence permits Story 1.3, release, promotion or deploy.
 
-**Given** repository dispatch для нового controller
-**When** PR identity разрешается через GitHub API
-**Then** controller подтверждает exact repository, open PR number/state, exact current head SHA, same-repository head/base и required ancestry/tree identity
-**And** arbitrary 40-hex commit, fork head, stale head, payload-only repository claim или PR-local workflow authority отклоняется.
+**Given** a repository dispatch for the new controller
+**When** PR identity is resolved through the GitHub API
+**Then** the controller confirms the exact repository, open PR number/state, exact current head SHA, same-repository head/base, and required ancestry/tree identity
+**And** an arbitrary 40-hex commit, fork head, stale head, payload-only repository claim, or PR-local workflow authority is rejected.
 
 **Given** validated PR identity
-**When** source materialизуется
-**Then** controller получает exact authenticated archive с token только в step environment, проверяет traversal, links, member policy и exact tree, затем удаляет response/archive credentials
-**And** source-materialization observation связывает repository, PR, head SHA/tree, default-branch controller/workflow blob, action/input digests, OWNER approval-comment projection и cleanup intent без выполнения untrusted project commands.
+**When** source is materialized
+**Then** the controller obtains the exact authenticated archive with the token only in the step environment, verifies traversal, links, member policy, and the exact tree, then removes response/archive credentials
+**And** the source-materialization observation binds repository, PR, head SHA/tree, default-branch controller/workflow blob, action/input digests, OWNER approval-comment projection, and cleanup intent without executing untrusted project commands.
 
 **Given** frozen Story 1.1 changes and exact 57-path review
 **When** the owner comment, frozen local verification outputs/hashes, independent source/security YES and graph/governance YES are present
 **Then** manual exact source-only landing installs the controller on the default branch with `authority=NONE`, while validation authority remains fail closed until Story 1.2 sandbox/self-validation
-**And** traceability связывает NFR15-NFR21, NFR27-NFR33, NFR38-NFR41 и AR5/AR8-AR11; rollback использует exact previous default-branch workflow identity.
+**And** traceability links NFR15-NFR21, NFR27-NFR33, NFR38-NFR41, and AR5/AR8-AR11; rollback uses the exact previous default-branch workflow identity.
 
-### Story 1.2: Выполнять validation в disposable multi-project Claw sandbox
+### Story 1.2: Run validation in a disposable multi-project Claw sandbox
 
-As an внутренний оператор/исследователь,
-I want запускать exact materialized source в изолированном rootless sandbox с verified cleanup,
-So that Claw можно полноценно использовать для realtime тестов без production, cross-project или credential authority.
+As an internal operator/researcher,
+I want to run the exact materialized source in an isolated rootless sandbox with verified cleanup,
+So that Claw can be fully used for realtime tests without production, cross-project, or credential authority.
 
 **Acceptance Criteria:**
 
 **Given** verified `authority=NONE` source-materialization observation plus a new Phase A
 OWNER approval/installation evidence set (PR24 evidence is historical `RETIRED_UNUSED`)
-**When** validation запускается
-**Then** untrusted source выполняется в unique rootless Podman container/network/workspace с pinned validation image, read-only source, dropped capabilities, no host Docker socket и no production routes/databases
-**And** registry/release/deploy/private venue credentials, n8n, live-trading authority и dirty `/home/operator/app-stack` недоступны.
+**When** validation starts
+**Then** untrusted source executes in a unique rootless Podman container/network/workspace with a pinned validation image, read-only source, dropped capabilities, no host Docker socket, and no production routes/databases
+**And** registry/release/deploy/private venue credentials, n8n, live-trading authority, and dirty `/home/operator/app-stack` are inaccessible.
 
-**Given** Claw обслуживает несколько проектов и test iterations
-**When** validation накатывает или откатывает migrations, containers, candidate artifacts либо test configuration
-**Then** mutable resources получают project/run/attempt identity, isolated database/network/paths/credentials и receipt-bound lifecycle
-**And** test mutation не затрагивает unrelated projects, а sandbox policy блокирует unscoped names/routes/mounts.
+**Given** Claw serves multiple projects and test iterations
+**When** validation applies or rolls back migrations, containers, candidate artifacts, or test configuration
+**Then** mutable resources receive project/run/attempt identity, isolated database/network/paths/credentials, and a receipt-bound lifecycle
+**And** test mutation does not affect unrelated projects, and sandbox policy blocks unscoped names/routes/mounts.
 
-**Given** validation command завершился success либо failure
-**When** cleanup выполняется
-**Then** named containers/processes/networks/workspaces удаляются либо подтверждаются absent, validation receipt фиксирует exact inputs/commands/results/output hashes, а отдельный cleanup receipt фиксирует verified outcome
-**And** downstream gate требует оба valid receipt hashes и отклоняет failed/unverified cleanup.
+**Given** a validation command has completed with success or failure
+**When** cleanup runs
+**Then** named containers/processes/networks/workspaces are removed or confirmed absent, the validation receipt records exact inputs/commands/results/output hashes, and a separate cleanup receipt records the verified outcome
+**And** the downstream gate requires both valid receipt hashes and rejects failed/unverified cleanup.
 
 **Given** Phase A source-only controller/host-helper install landed with `authority=NONE`
-**When** установленный exact Phase A controller валидирует separate minimal Phase B probe PR
-**Then** validation, cleanup и self-validation receipts связывают controller SHA/tree/workflow blob, sandbox policy/image, source SHA/tree, nonce consumption и cleanup
-**And** отдельный Phase C1 evidence-proposal PR lands immutable external Phase B run URL/hashes с `authority=NONE`; только следующий Phase C2 evidence-admission PR, связанный с уже существующим authenticated C1 merge SHA/tree/API payload и его committer date, может разрешить Story 1.3, не изменяет Phase B/C1 и только тогда фиксирует legacy `SUPERSEDED`/disabled evidence.
+**When** the installed exact Phase A controller validates a separate minimal Phase B probe PR
+**Then** validation, cleanup, and self-validation receipts bind controller SHA/tree/workflow blob, sandbox policy/image, source SHA/tree, nonce consumption, and cleanup
+**And** a separate Phase C1 evidence-proposal PR lands immutable external Phase B run URL/hashes with `authority=NONE`; only the subsequent Phase C2 evidence-admission PR, bound to the already existing authenticated C1 merge SHA/tree/API payload and its committer date, can authorize Story 1.3, leaves Phase B/C1 unchanged, and only then records legacy `SUPERSEDED`/disabled evidence.
 
-**Given** repository workflows и runner labels
-**When** policy tests и independent DevOps/security review выполняются
-**Then** test/validation/build/scan/promotion используют только `[self-hosted, claw]`, PR gate имеет minimal read-only permissions и no deploy/promotion/private/live authority
-**And** traceability связывает NFR15-NFR34, NFR38-NFR41 и AR5/AR8-AR11 с receipts, cleanup и reviewed replacement path.
+**Given** repository workflows and runner labels
+**When** policy tests and independent DevOps/security review run
+**Then** test/validation/build/scan/promotion use only `[self-hosted, claw]`, and the PR gate has minimal read-only permissions and no deploy/promotion/private/live authority
+**And** traceability links NFR15-NFR34, NFR38-NFR41, and AR5/AR8-AR11 to receipts, cleanup, and the reviewed replacement path.
 
 ### Story 1.2A: Claw engine-runner host transition
 
-As an внутренний оператор/исследователь,
-I want выполнять owner-approved переход Claw engine runner через root-owned
-transaction controller с durable rollback,
-So that rootless disposable validation получает dedicated runner identity без
-копирования credentials, нарушения app-stack или неавторизованной host mutation.
+As an internal operator/researcher,
+I want to carry out an owner-approved Claw engine runner transition through a root-owned
+transaction controller with durable rollback,
+So that rootless disposable validation receives a dedicated runner identity without
+copying credentials, disrupting app-stack, or unauthorized host mutation.
 
 **Acceptance Criteria:**
 
@@ -355,874 +355,874 @@ new exact D1 owner approval are mandatory before `begin`
 **And** `finalize` requires a later separate owner confirmation; the expired
 failed-attempt approval is never reused and Story 1.3 remains blocked.
 
-### Story 1.3: Запустить capability-isolated Public Capture из canonical distribution
+### Story 1.3: Launch capability-isolated Public Capture from the canonical distribution
 
-As an внутренний оператор/исследователь,
-I want запускать Public Capture из отдельного установленного артефакта с чистым контрактным ядром,
-So that сбор публичного evidence физически не может получить торговые, приватные или аналитические полномочия.
+As an internal operator/researcher,
+I want to run Public Capture from a separately installed artifact with a pure contract core,
+So that public evidence collection is physically unable to acquire trading, private, or analytical authority.
 
 **Acceptance Criteria:**
 
-**Given** modular-monorepo layout с отдельно устанавливаемыми `mee_contracts`, `mee_public_capture` и `mee_readonly_analyzer`
-**When** собираются и устанавливаются contracts и Public Capture distributions в чистое окружение
-**Then** Public Capture запускается только через canonical `mee_public_capture` entry point и импортирует application-код только из собственного namespace и pure `mee_contracts`
-**And** `mee_contracts` отдельно устанавливается и проходит contract tests без application, adapter, storage, network, database или workflow dependencies.
+**Given** a modular-monorepo layout with independently installable `mee_contracts`, `mee_public_capture`, and `mee_readonly_analyzer`
+**When** contracts and Public Capture distributions are built and installed in a clean environment
+**Then** Public Capture runs only through the canonical `mee_public_capture` entry point and imports application code only from its own namespace and pure `mee_contracts`
+**And** `mee_contracts` installs independently and passes contract tests without application, adapter, storage, network, database, or workflow dependencies.
 
-**Given** установленный Public Capture artifact и его resolved dependency/import/file/entry-point manifests
-**When** выполняется capability-boundary validation
-**Then** в артефакте отсутствуют `mee_readonly_analyzer`, legacy `multi_exchange_engine`, Go binaries/layers и любые signer, wallet, credential, private/account, order, cancel, transfer, withdrawal, n8n или execution capabilities
-**And** запрещённые imports, symbols, dependency edges, entry points или dormant execution files fail closed с typed boundary reason.
+**Given** an installed Public Capture artifact and its resolved dependency/import/file/entry-point manifests
+**When** capability-boundary validation runs
+**Then** the artifact contains no `mee_readonly_analyzer`, legacy `multi_exchange_engine`, Go binaries/layers, or any signer, wallet, credential, private/account, order, cancel, transfer, withdrawal, n8n, or execution capabilities
+**And** forbidden imports, symbols, dependency edges, entry points, or dormant execution files fail closed with a typed boundary reason.
 
-**Given** Public Capture configuration и runtime manifest
-**When** оператор выбирает публичные Hyperliquid/Lighter feeds
-**Then** runtime допускает только credential-free discovery, public streaming и append-only capture responsibilities
-**And** books, opportunities, economics, strategies, portfolio и verdict ownership отсутствуют из reachable runtime graph.
+**Given** Public Capture configuration and runtime manifest
+**When** the operator selects public Hyperliquid/Lighter feeds
+**Then** the runtime allows only credential-free discovery, public streaming, and append-only capture responsibilities
+**And** books, opportunities, economics, strategies, portfolio, and verdict ownership are absent from the reachable runtime graph.
 
 **Given** retained Go reference invariants
-**When** conformance/retirement status проверяется
-**Then** Go остаётся `TEST_ONLY_EXECUTABLE_SPEC`, исключённым из Stage-A source closure, binaries, dependencies и layers
-**And** каждый retirement candidate требует map invariant -> versioned contract -> Python implementation -> negative tests -> exact-SHA Claw receipt -> independent review; отсутствие evidence блокирует retirement, но никогда не делает Go deployable.
+**When** conformance/retirement status is checked
+**Then** Go remains `TEST_ONLY_EXECUTABLE_SPEC`, excluded from Stage-A source closure, binaries, dependencies, and layers
+**And** each retirement candidate requires the mapping invariant -> versioned contract -> Python implementation -> negative tests -> exact-SHA Claw receipt -> independent review; missing evidence blocks retirement but never makes Go deployable.
 
-**Given** изменения Story 1.3
-**When** выполняется её обязательный exact-SHA Claw validation
-**Then** focused RED/GREEN tests, installed-artifact boundary tests, dependency-DAG/orphan checks и independent security review завершаются успешно
-**And** traceability связывает FR16, NFR1-NFR4, NFR8-NFR21, NFR27-NFR41 и AR1-AR5/AR8-AR11 с canonical owner, тестами, Claw receipt, artifact boundary и rollback/replacement evidence.
+**Given** Story 1.3 changes
+**When** its mandatory exact-SHA Claw validation runs
+**Then** focused RED/GREEN tests, installed-artifact boundary tests, dependency-DAG/orphan checks, and independent security review complete successfully
+**And** traceability links FR16, NFR1-NFR4, NFR8-NFR21, NFR27-NFR41, and AR1-AR5/AR8-AR11 to the canonical owner, tests, Claw receipt, artifact boundary, and rollback/replacement evidence.
 
-### Story 1.4: Зарегистрировать immutable CaptureRun и evidence до partition admission
+### Story 1.4: Register immutable CaptureRun and evidence before partition admission
 
-As an внутренний оператор/исследователь,
-I want чтобы каждая capture-сессия и каждый принадлежащий ей evidence-объект сначала получали однозначную unpartitioned identity,
-So that partitioned payload нельзя записать без доказуемого владельца и полного пути к исходному запуску.
-
-**Acceptance Criteria:**
-
-**Given** новая публичная capture-сессия с exact collector/config/schema identities
-**When** Public Capture открывает сессию
-**Then** PostgreSQL создаёт ровно один immutable unpartitioned `CaptureRun` root в состоянии `OPEN` с уникальным `capture_run_id`
-**And** повторная регистрация той же session identity либо возвращает тот же согласованный root, либо fail closed при несовпадающем содержимом; молчаливое создание второго root запрещено.
-
-**Given** evidence-объект, принадлежащий открытому `CaptureRun`
-**When** объект допускается к хранению
-**Then** его immutable unpartitioned registry row с `node_id`, `capture_run_id`, node kind, schema/version и semantic hash существует до вставки payload в любую day partition
-**And** foreign-key/constraint authority отвергает partition payload без registry row, с неизвестным run, с несовпадающим owner или с повторно использованным `node_id`.
-
-**Given** зарегистрированный `CaptureRun` или capture node
-**When** runtime пытается изменить immutable identity, owner, schema identity или semantic hash прямым DML либо через неразрешённый путь
-**Then** операция атомарно отклоняется
-**And** Public Capture runtime role не имеет table ownership, direct update/delete, sequence или schema-creation privileges.
-
-**Given** clean digest-pinned PostgreSQL 16 и 17 databases
-**When** exact-SHA Claw запускает migration, schema, positive-admission и negative-orphan tests
-**Then** обе версии подтверждают unpartitioned root/registry authority и отсутствие partition-only или application-precheck обхода
-**And** traceability связывает FR15 и FR25 с NFR6, NFR15-NFR21, NFR27-NFR34, NFR38-NFR41 и AR5/AR8-AR10; rollback migration работает только до durable evidence и отказывается удалять непустые roots без явно проверенного replacement path.
-
-### Story 1.5: Связать evidence типизированными edges и глобальными logical keys
-
-As an внутренний оператор/исследователь,
-I want чтобы происхождение, уникальность и замещение каждого evidence-объекта проверялись одной graph authority,
-So that в наборе данных не возникали dangling nodes, скрытые дубликаты, циклы или неоднозначные преемники.
+As an internal operator/researcher,
+I want every capture session and each evidence object it owns to first receive an unambiguous unpartitioned identity,
+So that partitioned payload cannot be written without a provable owner and a complete path to the original run.
 
 **Acceptance Criteria:**
 
-**Given** два зарегистрированных evidence nodes
-**When** Public Capture создаёт edge между ними
-**Then** edge ссылается foreign keys на оба unpartitioned registry endpoints и указывает versioned edge kind/contract
-**And** отсутствующий endpoint, запрещённая комбинация node kinds, несовместимая contract version или неразрешённая cross-run связь fail closed до появления edge.
+**Given** a new public capture session with exact collector/config/schema identities
+**When** Public Capture opens the session
+**Then** PostgreSQL creates exactly one immutable unpartitioned `CaptureRun` root in `OPEN` state with a unique `capture_run_id`
+**And** registering the same session identity again either returns the same consistent root or fails closed on mismatched content; silently creating a second root is forbidden.
 
-**Given** node с declared logical-key scope
-**When** logical key регистрируется для этого node
-**Then** одна unpartitioned authority обеспечивает глобальную уникальность ключа внутри объявленного scope независимо от day partition
-**And** дубликат из другой partition, concurrent transaction или application-side precheck отклоняется базой данных и не создаёт payload либо edge.
+**Given** an evidence object owned by an open `CaptureRun`
+**When** the object is admitted to storage
+**Then** its immutable unpartitioned registry row with `node_id`, `capture_run_id`, node kind, schema/version, and semantic hash exists before payload insertion into any day partition
+**And** foreign-key/constraint authority rejects partition payload without a registry row, with an unknown run, with a mismatched owner, or with a reused `node_id`.
 
-**Given** `derived_from` или `supersedes` lineage
-**When** добавляется новый lineage edge
-**Then** graph остаётся acyclic и каждый superseded node имеет не более одного прямого successor в той же semantic lineage
-**And** попытка создать цикл либо конкурирующего successor не выбирает победителя автоматически, а создаёт typed blocking conflict evidence или полностью отклоняет атомарную операцию согласно frozen contract.
+**Given** a registered `CaptureRun` or capture node
+**When** the runtime tries to change immutable identity, owner, schema identity, or semantic hash through direct DML or an unauthorized path
+**Then** the operation is rejected atomically
+**And** the Public Capture runtime role has no table ownership, direct update/delete, sequence, or schema-creation privileges.
 
-**Given** будущая необходимость связать Capture, FrozenPackageReceipt, Analysis или Retention roots
-**When** edge kind не имеет заранее versioned cross-root contract с разрешёнными endpoint/root types
-**Then** ownership transfer, root reopening и неявная cross-root связь запрещены
-**And** текущая история публикует расширяемый contract interface, но не создаёт будущие root tables, writers или разрешения раньше возникновения соответствующей capability.
+**Given** clean digest-pinned PostgreSQL 16 and 17 databases
+**When** exact-SHA Claw runs migration, schema, positive-admission, and negative-orphan tests
+**Then** both versions confirm unpartitioned root/registry authority and absence of a partition-only or application-precheck bypass
+**And** traceability links FR15 and FR25 to NFR6, NFR15-NFR21, NFR27-NFR34, NFR38-NFR41, and AR5/AR8-AR10; migration rollback works only before durable evidence and refuses to remove nonempty roots without an explicitly verified replacement path.
 
-**Given** clean digest-pinned PostgreSQL 16 и 17 databases
-**When** exact-SHA Claw запускает migration, concurrent duplicate-key, dangling-edge, type-mismatch, cross-run, cycle и competing-successor tests
-**Then** обе версии выдают одинаковые typed результаты и graph/orphan checker подтверждает связность slice
-**And** traceability связывает FR26, FR27 и FR32, а также contract-часть FR39, с NFR15-NFR25, NFR27-NFR34, NFR40-NFR41 и AR4/AR8-AR10; rollback не удаляет непустую lineage authority без проверенного replacement path.
+### Story 1.5: Link evidence through typed edges and global logical keys
 
-### Story 1.6: Записывать capture evidence только через атомарный constrained writer
-
-As an внутренний оператор/исследователь,
-I want чтобы admission каждого capture evidence-объекта выполнялась одной атомарной операцией с каноническим временем,
-So that частичная запись, обход graph invariants или влияние host/audit time не могли изменить evidence и последующий replay.
+As an internal operator/researcher,
+I want the provenance, uniqueness, and supersession of each evidence object to be checked by one graph authority,
+So that the dataset contains no dangling nodes, hidden duplicates, cycles, or ambiguous successors.
 
 **Acceptance Criteria:**
 
-**Given** открытый `CaptureRun` и валидный evidence envelope
-**When** Public Capture вызывает единственный разрешённый writer contract
-**Then** одна transaction блокирует требуемый run authority и атомарно проверяет root state, registry identity, logical key, semantic hash, typed edges и payload admission
-**And** ошибка любого шага откатывает registry, key, edges и payload целиком без частичного durable state.
+**Given** two registered evidence nodes
+**When** Public Capture creates an edge between them
+**Then** the edge references both unpartitioned registry endpoints through foreign keys and specifies a versioned edge kind/contract
+**And** a missing endpoint, forbidden combination of node kinds, incompatible contract version, or unauthorized cross-run link fails closed before the edge appears.
+
+**Given** a node with a declared logical-key scope
+**When** a logical key is registered for this node
+**Then** one unpartitioned authority ensures global key uniqueness within the declared scope regardless of day partition
+**And** a duplicate from another partition, concurrent transaction, or application-side precheck is rejected by the database and creates no payload or edge.
+
+**Given** a `derived_from` or `supersedes` lineage
+**When** a new lineage edge is added
+**Then** the graph remains acyclic and each superseded node has at most one direct successor in the same semantic lineage
+**And** an attempt to create a cycle or competing successor does not automatically select a winner, but creates typed blocking conflict evidence or rejects the entire atomic operation according to the frozen contract.
+
+**Given** a future need to link Capture, FrozenPackageReceipt, Analysis, or Retention roots
+**When** the edge kind has no previously versioned cross-root contract with allowed endpoint/root types
+**Then** ownership transfer, root reopening, and implicit cross-root links are forbidden
+**And** this story publishes an extensible contract interface but creates no future root tables, writers, or permissions before the corresponding capability exists.
+
+**Given** clean digest-pinned PostgreSQL 16 and 17 databases
+**When** exact-SHA Claw runs migration, concurrent duplicate-key, dangling-edge, type-mismatch, cross-run, cycle, and competing-successor tests
+**Then** both versions produce identical typed results and the graph/orphan checker confirms slice connectivity
+**And** traceability links FR26, FR27, and FR32, plus the contract portion of FR39, to NFR15-NFR25, NFR27-NFR34, NFR40-NFR41, and AR4/AR8-AR10; rollback does not remove nonempty lineage authority without a verified replacement path.
+
+### Story 1.6: Write capture evidence only through an atomic constrained writer
+
+As an internal operator/researcher,
+I want admission of each capture evidence object to occur in one atomic operation with canonical time,
+So that a partial write, bypass of graph invariants, or host/audit time influence cannot change the evidence and subsequent replay.
+
+**Acceptance Criteria:**
+
+**Given** an open `CaptureRun` and a valid evidence envelope
+**When** Public Capture calls the only authorized writer contract
+**Then** one transaction locks the required run authority and atomically verifies root state, registry identity, logical key, semantic hash, typed edges, and payload admission
+**And** failure at any step rolls back the entire registry, key, edges, and payload without partial durable state.
 
 **Given** Public Capture runtime database role
-**When** проверяются grants и все доступные database paths
-**Then** роль имеет только минимальный `CONNECT`/`USAGE` и `EXECUTE` утверждённого writer interface
-**And** direct table DML, sequence privileges, ownership, role inheritance, schema creation, alternate writer functions и обход через mutable views отсутствуют и подтверждены negative tests.
+**When** grants and all accessible database paths are checked
+**Then** the role has only minimal `CONNECT`/`USAGE` and `EXECUTE` on the approved writer interface
+**And** direct table DML, sequence privileges, ownership, role inheritance, schema creation, alternate writer functions, and bypass through mutable views are absent, as confirmed by negative tests.
 
-**Given** evidence envelope с `effective_at_evidence_time`, source sequence/index и `recorded_at_audit_time`
-**When** вычисляется canonical semantic hash и порядок replay
-**Then** hashed identity включает evidence-effective time и требуемые source identity/sequence/payload fields
-**And** audit/insertion time хранится отдельно, не входит в semantic hash и не влияет на ordering, duplicate detection, economics либо deterministic output.
+**Given** an evidence envelope with `effective_at_evidence_time`, source sequence/index, and `recorded_at_audit_time`
+**When** the canonical semantic hash and replay order are computed
+**Then** the hashed identity includes evidence-effective time and the required source identity/sequence/payload fields
+**And** audit/insertion time is stored separately, excluded from the semantic hash, and has no effect on ordering, duplicate detection, economics, or deterministic output.
 
-**Given** две записи с одинаковой semantic identity, но разным audit time, либо с одинаковым audit time и разным effective identity
-**When** writer обрабатывает их последовательно или конкурентно
-**Then** решение о duplicate/conflict определяется только canonical identity и declared logical-key contract
-**And** изменение host clock, transaction order или retry не меняет canonical result.
+**Given** two records with the same semantic identity but different audit times, or the same audit time and different effective identities
+**When** the writer processes them sequentially or concurrently
+**Then** the duplicate/conflict decision is determined only by canonical identity and the declared logical-key contract
+**And** a change to the host clock, transaction order, or retry does not change the canonical result.
 
-**Given** clean digest-pinned PostgreSQL 16 и 17 databases
-**When** exact-SHA Claw запускает writer atomicity, privilege-denial, concurrent admission, rollback-on-error и time-determinism tests
-**Then** обе версии дают эквивалентные результаты без skipped database tests
-**And** traceability связывает FR28 и FR34 с NFR6, NFR15-NFR24, NFR27-NFR34, NFR38-NFR41 и AR5/AR8-AR10; replacement/rollback сохраняет уже принятый append-only evidence и не открывает DML bypass.
+**Given** clean digest-pinned PostgreSQL 16 and 17 databases
+**When** exact-SHA Claw runs writer atomicity, privilege-denial, concurrent admission, rollback-on-error, and time-determinism tests
+**Then** both versions give equivalent results with no skipped database tests
+**And** traceability links FR28 and FR34 to NFR6, NFR15-NFR24, NFR27-NFR34, NFR38-NFR41, and AR5/AR8-AR10; replacement/rollback preserves already admitted append-only evidence and does not open a DML bypass.
 
-### Story 1.7: Race-safe запечатать CaptureRun и зафиксировать terminal identity
+### Story 1.7: Seal CaptureRun race-safely and record terminal identity
 
-As an внутренний оператор/исследователь,
-I want атомарно закрыть capture-сессию и получить неизменяемую terminal identity,
-So that последующий frozen package относится к точному завершённому node set и никакая поздняя запись не меняет исходный evidence.
+As an internal operator/researcher,
+I want to atomically close the capture session and obtain an immutable terminal identity,
+So that the subsequent frozen package refers to the exact completed node set and no late write changes the original evidence.
 
 **Acceptance Criteria:**
 
-**Given** открытый `CaptureRun` с завершённым capture-owned graph
-**When** оператор инициирует terminalization через утверждённый seal contract
-**Then** seal блокирует ту же unpartitioned run row, что и admission writer, проверяет обязательный pre-seal capture replay-integrity receipt и graph closure
-**And** записывает expected/observed counts, terminal epochs/indices, canonical time bounds, complete node-set identity и canonical capture terminal hash перед переходом root в `SEALED`.
+**Given** an open `CaptureRun` with a complete capture-owned graph
+**When** the operator initiates terminalization through the approved seal contract
+**Then** the seal locks the same unpartitioned run row as the admission writer and verifies the mandatory pre-seal capture replay-integrity receipt and graph closure
+**And** records expected/observed counts, terminal epochs/indices, canonical time bounds, complete node-set identity, and the canonical capture terminal hash before moving the root to `SEALED`.
 
-**Given** admission и seal выполняются конкурентно
-**When** обе transaction претендуют на один `CaptureRun`
-**Then** admission либо полностью фиксируется до seal и входит в counts/node set/hash, либо выполняется после seal и полностью отклоняется
-**And** ни один registry, logical-key, edge, payload или lifecycle write не может commit через границу terminalization.
+**Given** admission and seal run concurrently
+**When** both transactions contend for one `CaptureRun`
+**Then** admission either commits completely before the seal and is included in counts/node set/hash, or runs after the seal and is rejected completely
+**And** no registry, logical-key, edge, payload, or lifecycle write can commit across the terminalization boundary.
 
 **Given** sealed `CaptureRun`
-**When** любой capture или analysis path пытается добавить либо изменить принадлежащий capture payload, registry row, logical key, edge, lifecycle record, terminal metadata или replay receipt
-**Then** операция fail closed с typed post-seal reason
-**And** отдельная будущая `AnalysisRun` никогда не получает ownership или append path под `CaptureRun`.
+**When** any capture or analysis path tries to add or change capture-owned payload, registry row, logical key, edge, lifecycle record, terminal metadata, or replay receipt
+**Then** the operation fails closed with a typed post-seal reason
+**And** a separate future `AnalysisRun` never obtains ownership or an append path under `CaptureRun`.
 
-**Given** sealed `CaptureRun`, готовый к будущему export
-**When** seal boundary публикует terminal identity для freeze pipeline
-**Then** он выдаёт exact terminal hash и complete capture node-set identity как обязательные candidate-export inputs
-**And** VERIFIED `FrozenPackageReceipt` на этом шаге не создаётся: его admission остаётся запрещённым до успешной полной semantic validation под отдельным versioned freeze contract.
+**Given** a sealed `CaptureRun` ready for future export
+**When** the seal boundary publishes terminal identity for the freeze pipeline
+**Then** it provides the exact terminal hash and complete capture node-set identity as mandatory candidate-export inputs
+**And** no VERIFIED `FrozenPackageReceipt` is created at this step: its admission remains forbidden until full semantic validation succeeds under a separate versioned freeze contract.
 
-**Given** clean digest-pinned PostgreSQL 16 и 17 databases
-**When** exact-SHA Claw запускает seal/admission race, post-seal mutation, incomplete-closure, terminal-hash и frozen-receipt mismatch tests
-**Then** обе версии демонстрируют одинаковую сериализацию и отсутствие skipped database tests
-**And** traceability связывает FR29 и FR33, а также receipt-boundary часть FR30/FR39, с NFR6, NFR15-NFR24, NFR27-NFR34, NFR36-NFR41 и AR5/AR8-AR10; rollback не может удалить или reopen sealed root и сохраняет terminal evidence.
+**Given** clean digest-pinned PostgreSQL 16 and 17 databases
+**When** exact-SHA Claw runs seal/admission race, post-seal mutation, incomplete-closure, terminal-hash, and frozen-receipt mismatch tests
+**Then** both versions demonstrate identical serialization and no skipped database tests
+**And** traceability links FR29 and FR33, plus the receipt-boundary portion of FR30/FR39, to NFR6, NFR15-NFR24, NFR27-NFR34, NFR36-NFR41, and AR5/AR8-AR10; rollback cannot remove or reopen a sealed root and preserves terminal evidence.
 
-### Story 1.8: Читать capture evidence через deterministic least-privilege PostgreSQL contract
+### Story 1.8: Read capture evidence through a deterministic least-privilege PostgreSQL contract
 
-As an внутренний оператор/исследователь,
-I want получать capture evidence через стабильный deterministic read-only PostgreSQL interface,
-So that анализ можно воспроизвести без доступа к writer paths или зависимости от физической раскладки таблиц.
+As an internal operator/researcher,
+I want to obtain capture evidence through a stable deterministic read-only PostgreSQL interface,
+So that analysis can be reproduced without access to writer paths or dependence on the physical table layout.
 
 **Acceptance Criteria:**
 
-**Given** зарегистрированный capture evidence graph
-**When** canonical `EvidenceReader` читает PostgreSQL projections
-**Then** versioned views возвращают manifest, control evidence, raw envelopes/batches, mapping, quality и terminal metadata в полностью определённом canonical порядке
-**And** physical partition order, query plan, audit time и insertion order не меняют результат.
+**Given** a registered capture evidence graph
+**When** the canonical `EvidenceReader` reads PostgreSQL projections
+**Then** versioned views return manifest, control evidence, raw envelopes/batches, mapping, quality, and terminal metadata in a fully specified canonical order
+**And** physical partition order, query plan, audit time, and insertion order do not change the result.
 
 **Given** Analyzer database role
-**When** проверяются effective privileges и reachable database objects
-**Then** роль имеет только требуемые `CONNECT`, schema `USAGE` и deterministic-view `SELECT`
-**And** base-table DML, sequence access, writer/seal function `EXECUTE`, ownership, inheritance, mutable views и alternate mutation paths отклоняются.
+**When** effective privileges and reachable database objects are checked
+**Then** the role has only the required `CONNECT`, schema `USAGE`, and deterministic-view `SELECT`
+**And** base-table DML, sequence access, writer/seal function `EXECUTE`, ownership, inheritance, mutable views, and alternate mutation paths are rejected.
 
-**Given** отсутствующая provenance, неизвестная schema/edge version, неполный node set либо unsealed run
-**When** reader запрашивает binding dataset
-**Then** reader fail closed с typed contract/integrity reason и не выдаёт частичный dataset как complete
-**And** read-only failure не изменяет capture graph и не создаёт AnalysisRun.
+**Given** missing provenance, an unknown schema/edge version, an incomplete node set, or an unsealed run
+**When** the reader requests a binding dataset
+**Then** the reader fails closed with a typed contract/integrity reason and does not present a partial dataset as complete
+**And** a read-only failure does not change the capture graph or create an AnalysisRun.
 
-**Given** clean digest-pinned PostgreSQL 16 и 17 databases
-**When** exact-SHA Claw запускает clean migrations, deterministic-view ordering, role/grant denial и reader-contract tests
-**Then** обе версии возвращают byte-equivalent canonical records без skipped integration tests
-**And** traceability связывает FR17, FR35 и FR36 с NFR6, NFR15-NFR24, NFR27-NFR41 и AR5/AR8-AR10; rollback сохраняет versioned reader compatibility либо блокируется до появления replacement view contract.
+**Given** clean digest-pinned PostgreSQL 16 and 17 databases
+**When** exact-SHA Claw runs clean migrations, deterministic-view ordering, role/grant denial, and reader-contract tests
+**Then** both versions return byte-equivalent canonical records with no skipped integration tests
+**And** traceability links FR17, FR35, and FR36 to NFR6, NFR15-NFR24, NFR27-NFR41, and AR5/AR8-AR10; rollback preserves versioned reader compatibility or is blocked until a replacement view contract exists.
 
-### Story 1.9: Экспортировать и семантически проверить immutable frozen package
+### Story 1.9: Export and semantically validate an immutable frozen package
 
-As an внутренний оператор/исследователь,
-I want экспортировать sealed CaptureRun в независимо проверяемый frozen package,
-So that финальный анализ опирается на переносимый tamper-evident dataset, эквивалентный PostgreSQL evidence authority.
+As an internal operator/researcher,
+I want to export a sealed CaptureRun to an independently verifiable frozen package,
+So that final analysis relies on a portable tamper-evident dataset equivalent to the PostgreSQL evidence authority.
 
 **Acceptance Criteria:**
 
-**Given** sealed `CaptureRun` с terminal hash, complete node set и pre-seal replay-integrity closure
-**When** Public Capture export boundary создаёт frozen package
-**Then** package использует canonical member names/encoding/order, связывает exact run/terminal/node-set/schema/collector/config identities и вычисляет member hashes и package root hash
-**And** export не импортирует Analyzer application, не создаёт analyzer replay и не изменяет sealed CaptureRun.
+**Given** a sealed `CaptureRun` with a terminal hash, complete node set, and pre-seal replay-integrity closure
+**When** the Public Capture export boundary creates a frozen package
+**Then** the package uses canonical member names/encoding/order, binds exact run/terminal/node-set/schema/collector/config identities, and computes member hashes and a package root hash
+**And** export does not import the Analyzer application, create analyzer replay, or change the sealed CaptureRun.
 
 **Given** candidate frozen package
-**When** independent semantic validator проверяет его
-**Then** он парсит каждый envelope, recomputes payload/mapping/quality hashes и проверяет run, venue, epoch, sequence/index, canonical time, counts, bounds, duplicate logical keys, lifecycle, soak, decoder-observation, connection и pre-seal replay-integrity closure
-**And** missing, extra, reordered, duplicated, cross-run, out-of-bounds, hash-mismatched или malformed evidence приводит к `INVALID_DATASET`, а не к частичному успеху.
+**When** an independent semantic validator checks it
+**Then** it parses every envelope, recomputes payload/mapping/quality hashes, and verifies run, venue, epoch, sequence/index, canonical time, counts, bounds, duplicate logical keys, lifecycle, soak, decoder-observation, connection, and pre-seal replay-integrity closure
+**And** missing, extra, reordered, duplicated, cross-run, out-of-bounds, hash-mismatched, or malformed evidence leads to `INVALID_DATASET`, rather than partial success.
 
-**Given** semantic validation прошла
-**When** регистрируется `FrozenPackageReceipt`
-**Then** отдельный immutable receipt связывает retrievable package URI/object identity, package hash, sealed capture terminal hash и complete capture node set
-**And** receipt не содержит post-package analyzer replay nodes и не переносит ownership либо writer rights.
+**Given** semantic validation has passed
+**When** a `FrozenPackageReceipt` is registered
+**Then** a separate immutable receipt binds retrievable package URI/object identity, package hash, sealed capture terminal hash, and the complete capture node set
+**And** the receipt contains no post-package analyzer replay nodes and transfers no ownership or writer rights.
 
-**Given** PostgreSQL reader и frozen-package reader над одним sealed run
-**When** оба реализуют sole versioned `EvidenceReader` contract
-**Then** они выдают эквивалентные canonical evidence streams и terminal metadata
-**And** повторное чтение в fresh processes не зависит от сети, host clock, filesystem enumeration order или repository cwd.
+**Given** a PostgreSQL reader and a frozen-package reader over one sealed run
+**When** both implement the sole versioned `EvidenceReader` contract
+**Then** they emit equivalent canonical evidence streams and terminal metadata
+**And** repeated reads in fresh processes do not depend on the network, host clock, filesystem enumeration order, or repository cwd.
 
 **Given** exact-SHA Claw validation
-**When** выполняются tamper corpus, semantic mismatch, database-to-package equivalence и installed-artifact tests
-**Then** package/reader slice проходит на clean PostgreSQL 16/17 и в isolated credential-free sandbox
-**And** traceability связывает FR17, FR29, FR30 и применимую часть FR31 с NFR6, NFR15-NFR24, NFR27-NFR41 и AR3/AR5/AR8-AR10; rollback сохраняет receipt/package и создаёт superseding export вместо перезаписи.
+**When** tamper corpus, semantic mismatch, database-to-package equivalence, and installed-artifact tests run
+**Then** the package/reader slice passes on clean PostgreSQL 16/17 and in an isolated credential-free sandbox
+**And** traceability links FR17, FR29, FR30, and the applicable portion of FR31 to NFR6, NFR15-NFR24, NFR27-NFR41, and AR3/AR5/AR8-AR10; rollback preserves the receipt/package and creates a superseding export instead of overwriting it.
 
-### Story 1.10: Разрешать retention только через verified FrozenPackageReceipt
+### Story 1.10: Allow retention only through a verified FrozenPackageReceipt
 
-As an внутренний оператор/исследователь,
-I want удалять или отсоединять raw storage только после независимо проверенного export receipt,
-So that retention никогда не уничтожает единственный воспроизводимый источник evidence.
+As an internal operator/researcher,
+I want to remove or detach raw storage only after an independently verified export receipt,
+So that retention never destroys the only reproducible evidence source.
 
 **Acceptance Criteria:**
 
-**Given** sealed `CaptureRun` без retrievable independently verified `FrozenPackageReceipt`
-**When** запрашивается drop, detach, expire или иная loss-of-availability операция над raw partition/object
-**Then** операция fail closed до любого storage mutation
-**And** наличие только package path, непроверенного hash либо несвязанного receipt не удовлетворяет gate.
+**Given** a sealed `CaptureRun` without a retrievable independently verified `FrozenPackageReceipt`
+**When** a drop, detach, expire, or other loss-of-availability operation is requested for a raw partition/object
+**Then** the operation fails closed before any storage mutation
+**And** a package path alone, an unverified hash, or an unbound receipt does not satisfy the gate.
 
-**Given** sealed `CaptureRun` и valid retrievable receipt
-**When** авторизованный retention boundary начинает операцию
-**Then** создаётся отдельный immutable `RetentionAction` root со своей registry, logical-key scope, writer privilege и state machine
-**And** versioned typed edges связывают его с exact CaptureRun и receipt без ownership transfer, root reopening или append под capture namespace.
+**Given** a sealed `CaptureRun` and a valid retrievable receipt
+**When** the authorized retention boundary starts an operation
+**Then** a separate immutable `RetentionAction` root is created with its own registry, logical-key scope, writer privilege, and state machine
+**And** versioned typed edges link it to the exact CaptureRun and receipt without ownership transfer, root reopening, or appending under the capture namespace.
 
 **Given** RetentionAction
-**When** storage mutation завершается либо терпит частичную/полную ошибку
-**Then** action записывает exact authorization, affected partitions/objects, precondition identities, result и retention-evidence hash, затем terminally seals
-**And** retry является idempotent либо создаёт явно связанный новый action; он не переписывает предыдущий result.
+**When** storage mutation completes or suffers partial/total failure
+**Then** the action records exact authorization, affected partitions/objects, precondition identities, result, and retention-evidence hash, then terminally seals
+**And** a retry is idempotent or creates an explicitly linked new action; it does not rewrite the previous result.
 
-**Given** package становится недоступен, receipt mismatch обнаружен либо affected-object set изменился до mutation
-**When** retention повторно проверяет preconditions
-**Then** mutation блокируется и failure evidence сохраняется append-only
-**And** recovery использует сохранённый verified package или exact prior storage identity, но никогда не реконструирует историю путём изменения sealed roots.
+**Given** the package becomes unavailable, a receipt mismatch is detected, or the affected-object set changes before mutation
+**When** retention rechecks preconditions
+**Then** mutation is blocked and failure evidence is preserved append-only
+**And** recovery uses the preserved verified package or exact prior storage identity but never reconstructs history by changing sealed roots.
 
-**Given** exact-SHA Claw validation на clean PostgreSQL 16/17
-**When** выполняются missing/unreachable/mismatched-receipt, unauthorized-object, retry, partial-failure и cross-root privilege tests
-**Then** retention gate одинаково fail closed на обеих версиях и не затрагивает Analyzer либо unrelated services
-**And** traceability связывает FR31, FR38 и оставшуюся часть FR39 с NFR6, NFR15-NFR24, NFR27-NFR41, NFR47 и AR5/AR8-AR10; rollback/recovery evidence остаётся связным и без orphan nodes.
+**Given** exact-SHA Claw validation on clean PostgreSQL 16/17
+**When** missing/unreachable/mismatched-receipt, unauthorized-object, retry, partial-failure, and cross-root privilege tests run
+**Then** the retention gate fails closed identically on both versions and does not affect Analyzer or unrelated services
+**And** traceability links FR31, FR38, and the remaining portion of FR39 to NFR6, NFR15-NFR24, NFR27-NFR41, NFR47, and AR5/AR8-AR10; rollback/recovery evidence remains connected with no orphan nodes.
 
-## Epic 2: Оператор воспроизводит рынок и измеряет исполнимую cross-venue экономику
+## Epic 2: The operator reproduces the market and measures executable cross-venue economics
 
-Оператор может из проверенного evidence детерминированно восстановить
-экономически эквивалентные инструменты и fail-closed книги, а затем измерить
-полную исполнимую стоимость входа и выхода по обеим площадкам без заявления о
-жизнеспособности стратегии.
+The operator can deterministically reconstruct economically equivalent
+instruments and fail-closed books from verified evidence, then measure the
+full executable cost of entry and exit across both venues without claiming
+strategy viability.
 
-**Implementation prerequisite:** Epic 1 предоставляет verified frozen package и
-sole `EvidenceReader`; exact-SHA validation продолжает использовать только M6
+**Implementation prerequisite:** Epic 1 provides a verified frozen package and
+sole `EvidenceReader`; exact-SHA validation continues to use only M6
 Task 1 trusted disposable Claw controller.
 
-### Story 2.1: Сопоставить инструменты по exact economic identity
+### Story 2.1: Map instruments by exact economic identity
 
-As an внутренний оператор/исследователь,
-I want анализировать только доказанно экономически эквивалентные инструменты с точной арифметикой,
-So that совпадающий ticker или float rounding не создавали ложную cross-venue возможность.
+As an internal operator/researcher,
+I want to analyze only instruments proven to be economically equivalent using exact arithmetic,
+So that a matching ticker or float rounding does not create a false cross-venue opportunity.
 
 **Acceptance Criteria:**
 
-**Given** verified evidence для Hyperliquid и Lighter instruments
-**When** Read-Only Analyzer строит economic identity mapping
-**Then** identity включает underlying, product/payoff kind, multiplier, price/quantity units, quote, settlement/collateral, venue instrument ID, validity interval, schema/version и provenance hashes
-**And** ticker equality без полного совпадения contract fields никогда не считается достаточной mapping authority.
+**Given** verified evidence for Hyperliquid and Lighter instruments
+**When** Read-Only Analyzer constructs an economic identity mapping
+**Then** identity includes underlying, product/payoff kind, multiplier, price/quantity units, quote, settlement/collateral, venue instrument ID, validity interval, schema/version, and provenance hashes
+**And** ticker equality without a complete match of contract fields is never sufficient mapping authority.
 
-**Given** price, quantity, fee, funding или P&L input
-**When** contracts декодируют и нормализуют значение
-**Then** расчёты используют canonical exact decimal, fixed-point или rational representation с явными units и rounding rules
-**And** binary floats, NaN/Infinity, ambiguous scale, unknown multiplier либо incompatible settlement fail closed до reconstruction/economics.
+**Given** price, quantity, fee, funding, or P&L input
+**When** contracts decode and normalize the value
+**Then** calculations use canonical exact decimal, fixed-point, or rational representation with explicit units and rounding rules
+**And** binary floats, NaN/Infinity, ambiguous scale, an unknown multiplier, or incompatible settlement fail closed before reconstruction/economics.
 
-**Given** mapping conflict, overlapping validity, missing provenance либо несколько допустимых economic identities
-**When** Analyzer выбирает identity для binding evidence
-**Then** создаётся typed unresolved/conflict result и downstream book/economics admission блокируется
-**And** latest-wins, ticker fallback, averaging и implicit coercion запрещены.
+**Given** a mapping conflict, overlapping validity, missing provenance, or multiple acceptable economic identities
+**When** Analyzer selects an identity for binding evidence
+**Then** a typed unresolved/conflict result is created and downstream book/economics admission is blocked
+**And** latest-wins, ticker fallback, averaging, and implicit coercion are forbidden.
 
-**Given** audited legacy analyzer fragments и PR #21 head `7fe6918690f8bc1da5826c67e3619de4126e4f54`
-**When** reusable exact contracts/evidence code мигрируется в canonical Analyzer/Contracts distributions
-**Then** каждый retained blob связывается с source commit/blob, stable requirement, rewrite rule и installed-namespace tests
-**And** whole-branch merge, conflicting workflow/config import, duplicate `multi_exchange_engine` owner или unprovenanced copy запрещены; rejected material сохраняется как quarantined provenance.
+**Given** audited legacy analyzer fragments and PR #21 head `7fe6918690f8bc1da5826c67e3619de4126e4f54`
+**When** reusable exact contracts/evidence code is migrated to canonical Analyzer/Contracts distributions
+**Then** every retained blob is bound to its source commit/blob, stable requirement, rewrite rule, and installed-namespace tests
+**And** whole-branch merge, conflicting workflow/config import, a duplicate `multi_exchange_engine` owner, or an unprovenanced copy are forbidden; rejected material is preserved as quarantined provenance.
 
 **Given** installed Read-Only Analyzer artifact
-**When** exact-SHA Claw выполняет contract, malformed-number, mapping-conflict и capability-boundary tests
-**Then** artifact содержит `mee_readonly_analyzer` и pure `mee_contracts`, но не capture writer, venue network client, private/trading/n8n/Go execution capability
-**And** traceability связывает FR19 и FR20 с NFR1-NFR9, NFR15-NFR24, NFR27-NFR41 и AR1-AR5/AR8-AR10; prior mapping remains provenance and correction uses explicit supersession.
+**When** exact-SHA Claw runs contract, malformed-number, mapping-conflict, and capability-boundary tests
+**Then** the artifact contains `mee_readonly_analyzer` and pure `mee_contracts`, but no capture writer, venue network client, or private/trading/n8n/Go execution capability
+**And** traceability links FR19 and FR20 to NFR1-NFR9, NFR15-NFR24, NFR27-NFR41, and AR1-AR5/AR8-AR10; prior mapping remains provenance and correction uses explicit supersession.
 
-### Story 2.2: Детерминированно восстановить fail-closed venue books
+### Story 2.2: Deterministically reconstruct fail-closed venue books
 
-As an внутренний оператор/исследователь,
-I want восстанавливать книгу только из authoritative snapshot и непрерывной venue-valid последовательности,
-So that gaps, reconnects и malformed updates не превращались в исполнимую ликвидность.
+As an internal operator/researcher,
+I want to reconstruct a book only from an authoritative snapshot and a continuous venue-valid sequence,
+So that gaps, reconnects, and malformed updates do not become executable liquidity.
 
 **Acceptance Criteria:**
 
-**Given** verified stream для одного mapped instrument/connection epoch
-**When** Analyzer получает authoritative snapshot и последующие venue-valid updates
-**Then** он создаёт deterministic book checkpoints только после snapshot и непрерывно применяет monotonic sequence/index transitions
-**And** каждый checkpoint связан с exact envelope/node, mapping, decoder/schema и reconstruction algorithm identities.
+**Given** a verified stream for one mapped instrument/connection epoch
+**When** Analyzer receives an authoritative snapshot and subsequent venue-valid updates
+**Then** it creates deterministic book checkpoints only after the snapshot and continuously applies monotonic sequence/index transitions
+**And** each checkpoint is bound to exact envelope/node, mapping, decoder/schema, and reconstruction algorithm identities.
 
 **Given** reconstructed bid/ask levels
-**When** checkpoint проходит admission
-**Then** prices и quantities положительны и exact, sides строго упорядочены, duplicate levels нормализованы только по versioned venue rule, а spread не crossed
-**And** invalid level, impossible deletion, unsupported transition или crossed result закрывает active reconstruction epoch.
+**When** a checkpoint passes admission
+**Then** prices and quantities are positive and exact, sides are strictly ordered, duplicate levels are normalized only according to a versioned venue rule, and the spread is not crossed
+**And** an invalid level, impossible deletion, unsupported transition, or crossed result closes the active reconstruction epoch.
 
-**Given** gap, regression, duplicate с несовпадающим payload, reconnect или malformed frame
-**When** transition нарушает venue sequencing contract
-**Then** текущий epoch становится invalid/closed и последующие incrementals не используются
-**And** reconstruction возобновляется только с новым independently valid snapshot; stale state не переносится через reconnect.
+**Given** a gap, regression, duplicate with mismatched payload, reconnect, or malformed frame
+**When** a transition violates the venue sequencing contract
+**Then** the current epoch becomes invalid/closed and subsequent incrementals are not used
+**And** reconstruction resumes only from a new independently valid snapshot; stale state is not carried across a reconnect.
 
-**Given** PostgreSQL и frozen readers одного evidence package
-**When** fresh Analyzer processes реконструируют checkpoints
-**Then** canonical checkpoints, rejection reasons и epoch boundaries byte-identical
-**And** exact-SHA Claw tests связывают FR21 и FR22 с FR17/FR19/FR20, NFR6, NFR15-NFR24, NFR27-NFR41 и AR8-AR10; rollback создаёт новый versioned reconstruction projection, не переписывая evidence.
+**Given** PostgreSQL and frozen readers of one evidence package
+**When** fresh Analyzer processes reconstruct checkpoints
+**Then** canonical checkpoints, rejection reasons, and epoch boundaries are byte-identical
+**And** exact-SHA Claw tests link FR21 and FR22 to FR17/FR19/FR20, NFR6, NFR15-NFR24, NFR27-NFR41, and AR8-AR10; rollback creates a new versioned reconstruction projection without rewriting evidence.
 
-### Story 2.3: Измерить полный четырёх-leg lifecycle через full-depth VWAP
+### Story 2.3: Measure the full four-leg lifecycle through full-depth VWAP
 
-As an внутренний оператор/исследователь,
-I want измерять обе venue legs при входе и выходе по фактически доступной глубине,
-So that top-of-book или неполный lifecycle не выдавались за исполнимую экономику.
+As an internal operator/researcher,
+I want to measure both venue legs at entry and exit using actually available depth,
+So that top-of-book or an incomplete lifecycle cannot be presented as executable economics.
 
 **Acceptance Criteria:**
 
-**Given** valid mapped books и requested exact quantity/notional
-**When** Analyzer оценивает cross-venue lifecycle
-**Then** он вычисляет full-depth VWAP отдельно для leg A entry, leg B entry, leg A exit и leg B exit с exact quantity consumption и declared rounding
-**And** каждый fill slice связан с конкретным checkpoint, levels consumed, timestamp/sequence и economic identity.
+**Given** valid mapped books and a requested exact quantity/notional
+**When** Analyzer evaluates a cross-venue lifecycle
+**Then** it computes full-depth VWAP separately for leg A entry, leg B entry, leg A exit, and leg B exit with exact quantity consumption and declared rounding
+**And** each fill slice is bound to a specific checkpoint, levels consumed, timestamp/sequence, and economic identity.
 
-**Given** недостаточная depth, invalid checkpoint, crossed book, stale/closed epoch либо несовместимые units на любой из четырёх legs
-**When** выполняется pricing
-**Then** весь lifecycle получает typed rejection и не производит partial executable result
-**And** top-of-book, last-price, extrapolation, synthetic liquidity и quantity shrinking fallback запрещены.
+**Given** insufficient depth, an invalid checkpoint, a crossed book, a stale/closed epoch, or incompatible units on any of the four legs
+**When** pricing runs
+**Then** the entire lifecycle receives a typed rejection and produces no partial executable result
+**And** top-of-book, last-price, extrapolation, synthetic liquidity, and quantity shrinking fallback are forbidden.
 
-**Given** обе возможные cross-venue directions и несколько frozen notionals
-**When** запускается measurement
-**Then** каждая direction/notional оценивается независимо по одинаковому deterministic contract, включая отрицательную экономику
-**And** результат остаётся economics measurement: он не называется opportunity, не создаёт strategy episode/verdict и не отправляет order command.
+**Given** both possible cross-venue directions and multiple frozen notionals
+**When** measurement starts
+**Then** each direction/notional is evaluated independently under the same deterministic contract, including negative economics
+**And** the result remains an economics measurement: it is not called an opportunity, creates no strategy episode/verdict, and sends no order command.
 
 **Given** exact-SHA Claw validation
-**When** выполняются golden depth ladders, rounding boundaries, insufficient-depth, four-leg provenance и fresh-process determinism tests
-**Then** expected VWAP/rejections exact и независимы от reader/backend/host clock
-**And** traceability связывает FR23 и повторно проверяет FR19-FR22 через NFR6, NFR15-NFR24, NFR27-NFR41 и AR8-AR10; algorithm replacement создаёт versioned superseding outputs.
+**When** golden depth ladders, rounding boundaries, insufficient-depth, four-leg provenance, and fresh-process determinism tests run
+**Then** expected VWAP/rejections are exact and independent of reader/backend/host clock
+**And** traceability links FR23 and rechecks FR19-FR22 through NFR6, NFR15-NFR24, NFR27-NFR41, and AR8-AR10; algorithm replacement creates versioned superseding outputs.
 
-## Epic 3: Оператор оценивает frozen shadow-стратегии с полными costs и capital constraints
+## Epic 3: The operator evaluates frozen shadow strategies with full costs and capital constraints
 
-Оператор может прогнать basis и realized-funding shadow-стратегии, увидеть
-полные затраты, задержки, неудачные попытки, блокировки капитала, концентрацию
-и диагностический paired-basis trailing, не создавая ордеров и не смешивая
-карантинные стратегии с binding verdict.
+The operator can run basis and realized-funding shadow strategies, see
+full costs, delays, failed attempts, capital locks, concentration,
+and diagnostic paired-basis trailing without creating orders or mixing
+quarantined strategies into the binding verdict.
 
-**Implementation prerequisite:** Epics 1-2 предоставляют verified frozen evidence,
-exact identities, fail-closed books и four-leg pricing. Все проверки выполняются
-на trusted exact-SHA Claw controller; retail UI и live/private execution не входят
-в scope.
+**Implementation prerequisite:** Epics 1-2 provide verified frozen evidence,
+exact identities, fail-closed books, and four-leg pricing. All checks run
+on the trusted exact-SHA Claw controller; retail UI and live/private execution are outside
+the scope.
 
-### Story 3.1: Заморозить admitted strategy universe и отдельные policy contracts
+### Story 3.1: Freeze the admitted strategy universe and separate policy contracts
 
-As an внутренний оператор/исследователь,
-I want до acquisition зафиксировать стратегии, cells, capital weights и экономические политики,
-So that наблюдаемый результат не мог изменить состав или правила проверяемой гипотезы.
+As an internal operator/researcher,
+I want to fix strategies, cells, capital weights, and economic policies before acquisition,
+So that the observed result cannot change the composition or rules of the hypothesis being tested.
 
 **Acceptance Criteria:**
 
-**Given** owner-approved Stage-A-v2 configuration до начала evidence window
-**When** создаётся strategy manifest
-**Then** closed set admitted `(strategy, asset, direction)` cells, deterministic capital weights, notionals, fee cases, delays, thresholds, episode rules, residual limits и policy versions canonicalized и hash-bound
-**And** разрешены binding basis convergence и realized funding carry; paired-basis trailing помечен `DIAGNOSTIC_NON_BINDING`.
+**Given** owner-approved Stage-A-v2 configuration before the evidence window starts
+**When** a strategy manifest is created
+**Then** the closed set of admitted `(strategy, asset, direction)` cells, deterministic capital weights, notionals, fee cases, delays, thresholds, episode rules, residual limits, and policy versions are canonicalized and hash-bound
+**And** binding basis convergence and realized funding carry are allowed; paired-basis trailing is marked `DIAGNOSTIC_NON_BINDING`.
 
 **Given** strategy domain model
-**When** contracts устанавливаются независимо
-**Then** signal/strategy, inventory, exit, execution-counterfactual, cost и portfolio policies являются отдельными versioned contracts
-**And** ни один contract не возвращает order/cancel/private command; разрешённый output type только immutable shadow simulation/evidence.
+**When** contracts are installed independently
+**Then** signal/strategy, inventory, exit, execution-counterfactual, cost, and portfolio policies are separate versioned contracts
+**And** no contract returns an order/cancel/private command; the only allowed output type is immutable shadow simulation/evidence.
 
-**Given** acquisition уже начался
-**When** предлагается удалить/добавить cell, изменить weight/threshold/cost/baseline либо выбрать параметры по observed economics
-**Then** binding configuration остаётся неизменной, а попытка fail closed либо создаёт новый future experiment identity
-**And** post-hoc sensitivity допускается только как clearly labelled diagnostic, не меняющий binding aggregate/verdict.
+**Given** acquisition has already started
+**When** removing/adding a cell, changing a weight/threshold/cost/baseline, or selecting parameters based on observed economics is proposed
+**Then** binding configuration remains immutable, and the attempt fails closed or creates a new future experiment identity
+**And** post-hoc sensitivity is allowed only as a clearly labelled diagnostic that does not change the binding aggregate/verdict.
 
-**Given** missing approval, unknown enum, weight mismatch, duplicate cell, unsupported strategy или noncanonical numeric input
-**When** manifest валидируется
-**Then** acquisition/analysis admission блокируется с typed configuration reason
-**And** exact-SHA Claw tests связывают FR40, FR44 и FR47 с AR4, NFR15-NFR26, NFR27-NFR41 и AR8-AR10; replacement manifest имеет новую identity и не переписывает прежний.
+**Given** missing approval, an unknown enum, weight mismatch, a duplicate cell, an unsupported strategy, or noncanonical numeric input
+**When** the manifest is validated
+**Then** acquisition/analysis admission is blocked with a typed configuration reason
+**And** exact-SHA Claw tests link FR40, FR44, and FR47 to AR4, NFR15-NFR26, NFR27-NFR41, and AR8-AR10; the replacement manifest has a new identity and does not rewrite the previous one.
 
-### Story 3.2: Атрибутировать delayed legs, failures, residuals и полный cost ledger
+### Story 3.2: Attribute delayed legs, failures, residuals and the full cost ledger
 
-As an внутренний оператор/исследователь,
-I want видеть полную стоимость каждой успешной и неуспешной counterfactual попытки,
-So that latency, residual risk или скрытые расходы не превращали отрицательную гипотезу в положительную.
-
-**Acceptance Criteria:**
-
-**Given** admitted shadow attempt и frozen delay/cost policies
-**When** моделируются entry и exit обеих venue legs
-**Then** каждая leg выбирает собственный evidence checkpoint после declared delay и получает independent fill/rejection outcome
-**And** simultaneous/atomic fill не предполагается, а missing delayed checkpoint или depth фиксируется как failed attempt.
-
-**Given** asymmetric fills либо failed second leg
-**When** возникает residual exposure
-**Then** deterministic residual-neutralization/rebalance policy использует только последующий valid executable evidence, учитывает additional delay/depth/fees и записывает bounded либо unresolved residual result
-**And** unresolved neutralization fail closed и не маскируется предположением о бесплатном close.
-
-**Given** completed или failed attempt
-**When** строится immutable cost ledger
-**Then** отдельно атрибутируются entry/exit fees каждой leg, realized funding, forecast funding label, slippage/depth, delay decay, residual neutralization, rebalance, failed-attempt cost, holding/inventory и frozen infrastructure cost
-**And** отсутствующий обязательный cost/provenance field сохраняет сам attempt и переводит весь run в `INVALID_DATASET` либо `INSUFFICIENT_EVIDENCE`; исключить attempt, заменить расход нулём или пересчитать aggregate без него запрещено.
-
-**Given** fresh-process replay одного attempt
-**When** exact-SHA Claw выполняет independent-delay, failed-leg, residual, fee-sign, cost-sum и provenance tests
-**Then** ledger и reason codes byte-identical и не зависят от host clock/network
-**And** traceability связывает FR41/FR42/FR49 и применимые FR40/FR44 с NFR6, NFR15-NFR24, NFR27-NFR41 и AR4/AR8-AR10; corrections supersede ledgers без rewrite.
-
-### Story 3.3: Выделить независимые episodes и блокировать virtual capital
-
-As an внутренний оператор/исследователь,
-I want считать только независимые opportunities и не переиспользовать занятый капитал,
-So that overlapping signals и duplicate frames не умножали economics искусственно.
+As an internal operator/researcher,
+I want to see the full cost of every successful and failed counterfactual attempt,
+So that latency, residual risk, or hidden expenses do not turn a negative hypothesis into a positive one.
 
 **Acceptance Criteria:**
 
-**Given** ordered strategy signals и frozen episode policy
-**When** tracker формирует episodes
-**Then** deterministic identity объединяет относящиеся к одной возможности frames/signals, а независимость определяется predeclared start/end/cooldown rules
-**And** duplicate/replayed inputs не создают новый episode либо второй P&L.
+**Given** an admitted shadow attempt and frozen delay/cost policies
+**When** entry and exit of both venue legs are modeled
+**Then** each leg selects its own evidence checkpoint after the declared delay and receives an independent fill/rejection outcome
+**And** simultaneous/atomic fill is not assumed, and a missing delayed checkpoint or depth is recorded as a failed attempt.
 
-**Given** несколько admitted cells конкурируют за ограниченный virtual capital
-**When** начинается attempt
-**Then** capital allocation использует frozen weights и deterministic priority, а allocated capital остаётся locked до exit, failed-attempt completion и residual neutralization
-**And** rejected из-за capital lock signal сохраняется как attributable non-executed attempt, если это требует frozen policy.
+**Given** asymmetric fills or a failed second leg
+**When** residual exposure arises
+**Then** deterministic residual-neutralization/rebalance policy uses only subsequent valid executable evidence, accounts for additional delay/depth/fees, and records a bounded or unresolved residual result
+**And** unresolved neutralization fails closed and is not masked by assuming a free close.
 
-**Given** episode завершён успешно, неуспешно либо остаётся unresolved
-**When** формируется episode ledger
-**Then** он содержит все attempts, time/capital bounds, cost-ledger links и typed terminal state
-**And** unresolved/open episode не считается completed independent lifecycle и не исчезает из sufficiency/concentration evidence.
+**Given** a completed or failed attempt
+**When** an immutable cost ledger is constructed
+**Then** entry/exit fees for each leg, realized funding, forecast funding label, slippage/depth, delay decay, residual neutralization, rebalance, failed-attempt cost, holding/inventory, and frozen infrastructure cost are attributed separately
+**And** a missing mandatory cost/provenance field preserves the attempt itself and moves the entire run to `INVALID_DATASET` or `INSUFFICIENT_EVIDENCE`; omitting the attempt, replacing a cost with zero, or recalculating the aggregate without it is forbidden.
+
+**Given** fresh-process replay of one attempt
+**When** exact-SHA Claw runs independent-delay, failed-leg, residual, fee-sign, cost-sum, and provenance tests
+**Then** the ledger and reason codes are byte-identical and independent of host clock/network
+**And** traceability links FR41/FR42/FR49 and applicable FR40/FR44 to NFR6, NFR15-NFR24, NFR27-NFR41, and AR4/AR8-AR10; corrections supersede ledgers without rewriting them.
+
+### Story 3.3: Identify independent episodes and lock virtual capital
+
+As an internal operator/researcher,
+I want to count only independent opportunities and avoid reusing committed capital,
+So that overlapping signals and duplicate frames do not artificially multiply economics.
+
+**Acceptance Criteria:**
+
+**Given** ordered strategy signals and a frozen episode policy
+**When** the tracker forms episodes
+**Then** deterministic identity groups frames/signals belonging to one opportunity, and independence is determined by predeclared start/end/cooldown rules
+**And** duplicate/replayed inputs do not create a new episode or a second P&L.
+
+**Given** multiple admitted cells compete for limited virtual capital
+**When** an attempt starts
+**Then** capital allocation uses frozen weights and deterministic priority, and allocated capital remains locked until exit, failed-attempt completion, and residual neutralization
+**And** a signal rejected because of a capital lock is preserved as an attributable non-executed attempt if the frozen policy requires it.
+
+**Given** an episode completes successfully, unsuccessfully, or remains unresolved
+**When** an episode ledger is formed
+**Then** it contains all attempts, time/capital bounds, cost-ledger links, and a typed terminal state
+**And** an unresolved/open episode is not counted as a completed independent lifecycle and does not disappear from sufficiency/concentration evidence.
 
 **Given** exact-SHA Claw validation
-**When** выполняются overlap, duplicate, cooldown, priority, capital-reuse, failure и concentration-input tests
-**Then** episode counts и capital timeline deterministic
-**And** traceability связывает FR48 и применимую FR49 с NFR15-NFR24, NFR27-NFR41 и AR4/AR8-AR10; policy changes create superseding experiment outputs.
+**When** overlap, duplicate, cooldown, priority, capital-reuse, failure, and concentration-input tests run
+**Then** episode counts and the capital timeline are deterministic
+**And** traceability links FR48 and applicable FR49 to NFR15-NFR24, NFR27-NFR41, and AR4/AR8-AR10; policy changes create superseding experiment outputs.
 
-### Story 3.4: Оценить executable basis-convergence lifecycle
+### Story 3.4: Evaluate the executable basis-convergence lifecycle
 
-As an внутренний оператор/исследователь,
-I want оценить вход и выход basis-convergence по independent delayed executable books,
-So that hypothesis учитывает реальную глубину и распад edge между двумя legs.
+As an internal operator/researcher,
+I want to evaluate basis-convergence entry and exit using independent delayed executable books,
+So that the hypothesis accounts for actual depth and edge decay between the two legs.
 
 **Acceptance Criteria:**
 
-**Given** admitted basis cell, valid episode и frozen entry/exit policy
-**When** basis signal проходит predeclared admission threshold
-**Then** strategy оценивает обе directions и весь four-leg lifecycle через full-depth VWAP, independent delays и complete cost ledger
-**And** result связывает signal, checkpoints, fills/rejections, capital locks, residual outcomes и policy/config hashes.
+**Given** an admitted basis cell, a valid episode, and a frozen entry/exit policy
+**When** a basis signal passes the predeclared admission threshold
+**Then** the strategy evaluates both directions and the entire four-leg lifecycle through full-depth VWAP, independent delays, and a complete cost ledger
+**And** the result binds signal, checkpoints, fills/rejections, capital locks, residual outcomes, and policy/config hashes.
 
-**Given** convergence, fixed-time, remaining-basis либо safety exit condition
-**When** exit policy срабатывает
-**Then** применяется deterministic declared precedence data/mapping invalid -> residual/margin safety -> max hold -> basis widening -> strategy exit
-**And** стратегия не выбирает лучший exit задним числом и не использует future evidence.
+**Given** a convergence, fixed-time, remaining-basis, or safety exit condition
+**When** the exit policy triggers
+**Then** the deterministic declared precedence data/mapping invalid -> residual/margin safety -> max hold -> basis widening -> strategy exit applies
+**And** the strategy does not choose the best exit retrospectively or use future evidence.
 
-**Given** negative edge, failed leg, insufficient depth, widened basis или expensive neutralization
-**When** attempt завершается
-**Then** negative/failed economics полностью сохраняется и входит в downstream aggregate по frozen policy
-**And** output остаётся shadow evidence и не создаёт execution command либо eligibility for live trading.
+**Given** negative edge, a failed leg, insufficient depth, widened basis, or expensive neutralization
+**When** the attempt completes
+**Then** negative/failed economics is preserved in full and enters the downstream aggregate according to frozen policy
+**And** output remains shadow evidence and creates no execution command or eligibility for live trading.
 
 **Given** exact-SHA Claw validation
-**When** выполняются golden convergence, widening, delayed-leg, exit-precedence, negative-edge и no-lookahead tests
-**Then** basis episode outputs deterministic и exact
-**And** traceability связывает FR40, FR41, FR44 и применимые FR48/FR49 с NFR15-NFR24, NFR27-NFR41 и AR4/AR8-AR10.
+**When** golden convergence, widening, delayed-leg, exit-precedence, negative-edge, and no-lookahead tests run
+**Then** basis episode outputs are deterministic and exact
+**And** traceability links FR40, FR41, FR44, and applicable FR48/FR49 to NFR15-NFR24, NFR27-NFR41, and AR4/AR8-AR10.
 
-### Story 3.5: Оценить realized-funding carry по фактическим settlements
+### Story 3.5: Evaluate realized-funding carry from actual settlements
 
-As an внутренний оператор/исследователь,
-I want отделить реализованные funding cashflows от прогнозов и полной holding economics,
-So that funding hypothesis подтверждалась только фактически наблюдаемыми settlement evidence.
+As an internal operator/researcher,
+I want to separate realized funding cashflows from forecasts and full holding economics,
+So that the funding hypothesis is supported only by actually observed settlement evidence.
 
 **Acceptance Criteria:**
 
-**Given** admitted funding cell и signed venue settlement evidence
-**When** funding lifecycle моделируется
-**Then** realized cashflow связывается с exact venue/instrument, rate/amount, sign, schedule, effective interval, position/notional и evidence hash
-**And** forecast/indicative rate хранится отдельным diagnostic type и никогда не заменяет realized settlement.
+**Given** an admitted funding cell and signed venue settlement evidence
+**When** the funding lifecycle is modeled
+**Then** realized cashflow is bound to exact venue/instrument, rate/amount, sign, schedule, effective interval, position/notional, and evidence hash
+**And** forecast/indicative rate is stored as a separate diagnostic type and never replaces realized settlement.
 
 **Given** funding episode
-**When** вычисляется net economics
-**Then** ledger включает entry/exit VWAP, basis movement, holding time, fees, delay, residual/rebalance, capital locks и realized funding каждой venue leg
-**And** missing/ambiguous settlement, sign, interval либо position attribution делает funding reason insufficient/invalid.
+**When** net economics is computed
+**Then** the ledger includes entry/exit VWAP, basis movement, holding time, fees, delay, residual/rebalance, capital locks, and realized funding for each venue leg
+**And** missing/ambiguous settlement, sign, interval, or position attribution makes the funding reason insufficient/invalid.
 
-**Given** положительный forecast и отрицательный или отсутствующий realized cashflow
-**When** episode/aggregate строится
-**Then** forecast не создаёт positive funding P&L и не удовлетворяет funding continuation evidence
-**And** completed и failed funding attempts остаются в admitted-cell slice.
+**Given** a positive forecast and negative or missing realized cashflow
+**When** the episode/aggregate is constructed
+**Then** the forecast creates no positive funding P&L and does not satisfy funding continuation evidence
+**And** completed and failed funding attempts remain in the admitted-cell slice.
 
 **Given** exact-SHA Claw validation
-**When** выполняются sign/schedule, settlement-boundary, forecast-separation, missing-cashflow, basis/holding-cost и replay tests
-**Then** funding outputs deterministic и provenance-complete
-**And** traceability связывает FR40, FR42, FR44 и применимые FR48/FR49 с NFR15-NFR24, NFR27-NFR41 и AR4/AR8-AR10.
+**When** sign/schedule, settlement-boundary, forecast-separation, missing-cashflow, basis/holding-cost, and replay tests run
+**Then** funding outputs are deterministic and provenance-complete
+**And** traceability links FR40, FR42, FR44, and applicable FR48/FR49 to NFR15-NFR24, NFR27-NFR41, and AR4/AR8-AR10.
 
-### Story 3.6: Сравнить paired-basis trailing только как diagnostic
+### Story 3.6: Compare paired-basis trailing only as a diagnostic
 
-As an внутренний оператор/исследователь,
-I want сравнить trailing exit по реализованной paired-basis convergence,
-So that потенциальное улучшение exit policy измерялось без влияния на binding Stage-A решение.
+As an internal operator/researcher,
+I want to compare a trailing exit based on realized paired-basis convergence,
+So that potential exit-policy improvement is measured without affecting the binding Stage-A decision.
 
 **Acceptance Criteria:**
 
-**Given** completed basis episodes и frozen diagnostic trailing configuration
-**When** Analyzer запускает counterfactual trailing
-**Then** trail отслеживает только synchronized executable paired-basis/net-capture measure с independent delayed exits и complete costs
-**And** single-asset price trail, lookahead peak, unfilled top-of-book и free cancellation assumptions запрещены.
+**Given** completed basis episodes and frozen diagnostic trailing configuration
+**When** Analyzer runs counterfactual trailing
+**Then** the trail tracks only a synchronized executable paired-basis/net-capture measure with independent delayed exits and complete costs
+**And** single-asset price trail, lookahead peak, unfilled top-of-book, and free cancellation assumptions are forbidden.
 
 **Given** diagnostic result
-**When** он сравнивается с frozen primary exits
-**Then** отчёт показывает non-inferiority, tail/drawdown, missed exits и regime slices как diagnostic evidence
-**And** trailing не изменяет admitted primary attempts, portfolio aggregate, sufficiency, binding reasons или verdict bytes.
+**When** it is compared with frozen primary exits
+**Then** the report shows non-inferiority, tail/drawdown, missed exits, and regime slices as diagnostic evidence
+**And** trailing does not change admitted primary attempts, portfolio aggregate, sufficiency, binding reasons, or verdict bytes.
 
-**Given** отрицательный cell либо positive trailing sensitivity
+**Given** a negative cell or positive trailing sensitivity
 **When** downstream decision consumes strategy evidence
-**Then** отрицательный cell остаётся в frozen aggregate, а trailing output недоступен через binding verdict input type
-**And** попытка такого import/type edge блокируется graph/capability tests.
+**Then** the negative cell remains in the frozen aggregate, and trailing output is inaccessible through the binding verdict input type
+**And** an attempt to create such an import/type edge is blocked by graph/capability tests.
 
 **Given** exact-SHA Claw validation
-**When** выполняются no-lookahead, delayed-exit, full-cost, binding-isolation и report-label tests
-**Then** diagnostic output deterministic и физически отделён от verdict inputs
-**And** traceability связывает FR43, FR44, FR47 и применимую FR49 с NFR15-NFR26, NFR27-NFR41 и AR4/AR8-AR10.
+**When** no-lookahead, delayed-exit, full-cost, binding-isolation, and report-label tests run
+**Then** diagnostic output is deterministic and physically separated from verdict inputs
+**And** traceability links FR43, FR44, FR47, and applicable FR49 to NFR15-NFR26, NFR27-NFR41, and AR4/AR8-AR10.
 
-### Story 3.7: Собрать frozen-universe portfolio aggregate без masking
+### Story 3.7: Build the frozen-universe portfolio aggregate without masking
 
-As an внутренний оператор/исследователь,
-I want получить один reconciled aggregate по всему заранее admitted universe,
-So that прибыльные survivors не скрывали missing, failed или отрицательные cells.
+As an internal operator/researcher,
+I want one reconciled aggregate across the entire previously admitted universe,
+So that profitable survivors cannot hide missing, failed, or negative cells.
 
 **Acceptance Criteria:**
 
-**Given** frozen manifest всех admitted cells и capital weights
+**Given** a frozen manifest of all admitted cells and capital weights
 **When** portfolio aggregator consumes strategy episodes
-**Then** он включает каждый completed и failed attempt каждого admitted cell с frozen weight и deterministic ordering
-**And** observed economics не может удалить, добавить, перевзвесить или переименовать cell.
+**Then** it includes every completed and failed attempt from every admitted cell with its frozen weight and deterministic ordering
+**And** observed economics cannot remove, add, reweight, or rename a cell.
 
-**Given** отсутствующая обязательная cell, unreconciled attempt, open residual либо incomplete required evidence
-**When** aggregate строится
-**Then** aggregate получает typed invalid/insufficient state и не пересчитывается по survivors
-**And** negative cell сохраняется внутри aggregate, но сама по себе не создаёт отдельный binding verdict.
+**Given** a missing mandatory cell, unreconciled attempt, open residual, or incomplete required evidence
+**When** the aggregate is constructed
+**Then** the aggregate receives a typed invalid/insufficient state and is not recalculated over survivors
+**And** a negative cell is preserved within the aggregate but does not by itself create a separate binding verdict.
 
 **Given** complete aggregate
-**When** вычисляются portfolio evidence metrics
-**Then** total/median net, notional cases, delay/fee cases, independent episode count, capital utilization и largest-episode concentration exact и reconciled с per-cell slices
-**And** per-cell slices обязательны для объяснимости, но помечены non-binding; их сумма/weights сходятся с aggregate без остатка.
+**When** portfolio evidence metrics are computed
+**Then** total/median net, notional cases, delay/fee cases, independent episode count, capital utilization, and largest-episode concentration are exact and reconciled with per-cell slices
+**And** per-cell slices are mandatory for explainability but marked non-binding; their sum/weights reconcile with the aggregate without a remainder.
 
 **Given** minimum episode contract
-**When** проверяется episode count
-**Then** minimum 20 independent episodes применяется к aggregate, если до acquisition не утверждён отдельный per-cell minimum
-**And** exact-SHA Claw tests связывают FR40, FR47, FR48 и FR49 с AR4, NFR15-NFR26, NFR27-NFR41 и AR8-AR10; aggregate algorithm/version входит в provenance.
+**When** episode count is checked
+**Then** the minimum of 20 independent episodes applies to the aggregate unless a separate per-cell minimum was approved before acquisition
+**And** exact-SHA Claw tests link FR40, FR47, FR48, and FR49 to AR4, NFR15-NFR26, NFR27-NFR41, and AR8-AR10; aggregate algorithm/version is part of provenance.
 
-### Story 3.8: Доказать quarantine unsupported strategy runtime
+### Story 3.8: Prove quarantine of unsupported strategy runtime
 
-As an внутренний оператор/исследователь,
-I want видеть проверяемое доказательство, что импортированные и live-oriented стратегии не входят в Stage A,
-So that исследовательские фрагменты не превращались в активные боты по совпадению имён или imports.
+As an internal operator/researcher,
+I want verifiable proof that imported and live-oriented strategies are not part of Stage A,
+So that research fragments do not become active bots through matching names or imports.
 
 **Acceptance Criteria:**
 
-**Given** installed Analyzer и Public Capture artifacts, manifests и runtime graph
-**When** выполняется quarantine boundary scan
-**Then** grid, DCA, Infinity Grid, Solana-chain runtime, maker-fill claims, legacy asset bots, private adapters и execution libraries отсутствуют из dependencies, files, imports, entry points, configuration selectors и reachable symbols
-**And** research/archive nodes сохраняют provenance и явно классифицированы `QUARANTINED_HYPOTHESIS` или `ARCHIVE`, не ACTIVE.
+**Given** installed Analyzer and Public Capture artifacts, manifests, and runtime graph
+**When** a quarantine boundary scan runs
+**Then** grid, DCA, Infinity Grid, Solana-chain runtime, maker-fill claims, legacy asset bots, private adapters, and execution libraries are absent from dependencies, files, imports, entry points, configuration selectors, and reachable symbols
+**And** research/archive nodes preserve provenance and are explicitly classified as `QUARANTINED_HYPOTHESIS` or `ARCHIVE`, not ACTIVE.
 
-**Given** запрос на promotion quarantined strategy
-**When** отсутствует отдельный approved actor/outcome, strategy manifest, economic contract, evidence gate, security/capability review и owner approval
-**Then** promotion fail closed и active graph не изменяется
-**And** reuse допустим только как provenance-labelled test/research input без private protocol, wallet, signer или live authority.
+**Given** a request to promote a quarantined strategy
+**When** a separate approved actor/outcome, strategy manifest, economic contract, evidence gate, security/capability review, and owner approval are absent
+**Then** promotion fails closed and the active graph does not change
+**And** reuse is allowed only as provenance-labelled test/research input without private protocol, wallet, signer, or live authority.
 
-**Given** maker-first, polling bot либо иной imported method
-**When** отсутствуют queue/fill/cancel/adverse-selection measurements и frozen evidence contract
-**Then** метод остаётся diagnostic/quarantined и не получает simulated fill либо binding economics authority
-**And** отсутствие retail demand/UX не считается дефектом Stage A.
+**Given** a maker-first, polling bot, or other imported method
+**When** queue/fill/cancel/adverse-selection measurements and a frozen evidence contract are absent
+**Then** the method remains diagnostic/quarantined and receives no simulated fill or binding economics authority
+**And** absence of retail demand/UX is not considered a Stage A defect.
 
-**Given** exact-SHA Claw installed-artifact validation и independent review
-**When** проверяются manifests, transitive dependencies, imports, OCI layers, strings/symbols, network surface и graph ownership
-**Then** capability absence доказана на собранных артефактах, а не только source grep
-**And** traceability связывает FR40, FR45 и FR46 с NFR1-NFR5, NFR13-NFR26, NFR27-NFR41 и AR1-AR10; quarantine removal требует отдельной future approval chain.
+**Given** exact-SHA Claw installed-artifact validation and independent review
+**When** manifests, transitive dependencies, imports, OCI layers, strings/symbols, network surface, and graph ownership are checked
+**Then** capability absence is proven on built artifacts, not only by source grep
+**And** traceability links FR40, FR45, and FR46 to NFR1-NFR5, NFR13-NFR26, NFR27-NFR41, and AR1-AR10; quarantine removal requires a separate future approval chain.
 
-## Epic 4: Оператор получает воспроизводимое Stage A решение
+## Epic 4: The operator obtains a reproducible Stage A decision
 
-Оператор получает запечатанный AnalysisRun, детерминированный replay и отчёт с
-одним из четырёх взаимоисключающих решений Stage A, полностью связанным с
-исходным evidence, конфигурацией, кодом, exact-SHA Claw gates, release/deploy
-границами и rollback evidence; решение никогда не означает разрешение live
+The operator receives a sealed AnalysisRun, deterministic replay, and a report with
+one of four mutually exclusive Stage A decisions, fully bound to
+the original evidence, configuration, code, exact-SHA Claw gates, release/deploy
+boundaries, and rollback evidence; the decision never authorizes live
 trading.
 
-**Implementation prerequisite:** Epics 1-3 предоставляют verified package,
-reconstruction и frozen aggregate. Stage A остаётся внутренним hypothesis test;
-Claw допускает realtime apply/rollback только в изолированном test scope.
+**Implementation prerequisite:** Epics 1-3 provide a verified package,
+reconstruction, and frozen aggregate. Stage A remains an internal hypothesis test;
+Claw permits realtime apply/rollback only within the isolated test scope.
 
-### Story 4.1: Создать и изолированно запечатать immutable AnalysisRun
+### Story 4.1: Create and seal an immutable AnalysisRun in isolation
 
-As an внутренний оператор/исследователь,
-I want записать все derived outputs под отдельным immutable AnalysisRun,
-So that результат полностью воспроизводим и никогда не изменяет исходный CaptureRun.
+As an internal operator/researcher,
+I want to record all derived outputs under a separate immutable AnalysisRun,
+So that the result is fully reproducible and never changes the original CaptureRun.
 
 **Acceptance Criteria:**
 
-**Given** sealed `CaptureRun`, verified `FrozenPackageReceipt`, exact analyzer artifact/code и frozen config identities
-**When** analysis начинается
-**Then** создаётся отдельный immutable `AnalysisRun` root со своей registry, logical-key scope, versioned node kinds, analysis-only writer privilege и lifecycle state machine
-**And** missing/mismatched capture terminal, package, artifact, code или config identity блокирует run creation.
+**Given** a sealed `CaptureRun`, verified `FrozenPackageReceipt`, exact analyzer artifact/code, and frozen config identities
+**When** analysis begins
+**Then** a separate immutable `AnalysisRun` root is created with its own registry, logical-key scope, versioned node kinds, analysis-only writer privilege, and lifecycle state machine
+**And** missing/mismatched capture terminal, package, artifact, code, or config identity blocks run creation.
 
 **Given** open AnalysisRun
-**When** reconstruction, quality, economics, strategy, portfolio, decision, replay или report evidence записывается
-**Then** writer принимает только ANALYSIS-owned node kinds и declared typed input/derived edges
-**And** никакая function/role не изменяет capture roots, registry, payload, receipt либо retention namespace.
+**When** reconstruction, quality, economics, strategy, portfolio, decision, replay, or report evidence is written
+**Then** the writer accepts only ANALYSIS-owned node kinds and declared typed input/derived edges
+**And** no function/role changes capture roots, registry, payload, receipt, or retention namespace.
 
 **Given** complete analysis graph
 **When** AnalysisRun seals
-**Then** terminal document canonicalizes input identities, output/node counts, canonical bounds, graph root, output digest и analysis terminal hash
-**And** post-seal analysis writes отклоняются; correction/re-run создаёт новый AnalysisRun, связанный provenance edge, а не reopen/rewrite.
+**Then** the terminal document canonicalizes input identities, output/node counts, canonical bounds, graph root, output digest, and analysis terminal hash
+**And** post-seal analysis writes are rejected; a correction/re-run creates a new AnalysisRun linked by a provenance edge, rather than reopening/rewriting.
 
-**Given** clean PostgreSQL 16/17 и two fresh processes
-**When** exact-SHA Claw запускает create/write/seal, cross-root denial, post-seal mutation и terminal-hash tests
-**Then** CaptureRun counts/hashes неизменны, AnalysisRun outputs/terminal hashes deterministic и DB tests не skipped
-**And** traceability связывает FR37 и основу FR18/FR24 с NFR6, NFR15-NFR24, NFR27-NFR41 и AR4/AR8-AR11; rollback создаёт новый run с prior artifact, не меняя существующий.
+**Given** clean PostgreSQL 16/17 and two fresh processes
+**When** exact-SHA Claw runs create/write/seal, cross-root denial, post-seal mutation, and terminal-hash tests
+**Then** CaptureRun counts/hashes remain unchanged, AnalysisRun outputs/terminal hashes are deterministic, and DB tests are not skipped
+**And** traceability links FR37 and the foundation of FR18/FR24 to NFR6, NFR15-NFR24, NFR27-NFR41, and AR4/AR8-AR11; rollback creates a new run with the prior artifact without changing the existing one.
 
-### Story 4.2: Выдать один Stage-A verdict по строгой fail-closed precedence
+### Story 4.2: Emit one Stage-A verdict under strict fail-closed precedence
 
-As an внутренний оператор/исследователь,
-I want получить один typed verdict из frozen predicates,
-So that invalid data, недостаточность и отрицательная экономика не смешивались и не интерпретировались как успех.
+As an internal operator/researcher,
+I want one typed verdict from frozen predicates,
+So that invalid data, insufficiency, and negative economics are not conflated or interpreted as success.
 
 **Acceptance Criteria:**
 
 **Given** AnalysisRun inputs
-**When** существует package/hash/schema/provenance/closure/replay/mapping integrity failure
-**Then** decision равен `INVALID_DATASET` и содержит только ordered closed-enum `INVALID_*` reasons
-**And** economics и survivor aggregate не оцениваются как binding result.
+**When** a package/hash/schema/provenance/closure/replay/mapping integrity failure exists
+**Then** the decision is `INVALID_DATASET` and contains only ordered closed-enum `INVALID_*` reasons
+**And** economics and a survivor aggregate are not evaluated as a binding result.
 
 **Given** dataset valid
-**When** acquisition меньше семи calendar days, complete UTC days меньше пяти, strict healthy minutes ниже 95%, required mapping/fee cases отсутствуют, aggregate independent episodes меньше 20, admitted cell incomplete либо required realized funding evidence отсутствует
-**Then** decision равен `INSUFFICIENT_EVIDENCE` и содержит только predicate-specific `INSUFFICIENT_*` reasons
-**And** partial boundary days и forecast funding остаются diagnostic и не удовлетворяют gate.
+**When** acquisition spans fewer than seven calendar days, complete UTC days are fewer than five, strict healthy minutes are below 95%, required mapping/fee cases are missing, aggregate independent episodes are fewer than 20, an admitted cell is incomplete, or required realized funding evidence is missing
+**Then** the decision is `INSUFFICIENT_EVIDENCE` and contains only predicate-specific `INSUFFICIENT_*` reasons
+**And** partial boundary days and forecast funding remain diagnostic and do not satisfy the gate.
 
-**Given** dataset valid и sufficient
-**When** frozen portfolio aggregate имеет non-positive total или median net, non-positive USD 1,000 net, negative USD 5,000 net, не выживает 300/500 ms delay или любой frozen fee case, либо largest-episode contribution не ниже 25%
-**Then** decision равен `STOP` с only `STOP_*` reasons для всех failed binding predicates
-**And** отрицательный отдельный cell не является самостоятельным verdict, но остаётся внутри aggregate с frozen weight.
+**Given** the dataset is valid and sufficient
+**When** the frozen portfolio aggregate has non-positive total or median net, non-positive USD 1,000 net, negative USD 5,000 net, does not survive 300/500 ms delay or any frozen fee case, or largest-episode contribution is not below 25%
+**Then** the decision is `STOP` with only `STOP_*` reasons for all failed binding predicates
+**And** an individual negative cell is not an independent verdict but remains within the aggregate with its frozen weight.
 
-**Given** dataset valid/sufficient и все binding aggregate predicates проходят exact boundaries
-**When** evaluator завершает precedence INVALID -> INSUFFICIENT -> STOP -> EXTEND
-**Then** decision равен только `EXTEND_LONGER_SHADOW` с `EXTEND_ALL_V2_GATES_PASS`
-**And** `GO`, `NO_GO`, `KILL`, `plausible`, `inconclusive`, arbitrary reasons и mixed precedence classes невозможно сконструировать.
+**Given** the dataset is valid/sufficient and all binding aggregate predicates pass the exact boundaries
+**When** the evaluator completes the precedence INVALID -> INSUFFICIENT -> STOP -> EXTEND
+**Then** the decision is only `EXTEND_LONGER_SHADOW` with `EXTEND_ALL_V2_GATES_PASS`
+**And** `GO`, `NO_GO`, `KILL`, `plausible`, `inconclusive`, arbitrary reasons, and mixed precedence classes cannot be constructed.
 
 **Given** exact threshold boundaries
-**When** exact-SHA Claw выполняет individual/combinatorial predicate tests
-**Then** `0.95` health и `0` USD 5,000 net проходят соответствующие inclusive gates, `0` USD 1,000 net и concentration `0.25` дают STOP, а invalid всегда имеет высший precedence
-**And** traceability связывает FR1-FR3, FR7-FR12 и применимые FR5/FR24 с AR4, NFR15-NFR26, NFR27-NFR41 и AR8-AR11.
+**When** exact-SHA Claw runs individual/combinatorial predicate tests
+**Then** `0.95` health and `0` USD 5,000 net pass the respective inclusive gates, `0` USD 1,000 net and concentration `0.25` produce STOP, and invalid always has the highest precedence
+**And** traceability links FR1-FR3, FR7-FR12, and applicable FR5/FR24 to AR4, NFR15-NFR26, NFR27-NFR41, and AR8-AR11.
 
-### Story 4.3: Воспроизвести byte-identical report и analysis replay receipt
+### Story 4.3: Reproduce a byte-identical report and analysis replay receipt
 
-As an внутренний оператор/исследователь,
-I want повторить анализ в двух чистых процессах и получить одинаковый evidence-linked report,
-So that Stage-A решение можно независимо проверить без сети, host clock или скрытого state.
+As an internal operator/researcher,
+I want to repeat analysis in two clean processes and obtain the same evidence-linked report,
+So that the Stage-A decision can be independently verified without network, host clock, or hidden state.
 
 **Acceptance Criteria:**
 
-**Given** verified frozen package, frozen config, exact analyzer identity и одна заранее созданная/hash-bound semantic `AnalysisRun` identity
-**When** два fresh processes запускают final replay без network и host-clock access
-**Then** canonical reconstruction/economics/portfolio/verdict/report bytes совпадают, как и graph root, output digest и AnalysisRun terminal hash
-**And** оба процесса получают одинаковые explicit `analysis_run_id`, input/algorithm/config/code identities и canonical time inputs; independently generated run IDs, `PYTHONHASHSEED`, filesystem enumeration, locale, audit time и process order не могут менять semantic output.
+**Given** a verified frozen package, frozen config, exact analyzer identity, and one previously created/hash-bound semantic `AnalysisRun` identity
+**When** two fresh processes run final replay without network or host-clock access
+**Then** canonical reconstruction/economics/portfolio/verdict/report bytes match, as do graph root, output digest, and AnalysisRun terminal hash
+**And** both processes receive identical explicit `analysis_run_id`, input/algorithm/config/code identities, and canonical time inputs; independently generated run IDs, `PYTHONHASHSEED`, filesystem enumeration, locale, audit time, and process order cannot change semantic output.
 
 **Given** report
-**When** оператор проверяет любой aggregate metric, per-cell slice, failed attempt, reason или decision
-**Then** существует complete path к AnalysisRun, policy/config, algorithm/code/artifact, FrozenPackageReceipt, CaptureRun terminal и raw evidence hashes
-**And** per-cell slices reconciled с binding aggregate, diagnostic trailing явно отделён, а missing provenance делает run invalid.
+**When** the operator checks any aggregate metric, per-cell slice, failed attempt, reason, or decision
+**Then** a complete path exists to AnalysisRun, policy/config, algorithm/code/artifact, FrozenPackageReceipt, CaptureRun terminal, and raw evidence hashes
+**And** per-cell slices reconcile with the binding aggregate, diagnostic trailing is explicitly separated, and missing provenance makes the run invalid.
 
 **Given** replay receipt
 **When** AnalysisRun seals
-**Then** receipt связывает обе process receipt hashes, frozen package digest, capture terminal, analyzer/config/code identities, canonical output digest, graph root и terminal hash
-**And** receipt относится только к AnalysisRun, не записывается в CaptureRun/frozen package и не создаётся при differing outputs.
+**Then** the receipt binds both process receipt hashes, frozen package digest, capture terminal, analyzer/config/code identities, canonical output digest, graph root, and terminal hash
+**And** the receipt belongs only to AnalysisRun, is not written into CaptureRun/frozen package, and is not created when outputs differ.
 
 **Given** exact-SHA Claw validation
-**When** выполняются fresh-process, no-network/no-clock, reversed-input, different-hashseed, tamper и provenance-closure tests
-**Then** deterministic replay доказан immutable receipts
-**And** traceability полностью связывает FR5, FR18, FR24 и FR37 с NFR6, NFR15-NFR24, NFR27-NFR41 и AR4/AR8-AR11; replay correction создаёт новый AnalysisRun.
+**When** fresh-process, no-network/no-clock, reversed-input, different-hashseed, tamper, and provenance-closure tests run
+**Then** deterministic replay is proven by immutable receipts
+**And** traceability fully links FR5, FR18, FR24, and FR37 to NFR6, NFR15-NFR24, NFR27-NFR41, and AR4/AR8-AR11; replay correction creates a new AnalysisRun.
 
-### Story 4.4: Ограничить решение внутренней Stage-A гипотезой
+### Story 4.4: Limit the decision to the internal Stage-A hypothesis
 
-As an внутренний оператор/исследователь,
-I want видеть точный смысл и границы Stage-A результата,
-So that shadow economics не выдавалась за retail demand, production profitability или разрешение торговли.
+As an internal operator/researcher,
+I want to see the exact meaning and boundaries of the Stage-A result,
+So that shadow economics is not presented as retail demand, production profitability, or trading authorization.
 
 **Acceptance Criteria:**
 
-**Given** любой из четырёх Stage-A verdicts
-**When** report и machine-readable decision публикуются
-**Then** primary actor указан как internal operator/researcher, а outcome — reproducible evidence-backed STOP/EXTEND research decision
-**And** документ явно говорит, что результат не разрешает private API, live trading, customer rollout, custody, Telegram/web authority или revenue claim.
+**Given** any of the four Stage-A verdicts
+**When** the report and machine-readable decision are published
+**Then** the primary actor is identified as the internal operator/researcher and the outcome as a reproducible evidence-backed STOP/EXTEND research decision
+**And** the document explicitly states that the result does not authorize private API, live trading, customer rollout, custody, Telegram/web authority, or a revenue claim.
 
 **Given** `EXTEND_LONGER_SHADOW`
-**When** оператор читает continuation target
-**Then** target immutable равен 7-14 complete UTC days и минимум 100 independent completed lifecycles
-**And** EXTEND никогда не синоним `GO`; первый live behavior требует отдельной будущей architecture/security/reconciliation/human authorization chain.
+**When** the operator reads the continuation target
+**Then** the immutable target is 7-14 complete UTC days and at least 100 independent completed lifecycles
+**And** EXTEND is never a synonym for `GO`; the first live behavior requires a separate future architecture/security/reconciliation/human authorization chain.
 
 **Given** historical USD 10 PUMP/DOGE KILL/EXTEND material
-**When** оно появляется в provenance/research
-**Then** оно помечено `SUPERSEDED`, не смешивается с Stage-A-v2 universe/thresholds и не влияет на verdict
-**And** replacement edge сохраняет историю без dual-active contract.
+**When** it appears in provenance/research
+**Then** it is marked `SUPERSEDED`, is not mixed with the Stage-A-v2 universe/thresholds, and does not affect the verdict
+**And** a replacement edge preserves history without a dual-active contract.
 
-**Given** claims об external demand, willingness to pay, revenue или production profitability
-**When** они входят в graph/report
-**Then** каждый claim существует только как separate unsupported falsifiable Hypothesis с отдельными actor, outcome, metric, evidence и approval requirements
-**And** отсутствие retail UX, market research или monetization evidence не блокирует честное завершение internal hypothesis test.
+**Given** claims about external demand, willingness to pay, revenue, or production profitability
+**When** they enter the graph/report
+**Then** each claim exists only as a separate unsupported falsifiable Hypothesis with separate actor, outcome, metric, evidence, and approval requirements
+**And** absence of retail UX, market research, or monetization evidence does not block honest completion of the internal hypothesis test.
 
-**Given** exact-SHA Claw graph/report tests и independent product/quant review
-**When** проверяются wording, enum, authority edges и unsupported claims
-**Then** traceability связывает FR4, FR6, FR8, FR12-FR14 с NFR7, NFR15-NFR26, NFR27-NFR41 и AR1-AR4/AR8-AR11
-**And** изменение product meaning требует нового owner approval, а не code-only commit.
+**Given** exact-SHA Claw graph/report tests and independent product/quant review
+**When** wording, enums, authority edges, and unsupported claims are checked
+**Then** traceability links FR4, FR6, FR8, FR12-FR14 to NFR7, NFR15-NFR26, NFR27-NFR41, and AR1-AR4/AR8-AR11
+**And** changing product meaning requires new owner approval, rather than a code-only commit.
 
-### Story 4.5: Зафиксировать versioned schemas causal release graph
+### Story 4.5: Establish versioned schemas for the causal release graph
 
-As an внутренний оператор/исследователь,
-I want проверять каждый release phase отдельным immutable contract,
-So that candidate, promotion и deployment нельзя было смешать или создать задним числом.
+As an internal operator/researcher,
+I want to verify each release phase through a separate immutable contract,
+So that candidate, promotion, and deployment cannot be conflated or created retrospectively.
 
 **Acceptance Criteria:**
 
 **Given** release contract package
-**When** schemas и validators устанавливаются
-**Then** candidate receipt, app-stack DB receipt, human promotion request, realized promotion receipt, final release receipt и deployment authorization имеют отдельные closed versioned schemas
-**And** каждый downstream object hash-bound ссылается на exact predecessor identities и запрещает unknown/missing/extra authority fields.
+**When** schemas and validators are installed
+**Then** candidate receipt, app-stack DB receipt, human promotion request, realized promotion receipt, final release receipt, and deployment authorization have separate closed versioned schemas
+**And** each downstream object refers to exact predecessor identities through hash binding and forbids unknown/missing/extra authority fields.
 
 **Given** causal chain candidate -> app-stack DB receipt -> promotion request -> promotion receipt -> final release -> deployment authorization
-**When** object предлагается вне порядка либо с copied/placeholder receipt
-**Then** validation fail closed до build/promotion/deploy mutation
-**And** candidate не является promotion, final release не является deployment authorization, а rollback identity обязательна в final release.
+**When** an object is proposed out of order or with a copied/placeholder receipt
+**Then** validation fails closed before build/promotion/deploy mutation
+**And** a candidate is not promotion, a final release is not deployment authorization, and rollback identity is mandatory in the final release.
 
-**Given** valid и mixed-SHA/missing-predecessor fixtures
-**When** exact-SHA Claw выполняет schema/canonical-hash/causality tests
-**Then** valid chain deterministic, все invalid combinations отклоняются typed reasons
-**And** traceability связывает NFR18, NFR24, NFR33, NFR42-NFR49 и AR6/AR8-AR11 с schemas, validators, tests и replacement compatibility.
+**Given** valid and mixed-SHA/missing-predecessor fixtures
+**When** exact-SHA Claw runs schema/canonical-hash/causality tests
+**Then** the valid chain is deterministic, and all invalid combinations are rejected with typed reasons
+**And** traceability links NFR18, NFR24, NFR33, NFR42-NFR49, and AR6/AR8-AR11 to schemas, validators, tests, and replacement compatibility.
 
-### Story 4.6: Собрать и просканировать exact release candidate на Claw
+### Story 4.6: Build and scan an exact release candidate on Claw
 
-As an внутренний оператор/исследователь,
-I want получить immutable candidate из exact validated source SHA,
-So that promotion рассматривает только reproducible artifacts с доказанной capability boundary.
+As an internal operator/researcher,
+I want an immutable candidate from the exact validated source SHA,
+So that promotion considers only reproducible artifacts with a proven capability boundary.
 
 **Acceptance Criteria:**
 
-**Given** exact default-branch engine SHA и successful same-SHA validation receipts
-**When** Claw строит release candidate
-**Then** separately installable Capture и Analyzer artifacts/OCI identities собираются с pinned build inputs, dependency locks и configuration hashes
-**And** installed-file/import/dependency/entry-point/layer proof подтверждает отсутствие private/trading/n8n/Go execution capability.
+**Given** the exact default-branch engine SHA and successful same-SHA validation receipts
+**When** Claw builds a release candidate
+**Then** separately installable Capture and Analyzer artifacts/OCI identities are built with pinned build inputs, dependency locks, and configuration hashes
+**And** installed-file/import/dependency/entry-point/layer proof confirms absence of private/trading/n8n/Go execution capability.
 
 **Given** built candidate artifacts
-**When** SBOM, vulnerability, deterministic-build и identity gates выполняются
-**Then** immutable candidate receipt связывает exact source/tree, validation receipts, locks, configs, artifact digests, SBOM и scan results
-**And** failed gate не публикует promotable candidate и cleanup удаляет isolated build resources без cross-project residue.
+**When** SBOM, vulnerability, deterministic-build, and identity gates run
+**Then** an immutable candidate receipt binds exact source/tree, validation receipts, locks, configs, artifact digests, SBOM, and scan results
+**And** a failed gate does not publish a promotable candidate, and cleanup removes isolated build resources without cross-project residue.
 
-**Given** realtime candidate iterations на Claw
-**When** agent накатывает либо откатывает build inputs в test namespace
-**Then** каждый attempt получает отдельную identity/receipt и не перезаписывает previous candidate
-**And** traceability связывает NFR2-NFR4, NFR13, NFR18, NFR27-NFR41 и AR5/AR8-AR11; mutable tags не являются identity authority.
+**Given** realtime candidate iterations on Claw
+**When** an agent applies or rolls back build inputs in the test namespace
+**Then** each attempt receives a separate identity/receipt and does not overwrite a previous candidate
+**And** traceability links NFR2-NFR4, NFR13, NFR18, NFR27-NFR41, and AR5/AR8-AR11; mutable tags are not identity authority.
 
-### Story 4.7: Материализовать exact app-stack и доказать DB contract
+### Story 4.7: Materialize the exact app-stack and prove the DB contract
 
-As an внутренний оператор/исследователь,
-I want проверить точный app-stack source и database boundary до promotion,
-So that release не зависит от dirty checkout или ошибочного partition contract.
+As an internal operator/researcher,
+I want to verify the exact app-stack source and database boundary before promotion,
+So that the release does not depend on a dirty checkout or an incorrect partition contract.
 
 **Acceptance Criteria:**
 
 **Given** exact private app-stack SHA
-**When** trusted Claw workflow materialизует source
-**Then** используется authenticated exact archive с token только в step environment, traversal/link и tree identity проверяются, persisted credentials отсутствуют
-**And** dirty `/home/operator/app-stack` не fetch/reset/checkout/mutate.
+**When** the trusted Claw workflow materializes source
+**Then** it uses an authenticated exact archive with the token only in the step environment, verifies traversal/links and tree identity, and leaves no persisted credentials
+**And** dirty `/home/operator/app-stack` is not fetched/reset/checked out/mutated.
 
-**Given** app-stack с fix `3ce7e1f` либо independently reviewed equivalent
-**When** isolated PostgreSQL 16/17 DB contract suite выполняется
-**Then** receipt связывает exact app SHA, migrations, roles/grants, relkind=`r` table-partition scans, constrained writer, views и frozen-reader evidence без skipped tests
-**And** index partitions не принимаются за table partitions, а missing equivalent evidence блокирует release.
+**Given** app-stack with fix `3ce7e1f` or an independently reviewed equivalent
+**When** the isolated PostgreSQL 16/17 DB contract suite runs
+**Then** the receipt binds exact app SHA, migrations, roles/grants, relkind=`r` table-partition scans, constrained writer, views, and frozen-reader evidence with no skipped tests
+**And** index partitions are not treated as table partitions, and missing equivalent evidence blocks release.
 
-**Given** PR #42-equivalent materialization repair и PR #39-equivalent no-push control
-**When** app-stack contract проверяется
-**Then** trusted exact archive repair предшествует no-push validation, automatic push deploy отсутствует
-**And** exact app-stack DB receipt создаётся только после independent DevOps/data review; traceability связывает NFR42-NFR49 и AR6-AR11.
+**Given** PR #42-equivalent materialization repair and PR #39-equivalent no-push control
+**When** the app-stack contract is checked
+**Then** trusted exact archive repair precedes no-push validation, and automatic push deploy is absent
+**And** an exact app-stack DB receipt is created only after independent DevOps/data review; traceability links NFR42-NFR49 and AR6-AR11.
 
-### Story 4.8: Авторизовать promotion и завершить final release receipt
+### Story 4.8: Authorize promotion and complete the final release receipt
 
-As an внутренний оператор/исследователь,
-I want явно связать candidate и app-stack evidence перед promotion,
-So that deployable release имеет неразрывную human-approved causal lineage и точный rollback target.
+As an internal operator/researcher,
+I want to explicitly bind candidate and app-stack evidence before promotion,
+So that a deployable release has an unbroken human-approved causal lineage and an exact rollback target.
 
 **Acceptance Criteria:**
 
-**Given** valid candidate receipt и exact app-stack DB receipt
-**When** owner выдаёт human promotion request
-**Then** request hash-bound связывает оба inputs, target environment class, allowed artifacts и previous rollback identity
-**And** отсутствующая/несовпадающая approval identity либо stale input блокирует promotion.
+**Given** a valid candidate receipt and exact app-stack DB receipt
+**When** the owner issues a human promotion request
+**Then** the hash-bound request binds both inputs, target environment class, allowed artifacts, and previous rollback identity
+**And** missing/mismatched approval identity or stale input blocks promotion.
 
 **Given** valid promotion request
-**When** Claw выполняет promotion
-**Then** realized promotion receipt фиксирует фактически promoted immutable digests/identities и не доверяет requested values без post-action verification
-**And** failure/partial promotion сохраняется evidence-linked и не создаёт final release.
+**When** Claw performs promotion
+**Then** the realized promotion receipt records the immutable digests/identities actually promoted and does not trust requested values without post-action verification
+**And** failure/partial promotion remains evidence-linked and creates no final release.
 
 **Given** realized promotion receipt
-**When** final release завершается
-**Then** final receipt связывает source, validations, scans, artifacts, app-stack contract, human request, realized promotion, config/schema compatibility и exact prior rollback digest
-**And** independent DevOps/security review подтверждает NFR18, NFR24, NFR27-NFR49 и AR5-AR11; final receipt остаётся не-deployment authorization.
+**When** the final release completes
+**Then** the final receipt binds source, validations, scans, artifacts, app-stack contract, human request, realized promotion, config/schema compatibility, and exact prior rollback digest
+**And** independent DevOps/security review confirms NFR18, NFR24, NFR27-NFR49, and AR5-AR11; the final receipt still does not constitute deployment authorization.
 
-### Story 4.9: Развернуть и наблюдать только mee-a2 в изолированной Claw test среде
+### Story 4.9: Deploy and observe only mee-a2 in an isolated Claw test environment
 
-As an внутренний оператор/исследователь,
-I want развернуть exact public-capture release только в изолированном `mee-a2` test boundary,
-So that можно собирать Stage-A evidence и доказать semantic progress без влияния на другие сервисы.
+As an internal operator/researcher,
+I want to deploy the exact public-capture release only within the isolated `mee-a2` test boundary,
+So that Stage-A evidence can be collected and semantic progress proven without affecting other services.
 
 **Acceptance Criteria:**
 
-**Given** final release receipt и отдельная explicit deployment authorization
-**When** controlled test deployment начинается
-**Then** immutable exact app-stack archive/checkout проверяет engine/app SHAs, candidate/promotion/final receipt hashes, image digest, config hash, clock и DB contract
-**And** dirty `/home/operator/app-stack` не fetch/reset/checkout/mutate, automatic push trigger отсутствует.
+**Given** a final release receipt and separate explicit deployment authorization
+**When** controlled test deployment starts
+**Then** the immutable exact app-stack archive/checkout verifies engine/app SHAs, candidate/promotion/final receipt hashes, image digest, config hash, clock, and DB contract
+**And** dirty `/home/operator/app-stack` is not fetched/reset/checked out/mutated, and no automatic push trigger exists.
 
 **Given** authorized deployment
-**When** Compose применяется
-**Then** target ограничен project `mee-a2` и public-capture services; n8n, unrelated bots/projects, private APIs и live trading не стартуют, не останавливаются и не перенастраиваются
-**And** per-run networks, database/schema, volumes, secrets, ports и evidence paths изолированы от других Claw projects.
+**When** Compose is applied
+**Then** the target is limited to project `mee-a2` and public-capture services; n8n, unrelated bots/projects, private APIs, and live trading are not started, stopped, or reconfigured
+**And** per-run networks, database/schema, volumes, secrets, ports, and evidence paths are isolated from other Claw projects.
 
-**Given** новый capture runtime
-**When** post-deploy evidence собирается после полного UTC minute и заданного soak
-**Then** receipt включает health, ready, WARMING/MEASURING/terminal state, nonzero expected/reporting/valid slots, feed/ownership/database status, image/config/source identity и current-run PostgreSQL evidence
-**And** process-only health или endpoint reachability без semantic progress не считается успешным rollout.
+**Given** a new capture runtime
+**When** post-deploy evidence is collected after a complete UTC minute and the specified soak
+**Then** the receipt includes health, ready, WARMING/MEASURING/terminal state, nonzero expected/reporting/valid slots, feed/ownership/database status, image/config/source identity, and current-run PostgreSQL evidence
+**And** process-only health or endpoint reachability without semantic progress does not count as a successful rollout.
 
-**Given** failed start, DB contract, readiness, semantic-minute, soak или identity gate
-**When** rollout evaluation завершается
-**Then** candidate services останавливаются внутри `mee-a2`, success deployment receipt не создаётся, а failure evidence и exact prior-release identity сохраняются для recovery
-**And** Story 4.9 независимо fail closed без mutation unrelated projects; восстановление prior release выполняется отдельной recovery capability.
+**Given** a failed start, DB contract, readiness, semantic-minute, soak, or identity gate
+**When** rollout evaluation completes
+**Then** candidate services stop within `mee-a2`, no success deployment receipt is created, and failure evidence and exact prior-release identity are preserved for recovery
+**And** Story 4.9 independently fails closed without mutating unrelated projects; restoration of the prior release is performed by a separate recovery capability.
 
-**Given** successful test rollout на Claw
-**When** independent SRE review проверяет deployment/telemetry graph
-**Then** NFR42-NFR46, NFR48-NFR49 и AR6/AR7/AR9-AR11 имеют receipts для authorization, isolation и semantic evidence
-**And** никакой test receipt не трактуется как production deployment или live-trading approval.
+**Given** a successful test rollout on Claw
+**When** independent SRE review checks the deployment/telemetry graph
+**Then** NFR42-NFR46, NFR48-NFR49, and AR6/AR7/AR9-AR11 have receipts for authorization, isolation, and semantic evidence
+**And** no test receipt is interpreted as production deployment or live-trading approval.
 
-### Story 4.10: Восстановить exact prior mee-a2 release и доказать cleanup
+### Story 4.10: Restore the exact prior mee-a2 release and prove cleanup
 
-As an внутренний оператор/исследователь,
-I want откатить неуспешный или выбранный test rollout к точному предыдущему release,
-So that realtime Claw эксперименты имеют независимо проверяемую recovery boundary и не теряют evidence.
+As an internal operator/researcher,
+I want to roll back a failed or selected test rollout to the exact previous release,
+So that realtime Claw experiments have an independently verifiable recovery boundary and do not lose evidence.
 
 **Acceptance Criteria:**
 
-**Given** failed start, DB contract, readiness, semantic-minute, soak или identity gate
-**When** rollback срабатывает либо оператор запрашивает realtime rollback
-**Then** exact prior promoted digest/config восстанавливается только внутри `mee-a2`, failed release остаётся evidence-linked, а append-only CaptureRun data не переписывается
-**And** cleanup receipt доказывает отсутствие orphan containers/networks/temp DB/resources и неизменность unrelated projects.
+**Given** a failed start, DB contract, readiness, semantic-minute, soak, or identity gate
+**When** rollback triggers or the operator requests realtime rollback
+**Then** the exact prior promoted digest/config is restored only within `mee-a2`, the failed release remains evidence-linked, and append-only CaptureRun data is not rewritten
+**And** a cleanup receipt proves absence of orphan containers/networks/temp DB/resources and that unrelated projects remain unchanged.
 
-**Given** exact prior release несовместим со schema/config или его digest/receipt недоступен
-**When** recovery preflight выполняется
-**Then** destructive rollback блокируется, candidate остаётся stopped, а typed manual-recovery requirement сохраняется
-**And** система не выбирает mutable tag, не переписывает database evidence и не затрагивает n8n/unrelated projects.
+**Given** the exact prior release is incompatible with schema/config or its digest/receipt is unavailable
+**When** recovery preflight runs
+**Then** destructive rollback is blocked, the candidate remains stopped, and a typed manual-recovery requirement is preserved
+**And** the system does not select a mutable tag, rewrite database evidence, or affect n8n/unrelated projects.
 
-**Given** successful rollout/rollback exercise на Claw
-**When** independent SRE review проверяет recovery graph
-**Then** NFR42-NFR49 и AR6/AR7/AR9-AR11 имеют receipts для prior identity, rollback action, post-rollback health/evidence и cleanup
-**And** recovery receipt не является production approval, а повторный rollout требует новой deployment authorization.
+**Given** a successful rollout/rollback exercise on Claw
+**When** independent SRE review checks the recovery graph
+**Then** NFR42-NFR49 and AR6/AR7/AR9-AR11 have receipts for prior identity, rollback action, post-rollback health/evidence, and cleanup
+**And** a recovery receipt is not production approval, and a repeated rollout requires new deployment authorization.

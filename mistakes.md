@@ -98,3 +98,7 @@ The bounded checker used Python int identity for JSON Schema integer membership,
 ## 2026-09-24 — One-way predicates and a hidden conversion limit left edge gaps
 
 Scoped review showed that scenario flags and readiness declarations were constrained in only one direction, while exact timestamp conversion still passed its entire fractional string through Python's limited int parser. The root cause was testing representative positive/negative cases without complete truth tables or an input beyond the host conversion limit. Bidirectional scenario binding, exhaustive readiness combinations and exact Decimal-to-Fraction tests with 4,301 digits now cover those gaps without weakening the timestamp schema.
+
+## 2026-09-24 — A complete truth table retained an incomplete expectation
+
+The readiness truth table covered every boolean combination but incorrectly allowed false payment readiness without blockers, preserving the schema omission. The root cause was applying the complete-explanation rule only to capabilities instead of both resource projections. A focused /readyz regression and corrected truth-table expectation now require a blocker whenever payment readiness is false.

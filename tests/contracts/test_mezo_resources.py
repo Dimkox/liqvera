@@ -331,13 +331,20 @@ def test_followup_readiness_truth_table(gates, ready, blocked):
     changed.update(storage_ready=storage, configuration_ready=configuration,
                    integration_ready=integration, payment_ready=payment, ready=ready,
                    blockers=["PAY_TO_MISSING"] if blocked else [])
-    # Current payment readiness already requires no unresolved blocker.
-    allowed = ready == (all(gates) and not blocked) and not (payment and blocked)
+    # Blockers completely explain payment readiness in either direction.
+    allowed = ready == (all(gates) and not blocked) and payment != blocked
     if allowed:
         validate_resource("readiness", changed)
     else:
         with pytest.raises(c.ContractError):
             validate_resource("readiness", changed)
+
+
+def test_unready_payment_requires_nonempty_blocker_explanation():
+    changed = deepcopy(EXAMPLES["readiness"])
+    changed.update(ready=False, payment_ready=False, blockers=[])
+    with pytest.raises(c.ContractError):
+        validate_resource("readiness", changed)
 
 
 @pytest.mark.parametrize("section,key,value", [

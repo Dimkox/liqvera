@@ -147,7 +147,7 @@
       "type": "object", "additionalProperties": false,
       "oneOf": [
         {"properties": {"ready": {"const": false}}, "oneOf": [
-          {"properties": {"payment_ready": {"const": false}}},
+          {"properties": {"payment_ready": {"const": false}, "blockers": {"minItems": 1}}},
           {"properties": {"payment_ready": {"const": true}, "blockers": {"maxItems": 0}}, "oneOf": [
             {"properties": {"storage_ready": {"const": false}}},
             {"properties": {"storage_ready": {"const": true}, "configuration_ready": {"const": false}}},

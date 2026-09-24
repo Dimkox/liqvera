@@ -479,9 +479,10 @@ carry rejection explanations; the general offline report schema still permits
 SIMULATED. In capabilities and readiness, payment_ready=true requires no
 blockers. Overall ready exactly equals the conjunction of every storage/
 configuration/integration/payment gate and blocker emptiness; all gates true
-with no blockers cannot report ready=false. Capabilities use blockers as their
-complete explanation: payment_ready=false requires a nonempty blocker list,
-and payment_ready=true additionally requires source_mode=live-public. Fixture
+with no blockers cannot report ready=false. Both capabilities and readiness
+use blockers as the complete explanation for payment readiness:
+payment_ready=false requires a nonempty blocker list. Capabilities with
+payment_ready=true additionally require source_mode=live-public. Fixture
 mode remains blocked even when its data is arithmetically valid. A future
 live-public ready state with empty blockers must remain representable. Encode
 these constraints with supported oneOf/properties/const/minItems/maxItems

@@ -48,8 +48,11 @@ found no remaining Critical or Important issue.
 - [x] Implement final follow-up: bidirectional reencoding coverage, arbitrary-precision fractional timestamps, and complete readiness truth tables.
 - [x] Verify the final follow-up: 445 contract tests; 1086 tests and 85 subtests in both full runs; graph/Ruff pass, only inherited Trivy fails Grok.
 - [ ] Obtain independent final follow-up re-review; leave the F2 evidence draft unfinalized.
+- [x] Require a nonempty blocker explanation for false payment readiness in /readyz as well as capabilities.
+- [x] Verify the readiness micro-fix: 130 resource tests, 446 F2 tests, 1087 tests plus 85 subtests in both full runs; only inherited Trivy fails Grok.
+- [ ] Independently re-review the readiness micro-fix before F2 closure.
 
-F2 status: **final follow-up implemented; scoped re-review pending**. The owner approved the repaired
+F2 status: **readiness micro-fix implemented; scoped re-review pending**. The owner approved the repaired
 plan and parallel task implementation; shared-file integration has one owner.
 The artifacts above exist, but final freeze and acceptance await independent
 review. Integration passed 329 focused tests and two full 970-test/85-subtest

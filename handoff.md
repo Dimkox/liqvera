@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 final follow-up implemented; re-review pending). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24 (F2 readiness micro-fix implemented; re-review pending). Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f2-contracts` (stacked on verified F1).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -47,9 +47,32 @@ The approved plan now reflects those corrections; simulated offline reports
 remain valid and no runtime layer or SDK identity rule was introduced.
 
 F2 remains **scoped re-review pending**, not complete. Next: independent
-scoped re-review of the final follow-up.
+scoped re-review of the final readiness micro-fix.
 The F2 evidence document retains the earlier integration draft until review
 has passed; its fingerprints and counts do not cover the subsequent repair.
+
+Edge re-review of `74a7b6f25ea4fe947eca5748481ee247aa1c8f32` found that
+readiness still admitted payment_ready=false without a blocker explanation.
+The micro-fix adds the missing nonempty-blocker constraint and corrects the
+truth table; the focused regression and eight affected combinations failed
+before implementation. Healthy future readiness remains representable and
+the F2 evidence draft is untouched; independent re-review is pending.
+
+Readiness micro-fix verification: targeted RED exited 1 with nine failures,
+56 passes and 65 deselected in 1.70s; GREEN exited 0 with 65 passes and 65
+deselected in 1.58s. Resource tests passed 130 in 38.40s; all six F2 modules
+passed 446 in 193.52s. `make verify` passed 1087 tests and 85 subtests in
+326.32s; bare pytest passed the same counts in 327.91s. Graph (the same seven
+inherited conflicts), Ruff and diff checks exited 0. Grok `--mode pr
+--no-record` exited 1 only for inherited Trivy; all other applicable checks
+passed, with coverage explicitly skipped by runner policy. Direct Trivy
+again found exactly two inherited LOW DS-0026 Dockerfile findings (exit 1).
+The stable pre-verification-record staged tree was
+`a6598b786db2ac3b5bf60457c3c69e127df14f1b`; its graph/schema/test index
+fingerprint is
+`2dd9403812ddcb5b3780ae314626316ee2381e27addaf3511b2c20be83d7138a`.
+Only verification prose changed afterward. Runtime remains NOT_RUN and no
+new unresolved failure or factory receipt is claimed.
 
 Scoped review of `fd672f89c6bde8d1b1170b2e7a8c631ebed4d793` found three
 remaining edge cases. The final follow-up now binds the reencoding scenario

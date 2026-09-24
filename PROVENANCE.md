@@ -38,7 +38,9 @@ gitleaks git --log-opts "--all --full-history -m" --redact=100 --no-banner --rep
 
 Coverage: 46 local Git refs, 400 reachable commits; Gitleaks reports 394 scanned commits. These are different counters and are reported separately. Merge-parent diffs were included. Raw scanner result: exit 1, six `generic-api-key` detections at two distinct file/line locations. The source-tree scan returned exit 1 with the same two locations.
 
-The detections concern a digest field in `scripts/claw_host_deployment_controller.py` and a file hash in `_bmad/_config/files-manifest.csv`. They are reviewed as digest false positives, not suppressed to claim a zero-detection scan. No matched values, private author details or private scan reports are published here. The final prepared snapshot is scanned separately before push.
+The detections concern a digest field in `scripts/claw_host_deployment_controller.py` and a file hash in `_bmad/_config/files-manifest.csv`. The controller constructs the field with `hashlib.sha256(...).hexdigest()`. The manifest value was independently matched against the SHA-256 of `.agents/skills/bmad-ux/assets/key-screens.md`; its older recorded directory path differs from the current location. Both are reviewed digest false positives, not suppressed to claim a zero-detection scan.
+
+The final prepared snapshot scan included the import manifest and Mezo documents. It returned exit 1 with exactly the same two digest detections and no additional findings. No matched values, private author details or private scan reports are published here.
 
 Automated scanning is evidence about this import, not a guarantee that all possible sensitive content is detectable.
 

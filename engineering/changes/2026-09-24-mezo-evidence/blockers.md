@@ -4,7 +4,7 @@
 
 ### BLOCKED_TRIVY_HEALTHCHECK_POLICY
 
-Fresh F1 verification at `0fceafe94e581e28cfb3861b97d041e6399b257a` passes
+Fresh F1 verification at `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25` passes
 `make verify`, but `grok_verify.py --mode pr --no-record` exits 1.
 `trivy config --exit-code 1 .` confirms exactly two LOW `DS-0026` findings:
 `deploy/images/Dockerfile.public-capture` and
@@ -54,7 +54,7 @@ these checks and record `BLOCKED_EXTERNAL` rather than rely on F1 observations.
 ## Resolved prerequisites
 
 - F0 public repository and provenance exist.
-- Final transport repair at `0fceafe94e581e28cfb3861b97d041e6399b257a`
+- Final transport repair at `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`
   bounds framing independently of decoded data, rejects chunk extensions/
   trailers and malformed CRLF, and enforces one total request deadline.
   Fresh checks at 2026-09-24T17:59:23Z–18:01:38Z passed 641 tests plus

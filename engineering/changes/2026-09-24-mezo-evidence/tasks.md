@@ -21,7 +21,7 @@
 
 F1 status: **complete-with-blockers**. Evidence is in
 `evidence/f1-verification.md`, bound to implementation commit
-`0fceafe94e581e28cfb3861b97d041e6399b257a`.
+`37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`.
 `make verify` passes; `grok_verify` still fails with
 `BLOCKED_TRIVY_HEALTHCHECK_POLICY`. The compatibility package is complete
 but payment readiness remains false: `PAY_TO_MISSING` and

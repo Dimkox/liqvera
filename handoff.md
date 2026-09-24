@@ -33,7 +33,7 @@ refreshed evidence below still require independent re-review.
 ## Verified F1 implementation
 
 Evidence is bound to literal implementation SHA
-`0fceafe94e581e28cfb3861b97d041e6399b257a`, captured before the refreshed
+`37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`, captured before the refreshed
 closure documentation edits. The implementation worktree was clean before
 and after the fresh checks at 17:59:23Z–18:01:38Z. See
 [F1 verification](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-verification.md)

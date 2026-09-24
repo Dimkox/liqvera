@@ -16,7 +16,7 @@ are implemented. [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md)
 accepts only the runtime and payment boundary. The overall change remains
 `implementing`; after final re-review, the next step is a separate F2 contracts plan.
 
-At implementation commit `0fceafe94e581e28cfb3861b97d041e6399b257a`,
+At implementation commit `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`,
 `make verify` passed with 641 tests and 85 subtests. The command
 `grok_verify.py --mode pr --no-record` exited 1 due to two pre-existing LOW
 Trivy `DS-0026` findings in the one-shot Stage A Dockerfiles

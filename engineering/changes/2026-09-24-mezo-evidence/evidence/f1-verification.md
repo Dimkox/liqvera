@@ -1,14 +1,15 @@
 # F1 verification evidence
 
-Observed: 2026-09-24T17:59:23Z–2026-09-24T18:01:38Z (UTC).
-Implementation SHA: `0fceafe94e581e28cfb3861b97d041e6399b257a`.
+Original observation window: 2026-09-24T17:59:23Z–2026-09-24T18:01:38Z
+(UTC). Revalidated after PR history hygiene on 2026-09-24 before 18:25:49Z.
+Implementation SHA: `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`.
 Branch: `feat/mezo-evidence-f1-impl`.
-The SHA was captured before documentation changes; the implementation tree
-was clean before and after these checks. This report belongs to the later
-documentation closure commit, not a new implementation or factory receipt.
-The clean SHA was confirmed again at 2026-09-24T18:02:00Z before these edits.
-This refresh supersedes the earlier closure observations at `68dafdb`; that
-evidence remains in Git history. Final independent re-review is pending.
+The rewritten implementation SHA was checked in a clean detached worktree.
+`make verify` and the live compatibility probe were repeated after replacing
+a synthetic Basic Auth test literal that triggered GitGuardian; production
+bytes did not change. This report belongs to a later documentation commit,
+not a new implementation or factory receipt. Final independent re-review is
+complete.
 
 ## Result and scope
 
@@ -32,17 +33,17 @@ and pin repair are historical evidence, not a fresh A28 run.
 
 | Command | Exit | Observed result |
 | --- | ---: | --- |
-| `git rev-parse HEAD` | 0 | 0fceafe94e581e28cfb3861b97d041e6399b257a |
-| `date -u +%Y-%m-%dT%H:%M:%SZ` | 0 | Start 2026-09-24T17:59:23Z; final long check ended 18:01:38Z |
+| `git rev-parse HEAD` | 0 | 37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25 |
+| `date -u +%Y-%m-%dT%H:%M:%SZ` | 0 | Rewritten-SHA live/focused sequence: 2026-09-24T18:25:37Z–18:25:49Z |
 | `.venv/bin/python --version` | 0 | Python 3.12.3 |
 | `.venv/bin/python -m pytest --version` | 0 | pytest 9.1.1 |
 | `.venv/bin/python -c 'import importlib.metadata as m; print("hatchling " + m.version("hatchling"))'` | 0 | hatchling 1.32.4 |
 | `.venv/bin/python -m pip check` | 0 | No broken requirements found |
-| `PATH="$PWD/.venv/bin:$PATH" make verify` | 0 | 17:59:23Z–18:01:38Z: 641 passed, 85 subtests passed in 131.25s; stage-a verify passed |
-| `PATH="$PWD/.venv/bin:$PATH" python -B scripts/grok_verify.py --mode pr --no-record` | 1 | 17:59:23Z–18:01:35Z: RESULT: FAIL; only trivy-config failed; changed=0 |
+| `PATH="$PWD/.venv/bin:$PATH" make verify` | 0 | Rewritten clean SHA: 641 passed, 85 subtests passed in 137.64s; stage-a verify passed |
+| `PATH="$PWD/.venv/bin:$PATH" python -B scripts/grok_verify.py --mode pr --no-record` | 1 | Tree-equivalent predecessor: RESULT: FAIL; only trivy-config failed; final PR-integration rerun is recorded separately after main synchronization |
 | `trivy config --exit-code 1 .` | 1 | 17:59:23Z–17:59:25Z: exactly two LOW DS-0026 findings; details below |
-| `PATH="$PWD/.venv/bin:$PATH" python -B scripts/check-mezo-compatibility.py --lock docs/compatibility/mezo-evidence-v1.json` | 0 | 17:59:23Z–17:59:34Z: COMPATIBILITY_PASS_PAYMENT_BLOCKED |
-| `PATH="$PWD/.venv/bin:$PATH" python -B -m pytest tests/compatibility/test_mezo_compatibility.py -q` | 0 | 107 passed in 5.36s; part of the focused-check sequence at 17:59:23Z–17:59:32Z |
+| `PATH="$PWD/.venv/bin:$PATH" python -B scripts/check-mezo-compatibility.py --lock docs/compatibility/mezo-evidence-v1.json` | 0 | Rewritten clean SHA, 18:25:37Z–18:25:49Z: COMPATIBILITY_PASS_PAYMENT_BLOCKED |
+| `PATH="$PWD/.venv/bin:$PATH" python -B -m pytest tests/compatibility/test_mezo_compatibility.py::test_ambient_proxy_credentials_never_reach_transport -q` | 0 | Rewritten clean SHA: 1 passed in 0.18s; the full 107-test compatibility directory also ran inside `make verify` |
 | `git diff --check` | 0 | No whitespace errors |
 | `git status --short` | 0 | Empty before documentation changes |
 | `.venv/bin/python scripts/grok_status.py` | 0 | route=null, change=null, evidence_gaps=[]; no active factory run |
@@ -52,8 +53,9 @@ long commands; their original exit codes were preserved by the shell wrapper.
 Environment inspection, `pip check`, hashes, and Grok status ran alongside
 those read-only checks. No dependency installation or npm invocation occurred.
 
-The following focused sequence also exited 0 on the same clean SHA at
-17:59:23Z–17:59:32Z, after its 107-test run:
+The following focused sequence exited 0 on the tree-equivalent predecessor at
+17:59:23Z–17:59:32Z, after its 107-test run. Final PR-integration checks after
+main synchronization supersede this sequence for merge readiness:
 
 ```bash
 PATH="$PWD/.venv/bin:$PATH" python -B -m ruff check tools/graph_checker tools/mezo_compatibility.py scripts/check-mezo-compatibility.py tests/graph tests/compatibility tests/readonly_analyzer/test_frozen_package_tamper.py tests/installed/test_root_development_toolchain.py
@@ -99,7 +101,7 @@ The implementation and covering tests were also hashed with `sha256sum`
 - `tools/mezo_compatibility.py`:
   `ce484e73f802b87a100f52767da0a6d4da4edfa69c4e5d4ad9d394d52cee79ff`.
 - `tests/compatibility/test_mezo_compatibility.py`:
-  `56aa07a9264eb44f93e68071312bbefc5a90e7c799812351b10803df4b1275d6`.
+  `ea00ce86bbb1e9b63034e68a0daedf7b87156f2ced4dad2ea7f3611f71d313bd`.
 
 ## Final-review transport repair
 

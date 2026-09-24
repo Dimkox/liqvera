@@ -1,7 +1,7 @@
 # Liqvera — handoff
 
 Updated: 2026-09-24 (F3–F7 code and factory integrated, verification deferred). Repository: `Dimkox/liqvera`.
-Branch: `feat/full-factory` (stacked on verified F2 and the local MVP).
+Branch: `feat/mezo-evidence-f3-report` (stacked on verified F2 and the local MVP).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
 [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).

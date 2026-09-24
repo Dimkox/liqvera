@@ -13,7 +13,8 @@ RUN python -m pip install --no-cache-dir --no-index --find-links=/wheels mee-pub
     && groupadd --system --gid 10001 liqvera \
     && useradd --system --uid 10001 --gid 10001 --home-dir /nonexistent liqvera \
     && mkdir -p /data/captures \
-    && chown 10001:10001 /data/captures
+    && chown 10001:10001 /data/captures \
+    && chmod 0750 /data/captures
 USER 10001:10001
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 LIQVERA_CAPTURE_PORT=8081 LIQVERA_CAPTURE_ROOT=/data/captures
 EXPOSE 8081

@@ -23,7 +23,11 @@ The deployment files live in `deploy/mezo-evidence/`. A `fixture` or `live`
 Compose profile must be selected, with different project names and volumes.
 The only published service is Caddy. The internal web service serves Vite
 assets; it has no artifact mount. The report service has read-only raw capture
-access and writable artifact access. The gateway has read-only artifact access;
+access and writable artifact access. Capture (UID 10001), report (UID 10002),
+and gateway (UID 10003) share only evidence GID 10001. Capture/report publish
+directories as `0750` and files as `0640`, so the report can read captures
+and the gateway can read completed artifacts without sharing a write UID.
+The gateway has read-only artifact access;
 it and its one-shot migration job are the only PostgreSQL clients. Capture alone has public Hyperliquid
 egress; report and database have no external network. Network ACLs on the host
 must constrain capture to approved Hyperliquid endpoints and gateway to the

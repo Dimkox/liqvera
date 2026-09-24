@@ -7,13 +7,13 @@ COPY apps/mezo-gateway/ ./
 RUN npm run build
 
 FROM node:22-alpine
-ENV NODE_ENV=production PORT=8080
+ENV NODE_ENV=production PORT=8080 HOME=/tmp NPM_CONFIG_CACHE=/tmp/npm-cache
 WORKDIR /app
 COPY apps/mezo-gateway/package.json apps/mezo-gateway/package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/migrations ./migrations
 COPY deploy/mezo-evidence/gateway-entrypoint.js /app/gateway-entrypoint.js
-USER node
+USER 10003:10001
 EXPOSE 8080
 CMD ["node", "/app/gateway-entrypoint.js"]

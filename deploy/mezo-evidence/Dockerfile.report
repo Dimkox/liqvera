@@ -12,10 +12,11 @@ COPY --from=wheels /wheels /wheels
 RUN python -m pip install --no-cache-dir --no-index --find-links=/wheels mee-evidence-report==0.1.0 \
     && rm -rf /wheels \
     && groupadd --system --gid 10001 liqvera \
-    && useradd --system --uid 10001 --gid 10001 --home-dir /nonexistent liqvera \
+    && useradd --system --uid 10002 --gid 10001 --home-dir /nonexistent liqvera-report \
     && mkdir -p /data/artifacts \
-    && chown 10001:10001 /data/artifacts
-USER 10001:10001
+    && chown 10002:10001 /data/artifacts \
+    && chmod 0750 /data/artifacts
+USER 10002:10001
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 LIQVERA_REPORT_PORT=8082 LIQVERA_CAPTURE_ROOT=/data/captures LIQVERA_ARTIFACT_ROOT=/data/artifacts
 EXPOSE 8082
 CMD ["python", "-B", "-m", "mee_evidence_report.service"]

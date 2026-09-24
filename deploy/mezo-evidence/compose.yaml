@@ -38,7 +38,7 @@ x-report: &report
   image: liqvera/evidence-report:local
   init: true
   restart: unless-stopped
-  user: "10001:10001"
+  user: "10002:10001"
   read_only: true
   cap_drop: [ALL]
   security_opt: [no-new-privileges:true]
@@ -98,7 +98,7 @@ x-gateway: &gateway
   image: liqvera/mezo-gateway:local
   init: true
   restart: unless-stopped
-  user: "node"
+  user: "10003:10001"
   read_only: true
   cap_drop: [ALL]
   security_opt: [no-new-privileges:true]
@@ -127,7 +127,7 @@ x-migrate: &migrate
   image: liqvera/mezo-gateway:local
   command: [node, /app/gateway-entrypoint.js, npm, run, migrate]
   restart: "no"
-  user: "node"
+  user: "10003:10001"
   read_only: true
   cap_drop: [ALL]
   security_opt: [no-new-privileges:true]

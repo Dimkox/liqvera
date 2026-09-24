@@ -1,7 +1,7 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 static contracts complete; F3 next). Repository: `Dimkox/liqvera`.
-Branch: `feat/mezo-evidence-f2-contracts` (stacked on verified F1).
+Updated: 2026-09-24 (F2 complete; F3 implementation plan in review). Repository: `Dimkox/liqvera`.
+Branch: `feat/mezo-evidence-f3-report` (stacked on verified F2).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
 [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
@@ -13,6 +13,25 @@ F2's static contract phase is complete; F3–F7 remain open. The accepted
 [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md) fixes only runtime,
 ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
+
+The [F3 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f3-evidence-report.md)
+is authored and awaiting independent/human review. It freezes an additive
+`mee-evidence-report` distribution, exact Hyperliquid metadata/L2 capture,
+canonical report bytes, deterministic ZIP_STORED bundles, archive-first offline
+verification, exactly 39 F3-owned vector executions, and separate SHA-bound F3
+runtime results. No F3 product code or live acceptance has been implemented by
+this planning commit. Discovery-only live observations are not acceptance.
+`PAY_TO_MISSING`, `FINALITY_RULE_UNVERIFIED`, funded buyer/signature/receipt and
+SDK identity gaps, A13–A14 `BLOCKED_EXTERNAL`, and inherited Trivy findings are
+unchanged.
+
+F3 planning verification recomputed the exact 156/39 vector inventory and its
+`4 sweep + 34 dataset_rejection + 1 artifact` split, both fixed request-body
+hashes, and the immutable mapping-review file hash. Markdown fences and 21
+local links across the changed documents passed; staged/unstaged diff checks
+passed. `make graph` passed with the same seven inherited declared conflicts.
+This documentation-only step ran no product suite, Grok receipt, live capture,
+payment, deployment, release, or push.
 
 The owner approved the repaired [F2 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md)
 after its independent re-review at `50f16225c23f5fde046b483321f86bb7d6bbf4f1`

@@ -74,9 +74,17 @@ or factory receipt.
 
 ## F3 — evidence report
 
+- [x] Author the [F3 implementation plan](../../../docs/superpowers/plans/2026-09-24-liqvera-f3-evidence-report.md) for review.
+- [ ] Complete independent plan review and obtain human approval before product implementation.
 - [ ] Replace synthetic timing and placeholder live identity evidence.
 - [ ] Implement report builder, canonical serialization, manifest, and bundle.
 - [ ] Implement hardened offline verifier and tamper tests.
+
+F3 status: **planning in review**. The plan defines seven TDD-first tasks with
+one write owner, a dependency DAG, exact 39-vector execution, additive A08/A09
+obligations, installed-wheel/socket-denied verification, and a separate opt-in
+live-source gate. No F3 runtime, payment, deployment, release, or acceptance is
+claimed. F2 closure and all existing blockers remain unchanged.
 
 ## F4 — API and ledger
 

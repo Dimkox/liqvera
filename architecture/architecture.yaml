@@ -14070,6 +14070,9 @@ repository_inventory:
   - path: docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: docs/superpowers/plans/2026-09-24-liqvera-f3-evidence-report.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: docs/superpowers/specs/2026-07-25-stage-a-operator-revenue-design.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

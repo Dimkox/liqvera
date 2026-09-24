@@ -115,3 +115,7 @@ Task 4 review proved npm 11.19.0 ignores candidate redirect-limit flags, so the 
 ## 2026-09-24 — Bound the complete compatibility response and its duration
 
 Live Mezo bytecode uses chunked transfer, so a Content-Length-only policy would reject a legitimate fixed endpoint. Keep the strict reader private to the compatibility opener: bound framing independently of decoded data, reject chunk extensions/trailers and malformed CRLF, and enforce a synchronous total request deadline with no worker left running. Fail closed without POSIX timer support, outside the main thread, or when a caller already owns the real-time alarm; restore the previous handler on every exit.
+
+## 2026-09-24 — F2 contract planning follows existing inventory boundaries
+
+The F2 plan places versioned JSON contracts under `schemas/mezo-evidence/v1/` and tests under the already-collected `tests/contracts/`. Inspection confirmed that these paths use the existing schema/test classifiers, avoiding an unrelated discovery or classifier change. The planning document itself has an exact documentation binding and passes the graph check; contract implementation and runtime acceptance remain pending.

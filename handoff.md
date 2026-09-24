@@ -1,7 +1,7 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24T18:33:25Z. Repository: `Dimkox/liqvera`.
-Branch: `feat/mezo-evidence-f1-impl`.
+Updated: 2026-09-24T19:17:59Z. Repository: `Dimkox/liqvera`.
+Branch: `feat/mezo-evidence-f2-contracts` (stacked on verified F1).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
 [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
@@ -14,9 +14,20 @@ F2–F7 remain open. The accepted
 ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
 
-Next: create a separate F2 contracts plan from the approved design and review
-OpenAPI/JSON Schemas, reason codes, state graphs, exact BUY/SELL vectors, and
-payment atomic-unit/idempotency vectors before implementation.
+The [F2 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md)
+now exists and awaits plan review/approval. Its six tasks cover closed JSON
+Schemas/OpenAPI, public reasons, separate request/quote/payment state graphs,
+exact BUY/SELL vectors, and payment atomic-unit/idempotency/auth obligations.
+F2 is not implemented. Next: review and approve the plan before starting its
+task-by-task implementation. Runtime acceptance remains unrun or externally
+blocked; F1 payment/finality and Trivy blockers remain unchanged.
+
+Planning verification: `git diff --check` and `make graph` passed; graph
+verification retains the seven inherited declared conflicts. The new plan has
+an exact DOCUMENTATION inventory binding. No product files changed and no
+new `make verify`, Grok receipt, runtime acceptance, payment, or release result
+is claimed by this planning step.
+
 The full delivery sequence is contracts → verifiable report → API/ledger →
 testnet settlement → UI/operations → acceptance. The canonical specification
 is `docs/planning/LIQVERA_FACTORY_TZ.md`; its legacy filename remains a

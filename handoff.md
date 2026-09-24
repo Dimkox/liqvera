@@ -63,6 +63,13 @@ except the already named Trivy policy blocker. The synthetic proxy credential
 fixture is assembled at runtime; the Basic Auth-shaped literal and its old
 introducing commit are absent from the rewritten PR history.
 
+PR #2 (`feat/mezo-evidence-f1-impl` into `main`) is open and mergeable at
+`237ecbc21901ca7045663b090a537a1ad824a36d`. The local branch, remote branch,
+and pull-request head were verified at that exact SHA after the guarded
+force-push. GitHub reports `MERGEABLE`, and the rerun GitGuardian Security
+Checks conclusion is `SUCCESS` (completed 2026-09-24T18:36:51Z). No PR merge
+was performed.
+
 ## Active blockers and limits
 
 - `BLOCKED_TRIVY_HEALTHCHECK_POLICY`: Trivy rejects both one-shot Stage A
@@ -89,10 +96,11 @@ introducing commit are absent from the rewritten PR history.
   It is a synchronous CLI probe, not a background transport service.
 
 No payment, signature, private-source verification, factory receipt,
-deployment, push, merge, tag, or release occurred during F1 closure. Mainnet,
-custody, exchange mutation, merchant private keys, user secrets, and exchange
-credentials remain excluded. Shadow-only and the old Stage A verdict remain
-unchanged. Synthetic timing and placeholder live identity still require F3.
+deployment, PR merge, tag, or release occurred during F1 closure. The F1
+branch was pushed only to open and repair PR #2. Mainnet, custody, exchange
+mutation, merchant private keys, user secrets, and exchange credentials remain
+excluded. Shadow-only and the old Stage A verdict remain unchanged. Synthetic
+timing and placeholder live identity still require F3.
 
 ## Completed F1 work and historical evidence
 

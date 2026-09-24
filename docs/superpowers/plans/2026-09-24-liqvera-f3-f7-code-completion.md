@@ -23,6 +23,26 @@
 - Unknown settlement means `PAYMENT_UNCERTAIN`; never resubmit or offer a second payment.
 - This phase creates code only. Do not run test suites, live captures, facilitator calls, RPC writes, payments, containers, acceptance, deployment, release, or push.
 
+## Task 0: Pin the official Mezo protocol sources
+
+**Owns:** `packages/mezo-protocol/**`.
+
+Vendor the integration-relevant official material from `mezo-org/musd` and
+record the exact `mezo-org/mezod` and `mezo-org/documentation` revisions. The
+package must include upstream provenance and GPL-3.0 notice, the exact Matsnet
+MUSD deployment artifact/ABI, a small typed read-only export for chain/network,
+token, event and EIP-2612 metadata, and a machine-readable source lock. Pin:
+
+- `mezo-org/musd` commit `aa25fd6defbe6c1385940e183ea7a0a3df4533d8`;
+- `mezo-org/mezod` commit `a5b390c80408b23f7579ffef0e0a1f5c336ad624`;
+- `mezo-org/documentation` commit `222891407f85e419b4c6c323f8392f08887d0f8a`.
+
+The gateway and browser packages consume this local protocol package instead
+of duplicating the MUSD address, decimals, Transfer topic, or permit metadata.
+Do not import minting, borrowing, liquidation, or administrative behavior into
+Liqvera; payment integration is limited to read-only metadata and user-signed
+MUSD transfer authorization through the official x402 SDK.
+
 ## Task 1: Canonical F3 capture, report, bundle, verifier, and services
 
 **Owns:**

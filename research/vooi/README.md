@@ -1,47 +1,47 @@
 # VOOI client inventory and static reverse engineering
 
-Снимок: **2026-08-10**. Каталог содержит воспроизводимую инвентаризацию
-официальных клиентов VOOI, зафиксированные SHA открытых репозиториев,
-извлечённую поверхность Perps API и безопасные инструменты статического
-анализа.
+Snapshot: **2026-08-10**. This directory contains a reproducible inventory of
+official VOOI clients, pinned SHAs of public repositories,
+the extracted Perps API surface, and safe static-analysis
+tools.
 
-## Итог инвентаризации
+## Inventory summary
 
-| Клиент | Текущий статус на дату снимка | Зафиксированная версия/ревизия |
+| Client | Current status as of the snapshot date | Recorded version/revision |
 |---|---|---|
-| VOOI Ultra | основной живой веб-терминал | footer: `Beta v1.0.1` |
-| VOOI Pro | живой legacy/pro терминал | `v1.12.0` |
-| VOOI Light | торговля остановлена, осталась миграция аккаунта | `v2.5.0` |
-| Telegram Mini App | живой Telegram WebApp | `@VooiAppBot` |
-| VOOI Perps MCP | удалённый Streamable HTTP MCP | `https://perps-api.vooi.io/mcp` |
-| MCP config repo | открытый конфигурационный клиент | `9a5fc1a...` |
-| Signals bot example | официальный Python-клиент | `bb81ee0...` |
-| Funding bot example | официальный Python-клиент | `c3ceab2...` |
-| MM bot example | официальный TypeScript/Node-клиент | `879d15c...` |
+| VOOI Ultra | primary live web terminal | footer: `Beta v1.0.1` |
+| VOOI Pro | live legacy/pro terminal | `v1.12.0` |
+| VOOI Light | trading stopped; account migration remains | `v2.5.0` |
+| Telegram Mini App | live Telegram WebApp | `@VooiAppBot` |
+| VOOI Perps MCP | remote Streamable HTTP MCP | `https://perps-api.vooi.io/mcp` |
+| MCP config repo | public configuration client | `9a5fc1a...` |
+| Signals bot example | official Python client | `bb81ee0...` |
+| Funding bot example | official Python client | `c3ceab2...` |
+| MM bot example | official TypeScript/Node client | `879d15c...` |
 
-Официальный APK, приложение Google Play, приложение App Store или браузерное
-расширение подтвердить не удалось. Это означает только отсутствие проверяемой
-официальной публикации в исследованном контуре, а не доказательство
-несуществования частной или снятой с публикации сборки.
+No official APK, Google Play app, App Store app, or browser
+extension could be verified. This means only that no verifiable
+official publication was found within the research scope, rather than proving
+that a private or delisted build does not exist.
 
-## Что находится в каталоге
+## Directory contents
 
-- `clients.lock.json` — машиночитаемый реестр клиентов, статусов, лицензий,
-  commit SHA и первичных источников.
-- `architecture.md` — результаты статического реверс-инжиниринга и выводы для
-  архитектуры Multi-Exchange Engine.
-- `data/api-surface-*.csv` — 77 наблюдавшихся пар `HTTP method + path` из
-  сгенерированного официального TypeScript SDK.
-- `SOURCES.md` — журнал первичных источников и ограничений достоверности.
-- `scripts/fetch_sources.py` — скачивание точных публичных Git-ревизий и
-  публичных same-origin web assets без авторизации и исполнения JavaScript.
-- `scripts/extract_observables.py` — статическое извлечение URL, API paths и
-  имён переменных окружения с редактированием secret-like параметров.
-- `scripts/verify_inventory.py` — полностью офлайн-проверка реестра и CSV.
+- `clients.lock.json` — machine-readable registry of clients, statuses, licenses,
+  commit SHAs, and primary sources.
+- `architecture.md` — static reverse-engineering findings and implications for
+  Multi-Exchange Engine architecture.
+- `data/api-surface-*.csv` — 77 observed `HTTP method + path` pairs from
+  the generated official TypeScript SDK.
+- `SOURCES.md` — log of primary sources and confidence limitations.
+- `scripts/fetch_sources.py` — downloads exact public Git revisions and
+  public same-origin web assets without authentication or JavaScript execution.
+- `scripts/extract_observables.py` — statically extracts URLs, API paths, and
+  environment variable names while redacting secret-like parameters.
+- `scripts/verify_inventory.py` — fully offline verification of the registry and CSV.
 
-## Офлайн-проверка
+## Offline verification
 
-Из корня репозитория:
+From the repository root:
 
 ```bash
 python -B research/vooi/scripts/verify_inventory.py
@@ -49,33 +49,33 @@ python -m py_compile research/vooi/scripts/*.py
 PYTHONPATH=research/vooi python -B -m unittest discover -s research/vooi/tests -v
 ```
 
-Ожидаемый результат первой команды:
+Expected result of the first command:
 
 ```json
 {"api_rows": 77, "ok": true, "programmatic_clients": 4, "snapshot_at": "2026-08-10T08:02:00Z", "web_clients": 6}
 ```
 
-## Получение открытых клиентов
+## Fetching public clients
 
-Скрипт не запускает скачанный код и не отправляет токены:
+The script does not execute downloaded code or send tokens:
 
 ```bash
-# Все четыре официальных открытых клиента на точных SHA
+# All four official public clients at exact SHAs
 python research/vooi/scripts/fetch_sources.py repos
 
-# Только один клиент
+# Only one client
 python research/vooi/scripts/fetch_sources.py repos \
   --include vooi-mm-bot-example
 
-# Публичный HTML и same-origin JS/CSS/manifest для web surfaces
+# Public HTML and same-origin JS/CSS/manifest for web surfaces
 python research/vooi/scripts/fetch_sources.py web \
   --include vooi-ultra,vooi-pro,vooi-light
 ```
 
-Результаты пишутся в `research/vooi/artifacts/`, который исключён из Git.
-Каждый объект получает SHA-256 и запись в `capture.json`.
+Results are written to `research/vooi/artifacts/`, which is excluded from Git.
+Each object receives a SHA-256 and an entry in `capture.json`.
 
-После загрузки:
+After downloading:
 
 ```bash
 python research/vooi/scripts/extract_observables.py \
@@ -84,25 +84,25 @@ python research/vooi/scripts/extract_observables.py \
   -o research/vooi/observables.local.json
 ```
 
-## Границы анализа
+## Analysis boundaries
 
-Выполнен статический анализ публичного кода, публичных страниц и официальной
-документации. Не выполнялись:
+Static analysis covered public code, public pages, and official
+documentation. The following were not performed:
 
-- вход в аккаунт, подключение кошелька или создание API token;
-- перехват чужого трафика, обход Cloudflare Access, DRM или иных ограничений;
-- вызовы order, leverage, margin, transfer, deposit или withdraw endpoints;
-- извлечение private keys, bearer tokens, cookies, wallet signatures или
-  пользовательских данных;
-- публикация закрытых web bundles в Git.
+- account login, wallet connection, or API token creation;
+- interception of other people's traffic or bypass of Cloudflare Access, DRM, or other restrictions;
+- calls to order, leverage, margin, transfer, deposit, or withdraw endpoints;
+- extraction of private keys, bearer tokens, cookies, wallet signatures, or
+  user data;
+- publication of nonpublic web bundles in Git.
 
-## Важная граница для Multi-Exchange Engine
+## Important boundary for Multi-Exchange Engine
 
-Сгенерированный VOOI SDK содержит не только market-data, но и создание/отмену
-ордеров, широкую отмену всех ордеров, изменение leverage/margin mode,
-межбиржевые переводы и withdrawal. Поэтому его нельзя подключать к текущему
-shadow-only runtime целиком.
+The generated VOOI SDK includes market data as well as order creation/cancellation,
+broad cancellation of all orders, leverage/margin mode changes,
+cross-exchange transfers, and withdrawals. It therefore cannot be connected in full to the current
+shadow-only runtime.
 
-Для будущего read-only адаптера допустим только отдельный вручную описанный
-контракт после review. Любой private/account/trading/funds path в
-`data/api-surface-*.csv` помечен как `forbidden` или `strictly_forbidden`.
+A future read-only adapter may use only a separate manually specified
+contract after review. Every private/account/trading/funds path in
+`data/api-surface-*.csv` is marked `forbidden` or `strictly_forbidden`.

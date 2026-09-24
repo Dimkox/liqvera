@@ -18,13 +18,15 @@ The owner subsequently adopted **Liqvera** and **Market reports you can verify.*
 
 [`provenance/import-manifest.json`](provenance/import-manifest.json) lists all 815 baseline files with their source Git blob, original executable mode, source SHA-256 and imported SHA-256. It describes the **initial import**, before the separate Mezo documentation changes. There is no self-referential hash of the manifest itself.
 
-793 files retain their exact source bytes. Privacy changes affect 22 files:
+At the initial import, 793 files retained their exact source bytes. Privacy changes affected 22 files:
 
 - Remove the personal author email field from the root and three package `pyproject.toml` files. Keep the author name and original `Proprietary` license metadata.
 - Redact three private IPv4 occurrences in documentation.
 - Replace 62 named home-directory references in 18 documents with `/home/operator`.
 
 The manifest marks every changed baseline file. Windows archive line-ending conversion was reversed before hashing; it is not counted as a source change. Application source and test bytes are preserved. Generic filesystem defaults in CI scripts and synthetic test fixtures remain part of the technical baseline.
+
+Subsequent documentation commits establish English as the default project language and translate Russian prose in the current documentation, inherited plans, research, and archives. These translations preserve the historical status and technical requirements of those documents. They are post-import changes: the initial manifest and source SHAs remain unchanged, and the original imported text remains available in Git history.
 
 No baseline file is omitted. The source contained no tracked symlinks, submodules, LFS pointers, `.gitmodules`, generated binary archives, database dumps, private-key files or runtime log files in the reviewed inventory. The tracked `.env.example` is an example, not a copied runtime environment.
 

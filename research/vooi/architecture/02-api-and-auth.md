@@ -1,6 +1,6 @@
-## 3. Восстановленная схема взаимодействия
+## 3. Reconstructed interaction model
 
-Высокодостоверная часть:
+High-confidence portion:
 
 ```text
 Web terminal / Bot / MCP client
@@ -17,8 +17,8 @@ Web terminal / Bot / MCP client
             +-- /mcp
 ```
 
-Следующая часть является архитектурным выводом из API shape и официального
-описания unified execution layer:
+The following portion is an architectural inference from the API shape and the official
+description of the unified execution layer:
 
 ```text
 perps-api.vooi.io
@@ -34,14 +34,14 @@ perps-api.vooi.io
               HIP-3 builders on Hyperliquid
 ```
 
-Публичного server repository, подтверждающего внутренние class/module names,
-нет. Поэтому слова `router` и `adapter` здесь описывают наблюдаемую роль, а не
-утверждают конкретную серверную реализацию.
+There is no public server repository confirming internal class/module names.
+The terms `router` and `adapter` therefore describe the observed role here, rather than
+asserting a specific server implementation.
 
 ## 4. API surface
 
-`data/api-surface-*.csv` содержит 77 точных пар method/path, извлечённых из
-сгенерированного SDK в pinned MM-bot commit. Основные группы:
+`data/api-surface-*.csv` contains 77 exact method/path pairs extracted from
+the generated SDK at the pinned MM-bot commit. Main groups:
 
 ### Market and strategy reads
 
@@ -56,9 +56,9 @@ GET /funding-strategies/spread-chart
 GET /time
 ```
 
-`GET /exchange/markets` в official examples назван authoritative list для
-доступных exchange/market combinations. `quotes` и `estimate-slippage` требуют
-Bearer в generated schema и не являются эквивалентом полностью публичного
+Official examples describe `GET /exchange/markets` as the authoritative list of
+available exchange/market combinations. `quotes` and `estimate-slippage` require
+Bearer in the generated schema and are not equivalent to a fully public
 market-data endpoint.
 
 ### Streaming
@@ -69,9 +69,9 @@ POST /exchange/updates-token
 GET  /exchange/updates
 ```
 
-Generated client описывает SSE. Разделение на public-looking orderbook stream и
-one-time-token updates указывает, что market stream и private account/order
-stream нельзя смешивать в одном доверительном контуре.
+The generated client describes SSE. The separation into a public-looking orderbook stream and
+one-time-token updates indicates that the market stream and private account/order
+stream must not be mixed within one trust boundary.
 
 ### Trading and account mutation
 
@@ -85,9 +85,9 @@ POST   /exchange/leverage
 POST   /exchange/margin-mode
 ```
 
-`DELETE /exchange/all-orders` описан как Lighter-only broad cancel. Он прямо
-несовместим с инвариантом Multi-Exchange Engine «отменять только собственные
-точно зарегистрированные ордера».
+`DELETE /exchange/all-orders` is described as a Lighter-only broad cancel. It is directly
+incompatible with the Multi-Exchange Engine invariant to "cancel only owned,
+exactly registered orders."
 
 ### Onboarding and wallet signatures
 
@@ -101,10 +101,10 @@ POST /user-exchange/{exchange}/register/execute
 GET  /user-exchange/{exchange}/register/status
 ```
 
-Наблюдается prepare/sign/execute pattern: API строит exchange-specific payload,
-пользователь подписывает его кошельком, затем signed data отправляется на
-execute endpoint. Это сильная граница полномочий; исследование не выполняло ни
-одного signing flow.
+A prepare/sign/execute pattern is observed: the API constructs an exchange-specific payload,
+the user signs it with a wallet, and the signed data is then sent to the
+execute endpoint. This is a strong authority boundary; the research performed no
+signing flows.
 
 ### Funds movement
 
@@ -119,8 +119,8 @@ POST /withdraw/extended/quote
 POST /withdraw/extended/execute
 ```
 
-Эти endpoints не имеют места в текущем shadow-only или public-data runtime.
-Даже «prepare» может создавать подпись/transaction intent и должен считаться
+These endpoints have no place in the current shadow-only or public-data runtime.
+Even "prepare" may create a signature/transaction intent and must be treated as a
 funds-moving capability.
 
 ### MCP
@@ -131,47 +131,47 @@ POST   /mcp
 DELETE /mcp
 ```
 
-Generated OpenAPI schema не помечает security одинаково во всех местах, но
-официальный MCP README и Ultra setup требуют Bearer token. Документация
-продукта имеет приоритет над отсутствующей annotation в generated client.
+The generated OpenAPI schema does not annotate security consistently everywhere, but
+the official MCP README and Ultra setup require a Bearer token. Product documentation
+takes precedence over a missing annotation in the generated client.
 
-## 5. Venue abstraction и утечки venue-specific семантики
+## 5. Venue abstraction and leaks of venue-specific semantics
 
-VOOI даёт общий `/exchange/*` namespace, но abstraction не полностью стирает
-различия venue:
+VOOI provides a common `/exchange/*` namespace, but the abstraction does not fully erase
+venue differences:
 
-- exchange передаётся строкой и может расширяться без regeneration клиента;
-- market identity включает `baseSymbol` и `id`;
-- Kinetiq и trade.xyz представлены как HIP-3 builder deployments внутри
+- exchange is passed as a string and can be extended without regenerating the client;
+- market identity includes `baseSymbol` and `id`;
+- Kinetiq and trade.xyz are represented as HIP-3 builder deployments within
   Hyperliquid;
-- их symbols имеют prefixes, например `km:` и `xyz:`;
-- official MM bot сопоставляет «virtual venue» с
+- their symbols have prefixes, such as `km:` and `xyz:`;
+- the official MM bot maps a "virtual venue" to
   `{exchange: "hyperliquid", prefix}`;
-- для Aster order/leverage `asset` использует market `id` вроде `BTCUSDT`,
-  тогда как другие paths используют `baseSymbol`;
-- две логические legs могут разделять один физический margin account.
+- for Aster order/leverage, `asset` uses a market `id` such as `BTCUSDT`,
+  while other paths use `baseSymbol`;
+- two logical legs may share one physical margin account.
 
-Следствие: ключ состояния только по `exchange` недостаточен. Минимальный ключ
-должен включать venue/exchange, canonical market identity, symbol namespace и
-роль leg. Нельзя предполагать, что одинаковый ticker означает одинаковый
+Consequence: a state key based only on `exchange` is insufficient. The minimum key
+must include venue/exchange, canonical market identity, symbol namespace, and
+leg role. An identical ticker must not be assumed to mean an identical
 contract.
 
-## 6. Authentication и secret boundary
+## 6. Authentication and secret boundary
 
-Наблюдаемая модель:
+Observed model:
 
-- VOOI API token создаётся в Ultra console;
-- clients передают Bearer header;
-- server-side broker identity/fee policy связывается с API key;
-- отдельные exchange actions требуют wallet signature;
-- Telegram/LLM/database credentials в examples передаются через environment.
+- the VOOI API token is created in the Ultra console;
+- clients send a Bearer header;
+- server-side broker identity/fee policy is bound to the API key;
+- individual exchange actions require a wallet signature;
+- Telegram/LLM/database credentials in the examples are passed through the environment.
 
-Исследовательские инструменты этого каталога:
+The research tools in this directory:
 
-- не читают `.env`;
-- не принимают Bearer token;
-- не отправляют cookies;
-- не подключают wallet;
-- удаляют secret-like query values из observables;
-- не выполняют скачанный код.
+- do not read `.env`;
+- do not accept a Bearer token;
+- do not send cookies;
+- do not connect a wallet;
+- remove secret-like query values from observables;
+- do not execute downloaded code.
 

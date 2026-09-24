@@ -99,3 +99,7 @@ Publish a privacy-reviewed source snapshot in an independent repository with a n
 ## 2026-09-24 — Liqvera brand
 
 The owner selected Liqvera with the tagline "Market reports you can verify." and attribution to MEZO ₿ — The Mezo Buildathon (https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10). The canonical repository is `Dimkox/liqvera`; documentation uses the new brand while inherited runtime identifiers and the immutable import manifest remain stable. The former specification path points to `docs/planning/LIQVERA_FACTORY_TZ.md` so existing factory links keep working.
+
+## 2026-09-24 — English is the default project language
+
+The owner requires English throughout project documentation and product content, regardless of the conversation language. Translate inherited prose as a documentation change while preserving technical identifiers, requirements, historical statuses, and the immutable initial import manifest. Record this default in `AGENTS.md` so future contributors do not infer localization from chat.

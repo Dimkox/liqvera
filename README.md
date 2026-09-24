@@ -2,34 +2,34 @@
 
 **Market reports you can verify.**
 
-Рыночные отчёты, которые можно проверить.
+Built for [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
 
-Создано для [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
+Verifiable reports from Hyperliquid BTC perpetual order-book snapshots, with planned access payments in test MUSD on Mezo Testnet.
 
-Проверяемые отчёты по снимку стакана BTC-perpetual на Hyperliquid с планируемой оплатой доступа тестовыми MUSD в Mezo Testnet.
+## Project status
 
-## Состояние проекта
+This standalone public repository starts from a technical snapshot of Multi-Exchange Engine. It includes the Stage A Python core, public-data capture, analysis, tests, build configuration, and the complete Mezo implementation specification. The HTTP API, payment gateway, and Mezo user interface still need to be implemented. Publishing the repository does not establish application readiness or a successful testnet payment.
 
-Отдельный публичный репозиторий подготовлен из технического снимка Multi-Exchange Engine. Здесь есть Python-ядро Stage A, сбор публичных данных, анализ, тесты, конфигурация сборки и полное ТЗ для Mezo. HTTP API, платёжный шлюз и интерфейс Mezo ещё предстоит реализовать. Публикация репозитория не подтверждает готовность приложения или успешную testnet-оплату.
+The private upstream Git history was not imported. Sources, checksums, and publication changes are documented in [PROVENANCE.md](PROVENANCE.md). Inherited GitHub Actions are disabled; upstream secrets and environments were not copied.
 
-Исходная приватная Git-история не перенесена. Источник, контрольные суммы и изменения для публикации перечислены в [PROVENANCE.md](PROVENANCE.md). Унаследованные GitHub Actions отключены; secrets и environments исходного проекта не перенесены.
+English is the default language for project documentation, contributor material, and product content.
 
-## Начать здесь
+## Start here
 
-- [ТЗ Liqvera](docs/planning/LIQVERA_FACTORY_TZ.md) — сценарий, этапы F0–F7 и 30 приёмочных проверок.
-- [Handoff](handoff.md) — актуальный статус и следующий шаг.
-- [Документация](docs/README.md) — техническая основа и архив исходного проекта.
-- [Security](SECURITY.md) — ограничения работы с данными и торговлей.
-- [Происхождение и проверка публикации](PROVENANCE.md).
+- [Liqvera specification](docs/planning/LIQVERA_FACTORY_TZ.md) — user journey, phases F0–F7, and 30 acceptance checks.
+- [Handoff](handoff.md) — current status and next step.
+- [Documentation](docs/README.md) — technical baseline and upstream archive.
+- [Security](SECURITY.md) — data and trading boundaries.
+- [Source provenance and publication verification](PROVENANCE.md).
 
-Актуальный план Liqvera — [этапы F0–F7 в ТЗ](docs/planning/LIQVERA_FACTORY_TZ.md). Публичный перенос F0 выполнен; следующий этап — проверка основы F1. Статус и происхождение файлов описаны в handoff и PROVENANCE.
+The current Liqvera plan is [phases F0–F7 in the specification](docs/planning/LIQVERA_FACTORY_TZ.md). The F0 public import is complete; F1 baseline verification is next. Handoff and PROVENANCE describe the status and origin of the files.
 
 ```mermaid
 graph LR
     R[README] --- H[handoff]
-    R --- T[ТЗ]
+    R --- T[Specification]
     R --- P[PROVENANCE]
-    R --- D[Документация]
+    R --- D[Documentation]
     H --- T
     H --- P
     H --- D
@@ -38,27 +38,27 @@ graph LR
     P --- D
 ```
 
-## Техническая основа
+## Technical baseline
 
-| Пакет | Назначение |
+| Package | Purpose |
 |---|---|
-| `packages/contracts` | Точные типы и контракты |
-| `packages/public-capture` | Получение публичных снимков |
-| `packages/readonly-analyzer` | Восстановление, проверка и расчёты |
+| `packages/contracts` | Exact types and contracts |
+| `packages/public-capture` | Public snapshot capture |
+| `packages/readonly-analyzer` | Reconstruction, verification, and calculations |
 
-Python — активное вычислительное ядро. Сохранённый Go-код относится к исторической основе. В ТЗ для новой версии предусмотрены отдельный TypeScript-шлюз x402, PostgreSQL и минимальный браузерный интерфейс; они не входят в текущую реализацию.
+Python is the active computation core. Retained Go code belongs to the historical baseline. The new product specification calls for a separate TypeScript x402 gateway, PostgreSQL, and a minimal browser interface; these are not part of the current implementation.
 
-Команды проверки унаследованной основы для среды с Python 3.11+, Make и зависимостями:
+To verify the inherited baseline in an environment with Python 3.11+, Make, and the required dependencies:
 
 ```bash
 python3 -m pip install -e '.[dev]'
 make verify
 ```
 
-Для fixture-демо: `make demo`. Сборка контейнеров требует Docker: `make product`. Полный `make verify`, контейнерная сборка и платёжный сценарий при публикации не запускались; их выполнение относится к F1 и последующим этапам.
+Use `make demo` for the fixture demo. Container builds require Docker: `make product`. The full `make verify`, container build, and payment flow were not run during publication; they belong to F1 and later phases.
 
-## Границы
+## Boundaries
 
-Только публичные рыночные данные и read-only аналитика. Планируемые платежи — только Mezo Testnet. Торговля, mainnet, хранение пользовательских средств и биржевые ключи исключены. Fixture-данные не являются live-отчётом.
+Public market data and read-only analysis only. Planned payments are restricted to Mezo Testnet. Trading, mainnet, custody of user funds, and exchange API keys are excluded. Fixture data is not a live report.
 
-В исходных Python-метаданных указано `Proprietary`; эта маркировка сохранена. Публичность репозитория сама по себе не предоставляет открытую лицензию. Новая лицензия не добавлялась.
+The original Python metadata specifies `Proprietary`; that designation is retained. Public repository visibility does not itself grant an open-source license. No new license has been added.

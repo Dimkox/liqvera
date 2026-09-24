@@ -1,7 +1,7 @@
-# Liqvera — указатель на актуальное ТЗ
+# Liqvera — current specification pointer
 
-Актуальный документ: **[ТЗ для фабрики: Liqvera](LIQVERA_FACTORY_TZ.md)**.
+Current document: **[Factory specification: Liqvera](LIQVERA_FACTORY_TZ.md)**.
 
-Этот путь сохранён для совместимости со ссылками из фабрики и исходного PR. Бренд проекта — **Liqvera**, слоган — **Market reports you can verify.**
+This path is retained for compatibility with links from the factory and original PR. The project brand is **Liqvera**, and the tagline is **Market reports you can verify.**
 
-Создано для [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
+Built for [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).

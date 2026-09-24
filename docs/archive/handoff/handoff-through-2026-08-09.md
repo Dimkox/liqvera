@@ -1,4 +1,4 @@
-# Multi-Exchange Engine — полный handoff
+# Multi-Exchange Engine — complete handoff
 
 ## Update 2026-08-09: A2 verify image includes actionlint config
 
@@ -189,60 +189,60 @@
 
 ## Update 2026-07-28: A2 public-only boundary regression
 
-- Добавлен fail-closed AST scanner `scripts/check-a2-boundary.py`. Он проверяет
-  только production A2 source: import boundary, third-party allowlist,
-  credential-free public URL literals, structured outbound message types и
-  запрещённые normalized-book symbols.
-- `tests/a2/test_dependency_boundary.py` копирует A2 package во временную
-  директорию и mutation-tests отклоняют execution import, неразрешённый domain
-  import, private outbound `order` и private URL literal. Comments и harmless
-  public `order_book` names не считаются private capability evidence.
-- Scanner success означает только отсутствие запрещённых capabilities в
-  статически проверяемом A2 source. Он не доказывает data quality,
-  reconstructability, arbitrage edge, profitability или readiness for live
+- Added the fail-closed AST scanner `scripts/check-a2-boundary.py`. It checks
+  only production A2 source: import boundaries, the third-party allowlist,
+  credential-free public URL literals, structured outbound message types, and
+  forbidden normalized-book symbols.
+- `tests/a2/test_dependency_boundary.py` copies the A2 package to a temporary
+  directory, and mutation tests reject execution imports, unauthorized domain
+  imports, private outbound `order`, and private URL literals. Comments and harmless
+  public `order_book` names do not count as private capability evidence.
+- Scanner success means only that forbidden capabilities are absent from
+  statically checked A2 source. It does not establish data quality,
+  reconstructability, arbitrage edge, profitability, or readiness for live
   trading.
-- После GREEN этого checkpoint public warm-up и five-day measured run всё ещё
-  требуют следующих packaging/deployment gates; venue/private APIs, signers,
-  account data и торговые методы не запускались.
+- After this checkpoint is GREEN, public warm-up and the five-day measured run still
+  require the subsequent packaging/deployment gates; venue/private APIs, signers,
+  account data, and trading methods were not invoked.
 
 ## Update 2026-07-27: A2 Task 10 replay and fault gate complete
 
-### Результат
+### Result
 
-- Реализован deterministic PostgreSQL replay по одному raw batch за раз:
+- Implemented deterministic PostgreSQL replay one raw batch at a time:
   compressed/uncompressed hashes, strict envelopes, contiguous batch/ingest
-  indexes, frame indexes по `(venue, boot_id, connection_epoch)` и повторная
+  indexes, frame indexes by `(venue, boot_id, connection_epoch)`, and repeated
   venue-native semantic classification.
-- Replay сравнивает raw-envelope semantics со stored decoder evidence и
-  fail-closed выдаёт только typed A2 reason codes. Order book не строится.
-- `scripts/replay-a2-run.py` печатает один credential-free canonical JSON
-  report. Ошибка configuration получает exit `2`; integrity/runtime failure —
-  exit `1`; traceback и DSN наружу не выходят.
-- Два свежих Python процесса против одного PostgreSQL snapshot обязаны
-  выдавать побайтно одинаковый stdout. Это доказано integration test.
+- Replay compares raw-envelope semantics with stored decoder evidence and
+  fails closed using only typed A2 reason codes. It does not build an order book.
+- `scripts/replay-a2-run.py` prints one credential-free canonical JSON
+  report. Configuration errors return exit `2`; integrity/runtime failures return
+  exit `1`; tracebacks and DSNs are not exposed.
+- Two fresh Python processes against the same PostgreSQL snapshot must
+  produce byte-identical stdout. An integration test proves this.
 - Decoder schema/version drift, hash corruption, gzip truncation/append,
-  duplicate/missing index, epoch merge и semantic mismatch имеют negative
+  duplicate/missing indexes, epoch merging, and semantic mismatches have negative
   replay coverage.
 
 ### Fault matrix
 
-- Queue saturation завершает ingress с `QUEUE_SATURATED`.
-- WebSocket EOF сохраняется как `WEBSOCKET_DISCONNECTED`.
-- Lighter nonce gap открывает `GAP_OPEN`; большой `offset` при правильной
-  nonce chain остаётся valid и не используется как continuity key.
-- Hyperliquid source-time regression сохраняется как
+- Queue saturation terminates ingress with `QUEUE_SATURATED`.
+- WebSocket EOF is recorded as `WEBSOCKET_DISCONNECTED`.
+- A Lighter nonce gap opens `GAP_OPEN`; a large `offset` with a correct
+  nonce chain remains valid and is not used as a continuity key.
+- Hyperliquid source-time regression is recorded as
   `SOURCE_TIME_REGRESSION`/`INVALID_SOURCE_TIME`.
-- Stored future decoder version даёт `DECODER_VERSION_MISMATCH`.
-- Existing binding PostgreSQL harness реально убивает child до и после commit,
-  доказывая atomic/idempotent recovery, и отдельно закрывает connection перед
-  pending retry, доказывая outage/reclaim path.
+- A stored future decoder version produces `DECODER_VERSION_MISMATCH`.
+- The existing binding PostgreSQL harness actually kills the child before and after commit,
+  proving atomic/idempotent recovery, and separately closes the connection before
+  a pending retry, proving the outage/reclaim path.
 
-### Файлы и Git
+### Files and Git
 
 - Core replay checkpoint: `b3d9a79`.
-- Canonical CLI/PostgreSQL/fault checkpoint: `e699e31`, pushed в
+- Canonical CLI/PostgreSQL/fault checkpoint: `e699e31`, pushed to
   `origin/feature/a2-raw-wire-capture`.
-- Изменены/добавлены:
+- Changed/added:
   `multi_exchange_engine/a2/model.py`,
   `multi_exchange_engine/a2/repository.py`,
   `multi_exchange_engine/a2/replay.py`,
@@ -252,119 +252,119 @@
   `tests/a2/integration/test_replay_postgres.py`,
   `tests/a2/integration/test_fault_matrix.py`.
 
-### Проверка на Claw
+### Claw verification
 
 - Source archive exact commit: `e699e31`; SHA-256
   `3946e196fdcd0f4222c786b36aba066612bec3b7eaff385ea1be077442b93aec`.
 - Pinned Linux wheelhouse: 13 wheels; archive SHA-256
   `4edce479619007a533831b968d793b5d26ca90f6b9852364b5a4c8a53ff6a759`.
 - Runtime: `python:3.12-slim-bookworm`, `postgres:16-alpine`, network
-  `app-stack_airgap_net`, ephemeral random database password, read-only source
-  mount и tmpfs для venv/bytecode.
+  `app-stack_airgap_net`, an ephemeral random database password, a read-only source
+  mount, and tmpfs for the venv/bytecode.
 - Focused Task 10 + binding crash/outage gate: 8/8.
-- Полный PostgreSQL integration gate: 22/22, skips запрещены.
-- Полный suite на Python 3.12: 377/377.
-- `pip check` и `compileall` прошли.
-- `/home/operator/app-stack` остался на
-  `5109675c17c1b3d8975c208c83d054bbc4e5b550`; HEAD и dirty-state hash до/после
-  совпали. Временные containers/source/archive удалены.
+- Full PostgreSQL integration gate: 22/22; skips are prohibited.
+- Full suite on Python 3.12: 377/377.
+- `pip check` and `compileall` passed.
+- `/home/operator/app-stack` remained at
+  `5109675c17c1b3d8975c208c83d054bbc4e5b550`; HEAD and dirty-state hashes matched
+  before and after. Temporary containers/source/archive were removed.
 - Evidence:
-  `outputs/mee-a2-task10-e699e31-claw.log` и
+  `outputs/mee-a2-task10-e699e31-claw.log` and
   `outputs/mee-a2-task10-e699e31-claw.status`.
 
-### Что пробовали и что не сработало
+### Attempts and failures
 
-- Первый runner делал `pip install` через `proxy-gateway`; intermittent TLS
-  record corruption оборвал download до тестов. n8n имеет тот же proxy origin,
-  но обычный Node `fetch` сам по себе environment proxy не применяет.
-- Повтор заменён на offline delivery pinned Linux wheelhouse. В test container
-  нет dependency egress и нет обходного direct-WAN route.
-- Следующий runner не передал `PYTHONPATH=/workspace`; explicit script видел
-  `scripts/`, но не package `tests`. Path зафиксирован явно.
-- Затем `compileall` корректно отказался писать `__pycache__` в read-only
-  source mount. Bytecode output перенесён в `/tmp/pycache`; source mount не
-  ослаблялся.
+- The first runner performed `pip install` through `proxy-gateway`; intermittent TLS
+  record corruption interrupted the download before tests. n8n has the same proxy origin,
+  but ordinary Node `fetch` does not apply an environment proxy by itself.
+- The retry switched to offline delivery of a pinned Linux wheelhouse. The test container
+  has no dependency egress and no bypass through a direct-WAN route.
+- The next runner did not pass `PYTHONPATH=/workspace`; the explicit script saw
+  `scripts/`, but not the `tests` package. The path was set explicitly.
+- Then `compileall` correctly refused to write `__pycache__` into the read-only
+  source mount. Bytecode output moved to `/tmp/pycache`; source-mount restrictions
+  were not relaxed.
 
-### Claim boundary и следующий шаг
+### Claim boundary and next step
 
-- Task 10 доказывает replay integrity и fault handling сохранённых public
-  application messages. Он не доказывает reconstructability, arbitrage edge,
-  прибыльность или готовность live trading.
-- Venue/private APIs, signer, account data и торговые методы не вызывались.
-- Следующий шаг: Task 11 forbidden-capability scan и claim-boundary regression.
-  До его GREEN и следующих packaging/deployment gates public warm-up и
-  пятидневный measured run не запускать.
+- Task 10 proves replay integrity and fault handling for stored public
+  application messages. It does not establish reconstructability, arbitrage edge,
+  profitability, or live-trading readiness.
+- Venue/private APIs, signers, account data, and trading methods were not invoked.
+- Next step: Task 11 forbidden-capability scan and claim-boundary regression.
+  Do not start public warm-up or the five-day measured run until it is GREEN
+  and the subsequent packaging/deployment gates pass.
 
 ## Update 2026-07-27: A2 Task 10 bounded replay core checkpoint
 
-- Добавлен batch-bounded deterministic replay. В памяти одновременно
-  находится не больше одного raw batch и его bounded decoder evidence range.
-- Replay проверяет оба stored hashes, fixed gzip profile, canonical NDJSON,
-  contiguous batch/ingest indexes и epoch-local frame indexes.
-- Observer state разделён по `(venue, boot_id, connection_epoch)`: одинаковый
-  номер epoch нового boot не сливается со старым.
-- Reproduced observation сравнивается с combined persisted evidence:
-  semantic/source fields из immutable raw envelope плюс decoder version,
-  class/continuity/error из `raw_decoder_observations`.
-- Terminal report имеет canonical SHA-256, exact `VERIFIED|FAILED` и только
-  типизированные A2 reason codes. Replay не строит order book.
-- PostgreSQL reader загружает decoder rows только для диапазона текущего
-  batch и fail-closed отклоняет missing, duplicate или non-contiguous rows.
-- TDD RED: отсутствовал `multi_exchange_engine.a2.replay`, затем отсутствовал
-  typed bounded decoder reader. Focused GREEN: 8/8 tests; `compileall` и
-  `git diff --check` прошли.
-- Один первоначальный corruption test ничего не менял: последний gzip byte
-  уже был `0x00`. Fixture исправлена на гарантированный XOR; production code
-  для этого не менялся.
-- Следующий шаг Task 10: canonical CLI, PostgreSQL replay integration и fault
-  matrix. Claw gate и public warm-up на этом checkpoint не запускались.
+- Added batch-bounded deterministic replay. Memory holds no more than
+  one raw batch and its bounded decoder evidence range at a time.
+- Replay checks both stored hashes, the fixed gzip profile, canonical NDJSON,
+  contiguous batch/ingest indexes, and epoch-local frame indexes.
+- Observer state is separated by `(venue, boot_id, connection_epoch)`: the same
+  epoch number in a new boot is not merged with the old one.
+- Reproduced observations are compared with combined persisted evidence:
+  semantic/source fields from the immutable raw envelope plus decoder version,
+  class/continuity/error from `raw_decoder_observations`.
+- The terminal report has a canonical SHA-256, exact `VERIFIED|FAILED` status, and only
+  typed A2 reason codes. Replay does not build an order book.
+- The PostgreSQL reader loads decoder rows only for the current batch range
+  and fails closed on missing, duplicate, or non-contiguous rows.
+- TDD RED: `multi_exchange_engine.a2.replay` was missing, then the
+  typed bounded decoder reader was missing. Focused GREEN: 8/8 tests; `compileall` and
+  `git diff --check` passed.
+- One initial corruption test changed nothing: the final gzip byte
+  was already `0x00`. The fixture was corrected to use a guaranteed XOR; production code
+  was not changed for this.
+- Next Task 10 step: canonical CLI, PostgreSQL replay integration, and fault
+  matrix. The Claw gate and public warm-up were not run at this checkpoint.
 
 ## Update 2026-07-27: A2 Task 9 runtime composition complete
 
-### Результат
+### Result
 
-- Собран concrete A2 service runtime для `public|fixture`: strict config,
+- Assembled a concrete A2 service runtime for `public|fixture`: strict configuration,
   PostgreSQL run lease, clock qualification, discovery/frozen universe,
-  append-only lifecycle, durable batch writer, оба public raw feeds и exact
+  append-only lifecycle, durable batch writer, both public raw feeds, and the exact
   GET-only status surface.
-- Startup зафиксирован как lease/database → clock/discovery/freeze → writer →
-  Hyperliquid → Lighter → status. Shutdown идёт через единый boundary:
+- Startup order is fixed as lease/database → clock/discovery/freeze → writer →
+  Hyperliquid → Lighter → status. Shutdown uses one boundary:
   stop admission → close feed epochs → durable batch flush → lifecycle
   persistence → lease release → status stop.
-- `python -m multi_exchange_engine.a2` не печатает DSN или произвольный текст
-  исключения. Configuration, terminal и generic failures имеют bounded
-  operator-facing сообщения.
+- `python -m multi_exchange_engine.a2` does not print DSNs or arbitrary exception
+  text. Configuration, terminal, and generic failures have bounded
+  operator-facing messages.
 
-### Persistence и restart
+### Persistence and restart
 
-- Public discovery получает только fixed credential-free endpoints через
-  `proxy-gateway`. Exact raw Hyperliquid/Lighter control payloads и processed
-  frozen universe сохраняются атомарно после hash/provenance/registry
+- Public discovery accesses only fixed credential-free endpoints through
+  `proxy-gateway`. Exact raw Hyperliquid/Lighter control payloads and the processed
+  frozen universe are stored atomically after hash/provenance/registry
   validation.
-- Restart восстанавливает exact lifecycle events и frozen universe из
-  PostgreSQL. Уже замороженный run не делает повторный discovery и не меняет
-  ранжирование.
-- Status persistence cursor обновляется после каждого подтверждённого DB
-  commit, а не только при shutdown. Callback получает следующий
-  `batch_sequence` и `ingest_index` только после успешного `persist`.
-- Lifecycle/connection control writes вынесены из asyncio event loop через
-  bounded thread calls; batch persistence уже использует тот же подход.
+- Restart restores exact lifecycle events and the frozen universe from
+  PostgreSQL. A previously frozen run does not repeat discovery or change
+  the ranking.
+- The status persistence cursor is updated after every confirmed DB
+  commit, not only at shutdown. The callback receives the next
+  `batch_sequence` and `ingest_index` only after successful `persist`.
+- Lifecycle/connection control writes are moved out of the asyncio event loop through
+  bounded thread calls; batch persistence already uses the same approach.
 
 ### Fixture boundary
 
-- Fixture mode не создаёт public HTTP/WebSocket session. Он строит
-  deterministic synthetic discovery из committed reviewed registry,
-  замораживает 10 mappings и пропускает через настоящий ingress/writer семь
-  exact committed application payloads: три Hyperliquid и четыре Lighter.
-- Fixture readiness доказывает только wiring, raw-byte admission, durability,
-  startup/shutdown и отсутствие venue network. Она не доказывает полноту
-  semantic routing, public subscription acknowledgement, качество данных,
-  reconstructability или arbitrage expectancy.
-- Public collector readiness означает: WebSocket открыт и все fixed
-  subscription requests отправлены. Качество acknowledged subscription и
-  каждого one-second slot остаётся binding обязанностью warm-up/gate.
+- Fixture mode creates no public HTTP/WebSocket session. It builds
+  deterministic synthetic discovery from the committed reviewed registry,
+  freezes 10 mappings, and passes seven exact committed application payloads through
+  the real ingress/writer: three Hyperliquid and four Lighter payloads.
+- Fixture readiness proves only wiring, raw-byte admission, durability,
+  startup/shutdown, and absence of venue network access. It does not establish complete
+  semantic routing, public subscription acknowledgement, data quality,
+  reconstructability, or arbitrage expectancy.
+- Public collector readiness means the WebSocket is open and all fixed
+  subscription requests have been sent. Acknowledged subscription quality and
+  each one-second slot remain binding responsibilities of warm-up/the gate.
 
-### Файлы Task 9
+### Task 9 files
 
 - `multi_exchange_engine/a2/config.py`
 - `multi_exchange_engine/a2/status_api.py`
@@ -381,137 +381,135 @@
 - `tests/a2/test_status_api.py`
 - `tests/a2/test_app.py`
 - `tests/a2/test_runtime.py`
-- связанные feed/pipeline/repository unit и PostgreSQL integration tests.
+- Related feed/pipeline/repository unit and PostgreSQL integration tests.
 
-### Что пробовали и что не сработало
+### Attempts and failures
 
-- Первый Claw runner ожидал отсутствующий cached
-  `python:3.12-alpine`; выбран имеющийся `python:3.12-slim-bookworm`.
-- Первый container run передал explicit unittest modules без
-  `PYTHONPATH=/workspace`, поэтому Python видел `scripts/`, но не package
-  `tests`. Финальный runner фиксирует top-level path.
-- Попытка использовать host Python подтвердила `Python 3.12.3`, но system
-  environment не содержит `aiohttp/psycopg`. Временный venv сначала получил
-  склеенные IP всех сетей `proxy-gateway`, затем host-to-container DB path
-  завис. Этот смешанный маршрут отброшен.
-- Финальный gate повторяет рабочий n8n network pattern: Python runner и
-  ephemeral PostgreSQL находятся в `app-stack_airgap_net`; outbound dependency
-  fetch идёт только через `http://proxy-gateway:1080`, DB — по container DNS.
-- Чтение полного `docker logs` через Bitvise зависло после terminal
-  `EXIT=0`; отдельная bounded cleanup-проверка подтвердила отсутствие
-  контейнеров, archive и temp tree.
+- The first Claw runner expected an unavailable cached
+  `python:3.12-alpine`; the available `python:3.12-slim-bookworm` was selected.
+- The first container run passed explicit unittest modules without
+  `PYTHONPATH=/workspace`, so Python saw `scripts/`, but not the
+  `tests` package. The final runner sets the top-level path.
+- An attempt to use host Python confirmed `Python 3.12.3`, but the system
+  environment lacks `aiohttp/psycopg`. A temporary venv first received the
+  concatenated IPs of all `proxy-gateway` networks; then the host-to-container DB path
+  hung. This mixed route was abandoned.
+- The final gate follows the working n8n network pattern: the Python runner and
+  ephemeral PostgreSQL are in `app-stack_airgap_net`; outbound dependency
+  fetching uses only `http://proxy-gateway:1080`, and DB access uses container DNS.
+- Reading the full `docker logs` through Bitvise hung after terminal
+  `EXIT=0`; a separate bounded cleanup check confirmed that the
+  containers, archive, and temporary tree were absent.
 
-### Проверка и Git
+### Verification and Git
 
-- Финальный локальный suite: 362 tests, 345 passed, 17 ожидаемых PostgreSQL
-  skips без локального DSN.
-- Claw binding PostgreSQL gate: 17/17, runner `EXIT=0`; gate отдельно падает
-  при любом skip.
-- `compileall`, `pip check` и `git diff --check` прошли.
+- Final local suite: 362 tests, 345 passed, and 17 expected PostgreSQL
+  skips without a local DSN.
+- Claw binding PostgreSQL gate: 17/17, runner `EXIT=0`; the gate separately fails
+  on any skip.
+- `compileall`, `pip check`, and `git diff --check` passed.
 - Runtime checkpoints pushed:
   `6730b85`, `c472926`, `da17eef`, `0c2024d`.
-- `/home/operator/app-stack` не изменялся. Временные Claw containers, source tree
-  и archive удалены.
-- Public warm-up, пятидневный measured run, replay и торговые операции не
-  запускались.
+- `/home/operator/app-stack` was not changed. Temporary Claw containers, the source tree,
+  and the archive were removed.
+- Public warm-up, the five-day measured run, replay, and trading operations were
+  not started.
 
-### Следующий шаг
+### Next step
 
-- Task 10: deterministic bounded PostgreSQL replay и fault matrix. Без
-  byte-identical двойного replay и crash/outage evidence запуск public
-  warm-up преждевременен.
+- Task 10: deterministic bounded PostgreSQL replay and fault matrix. Starting public
+  warm-up is premature without byte-identical double replay and crash/outage evidence.
 
 ## Update 2026-07-27: A2 Task 9 GET-only status checkpoint
 
-- Добавлен exact GET-only aiohttp surface: `/health`, `/ready`,
-  `/v1/a2/soak-status`. Автоматический `HEAD` отключён; известные пути дают
-  `405` для `HEAD/POST/PUT/PATCH/DELETE`, mutating routes отсутствуют.
-- Status публикует только типизированный `A2StatusSnapshot`: lifecycle,
-  immutable window, warm-up, aggregate coverage, typed failure counts и
-  batch/index/hash progress. Произвольный config/secret payload не принимается.
-- Readiness равна `true` только при одновременно held ownership, ready
-  database, frozen universe и ready Hyperliquid/Lighter collectors.
-- `A2Application` фиксирует startup order
+- Added the exact GET-only aiohttp surface: `/health`, `/ready`,
+  `/v1/a2/soak-status`. Automatic `HEAD` is disabled; known paths return
+  `405` for `HEAD/POST/PUT/PATCH/DELETE`, and mutating routes are absent.
+- Status publishes only a typed `A2StatusSnapshot`: lifecycle,
+  immutable window, warm-up, aggregate coverage, typed failure counts, and
+  batch/index/hash progress. Arbitrary config/secret payloads are not accepted.
+- Readiness is `true` only when ownership is held, the database is ready,
+  the universe is frozen, and Hyperliquid/Lighter collectors are ready simultaneously.
+- `A2Application` fixes startup order as
   database/ownership → discovery/freeze → writer → Hyperliquid → Lighter →
   status. Shutdown order:
   stop admission → close both epochs → flush boundary → persist lifecycle →
   release ownership → stop status.
-- Ownership conflict останавливает startup до discovery/writer/feeds/status и
-  публикуется как typed failure. SIGINT/SIGTERM только выставляют stop event;
-  shutdown выполняет один и тот же boundary-controller.
-- TDD: ожидаемый RED — отсутствовали `a2.status_api` и `a2.app`. Один тест
-  ошибочно использовал quality label `MISSING_SLOT` как terminal enum; посылка
-  исправлена на `COVERAGE_BELOW_THRESHOLD`. Focused suite прошёл 6/6.
-- Полный локальный suite: 356 total, 340 passed, 16 ожидаемых PostgreSQL
-  skips. `compileall`, `pip check`, 88-column scan и `git diff --check`
-  прошли.
-- Следующий шаг внутри Task 9: concrete runtime assembly и `__main__.py`.
-  Public/fixture run не запускался.
+- An ownership conflict stops startup before discovery/writer/feeds/status and
+  is published as a typed failure. SIGINT/SIGTERM only set a stop event;
+  the same boundary controller performs shutdown.
+- TDD: expected RED — `a2.status_api` and `a2.app` were missing. One test
+  incorrectly used the quality label `MISSING_SLOT` as a terminal enum; the premise
+  was corrected to `COVERAGE_BELOW_THRESHOLD`. The focused suite passed 6/6.
+- Full local suite: 356 total, 340 passed, and 16 expected PostgreSQL
+  skips. `compileall`, `pip check`, the 88-column scan, and `git diff --check`
+  passed.
+- Next step within Task 9: concrete runtime assembly and `__main__.py`.
+  No public/fixture run was started.
 
 ## Update 2026-07-27: A2 Task 9 safe-config checkpoint
 
-- Добавлен строгий `A2Config`: canonical run UUID, только `public|fixture`,
-  fixed app-stack proxy, IPv4 status bind, bounded port и allowlisted log
+- Added strict `A2Config`: canonical run UUID, only `public|fixture`,
+  fixed app-stack proxy, IPv4 status bind, bounded port, and allowlisted log
   level.
-- `A2_DATABASE_URL` и неизвестные `A2_*` переменные отклоняются без вывода
-  значений. PostgreSQL DSN читается только из bounded regular non-symlink
-  файла; на Linux group/other permissions запрещены.
-- DSN исключён из `repr` и ошибок. Secret file проверяется до и после
-  открытия, ограничен 4096 bytes и не допускает пустой, multiline, NUL или
-  whitespace-mutated value.
-- TDD: ожидаемый RED — отсутствовал `a2.config`; первый GREEN обнаружил
-  неверный exact-type check для Windows `WindowsPath`, после исправления
-  focused config suite прошёл 5/5.
-- Полный локальный suite: 350 total, 334 passed, 16 ожидаемых PostgreSQL
-  skips. `compileall`, `pip check`, 88-column scan и `git diff --check`
-  прошли.
-- Следующий шаг: status/application RED, GET-only API и boundary-ordered
-  application composition. Public или fixture run ещё не запускался.
+- `A2_DATABASE_URL` and unknown `A2_*` variables are rejected without printing
+  values. The PostgreSQL DSN is read only from a bounded regular non-symlink
+  file; group/other permissions are prohibited on Linux.
+- The DSN is excluded from `repr` and errors. The secret file is checked before and after
+  opening, limited to 4096 bytes, and rejects empty, multiline, NUL-containing, or
+  whitespace-mutated values.
+- TDD: expected RED — `a2.config` was missing; the first GREEN attempt exposed
+  an incorrect exact-type check for Windows `WindowsPath`; after correction,
+  the focused configuration suite passed 5/5.
+- Full local suite: 350 total, 334 passed, and 16 expected PostgreSQL
+  skips. `compileall`, `pip check`, the 88-column scan, and `git diff --check`
+  passed.
+- Next step: status/application RED, GET-only API, and application composition
+  with boundary-ordered startup/shutdown. No public or fixture run has started yet.
 
 ## Update 2026-07-27: A2 Task 8 quality, lifecycle and five-day gate
 
-### Цель и результат
+### Goal and result
 
-- Реализован credential-free Task 8: fixed-slot quality evidence,
-  60-минутный contiguous warm-up, одно immutable measured window и
-  deterministic `PASS|FAIL` gate.
-- Исправлена критическая несогласованность: отдельные A2 design/plan всё ещё
-  задавали 24 часа, хотя binding Stage A spec и явная команда пользователя
-  требуют пять полных data days. Единый контракт теперь равен ровно
-  432000 секундам после warm-up, half-open
+- Implemented credential-free Task 8: fixed-slot quality evidence,
+  a 60-minute contiguous warm-up, one immutable measured window, and
+  a deterministic `PASS|FAIL` gate.
+- Corrected a critical inconsistency: the separate A2 design/plan still
+  specified 24 hours, although the binding Stage A specification and the user's explicit
+  instruction require five full data days. The unified contract is now exactly
+  432000 seconds after warm-up, half-open
   `[measured_start, measured_end)`.
-- Торговых/private/account/signer/order/transaction методов нет. Task 8 не
-  строит книги и не заявляет прибыльность.
+- No trading/private/account/signer/order/transaction methods exist. Task 8 does not
+  build books or claim profitability.
 
-### Что изменено
+### Changes
 
-- Каждый из 20 frozen venue-market L2 streams получает 60 expected
-  one-second slots на UTC minute. Slot valid только при acknowledged
-  subscription, active epoch, valid recorder clock, ready persistence и
-  отсутствии continuity gap. Quiet healthy second valid; отсутствующий slot
-  синтезируется как `MISSING_SLOT`.
-- Source-time age и latest cross-venue receive skew считаются exact
-  `Decimal` из integer nanoseconds. Пороги 750/200/250 ms сохраняются как
-  hash-bound evidence для A3 и сами не уменьшают A2 coverage. Future source
-  time получает отдельный reason count.
-- Warm-up требует 60 contiguous complete minutes. Invalid minute, временной
-  скачок или restart сбрасывает progress append-only событием `WARMUP_RESET`.
-  После 60-й минуты bounds фиксируются один раз; restart во время measurement
-  не меняет и не продлевает окно.
-- `SoakGate` проверяет ровно 10 mappings, 20 L2 streams и 7200 quality
-  minutes на stream. На каждом stream 432000 expected slots; ровно 429840
-  valid slots (99,5%) ещё проходят, 429839 уже дают
+- Each of the 20 frozen venue-market L2 streams receives 60 expected
+  one-second slots per UTC minute. A slot is valid only with an acknowledged
+  subscription, an active epoch, a valid recorder clock, ready persistence, and
+  no continuity gap. A quiet healthy second is valid; a missing slot
+  is synthesized as `MISSING_SLOT`.
+- Source-time age and the latest cross-venue receive skew are computed as exact
+  `Decimal` values from integer nanoseconds. The 750/200/250 ms thresholds are stored as
+  hash-bound evidence for A3 and do not themselves reduce A2 coverage. Future source
+  time receives a separate reason count.
+- Warm-up requires 60 contiguous complete minutes. An invalid minute, time
+  jump, or restart resets progress with an append-only `WARMUP_RESET` event.
+  After the 60th minute, bounds are fixed once; a restart during measurement
+  neither changes nor extends the window.
+- `SoakGate` checks exactly 10 mappings, 20 L2 streams, and 7200 quality
+  minutes per stream. Each stream has 432000 expected slots; exactly 429840
+  valid slots (99.5%) still pass, while 429839 produce
   `COVERAGE_BELOW_THRESHOLD`.
-- `PASS` требует valid replay shape и terminal evidence hash. Missing stream,
-  bad quality hash, bad replay anchor, silent drop, wrong duration или
-  неполный window дают immutable `FAIL`; ручного override, `GO` или `EXTEND`
-  в A2 нет.
-- Python `RunEvent` и PostgreSQL authoritative trigger теперь независимо
-  запрещают `MEASURING/PASS` без exact 432000-second bounds, окно в
-  `PLANNED/WARMING`, неправильную длительность и изменение bounds terminal
-  событием. `PASS` decision row также обязан иметь пятидневное окно.
+- `PASS` requires a valid replay shape and terminal evidence hash. A missing stream,
+  bad quality hash, bad replay anchor, silent drop, wrong duration, or
+  incomplete window produces immutable `FAIL`; A2 has no manual override, `GO`, or `EXTEND`.
+- Python `RunEvent` and the authoritative PostgreSQL trigger now independently
+  prohibit `MEASURING/PASS` without exact 432000-second bounds, a window in
+  `PLANNED/WARMING`, an incorrect duration, and changes to bounds by a terminal
+  event. A `PASS` decision row must also have a five-day window.
 
-### Файлы Task 8
+### Task 8 files
 
 - `multi_exchange_engine/a2/quality.py`
 - `multi_exchange_engine/a2/lifecycle.py`
@@ -524,94 +522,94 @@
 - `tests/a2/test_repository_unit.py`
 - `tests/a2/integration/test_pipeline_postgres.py`
 - `tests/a2/integration/test_repository_postgres.py`
-- A2 design, plan и этот `handoff.md`.
+- The A2 design, plan, and this `handoff.md`.
 
-### Что пробовали и что не сработало
+### Attempts and failures
 
-- Первый Claw runner поставил только `psycopg`; импорт repository требует
-  pinned public transport dependency `aiohttp`, поэтому tests остановились до
-  миграции. Runner переведён на полный `requirements-a2.txt`.
-- Первый полный PostgreSQL run дал 15 pass и одну rejected fixture: старый
-  owner-immutability test вставлял фиктивный `PASS` с bounds `1..2`. Fixture
-  заменена на `FAIL`, поскольку тест проверяет только owner-level запрет
-  `UPDATE/DELETE`, а не успешный soak.
-- Root test container создал временный `__pycache__`, который не мог удалить
-  host user. Повторный runner запретил bytecode; старый temp tree удалён через
-  точечно смонтированный `/tmp`. Финальная cleanup-проверка прошла.
-- При финальном разделении reducer и gate focused-тест поймал забытый
-  `SoakDecision` import в `LifecycleEvent.finalize`. Импорт восстановлен,
-  повторный focused и полный suite прошли.
+- The first Claw runner installed only `psycopg`; importing the repository requires
+  the pinned public transport dependency `aiohttp`, so tests stopped before
+  migration. The runner switched to the full `requirements-a2.txt`.
+- The first full PostgreSQL run produced 15 passes and one rejected fixture: the old
+  owner-immutability test inserted a dummy `PASS` with bounds `1..2`. The fixture
+  was changed to `FAIL`, because the test checks only the owner-level prohibition on
+  `UPDATE/DELETE`, not a successful soak.
+- The root test container created temporary `__pycache__` that the
+  host user could not remove. The retry runner disabled bytecode; the old temporary tree was removed
+  through a targeted `/tmp` mount. The final cleanup check passed.
+- During the final reducer/gate split, a focused test caught a missing
+  `SoakDecision` import in `LifecycleEvent.finalize`. The import was restored,
+  and the repeated focused and full suites passed.
 
-### Проверка и среда
+### Verification and environment
 
 - Focused Task 8: 11/11 passed.
-- Локальный полный suite: 345 total, 329 passed, 16 PostgreSQL tests
-  ожидаемо skipped без DSN.
-- `compileall`, repository contract suite 23/23 и `git diff --check` прошли.
-- На Claw: ephemeral `postgres:16-alpine` и Python 3.12 container в
+- Full local suite: 345 total, 329 passed, and 16 PostgreSQL tests
+  expectedly skipped without a DSN.
+- `compileall`, the repository contract suite 23/23, and `git diff --check` passed.
+- On Claw: ephemeral `postgres:16-alpine` and Python 3.12 containers in
   `app-stack_airgap_net`; binding PostgreSQL gate 16/16, skips 0.
-- Временные archive, runner, test tree и PostgreSQL container удалены.
-  `/home/operator/app-stack` не изменялся; production deployment и пятидневный
-  сбор не запускались.
+- Temporary archive, runner, test tree, and PostgreSQL container were removed.
+  `/home/operator/app-stack` was not changed; production deployment and five-day
+  capture were not started.
 
-### Следующий шаг
+### Next step
 
-- Task 9: safe configuration, application composition и GET-only status API.
-- До Task 9/10 нельзя запускать warm-up или пятидневный сбор: Task 8 доказал
-  reducer/gate и DB constraints, но runtime orchestration, status surface и
-  deterministic database replay ещё отсутствуют.
+- Task 9: safe configuration, application composition, and GET-only status API.
+- Do not start warm-up or five-day capture before Task 9/10: Task 8 proved
+  the reducer/gate and DB constraints, but runtime orchestration, the status surface, and
+  deterministic database replay are still absent.
 
 ## Update 2026-07-27: A2 Task 7 public discovery and raw feeds
 
-### Цель и результат
+### Goal and result
 
-- Task 7 реализует только credential-free public discovery и raw capture для
-  Hyperliquid/Lighter. Торговых, private, signer, account, order, transaction,
-  transfer или withdrawal методов нет.
-- Контракт инструмента: одинаковый base asset, linear perpetual, `1x`
-  displayed base units, USD valuation, USDC settlement и обязательный
-  `EXPLICIT_ORACLE_STABLECOIN_BASIS/v1`. Это не доказательство нулевого basis
-  risk или прибыльности.
-- Коммитный manual registry содержит 12 текущих reviewed кандидатов; runtime
-  ранжирует их только после semantic membership review и замораживает top 10
-  по минимуму положительного venue-reported 24h quote volume.
+- Task 7 implements only credential-free public discovery and raw capture for
+  Hyperliquid/Lighter. There are no trading, private, signer, account, order, transaction,
+  transfer, or withdrawal methods.
+- Instrument contract: the same base asset, a linear perpetual, `1x`
+  displayed base units, USD valuation, USDC settlement, and mandatory
+  `EXPLICIT_ORACLE_STABLECOIN_BASIS/v1`. This does not prove zero basis
+  risk or profitability.
+- The committed manual registry contains 12 current reviewed candidates; runtime
+  ranks them only after semantic membership review and freezes the top 10
+  by the minimum positive venue-reported 24h quote volume.
 
-### Что изменено
+### Changes
 
-- Добавлены fixed public transports:
+- Added fixed public transports:
   `https://api.hyperliquid.xyz/info`,
   `wss://api.hyperliquid.xyz/ws`,
-  Lighter `orderBooks` и
+  Lighter `orderBooks`, and
   `wss://mainnet.zklighter.elliot.ai/stream?readonly=true`.
-  Все venue-соединения идут через `http://proxy-gateway:1080`; TLS verification
-  включена, redirect policy fail closed, WebSocket heartbeat равен 30 секундам,
-  frame limit равен 8 MiB.
-- JSON discovery разбирается строго: числа с дробной частью становятся
-  `Decimal`, duplicate keys и non-finite constants отклоняются. Semantic value
-  каждый раз восстанавливается из exact hash-bound raw bytes и не может
-  разойтись с payload после внешней мутации.
-- Discovery обрабатывается до записи. Затем одна PostgreSQL transaction
-  сохраняет:
+  All venue connections go through `http://proxy-gateway:1080`; TLS verification
+  is enabled, redirect policy fails closed, WebSocket heartbeat is 30 seconds,
+  and frame limit is 8 MiB.
+- Discovery JSON is parsed strictly: fractional numbers become
+  `Decimal`; duplicate keys and non-finite constants are rejected. The semantic value
+  is reconstructed each time from exact hash-bound raw bytes and cannot
+  diverge from the payload after external mutation.
+- Discovery is processed before writing. Then one PostgreSQL transaction
+  stores:
   1. exact raw Hyperliquid `metaAndAssetCtxs`;
   2. exact raw Lighter active `orderBooks`;
   3. exact raw Lighter read-only `market_stats/all`;
   4. processed hash-bound frozen mappings.
-  Missing, duplicate, wrong-run, wrong-provenance или hash-unbound evidence
-  отклоняется до transaction. Lighter catalog дополнительно обязан реально
-  разрешать каждый frozen market ID/base asset; raw-only и processed-only
-  успешная запись запрещена.
-- Добавлена append-only таблица `a2.raw_control_evidence` с фиксированными
-  venue/kind/transport/source URI constraints, raw `bytea`, SHA-256, 8 MiB
-  limit и owner-level immutable trigger.
-- Добавлены по одному multiplexed public WebSocket collector на venue. Exact
-  text UTF-8/binary application bytes допускаются в ingress до semantic
-  observer. Reconnect создаёт новый epoch и observer. Queue saturation и
-  oversized frame закрывают epoch без бесконечного reconnect. OPEN/CLOSE
-  evidence хранит фактические extensions и точную версию `aiohttp`.
-- Добавлены deterministic mapping-review generator, committed registry,
-  критический review-документ и credential-free live smoke.
+  Missing, duplicate, wrong-run, wrong-provenance, or hash-unbound evidence
+  is rejected before the transaction. The Lighter catalog must also actually
+  resolve every frozen market ID/base asset; successful raw-only or processed-only
+  writes are prohibited.
+- Added the append-only `a2.raw_control_evidence` table with fixed
+  venue/kind/transport/source URI constraints, raw `bytea`, SHA-256, an 8 MiB
+  limit, and an owner-level immutable trigger.
+- Added one multiplexed public WebSocket collector per venue. Exact
+  text UTF-8/binary application bytes are admitted to ingress before the semantic
+  observer. Reconnect creates a new epoch and observer. Queue saturation and
+  oversized frames close the epoch without infinite reconnect. OPEN/CLOSE
+  evidence stores the actual extensions and exact `aiohttp` version.
+- Added a deterministic mapping-review generator, committed registry,
+  critical review document, and credential-free live smoke.
 
-### Файлы Task 7
+### Task 7 files
 
 - `multi_exchange_engine/a2/transport.py`
 - `multi_exchange_engine/a2/feed.py`
@@ -630,42 +628,42 @@
 - `tests/a2/test_lighter_feed.py`
 - `tests/a2/test_repository_unit.py`
 - `tests/a2/integration/test_repository_postgres.py`
-- A2 design, plan и этот `handoff.md`.
+- The A2 design, plan, and this `handoff.md`.
 
-### Что пробовали и что не сработало
+### Attempts and failures
 
-- `aiohttp 3.14.3` не принимает `max_redirects` в `ws_connect`; это обнаружил
-  первый Claw live smoke. Защита заменена на session middleware, которое
-  отклоняет любой 3xx до follow-up request, плюс проверку exact final WS URL и
+- `aiohttp 3.14.3` does not accept `max_redirects` in `ws_connect`; the first
+  Claw live smoke exposed this. Protection was replaced with session middleware that
+  rejects any 3xx before a follow-up request, plus checks for the exact final WS URL and
   empty response history.
-- Первый финальный Claw gate оборвался на transient
-  `SSL record layer failure` при `pip` через proxy-gateway. Cleanup удалил
-  временную БД и файлы. Добавлен bounded dependency-install retry.
-- Следующий PostgreSQL gate выявил только ошибку нового теста:
-  отсутствовал локальный `import psycopg` перед zero-row assertion. После
-  исправления весь binding gate прошёл.
+- The first final Claw gate was interrupted by a transient
+  `SSL record layer failure` during `pip` through proxy-gateway. Cleanup removed
+  the temporary DB and files. A bounded dependency-install retry was added.
+- The next PostgreSQL gate exposed only an error in the new test:
+  a local `import psycopg` was missing before the zero-row assertion. After
+  correction, the entire binding gate passed.
 
-### Проверка и среда
+### Verification and environment
 
-- Локально: suite выполнил 334 теста — 318 passed и 16 PostgreSQL tests
-  ожидаемо skipped без DSN; focused Task 7/repository — 46 passed;
-  `compileall`, `pip check`, line-length scan и `git diff --check` прошли.
-- На Claw: ephemeral PostgreSQL 16 в `app-stack_airgap_net`, 16/16 binding
-  integration tests без skips. Доказаны raw+processed round-trip,
-  pre-transaction rejection с нулём строк и immutable восьми evidence tables.
-- Live smoke через реальный `proxy-gateway`: 12 current accepted mappings,
-  10 frozen mappings, 3 raw control documents, 313786 raw bytes, один
+- Locally: the suite ran 334 tests — 318 passed and 16 PostgreSQL tests
+  expectedly skipped without a DSN; focused Task 7/repository — 46 passed;
+  `compileall`, `pip check`, the line-length scan, and `git diff --check` passed.
+- On Claw: ephemeral PostgreSQL 16 in `app-stack_airgap_net`, 16/16 binding
+  integration tests with no skips. Proven: raw+processed round-trip,
+  pre-transaction rejection with zero rows, and immutability of eight evidence tables.
+- Live smoke through the real `proxy-gateway`: 12 current accepted mappings,
+  10 frozen mappings, 3 raw control documents, 313786 raw bytes, one
   Hyperliquid application WebSocket frame, `public_only=true`.
-- `/home/operator/app-stack` не изменялся. Временный PostgreSQL container, archive,
-  test directory и runner удалены после проверки.
+- `/home/operator/app-stack` was not changed. The temporary PostgreSQL container, archive,
+  test directory, and runner were removed after verification.
 
-### Следующий шаг
+### Next step
 
-- Task 8: warm-up lifecycle, fixed measured window и soak gate.
-- До Task 8 нельзя заявлять готовность пятидневного сбора: collectors и
-  persistence primitives готовы, но orchestration, 60 contiguous warm-up
-  minutes, 5-day window, coverage decision и production deployment ещё не
-  реализованы.
+- Task 8: warm-up lifecycle, fixed measured window, and soak gate.
+- Five-day capture readiness cannot be claimed before Task 8: collectors and
+  persistence primitives are ready, but orchestration, 60 contiguous warm-up
+  minutes, the 5-day window, coverage decision, and production deployment are not
+  implemented yet.
 
 ## Update 2026-07-27: A2 compatibility contract corrected before Task 7
 
@@ -1473,128 +1471,128 @@
   the credential-free two-venue shadow selector and lifecycle before any live
   SDK transport is considered.
 
-Обновлено: 2026-07-25
-Рабочая ветка: `stage-a-falsifier`
-HEAD до создания этого документа: `e2e9fa2`
-Статус: **Stage A не запущен; live execution не разрешён**
+Updated: 2026-07-25
+Working branch: `stage-a-falsifier`
+HEAD before this document was created: `e2e9fa2`
+Status: **Stage A has not started; live execution is not authorized**
 
-## 1. Коротко: где проект находится на самом деле
+## 1. Current project status
 
-Это пока не торговый MVP и не готовый пятидневный эксперимент.
+This is not yet a trading MVP or a ready five-day experiment.
 
-Фактически готовы:
+Actually ready:
 
-- safety-first фундамент Stage 0;
-- зафиксированная спецификация пятидневного Stage A;
-- детальный план из 10 задач;
-- Task 1: публичная конфигурация, модель инструментов и capital gate;
-- неактивный GET-only workflow n8n для будущего контроля Stage A;
-- валидаторы, запрещающие превратить этот workflow в торговый контур.
+- Safety-first Stage 0 foundation;
+- Fixed five-day Stage A specification;
+- Detailed 10-task plan;
+- Task 1: public configuration, instrument model, and capital gate;
+- Inactive GET-only n8n workflow for future Stage A monitoring;
+- Validators that prevent converting this workflow into a trading system.
 
-Фактически отсутствуют:
+Actually absent:
 
-- сборщики публичного L2 Hyperliquid и Lighter;
-- реконструкция книг и контроль sequence gaps;
-- PostgreSQL-схема evidence для Stage A;
-- расчёт общего количества, executable VWAP и economics;
-- delayed/stress lifecycle и статистика;
+- Public L2 collectors for Hyperliquid and Lighter;
+- Book reconstruction and sequence-gap checks;
+- PostgreSQL evidence schema for Stage A;
+- Common quantity, executable VWAP, and economics calculations;
+- Delayed/stress lifecycle and statistics;
 - Variational observer;
-- Stage A runtime и четыре из пяти внутренних GET API;
+- Stage A runtime and four of the five internal GET APIs;
 - `/v1/business/operator-revenue`;
-- детерминированный итоговый отчёт;
-- warm-up и пятидневный clock gate;
-- любое подтверждение положительной доходности или операторской выручки.
+- Deterministic final report;
+- Warm-up and five-day clock gate;
+- Any evidence of positive returns or operator revenue.
 
-Текущий честный verdict: **исследовательская гипотеза не доказана, операторская
-экономика не определена, переход к live запрещён**.
+Current honest verdict: **the research hypothesis is unproven, operator
+economics is undefined, and transition to live is prohibited**.
 
-## 2. Цель проекта
+## 2. Project goal
 
-Проверить на реальных публичных данных, существует ли между Hyperliquid и
-Lighter воспроизводимое расхождение цен, которое:
+Use real public data to test whether Hyperliquid and
+Lighter exhibit a reproducible price discrepancy that:
 
-1. сохраняется после executable depth, округлений, venue minimums, entry и
+1. Survives executable depth, rounding, venue minimums, and entry and
    exit costs;
-2. переживает измеренную задержку и консервативный stress;
-3. укладывается в заданный капитал;
-4. не зависит от stale/misaligned books, maker fills, forecast funding или
-   выдуманной ликвидности;
-5. может дать измеримую операторскую выручку, а не только красивую trader-side
-   метрику.
+2. Survives measured latency and conservative stress;
+3. Fits within the specified capital;
+4. Does not depend on stale/misaligned books, maker fills, forecast funding, or
+   invented liquidity;
+5. Can generate measurable operator revenue, rather than merely an attractive
+   trader-side metric.
 
-Stage A — это пятидневный credential-free falsification experiment. После
-60-минутного warm-up должны пройти пять полных UTC data days. Допустимы только
-два итоговых решения:
+Stage A is a five-day credential-free falsification experiment. A
+60-minute warm-up must be followed by five complete UTC data days. Only
+two final decisions are allowed:
 
-- `KILL` — гипотеза или экономика провалена;
-- `EXTEND` — данных недостаточно, но заранее заданные критерии продления
-  выполнены.
+- `KILL` — the hypothesis or economics failed;
+- `EXTEND` — data is insufficient, but the predefined extension criteria
+  are met.
 
-Stage A **никогда не выдаёт `GO`**, не разрешает live trading и не является
-релизом Telegram Mini App.
+Stage A **never returns `GO`**, does not authorize live trading, and is not
+a Telegram Mini App release.
 
-## 3. Зафиксированный scope
+## 3. Fixed scope
 
-### Основные площадки
+### Primary venues
 
-- Hyperliquid — основной публичный L2.
-- Lighter — основной публичный L2.
-- Variational — только редкий read-only reference witness:
-  раз в 60 секунд, с максимальной допустимой свежестью 600 секунд.
+- Hyperliquid — primary public L2.
+- Lighter — primary public L2.
+- Variational — only an occasional read-only reference witness:
+  once every 60 seconds, with a maximum permitted age of 600 seconds.
 
-Variational не является третьей исполняемой ногой. Его данные запрещено
-включать в executable VWAP, fill simulation или PnL.
+Variational is not a third executable leg. Its data must not be
+included in executable VWAP, fill simulation, or PnL.
 
-### Инструменты
+### Instruments
 
-В allowlist находятся только:
+The allowlist contains only:
 
-- `PUMP` — кандидат с микроценой;
-- `DOGE` — legacy control из старого Hyperliquid-бота.
+- `PUMP` — a micro-price candidate;
+- `DOGE` — the legacy control from the old Hyperliquid bot.
 
-Для обоих инструментов заведены provisional mappings на Hyperliquid и Lighter.
-Все `evidence_hash` пустые. Поэтому `AdmitLifecycle` обязан отклонять каждый
-lifecycle с причинами:
+Both instruments have provisional mappings on Hyperliquid and Lighter.
+All `evidence_hash` values are empty. Therefore, `AdmitLifecycle` must reject every
+lifecycle with these reasons:
 
 - `INSTRUMENT_MAPPING_UNVERIFIED`;
 - `CONTRACT_EQUIVALENCE_UNVERIFIED`.
 
-Совпадение тикера не доказывает совпадение контракта, multiplier, payoff,
-oracle, settlement или единиц измерения.
+Matching tickers do not prove matching contracts, multipliers, payoffs,
+oracles, settlement, or measurement units.
 
-### Капитал и исследовательские профили
+### Capital and research profiles
 
-- целевой суммарный капитал: `$10`;
-- условное распределение: `$5` на каждую основную площадку;
-- исследовательские notional: `$10`, `$25`, `$50` на одну ногу;
-- leverage в текущей проверке: `2x`, без автоматического повышения.
+- Target total capital: `$10`;
+- Assumed allocation: `$5` per primary venue;
+- Research notionals: `$10`, `$25`, `$50` per leg;
+- Leverage in the current check: `2x`, with no automatic increase.
 
-`$10` на ногу при `$5` collateral и `2x` использует всю venue allocation ещё
-до fees и reserve. Это `ZERO_MARGIN_HEADROOM`, а не рабочий профиль.
-`$25/$50` при тех же условиях — только stress diagnostics и
+`$10` per leg with `$5` collateral and `2x` consumes the entire venue allocation
+before fees and reserve. This is `ZERO_MARGIN_HEADROOM`, not a usable profile.
+`$25/$50` under the same conditions are stress diagnostics only and
 `CAPITAL_NOTIONAL_UNSUPPORTED`.
 
-Ранее упомянутые фактические балансы пользователя на биржах не являются
-бюджетом проекта, разрешением на торговлю или доказательством исполнимости.
+The user's previously mentioned actual exchange balances are not
+the project budget, trading authorization, or evidence of executability.
 
-### Жёсткие non-goals Stage A
+### Strict Stage A non-goals
 
-- private API и account streams;
-- API keys, signing, wallets и mnemonics;
-- создание, изменение или отмена ордеров;
-- live mode;
+- Private APIs and account streams;
+- API keys, signing, wallets, and mnemonics;
+- Creating, changing, or cancelling orders;
+- Live mode;
 - Telegram Mini App;
-- billing, referrals и deposits;
-- multi-tenancy и внешнее onboarding;
+- Billing, referrals, and deposits;
+- Multi-tenancy and external onboarding;
 - RFQ;
-- maker/queue assumptions;
-- свечи как замена executable L2 evidence.
+- Maker/queue assumptions;
+- Candles as a substitute for executable L2 evidence.
 
-## 4. Архитектурная граница
+## 4. Architecture boundary
 
 ```mermaid
 flowchart LR
-    HL["Hyperliquid public L2"] --> GO["Детерминированный Go falsifier"]
+    HL["Hyperliquid public L2"] --> GO["Deterministic Go falsifier"]
     LI["Lighter public L2"] --> GO
     VA["Variational read-only observer"] -. "reference only" .-> GO
     GO --> PG["PostgreSQL evidence store"]
@@ -1603,127 +1601,127 @@ flowchart LR
     N8N --> GATE["Fail-closed status/revenue gate"]
 ```
 
-Только Go falsifier имеет право:
+Only the Go falsifier may:
 
-- собирать и нормализовать market data;
-- реконструировать книги;
-- формировать immutable evidence;
-- считать economics;
-- принимать `KILL`/`EXTEND`;
-- публиковать внутренний read-only API.
+- Capture and normalize market data;
+- Reconstruct books;
+- Produce immutable evidence;
+- Compute economics;
+- Decide `KILL`/`EXTEND`;
+- Publish the internal read-only API.
 
-n8n не имеет права:
+n8n must not:
 
-- читать биржевые WebSocket напрямую;
-- реконструировать L2;
-- считать economics;
-- писать evidence;
-- хранить venue credentials;
-- вызывать private endpoints;
-- подписывать или отправлять ордера.
+- Read exchange WebSockets directly;
+- Reconstruct L2;
+- Compute economics;
+- Write evidence;
+- Store venue credentials;
+- Call private endpoints;
+- Sign or submit orders.
 
-## 5. Репозиторий и рабочая среда
+## 5. Repository and working environment
 
-### Локальные пути
+### Local paths
 
-- основной checkout:
+- Main checkout:
   `C:\Users\Dmitry\Documents\Codex\2026-07-20\new-chat\work\multi-exchange-engine`
-- изолированный worktree:
+- Isolated worktree:
   `C:\Users\Dmitry\Documents\Codex\2026-07-20\new-chat\work\multi-exchange-engine\.worktrees\stage-a-falsifier`
-- текущая ветка: `stage-a-falsifier`;
-- integration branch: `main` на `668ce8a`;
-- private GitHub remote:
+- Current branch: `stage-a-falsifier`;
+- Integration branch: `main` at `668ce8a`;
+- Private GitHub remote:
   `https://github.com/Dimkox/multi-exchange-engine`;
-- `main` и `stage-a-falsifier` отслеживают соответствующие ветки `origin`;
-- draft PR: `https://github.com/Dimkox/multi-exchange-engine/pull/1`.
+- `main` and `stage-a-falsifier` track the corresponding `origin` branches;
+- Draft PR: `https://github.com/Dimkox/multi-exchange-engine/pull/1`.
 
 ### Claw
 
-- hostname: `claw`;
+- Hostname: `claw`;
 - SSH user: `pall`;
 - LAN: `[redacted private IP]`;
 - Tailscale IPv4: `100.119.249.65`;
 - MagicDNS: `claw.taild9f611.ts.net`;
-- live application area: `/home/operator/app-stack`;
-- временные Stage A материалы использовались ниже
+- Live application area: `/home/operator/app-stack`;
+- Temporary Stage A material was used under
   `/home/operator/stage-a-falsifier-dev`.
 
-Проверенные ранее версии:
+Previously verified versions:
 
 - Docker Engine `29.6.2`;
 - Docker Compose `5.3.1`;
 - `x86_64`;
 - n8n `2.31.3`.
 
-### Сетевой контракт Claw
+### Claw network contract
 
-Контейнеры проекта не должны долбиться в прямой Internet egress.
+Project containers must not attempt direct Internet egress.
 
-Они обязаны:
+They must:
 
-- read-only переиспользовать существующий proxy/network contract из
-  `/home/operator/app-stack`;
-- fail closed, если этот контракт отсутствует;
-- не менять `app-stack`, его контейнеры или dirty `glider.conf`;
-- не копировать credentials из `app-stack` в этот репозиторий.
+- Reuse the existing proxy/network contract from
+  `/home/operator/app-stack` in read-only mode;
+- Fail closed if that contract is absent;
+- Leave `app-stack`, its containers, and dirty `glider.conf` unchanged;
+- Never copy credentials from `app-stack` into this repository.
 
-`--network none` применялся для детерминированной сборки и тестов, которым сеть
-не нужна. Runtime collectors в будущем должны использовать утверждённый
-app-stack proxy contract, а не прямой выход.
+`--network none` was used for deterministic builds and tests that do not need
+network access. Future runtime collectors must use the approved
+app-stack proxy contract rather than direct egress.
 
-## 6. Исторический статус старого Stage A плана
+## 6. Historical status of the old Stage A plan
 
-Эта таблица относится к прежней нумерации Stage A и не описывает задачи
-актуального A2 raw-capture плана выше.
+This table uses the former Stage A task numbering and does not describe tasks
+in the current A2 raw-capture plan above.
 
-| Этап | Состояние | Фактический результат |
+| Phase | Status | Actual result |
 |---|---|---|
-| Stage 0 foundation | Готов | Fixed-point, shadow-only config, safety interfaces, reducer/reconciliation, ownership, risk, HTTP skeleton, migration, Docker/CI |
-| Five-day spec | Готов | Scope, gates, persistence, API boundary, `KILL/EXTEND` зафиксированы |
-| Implementation plan | Готов | 10 TDD-задач, Task 1–10 |
-| Task 1 | Готов | Public config, manifest, lifecycle admission и capital gate |
-| Task 2 | Не начат | Нет deterministic book reconstruction и quality gates |
-| Task 3 | Не начат | Нет Stage A evidence schema/replay |
-| Task 4 | Не начат | Нет Hyperliquid public collector |
-| Task 5 | Не начат | Нет Lighter public collector |
-| Task 6 | Не начат | Нет common quantity/VWAP/paired evaluation |
-| Task 7 | Не начат | Нет delayed lifecycle/stress/statistics |
-| Task 8 | Не начат | Нет Variational observer |
-| Task 9 | Частично | n8n contract есть; Go runtime и API отсутствуют |
-| Task 10 | Не начат | Нет report, warm-up и five-day start gate |
-| n8n import | Готов, inactive | Workflow импортирован и экспортом проверен |
-| Live execution | Запрещён | Нет реализации и нет авторизации |
+| Stage 0 foundation | Complete | Fixed-point, shadow-only config, safety interfaces, reducer/reconciliation, ownership, risk, HTTP skeleton, migration, Docker/CI |
+| Five-day spec | Complete | Scope, gates, persistence, API boundary, and `KILL/EXTEND` fixed |
+| Implementation plan | Complete | 10 TDD tasks, Task 1–10 |
+| Task 1 | Complete | Public config, manifest, lifecycle admission, and capital gate |
+| Task 2 | Not started | No deterministic book reconstruction or quality gates |
+| Task 3 | Not started | No Stage A evidence schema/replay |
+| Task 4 | Not started | No Hyperliquid public collector |
+| Task 5 | Not started | No Lighter public collector |
+| Task 6 | Not started | No common quantity/VWAP/paired evaluation |
+| Task 7 | Not started | No delayed lifecycle/stress/statistics |
+| Task 8 | Not started | No Variational observer |
+| Task 9 | Partial | n8n contract exists; Go runtime and API are absent |
+| Task 10 | Not started | No report, warm-up, or five-day start gate |
+| n8n import | Complete, inactive | Workflow imported and verified by export |
+| Live execution | Prohibited | Neither implementation nor authorization exists |
 
-## 7. Что было изменено
+## 7. Changes made
 
-Stage A changeset от `a173359^` до `e2e9fa2`:
+Stage A changeset from `a173359^` to `e2e9fa2`:
 
 - 16 tracked files;
-- 2,650 добавленных строк;
-- 9 удалённых строк;
-- 14 последовательных коммитов 2026-07-21.
+- 2,650 added lines;
+- 9 deleted lines;
+- 14 consecutive commits on 2026-07-21.
 
-### Спецификация и план
+### Specification and plan
 
 #### `docs/five-day-stage-a-spec.md`
 
-Создана binding specification:
+Created a binding specification:
 
-- пятидневное окно и 60-минутный warm-up;
-- только `KILL`/`EXTEND`;
+- Five-day window and 60-minute warm-up;
+- Only `KILL`/`EXTEND`;
 - PUMP/DOGE instrument gate;
-- public feed semantics;
-- clock/data-quality gates;
-- common quantity и VWAP rule;
-- taker-only lifecycle;
-- evidence/statistical gates;
-- persistence и API boundary;
+- Public feed semantics;
+- Clock/data-quality gates;
+- Common quantity and VWAP rule;
+- Taker-only lifecycle;
+- Evidence/statistical gates;
+- Persistence and API boundary;
 - CI proof of no execution;
-- future Sybil/bot-farm threat model.
+- Future Sybil/bot-farm threat model.
 
 #### `docs/superpowers/plans/2026-07-21-five-day-stage-a.md`
 
-Создан пошаговый TDD-план из 10 задач:
+Created a step-by-step TDD plan with 10 tasks:
 
 1. config/model/capital;
 2. book reconstruction/quality;
@@ -1736,48 +1734,48 @@ Stage A changeset от `a173359^` до `e2e9fa2`:
 9. runtime/GET API/negative CI;
 10. report/warm-up/five-day gate.
 
-План остаётся ориентиром, но порядок Task 2+ заблокирован незавершённым
+The plan remains a guide, but the Task 2+ sequence is blocked by the unfinished
 operator-revenue contract.
 
-### Task 1: код и конфигурация
+### Task 1: code and configuration
 
 #### `config/stage-a.env.example`
 
-Добавлен публичный конфигурационный контракт:
+Added a public configuration contract:
 
-- public WebSocket/HTTP URLs;
-- manifest path;
-- raw/evidence retention;
-- venue age, skew и clock-error limits.
+- Public WebSocket/HTTP URLs;
+- Manifest path;
+- Raw/evidence retention;
+- Venue age, skew, and clock-error limits.
 
-Credentials в контракт не входят.
+Credentials are not part of the contract.
 
 #### `config/stage-a-instruments.json`
 
-Добавлены ровно четыре provisional mapping:
+Added exactly four provisional mappings:
 
 - Hyperliquid PUMP, market `200`;
 - Lighter PUMP, market `45`;
 - Hyperliquid DOGE, market `12`;
 - Lighter DOGE, market `3`.
 
-Зафиксированы quote/base units, multiplier, tick/lot sizes и minimums.
-`evidence_hash` намеренно пустой, чтобы lifecycle admission оставался закрыт.
+Quote/base units, multipliers, tick/lot sizes, and minimums are fixed.
+`evidence_hash` is deliberately empty to keep lifecycle admission closed.
 
 #### `internal/stagea/model/reasons.go`
 
-Добавлены стабильные reason codes для:
+Added stable reason codes for:
 
-- contract/mapping failures;
-- missing/stale/invalid books;
-- skew и sequence gaps;
-- depth/quantity/minimum failures;
-- capital/headroom failures;
-- fee/economics/lifecycle failures.
+- Contract/mapping failures;
+- Missing/stale/invalid books;
+- Skew and sequence gaps;
+- Depth/quantity/minimum failures;
+- Capital/headroom failures;
+- Fee/economics/lifecycle failures.
 
 #### `internal/stagea/model/types.go`
 
-Добавлены структуры Stage A:
+Added Stage A structures:
 
 - venue/contract/instrument;
 - research profile;
@@ -1788,69 +1786,69 @@ Credentials в контракт не входят.
 - stage decision;
 - admission result.
 
-`AdmitLifecycle` fail closed проверяет verified mapping и непустой evidence
+`AdmitLifecycle` fails closed when checking verified mappings and a nonempty evidence
 hash.
 
 #### `internal/stagea/config/config.go`
 
-Добавлен строгий loader:
+Added a strict loader:
 
-- публичные defaults;
-- allowlist `STAGE_A_*`;
-- запрет credential-like environment variables;
-- positive integer validation;
-- JSON manifest с `DisallowUnknownFields`;
-- ошибка на пустом manifest.
+- Public defaults;
+- `STAGE_A_*` allowlist;
+- Rejection of credential-like environment variables;
+- Positive integer validation;
+- JSON manifest with `DisallowUnknownFields`;
+- Error on an empty manifest.
 
 #### `internal/stagea/config/config_test.go`
 
-Покрыты:
+Coverage includes:
 
-- public contract и defaults;
-- запрет credentials;
-- запрет любого неизвестного `STAGE_A_*`, включая пустое значение;
-- точный набор PUMP/DOGE × Hyperliquid/Lighter;
-- блокировка lifecycle при пустом evidence.
+- Public contract and defaults;
+- Credential rejection;
+- Rejection of any unknown `STAGE_A_*`, including an empty value;
+- Exact PUMP/DOGE × Hyperliquid/Lighter set;
+- Lifecycle blocking when evidence is empty.
 
 #### `internal/stagea/feasibility/capital.go`
 
-Добавлена fixed-point проверка:
+Added fixed-point checks for:
 
-- положительных capital/leverage/notional;
-- достаточности total capital для двух venue allocations;
-- запрета отрицательных fees/reserve;
-- required margin;
-- fee/stress-adjusted headroom;
-- отдельного `ZERO_MARGIN_HEADROOM`;
+- Positive capital/leverage/notional;
+- Sufficient total capital for two venue allocations;
+- Rejection of negative fees/reserve;
+- Required margin;
+- Fee/stress-adjusted headroom;
+- Separate `ZERO_MARGIN_HEADROOM`;
 - `CAPITAL_NOTIONAL_UNSUPPORTED`.
 
 #### `internal/stagea/feasibility/capital_test.go`
 
-Покрыты:
+Coverage includes:
 
-- `$10` без запаса;
-- `$25/$50` при `2x`;
-- запрет неявного увеличения leverage;
-- недостаточный total capital;
-- отрицательные costs/reserve.
+- `$10` with no headroom;
+- `$25/$50` at `2x`;
+- Rejection of implicit leverage increases;
+- Insufficient total capital;
+- Negative costs/reserve.
 
 ### n8n control plane
 
 #### `deploy/n8n/stage-a-orchestrator.workflow.json`
 
-Создан и импортирован workflow:
+Created and imported a workflow:
 
 - id: `stageAOrchestrator01`;
 - name: `Stage A HL+Lighter - ORCHESTRATOR (NO EXECUTION)`;
 - `active=false`;
 - 9 allowlisted nodes;
 - 0 credentials;
-- manual trigger;
-- five-minute trigger;
-- пять внутренних GET;
-- финальный fail-closed Code gate.
+- Manual trigger;
+- Five-minute trigger;
+- Five internal GET requests;
+- Final fail-closed Code gate.
 
-Внутренние routes:
+Internal routes:
 
 - `/healthz`;
 - `/readyz`;
@@ -1858,70 +1856,70 @@ hash.
 - `/v1/ops/data-quality`;
 - `/v1/business/operator-revenue`.
 
-Последний endpoint ещё не реализован. Поэтому workflow и должен оставаться
-неактивным и непроходимым.
+The last endpoint is not implemented yet. Therefore, the workflow must remain
+inactive and unable to pass its gate.
 
 #### `scripts/validate-stage-a-n8n.ps1`
 
-Валидатор отклоняет:
+The validator rejects:
 
-- активный workflow;
-- credentials;
-- любой node type вне allowlist;
-- не ровно 9 nodes;
-- неверный schedule;
-- external URLs;
-- HTTP method кроме GET;
-- отсутствующие routes/connections;
-- execution-related строки;
-- неполный fail-closed gate.
+- An active workflow;
+- Credentials;
+- Any node type outside the allowlist;
+- Any node count other than exactly 9;
+- An incorrect schedule;
+- External URLs;
+- HTTP methods other than GET;
+- Missing routes/connections;
+- Execution-related strings;
+- An incomplete fail-closed gate.
 
 #### `scripts/test-validate-stage-a-n8n-mutations.ps1`
 
-Добавлены positive control и mutation tests. Проверяется, что:
+Added a positive control and mutation tests. They verify that:
 
-- исходный workflow принимается;
-- side-effect node отклоняется;
-- comment-only fake gate отклоняется;
-- seven-minute schedule отклоняется.
+- The original workflow is accepted;
+- A side-effect node is rejected;
+- A comment-only fake gate is rejected;
+- A seven-minute schedule is rejected.
 
 #### `docs/n8n-stage-a.md`
 
-Зафиксированы authority boundary, routes, fail-closed contract и команда
-валидации.
+The authority boundary, routes, fail-closed contract, and validation command
+are fixed.
 
-### Continuity и Git
+### Continuity and Git
 
 #### `.gitignore`
 
-Добавлены ignore для isolated worktrees и локальных Serena metadata.
+Added ignore rules for isolated worktrees and local Serena metadata.
 
 #### `docs/agent-handoff.md`
 
-В процессе работы обновлялся краткий continuity log. После появления этого
-файла канонический handoff находится в корне: `handoff.md`.
+A brief continuity log was updated during the work. With this file in place,
+the canonical handoff is at the root: `handoff.md`.
 
-## 8. Проверки, которые уже проходили
+## 8. Checks that have passed
 
 ### Stage 0
 
-Зафиксированное evidence:
+Recorded evidence:
 
 - `gofmt`, `go vet`, unit tests, coverage, binary build — pass;
-- Linux `go test -race ./...` на Claw — pass;
+- Linux `go test -race ./...` on Claw — pass;
 - actionlint — pass;
 - Hadolint — pass, 0 findings;
 - Checkov Dockerfile — 92 checks, 0 failures;
-- Docker verify и production build — pass;
-- hardened runtime smoke:
+- Docker verify and production build — pass;
+- Hardened runtime smoke:
   read-only root, dropped capabilities, no-new-privileges, no network — pass;
 - PostgreSQL migration up/down — pass.
 
 ### Task 1
 
-TDD выполнялся как RED → GREEN → adversarial review → regression RED/GREEN.
+TDD followed RED → GREEN → adversarial review → regression RED/GREEN.
 
-Итоговые команды на Claw в cached verifier с `--network none`:
+Final commands on Claw in the cached verifier with `--network none`:
 
 ```text
 gofmt -l .
@@ -1929,264 +1927,264 @@ go vet ./...
 go test -cover ./...
 ```
 
-Итог: exit `0`, reviewer не оставил Critical/Important/Minor findings.
+Result: exit `0`; the reviewer left no Critical/Important/Minor findings.
 
 ### n8n
 
-Проверены:
+Verified:
 
-- статический workflow validator;
-- positive control;
-- три запрещённые мутации;
-- импорт в n8n `2.31.3`;
-- обратный export;
+- Static workflow validator;
+- Positive control;
+- Three forbidden mutations;
+- Import into n8n `2.31.3`;
+- Round-trip export;
 - `active=false`;
 - 9 nodes;
 - 0 credentials.
 
-Старый workflow `Hyperliquid DOGE Grid - LIVE` не изменялся и не
-активировался.
+The old `Hyperliquid DOGE Grid - LIVE` workflow was neither changed nor
+activated.
 
-## 9. Что пробовали и что не сработало
+## 9. Attempts and failures
 
-### 9.1. Локальный Go на Windows
+### 9.1. Local Go on Windows
 
-В исходной Windows-среде Go отсутствовал.
+Go was absent from the original Windows environment.
 
-Первая попытка скачать portable Go через PowerShell собрала некорректный
-слишком длинный URL и получила HTTP `414`. После выбора точного архива
-Go `1.26.5` был скачан и использован, но пользователь прямо указал, что
-локальный Go здесь не нужен.
+The first attempt to download portable Go through PowerShell constructed an invalid,
+overlong URL and received HTTP `414`. After selecting the exact archive,
+Go `1.26.5` was downloaded and used, but the user explicitly stated that
+local Go was not needed here.
 
-Результат:
+Result:
 
-- portable toolchain удалён из worktree;
-- временная копия перемещена в
+- Portable toolchain removed from the worktree;
+- Temporary copy moved to
   `C:\Temp\codex-trash-stage-a-go-20260721`;
-- рабочая проверка закреплена за Docker/Claw.
+- Working verification assigned to Docker/Claw.
 
-### 9.2. Доступ к Claw
+### 9.2. Claw access
 
-Из проверявшей Windows-машины:
+From the Windows machine used for verification:
 
-- SSH key auth не сработал;
-- MagicDNS не разрешился;
-- прямой Tailscale IPv4 timed out;
-- LAN `[redacted private IP]` сработал.
+- SSH key authentication failed;
+- MagicDNS did not resolve;
+- Direct Tailscale IPv4 timed out;
+- LAN `[redacted private IP]` worked.
 
-Tailscale адреса остаются документированными, но перед следующим использованием
-их нужно проверить заново. Пароли в Git, handoff и logs не записывать.
+Tailscale addresses remain documented, but they must be checked again before
+the next use. Never record passwords in Git, handoff, or logs.
 
 ### 9.3. RED build Task 1
 
-Первая Docker-проверка с `--network none` упала из-за отсутствующих
-`internal/stagea/config`, `model` и `feasibility`.
+The first Docker check with `--network none` failed because
+`internal/stagea/config`, `model`, and `feasibility` were missing.
 
-Это был ожидаемый RED, а не инфраструктурный сбой. После реализации тесты
-стали GREEN.
+This was expected RED, not an infrastructure failure. After implementation, the tests
+turned GREEN.
 
-### 9.4. Первая реализация Task 1 была недостаточно fail-closed
+### 9.4. The first Task 1 implementation was insufficiently fail-closed
 
-Независимый review нашёл четыре реальные ошибки:
+Independent review found four real bugs:
 
-1. нулевой margin headroom считался допустимым;
-2. неизвестный пустой `STAGE_A_*` проходил;
-3. total capital игнорировался;
-4. отрицательные fee/reserve принимались.
+1. Zero margin headroom was considered acceptable;
+2. An unknown empty `STAGE_A_*` passed;
+3. Total capital was ignored;
+4. Negative fees/reserve were accepted.
 
-Все четыре случая сначала закреплены regression tests, затем исправлены.
-Именно поэтому конечный код находится на `eb31b39`, а не на первоначальном
+All four cases were first captured by regression tests, then fixed.
+That is why the final code is at `eb31b39`, rather than the initial
 `9e41da3`.
 
-### 9.5. Первая версия n8n validator была слабой
+### 9.5. The first n8n validator was weak
 
-Review обнаружил:
+Review found:
 
-1. произвольные node types могли пройти;
-2. fail-closed gate проверялся строками недостаточно строго;
-3. schedule не валидировался структурно;
-4. отсутствовал positive control.
+1. Arbitrary node types could pass;
+2. The string-based fail-closed gate check was insufficiently strict;
+3. The schedule was not structurally validated;
+4. There was no positive control.
 
-Исправления:
+Fixes:
 
-- node allowlist и точное количество nodes;
-- точная topology/routes;
-- структурная проверка Code gate;
-- ровно five-minute schedule;
-- positive control;
-- mutation tests.
+- Node allowlist and exact node count;
+- Exact topology/routes;
+- Structural Code gate check;
+- Exactly a five-minute schedule;
+- Positive control;
+- Mutation tests.
 
-### 9.6. Ошибка в имени mutation script
+### 9.6. Incorrect mutation script name
 
-Сначала была запущена несуществующая команда
-`test-validate-stage-a-n8n.ps1`, а последующая команда скрыла её exit status.
+The nonexistent command `test-validate-stage-a-n8n.ps1` was run first,
+and a subsequent command masked its exit status.
 
-Исправлено:
+Corrected:
 
-- используется `test-validate-stage-a-n8n-mutations.ps1`;
-- exit codes проверяются явно;
-- финальный прогон прошёл.
+- Use `test-validate-stage-a-n8n-mutations.ps1`;
+- Check exit codes explicitly;
+- The final run passed.
 
-### 9.7. Прямой Internet egress контейнеров
+### 9.7. Direct container Internet egress
 
-Подход с прямым выходом каждого контейнера в Интернет отвергнут владельцем.
-Правильный контракт — существующий `/home/operator/app-stack` proxy/network,
-read-only и fail-closed.
+The owner rejected direct Internet access from each container.
+The correct contract is the existing `/home/operator/app-stack` proxy/network,
+read-only and fail-closed.
 
-Не пытаться «починить сеть» изменением dirty `glider.conf`: это чужая live
-зона и отдельный blast radius.
+Do not try to "fix networking" by modifying dirty `glider.conf`: it belongs to another live
+area with a separate blast radius.
 
-### 9.8. Переиспользование старого Hyperliquid-бота целиком
+### 9.8. Reusing the entire old Hyperliquid bot
 
-Старый бот полезен только как источник:
+The old bot is useful only as a source of:
 
-- fill identity/deduplication;
-- watermarks;
-- causal metadata;
-- deterministic client order IDs;
-- exact-order ownership;
-- unknown-outcome reconciliation;
-- restart и cancel/fill race scenarios.
+- Fill identity/deduplication;
+- Watermarks;
+- Causal metadata;
+- Deterministic client order IDs;
+- Exact-order ownership;
+- Unknown-outcome reconciliation;
+- Restart and cancel/fill race scenarios.
 
-Не переносить:
+Do not import:
 
-- Python live monolith;
+- The Python live monolith;
 - DOGE grid strategy/constants;
-- embedded SQL;
-- `float` на денежных границах;
-- broad cancel;
-- candle-touch replay;
-- n8n/cron как trading или market-data plane.
+- Embedded SQL;
+- `float` at money boundaries;
+- Broad cancel;
+- Candle-touch replay;
+- n8n/cron as a trading or market-data plane.
 
-Старый бот не является доказательством expectancy новой системы.
+The old bot is not evidence of the new system's expectancy.
 
-### 9.9. Поиск «монеты с большим числом нулей»
+### 9.9. Searching for a "coin with many zeros"
 
-Низкая номинальная цена не создаёт edge и не уменьшает экономически значимый
-minimum notional. `LILPEPE` не был найден как точный общий официальный контракт
-на Hyperliquid, Lighter и Variational. PUMP был выбран лишь как provisional
-micro-price candidate, DOGE — как control.
+A low nominal price does not create edge or reduce the economically meaningful
+minimum notional. `LILPEPE` was not found as an exact common official contract
+on Hyperliquid, Lighter, and Variational. PUMP was selected only as a provisional
+micro-price candidate, and DOGE as a control.
 
-До contract/oracle equivalence оба остаются непригодными для lifecycle.
+Until contract/oracle equivalence is established, neither is eligible for a lifecycle.
 
-## 10. Главные блокеры и риски
+## 10. Main blockers and risks
 
-### Blocker 1 — операторская комиссия утверждена, но ещё не реализована
+### Blocker 1 — the operator fee is approved but not yet implemented
 
-Владелец выбрал одновременно:
+The owner selected both:
 
-1. venue builder/referral cash;
-2. собственную turnover fee.
+1. Venue builder/referral cash;
+2. A proprietary turnover fee.
 
-Решение от 2026-07-25:
+Decision dated 2026-07-25:
 
 - `own_fee_bps`: `10`;
-- turnover basis: каждый подтверждённый simulated fill на entry и exit обеих
-  ног;
-- collection mechanism Stage A: `modeled_only`, без списания денег;
-- payer: будущий end user;
-- unfilled/rejected volume не тарифицируется;
-- venue-program revenue учитывается только по cash evidence, иначе `0`;
-- infrastructure cost: фактически распределённый USD cost;
-- gate: минимум `$0.50` net operator revenue на `$1,000` evidenced turnover.
+- Turnover basis: every confirmed simulated fill on entry and exit of both
+  legs;
+- Stage A collection mechanism: `modeled_only`, with no money charged;
+- Payer: the future end user;
+- Unfilled/rejected volume is not charged;
+- Venue-program revenue counts only with cash evidence; otherwise `0`;
+- Infrastructure cost: actual allocated USD cost;
+- Gate: at least `$0.50` net operator revenue per `$1,000` evidenced turnover.
 
-Утверждённый дизайн:
+Approved design:
 `docs/superpowers/specs/2026-07-25-stage-a-operator-revenue-design.md`.
-Реализация и endpoint пока отсутствуют, поэтому блокер снят на уровне product
-decision, но не на уровне кода.
+Implementation and endpoint are still absent, so the blocker is resolved at the product
+decision level, but not at the code level.
 
-Историческая проверка официальных условий на 2026-07-21 показала:
+Historical verification of official terms on 2026-07-21 found:
 
-- Hyperliquid builder fee требует отдельного согласия пользователя;
-- perp builder fee ограничен 10 bps;
-- builder account требует не менее `$100` account value;
-- referral code требовал `$10,000` предыдущего volume;
-- Lighter Standard maker/taker fees были нулевыми;
-- для Lighter не был найден опубликованный гарантированный cash referral rate;
-- points нельзя считать cash revenue.
+- Hyperliquid builder fees require separate user consent;
+- The perp builder fee is capped at 10 bps;
+- A builder account requires at least `$100` account value;
+- A referral code required `$10,000` prior volume;
+- Lighter Standard maker/taker fees were zero;
+- No published guaranteed cash referral rate was found for Lighter;
+- Points cannot count as cash revenue.
 
-Эти внешние условия изменчивы и должны быть перепроверены перед реализацией.
+These external terms can change and must be rechecked before implementation.
 
-Для масштаба: lifecycle с `$10` на одну ногу имеет около `$40` суммарного
-entry+exit turnover по двум ногам. Тогда gross owner fee равна:
+For scale: a lifecycle with `$10` per leg has roughly `$40` total
+entry+exit turnover across both legs. The gross owner fee is then:
 
-| Fee | Gross revenue на lifecycle |
+| Fee | Gross revenue per lifecycle |
 |---|---:|
 | 1 bp | `$0.004` |
 | 5 bps | `$0.020` |
 | 10 bps | `$0.040` |
 
-Это до infrastructure, failed lifecycle, refunds, acquisition и abuse. Без
-огромного валидного turnover модель почти наверняка не даёт значимой выручки.
+This is before infrastructure, failed lifecycles, refunds, acquisition, and abuse. Without
+enormous valid turnover, the model almost certainly generates no meaningful revenue.
 
-### Blocker 2 — operator revenue API отсутствует
+### Blocker 2 — the operator revenue API is absent
 
-`/v1/business/operator-revenue` существует только как n8n contract. В Go его
-нет. Пока endpoint отсутствует и `contract_complete` не может быть истинным,
-n8n workflow обязан fail closed.
+`/v1/business/operator-revenue` exists only as an n8n contract. It is absent from
+Go. While the endpoint is absent and `contract_complete` cannot be true,
+the n8n workflow must fail closed.
 
-### Blocker 3 — instrument equivalence не доказана
+### Blocker 3 — instrument equivalence is unproven
 
-У всех четырёх mappings пустой `evidence_hash`. Нельзя запускать lifecycle,
-пока не сохранены authoritative contract/multiplier/oracle/settlement evidence.
+All four mappings have empty `evidence_hash` values. No lifecycle may start
+until authoritative contract/multiplier/oracle/settlement evidence is stored.
 
-### Blocker 4 — основной evidence engine отсутствует
+### Blocker 4 — the core evidence engine is absent
 
-Task 2–8 и большая часть Task 9–10 не реализованы. Сейчас нечему собирать пять
-дней данных, считать VWAP, закрывать lifecycle или формировать решение.
+Tasks 2–8 and most of Tasks 9–10 are not implemented. There is currently nothing to capture five
+days of data, calculate VWAP, close lifecycles, or produce a decision.
 
-### Blocker 5 — `$10` capital profile уже на границе непригодности
+### Blocker 5 — the `$10` capital profile is already at the edge of viability
 
-При `$5` на venue и `2x` базовый `$10` notional имеет нулевой запас.
-Даже минимальные fees, slippage, reserve или price movement делают профиль
-неподдерживаемым.
+With `$5` per venue and `2x`, the base `$10` notional has zero headroom.
+Even minimal fees, slippage, reserve, or price movement make the profile
+unsupported.
 
-### Risk 6 — Stage A ещё не интегрирован
+### Risk 6 — Stage A is not integrated yet
 
-Private remote и draft PR созданы 2026-07-25. Ветка `stage-a-falsifier`
-сохранена на GitHub, но изменения ещё не прошли реализацию operator-revenue
-checkpoint, финальный review и merge в `main`.
+The private remote and draft PR were created on 2026-07-25. The `stage-a-falsifier` branch
+is saved on GitHub, but the changes have not yet passed the operator-revenue
+implementation checkpoint, final review, and merge into `main`.
 
-## 11. Следующий шаг
+## 11. Next step
 
-### Сначала закончить operator-revenue checkpoint
+### Finish the operator-revenue checkpoint first
 
-1. Выполнить TDD implementation plan:
+1. Execute the TDD implementation plan:
    `docs/superpowers/plans/2026-07-25-stage-a-operator-revenue.md`.
-2. Реализовать versioned contract, fixed-point revenue domain, отдельный
-   Stage A HTTP slice и минимальный `cmd/falsifier`.
-3. Проверить exact boundary `$0.50/$1,000`, incomplete contract, zero turnover,
-   unknown JSON fields и запрет mutating routes.
-4. Обновить source n8n gate: одного `contract_complete:true` недостаточно,
-   требуется `gate_passed:true`.
-5. Провести независимый review и обновить этот handoff.
-6. Оставить Claw n8n `active=false`, не re-import и не деплоить checkpoint.
-7. Отдельным следующим коммитом продолжить Task 2:
-   deterministic book reconstruction, clock epochs и quality gates.
+2. Implement the versioned contract, fixed-point revenue domain, separate
+   Stage A HTTP slice, and minimal `cmd/falsifier`.
+3. Check the exact `$0.50/$1,000` boundary, incomplete contract, zero turnover,
+   unknown JSON fields, and prohibition on mutating routes.
+4. Update the source n8n gate: `contract_complete:true` alone is insufficient;
+   `gate_passed:true` is required.
+5. Conduct independent review and update this handoff.
+6. Leave Claw n8n `active=false`; do not re-import or deploy the checkpoint.
+7. Continue Task 2 in a separate subsequent commit:
+   deterministic book reconstruction, clock epochs, and quality gates.
 
-Не смешивать operator-revenue contract и Task 2 в одном коммите.
+Do not mix the operator-revenue contract and Task 2 in one commit.
 
-## 12. Условия, при которых n8n можно рассматривать для активации
+## 12. Conditions for considering n8n activation
 
-Одного существования workflow недостаточно. До отдельного решения владельца
-должны быть истинны все условия:
+The workflow's mere existence is insufficient. Before a separate owner decision,
+all conditions must be true:
 
-- Stage A runtime развёрнут;
-- все пять GET routes отвечают внутри Docker network;
+- Stage A runtime is deployed;
+- All five GET routes respond within the Docker network;
 - `execution_available=false`;
-- revenue contract полный и versioned;
-- instrument mappings verified;
-- collectors и quality gates прошли warm-up;
-- workflow validator и mutation tests зелёные;
-- экспорт из n8n подтверждает 0 credentials и неизменную topology;
-- старый live workflow остаётся выключенным;
-- есть отдельная явная авторизация на активацию именно Stage A observer.
+- The revenue contract is complete and versioned;
+- Instrument mappings are verified;
+- Collectors and quality gates have passed warm-up;
+- Workflow validator and mutation tests are green;
+- n8n export confirms 0 credentials and unchanged topology;
+- The old live workflow remains disabled;
+- There is separate explicit authorization to activate the Stage A observer specifically.
 
-Даже после этого активация n8n не разрешает торговлю.
+Even then, activating n8n does not authorize trading.
 
-## 13. Команды для продолжения
+## 13. Commands to continue
 
-### Открыть правильный worktree
+### Open the correct worktree
 
 ```powershell
 Set-Location 'C:\Users\Dmitry\Documents\Codex\2026-07-20\new-chat\work\multi-exchange-engine\.worktrees\stage-a-falsifier'
@@ -2195,14 +2193,14 @@ git log --oneline --decorate -20
 Get-Content .\handoff.md
 ```
 
-### Проверить n8n contract
+### Check the n8n contract
 
 ```powershell
 & .\scripts\validate-stage-a-n8n.ps1
 & .\scripts\test-validate-stage-a-n8n-mutations.ps1
 ```
 
-### Полная Go-проверка в подготовленной среде
+### Full Go verification in a prepared environment
 
 ```text
 gofmt -l .
@@ -2211,8 +2209,8 @@ go test -race -cover ./...
 go build -trimpath ./cmd/engine
 ```
 
-Если локального Go нет, использовать pinned Docker builder/Claw. Не
-устанавливать toolchain в репозиторий.
+If local Go is unavailable, use the pinned Docker builder/Claw. Do not
+install a toolchain into the repository.
 
 ### Docker verification
 
@@ -2221,25 +2219,25 @@ docker build --target verify -t multi-exchange-engine:verify .
 docker build -t multi-exchange-engine:dev .
 ```
 
-Не передавать secrets как build args. Не запускать private/live adapters:
-их не должно существовать в Stage A.
+Do not pass secrets as build args. Do not start private/live adapters:
+they must not exist in Stage A.
 
 ## 14. Secret handling
 
-- В этом worktree `.env` отсутствует.
-- `.env` игнорируется Git.
-- В других локальных checkout могли ранее находиться venue/Telegram
-  credentials; их содержимое не переносить в handoff или commits.
-- В документации разрешено указывать только имена переменных и secret
+- This worktree has no `.env`.
+- `.env` is ignored by Git.
+- Other local checkouts may previously have contained venue/Telegram
+  credentials; do not copy their contents into handoff or commits.
+- Documentation may contain only variable names and secret
   locations.
-- Lighter private keys, read-only token, email, wallet, SSH password и любые
-  Telegram/venue tokens считать скомпрометированными, если они когда-либо
-  попадали в чат или незашифрованный лог; перед live use их нужно ротировать.
-- Stage A не должен читать ни один из этих секретов.
+- Treat Lighter private keys, read-only tokens, email, wallets, SSH passwords, and any
+  Telegram/venue tokens as compromised if they ever appeared
+  in chat or an unencrypted log; rotate them before live use.
+- Stage A must not read any of these secrets.
 
-## 15. Карта ключевых коммитов
+## 15. Key commit map
 
-| Commit | Значение |
+| Commit | Meaning |
 |---|---|
 | `a173359` | Five-day Stage A specification |
 | `cdee1ec` | Implementation plan |
@@ -2247,7 +2245,7 @@ docker build -t multi-exchange-engine:dev .
 | `6aa7848` | Claw proxy/network invariant |
 | `8de7b53` | Task 1 RED tests |
 | `9e41da3` | Initial Task 1 implementation |
-| `2e895df` | Regression tests после review |
+| `2e895df` | Regression tests after review |
 | `eb31b39` | Fail-closed Task 1 fixes |
 | `f7a405c` | Task 1/revenue blocker handoff |
 | `7169cdd` | Dual revenue model selection |
@@ -2256,31 +2254,31 @@ docker build -t multi-exchange-engine:dev .
 | `fc1aee2` | n8n positive control |
 | `e2e9fa2` | Verified inactive n8n import |
 
-## 16. Definition of done для следующего checkpoint
+## 16. Definition of done for the next checkpoint
 
-Следующий checkpoint считается завершённым только если:
+The next checkpoint is complete only if:
 
-- owner fee contract зафиксирован без неоднозначностей;
-- spec и plan согласованы с ним;
-- `/v1/business/operator-revenue` реализован fail closed;
-- fixed-point unit tests и negative tests проходят;
-- n8n validator/mutation suite проходит;
-- workflow всё ещё inactive и без credentials;
-- `gofmt`, `go vet`, `go test -race -cover ./...` зелёные;
-- изменения оформлены одним coherent commit;
-- этот handoff обновлён в том же commit.
+- The owner fee contract is fixed without ambiguity;
+- The specification and plan align with it;
+- `/v1/business/operator-revenue` is implemented fail closed;
+- Fixed-point unit tests and negative tests pass;
+- The n8n validator/mutation suite passes;
+- The workflow is still inactive and credential-free;
+- `gofmt`, `go vet`, `go test -race -cover ./...` are green;
+- Changes form one coherent commit;
+- This handoff is updated in the same commit.
 
-## 17. Главная передача следующему агенту
+## 17. Primary handoff to the next agent
 
-Не начинай с написания WebSocket collectors и не активируй n8n.
+Do not start by writing WebSocket collectors, and do not activate n8n.
 
-Сначала добей у владельца точный operator fee contract. Без него проект
-оптимизирует trader-side картинку, хотя заявленный бизнес-критерий — комиссия
-оператора. Это будет не прогресс, а дорогое избегание главного вопроса.
+First, obtain the exact operator fee contract from the owner. Without it, the project
+optimizes trader-side appearances while its stated business criterion is the operator's
+fee. That would be costly avoidance of the main question rather than progress.
 
-После фиксации контракта реализуй revenue endpoint отдельным TDD checkpoint,
-затем переходи к Task 2. Live trading, private credentials и изменение
-`/home/operator/app-stack` не авторизованы.
+After fixing the contract, implement the revenue endpoint as a separate TDD checkpoint,
+then move to Task 2. Live trading, private credentials, and changes to
+`/home/operator/app-stack` are not authorized.
 
 ## 18. Task 12: A2 packaging and CI checkpoint
 

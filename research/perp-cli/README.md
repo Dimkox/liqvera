@@ -1,63 +1,63 @@
 # perp-cli inventory and static reverse engineering
 
-Снимок: **2026-08-10**. Каталог повторяет подход `research/vooi`: фиксирует
-публичные дистрибутивы, точные ревизии, наблюдаемые поверхности, архитектурный
-разбор и воспроизводимые инструменты получения исходных артефактов без запуска
-скачанного кода.
+Snapshot: **2026-08-10**. This directory follows the `research/vooi` approach: it records
+public distributions, exact revisions, observable surfaces, architectural
+analysis, and reproducible tools for obtaining source artifacts without executing
+the downloaded code.
 
-## Ключевой вывод
+## Key finding
 
-В отличие от закрытого web/mobile клиента, `hypurrquant/perp-cli` уже опубликован
-как исходный TypeScript-проект под MIT. Поэтому «обратный инжиниринг до
-исходников» здесь не требует декомпиляции: authoritative source — публичный
-репозиторий, зафиксированный на commit
-`ed94cfd46259ff9186bf4f2489252a4f8f773e31`. Текущий `package.json` — `perp-cli@0.13.0`.
+Unlike a closed web/mobile client, `hypurrquant/perp-cli` is already published
+as a TypeScript source project under MIT. Therefore, "reverse engineering to
+source code" requires no decompilation here: the authoritative source is the public
+repository pinned to commit
+`ed94cfd46259ff9186bf4f2489252a4f8f773e31`. Its current `package.json` specifies `perp-cli@0.13.0`.
 
-## Инвентаризация
+## Inventory
 
-| Поверхность | Статус | Зафиксировано |
+| Surface | Status | Recorded version |
 |---|---|---|
-| `hypurrquant/perp-cli` | официальный source repo | `0.13.0`, `ed94cfd462...` |
-| npm `perp-cli` | официальный пакет | `0.13.0` |
-| `perp` | основной CLI entry point | `dist/index.js` |
+| `hypurrquant/perp-cli` | Official source repo | `0.13.0`, `ed94cfd462...` |
+| npm `perp-cli` | Official package | `0.13.0` |
+| `perp` | Main CLI entry point | `dist/index.js` |
 | `perp-mcp` | MCP/agent entry point | `dist/mcp-server.js` |
 | `perp-guardrail` | safety/guardrail entry point | `dist/guardrail/perp-guardrail.js` |
-| `skills/perp-cli` | bundled AI-agent skill | входит в npm package |
-| `iflow-mcp/hypurrquant-perp-cli` | сторонний fork/mirror | `0.9.8`, `cae9101d18...` |
-| npm `@iflow-mcp/hypurrquant-perp-cli` | сторонняя републикация | `0.9.8` |
-| Glama / ClaudePluginHub / Unyly / mcp.so | сторонние каталоги | index/listing only |
-| npm `@perp/cli` | **не относится** к этому проекту | historical Perpetual Protocol CLI `0.2.6` |
+| `skills/perp-cli` | bundled AI-agent skill | Included in the npm package |
+| `iflow-mcp/hypurrquant-perp-cli` | Third-party fork/mirror | `0.9.8`, `cae9101d18...` |
+| npm `@iflow-mcp/hypurrquant-perp-cli` | Third-party republication | `0.9.8` |
+| Glama / ClaudePluginHub / Unyly / mcp.so | Third-party directories | index/listing only |
+| npm `@perp/cli` | **Unrelated** to this project | historical Perpetual Protocol CLI `0.2.6` |
 
-Официальные Android/iOS приложения, browser extension или отдельный native
-desktop app подтвердить не удалось. Это qualified negative finding, а не
-доказательство отсутствия любых частных сборок.
+Official Android/iOS applications, a browser extension, or a separate native
+desktop app could not be confirmed. This is a qualified negative finding, not
+proof that no private builds exist.
 
-## Что находится в каталоге
+## Directory contents
 
-- `clients.lock.json` — машиночитаемый реестр source/package/entry points,
-  third-party mirrors и name collisions.
-- `architecture.md` — индекс статического разбора.
+- `clients.lock.json` — machine-readable registry of source/package/entry points,
+  third-party mirrors, and name collisions.
+- `architecture.md` — static analysis index.
 - `architecture/01-packaging-and-surfaces.md` — packaging, npm, bin, skill, mirrors.
 - `architecture/02-runtime-and-adapters.md` — CLI runtime, adapter abstraction,
-  public API endpoints и exchange model.
+  public API endpoints, and exchange model.
 - `architecture/03-auth-mcp-and-risk.md` — keys/signers, MCP boundary, mutation
-  paths и ограничения интеграции.
-- `data/surface-map.csv` — surface-level классификация read/mutate/funds risk.
-- `data/exchange-adapters.csv` — 4 встроенных DEX adapter registrations.
-- `SOURCES.md` — первичные и вторичные источники, версии и ограничения.
-- `scripts/fetch_sources.py` — безопасное получение закреплённых публичных Git
-  revisions без выполнения скачанного project code.
-- `scripts/extract_observables.py` — URL/env/bin/command-like observables из
-  скачанного source и локально добавленных npm tarballs.
-- `scripts/verify_inventory.py` — офлайн-проверка inventory + CSV.
-- `tests/test_verify_inventory.py` — минимальный regression contract для inventory.
+  paths, and integration constraints.
+- `data/surface-map.csv` — surface-level classification of read/mutate/funds risk.
+- `data/exchange-adapters.csv` — 4 built-in DEX adapter registrations.
+- `SOURCES.md` — primary and secondary sources, versions, and limitations.
+- `scripts/fetch_sources.py` — safe retrieval of pinned public Git
+  revisions without executing downloaded project code.
+- `scripts/extract_observables.py` — URL/env/bin/command-like observables from
+  downloaded source and locally added npm tarballs.
+- `scripts/verify_inventory.py` — offline inventory + CSV verification.
+- `tests/test_verify_inventory.py` — minimal regression contract for the inventory.
 
-`artifacts/` намеренно исключён из Git: туда попадают точные копии upstream
-source и любые локально скачанные npm tarballs/capture metadata.
+`artifacts/` is deliberately excluded from Git: it holds exact copies of upstream
+source and any locally downloaded npm tarballs/capture metadata.
 
-## Офлайн-проверка
+## Offline verification
 
-Из корня `multi-exchange-engine`:
+From the `multi-exchange-engine` root:
 
 ```bash
 python -B research/perp-cli/scripts/verify_inventory.py
@@ -65,28 +65,28 @@ python -m py_compile research/perp-cli/scripts/*.py
 PYTHONPATH=research/perp-cli python -B -m unittest discover -s research/perp-cli/tests -v
 ```
 
-Ожидаемая структура результата первой команды:
+Expected output structure of the first command:
 
 ```json
 {"ok": true, "official_components": 6, "supported_exchanges": 4, "third_party_surfaces": 6, "snapshot_at": "2026-08-10T11:44:00Z"}
 ```
 
-## Получение исходников
+## Fetching source
 
-Fetcher ограничен публичными `github.com` HTTPS repositories, перечисленными в
-`clients.lock.json`, и проверяет итоговый commit SHA. Он не импортирует и не
-запускает загруженный JavaScript/TypeScript:
+The fetcher is restricted to public `github.com` HTTPS repositories listed in
+`clients.lock.json` and verifies the final commit SHA. It neither imports nor
+executes downloaded JavaScript/TypeScript:
 
 ```bash
 python research/perp-cli/scripts/fetch_sources.py repos
 ```
 
-Точные npm package versions и registry metadata URLs закреплены в
-`clients.lock.json`. Npm tarballs намеренно не vendor-ятся в Git; при локальном
-снятии пакета его следует сохранять в `research/perp-cli/artifacts/npm/` и
-фиксировать SHA-256 рядом с capture metadata.
+Exact npm package versions and registry metadata URLs are pinned in
+`clients.lock.json`. Npm tarballs are deliberately not vendored in Git; when capturing
+a package locally, save it under `research/perp-cli/artifacts/npm/` and
+record its SHA-256 alongside capture metadata.
 
-После загрузки:
+After downloading:
 
 ```bash
 python research/perp-cli/scripts/extract_observables.py \
@@ -94,32 +94,32 @@ python research/perp-cli/scripts/extract_observables.py \
   -o research/perp-cli/observables.local.json
 ```
 
-## Что показал статический разбор
+## Static analysis findings
 
-`perp-cli` строится вокруг общего `ExchangeAdapter`, который объединяет
-market-data, account reads, trading mutations и risk operations. Встроенный
-registry фиксирует Pacifica, Hyperliquid, Lighter и Aster. CLI дополнительно
-содержит funds/bridge/rebalance, strategies/background jobs, wallet/agent
-signing и Hyperliquid HIP-4 outcome markets.
+`perp-cli` is built around a shared `ExchangeAdapter` that combines
+market-data, account reads, trading mutations, and risk operations. The built-in
+registry specifies Pacifica, Hyperliquid, Lighter, and Aster. The CLI additionally
+includes funds/bridge/rebalance, strategies/background jobs, wallet/agent
+signing, and Hyperliquid HIP-4 outcome markets.
 
-`mcp-server.ts` в текущем source прямо описывает MCP как advisor/read-oriented
-surface и не должен считаться прямым trade executor. При этом основной CLI
-умеет размещать/редактировать/отменять ордера, менять leverage, перемещать
-средства и запускать долгоживущие стратегии. Поэтому для Multi-Exchange Engine
-нельзя импортировать весь CLI как «read-only adapter» — нужен отдельный
-allowlist public/read path.
+`mcp-server.ts` in the current source explicitly describes MCP as an advisor/read-oriented
+surface and must not be treated as a direct trade executor. However, the main CLI
+can place/edit/cancel orders, change leverage, move
+funds, and run long-lived strategies. Therefore, Multi-Exchange Engine
+must not import the entire CLI as a "read-only adapter" — it needs a separate
+allowlist for the public/read path.
 
-## Границы анализа
+## Analysis boundaries
 
-Не выполнялись:
+The following were not performed:
 
-- импорт, запуск или postinstall/prepublish скачанных npm packages;
-- подключение реальных wallet/private keys;
-- trade/withdraw/bridge/deposit/rebalance;
-- перехват пользовательского или authenticated traffic;
-- извлечение private keys, API keys, cookies, bearer tokens или wallet signatures;
-- exploit testing на реальных биржах/средствах.
+- Importing, running, or postinstall/prepublish of downloaded npm packages;
+- Connecting real wallets/private keys;
+- Trade/withdraw/bridge/deposit/rebalance;
+- Intercepting user or authenticated traffic;
+- Extracting private keys, API keys, cookies, bearer tokens, or wallet signatures;
+- Exploit testing against real exchanges/funds.
 
-Для интеграции в Multi-Exchange Engine рекомендуемый первый этап — только
-публичные market-data readers и типы/normalization. Trading, funds и signer
-слои должны оставаться за отдельной boundary с явным consent и policy review.
+For integration into Multi-Exchange Engine, the recommended first phase is limited to
+public market-data readers and types/normalization. Trading, funds, and signer
+layers must remain behind a separate boundary with explicit consent and policy review.

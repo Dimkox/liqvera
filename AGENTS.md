@@ -4,6 +4,8 @@ These rules apply to every model or agent working in this repository.
 
 Current product brand: **Liqvera**. Tagline: **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10). Repository: `Dimkox/liqvera`; canonical specification: `docs/planning/LIQVERA_FACTORY_TZ.md`. Preserve inherited `mee-*` package/API identifiers unless a separate technical migration is approved.
 
+Project language: **English by default**. Write documentation, specifications, code comments, product UI copy, user-facing messages, commit messages, and issue/PR descriptions in English unless the owner explicitly requests a localization. Do not infer the artifact language from the conversation language. Preserve technical identifiers, source URLs, and language-specific parser inputs or test fixtures when their exact bytes affect behavior.
+
 1. Commit every significant completed step after its relevant checks pass.
 2. Keep each commit coherent and independently reviewable; do not mix unrelated changes.
 3. Update the canonical root `handoff.md` in the same commit whenever project state, decisions, verification evidence, blockers, or the next action change materially.

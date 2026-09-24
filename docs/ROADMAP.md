@@ -1,6 +1,6 @@
 # Liqvera — roadmap
 
-Текущий план конкурсного продукта Liqvera: [ТЗ, этапы F0–F7](planning/LIQVERA_FACTORY_TZ.md). F0 выполнен; далее F1 — проверка основы. Ниже сохранена техническая дорожная карта upstream Multi-Exchange Engine: прежние названия MEE обозначают унаследованные исследовательские направления.
+The current Liqvera buildathon plan is in the [specification, phases F0–F7](planning/LIQVERA_FACTORY_TZ.md). F0 is complete; F1 baseline verification is next. The upstream Multi-Exchange Engine technical roadmap is retained below; the former MEE names refer to inherited research directions.
 
 [Repository README](../README.md) · [Master Plan pointer](../MASTER_PLAN.md) · [Accepted Python ADR](adr/0001-python-universal-arbitrage-core.md) · [Master research](research/MASTER_RESEARCH.md) · [Critical PMF review](research/PMF_CRITICAL_REVIEW.md) · [Canonical market demand and JTBD](research/user-needs/README.md)
 

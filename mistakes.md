@@ -36,3 +36,8 @@ Root causes, not symptoms. Record only mistakes that caused a real problem.
 
 **Symptom:** `tests/conformance/test_stage_a_excludes_go.py` could not import the artifact scanner.
 **Root cause:** Inspection logic lived only in `scripts/check-stage-a-artifacts.py`. A hyphenated CLI name is not a Python module; shared logic belongs under `tools/`.
+
+## 2026-09-24 — Inferred project language from the conversation
+
+**Symptom:** Newly published Liqvera documentation used Russian even though the owner requires English throughout the project.
+**Root cause:** The artifact language was inferred from the chat instead of being treated as a separate project requirement. Use English by default and preserve that decision in `AGENTS.md`.

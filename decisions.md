@@ -135,3 +135,11 @@ F2 vectors use the existing mapping contract's inclusive validity endpoint, reje
 ## 2026-09-24 — F2 graph edges describe context, not acceptance proof
 
 The graph checker requires implemented nodes to trace back to an approved requirement and positive edges to declare their proof scope. Link the exact-number contracts to existing DATA-005 with the closed `AGGREGATE_SEMANTIC_CONTEXT` marker on both context and validation edges, keeping the plan's empty requirement lists. This satisfies inventory traceability without manufacturing a requirement proof or changing inherited conflicts.
+
+## 2026-09-24 — Align public status contracts with the recovery model
+
+Whole-branch review requires evidence GET to expose a private 202 JSON recovery error and same-scope expired quotes to return 410 only after authentication/scope checks. Quote previews admit only eligible snapshots, while free rejection resources and simulated offline reports preserve their separate roles. Cross-contract vector status checks prevent endpoint declarations from diverging from recovery obligations without pretending an HTTP runtime exists.
+
+## 2026-09-24 — Exact instants and schema numbers preserve interoperable boundaries
+
+Compare UTC instants as integer seconds plus an exact fractional remainder, preserving every admitted fractional digit instead of relying on lexical order or microsecond truncation. Draft 2020-12 integer checks accept finite integral float/Decimal representations while retaining exact comparisons and rejecting boolean/nonfinite/fractional inputs; monetary schemas remain string-only. Closed resource schemas permit a future ready state only without blockers, and overall readiness requires all gates.

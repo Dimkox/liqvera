@@ -23,7 +23,7 @@ OPERATIONS = {
     ("/v1/reports/{report_id}", "get"): (
         "getReport", {"200", "202", "401", "402", "404", "409", "410", "429", "503"}),
     ("/v1/reports/{report_id}/evidence", "get"): (
-        "getEvidence", {"200", "401", "402", "404", "410", "429", "503"}),
+        "getEvidence", {"200", "202", "401", "402", "404", "410", "429", "503"}),
 }
 
 
@@ -35,6 +35,17 @@ def api():
 
 def response_schema(operation, status):
     return operation["responses"][status]["content"]["application/json"]["schema"]
+
+
+def test_final_review_evidence_recovery_is_private_json_without_payment_headers():
+    responses = api()["paths"]["/v1/reports/{report_id}/evidence"]["get"]["responses"]
+    assert "202" in responses
+    response = responses["202"]
+    assert set(response["content"]) == {"application/json"}
+    assert response["content"]["application/json"]["schema"] == ERROR_REF
+    assert set(response["headers"]) == {"X-Request-ID", "Cache-Control"}
+    assert response["headers"]["X-Request-ID"]["required"] is True
+    assert response["headers"]["Cache-Control"]["schema"]["const"] == "private, no-store"
 
 
 def test_paid_body_is_only_the_entitled_report_response():

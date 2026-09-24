@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 integration verified; independent review pending). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24 (F2 consolidated review fixes; scoped re-review pending). Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f2-contracts` (stacked on verified F1).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -25,23 +25,52 @@ atomic-unit/idempotency/auth obligations. They add no runtime service.
 
 Task 1's three Important numeric-semantics findings and Task 3's HTTPS
 evidence-reference finding passed scoped re-review after repair. Task 2 was
-approved. Task 4's artifacts were found coherent; its missing shared graph
-and handoff bindings are addressed here, with vector linkage still requiring
-integrated verification. Task 5 was approved with one Minor wording issue;
+approved. Task 4's artifacts were found coherent; integration supplied its
+shared graph/handoff bindings and verified state/vector linkage. Task 5 was
+approved with one Minor wording issue;
 the 202 description now says "without paid report fields" and retains the
 JSON recovery error body. Its existing response-schema assertion covers that
 body, so no prose-matching test was added. Task 6 review found one Important
 gap in validating the on-disk vector envelope; its test-only repair is now
 integrated. Integration also reproduced and repaired a state-schema symbol
 pattern that rejected its own `report_sha256` field, adding full document
-validation and unsafe-name regressions. These repairs await final review.
+validation and unsafe-name regressions. Both repairs were included in the
+reviewed integration snapshot.
 
-F2 remains **independent review pending**, not complete. Next: obtain an
-independent whole-branch review including the integration state-schema repair.
+Independent whole-branch review of `644cb702ae879b9d7c8acac1039eb8c5bf37d2aa`
+identified cross-contract safety/standards gaps. The consolidated repair adds
+evidence GET 202 recovery, expired-quote 410 after scope checks, fixture-source
+rejection after more specific reasons, eligible-only quote previews, exact UTC
+fractional expiry comparisons, unresolved reencoded-authorization assertions,
+mathematically integral JSON number validation, and coherent readiness gates.
+The approved plan now reflects those corrections; simulated offline reports
+remain valid and no runtime layer or SDK identity rule was introduced.
+
+F2 remains **scoped re-review pending**, not complete. Next: independent
+scoped re-review of the consolidated repair.
+The F2 evidence document retains the earlier integration draft until review
+has passed; its fingerprints and counts do not cover the subsequent repair.
+
+Consolidated repair verification on 2026-09-24: the new focused regressions
+first failed as expected (23 failed, 16 passed, 219 deselected), then passed
+(39 passed, 219 deselected in 5.87s). The final six-module contract suite
+passed 368 tests in 191.16s. `make verify` passed 1009 tests and 85 subtests in
+322.79s; bare pytest passed the same counts in 323.83s. Graph, changed-Python
+Ruff, and staged/unstaged diff checks passed. Grok `--mode pr --no-record`
+exited 1 only for Trivy, with every other applicable check passing and coverage
+explicitly skipped by runner policy. Direct Trivy again found exactly the two
+inherited LOW DS-0026 findings. No new unresolved failure or receipt exists.
+
+The stable pre-verification-record staged tree was
+`c4a5bd7764e3b65def7251064b7f1a0739bd9fa5`; the graph/schema/test index
+fingerprint (using the command in the existing evidence draft) is
+`a6c58a366d7b0354013f615f93a41862d4d34416d07a30212fc9bd514565cf7a`.
+Later edits only record verification in continuity prose; scoped re-review
+must bind the resulting repair commit before evidence closure.
 Runtime acceptance stays `NOT_RUN`, with
 A13–A14 `BLOCKED_EXTERNAL`; F1 payment/finality and Trivy blockers remain.
 
-Integrated verification on 2026-09-24 passed `git diff --check`, `make graph`
+Pre-repair integration verification on 2026-09-24 passed `git diff --check`, `make graph`
 (the same seven declared conflicts), changed-Python Ruff, all six F2 contract
 modules (329 passed in 179.24s), `make verify` (970 passed and 85 subtests in
 311.17s), and bare pytest (970 passed and 85 subtests in 311.25s). Grok PR

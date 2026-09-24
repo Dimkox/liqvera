@@ -275,6 +275,38 @@ def test_simulated_report_has_valid_shape_without_implying_sale_eligibility():
     c.validate(c.load("report.schema.json"), changed, document="report.schema.json")
 
 
+@pytest.mark.parametrize("status", ["REJECTED", "SIMULATED"])
+def test_final_review_chargeable_quote_rejects_unchargeable_preview(status):
+    changed = deepcopy(EXAMPLES["quote"])
+    changed["preview"]["snapshot_status"] = status
+    with pytest.raises(c.ContractError):
+        validate_resource("quote", changed)
+
+
+def test_final_review_payment_ready_forbids_every_blocker():
+    for resource in ("capabilities", "readiness"):
+        changed = deepcopy(EXAMPLES[resource])
+        changed["payment_ready"] = True
+        changed["blockers"] = []
+        validate_resource(resource, changed)
+        for reason in c.load("reasons.schema.json")["enum"]:
+            changed["blockers"] = [reason]
+            with pytest.raises(c.ContractError):
+                validate_resource(resource, changed)
+
+
+@pytest.mark.parametrize("gate", ["storage_ready", "configuration_ready", "integration_ready",
+                                  "payment_ready"])
+def test_final_review_overall_readiness_requires_every_gate(gate):
+    changed = deepcopy(EXAMPLES["readiness"])
+    changed.update(ready=True, storage_ready=True, configuration_ready=True,
+                   integration_ready=True, payment_ready=True, blockers=[])
+    validate_resource("readiness", changed)
+    changed[gate] = False
+    with pytest.raises(c.ContractError):
+        validate_resource("readiness", changed)
+
+
 @pytest.mark.parametrize("section,key,value", [
     ("identity", "evidence", []),
     ("source", "build_age_ms", 5001),

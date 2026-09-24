@@ -42,16 +42,21 @@ found no remaining Critical or Important issue.
 - [x] Integrate Task 6 on-disk vector-envelope repair and fix state-schema self-validation.
 - [ ] Complete scoped repair re-review and whole-branch independent review.
 - [x] Pass integrated graph, focused tests, Ruff, `make verify` and bare pytest; classify Grok's inherited Trivy failure.
-- [ ] Complete independent whole-branch review before F2 closure.
+- [x] Complete independent whole-branch review of integration commit `644cb702ae879b9d7c8acac1039eb8c5bf37d2aa` and implement its consolidated repair.
+- [x] Verify the consolidated repair: 368 focused tests; 1009 tests and 85 subtests in both full runs; graph/Ruff pass, only inherited Trivy fails Grok.
+- [ ] Pass independent scoped re-review before F2 closure.
 
-F2 status: **independent review pending**. The owner approved the repaired
+F2 status: **consolidated repair implemented; scoped re-review pending**. The owner approved the repaired
 plan and parallel task implementation; shared-file integration has one owner.
 The artifacts above exist, but final freeze and acceptance await independent
 review. Integration passed 329 focused tests and two full 970-test/85-subtest
 runs; only the inherited Trivy policy blocks Grok. Tasks 1 and 3 passed scoped repair re-review; Task 2 was
 approved, Task 4's shared-file findings are addressed by integration, and
-Task 5's approved Minor wording is corrected. Task 6's vector-envelope repair
-and integration's state-schema repair await final review. Runtime vectors remain `NOT_RUN`, A13–A14
+Task 5's approved Minor wording is corrected. Whole-branch review then found
+endpoint/oracle, fixture/quote eligibility, numeric and readiness consistency
+gaps; the consolidated repair implements those corrections and exact timestamp
+comparisons without adding runtime behavior. The evidence draft awaits scoped
+re-review. Runtime vectors remain `NOT_RUN`, A13–A14
 remain `BLOCKED_EXTERNAL`, and no receipt, payment or release is authorized.
 
 ## F3 — evidence report

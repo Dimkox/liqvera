@@ -39,7 +39,9 @@
 
 ## Execution and file map
 
-Status: authored for plan review; no F2 implementation or approval claimed.
+Status: owner-approved plan implemented through integration; consolidated
+final-review corrections are implemented and await scoped re-review. F2 is
+not closed; current verification/review status is recorded in handoff.md.
 The current branch is `feat/mezo-evidence-f2-contracts`, stacked on F1 at
 `d2d7923`. Read the spec, this plan, `AGENTS.md`, README, architecture,
 handoff, security, roadmap, and active route before execution. No route exists
@@ -165,7 +167,11 @@ Expected: valid rational assertion fails. Retain the exact exit/result.
   `minLength`, `maxLength`, `pattern`, `format`, `minimum`, `maximum`, `oneOf`.
   Annotations never substitute for validation. Disallow `$ref` siblings except
   title/description. Restrict schema types to object/array/string/integer/boolean/null;
-  reject booleans as integers. Require `additionalProperties:false` for every
+  accept finite mathematically integral JSON numbers (including 1.0 and
+  equivalent Decimal values) as integers, while rejecting fractional values,
+  nonfinite values and booleans. Preserve exact numeric equality and bounds
+  near precision boundaries without float coercion; monetary inputs remain
+  string-only. Require `additionalProperties:false` for every
   object and `items` for every array. Validate each `oneOf` independently and
   require exactly one matching branch. Detect reference cycles with a recursion
   stack, allowing repeated acyclic references. Resolve JSON Pointer `~0`/`~1`.
@@ -430,7 +436,7 @@ fictitious evidence, false arithmetic, and out-of-policy timing.
 
 | Definition | Required fields and bounds |
 | --- | --- |
-| `preview` | Exactly the eight keys in PREVIEW; side/instrument/quantity primitives; snapshot status as report enum; price constant `0.01` |
+| `preview` | Exactly the eight keys in PREVIEW; side/instrument/quantity primitives; snapshot status constant `VALID_FOR_SNAPSHOT_CALCULATION`; price constant `0.01` |
 | `terms` | `version="mee-evidence-terms/v1"`, `network="eip155:31611"`, `chain_id=31611`, `asset` fixed lock MUSD address, `decimals=18`, `amount_atomic="10000000000000000"`, `price_musd="0.01"`, `pay_to` canonical nonzero address, `expected_payer` canonical nonzero address, `expires_at` timestamp |
 | `quote` | `schema="mee-evidence-quote/v1"`, `request_id`, `report_request_id`, `quote_id`, `report_id` UUIDs, `report_sha256`, `bundle_sha256`, `state` READY/PAYMENT_PENDING/PAYMENT_UNCERTAIN/PAID/EXPIRED/MANUAL_REVIEW, `preview`, `terms`, `retention` `{paid_days:integer minimum 7, unpaid_grace_seconds:integer minimum 900, ledger_days:integer minimum 30, authorization_validity_floor:true, deletion_must_not_enable_replay:true}` |
 | `request_status` | Closed `oneOf` variants, all requiring `schema="mee-evidence-request-status/v1"`, `request_id`, `report_request_id` UUIDs and `status_location` path `/v1/report-requests/{UUID}`; PREPARING requires only those fields plus `state="PREPARING"`; READY additionally requires `quote_id` UUID; REJECTED and BUILD_FAILED additionally require their respective `reason` enums below. Each branch declares its full closed properties, so absent branch-specific fields are forbidden |
@@ -466,6 +472,15 @@ shape. Define examples for every `$defs` resource and mutate each required
 field away plus one extra field to verify closure. Synthetic examples may
 use nonzero repeat-byte addresses but must be explicitly fixture data and
 must never populate merchant configuration.
+
+Quote previews always describe an eligible original snapshot, including when
+the quote later expires or enters recovery. Free errors/status resources
+carry rejection explanations; the general offline report schema still permits
+SIMULATED. In capabilities and readiness, payment_ready=true requires no
+blockers. Overall ready=true additionally requires every storage/configuration/
+integration/payment gate to be true; a future ready state with empty blockers
+must remain representable. Encode these cross-field constraints with supported
+oneOf/properties/const/maxItems assertions under the closed resource objects.
 
 - [ ] **Step 5: Run focused GREEN and common checks; commit.** Record the added
   read-only report-request status resource as a bounded resolution of the
@@ -664,7 +679,7 @@ Expected: missing HTTP contract assertion.
 | GET `/v1/report-requests/{report_request_id}`; `getReportRequest` | 200 request_status (terminal), 202 request_status (PREPARING) | 401,404,429,503 error |
 | GET `/v1/report-quotes/{quote_id}`; `getReportQuote` | 200 quote, 202 quote (pending/uncertain/manual review) | 401,404,410,429,503 error |
 | GET `/v1/reports/{report_id}`; `getReport` | 200 paid_report, 202 error recovery | 401,402,404,409,410,429,503 error |
-| GET `/v1/reports/{report_id}/evidence`; `getEvidence` | 200 raw `application/zip`, no schema | 401,402,404,410,429,503 error |
+| GET `/v1/reports/{report_id}/evidence`; `getEvidence` | 200 raw `application/zip`, no schema; 202 JSON recovery error | 401,402,404,410,429,503 error |
 
 The ZIP success response has `"content":{"application/zip":{}}` with no
 schema, JSON encoding, or string conversion. Exclude this body from JSON
@@ -674,6 +689,15 @@ F4 owns raw ZIP bytes, Content-Type and ≤10 MiB response tests. Require
 responses it equals body.request_id. ZIP success carries correlation only in
 this header, never by inserting request_id into immutable bundle bytes. Test
 its header schema against a valid UUID, malformed UUID and trailing newline.
+
+Evidence 202 handles pending/uncertain payment, manual review and unavailable
+current finality. It contains only the JSON error envelope plus X-Request-ID
+and private no-store headers; no ZIP, receipt, payment challenge, payment
+response header or settlement occurs. Cross-check every access vector's
+response status against its specific OpenAPI endpoint. For expired quotes,
+authenticate and check scope first (401/404), then return same-scope 410
+QUOTE_EXPIRED. Pending/UNKNOWN attempts never expire merely because the
+deadline passed; confirmed historical entitlement continues to serve 200.
 
 Only health/readiness/capabilities use `security:[]`; all remaining operations
 require CapabilityBearer. POST requires `Idempotency-Key`, bounded 1–128
@@ -842,6 +866,11 @@ wrong requested instrument→UNSUPPORTED_INSTRUMENT; wrong returned identity→
 IDENTITY_MISMATCH; missing/stale/unverifiable identity provenance or unsupported
 unit/multiplier→IDENTITY_UNVERIFIED; outage→SOURCE_UNAVAILABLE.
 Boundary successes are shape/policy obligations only until F3 implements them.
+An otherwise valid fixture still yields SIMULATED_SOURCE and no quote or
+settlement. Apply that reason after specific dataset/provenance failures so
+stale, crossed, missing-source and invalid-identity reasons remain specific.
+Keep a separate live-public policy-boundary vector, never treating its
+synthetic inputs as evidence that live acquisition ran.
 
 Store deliberately malformed request bodies in `invalid_request.input` as
 `request_json` (a UTF-8 JSON text string), so the vector document remains strict
@@ -893,7 +922,7 @@ actual capability hashes or tokens. State fields use the exact Task 4 enums.
 | --- | --- | --- |
 | idempotency / F4 | `{phase:PREPARING/READY, parallelism:integer 1..20, calls:[{scope:Text,key:Text,request_json:Text}]}` | `{http_statuses:[integer enum 201/202/409/422], logical_requests:Count, builds:Count, quotes:Count, same_object:Bool, cross_scope_access:false, settlement_calls:0}` |
 | payment / F5 | `{scenario:exact_units/wrong_network/wrong_token/wrong_amount/wrong_receiver/wrong_payer/invalid_signature/expired_authorization/reused_authorization/reencoded_authorization, price_musd:display_decimal, decimals:integer 0..36, terms:Task3 terms, candidate_claims_json:Text, identity_binding_status:UNRESOLVED_F5}` | `{http_status:integer enum 202/409/503, code:Reason?, amount_atomic:atomic_amount, entitlement_count:Count, paid_body:Bool, settlement_calls:Count, distinct_attempts:Count}` |
-| access / F4 | `{authorization:missing/other_scope/same_scope/guessed_id/public_tx_hash, resource:quote/report/evidence, entitlement_present:Bool, quote_state:quote enum, attempt_state:attempt enum, finality_verified:Bool, chain_inconsistency:Bool}` | `{http_status:integer enum 200/202/401/402/404, code:Reason?, paid_body:Bool, settlement_calls:0}` |
+| access / F4 | `{authorization:missing/other_scope/same_scope/guessed_id/public_tx_hash, resource:quote/report/evidence, entitlement_present:Bool, quote_state:quote enum, attempt_state:attempt enum, finality_verified:Bool, chain_inconsistency:Bool}` | `{http_status:integer enum 200/202/401/402/404/410, code:Reason?, paid_body:Bool, settlement_calls:0}` |
 | recovery / F5 | `{event:verify_only/timeout_without_hash/ambiguous_transfers/crash_before_submit/crash_after_broadcast/crash_after_chain_success/lost_response/expiry_before_submit/confirmation_after_expiry/unknown_after_expiry/repeat_paid_read/chain_inconsistency/retention_check, quote_state:quote enum, attempt_state:attempt enum, now:Time, quote_expires_at:Time, authoritative_no_broadcast_proof:Bool, finality_verified:Bool, chain_inconsistency:Bool, tx_hash:oneOf 0x+64 lower hex and null, matching_transfer_count:Count, ledger_created_at:Time, ledger_days:integer minimum 30, authorization_valid_until:oneOf Time and null, replay_impossible_proven:Bool}` | `{quote_state:quote enum, attempt_state:attempt enum, http_status:integer enum 200/202/409/410, paid_body:Bool, additional_settlement_calls:0, original_digest_preserved:true, retain_artifacts:Bool, retain_ledger:Bool, retain_scope_binding:Bool, retain_dedup_association:Bool}` |
 | artifact / F3 or F4 | `{phase:report_validation/before_payment/after_payment, defect:missing_bytes/corrupt_bytes/fictitious_provenance, expected_digest:Digest, readback_digest:oneOf Digest and null, source_mode:fixture/live-public}` | `{http_status:integer enum 422/503, code:Reason?, chargeable_quote:false, paid_body:false, additional_settlement_calls:0, recovery_required:Bool}` |
 
@@ -906,6 +935,17 @@ x402/EIP-2612/Permit2 payload. Its parsed object has exactly `network`, `asset`,
 five are strings except intentionally rejected numeric amount cases; the last
 four are booleans. Reject any other key. This encodes a future assertion about
 SDK-verified claims without inventing cryptographic wire fields or nonce data.
+When same_authorization_different_encoding is true, the unresolved projection
+must remain 503 AUTHORIZATION_IDENTITY_UNVERIFIED with zero attempts,
+settlements and entitlements, no paid body, and exactly the future assertion
+sdk_identity_deduplicates_reencoding. It cannot assert a resolved replay
+identity or silently accept a duplicate charge.
+
+Compare RFC3339 UTC timestamps as instants, not lexically. Preserve every
+fractional digit admitted by the timestamp schema by using exact rational
+seconds; datetime's microsecond truncation cannot choose an expiry boundary.
+Test immediately before, exactly at and after expiry using mixed fractional
+forms, including sub-microsecond differences and confirmation after expiry.
 
 Concrete representative inputs/expected values follow; wrap each pair in the
 common record envelope with the stated id/kind/owner/acceptance_ids,
@@ -1111,6 +1151,7 @@ forward-recover without deleting ledger/artifacts.
 - [x] Plan scanned for unresolved authoring instructions and incomplete steps.
   Remaining UNRESOLVED values are deliberate, fail-closed F5 bindings.
 
-Plan review/approval is the next step. After approval, execute Tasks 1–6 under
-the selected subagent-driven workflow; implementation must not start merely
-because this planning document is committed.
+The owner approved implementation after the independent plan repair review.
+The integrated artifacts and consolidated final-review corrections now await
+scoped re-review; see handoff.md for exact verification and remaining blockers.
+This plan's correction does not establish F2 closure or runtime acceptance.

@@ -19,7 +19,7 @@
         "side": {"$ref": "quote-request.schema.json#/properties/side"},
         "quantity_base": {"$ref": "primitives.schema.json#/$defs/quantity"},
         "snapshot_at": {"$ref": "primitives.schema.json#/$defs/timestamp"},
-        "snapshot_status": {"$ref": "report.schema.json#/$defs/snapshot_status"},
+        "snapshot_status": {"const": "VALID_FOR_SNAPSHOT_CALCULATION"},
         "limitations": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"type": "string", "minLength": 1}},
         "price_musd": {"$ref": "#/$defs/price_musd"},
         "expires_at": {"$ref": "primitives.schema.json#/$defs/timestamp"}
@@ -113,6 +113,10 @@
     },
     "capabilities": {
       "type": "object", "additionalProperties": false,
+      "oneOf": [
+        {"properties": {"payment_ready": {"const": false}}},
+        {"properties": {"payment_ready": {"const": true}, "blockers": {"maxItems": 0}}}
+      ],
       "required": ["schema", "request_id", "instrument_id", "instrument_label", "network", "asset", "decimals", "price_musd", "amount_atomic", "source_mode", "limitations", "payment_ready", "blockers"],
       "properties": {
         "schema": {"const": "mee-evidence-capabilities/v1"},
@@ -141,6 +145,13 @@
     },
     "readiness": {
       "type": "object", "additionalProperties": false,
+      "oneOf": [
+        {"properties": {"ready": {"const": false}}, "oneOf": [
+          {"properties": {"payment_ready": {"const": false}}},
+          {"properties": {"payment_ready": {"const": true}, "blockers": {"maxItems": 0}}}
+        ]},
+        {"properties": {"ready": {"const": true}, "storage_ready": {"const": true}, "configuration_ready": {"const": true}, "integration_ready": {"const": true}, "payment_ready": {"const": true}, "blockers": {"maxItems": 0}}}
+      ],
       "required": ["schema", "request_id", "ready", "storage_ready", "configuration_ready", "integration_ready", "payment_ready", "blockers"],
       "properties": {
         "schema": {"const": "mee-evidence-readiness/v1"},

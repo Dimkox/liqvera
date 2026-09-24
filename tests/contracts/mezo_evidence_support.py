@@ -9,6 +9,7 @@ import math
 import re
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
@@ -266,14 +267,18 @@ def _matches_type(kind: str, value: object) -> bool:
         "object": lambda: isinstance(value, dict),
         "array": lambda: isinstance(value, list),
         "string": lambda: isinstance(value, str),
-        "integer": lambda: type(value) is int,
+        "integer": lambda: (
+            type(value) is int
+            or type(value) is float and math.isfinite(value) and value.is_integer()
+            or type(value) is Decimal and value.is_finite() and value == value.to_integral_value()
+        ),
         "boolean": lambda: type(value) is bool,
         "null": lambda: value is None,
     }[kind]()
 
 
 def _equal(left: object, right: object) -> bool:
-    if type(left) in {int, float} and type(right) in {int, float}:
+    if type(left) in {int, float, Decimal} and type(right) in {int, float, Decimal}:
         return left == right
     if type(left) is not type(right):
         return False
@@ -357,7 +362,10 @@ def _validate_node(schema: dict, value: object, document: str) -> None:
             raise ContractError("pattern mismatch")
         if "format" in schema and not _format_valid(schema["format"], value):
             raise ContractError("format mismatch")
-    if type(value) in {int, float}:
+    if type(value) in {int, float, Decimal}:
+        if (type(value) is float and not math.isfinite(value)
+                or type(value) is Decimal and not value.is_finite()):
+            raise ContractError("nonfinite JSON number")
         if "minimum" in schema and value < schema["minimum"]:
             raise ContractError("below minimum")
         if "maximum" in schema and value > schema["maximum"]:

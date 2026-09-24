@@ -15,9 +15,10 @@ the pinned Python development toolchain, and the public compatibility lock
 are implemented. [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md)
 accepts only the runtime and payment boundary. The overall change remains
 `implementing`. The approved F2 plan's six contract slices are integrated;
-329 focused contract tests and the full suite of 970 tests plus 85 subtests
-pass. Grok still fails only the inherited Trivy policy gate. Independent
-whole-branch review remains pending, so F2 is not yet closed.
+the consolidated review repair passes 368 contract tests and 1009 full-suite
+tests plus 85 subtests. The repair is implemented and pending scoped re-review.
+Grok's inherited Trivy
+policy gate remains open; F2 is not yet closed.
 
 At implementation commit `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`,
 `make verify` passed with 641 tests and 85 subtests. The command

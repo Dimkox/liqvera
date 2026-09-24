@@ -2,6 +2,7 @@
 
 import json
 import shutil
+from decimal import Decimal
 
 import mezo_evidence_support as c
 import pytest
@@ -287,6 +288,37 @@ def test_unique_items_rejects_equivalent_integer_and_decimal():
     with pytest.raises(c.ContractError):
         c.validate(schema, [1, 1.0], document="primitives.schema.json")
     c.validate(schema, [1, True], document="primitives.schema.json")
+
+
+@pytest.mark.parametrize("value", [1.0, -2.0, Decimal("1.0"), Decimal("9007199254740993.0")])
+def test_final_review_integer_accepts_integral_json_numbers(value):
+    c.validate({"type": "integer"}, value, document="primitives.schema.json")
+
+
+@pytest.mark.parametrize("value", [1.5, Decimal("1.5"), float("inf"), float("nan"),
+                                   Decimal("Infinity"), Decimal("NaN"), True, False])
+def test_final_review_integer_rejects_nonintegral_nonfinite_and_boolean(value):
+    with pytest.raises(c.ContractError):
+        c.validate({"type": "integer"}, value, document="primitives.schema.json")
+
+
+def test_final_review_numeric_equality_preserves_precision_boundary():
+    exact = 9007199254740993
+    decimal = Decimal("9007199254740993.0")
+    rounded_float = 9007199254740992.0
+    c.validate({"const": exact}, decimal, document="primitives.schema.json")
+    with pytest.raises(c.ContractError):
+        c.validate({"enum": [exact]}, rounded_float, document="primitives.schema.json")
+    schema = {"type": "array", "items": {"type": "integer"}, "uniqueItems": True}
+    c.validate(schema, [exact, rounded_float], document="primitives.schema.json")
+    with pytest.raises(c.ContractError):
+        c.validate(schema, [exact, decimal], document="primitives.schema.json")
+    for bound in ({"minimum": exact + 1}, {"maximum": exact - 1}):
+        with pytest.raises(c.ContractError):
+            c.validate(bound, decimal, document="primitives.schema.json")
+    with pytest.raises(c.ContractError):
+        c.validate({"$ref": "#/$defs/quantity"}, Decimal("0.15"),
+                   document="primitives.schema.json")
 
 
 @pytest.mark.parametrize("value", [

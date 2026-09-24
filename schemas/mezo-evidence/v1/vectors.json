@@ -2,6 +2,77 @@
   "schema": "mee-evidence-vectors/v1",
   "vectors": [
     {
+      "id": "valid-fixture-no-sale",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "source-age-boundary",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":5000,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 422,
+        "code": "SIMULATED_SOURCE",
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "valid-live-policy-boundary",
+      "kind": "dataset_rejection",
+      "owner": "F3",
+      "acceptance_ids": [
+        "A05"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "scenario": "source-age-boundary",
+        "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"live-public\",\"age_ms\":5000,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
+      },
+      "expected": {
+        "http_status": 200,
+        "code": null,
+        "chargeable_quote": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "dataset_policy_rejects_invalid_evidence"
+      ]
+    },
+    {
+      "id": "same-scope-expired-quote",
+      "kind": "access",
+      "owner": "F4",
+      "acceptance_ids": [
+        "A21"
+      ],
+      "runtime_status": "NOT_RUN",
+      "input": {
+        "authorization": "same_scope",
+        "resource": "quote",
+        "entitlement_present": false,
+        "quote_state": "EXPIRED",
+        "attempt_state": "REJECTED",
+        "finality_verified": false,
+        "chain_inconsistency": false
+      },
+      "expected": {
+        "http_status": 410,
+        "code": "QUOTE_EXPIRED",
+        "paid_body": false,
+        "settlement_calls": 0
+      },
+      "future_assertions": [
+        "capability_required_for_access"
+      ]
+    },
+    {
       "id": "quantity-zero-scale",
       "kind": "invalid_request",
       "owner": "F4",
@@ -1459,8 +1530,8 @@
         "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":5000,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
       },
       "expected": {
-        "http_status": 200,
-        "code": null,
+        "http_status": 422,
+        "code": "SIMULATED_SOURCE",
         "chargeable_quote": false,
         "settlement_calls": 0
       },
@@ -1503,8 +1574,8 @@
         "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":-1000,\"metadata_age_ms\":0,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
       },
       "expected": {
-        "http_status": 200,
-        "code": null,
+        "http_status": 422,
+        "code": "SIMULATED_SOURCE",
         "chargeable_quote": false,
         "settlement_calls": 0
       },
@@ -1547,8 +1618,8 @@
         "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":86400000,\"metadata_now_ms\":100,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
       },
       "expected": {
-        "http_status": 200,
-        "code": null,
+        "http_status": 422,
+        "code": "SIMULATED_SOURCE",
         "chargeable_quote": false,
         "settlement_calls": 0
       },
@@ -1591,8 +1662,8 @@
         "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":1,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
       },
       "expected": {
-        "http_status": 200,
-        "code": null,
+        "http_status": 422,
+        "code": "SIMULATED_SOURCE",
         "chargeable_quote": false,
         "settlement_calls": 0
       },
@@ -1613,8 +1684,8 @@
         "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":0,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
       },
       "expected": {
-        "http_status": 200,
-        "code": null,
+        "http_status": 422,
+        "code": "SIMULATED_SOURCE",
         "chargeable_quote": false,
         "settlement_calls": 0
       },
@@ -1657,8 +1728,8 @@
         "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":199,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
       },
       "expected": {
-        "http_status": 200,
-        "code": null,
+        "http_status": 422,
+        "code": "SIMULATED_SOURCE",
         "chargeable_quote": false,
         "settlement_calls": 0
       },
@@ -1679,8 +1750,8 @@
         "dataset_json": "{\"requested_instrument\":\"hyperliquid:BTC:perpetual\",\"returned_instrument\":\"hyperliquid:BTC:perpetual\",\"quantity_unit\":\"coin\",\"multiplier\":\"1\",\"source_mode\":\"fixture\",\"age_ms\":0,\"metadata_age_ms\":0,\"metadata_now_ms\":200,\"metadata_valid_from_ms\":0,\"metadata_valid_until_ms\":200,\"evidence_text\":\"SIMULATED retained metadata v1\\n\",\"evidence_sha256\":\"c6f33166efb41cf20d5e156a93197bd252781f2966f5daee1ab86f4ca0c7be85\",\"upstream_available\":true,\"bids\":[[\"99900\",\"0.10\"],[\"99800\",\"0.10\"]],\"asks\":[[\"100000\",\"0.10\"],[\"100100\",\"0.10\"]],\"side\":\"BUY\",\"quantity_base\":\"0.15\"}"
       },
       "expected": {
-        "http_status": 200,
-        "code": null,
+        "http_status": 422,
+        "code": "SIMULATED_SOURCE",
         "chargeable_quote": false,
         "settlement_calls": 0
       },

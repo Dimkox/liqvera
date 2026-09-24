@@ -3,7 +3,7 @@
 import copy
 import hashlib
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import ROUND_HALF_EVEN, Decimal, localcontext
 from fractions import Fraction
 from pathlib import Path
@@ -92,6 +92,76 @@ def vector_document():
 
 def records():
     return vector_document()["vectors"]
+
+
+@pytest.fixture(scope="module")
+def review_vectors():
+    return {vector["id"]: vector for vector in records()}
+
+
+def test_final_review_vector_http_statuses_are_declared_by_their_endpoints(review_vectors):
+    paths = support().load("openapi.json")["paths"]
+    endpoints = {"quote": "/v1/report-quotes/{quote_id}",
+                 "report": "/v1/reports/{report_id}",
+                 "evidence": "/v1/reports/{report_id}/evidence"}
+    for vector in review_vectors.values():
+        if vector["kind"] == "access":
+            path = endpoints[vector["input"]["resource"]]
+            assert str(vector["expected"]["http_status"]) in paths[path]["get"]["responses"], vector["id"]
+        elif vector["kind"] == "idempotency":
+            for status in vector["expected"]["http_statuses"]:
+                assert str(status) in paths["/v1/report-quotes"]["post"]["responses"], vector["id"]
+        elif vector["kind"] in {"payment", "recovery"}:
+            assert str(vector["expected"]["http_status"]) in paths[endpoints["report"]]["get"]["responses"], vector["id"]
+
+
+@pytest.mark.parametrize("authorization,status,code", [
+    ("same_scope", 410, "QUOTE_EXPIRED"), ("missing", 401, "UNAUTHORIZED"),
+    ("other_scope", 404, "NOT_FOUND")])
+def test_final_review_expired_quote_preserves_scope_boundary(review_vectors, authorization, status, code):
+    vector = copy.deepcopy(review_vectors["missing-quote"])
+    vector["input"].update(authorization=authorization, quote_state="EXPIRED",
+                           attempt_state="REJECTED", entitlement_present=False)
+    vector["expected"].update(http_status=status, code=code)
+    check_access(vector)
+
+
+@pytest.mark.parametrize("vector_id,reason", [
+    ("source-age-boundary", "SIMULATED_SOURCE"), ("source-age-outside", "STALE_SOURCE"),
+    ("crossed-book", "CROSSED_BOOK"), ("live-upstream-outage", "SOURCE_UNAVAILABLE")])
+def test_final_review_fixture_reason_preserves_specific_rejections(review_vectors, vector_id, reason):
+    source = strict_json(review_vectors[vector_id]["input"]["dataset_json"])
+    assert dataset_reason(source) == reason
+
+
+@pytest.mark.parametrize("vector_id,now,expiry", [
+    ("crash-after-durable-attempt-before-submit", "2026-09-24T12:02:00Z", "2026-09-24T12:02:00.000000001Z"),
+    ("expired-before-submitting", "2026-09-24T12:02:00.000Z", "2026-09-24T12:02:00Z"),
+    ("expired-before-submitting", "2026-09-24T12:02:00.000000001Z", "2026-09-24T12:02:00Z"),
+    ("submitted-before-confirmed-after-expiry", "2026-09-24T12:02:00.1Z", "2026-09-24T12:02:00Z"),
+    ("unknown-retained-after-expiry", "2026-09-24T12:02:00.1Z", "2026-09-24T12:02:00Z")])
+def test_final_review_expiry_compares_exact_instants(review_vectors, vector_id, now, expiry):
+    vector = copy.deepcopy(review_vectors[vector_id])
+    vector["input"].update(now=now, quote_expires_at=expiry)
+    check_recovery(vector)
+
+
+@pytest.mark.parametrize("mutation", ["assertion", "reused", "attempts", "settlements", "entitlement"])
+def test_final_review_reencoded_identity_cannot_claim_resolution(review_vectors, mutation):
+    vector = copy.deepcopy(review_vectors["reencoded-authorization"])
+    if mutation == "assertion":
+        vector["future_assertions"] = ["invalid_authorization_never_entitles"]
+    elif mutation == "reused":
+        claims = strict_json(vector["input"]["candidate_claims_json"])
+        claims["authorization_reused"] = True
+        vector["input"]["candidate_claims_json"] = json.dumps(claims)
+        vector["expected"].update(http_status=409, code="AUTHORIZATION_REUSED")
+    else:
+        field = {"attempts": "distinct_attempts", "settlements": "settlement_calls",
+                 "entitlement": "entitlement_count"}[mutation]
+        vector["expected"][field] = 1
+    with pytest.raises(AssertionError):
+        check_payment(vector)
 
 
 @pytest.mark.parametrize("mutation", ["wrong_version", "missing_version", "extra_field"])
@@ -276,7 +346,7 @@ def dataset_reason(source):
             return "DEPTH_INSUFFICIENT"
     except (ValueError, ArithmeticError):
         return "INVALID_DATASET"
-    return None
+    return "SIMULATED_SOURCE" if source["source_mode"] == "fixture" else None
 
 
 def check_invalid_request(vector):
@@ -373,6 +443,11 @@ def check_payment(vector):
     )
     claims = strict_json(source["candidate_claims_json"])
     c.validate({"$ref": "#/$defs/candidate_claims"}, claims, document="vectors.schema.json")
+    if claims["same_authorization_different_encoding"]:
+        assert source["scenario"] == "reencoded_authorization"
+        assert vector["future_assertions"] == ["sdk_identity_deduplicates_reencoding"]
+        assert expected["code"] == "AUTHORIZATION_IDENTITY_UNVERIFIED"
+        assert expected["http_status"] == 503
     invalid = (
         any(
             claims[a] != terms[b]
@@ -428,6 +503,8 @@ def check_access(vector):
         or source["chain_inconsistency"]
     ):
         status, code, paid = 202, "MANUAL_REVIEW", False
+    elif source["quote_state"] == "EXPIRED":
+        status, code, paid = 410, "QUOTE_EXPIRED", False
     elif source["resource"] == "quote":
         status, code, paid = 200, None, False
     elif source["entitlement_present"] and deliverable(source):
@@ -442,6 +519,17 @@ def check_access(vector):
         "paid_body": paid,
         "settlement_calls": 0,
     }
+
+
+def utc_instant(timestamp):
+    """Exact UTC seconds, retaining every schema-permitted fractional digit."""
+    support().validate({"$ref": "primitives.schema.json#/$defs/timestamp"}, timestamp,
+                       document="vectors.schema.json")
+    whole, dot, fraction = timestamp[:-1].partition(".")
+    instant = datetime.fromisoformat(whole)
+    seconds = (instant.toordinal() * 86400 + instant.hour * 3600
+               + instant.minute * 60 + instant.second)
+    return Fraction(seconds) + (Fraction(int(fraction), 10 ** len(fraction)) if dot else 0)
 
 
 def check_recovery(vector):
@@ -473,9 +561,9 @@ def check_recovery(vector):
         assert source["finality_verified"] and not source["chain_inconsistency"]
     if event == "crash_before_submit":
         assert source["authoritative_no_broadcast_proof"]
-        assert source["now"] < source["quote_expires_at"]
+        assert utc_instant(source["now"]) < utc_instant(source["quote_expires_at"])
     if event in {"expiry_before_submit", "confirmation_after_expiry", "unknown_after_expiry"}:
-        assert source["now"] >= source["quote_expires_at"]
+        assert utc_instant(source["now"]) >= utc_instant(source["quote_expires_at"])
     if event == "ambiguous_transfers":
         assert source["matching_transfer_count"] > 1 and not source["finality_verified"]
     if event == "timeout_without_hash":
@@ -483,15 +571,13 @@ def check_recovery(vector):
     assert expected["additional_settlement_calls"] == 0
     assert expected["original_digest_preserved"] is True
     assert expected["retain_artifacts"] is (event != "retention_check")
-    now = datetime.fromisoformat(source["now"])
-    minimum = datetime.fromisoformat(source["ledger_created_at"]) + timedelta(
-        days=source["ledger_days"]
-    )
+    now = utc_instant(source["now"])
+    minimum = utc_instant(source["ledger_created_at"]) + source["ledger_days"] * 86400
     validity = source["authorization_valid_until"]
     must_retain = (
         now < minimum
         or validity is None
-        or now < datetime.fromisoformat(validity)
+        or now < utc_instant(validity)
         or not source["replay_impossible_proven"]
         or attempt in {"SUBMITTING", "UNKNOWN", "MANUAL_REVIEW"}
     )
@@ -545,6 +631,9 @@ def test_each_family_semantics(kind):
 def test_required_adversarial_cases_cannot_disappear():
     by_id = {vector["id"]: vector for vector in records()}
     required = {
+        "same-scope-expired-quote",
+        "valid-fixture-no-sale",
+        "valid-live-policy-boundary",
         "buy-two-levels",
         "sell-two-levels",
         "sell-one-level",

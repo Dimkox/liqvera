@@ -86,3 +86,11 @@ Integration found that the symbol pattern rejected the existing `report_sha256` 
 ## 2026-09-24 — Reconstructed vector envelopes hid invalid root fields
 
 Task 6 initially extracted the vector array and rebuilt a known-valid envelope before schema validation. The root cause was validating transformed test data instead of the original loaded document, allowing a wrong/missing schema version or extra root field to escape detection. The loading-path repair validates the original document first and rejects each corruption through real file-loading regressions.
+
+## 2026-09-24 — F2 local consistency checks missed shared safety predicates
+
+Whole-branch review found evidence recovery statuses absent from OpenAPI, expired quotes classified before expiry handling, and valid fixtures/previews/readiness fields not constrained by sale eligibility. The root cause was treating independently valid shapes and model branches as proof of cross-contract agreement. Endpoint/vector comparisons and direct eligibility/readiness mutations now reproduce and cover those shared boundaries; reencoded identity remains explicitly unresolved with no charge or attempt.
+
+## 2026-09-24 — Host-language representations replaced contract semantics
+
+The bounded checker used Python int identity for JSON Schema integer membership, and recovery tests ordered UTC strings lexically. The root cause was conflating implementation representation with mathematical JSON values and temporal instants. Integral float/Decimal regressions, exact numeric precision-boundary checks and mixed/sub-microsecond timestamp regressions now preserve the contract semantics.

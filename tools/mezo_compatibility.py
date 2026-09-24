@@ -6,11 +6,15 @@ import argparse
 import json
 import os
 import re
+import signal
 import sys
 import tempfile
+import threading
+import time
 import urllib.error
 import urllib.request
-from http.client import HTTPException
+from contextlib import contextmanager
+from http.client import HTTPConnection, HTTPException, HTTPResponse, HTTPSConnection
 from pathlib import Path
 
 INFO_URL = "https://api.hyperliquid.xyz/info"
@@ -26,6 +30,9 @@ REGISTRY_METADATA = (
     ("@x402/paywall", "https://registry.npmjs.org/%40x402%2Fpaywall/2.16.0"),
 )
 MAX_RESPONSE_BYTES = 2 * 1024 * 1024
+MAX_FRAMING_BYTES = 64 * 1024
+MAX_LINE_BYTES = 8192
+REQUEST_TIMEOUT_SECONDS = 12
 
 
 class CompatibilityError(ValueError):
@@ -202,8 +209,143 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         raise CompatibilityError("HTTP_REDIRECT_BLOCKED")
 
 
+class _FramingError(HTTPException):
+    """Internal static error; the caller replaces it with its stable reason."""
+
+
+class _BudgetedReader:
+    """Bound all consumed wire bytes and framing separately from JSON bytes."""
+
+    def __init__(self, stream):
+        self.stream = stream
+        self.wire_bytes = 0
+        self.framing_bytes = 0
+
+    def _account(self, data: bytes, *, framing: bool) -> bytes:
+        self.wire_bytes += len(data)
+        if framing:
+            self.framing_bytes += len(data)
+        if (
+            self.wire_bytes > MAX_RESPONSE_BYTES + MAX_FRAMING_BYTES
+            or self.framing_bytes > MAX_FRAMING_BYTES
+        ):
+            raise _FramingError()
+        return data
+
+    def read(self, amount=-1):
+        remaining = MAX_RESPONSE_BYTES + MAX_FRAMING_BYTES - self.wire_bytes
+        amount = remaining + 1 if amount < 0 else min(amount, remaining + 1)
+        return self._account(self.stream.read(amount), framing=False)
+
+    def read_framing(self, amount):
+        data = self.read(amount)
+        self.framing_bytes += len(data)
+        if self.framing_bytes > MAX_FRAMING_BYTES:
+            raise _FramingError()
+        return data
+
+    def readline(self, limit=-1):
+        remaining = MAX_FRAMING_BYTES - self.framing_bytes
+        maximum = min(MAX_LINE_BYTES + 1, remaining + 1)
+        if limit >= 0:
+            maximum = min(maximum, limit)
+        data = self._account(self.stream.readline(maximum), framing=True)
+        if len(data) > MAX_LINE_BYTES or not data.endswith(b"\r\n"):
+            raise _FramingError()
+        return data
+
+    def close(self):
+        self.stream.close()
+
+    def flush(self):
+        self.stream.flush()
+
+
+class _BoundedHTTPResponse(HTTPResponse):
+    """Private probe response: strict CRLF chunks, no extensions or trailers."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fp = _BudgetedReader(self.fp)
+
+    def _read_chunked(self, amt=None):
+        # This transport consumes each response exactly once. Reject excess data
+        # instead of leaving a partially consumed chunked message behind.
+        maximum = MAX_RESPONSE_BYTES if amt is None else min(amt, MAX_RESPONSE_BYTES)
+        parts = []
+        total = 0
+        while True:
+            line = self.fp.readline()
+            if re.fullmatch(rb"[0-9a-fA-F]{1,8}\r\n", line) is None:
+                raise _FramingError()
+            size = int(line[:-2], 16)
+            if size == 0:
+                if self.fp.readline() != b"\r\n":
+                    raise _FramingError()
+                self._close_conn()
+                return b"".join(parts)
+            total += size
+            if total > maximum:
+                raise _FramingError()
+            parts.append(self._safe_read(size))
+            if self.fp.read_framing(2) != b"\r\n":
+                raise _FramingError()
+
+
+class _HTTPConnection(HTTPConnection):
+    response_class = _BoundedHTTPResponse
+
+
+class _HTTPSConnection(HTTPSConnection):
+    response_class = _BoundedHTTPResponse
+
+
+class _HTTPHandler(urllib.request.HTTPHandler):
+    def http_open(self, request):
+        return self.do_open(_HTTPConnection, request)
+
+
+class _HTTPSHandler(urllib.request.HTTPSHandler):
+    def https_open(self, request):
+        return self.do_open(_HTTPSConnection, request, context=self._context)
+
+
 def _build_opener():
-    return urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+    return urllib.request.build_opener(
+        urllib.request.ProxyHandler({}),
+        NoRedirect(),
+        _HTTPHandler(),
+        _HTTPSHandler(),
+    )
+
+
+@contextmanager
+def _request_deadline(reason: str):
+    """Synchronous CLI-only deadline; never steal a caller's active alarm."""
+    _require(
+        threading.current_thread() is threading.main_thread()
+        and all(
+            hasattr(signal, name) for name in ("setitimer", "getitimer", "ITIMER_REAL", "SIGALRM")
+        ),
+        reason,
+    )
+    _require(signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0), reason)
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    deadline = time.monotonic() + REQUEST_TIMEOUT_SECONDS
+
+    def expired(signum, frame):
+        raise CompatibilityError(reason)
+
+    try:
+        signal.signal(signal.SIGALRM, expired)
+        remaining = deadline - time.monotonic()
+        _require(remaining > 0, reason)
+        signal.setitimer(signal.ITIMER_REAL, remaining)
+        yield
+        _require(time.monotonic() <= deadline, reason)
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
 
 
 def _request_json(opener, url: str, payload: dict | None, reason: str) -> object:
@@ -218,7 +360,10 @@ def _request_json(opener, url: str, payload: dict | None, reason: str) -> object
         method="GET" if payload is None else "POST",
     )
     try:
-        with opener.open(request, timeout=12) as response:
+        with (
+            _request_deadline(reason),
+            opener.open(request, timeout=REQUEST_TIMEOUT_SECONDS) as response,
+        ):
             lengths = response.headers.get_all("Content-Length", [])
             encodings = response.headers.get_all("Content-Encoding", [])
             transfers = response.headers.get_all("Transfer-Encoding", [])

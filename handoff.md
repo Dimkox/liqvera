@@ -8,6 +8,24 @@ Branch: `feat/mezo-evidence-f1-impl`.
 
 ## Current state and next action
 
+Final-review transport repair is in progress. The earlier SHA-bound closure
+evidence below is historical until the new implementation commit is verified
+and the closure documents are refreshed. The overall change remains
+`implementing`; no payment or release gate has changed.
+
+The repair privately bounds consumed HTTP framing to 64 KiB, each framing
+line to 8 KiB, and decoded response data to 2 MiB. Chunk extensions, trailers,
+and malformed CRLF are rejected. A 12-second synchronous total deadline
+covers connection, TLS handshake, headers, body, and chunk termination;
+network reads require POSIX `setitimer`, the main thread, and no existing
+active real-time alarm, otherwise they fail closed before I/O. The prior
+signal handler is restored and the temporary timer cleared on every exit.
+No background transport worker is created. The live probe passes, including
+Mezo's legitimate chunked bytecode response, with both payment blockers.
+Before the repair commit, focused tests passed 107 cases, Ruff passed, and
+`make verify` passed 641 tests plus 85 subtests. Fresh verification against
+the new implementation SHA is the next step before closure evidence refresh.
+
 F1 is **complete-with-blockers**. The overall Mezo change is `implementing`;
 F2–F7 remain open. The accepted
 [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md) fixes only runtime,

@@ -48,3 +48,7 @@ A 2 MiB synthetic response fixture became its own default pytest parameter ID an
 ## 2026-09-24 — Fixed initial URLs did not constrain the full transport
 
 The initial compatibility implementation treated fixed urllib URLs and npm registry argv as proof of endpoint isolation, while urllib inherited ambient proxy credentials and npm followed redirects. The injected IncompleteRead test also missed that real bounded HTTP reads can silently return fewer bytes than Content-Length. Test actual transport behavior and dependency defaults, including proxy selection, redirect follow-up requests, and real HTTPResponse framing, before claiming a fail-closed boundary.
+
+## 2026-09-24 — Decoded-body and socket-operation limits were incomplete
+
+The reviewed transport bounded decoded JSON and individual socket operations, leaving HTTP chunk trailers and total elapsed request time insufficiently bounded. Test real wire framing and slow-drip responses, budget framing separately from payload, and use one total deadline that covers every transport phase.

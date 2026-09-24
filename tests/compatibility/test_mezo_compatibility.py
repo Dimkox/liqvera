@@ -3,7 +3,11 @@
 import io
 import json
 import runpy
+import signal
+import socketserver
 import threading
+import time
+from contextlib import contextmanager
 from http.client import HTTPResponse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -28,6 +32,32 @@ def wire_response(body, headers=None):
     response = HTTPResponse(Socket())
     response.begin()
     return response
+
+
+@contextmanager
+def raw_http_server(respond):
+    """Real wire fixture, synchronously stopped and joined on every exit."""
+    stop = threading.Event()
+
+    class Handler(socketserver.BaseRequestHandler):
+        def handle(self):
+            self.request.settimeout(2)
+            try:
+                self.request.recv(16384)
+                respond(self.request, stop)
+            except OSError:
+                pass  # A rejected response may close while the fixture sends.
+
+    with socketserver.TCPServer(("127.0.0.1", 0), Handler) as server:
+        thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.01})
+        thread.start()
+        try:
+            yield f"http://127.0.0.1:{server.server_address[1]}", thread
+        finally:
+            stop.set()
+            server.shutdown()
+            thread.join(timeout=2)
+            assert not thread.is_alive()
 
 
 @pytest.fixture
@@ -460,6 +490,8 @@ def test_ambient_proxy_credentials_never_reach_transport(monkeypatch):
     original = compatibility.urllib.request.build_opener
 
     class CaptureHTTPS(HTTPSHandler):
+        handler_order = 101
+
         def https_open(self, request):
             requests.append((request.host, request.get_header("Proxy-authorization")))
             raise CompatibilityError("TEST_TRANSPORT_STOP")
@@ -581,3 +613,211 @@ def test_failed_atomic_output_preserves_existing_file_and_cleans_temp(
     assert target.read_text() == "previous-sanitized-evidence\n"
     assert list(tmp_path.iterdir()) == [target]
     assert capsys.readouterr().err == ""
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        "oversized-trailers",
+        "missing-terminal-crlf",
+        "invalid-data-crlf",
+        "chunk-extension",
+        "oversized-header-framing",
+        "too-many-small-chunks",
+    ],
+)
+def test_real_wire_rejects_unbounded_or_malformed_framing(case):
+    header = b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n"
+    body = b"2\r\n{}\r\n0\r\n"
+    if case == "oversized-trailers":
+        body += (b"X: " + b"a" * 64 + b"\r\n") * 35000 + b"\r\n"
+    elif case == "missing-terminal-crlf":
+        pass
+    elif case == "invalid-data-crlf":
+        body = b"2\r\n{}XX0\r\n\r\n"
+    elif case == "chunk-extension":
+        body = b"2;extension=value\r\n{}\r\n0\r\n\r\n"
+    elif case == "oversized-header-framing":
+        header = b"HTTP/1.1 200 OK\r\n" + (b"X: " + b"a" * 1000 + b"\r\n") * 70
+        header += b"Content-Length: 2\r\n\r\n"
+        body = b"{}"
+    elif case == "too-many-small-chunks":
+        # Valid JSON whitespace, but framing exceeds the independent budget.
+        body = b"1\r\n \r\n" * 15000 + b"2\r\n{}\r\n0\r\n\r\n"
+
+    def respond(connection, stop):
+        connection.sendall(header + body)
+
+    with raw_http_server(respond) as (url, _):
+        with pytest.raises(CompatibilityError, match="^MEZO_RPC_UNAVAILABLE$"):
+            compatibility._request_json(
+                compatibility._build_opener(), url, None, "MEZO_RPC_UNAVAILABLE"
+            )
+
+
+@pytest.mark.parametrize("phase", ["headers", "body", "chunk-ending"])
+def test_total_deadline_stops_real_wire_drip_without_background_worker(phase, monkeypatch):
+    monkeypatch.setattr(compatibility, "REQUEST_TIMEOUT_SECONDS", 0.25, raising=False)
+    initial_threads = set(threading.enumerate())
+
+    def respond(connection, stop):
+        if phase == "headers":
+            connection.sendall(b"HTTP/1.1 200 OK\r\n")
+            if not stop.wait(1.1):
+                connection.sendall(b"Content-Length: 2\r\n\r\n{}")
+        elif phase == "body":
+            connection.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\n")
+            for byte in b'{"ok":true}':
+                if stop.wait(0.1):
+                    break
+                connection.sendall(bytes([byte]))
+        else:
+            connection.sendall(
+                b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n2\r\n{}\r\n0\r\n"
+            )
+            if not stop.wait(1.1):
+                connection.sendall(b"\r\n")
+
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    with raw_http_server(respond) as (url, fixture_thread):
+        started = time.monotonic()
+        with pytest.raises(CompatibilityError, match="^MEZO_RPC_UNAVAILABLE$"):
+            compatibility._request_json(
+                compatibility._build_opener(), url, None, "MEZO_RPC_UNAVAILABLE"
+            )
+        assert time.monotonic() - started < 0.75
+        assert set(threading.enumerate()) <= initial_threads | {fixture_thread}
+    assert set(threading.enumerate()) <= initial_threads
+    assert signal.getsignal(signal.SIGALRM) == previous_handler
+    assert signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0)
+
+
+def test_deadline_refuses_to_replace_an_existing_caller_timer():
+    class Opener:
+        def open(self, *args, **kwargs):
+            pytest.fail("existing timer must fail closed before network I/O")
+
+    signal.setitimer(signal.ITIMER_REAL, 30)
+    try:
+        with pytest.raises(CompatibilityError, match="^MEZO_RPC_UNAVAILABLE$"):
+            compatibility._request_json(
+                Opener(), "https://rpc.test.mezo.org", None, "MEZO_RPC_UNAVAILABLE"
+            )
+        assert signal.getitimer(signal.ITIMER_REAL)[0] > 20
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+
+
+@pytest.mark.parametrize("body", [b"{}", b"invalid-json"])
+def test_custom_signal_handler_is_restored_on_success_and_error(body):
+    previous_handler = signal.getsignal(signal.SIGALRM)
+
+    def caller_handler(signum, frame):
+        pytest.fail("the inactive caller alarm must not fire")
+
+    class Opener:
+        def open(self, *args, **kwargs):
+            return wire_response(body)
+
+    signal.signal(signal.SIGALRM, caller_handler)
+    try:
+        if body == b"{}":
+            assert (
+                compatibility._request_json(
+                    Opener(), "https://rpc.test.mezo.org", None, "MEZO_RPC_UNAVAILABLE"
+                )
+                == {}
+            )
+        else:
+            with pytest.raises(CompatibilityError, match="^MEZO_RPC_UNAVAILABLE$"):
+                compatibility._request_json(
+                    Opener(), "https://rpc.test.mezo.org", None, "MEZO_RPC_UNAVAILABLE"
+                )
+        assert signal.getsignal(signal.SIGALRM) is caller_handler
+        assert signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0)
+    finally:
+        signal.signal(signal.SIGALRM, previous_handler)
+
+
+def test_deadline_refuses_non_main_thread_before_io():
+    errors = []
+
+    class Opener:
+        def open(self, *args, **kwargs):
+            pytest.fail("worker thread must fail closed before network I/O")
+
+    def run():
+        try:
+            compatibility._request_json(
+                Opener(), "https://rpc.test.mezo.org", None, "MEZO_RPC_UNAVAILABLE"
+            )
+        except CompatibilityError as error:
+            errors.append(str(error))
+
+    thread = threading.Thread(target=run)
+    thread.start()
+    thread.join(timeout=2)
+    assert not thread.is_alive()
+    assert errors == ["MEZO_RPC_UNAVAILABLE"]
+
+
+@pytest.mark.parametrize("chunked", [False, True])
+def test_real_wire_decoded_body_bound_is_independent_of_small_framing(chunked):
+    body = b" " * (2 * 1024 * 1024 - 1) + b"{}"
+    if chunked:
+        header = b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n"
+        payload = b"200001\r\n" + body + b"\r\n0\r\n\r\n"
+    else:
+        header = b"HTTP/1.1 200 OK\r\nContent-Length: 2097153\r\n\r\n"
+        payload = body
+
+    def respond(connection, stop):
+        connection.sendall(header + payload)
+
+    with raw_http_server(respond) as (url, _):
+        with pytest.raises(CompatibilityError, match="^MEZO_RPC_UNAVAILABLE$"):
+            compatibility._request_json(
+                compatibility._build_opener(), url, None, "MEZO_RPC_UNAVAILABLE"
+            )
+
+
+@pytest.mark.parametrize("chunked", [False, True])
+def test_real_wire_accepts_complete_bounded_payload(chunked):
+    payload = (
+        b"Transfer-Encoding: chunked\r\n\r\n1\r\n{\r\n1\r\n}\r\n0\r\n\r\n"
+        if chunked
+        else b"Content-Length: 2\r\n\r\n{}"
+    )
+
+    def respond(connection, stop):
+        connection.sendall(b"HTTP/1.1 200 OK\r\n" + payload)
+
+    with raw_http_server(respond) as (url, _):
+        assert (
+            compatibility._request_json(
+                compatibility._build_opener(),
+                url,
+                None,
+                "MEZO_RPC_UNAVAILABLE",
+            )
+            == {}
+        )
+
+
+def test_total_deadline_covers_tls_handshake(monkeypatch):
+    monkeypatch.setattr(compatibility, "REQUEST_TIMEOUT_SECONDS", 0.25)
+
+    def respond(connection, stop):
+        stop.wait(1.1)  # Received ClientHello; deliberately never answer it.
+
+    with raw_http_server(respond) as (url, _):
+        started = time.monotonic()
+        with pytest.raises(CompatibilityError, match="^MEZO_RPC_UNAVAILABLE$"):
+            compatibility._request_json(
+                compatibility._build_opener(),
+                url.replace("http:", "https:"),
+                None,
+                "MEZO_RPC_UNAVAILABLE",
+            )
+        assert time.monotonic() - started < 0.75
+    assert signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0)

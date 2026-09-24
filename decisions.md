@@ -107,3 +107,7 @@ Pin the entire F1 compatibility boundary in a closed lock, emit only an allowlis
 ## 2026-09-24 — One transport enforces the full public endpoint boundary
 
 Task 4 review proved npm 11.19.0 ignores candidate redirect-limit flags, so the controller approved replacing npm-view with four literal version-metadata URLs through the same Python transport; this supersedes the temporary npm config/cache approach above. Explicitly disable ambient proxies, forbid redirects, request identity encoding, and validate response framing within the 2 MiB bound before interpreting metadata. Real proxy-routing, loopback redirect, and HTTPResponse fixtures cover those behaviors, and the live probe passed with unchanged payment blockers.
+
+## 2026-09-24 — Bound the complete compatibility response and its duration
+
+Live Mezo bytecode uses chunked transfer, so a Content-Length-only policy would reject a legitimate fixed endpoint. Keep the strict reader private to the compatibility opener: bound framing independently of decoded data, reject chunk extensions/trailers and malformed CRLF, and enforce a synchronous total request deadline with no worker left running. Fail closed without POSIX timer support, outside the main thread, or when a caller already owns the real-time alarm; restore the previous handler on every exit.

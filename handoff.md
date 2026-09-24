@@ -115,13 +115,13 @@ is preserved separately from the current results.
   `hyperliquid-python-sdk==0.24.0`. The initial clean resolver rejected
   eth-account 0.14.0; the corrected clean install and pip check passed.
   The then-current suite passed 534 tests and 85 subtests.
-- Task 4, `3c09b44` and `68dafdb`: sanitized closed compatibility lock and
+- Task 4, `3c09b44` and `df70f93`: sanitized closed compatibility lock and
   stdlib probe. Review found ambient proxies, npm redirects, and incomplete
   HTTP framing. The approved repair uses four literal registry URLs,
   disabled proxies, redirect refusal, identity encoding, bounded reads, and
   strict Content-Length validation. 89 focused tests passed; final full
   suite at that point had 623 tests and 85 subtests. No npm subprocess/cache remains.
-- Final review repair, `0fceafe`: the public bytecode endpoint legitimately
+- Final review repair, `37d3e2c`: the public bytecode endpoint legitimately
   uses chunked transfer. A private strict response reader now limits decoded
   data to 2 MiB, framing to 64 KiB, and each framing line to 8 KiB; it rejects
   chunk extensions, all trailers, and malformed/missing CRLF. One 12-second

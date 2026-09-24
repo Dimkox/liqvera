@@ -1,0 +1,14 @@
+*
+!packages/
+!packages/contracts/
+!packages/contracts/**
+!packages/readonly-analyzer/
+!packages/readonly-analyzer/**
+!packages/evidence-report/
+!packages/evidence-report/**
+**/.env
+**/.env.*
+**/secrets/**
+**/*.pem
+**/*.key
+**/node_modules/**

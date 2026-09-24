@@ -1,0 +1,13 @@
+*
+!apps/
+!apps/mezo-gateway/
+!apps/mezo-gateway/**
+!deploy/
+!deploy/mezo-evidence/
+!deploy/mezo-evidence/gateway-entrypoint.js
+**/.env
+**/.env.*
+**/secrets/**
+**/*.pem
+**/*.key
+**/node_modules/**

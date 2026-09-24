@@ -1,0 +1,13 @@
+*
+!apps/
+!apps/mezo-web/
+!apps/mezo-web/**
+!deploy/
+!deploy/mezo-evidence/
+!deploy/mezo-evidence/nginx-web.conf
+**/.env
+**/.env.*
+**/secrets/**
+**/*.pem
+**/*.key
+**/node_modules/**

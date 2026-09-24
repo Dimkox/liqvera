@@ -1,0 +1,164 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "Liqvera verifiable report API",
+    "version": "1.0.0",
+    "description": "Proposed testnet-only HTTP contract. F4 and F5 must implement and verify it; this document does not describe a deployed service."
+  },
+  "x-liqvera-capability": {
+    "minimum_entropy_bits": 256,
+    "storage": "hash_only",
+    "payer_authenticity": "not_established",
+    "scope_isolation": "A missing resource and another scope's resource have identical 404 envelopes. A public transaction hash and a guessed UUID grant no access.",
+    "future_owner": "F4"
+  },
+  "x-liqvera-idempotency": {
+    "namespace": "access_scope",
+    "canonical_body_fields": ["instrument_id", "side", "quantity_base", "expected_payer"],
+    "same_key_same_body": "Return the same logical request or quote; a PREPARING repeat returns 202 and the same status Location.",
+    "same_key_different_body": "409 without another capture or settlement",
+    "other_scope": "Independent namespace; never grants access to the first scope's object.",
+    "future_owner": "F4"
+  },
+  "x-liqvera-payment": {
+    "protocol_version": 2,
+    "scheme": "exact",
+    "sdk_family_version": "2.16.0",
+    "requirements_header": "PAYMENT-REQUIRED",
+    "authorization_header": "PAYMENT-SIGNATURE",
+    "receipt_header": "PAYMENT-RESPONSE",
+    "authorization_identity_status": "UNRESOLVED_F5",
+    "finality_status": "FINALITY_RULE_UNVERIFIED"
+  },
+  "x-liqvera-runtime-obligations": {
+    "owner": "F4/F5",
+    "json_body_max_bytes": 16384,
+    "decoded_payment_max_bytes": 16384,
+    "evidence_zip_max_bytes": 10485760,
+    "quote_rate_per_minute_per_scope": 5,
+    "build_concurrency_max": 4,
+    "build_deadline_seconds": 15,
+    "upstream_attempts_max": 2,
+    "correlation": "Every JSON response body request_id equals X-Request-ID. Raw ZIP is unchanged and carries correlation only in X-Request-ID.",
+    "payment_payloads": "SDK-produced opaque base64 headers; F5 validates decoded values against the pinned official SDK."
+  },
+  "components": {
+    "securitySchemes": {
+      "CapabilityBearer": {"type": "http", "scheme": "bearer"}
+    }
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "getHealth", "security": [],
+        "description": "Process liveness only; it does not establish payment readiness.",
+        "responses": {
+          "200": {"description": "Alive", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/health"}, "example": {"schema": "mee-evidence-health/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "status": "alive"}}}}
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "operationId": "getReadiness", "security": [],
+        "description": "Readiness reports payment blockers; unresolved receiver/finality means payment_ready=false.",
+        "responses": {
+          "200": {"description": "Ready according to reported gates", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/readiness"}}}},
+          "503": {"description": "Not ready; no payment implied", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/readiness"}, "example": {"schema": "mee-evidence-readiness/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "ready": false, "storage_ready": true, "configuration_ready": false, "integration_ready": true, "payment_ready": false, "blockers": ["PAY_TO_MISSING", "FINALITY_RULE_UNVERIFIED"]}}}}
+        }
+      }
+    },
+    "/v1/capabilities": {
+      "get": {
+        "operationId": "getCapabilities", "security": [],
+        "description": "Public product capabilities and explicit payment readiness blockers. No bearer capability is returned.",
+        "responses": {
+          "200": {"description": "Public capabilities", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/capabilities"}, "example": {"schema": "mee-evidence-capabilities/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "instrument_id": "hyperliquid:BTC:perpetual", "instrument_label": "Hyperliquid BTC linear perpetual", "network": "eip155:31611", "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503", "decimals": 18, "price_musd": "0.01", "amount_atomic": "10000000000000000", "source_mode": "live-public", "limitations": ["Payment receiver and finality policy are unresolved."], "payment_ready": false, "blockers": ["PAY_TO_MISSING", "FINALITY_RULE_UNVERIFIED"]}}}},
+          "503": {"description": "Capability service unavailable", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}}
+        }
+      }
+    },
+    "/v1/report-quotes": {
+      "post": {
+        "operationId": "createReportQuote", "security": [{"CapabilityBearer": []}],
+        "description": "Canonicalize exactly the four submitted fields. Price, source, receiver, access scope and report identity are server controlled. Never issue a chargeable quote until live source and immutable artifact readback have been verified.",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "description": "Access-scope-local key; 1–128 printable ASCII characters. Same canonical body replays one logical request; different body returns 409 without new work.", "schema": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]+(?![\\s\\S])"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "quote-request.schema.json"}, "example": {"instrument_id": "hyperliquid:BTC:perpetual", "side": "BUY", "quantity_base": "0.15", "expected_payer": "0xabababababababababababababababababababab"}}}, "description": "Maximum JSON body 16 KiB; F4 enforces decoded size and canonicalization before side effects."},
+        "responses": {
+          "201": {"description": "Verified artifact and chargeable quote ready; Location identifies the actual quote", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "Location": {"required": true, "schema": {"type": "string", "pattern": "^/v1/report-quotes/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![\\s\\S])"}, "x-liqvera-location-template": "/v1/report-quotes/{quote_id}"}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/quote"}}}},
+          "202": {"description": "Build PREPARING; Location identifies the report request, with no quote terms", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "Location": {"required": true, "schema": {"type": "string", "pattern": "^/v1/report-requests/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![\\s\\S])"}, "x-liqvera-location-template": "/v1/report-requests/{report_request_id}"}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/request_status"}, "example": {"schema": "mee-evidence-request-status/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "report_request_id": "12345678-89ab-4def-8abc-0123456789ab", "status_location": "/v1/report-requests/12345678-89ab-4def-8abc-0123456789ab", "state": "PREPARING"}}}},
+          "401": {"description": "Bearer missing or malformed", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}, "example": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "UNAUTHORIZED", "message": "Authorization required."}}}},
+          "409": {"description": "Idempotency key reused with a different canonical body; no new build or settlement", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "422": {"description": "Invalid request or rejected public dataset; no quote", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "429": {"description": "Rate limited; no build", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "Retry-After": {"required": true, "schema": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(?![\\s\\S])"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "503": {"description": "Source, storage or payment readiness unavailable; no sale", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}}
+        }
+      }
+    },
+    "/v1/report-requests/{report_request_id}": {
+      "get": {
+        "operationId": "getReportRequest", "security": [{"CapabilityBearer": []}],
+        "description": "PREPARING has no quote identifier, terms or paid fields. Terminal state resolves the original request. Sibling scopes and missing IDs share a 404 envelope.",
+        "parameters": [{"name": "report_request_id", "in": "path", "required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}],
+        "responses": {
+          "200": {"description": "Terminal request status", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/request_status"}}}},
+          "202": {"description": "Still PREPARING", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "Location": {"required": true, "schema": {"type": "string", "pattern": "^/v1/report-requests/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![\\s\\S])"}, "x-liqvera-location-template": "/v1/report-requests/{report_request_id}"}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/request_status"}}}},
+          "401": {"description": "Bearer missing or malformed", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "404": {"description": "Absent, guessed, public-tx-derived or another scope's resource; indistinguishable", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}, "examples": {"missing": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "other_scope": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "guessed_id": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "public_tx_hash": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}}}}},
+          "429": {"description": "Rate limited", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "Retry-After": {"required": true, "schema": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(?![\\s\\S])"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "503": {"description": "Status service unavailable", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}}
+        }
+      }
+    },
+    "/v1/report-quotes/{quote_id}": {
+      "get": {
+        "operationId": "getReportQuote", "security": [{"CapabilityBearer": []}],
+        "description": "Read one scope-bound quote. Payment uncertainty or manual review may return 202; no second settlement is initiated.",
+        "parameters": [{"name": "quote_id", "in": "path", "required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}],
+        "responses": {
+          "200": {"description": "Quote state and immutable terms", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/quote"}}}},
+          "202": {"description": "Pending, uncertain or under manual review; no new payment", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/quote"}}}},
+          "401": {"description": "Bearer missing or malformed", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "404": {"description": "Absent, guessed, public-tx-derived or another scope's resource; indistinguishable", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}, "examples": {"missing": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "other_scope": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "guessed_id": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "public_tx_hash": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}}}}},
+          "410": {"description": "Quote expired or beyond retention", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "429": {"description": "Rate limited", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "Retry-After": {"required": true, "schema": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(?![\\s\\S])"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "503": {"description": "Quote service unavailable", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}}
+        }
+      }
+    },
+    "/v1/reports/{report_id}": {
+      "get": {
+        "operationId": "getReport", "security": [{"CapabilityBearer": []}],
+        "description": "Unpaid access yields 402. Only this route may receive PAYMENT-SIGNATURE and start one durable settlement. Paid delivery requires current confirmed receipt, finality, matching entitlement and intact artifact; uncertainty yields 202 without body.",
+        "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, {"name": "PAYMENT-SIGNATURE", "in": "header", "required": false, "description": "Opaque SDK-produced x402 v2 authorization. F5 checks decoded payload at most 16 KiB and scheme-specific identity, replay domain and quote binding. Never log or reflect this header.", "schema": {"type": "string", "minLength": 1}, "x-liqvera-decoded-max-bytes": 16384}],
+        "responses": {
+          "200": {"description": "Entitled immutable report and final receipt", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "PAYMENT-RESPONSE": {"required": true, "description": "Opaque base64 SDK receipt, emitted only after verified finality; never logged", "schema": {"type": "string", "minLength": 1}}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/paid_report"}}}},
+          "202": {"description": "Checking an already submitted payment or recovering delivery; no paid fields and no resubmission", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}, "example": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "PAYMENT_UNCERTAIN", "message": "Checking the payment already submitted."}}}},
+          "401": {"description": "Bearer missing or malformed", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "402": {"description": "Payment required; SDK-produced requirements; no paid report fields", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "PAYMENT-REQUIRED": {"required": true, "description": "Opaque base64 SDK x402 v2 requirements; F5 validates actual decoded payload", "schema": {"type": "string", "minLength": 1}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}, "example": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "PAYMENT_REQUIRED", "message": "Payment required for this report."}}}},
+          "404": {"description": "Absent, guessed, public-tx-derived or another scope's resource; indistinguishable", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}, "examples": {"missing": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "other_scope": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "guessed_id": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "public_tx_hash": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}}}}},
+          "409": {"description": "Invalid payment state or rejected authorization; no body", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "410": {"description": "Expired sale or retention; submitted settlement remains in recovery, not 410", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "429": {"description": "Rate limited", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "Retry-After": {"required": true, "schema": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(?![\\s\\S])"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "503": {"description": "Payment unavailable or artifact integrity failure; no paid body", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}}
+        }
+      }
+    },
+    "/v1/reports/{report_id}/evidence": {
+      "get": {
+        "operationId": "getEvidence", "security": [{"CapabilityBearer": []}],
+        "description": "Existing entitlement only. This route never accepts a payment signature or starts settlement. The immutable ZIP is raw bytes up to 10 MiB; request correlation is only in X-Request-ID.",
+        "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}],
+        "responses": {
+          "200": {"description": "Raw immutable evidence bundle after current finality and integrity checks", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/zip": {}}},
+          "401": {"description": "Bearer missing or malformed", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "402": {"description": "No entitlement; use the report route for payment. This route starts no settlement", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "PAYMENT-REQUIRED": {"required": true, "description": "Opaque base64 SDK requirements for the report route; no settlement here", "schema": {"type": "string", "minLength": 1}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}, "example": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "PAYMENT_REQUIRED", "message": "Pay through the report route before downloading evidence."}}}},
+          "404": {"description": "Absent, guessed, public-tx-derived or another scope's resource; indistinguishable", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}, "examples": {"missing": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "other_scope": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "guessed_id": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}, "public_tx_hash": {"value": {"schema": "mee-evidence-error/v1", "request_id": "01234567-89ab-4def-8abc-0123456789ab", "code": "NOT_FOUND", "message": "Resource not found."}}}}}},
+          "410": {"description": "Retention expired", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "429": {"description": "Rate limited", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "Retry-After": {"required": true, "schema": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(?![\\s\\S])"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}},
+          "503": {"description": "Artifact unavailable or integrity failure", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}}, "content": {"application/json": {"schema": {"$ref": "error.schema.json"}}}}
+        }
+      }
+    }
+  }
+}

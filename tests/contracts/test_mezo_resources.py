@@ -2,10 +2,8 @@
 
 from copy import deepcopy
 
-import pytest
-
 import mezo_evidence_support as c
-
+import pytest
 
 ID = "123e4567-e89b-42d3-a456-426614174000"
 OTHER_ID = "123e4567-e89b-42d3-a456-426614174001"
@@ -233,6 +231,16 @@ def test_report_is_closed_and_does_not_hash_itself():
         with pytest.raises(c.ContractError):
             c.validate(c.load("report.schema.json"), {**REPORT, key: "private"},
                        document="report.schema.json")
+
+
+def test_evidence_reference_requires_https_even_when_format_is_annotation():
+    reference = c.load("report.schema.json")["$defs"]["evidence"]["properties"]["reference"]
+    without_format = {key: value for key, value in reference.items() if key != "format"}
+    c.validate(without_format, "https://example.invalid/metadata",
+               document="report.schema.json")
+    with pytest.raises(c.ContractError):
+        c.validate(without_format, "http://example.invalid/metadata",
+                   document="report.schema.json")
 
 
 @pytest.mark.parametrize("path", ["/absolute", "../escape", "a/../b", "a/./b",

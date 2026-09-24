@@ -25,7 +25,7 @@
       "type": "object", "additionalProperties": false,
       "required": ["reference", "sha256"],
       "properties": {
-        "reference": {"type": "string", "format": "uri"},
+        "reference": {"type": "string", "format": "uri", "pattern": "^https://.+(?![\\s\\S])"},
         "sha256": {"$ref": "primitives.schema.json#/$defs/sha256"}
       }
     },

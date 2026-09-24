@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 complete; F3 fixture MVP implementation next). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24 (F2 complete; F3 fixture MVP implemented). Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f3-report` (stacked on verified F2).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -14,11 +14,10 @@ F2's static contract phase is complete; F3–F7 remain open. The accepted
 ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
 
-The [F3 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f3-evidence-report.md)
-now defines a three-task fixture-only MVP. The next implementation reads an
-existing frozen Stage A package, reuses the exact BUY/SELL sweep, writes a
-schema-shaped `SIMULATED` `report.json`, and creates a simple deterministic ZIP
-containing that report plus the unchanged `sealed-input/` tree. The ZIP is a
+The fixture-only F3 MVP is implemented. `make mvp` creates a frozen Stage A
+fixture package, reuses the exact BUY/SELL sweep, writes a schema-shaped
+`SIMULATED` `report.json`, and creates a deterministic `ZIP_STORED` archive
+containing the report plus the unchanged `sealed-input/` tree. The ZIP is a
 prototype: unverified, non-chargeable, unsuitable for untrusted input, and not
 canonical F3 completion.
 
@@ -26,15 +25,25 @@ The MVP explicitly excludes live capture, hardened offline verification,
 production runtime schema validation, identity approval, A08/A09, runtime
 results, and acceptance claims. Payments, gateway, database, UI,
 factory/architecture-graph integration, deployment, and release are deferred.
-No F3 product code is implemented by this planning commit. F2 closure, all 156
-`NOT_RUN` vector statuses, `PAY_TO_MISSING`, `FINALITY_RULE_UNVERIFIED`, funded
-buyer/signature/receipt and SDK identity gaps, A13–A14 `BLOCKED_EXTERNAL`, and
-inherited Trivy findings remain unchanged.
+F2 closure, all 156 `NOT_RUN` vector statuses, `PAY_TO_MISSING`,
+`FINALITY_RULE_UNVERIFIED`, funded buyer/signature/receipt and SDK identity
+gaps, A13–A14 `BLOCKED_EXTERNAL`, and inherited Trivy findings remain unchanged.
 
-This documentation-only pivot changes implementation scope, not evidence. It
-ran no product suite, graph/factory validation, Grok receipt, live request,
-payment, deployment, release, or push. The only checks for this planning commit
-are the requested diff check and repository-status inspection.
+The three parallel implementation slices reported 6 report-kernel tests, 6
+CLI/bundle tests, and 3 demo-contract tests passing. Integration then ran only
+`make mvp`, as requested: it exited 0, emitted a BUY `0.15` report with VWAP
+`1.1`, notional `0.165`, `snapshot_status=SIMULATED`, reason
+`SIMULATED_SOURCE`, and `execution_authority=NONE`, plus an eight-member ZIP.
+The smoke report SHA-256 was
+`998ada1362a523f8abfbbddd26bd43f04d08a5d0388c35837fc084c215dcf0f3` and the
+ZIP SHA-256 was
+`e320026264d42046b39650a7e1376430891ece631dd722a6f160603db449fda1`.
+
+Per the owner's fast-MVP direction, no full product suite, graph/factory
+validation, Grok receipt, independent hardening review, live request, payment,
+deployment, release, or push ran. The new package is intentionally not yet
+bound into the architecture graph or Stage A wheel factory; that work is the
+next planned factory update rather than evidence for this prototype.
 
 The owner approved the repaired [F2 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md)
 after its independent re-review at `50f16225c23f5fde046b483321f86bb7d6bbf4f1`
@@ -68,8 +77,9 @@ mathematically integral JSON number validation, and coherent readiness gates.
 The approved plan now reflects those corrections; simulated offline reports
 remain valid and no runtime layer or SDK identity rule was introduced.
 
-F2 is **static-contract complete**. Next: the fixture-only F3 MVP report CLI
-and deterministic prototype bundle described above.
+F2 is **static-contract complete**. F3 now has the fixture-only MVP described
+above; next is the separately requested factory update, followed by hardening
+and defect cleanup without treating this prototype as canonical F3 acceptance.
 The [final F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md)
 binds implementation `3729bdc131ca4ac971ab04e735da2e113d68ad71`, tree
 `155d7fb44f5953f814f5463c381dde14932a8ab3`, and fingerprint

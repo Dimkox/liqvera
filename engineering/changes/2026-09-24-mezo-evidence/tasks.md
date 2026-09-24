@@ -75,16 +75,19 @@ or factory receipt.
 ## F3 — evidence report
 
 - [x] Narrow the [F3 implementation plan](../../../docs/superpowers/plans/2026-09-24-liqvera-f3-evidence-report.md) to the user-approved fixture MVP.
-- [ ] Implement the exact BUY/SELL `SIMULATED` report kernel over an existing frozen fixture package.
-- [ ] Add the fixture-only CLI and deterministic prototype ZIP containing `report.json` plus `sealed-input/`.
-- [ ] Run focused/Stage A regressions and record the prototype boundary.
+- [x] Implement the exact BUY/SELL `SIMULATED` report kernel over an existing frozen fixture package.
+- [x] Add the fixture-only CLI and deterministic prototype ZIP containing `report.json` plus `sealed-input/`.
+- [x] Add `make mvp` and run one local end-to-end fixture smoke test.
+- [ ] Harden and verify canonical F3 after the planned factory update.
 
-F3 status: **MVP implementation next**. The three-task TDD plan produces only a
-fixture-derived, unverified, non-chargeable prototype. Hardened verification,
-runtime schema validation, live capture, identity approval, A08/A09, runtime
-results, and acceptance claims are deferred. Payments, gateway, database, UI,
-factory/graph integration, deployment, and release are also deferred. F2
-closure, all 156 `NOT_RUN` vector statuses, and existing blockers are unchanged.
+F3 status: **fixture MVP implemented; canonical F3 remains open**. `make mvp`
+produced a schema-shaped `SIMULATED` report and an eight-member deterministic
+prototype ZIP. This is unverified, non-chargeable output with execution
+authority `NONE`. Hardened verification, runtime schema validation, live
+capture, identity approval, A08/A09, runtime results, and acceptance claims are
+deferred. Payments, gateway, database, UI, factory/graph integration,
+deployment, and release are also deferred. F2 closure, all 156 `NOT_RUN`
+vector statuses, and existing blockers are unchanged.
 
 ## F4 — API and ledger
 

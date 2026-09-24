@@ -17,5 +17,6 @@ __pycache__/
 *.py[cod]
 dist/
 .stage-a/
+.mvp/
 *.egg-info/
 .DS_Store

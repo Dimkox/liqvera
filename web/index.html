@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="Liqvera local fixture report demo. Simulated read-only BTC perpetual analytics with downloadable evidence.">
+    <title>Liqvera — Local report studio</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="safety-bar" aria-label="Permanent demo status">
+      <div class="shell safety-bar-inner">
+        <span class="status-pill">SIMULATED</span>
+        <span class="status-pill">UNVERIFIED</span>
+        <span class="status-pill">NO TRANSFER</span>
+        <span class="safety-detail">Fixture input · Read-only analytics · No wallet or trading connection</span>
+      </div>
+    </div>
+
+    <div class="page-glow" aria-hidden="true"></div>
+    <header class="shell site-header">
+      <a class="brand" href="/" aria-label="Liqvera home"><span class="brand-mark" aria-hidden="true">L<span class="brand-spark">✳</span></span><span>Liqvera</span></a>
+      <span class="header-note"><span class="live-dot" aria-hidden="true"></span> LOCAL DEMO / 001</span>
+    </header>
+
+    <main class="shell">
+      <section class="intro" aria-labelledby="page-title">
+        <div class="eyebrow"><span class="eyebrow-line"></span> MARKET REPORT STUDIO</div>
+        <h1 id="page-title">See the calculation.<br><em>Keep the evidence.</em></h1>
+        <p class="intro-copy">Explore a hypothetical BTC perpetual order-book sweep from a fixed fixture. Review the preview, explicitly unlock local access, then inspect the report and its evidence bundle.</p>
+        <div class="intro-meta"><span>ONE INSTRUMENT</span><span class="meta-separator" aria-hidden="true"></span><span>EXACT-DECIMAL INPUT</span><span class="meta-separator" aria-hidden="true"></span><span>NO EXECUTION AUTHORITY</span></div>
+      </section>
+
+      <div class="workspace">
+        <section class="panel request-panel" aria-labelledby="request-title">
+          <div class="panel-heading"><div><span class="step-index">01 / REQUEST</span><h2 id="request-title">Set the scenario</h2></div><span class="panel-symbol" aria-hidden="true">↗</span></div>
+          <p class="panel-description">A fixed historical fixture is swept at the quantity you enter. Nothing is sent to an exchange.</p>
+          <form id="request-form" novalidate>
+            <div class="field"><span class="field-label">Market</span><div class="market-field"><div><strong>BTC perpetual</strong><small id="market-id">hyperliquid:BTC:perpetual</small></div><span class="market-badge">FIXTURE</span></div></div>
+            <fieldset class="field side-fieldset"><legend class="field-label">Side</legend><div class="segmented"><label><input type="radio" name="side" value="BUY" checked><span>Buy <small>Take asks</small></span></label><label><input type="radio" name="side" value="SELL"><span>Sell <small>Take bids</small></span></label></div></fieldset>
+            <div class="field"><label class="field-label" for="quantity">Quantity <span class="field-hint">BTC</span></label><input id="quantity" name="quantity" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0.15" required aria-describedby="quantity-help"><small class="field-help" id="quantity-help">Enter an exact positive decimal. Available fixture depth is limited.</small></div>
+            <div class="field"><label class="field-label" for="payer">Illustrative expected payer <span class="field-hint">DISPLAY ONLY</span></label><input id="payer" name="payer" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="0x… (40 hexadecimal characters)" required aria-describedby="payer-help"><small class="field-help" id="payer-help">No wallet is connected, authenticated, charged, or asked to sign.</small></div>
+            <button class="primary-button" id="create-button" type="submit"><span>Build simulated preview</span><span aria-hidden="true">↗</span></button>
+          </form>
+          <div class="price-note"><span>ACCESS PRICE</span><strong id="price-display">Fixed local demo · no charge</strong></div>
+        </section>
+
+        <section class="panel result-panel" aria-labelledby="result-title">
+          <div class="panel-heading"><div><span class="step-index">02 / REVIEW</span><h2 id="result-title">Your report</h2></div><span class="panel-symbol" aria-hidden="true">◌</span></div>
+          <div id="status-message" class="notice" role="status" aria-live="polite">Preparing the local demo…</div>
+          <button id="retry-recovery" class="download-button" type="button" hidden>Retry run recovery <span aria-hidden="true">↻</span></button>
+          <div id="empty-state" class="empty-state" hidden><div class="empty-orbit" aria-hidden="true"><span>◈</span></div><h3>Ready when you are</h3><p>Build a preview to see the fixture snapshot and the calculation’s boundaries.</p></div>
+          <div id="run-content" hidden>
+            <div class="run-meta"><span>RUN ID</span><code id="run-id">—</code><span id="quote-state" class="quote-tag">OFFERED</span></div>
+            <div class="snapshot-card"><span class="micro-label">FIXTURE SNAPSHOT</span><strong id="snapshot-at">—</strong><p>A retained historical input. This timestamp is not a live freshness claim.</p></div>
+            <div class="preview-grid"><div><span class="micro-label">SIDE</span><strong id="preview-side">—</strong></div><div><span class="micro-label">QUANTITY</span><strong id="preview-quantity">—</strong></div><div><span class="micro-label">INSTRUMENT</span><strong id="preview-instrument">—</strong></div><div><span class="micro-label">DEMO ACCESS</span><strong id="preview-price">—</strong></div></div>
+            <div id="confirm-section" class="confirm-card" hidden><span class="step-index">03 / LOCAL ACCESS</span><h3>Confirm simulated access</h3><p>This records a local demo unlock only. <strong>NO TRANSFER</strong> occurs. No payment, wallet signature, receipt, or chain transaction is created.</p><button class="confirm-button" id="confirm-button" type="button">Confirm simulated access <span aria-hidden="true">↗</span></button><small id="expires-at"></small></div>
+            <div id="expired-section" class="expired-card" hidden><strong>Preview expired</strong><p>Build a new simulated preview to continue. The prior run remains available for reference in this tab.</p></div>
+            <div id="report-section" hidden><div class="report-heading"><div><span class="step-index">04 / REPORT</span><h3>Snapshot calculation</h3></div><span class="report-badge">ACCESS UNLOCKED · SIMULATED</span></div><div class="metric-grid"><div class="metric metric-featured"><span>VWAP <small>USD / BTC</small></span><strong id="metric-vwap">—</strong></div><div class="metric"><span>WORST PRICE</span><strong id="metric-worst">—</strong></div><div class="metric"><span>NOTIONAL <small>USD</small></span><strong id="metric-notional">—</strong></div><div class="metric"><span>LEVELS CONSUMED</span><strong id="metric-levels">—</strong></div></div><button id="retry-report" class="download-button" type="button" hidden>Retry loading report <span aria-hidden="true">↻</span></button><div class="downloads" id="downloads" hidden><button type="button" id="download-json" class="download-button">Download report JSON <span aria-hidden="true">↓</span></button><button type="button" id="download-zip" class="download-button">Download evidence ZIP <span aria-hidden="true">↓</span></button></div><div class="digests"><div><span>REPORT SHA-256</span><code id="report-digest">—</code></div><div><span>ZIP SHA-256</span><code id="bundle-digest">—</code></div></div></div>
+          </div>
+        </section>
+      </div>
+
+      <section class="boundaries" aria-labelledby="boundaries-title"><div class="boundaries-heading"><span class="step-index">READ BEFORE USE</span><h2 id="boundaries-title">What this report can tell you</h2></div><div class="boundary-grid"><div><span class="boundary-icon" aria-hidden="true">01</span><h3>One fixed snapshot</h3><p>The demo uses sealed fixture data. It cannot establish a current market price or live data provenance.</p></div><div><span class="boundary-icon" aria-hidden="true">02</span><h3>A hypothetical sweep</h3><p>VWAP and depth describe this snapshot only. Fees, funding, execution, and net P&amp;L are outside the calculation.</p></div><div><span class="boundary-icon" aria-hidden="true">03</span><h3>Evidence for inspection</h3><p>The JSON and ZIP carry local prototype artifacts. This unverified demo is not a hardened offline verifier.</p></div></div><div id="api-limitations" class="api-limitations" hidden><span class="micro-label">SOURCE LIMITATIONS</span><ul id="limitations-list"></ul></div></section>
+    </main>
+
+    <footer class="shell site-footer"><span>Liqvera <span class="footer-dot">✳</span> Market reports you can verify.</span><span>LOCAL PROTOTYPE · SIMULATED · UNVERIFIED · NO TRANSFER</span></footer>
+  </body>
+</html>

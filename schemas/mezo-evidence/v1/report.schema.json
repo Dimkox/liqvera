@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/report.schema.json",
+  "title": "Immutable Liqvera snapshot report body",
+  "description": "The canonical report body has no self-digest. Shape validity alone does not authorize a chargeable quote; F3 must verify provenance, arithmetic, timing, and status.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "report_id", "identity", "request", "source", "calculation", "quality", "reproducibility", "boundaries"],
+  "properties": {
+    "schema": {"const": "mee-evidence-report/v1"},
+    "report_id": {"$ref": "primitives.schema.json#/$defs/id"},
+    "identity": {"$ref": "#/$defs/identity"},
+    "request": {"$ref": "#/$defs/request"},
+    "source": {"$ref": "#/$defs/source"},
+    "calculation": {"$ref": "#/$defs/calculation"},
+    "quality": {"$ref": "#/$defs/quality"},
+    "reproducibility": {"$ref": "#/$defs/reproducibility"},
+    "boundaries": {"$ref": "#/$defs/boundaries"}
+  },
+  "$defs": {
+    "snapshot_status": {"type": "string", "enum": ["VALID_FOR_SNAPSHOT_CALCULATION", "REJECTED", "SIMULATED"]},
+    "side": {"type": "string", "enum": ["BUY", "SELL"]},
+    "safe_path": {"type": "string", "minLength": 1, "pattern": "^([A-Za-z0-9_-][A-Za-z0-9_.-]*|[.]+[A-Za-z0-9_-][A-Za-z0-9_.-]*|[.]{3,})(/([A-Za-z0-9_-][A-Za-z0-9_.-]*|[.]+[A-Za-z0-9_-][A-Za-z0-9_.-]*|[.]{3,}))*(?![\\s\\S])"},
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["reference", "sha256"],
+      "properties": {
+        "reference": {"type": "string", "format": "uri", "pattern": "^https://.+(?![\\s\\S])"},
+        "sha256": {"$ref": "primitives.schema.json#/$defs/sha256"}
+      }
+    },
+    "identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["venue", "instrument_id", "product_kind", "payoff_kind", "base_asset", "quote_asset", "settlement_asset", "quantity_unit", "displayed_size_unit", "contract_multiplier", "mapping_version", "evidence"],
+      "properties": {
+        "venue": {"const": "hyperliquid"},
+        "instrument_id": {"$ref": "quote-request.schema.json#/properties/instrument_id"},
+        "product_kind": {"const": "perpetual"},
+        "payoff_kind": {"const": "linear"},
+        "base_asset": {"const": "BTC"},
+        "quote_asset": {"const": "USD"},
+        "settlement_asset": {"type": "string", "minLength": 1},
+        "quantity_unit": {"const": "BTC"},
+        "displayed_size_unit": {"const": "coin"},
+        "contract_multiplier": {"const": "1"},
+        "mapping_version": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"$ref": "#/$defs/evidence"}}
+      }
+    },
+    "request": {
+      "type": "object", "additionalProperties": false,
+      "required": ["side", "quantity_base"],
+      "properties": {
+        "side": {"$ref": "quote-request.schema.json#/properties/side"},
+        "quantity_base": {"$ref": "primitives.schema.json#/$defs/quantity"}
+      }
+    },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_mode", "started_at", "observed_at", "source_at", "created_at", "build_age_ms", "payload_sha256", "package_sha256", "available_bid_levels", "available_ask_levels"],
+      "properties": {
+        "source_mode": {"type": "string", "enum": ["live-public", "fixture"]},
+        "started_at": {"$ref": "primitives.schema.json#/$defs/timestamp"},
+        "observed_at": {"$ref": "primitives.schema.json#/$defs/timestamp"},
+        "source_at": {"$ref": "primitives.schema.json#/$defs/timestamp"},
+        "created_at": {"$ref": "primitives.schema.json#/$defs/timestamp"},
+        "build_age_ms": {"type": "integer", "minimum": -1000, "maximum": 5000},
+        "payload_sha256": {"$ref": "primitives.schema.json#/$defs/sha256"},
+        "package_sha256": {"$ref": "primitives.schema.json#/$defs/sha256"},
+        "available_bid_levels": {"type": "integer", "minimum": 1, "maximum": 20},
+        "available_ask_levels": {"type": "integer", "minimum": 1, "maximum": 20}
+      }
+    },
+    "display": {
+      "type": "object", "additionalProperties": false,
+      "required": ["notional_quote", "vwap", "worst_price", "price_impact_bps"],
+      "properties": {
+        "notional_quote": {"$ref": "primitives.schema.json#/$defs/display_decimal"},
+        "vwap": {"$ref": "primitives.schema.json#/$defs/display_decimal"},
+        "worst_price": {"$ref": "primitives.schema.json#/$defs/display_decimal"},
+        "price_impact_bps": {"$ref": "primitives.schema.json#/$defs/display_decimal"}
+      }
+    },
+    "calculation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["requested_quantity", "filled_quantity", "notional_quote", "vwap", "worst_price", "price_impact_bps", "consumed_levels", "display", "display_precision", "display_rounding"],
+      "properties": {
+        "requested_quantity": {"$ref": "primitives.schema.json#/$defs/quantity"},
+        "filled_quantity": {"$ref": "primitives.schema.json#/$defs/quantity"},
+        "notional_quote": {"$ref": "primitives.schema.json#/$defs/rational"},
+        "vwap": {"$ref": "primitives.schema.json#/$defs/rational"},
+        "worst_price": {"$ref": "primitives.schema.json#/$defs/rational"},
+        "price_impact_bps": {"$ref": "primitives.schema.json#/$defs/rational"},
+        "consumed_levels": {"type": "integer", "minimum": 1, "maximum": 20},
+        "display": {"$ref": "#/$defs/display"},
+        "display_precision": {"const": 28},
+        "display_rounding": {"const": "ROUND_HALF_EVEN"}
+      }
+    },
+    "quality_check": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "result"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "result": {"type": "string", "enum": ["PASS", "REJECT", "UNCERTAIN"]}
+      }
+    },
+    "stage_a": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "package_schema", "capture_run_id", "decision", "reasons"],
+      "properties": {
+        "schema": {"const": "mee-stage-a-decision/v1"},
+        "package_schema": {"const": "mee-readonly-frozen-package/v1"},
+        "capture_run_id": {"oneOf": [{"$ref": "primitives.schema.json#/$defs/id"}, {"type": "null"}]},
+        "decision": {"type": "string", "enum": ["INVALID_DATASET", "INSUFFICIENT_EVIDENCE", "STOP", "EXTEND_LONGER_SHADOW"]},
+        "reasons": {"type": "array", "minItems": 1, "maxItems": 20, "uniqueItems": true, "items": {"type": "string", "enum": ["INVALID_MEMBER_SET_MISMATCH", "INVALID_MEMBER_HASH_MISMATCH", "INVALID_MANIFEST", "INVALID_RECORD", "INVALID_SYMLINK", "INVALID_UNSUPPORTED_VERSION", "INVALID_PATH", "INSUFFICIENT_ACQUISITION_WINDOW", "INSUFFICIENT_COMPLETE_UTC_DAYS", "INSUFFICIENT_STRICT_HEALTHY_MINUTES", "INSUFFICIENT_INDEPENDENT_EPISODES", "STOP_TOTAL_NET_NON_POSITIVE", "STOP_MEDIAN_NET_NON_POSITIVE", "STOP_USD_1000_NET_NON_POSITIVE", "STOP_USD_5000_NET_NEGATIVE", "STOP_DELAY_300MS_NOT_SURVIVED", "STOP_DELAY_500MS_NOT_SURVIVED", "STOP_FEE_CASE_NOT_SURVIVED", "STOP_CONCENTRATION_NOT_BELOW_25_PERCENT", "EXTEND_ALL_V2_GATES_PASS"]}}
+      }
+    },
+    "quality": {
+      "type": "object", "additionalProperties": false,
+      "required": ["snapshot_status", "reason_codes", "checks", "limitations"],
+      "properties": {
+        "snapshot_status": {"$ref": "#/$defs/snapshot_status"},
+        "reason_codes": {"type": "array", "maxItems": 32, "uniqueItems": true, "items": {"$ref": "reasons.schema.json"}},
+        "checks": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"$ref": "#/$defs/quality_check"}},
+        "limitations": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"type": "string", "minLength": 1}},
+        "stage_a": {"$ref": "#/$defs/stage_a"}
+      }
+    },
+    "file_digest": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"$ref": "#/$defs/safe_path"},
+        "sha256": {"$ref": "primitives.schema.json#/$defs/sha256"}
+      }
+    },
+    "package_version": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "reproducibility": {
+      "type": "object", "additionalProperties": false,
+      "required": ["engine_commit", "package_versions", "lockfile_digests", "calculation_version", "policy_version", "serialization_version", "input_files"],
+      "properties": {
+        "engine_commit": {"type": "string", "pattern": "^[0-9a-f]{40}(?![\\s\\S])"},
+        "package_versions": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"$ref": "#/$defs/package_version"}},
+        "lockfile_digests": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"$ref": "#/$defs/file_digest"}},
+        "calculation_version": {"const": "snapshot-sweep/v1"},
+        "policy_version": {"const": "snapshot-policy/v1"},
+        "serialization_version": {"const": "canonical-json/v1"},
+        "input_files": {"type": "array", "minItems": 1, "maxItems": 128, "items": {"$ref": "#/$defs/file_digest"}}
+      }
+    },
+    "boundaries": {
+      "type": "object", "additionalProperties": false,
+      "required": ["execution_authority", "fees_calculated", "funding_calculated", "net_pnl_calculated", "execution_promise", "calculation_label"],
+      "properties": {
+        "execution_authority": {"const": "NONE"},
+        "fees_calculated": {"const": false},
+        "funding_calculated": {"const": false},
+        "net_pnl_calculated": {"const": false},
+        "execution_promise": {"const": false},
+        "calculation_label": {"const": "hypothetical snapshot sweep"}
+      }
+    }
+  }
+}

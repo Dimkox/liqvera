@@ -1,0 +1,78 @@
+{
+  "schema": "mee-evidence-states/v1",
+  "machines": [
+    {
+      "name": "report_request",
+      "initial": "PREPARING",
+      "states": ["PREPARING", "READY", "REJECTED", "BUILD_FAILED"],
+      "transitions": [
+        {"from": "PREPARING", "event": "artifact_verified", "to": "READY", "guards": ["semantic_report_valid", "live_source", "immutable_publish_complete", "report_and_bundle_readback_verified"], "effects": ["issue_one_quote", "bind_scope_and_digest"]},
+        {"from": "PREPARING", "event": "data_rejected", "to": "REJECTED", "guards": ["specific_public_reason"], "effects": ["no_quote"]},
+        {"from": "PREPARING", "event": "build_failed", "to": "BUILD_FAILED", "guards": ["bounded_failure"], "effects": ["no_quote"]}
+      ]
+    },
+    {
+      "name": "quote",
+      "initial": "READY",
+      "states": ["READY", "PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "PAID", "EXPIRED", "MANUAL_REVIEW"],
+      "transitions": [
+        {"from": "READY", "event": "authorization_accepted", "to": "PAYMENT_PENDING", "guards": ["not_expired", "scope_matches", "payer_matches", "terms_match", "artifact_readback_verified", "payment_bindings_verified", "no_active_attempt", "authorization_unique"], "effects": ["persist_attempt_before_submit"]},
+        {"from": "READY", "event": "deadline_passed", "to": "EXPIRED", "guards": ["no_active_attempt"], "effects": ["block_new_payment"]},
+        {"from": "PAYMENT_PENDING", "event": "outcome_unknown", "to": "PAYMENT_UNCERTAIN", "guards": ["attempt_may_have_submitted"], "effects": ["retain_artifacts", "prohibit_resubmit"]},
+        {"from": "PAYMENT_PENDING", "event": "payment_confirmed", "to": "PAID", "guards": ["final_receipt_bound_to_authorization", "atomic_entitlement_commit"], "effects": ["deliver_original_digest"]},
+        {"from": "PAYMENT_UNCERTAIN", "event": "reconciled_confirmation", "to": "PAID", "guards": ["final_receipt_bound_to_authorization", "atomic_entitlement_commit"], "effects": ["deliver_original_digest"]},
+        {"from": "PAYMENT_PENDING", "event": "definitive_pre_submit_rejection", "to": "READY", "guards": ["authoritative_no_broadcast_proof", "not_expired"], "effects": ["close_attempt"]},
+        {"from": "PAYMENT_PENDING", "event": "definitive_pre_submit_rejection_after_expiry", "to": "EXPIRED", "guards": ["authoritative_no_broadcast_proof", "quote_expired"], "effects": ["close_attempt"]},
+        {"from": "PAYMENT_PENDING", "event": "inconsistent_receipt", "to": "MANUAL_REVIEW", "guards": ["uncertainty_requires_review"], "effects": ["retain_artifacts", "prohibit_resubmit"]},
+        {"from": "PAYMENT_UNCERTAIN", "event": "reconciliation_exhausted", "to": "MANUAL_REVIEW", "guards": ["bounded_reconciliation_exhausted"], "effects": ["retain_artifacts", "prohibit_resubmit"]},
+        {"from": "PAID", "event": "chain_inconsistency", "to": "MANUAL_REVIEW", "guards": ["reorg_or_rpc_conflict"], "effects": ["retain_artifacts", "prohibit_resubmit", "withhold_unverified_delivery"]},
+        {"from": "MANUAL_REVIEW", "event": "authoritative_confirmation", "to": "PAID", "guards": ["final_receipt_bound_to_authorization", "atomic_entitlement_commit"], "effects": ["deliver_original_digest"]}
+      ]
+    },
+    {
+      "name": "payment_attempt",
+      "initial": "RECEIVED",
+      "states": ["RECEIVED", "VERIFIED", "SUBMITTING", "CONFIRMED", "REJECTED", "UNKNOWN", "MANUAL_REVIEW"],
+      "transitions": [
+        {"from": "RECEIVED", "event": "verification_succeeded", "to": "VERIFIED", "guards": ["payer_terms_deadline_nonce_valid", "payment_bindings_verified"], "effects": ["record_verification"]},
+        {"from": "RECEIVED", "event": "verification_rejected", "to": "REJECTED", "guards": ["no_submission"], "effects": ["withhold_entitlement"]},
+        {"from": "VERIFIED", "event": "submit_committed", "to": "SUBMITTING", "guards": ["attempt_durable", "quote_not_expired", "no_other_active_attempt"], "effects": ["one_settle_call_after_commit"]},
+        {"from": "VERIFIED", "event": "expired_before_submit", "to": "REJECTED", "guards": ["no_submission", "quote_expired"], "effects": ["withhold_entitlement"]},
+        {"from": "SUBMITTING", "event": "receipt_confirmed", "to": "CONFIRMED", "guards": ["final_receipt_bound_to_authorization"], "effects": ["atomic_entitlement_commit"]},
+        {"from": "SUBMITTING", "event": "timeout_or_crash", "to": "UNKNOWN", "guards": ["outcome_not_authoritative"], "effects": ["prohibit_resubmit"]},
+        {"from": "SUBMITTING", "event": "definitely_not_submitted", "to": "REJECTED", "guards": ["authoritative_no_broadcast_proof"], "effects": ["withhold_entitlement"]},
+        {"from": "UNKNOWN", "event": "reconciled_confirmation", "to": "CONFIRMED", "guards": ["final_receipt_bound_to_authorization"], "effects": ["atomic_entitlement_commit"]},
+        {"from": "UNKNOWN", "event": "unresolved", "to": "MANUAL_REVIEW", "guards": ["bounded_reconciliation_exhausted"], "effects": ["prohibit_resubmit"]},
+        {"from": "CONFIRMED", "event": "chain_inconsistency", "to": "MANUAL_REVIEW", "guards": ["reorg_or_rpc_conflict"], "effects": ["prohibit_resubmit"]},
+        {"from": "MANUAL_REVIEW", "event": "authoritative_confirmation", "to": "CONFIRMED", "guards": ["final_receipt_bound_to_authorization"], "effects": ["atomic_entitlement_commit"]}
+      ]
+    },
+    {
+      "name": "delivery",
+      "initial": "NOT_ATTEMPTED",
+      "states": ["NOT_ATTEMPTED", "ATTEMPTED"],
+      "transitions": [
+        {"from": "NOT_ATTEMPTED", "event": "delivery_started", "to": "ATTEMPTED", "guards": ["quote_is_paid", "attempt_is_confirmed", "current_finality_verified", "no_chain_inconsistency", "entitlement_matches_digest", "storage_integrity_verified"], "effects": ["no_settlement"]},
+        {"from": "ATTEMPTED", "event": "read_retried", "to": "ATTEMPTED", "guards": ["quote_is_paid", "attempt_is_confirmed", "current_finality_verified", "no_chain_inconsistency", "entitlement_matches_digest", "storage_integrity_verified"], "effects": ["no_settlement"]}
+      ]
+    }
+  ],
+  "bindings": {
+    "finality": {"status": "UNRESOLVED", "code": "FINALITY_RULE_UNVERIFIED", "owner": "F5", "required_before": "payment_bindings_verified"},
+    "authorization_identity": {"status": "UNRESOLVED", "code": "AUTHORIZATION_IDENTITY_UNVERIFIED", "owner": "F5", "required_before": "payment_bindings_verified", "requirements": ["canonical scheme-specific identity", "nonce semantics", "replay domain", "quote association", "chain correlation"]},
+    "expiry_policy": {"not_expired": "now < expires_at", "quote_not_expired": "now < expires_at", "quote_expired": "now >= expires_at", "submitted_confirmation_after_expiry": true},
+    "payment_ready": false
+  },
+  "uniqueness": [
+    {"entity": "report_request", "fields": ["access_scope", "idempotency_key"], "invariant": "one logical request per access scope and idempotency key"},
+    {"entity": "payment_attempt", "fields": ["authorization_identity"], "invariant": "one durable attempt per canonical scheme-specific authorization identity"},
+    {"entity": "chain_event", "fields": ["chain_id", "tx_hash", "log_index"], "invariant": "one applied event per canonical chain log"},
+    {"entity": "entitlement", "fields": ["quote_id", "report_id", "report_sha256"], "invariant": "one entitlement for the immutable report bound to the quote"},
+    {"entity": "active_attempt", "fields": ["quote_id"], "invariant": "at most one active or uncertain payment attempt per quote"}
+  ],
+  "invariants": [
+    {"name": "delivery_requires_current_confirmation", "owner": "F5", "expression": "For every report or bundle read, quote=PAID and attempt=CONFIRMED and current_finality_verified and not chain_inconsistency and entitlement_matches_digest and storage_integrity_verified; otherwise withhold both bodies without a new settlement."},
+    {"name": "retention_covers_authorization_validity", "owner": "F5", "expression": "Retain ledger, access-scope binding, and authorization dedup association for at least 30 days and until the selected authorization's validity horizon; if that horizon is unknown, retain them until resolved."},
+    {"name": "deletion_cannot_enable_replay", "owner": "F5", "expression": "After the ordinary retention floor or artifact cleanup, retain the effective authorization dedup association and scope linkage until reviewed evidence proves reuse impossible; deletion must never make a previously used authorization payable again."}
+  ]
+}

@@ -1,0 +1,1574 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/vectors.schema.json",
+  "description": "Closed F2 obligations. Embedded request/dataset/claim JSON is checked by the contract oracle. No vector is runtime acceptance evidence.",
+  "$defs": {
+    "assertions_F3": {
+      "type": "string",
+      "enum": [
+        "report_builder_matches_exact_sweep",
+        "fixture_is_not_live_sale",
+        "insufficient_depth_never_sells_partial",
+        "dataset_policy_rejects_invalid_evidence",
+        "live_outage_never_uses_fixture",
+        "report_provenance_required",
+        "canonical_report_bytes_reproduce"
+      ]
+    },
+    "assertions_F4": {
+      "type": "string",
+      "enum": [
+        "invalid_request_never_creates_quote",
+        "canonical_retries_one_quote",
+        "twenty_concurrent_retries_one_quote",
+        "idempotency_body_conflict",
+        "idempotency_scope_isolation",
+        "sibling_scope_never_reads_body",
+        "capability_required_for_access",
+        "unpaid_read_returns_sdk_402",
+        "missing_artifact_prevents_payment",
+        "paid_artifact_loss_requires_recovery_without_charge"
+      ]
+    },
+    "assertions_F5": {
+      "type": "string",
+      "enum": [
+        "atomic_amount_matches_all_layers",
+        "invalid_authorization_never_entitles",
+        "sdk_identity_deduplicates_reencoding",
+        "receipt_log_bound_to_authorization",
+        "verify_alone_never_delivers",
+        "unknown_never_resubmits",
+        "crash_recovery_never_double_charges",
+        "lost_response_reuses_entitlement",
+        "expiry_blocks_new_payment_only",
+        "late_confirmation_delivers_original",
+        "paid_repeat_read_never_settles",
+        "current_confirmation_required_for_delivery",
+        "retention_covers_authorization_validity",
+        "deletion_cannot_enable_replay"
+      ]
+    },
+    "dataset_input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested_instrument",
+        "returned_instrument",
+        "quantity_unit",
+        "multiplier",
+        "source_mode",
+        "age_ms",
+        "metadata_age_ms",
+        "metadata_now_ms",
+        "metadata_valid_from_ms",
+        "metadata_valid_until_ms",
+        "evidence_text",
+        "evidence_sha256",
+        "upstream_available",
+        "bids",
+        "asks",
+        "side",
+        "quantity_base"
+      ],
+      "properties": {
+        "requested_instrument": {
+          "type": "string",
+          "minLength": 1
+        },
+        "returned_instrument": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quantity_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "multiplier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_mode": {
+          "type": "string",
+          "enum": [
+            "fixture",
+            "live-public"
+          ]
+        },
+        "age_ms": {
+          "type": "integer"
+        },
+        "metadata_age_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "metadata_now_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "metadata_valid_from_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "metadata_valid_until_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidence_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_sha256": {
+          "oneOf": [
+            {
+              "$ref": "primitives.schema.json#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "upstream_available": {
+          "type": "boolean"
+        },
+        "bids": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 1,
+          "maxItems": 20
+        },
+        "asks": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 1,
+          "maxItems": 20
+        },
+        "side": {
+          "type": "string",
+          "enum": [
+            "BUY",
+            "SELL"
+          ]
+        },
+        "quantity_base": {
+          "$ref": "primitives.schema.json#/$defs/quantity"
+        }
+      }
+    },
+    "candidate_claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "network",
+        "asset",
+        "amount_atomic",
+        "pay_to",
+        "payer",
+        "signature_valid",
+        "authorization_expired",
+        "authorization_reused",
+        "same_authorization_different_encoding"
+      ],
+      "properties": {
+        "network": {
+          "type": "string",
+          "minLength": 1
+        },
+        "asset": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount_atomic": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "pay_to": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signature_valid": {
+          "type": "boolean"
+        },
+        "authorization_expired": {
+          "type": "boolean"
+        },
+        "authorization_reused": {
+          "type": "boolean"
+        },
+        "same_authorization_different_encoding": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "vectors"
+  ],
+  "properties": {
+    "schema": {
+      "const": "mee-evidence-vectors/v1"
+    },
+    "vectors": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "owner",
+              "acceptance_ids",
+              "runtime_status",
+              "input",
+              "expected",
+              "future_assertions"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "sweep"
+              },
+              "owner": {
+                "const": "F3"
+              },
+              "acceptance_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^A(0[1-9]|[12][0-9]|30)(?![\\s\\S])"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "runtime_status": {
+                "const": "NOT_RUN"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "side",
+                  "quantity_base",
+                  "source_mode",
+                  "bids",
+                  "asks"
+                ],
+                "properties": {
+                  "side": {
+                    "type": "string",
+                    "enum": [
+                      "BUY",
+                      "SELL"
+                    ]
+                  },
+                  "quantity_base": {
+                    "$ref": "primitives.schema.json#/$defs/quantity"
+                  },
+                  "source_mode": {
+                    "const": "fixture"
+                  },
+                  "bids": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "minItems": 1,
+                    "maxItems": 20
+                  },
+                  "asks": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "minItems": 1,
+                    "maxItems": 20
+                  }
+                }
+              },
+              "expected": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "notional_quote",
+                  "vwap",
+                  "worst_price",
+                  "price_impact_bps",
+                  "filled_quantity",
+                  "consumed_levels",
+                  "snapshot_status",
+                  "chargeable_quote",
+                  "display",
+                  "display_rounding_examples"
+                ],
+                "properties": {
+                  "notional_quote": {
+                    "$ref": "primitives.schema.json#/$defs/rational"
+                  },
+                  "vwap": {
+                    "$ref": "primitives.schema.json#/$defs/rational"
+                  },
+                  "worst_price": {
+                    "$ref": "primitives.schema.json#/$defs/rational"
+                  },
+                  "price_impact_bps": {
+                    "$ref": "primitives.schema.json#/$defs/rational"
+                  },
+                  "filled_quantity": {
+                    "$ref": "primitives.schema.json#/$defs/quantity"
+                  },
+                  "consumed_levels": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20
+                  },
+                  "snapshot_status": {
+                    "const": "SIMULATED"
+                  },
+                  "chargeable_quote": {
+                    "const": false
+                  },
+                  "display": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "notional_quote",
+                      "vwap",
+                      "worst_price",
+                      "price_impact_bps"
+                    ],
+                    "properties": {
+                      "notional_quote": {
+                        "$ref": "primitives.schema.json#/$defs/display_decimal"
+                      },
+                      "vwap": {
+                        "$ref": "primitives.schema.json#/$defs/display_decimal"
+                      },
+                      "worst_price": {
+                        "$ref": "primitives.schema.json#/$defs/display_decimal"
+                      },
+                      "price_impact_bps": {
+                        "$ref": "primitives.schema.json#/$defs/display_decimal"
+                      }
+                    }
+                  },
+                  "display_rounding_examples": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "exact",
+                        "display"
+                      ],
+                      "properties": {
+                        "exact": {
+                          "$ref": "primitives.schema.json#/$defs/rational"
+                        },
+                        "display": {
+                          "$ref": "primitives.schema.json#/$defs/display_decimal"
+                        }
+                      }
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                }
+              },
+              "future_assertions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertions_F3"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "owner",
+              "acceptance_ids",
+              "runtime_status",
+              "input",
+              "expected",
+              "future_assertions"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "invalid_request"
+              },
+              "owner": {
+                "const": "F4"
+              },
+              "acceptance_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^A(0[1-9]|[12][0-9]|30)(?![\\s\\S])"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "runtime_status": {
+                "const": "NOT_RUN"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "request_json"
+                ],
+                "properties": {
+                  "request_json": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "expected": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "http_status",
+                  "code",
+                  "chargeable_quote",
+                  "settlement_calls"
+                ],
+                "properties": {
+                  "http_status": {
+                    "const": 422
+                  },
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "INVALID_INPUT",
+                      "UNSUPPORTED_INSTRUMENT"
+                    ]
+                  },
+                  "chargeable_quote": {
+                    "const": false
+                  },
+                  "settlement_calls": {
+                    "const": 0
+                  }
+                }
+              },
+              "future_assertions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertions_F4"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "owner",
+              "acceptance_ids",
+              "runtime_status",
+              "input",
+              "expected",
+              "future_assertions"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "dataset_rejection"
+              },
+              "owner": {
+                "const": "F3"
+              },
+              "acceptance_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^A(0[1-9]|[12][0-9]|30)(?![\\s\\S])"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "runtime_status": {
+                "const": "NOT_RUN"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "scenario",
+                  "dataset_json"
+                ],
+                "properties": {
+                  "scenario": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "dataset_json": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "expected": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "http_status",
+                  "code",
+                  "chargeable_quote",
+                  "settlement_calls"
+                ],
+                "properties": {
+                  "http_status": {
+                    "type": "integer",
+                    "enum": [
+                      200,
+                      422,
+                      503
+                    ]
+                  },
+                  "code": {
+                    "oneOf": [
+                      {
+                        "$ref": "reasons.schema.json"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "chargeable_quote": {
+                    "const": false
+                  },
+                  "settlement_calls": {
+                    "const": 0
+                  }
+                }
+              },
+              "future_assertions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertions_F3"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "owner",
+              "acceptance_ids",
+              "runtime_status",
+              "input",
+              "expected",
+              "future_assertions"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "idempotency"
+              },
+              "owner": {
+                "const": "F4"
+              },
+              "acceptance_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^A(0[1-9]|[12][0-9]|30)(?![\\s\\S])"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "runtime_status": {
+                "const": "NOT_RUN"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "phase",
+                  "parallelism",
+                  "calls"
+                ],
+                "properties": {
+                  "phase": {
+                    "type": "string",
+                    "enum": [
+                      "PREPARING",
+                      "READY"
+                    ]
+                  },
+                  "parallelism": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20
+                  },
+                  "calls": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "scope",
+                        "key",
+                        "request_json"
+                      ],
+                      "properties": {
+                        "scope": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "key": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "request_json": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    },
+                    "minItems": 1,
+                    "maxItems": 20
+                  }
+                }
+              },
+              "expected": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "http_statuses",
+                  "logical_requests",
+                  "builds",
+                  "quotes",
+                  "same_object",
+                  "cross_scope_access",
+                  "settlement_calls"
+                ],
+                "properties": {
+                  "http_statuses": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "enum": [
+                        201,
+                        202,
+                        409,
+                        422
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 20
+                  },
+                  "logical_requests": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "builds": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "quotes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "same_object": {
+                    "type": "boolean"
+                  },
+                  "cross_scope_access": {
+                    "const": false
+                  },
+                  "settlement_calls": {
+                    "const": 0
+                  }
+                }
+              },
+              "future_assertions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertions_F4"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "owner",
+              "acceptance_ids",
+              "runtime_status",
+              "input",
+              "expected",
+              "future_assertions"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "payment"
+              },
+              "owner": {
+                "const": "F5"
+              },
+              "acceptance_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^A(0[1-9]|[12][0-9]|30)(?![\\s\\S])"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "runtime_status": {
+                "const": "NOT_RUN"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "scenario",
+                  "price_musd",
+                  "decimals",
+                  "terms",
+                  "candidate_claims_json",
+                  "identity_binding_status"
+                ],
+                "properties": {
+                  "scenario": {
+                    "type": "string",
+                    "enum": [
+                      "exact_units",
+                      "wrong_network",
+                      "wrong_token",
+                      "wrong_amount",
+                      "wrong_receiver",
+                      "wrong_payer",
+                      "invalid_signature",
+                      "expired_authorization",
+                      "reused_authorization",
+                      "reencoded_authorization"
+                    ]
+                  },
+                  "price_musd": {
+                    "$ref": "primitives.schema.json#/$defs/display_decimal"
+                  },
+                  "decimals": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 36
+                  },
+                  "terms": {
+                    "$ref": "resources.schema.json#/$defs/terms"
+                  },
+                  "candidate_claims_json": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "identity_binding_status": {
+                    "const": "UNRESOLVED_F5"
+                  }
+                }
+              },
+              "expected": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "http_status",
+                  "code",
+                  "amount_atomic",
+                  "entitlement_count",
+                  "paid_body",
+                  "settlement_calls",
+                  "distinct_attempts"
+                ],
+                "properties": {
+                  "http_status": {
+                    "type": "integer",
+                    "enum": [
+                      202,
+                      409,
+                      503
+                    ]
+                  },
+                  "code": {
+                    "oneOf": [
+                      {
+                        "$ref": "reasons.schema.json"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "amount_atomic": {
+                    "$ref": "primitives.schema.json#/$defs/atomic_amount"
+                  },
+                  "entitlement_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "paid_body": {
+                    "type": "boolean"
+                  },
+                  "settlement_calls": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "distinct_attempts": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "future_assertions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertions_F5"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "owner",
+              "acceptance_ids",
+              "runtime_status",
+              "input",
+              "expected",
+              "future_assertions"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "access"
+              },
+              "owner": {
+                "const": "F4"
+              },
+              "acceptance_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^A(0[1-9]|[12][0-9]|30)(?![\\s\\S])"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "runtime_status": {
+                "const": "NOT_RUN"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "authorization",
+                  "resource",
+                  "entitlement_present",
+                  "quote_state",
+                  "attempt_state",
+                  "finality_verified",
+                  "chain_inconsistency"
+                ],
+                "properties": {
+                  "authorization": {
+                    "type": "string",
+                    "enum": [
+                      "missing",
+                      "other_scope",
+                      "same_scope",
+                      "guessed_id",
+                      "public_tx_hash"
+                    ]
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "quote",
+                      "report",
+                      "evidence"
+                    ]
+                  },
+                  "entitlement_present": {
+                    "type": "boolean"
+                  },
+                  "quote_state": {
+                    "type": "string",
+                    "enum": [
+                      "READY",
+                      "PAYMENT_PENDING",
+                      "PAYMENT_UNCERTAIN",
+                      "PAID",
+                      "EXPIRED",
+                      "MANUAL_REVIEW"
+                    ]
+                  },
+                  "attempt_state": {
+                    "type": "string",
+                    "enum": [
+                      "RECEIVED",
+                      "VERIFIED",
+                      "SUBMITTING",
+                      "CONFIRMED",
+                      "REJECTED",
+                      "UNKNOWN",
+                      "MANUAL_REVIEW"
+                    ]
+                  },
+                  "finality_verified": {
+                    "type": "boolean"
+                  },
+                  "chain_inconsistency": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "expected": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "http_status",
+                  "code",
+                  "paid_body",
+                  "settlement_calls"
+                ],
+                "properties": {
+                  "http_status": {
+                    "type": "integer",
+                    "enum": [
+                      200,
+                      202,
+                      401,
+                      402,
+                      404,
+                      410
+                    ]
+                  },
+                  "code": {
+                    "oneOf": [
+                      {
+                        "$ref": "reasons.schema.json"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "paid_body": {
+                    "type": "boolean"
+                  },
+                  "settlement_calls": {
+                    "const": 0
+                  }
+                }
+              },
+              "future_assertions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertions_F4"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "owner",
+              "acceptance_ids",
+              "runtime_status",
+              "input",
+              "expected",
+              "future_assertions"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "recovery"
+              },
+              "owner": {
+                "const": "F5"
+              },
+              "acceptance_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^A(0[1-9]|[12][0-9]|30)(?![\\s\\S])"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "runtime_status": {
+                "const": "NOT_RUN"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "event",
+                  "quote_state",
+                  "attempt_state",
+                  "now",
+                  "quote_expires_at",
+                  "authoritative_no_broadcast_proof",
+                  "finality_verified",
+                  "chain_inconsistency",
+                  "tx_hash",
+                  "matching_transfer_count",
+                  "ledger_created_at",
+                  "ledger_days",
+                  "authorization_valid_until",
+                  "replay_impossible_proven"
+                ],
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "enum": [
+                      "verify_only",
+                      "timeout_without_hash",
+                      "ambiguous_transfers",
+                      "crash_before_submit",
+                      "crash_after_broadcast",
+                      "crash_after_chain_success",
+                      "lost_response",
+                      "expiry_before_submit",
+                      "confirmation_after_expiry",
+                      "unknown_after_expiry",
+                      "repeat_paid_read",
+                      "chain_inconsistency",
+                      "retention_check"
+                    ]
+                  },
+                  "quote_state": {
+                    "type": "string",
+                    "enum": [
+                      "READY",
+                      "PAYMENT_PENDING",
+                      "PAYMENT_UNCERTAIN",
+                      "PAID",
+                      "EXPIRED",
+                      "MANUAL_REVIEW"
+                    ]
+                  },
+                  "attempt_state": {
+                    "type": "string",
+                    "enum": [
+                      "RECEIVED",
+                      "VERIFIED",
+                      "SUBMITTING",
+                      "CONFIRMED",
+                      "REJECTED",
+                      "UNKNOWN",
+                      "MANUAL_REVIEW"
+                    ]
+                  },
+                  "now": {
+                    "$ref": "primitives.schema.json#/$defs/timestamp"
+                  },
+                  "quote_expires_at": {
+                    "$ref": "primitives.schema.json#/$defs/timestamp"
+                  },
+                  "authoritative_no_broadcast_proof": {
+                    "type": "boolean"
+                  },
+                  "finality_verified": {
+                    "type": "boolean"
+                  },
+                  "chain_inconsistency": {
+                    "type": "boolean"
+                  },
+                  "tx_hash": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^0x[0-9a-f]{64}(?![\\s\\S])"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "matching_transfer_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "ledger_created_at": {
+                    "$ref": "primitives.schema.json#/$defs/timestamp"
+                  },
+                  "ledger_days": {
+                    "type": "integer",
+                    "minimum": 30
+                  },
+                  "authorization_valid_until": {
+                    "oneOf": [
+                      {
+                        "$ref": "primitives.schema.json#/$defs/timestamp"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "replay_impossible_proven": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "expected": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "quote_state",
+                  "attempt_state",
+                  "http_status",
+                  "paid_body",
+                  "additional_settlement_calls",
+                  "original_digest_preserved",
+                  "retain_artifacts",
+                  "retain_ledger",
+                  "retain_scope_binding",
+                  "retain_dedup_association"
+                ],
+                "properties": {
+                  "quote_state": {
+                    "type": "string",
+                    "enum": [
+                      "READY",
+                      "PAYMENT_PENDING",
+                      "PAYMENT_UNCERTAIN",
+                      "PAID",
+                      "EXPIRED",
+                      "MANUAL_REVIEW"
+                    ]
+                  },
+                  "attempt_state": {
+                    "type": "string",
+                    "enum": [
+                      "RECEIVED",
+                      "VERIFIED",
+                      "SUBMITTING",
+                      "CONFIRMED",
+                      "REJECTED",
+                      "UNKNOWN",
+                      "MANUAL_REVIEW"
+                    ]
+                  },
+                  "http_status": {
+                    "type": "integer",
+                    "enum": [
+                      200,
+                      202,
+                      409,
+                      410
+                    ]
+                  },
+                  "paid_body": {
+                    "type": "boolean"
+                  },
+                  "additional_settlement_calls": {
+                    "const": 0
+                  },
+                  "original_digest_preserved": {
+                    "const": true
+                  },
+                  "retain_artifacts": {
+                    "type": "boolean"
+                  },
+                  "retain_ledger": {
+                    "type": "boolean"
+                  },
+                  "retain_scope_binding": {
+                    "type": "boolean"
+                  },
+                  "retain_dedup_association": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "future_assertions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertions_F5"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "owner",
+              "acceptance_ids",
+              "runtime_status",
+              "input",
+              "expected",
+              "future_assertions"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "artifact"
+              },
+              "owner": {
+                "const": "F3"
+              },
+              "acceptance_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^A(0[1-9]|[12][0-9]|30)(?![\\s\\S])"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "runtime_status": {
+                "const": "NOT_RUN"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "phase",
+                  "defect",
+                  "expected_digest",
+                  "readback_digest",
+                  "source_mode"
+                ],
+                "properties": {
+                  "phase": {
+                    "type": "string",
+                    "enum": [
+                      "report_validation",
+                      "before_payment",
+                      "after_payment"
+                    ]
+                  },
+                  "defect": {
+                    "type": "string",
+                    "enum": [
+                      "missing_bytes",
+                      "corrupt_bytes",
+                      "fictitious_provenance"
+                    ]
+                  },
+                  "expected_digest": {
+                    "$ref": "primitives.schema.json#/$defs/sha256"
+                  },
+                  "readback_digest": {
+                    "oneOf": [
+                      {
+                        "$ref": "primitives.schema.json#/$defs/sha256"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "source_mode": {
+                    "type": "string",
+                    "enum": [
+                      "fixture",
+                      "live-public"
+                    ]
+                  }
+                }
+              },
+              "expected": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "http_status",
+                  "code",
+                  "chargeable_quote",
+                  "paid_body",
+                  "additional_settlement_calls",
+                  "recovery_required"
+                ],
+                "properties": {
+                  "http_status": {
+                    "type": "integer",
+                    "enum": [
+                      422,
+                      503
+                    ]
+                  },
+                  "code": {
+                    "oneOf": [
+                      {
+                        "$ref": "reasons.schema.json"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "chargeable_quote": {
+                    "const": false
+                  },
+                  "paid_body": {
+                    "const": false
+                  },
+                  "additional_settlement_calls": {
+                    "const": 0
+                  },
+                  "recovery_required": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "future_assertions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertions_F3"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "kind",
+              "owner",
+              "acceptance_ids",
+              "runtime_status",
+              "input",
+              "expected",
+              "future_assertions"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "artifact"
+              },
+              "owner": {
+                "const": "F4"
+              },
+              "acceptance_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^A(0[1-9]|[12][0-9]|30)(?![\\s\\S])"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "runtime_status": {
+                "const": "NOT_RUN"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "phase",
+                  "defect",
+                  "expected_digest",
+                  "readback_digest",
+                  "source_mode"
+                ],
+                "properties": {
+                  "phase": {
+                    "type": "string",
+                    "enum": [
+                      "report_validation",
+                      "before_payment",
+                      "after_payment"
+                    ]
+                  },
+                  "defect": {
+                    "type": "string",
+                    "enum": [
+                      "missing_bytes",
+                      "corrupt_bytes",
+                      "fictitious_provenance"
+                    ]
+                  },
+                  "expected_digest": {
+                    "$ref": "primitives.schema.json#/$defs/sha256"
+                  },
+                  "readback_digest": {
+                    "oneOf": [
+                      {
+                        "$ref": "primitives.schema.json#/$defs/sha256"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "source_mode": {
+                    "type": "string",
+                    "enum": [
+                      "fixture",
+                      "live-public"
+                    ]
+                  }
+                }
+              },
+              "expected": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "http_status",
+                  "code",
+                  "chargeable_quote",
+                  "paid_body",
+                  "additional_settlement_calls",
+                  "recovery_required"
+                ],
+                "properties": {
+                  "http_status": {
+                    "type": "integer",
+                    "enum": [
+                      422,
+                      503
+                    ]
+                  },
+                  "code": {
+                    "oneOf": [
+                      {
+                        "$ref": "reasons.schema.json"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "chargeable_quote": {
+                    "const": false
+                  },
+                  "paid_body": {
+                    "const": false
+                  },
+                  "additional_settlement_calls": {
+                    "const": 0
+                  },
+                  "recovery_required": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "future_assertions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertions_F4"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1
+    }
+  }
+}

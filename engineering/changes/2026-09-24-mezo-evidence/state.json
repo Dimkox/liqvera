@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "change_id": "2026-09-24-mezo-evidence",
+  "title": "Liqvera Mezo Evidence",
+  "route_id": null,
+  "route_status": "absent_in_public_clone",
+  "status": "implementing",
+  "created_at": "2026-09-24T15:46:33Z",
+  "updated_at": "2026-09-24T18:33:25Z",
+  "history": [
+    {
+      "from": null,
+      "to": "draft",
+      "at": "2026-09-24T15:46:33Z",
+      "reason": "Created after user approval of the F1-first delivery direction; written specification still requires review"
+    },
+    {
+      "from": "draft",
+      "to": "scoped",
+      "at": "2026-09-24T15:57:05Z",
+      "reason": "Written design approved by the user; F1 implementation plan authored for review"
+    },
+    {
+      "from": "scoped",
+      "to": "implementing",
+      "at": "2026-09-24T17:32:53Z",
+      "reason": "F1 implementation and compatibility package complete-with-blockers at df70f933c9d359f3db00bbf14ffe3d8778ed4483; make verify passes, BLOCKED_TRIVY_HEALTHCHECK_POLICY remains, payment readiness is false with PAY_TO_MISSING and FINALITY_RULE_UNVERIFIED; F2 contracts plan is next and F2-F7 remain open"
+    },
+    {
+      "from": "implementing",
+      "to": "implementing",
+      "at": "2026-09-24T18:02:00Z",
+      "reason": "Final transport repair at 37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25 bounds wire framing and total request time; fresh make verify passes 641 tests and 85 subtests, live compatibility passes with PAY_TO_MISSING and FINALITY_RULE_UNVERIFIED, and BLOCKED_TRIVY_HEALTHCHECK_POLICY remains. SHA-bound evidence refreshed; independent re-review is complete and F2-F7 remain open."
+    },
+    {
+      "from": "implementing",
+      "to": "implementing",
+      "at": "2026-09-24T18:33:25Z",
+      "reason": "PR history hygiene removed a synthetic Basic Auth-shaped test literal, origin/main English documentation was merged, make verify passes 641 tests and 85 subtests, the local secret scan reports zero findings, and only BLOCKED_TRIVY_HEALTHCHECK_POLICY remains in the Grok PR profile; F2-F7 remain open."
+    }
+  ]
+}

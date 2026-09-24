@@ -1,0 +1,28 @@
+{
+  "schema": "liqvera-mezo-compatibility/v1",
+  "hyperliquid": {
+    "info_url": "https://api.hyperliquid.xyz/info",
+    "coin": "BTC",
+    "maximum_levels_per_side": 20
+  },
+  "mezo": {
+    "network": "eip155:31611",
+    "chain_id": 31611,
+    "rpc_url": "https://rpc.test.mezo.org",
+    "musd_address": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+    "musd_decimals": 18,
+    "facilitator_url": "https://facilitator.vativ.io"
+  },
+  "x402": {
+    "version": 2,
+    "scheme": "exact",
+    "typescript_version": "2.16.0",
+    "packages": ["@x402/core", "@x402/evm", "@x402/express", "@x402/paywall"]
+  },
+  "payment_readiness": {
+    "pay_to_required": true,
+    "pay_to_source": "operator_environment",
+    "default_pay_to_forbidden": true,
+    "finality_policy_status": "UNVERIFIED"
+  }
+}

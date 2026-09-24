@@ -10,11 +10,13 @@ coverage/
 *.exe
 .idea/
 .vscode/
+.venv/
 .worktrees/
 .serena/
 __pycache__/
 *.py[cod]
 dist/
 .stage-a/
+.mvp/
 *.egg-info/
 .DS_Store

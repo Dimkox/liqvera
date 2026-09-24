@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import ast
-from datetime import datetime
-from functools import lru_cache
 import json
-from pathlib import Path
 import re
 import subprocess
+from datetime import datetime
+from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 import yaml
@@ -19,17 +19,17 @@ from .model import (
     Classification,
     GraphEdge,
     GraphNode,
-    Lifecycle,
     InventoryExclusionReason,
+    Lifecycle,
     NodeKind,
     PathClass,
     Phase,
     ReceiptRequirement,
-    RepositoryInventoryExclusion,
+    ReceiptValidationContext,
     RepositoryArtifact,
+    RepositoryInventoryExclusion,
     RequirementClass,
     RuntimeDependency,
-    ReceiptValidationContext,
     VerifiedReceiptRegistryEntry,
 )
 
@@ -506,6 +506,48 @@ def _classify_repository_path(path: str) -> PathClass:
         return PathClass.VENDORED_TOOLING
     if name.endswith(".ps1"):
         return PathClass.POWERSHELL
+    if normalized.startswith("deploy/mezo-evidence/"):
+        if name.startswith("dockerfile") or name.endswith(".dockerignore"):
+            return PathClass.BUILD_PACKAGING
+        if name == "compose.yaml":
+            return PathClass.COMPOSE
+        if name == ".gitignore" or normalized.startswith("deploy/mezo-evidence/env/"):
+            return PathClass.CONFIGURATION
+        if name.endswith(".md"):
+            return PathClass.DOCUMENTATION
+        return PathClass.DEPLOYMENT_ENTRYPOINT
+    if normalized.startswith("apps/mezo-gateway/migrations/") and name.endswith(".sql"):
+        return PathClass.MIGRATION
+    if normalized.startswith(("apps/mezo-gateway/", "apps/mezo-web/")):
+        if name.endswith(".md"):
+            return PathClass.DOCUMENTATION
+        if name in {".gitignore", "package.json", "package-lock.json", "tsconfig.json"}:
+            return PathClass.CONFIGURATION
+        if normalized == "apps/mezo-web/vite.config.ts":
+            return PathClass.CONFIGURATION
+        if normalized.startswith("apps/mezo-gateway/scripts/"):
+            return PathClass.BUILD_PACKAGING
+        return PathClass.RUNTIME_SOURCE
+    if normalized.startswith("packages/mezo-protocol/"):
+        if name.endswith(".md") or name.startswith("license"):
+            return PathClass.DOCUMENTATION
+        if name in {"package.json", "source-lock.json", "tsconfig.json"}:
+            return PathClass.CONFIGURATION
+        if normalized.startswith("packages/mezo-protocol/vendor/"):
+            return PathClass.FIXTURE_DATA
+        return PathClass.RUNTIME_SOURCE
+    if normalized.startswith("packages/evidence-report/migrations/") and name.endswith(".sql"):
+        return PathClass.MIGRATION
+    if normalized == "packages/evidence-report/pyproject.toml":
+        return PathClass.CONFIGURATION
+    if normalized.startswith("packages/evidence-report/src/mee_evidence_report/"):
+        if normalized.startswith("packages/evidence-report/src/mee_evidence_report/resources/"):
+            return PathClass.CONFIGURATION
+        return PathClass.RUNTIME_SOURCE
+    if normalized.startswith("services/") and name.endswith(".md"):
+        return PathClass.DOCUMENTATION
+    if normalized.startswith("web/"):
+        return PathClass.RUNTIME_SOURCE
     stem = name.rsplit(".", 1)[0]
     execution_names = {"submit", "cancel", "sign", "signer", "send", "trading", "execution"}
     if (
@@ -548,7 +590,9 @@ def _classify_repository_path(path: str) -> PathClass:
         normalized.startswith("internal/") and name.endswith("_test.go")
     ):
         return PathClass.TEST_SOURCE
-    if normalized.startswith("docs/") or ("/" not in normalized and name.endswith(".md")):
+    if normalized.startswith(("docs/", "engineering/changes/", "provenance/")) or (
+        "/" not in normalized and name.endswith(".md")
+    ):
         return PathClass.DOCUMENTATION
     if normalized.startswith("architecture/"):
         return PathClass.SCHEMA_MANIFEST

@@ -1,0 +1,378 @@
+name: liqvera-evidence
+
+# Select exactly one profile and a distinct project name:
+# docker compose --env-file env/fixture.env -p liqvera-fixture --profile fixture up -d
+# docker compose --env-file env/live.env -p liqvera-live --profile live up -d
+
+x-capture: &capture
+  build:
+    context: ../..
+    dockerfile: deploy/mezo-evidence/Dockerfile.capture
+  image: liqvera/evidence-capture:local
+  init: true
+  restart: unless-stopped
+  user: "10001:10001"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 128
+  mem_limit: 384m
+  cpus: 0.5
+  tmpfs: [/tmp:rw,noexec,nosuid,size=32m]
+  volumes:
+    - captures:/data/captures
+  networks:
+    capture_report: { aliases: [evidence-capture] }
+    capture_egress: {}
+  healthcheck:
+    test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/healthz', timeout=2).read()"]
+    interval: 15s
+    timeout: 3s
+    retries: 3
+    start_period: 20s
+
+x-report: &report
+  build:
+    context: ../..
+    dockerfile: deploy/mezo-evidence/Dockerfile.report
+  image: liqvera/evidence-report:local
+  init: true
+  restart: unless-stopped
+  user: "10002:10001"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 128
+  mem_limit: 512m
+  cpus: 1.0
+  tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+  volumes:
+    - captures:/data/captures:ro
+    - artifacts:/data/artifacts
+  networks:
+    capture_report: {}
+    gateway_report: { aliases: [report] }
+  healthcheck:
+    test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8082/healthz', timeout=2).read()"]
+    interval: 15s
+    timeout: 3s
+    retries: 3
+    start_period: 20s
+
+x-postgres: &postgres
+  image: postgres:16-alpine
+  init: true
+  restart: unless-stopped
+  user: "70:70"
+  group_add: ["10001"]
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 128
+  mem_limit: 768m
+  cpus: 1.0
+  shm_size: 128m
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+    - /var/run/postgresql:rw,nosuid,size=8m
+  environment:
+    POSTGRES_USER: liqvera
+    POSTGRES_DB: liqvera
+    POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    PGDATA: /var/lib/postgresql/data/pgdata
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+  networks:
+    gateway_db: { aliases: [postgres] }
+  healthcheck:
+    test: [CMD-SHELL, "pg_isready -U liqvera -d liqvera"]
+    interval: 10s
+    timeout: 3s
+    retries: 5
+    start_period: 30s
+
+x-gateway: &gateway
+  build:
+    context: ../..
+    dockerfile: deploy/mezo-evidence/Dockerfile.gateway
+  image: liqvera/mezo-gateway:local
+  init: true
+  restart: unless-stopped
+  user: "10003:10001"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 256
+  mem_limit: 512m
+  cpus: 1.0
+  tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+  volumes:
+    - artifacts:/data/artifacts:ro
+  networks:
+    edge: { aliases: [gateway] }
+    gateway_db: {}
+    gateway_report: {}
+    payment_egress: {}
+  healthcheck:
+    test: [CMD, node, -e, "fetch('http://127.0.0.1:8080/healthz', {signal: AbortSignal.timeout(2000)}).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+    interval: 15s
+    timeout: 3s
+    retries: 3
+    start_period: 30s
+
+x-migrate: &migrate
+  build:
+    context: ../..
+    dockerfile: deploy/mezo-evidence/Dockerfile.gateway
+  image: liqvera/mezo-gateway:local
+  command: [node, /app/gateway-entrypoint.js, npm, run, migrate]
+  restart: "no"
+  user: "10003:10001"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 128
+  mem_limit: 256m
+  cpus: 0.5
+  tmpfs: [/tmp:rw,noexec,nosuid,size=32m]
+  networks:
+    gateway_db: {}
+
+x-web: &web
+  build:
+    context: ../..
+    dockerfile: deploy/mezo-evidence/Dockerfile.web
+  image: liqvera/mezo-web:local
+  init: true
+  restart: unless-stopped
+  user: "101:101"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 64
+  mem_limit: 128m
+  cpus: 0.25
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=8m
+    - /var/cache/nginx:rw,nosuid,size=8m
+    - /var/run:rw,nosuid,size=8m
+  networks:
+    edge: { aliases: [web] }
+  healthcheck:
+    test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8083/healthz]
+    interval: 15s
+    timeout: 3s
+    retries: 3
+    start_period: 10s
+
+x-edge: &edge
+  build:
+    context: ../..
+    dockerfile: deploy/mezo-evidence/Dockerfile.edge
+  image: liqvera/mezo-edge:local
+  init: true
+  restart: unless-stopped
+  user: "10001:10001"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 128
+  mem_limit: 192m
+  cpus: 0.5
+  tmpfs: [/tmp:rw,noexec,nosuid,size=16m]
+  volumes:
+    - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    - caddy_data:/data
+    - caddy_config:/config
+  networks:
+    edge: {}
+    tls_egress: {}
+  healthcheck:
+    test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:2019/config/]
+    interval: 15s
+    timeout: 3s
+    retries: 3
+    start_period: 20s
+
+services:
+  evidence-capture-fixture:
+    <<: *capture
+    profiles: [fixture]
+    environment:
+      LIQVERA_SOURCE_MODE: fixture
+      LIQVERA_CAPTURE_PORT: "8081"
+      LIQVERA_CAPTURE_ROOT: /data/captures
+
+  evidence-capture-live:
+    <<: *capture
+    profiles: [live]
+    environment:
+      LIQVERA_SOURCE_MODE: live-public
+      LIQVERA_CAPTURE_PORT: "8081"
+      LIQVERA_CAPTURE_ROOT: /data/captures
+
+  report-fixture:
+    <<: *report
+    profiles: [fixture]
+    secrets:
+      - source: report_token_fixture
+        target: report_service_token
+    environment:
+      LIQVERA_SOURCE_MODE: fixture
+      LIQVERA_CAPTURE_URL: http://evidence-capture:8081
+      LIQVERA_CAPTURE_ROOT: /data/captures
+      LIQVERA_ARTIFACT_ROOT: /data/artifacts
+      LIQVERA_REPORT_PORT: "8082"
+      LIQVERA_ENGINE_COMMIT: ${LIQVERA_ENGINE_COMMIT:?set a 40-character lowercase Git commit}
+      LIQVERA_INTERNAL_TOKEN_FILE: /run/secrets/report_service_token
+    depends_on:
+      evidence-capture-fixture: { condition: service_healthy }
+
+  report-live:
+    <<: *report
+    profiles: [live]
+    secrets:
+      - source: report_token_live
+        target: report_service_token
+    environment:
+      LIQVERA_SOURCE_MODE: live-public
+      LIQVERA_CAPTURE_URL: http://evidence-capture:8081
+      LIQVERA_CAPTURE_ROOT: /data/captures
+      LIQVERA_ARTIFACT_ROOT: /data/artifacts
+      LIQVERA_REPORT_PORT: "8082"
+      LIQVERA_ENGINE_COMMIT: ${LIQVERA_ENGINE_COMMIT:?set a 40-character lowercase Git commit}
+      LIQVERA_INTERNAL_TOKEN_FILE: /run/secrets/report_service_token
+    depends_on:
+      evidence-capture-live: { condition: service_healthy }
+
+  postgres-fixture:
+    <<: *postgres
+    profiles: [fixture]
+    secrets:
+      - source: postgres_password_fixture
+        target: postgres_password
+
+  postgres-live:
+    <<: *postgres
+    profiles: [live]
+    secrets:
+      - source: postgres_password_live
+        target: postgres_password
+
+  migrate-fixture:
+    <<: *migrate
+    profiles: [fixture]
+    secrets:
+      - source: postgres_password_fixture
+        target: postgres_password
+    depends_on:
+      postgres-fixture: { condition: service_healthy }
+
+  migrate-live:
+    <<: *migrate
+    profiles: [live]
+    secrets:
+      - source: postgres_password_live
+        target: postgres_password
+    depends_on:
+      postgres-live: { condition: service_healthy }
+
+  gateway-fixture:
+    <<: *gateway
+    profiles: [fixture]
+    secrets:
+      - source: postgres_password_fixture
+        target: postgres_password
+      - source: report_token_fixture
+        target: report_service_token
+    environment:
+      SOURCE_MODE: fixture
+      REPORT_SERVICE_URL: http://report:8082
+      REPORT_SERVICE_TOKEN_FILE: /run/secrets/report_service_token
+      ARTIFACT_ROOT: /data/artifacts
+      PUBLIC_BASE_URL: http://localhost:8080
+      CORS_ORIGINS: http://localhost:8080
+      PAY_TO: ""
+      PORT: "8080"
+    depends_on:
+      migrate-fixture: { condition: service_completed_successfully }
+      report-fixture: { condition: service_healthy }
+
+  gateway-live:
+    <<: *gateway
+    profiles: [live]
+    secrets:
+      - source: postgres_password_live
+        target: postgres_password
+      - source: report_token_live
+        target: report_service_token
+    environment:
+      SOURCE_MODE: live-public
+      REPORT_SERVICE_URL: http://report:8082
+      REPORT_SERVICE_TOKEN_FILE: /run/secrets/report_service_token
+      ARTIFACT_ROOT: /data/artifacts
+      PUBLIC_BASE_URL: ${LIQVERA_PUBLIC_ORIGIN:-}
+      CORS_ORIGINS: ${LIQVERA_PUBLIC_ORIGIN:-}
+      PAY_TO: ${LIQVERA_PAY_TO:-}
+      PORT: "8080"
+    depends_on:
+      migrate-live: { condition: service_completed_successfully }
+      report-live: { condition: service_healthy }
+
+  web-fixture:
+    <<: *web
+    profiles: [fixture]
+
+  web-live:
+    <<: *web
+    profiles: [live]
+
+  edge-fixture:
+    <<: *edge
+    profiles: [fixture]
+    environment:
+      LIQVERA_SITE_ADDRESS: :8080
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      gateway-fixture: { condition: service_healthy }
+      web-fixture: { condition: service_healthy }
+
+  edge-live:
+    <<: *edge
+    profiles: [live]
+    environment:
+      LIQVERA_SITE_ADDRESS: ${LIQVERA_SITE_ADDRESS:-}
+    ports:
+      - "80:8080"
+      - "443:8443"
+    depends_on:
+      gateway-live: { condition: service_healthy }
+      web-live: { condition: service_healthy }
+
+secrets:
+  postgres_password_fixture:
+    file: ./secrets/fixture_postgres_password
+  postgres_password_live:
+    file: ./secrets/live_postgres_password
+  report_token_fixture:
+    file: ./secrets/fixture_report_service_token
+  report_token_live:
+    file: ./secrets/live_report_service_token
+
+volumes:
+  captures: {}
+  artifacts: {}
+  postgres_data: {}
+  caddy_data: {}
+  caddy_config: {}
+
+networks:
+  edge: { internal: true }
+  gateway_db: { internal: true }
+  gateway_report: { internal: true }
+  capture_report: { internal: true }
+  capture_egress: {}
+  payment_egress: {}
+  tls_egress: {}

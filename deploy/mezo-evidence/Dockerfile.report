@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+FROM python:3.12.13-slim-bookworm AS wheels
+WORKDIR /src
+COPY packages/contracts packages/contracts
+COPY packages/public-capture packages/public-capture
+COPY packages/readonly-analyzer packages/readonly-analyzer
+COPY packages/evidence-report packages/evidence-report
+COPY schemas/mezo-evidence/v1 schemas/mezo-evidence/v1
+COPY web web
+COPY scripts/run-mvp-web.py scripts/run-mvp-web.py
+RUN python -m pip wheel --no-cache-dir --wheel-dir /wheels \
+    ./packages/contracts ./packages/public-capture ./packages/readonly-analyzer ./packages/evidence-report
+
+FROM python:3.12.13-slim-bookworm
+COPY --from=wheels /wheels /wheels
+RUN python -m pip install --no-cache-dir --no-index --find-links=/wheels mee-evidence-report==0.1.0 \
+    && rm -rf /wheels \
+    && groupadd --system --gid 10001 liqvera \
+    && useradd --system --uid 10002 --gid 10001 --home-dir /nonexistent liqvera-report \
+    && mkdir -p /data/artifacts \
+    && chown 10002:10001 /data/artifacts \
+    && chmod 0750 /data/artifacts
+USER 10002:10001
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 LIQVERA_REPORT_PORT=8082 LIQVERA_CAPTURE_ROOT=/data/captures LIQVERA_ARTIFACT_ROOT=/data/artifacts
+EXPOSE 8082
+CMD ["python", "-B", "-m", "mee_evidence_report.service"]

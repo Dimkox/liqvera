@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/quote-request.schema.json",
+  "title": "Liqvera report quote request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["instrument_id", "side", "quantity_base", "expected_payer"],
+  "properties": {
+    "instrument_id": {"const": "hyperliquid:BTC:perpetual"},
+    "side": {"enum": ["BUY", "SELL"]},
+    "quantity_base": {"$ref": "primitives.schema.json#/$defs/quantity_input"},
+    "expected_payer": {"$ref": "primitives.schema.json#/$defs/address_input"}
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/primitives.schema.json",
+  "$defs": {
+    "id": {"type": "string", "format": "uuid"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}(?![\\s\\S])"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "quantity_input": {"type": "string", "maxLength": 32, "pattern": "^[+]?[0-9]+([.][0-9]{1,8})?(?![\\s\\S])"},
+    "quantity": {"type": "string", "maxLength": 32, "pattern": "^(0|[1-9][0-9]*)([.][0-9]{0,7}[1-9])?(?![\\s\\S])"},
+    "address_input": {"type": "string", "pattern": "^0x[0-9a-fA-F]{40}(?![\\s\\S])"},
+    "address": {"type": "string", "pattern": "^0x[0-9a-f]{40}(?![\\s\\S])"},
+    "atomic_amount": {"type": "string", "pattern": "^[1-9][0-9]*(?![\\s\\S])", "maxLength": 78},
+    "display_decimal": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?(?![\\s\\S])"},
+    "rational": {
+      "type": "object", "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(?![\\s\\S])"},
+        "denominator": {"type": "string", "pattern": "^[1-9][0-9]*(?![\\s\\S])"}
+      }
+    }
+  }
+}

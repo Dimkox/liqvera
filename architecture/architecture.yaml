@@ -1,5 +1,15 @@
 manifest_version: 2
 nodes:
+- id: contract:mezo-evidence-v1
+  kind: Contract
+  owner: contracts
+  lifecycle: IMPLEMENTED
+  requirements: []
+- id: test:mezo-evidence-contracts
+  kind: TestOrEval
+  owner: contracts
+  lifecycle: IMPLEMENTED
+  requirements: []
 - id: contract:architecture-authority
   kind: Contract
   owner: architecture
@@ -6281,6 +6291,14 @@ nodes:
   requirements:
   - HOST-013
 edges:
+- from: requirement:DATA-005
+  to: contract:mezo-evidence-v1
+  kind: specified_by
+  non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
+- from: contract:mezo-evidence-v1
+  to: test:mezo-evidence-contracts
+  kind: validated_by
+  non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
 - from: requirement:PROD-001
   to: approval:m0-owner-approved
   kind: approved_by
@@ -13380,6 +13398,84 @@ phase_policy_times:
   deployment: '2026-08-11T00:00:00Z'
 repository_inventory:
   bindings:
+  - path: schemas/mezo-evidence/v1/primitives.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/reasons.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/error.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/quote-request.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/report.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/resources.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/states.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/states.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/openapi.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/vectors.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/vectors.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: tests/contracts/mezo_evidence_support.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_primitives.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_requests.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_resources.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_states.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_openapi.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_vectors.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: docs/adr/0002-liqvera-report-payment-boundary.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/evidence/f1-verification.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/evidence/f1-compatibility.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: docs/compatibility/mezo-evidence-v1.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: tools/mezo_compatibility.py
+    node: runtime:public-capture
+    path_class: TOOL_SOURCE
+  - path: scripts/check-mezo-compatibility.py
+    node: runtime:public-capture
+    path_class: TOOL_SOURCE
+  - path: tests/compatibility/test_mezo_compatibility.py
+    node: test:data-contracts
+    path_class: TEST_SOURCE
   - path: docs/implementation/1-2a-claw-engine-runner-host-transition.md
     node: document:ociapath-source-only-authority-none
     path_class: DOCUMENTATION
@@ -13734,7 +13830,13 @@ repository_inventory:
   - path: README.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: PROVENANCE.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: SECURITY.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: provenance/import-manifest.json
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
   - path: architecture/architecture.yaml
@@ -13857,6 +13959,12 @@ repository_inventory:
   - path: docs/n8n-stage-a.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: docs/planning/LIQVERA_FACTORY_TZ.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: docs/planning/MEE_MEZO_EVIDENCE_FACTORY_TZ.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: docs/planning/epics.md
     node: document:unified-graph-execution-program
     path_class: DOCUMENTATION
@@ -13956,6 +14064,15 @@ repository_inventory:
   - path: docs/superpowers/plans/2026-08-13-claw-installed-approval-path.md
     node: document:ociapath-source-only-authority-none
     path_class: DOCUMENTATION
+  - path: docs/superpowers/plans/2026-09-24-mezo-evidence-f1.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: docs/superpowers/plans/2026-09-24-liqvera-f3-evidence-report.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: docs/superpowers/specs/2026-07-25-stage-a-operator-revenue-design.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
@@ -13977,7 +14094,46 @@ repository_inventory:
   - path: docs/superpowers/specs/2026-08-13-claw-host-deployment-controller-design.md
     node: document:ociapath-source-only-authority-none
     path_class: DOCUMENTATION
+  - path: docs/superpowers/specs/2026-09-24-mezo-evidence-design.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: docs/validation.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/acceptance-matrix.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/adr.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/blockers.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/evidence/source-baseline.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/test-plan.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
   - path: experiments/lighter/README.md
@@ -14466,12 +14622,387 @@ repository_inventory:
   - path: tests/installed/test_stage_a_product.py
     node: test:runtime-boundaries
     path_class: TEST_SOURCE
+  - path: tests/installed/test_root_development_toolchain.py
+    node: test:runtime-boundaries
+    path_class: TEST_SOURCE
   - path: tests/installed/test_three_fresh_environments.py
     node: test:stage-a-artifacts
     path_class: TEST_SOURCE
   - path: tests/installed/test_no_legacy_namespace.py
     node: test:runtime-boundaries
     path_class: TEST_SOURCE
+  - path: packages/evidence-report/pyproject.toml
+    node: configuration:evidence-report-package
+    path_class: CONFIGURATION
+  - path: packages/evidence-report/migrations/001_local_demo.sql
+    node: contract:liqvera-evidence-runtime
+    path_class: MIGRATION
+  - path: packages/evidence-report/src/mee_evidence_report/__init__.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/builder.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/bundle.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/canonical.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/cli.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/evidence_bundle.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/evidence_cli.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/evidence_io.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/local_flow.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/local_store.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/model.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/report.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/schema_validation.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/sealed_input.py
+    node: runtime:evidence-report
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/service.py
+    node: runtime:evidence-report-service
+    path_class: RUNTIME_SOURCE
+  - path: packages/evidence-report/src/mee_evidence_report/resources/runtime-dependencies.txt
+    node: configuration:evidence-report-package
+    path_class: CONFIGURATION
+  - path: packages/public-capture/src/mee_public_capture/evidence_capture.py
+    node: runtime:public-capture
+    path_class: RUNTIME_SOURCE
+  - path: packages/public-capture/src/mee_public_capture/evidence_package.py
+    node: runtime:public-capture
+    path_class: RUNTIME_SOURCE
+  - path: packages/public-capture/src/mee_public_capture/evidence_service.py
+    node: runtime:evidence-capture-service
+    path_class: RUNTIME_SOURCE
+  - path: scripts/run-f3-mvp.py
+    node: runtime:evidence-report
+    path_class: TOOL_SOURCE
+  - path: scripts/run-mvp-web.py
+    node: runtime:local-demo
+    path_class: TOOL_SOURCE
+  - path: web/app.js
+    node: runtime:local-demo
+    path_class: RUNTIME_SOURCE
+  - path: web/index.html
+    node: runtime:local-demo
+    path_class: RUNTIME_SOURCE
+  - path: web/styles.css
+    node: runtime:local-demo
+    path_class: RUNTIME_SOURCE
+  - path: tests/evidence_report/test_mvp_builder.py
+    node: test:liqvera-local-mvp
+    path_class: TEST_SOURCE
+  - path: tests/evidence_report/test_mvp_cli.py
+    node: test:liqvera-local-mvp
+    path_class: TEST_SOURCE
+  - path: tests/installed/test_f3_mvp_demo_contract.py
+    node: test:liqvera-local-mvp
+    path_class: TEST_SOURCE
+  - path: packages/mezo-protocol/package.json
+    node: configuration:mezo-protocol-package
+    path_class: CONFIGURATION
+  - path: packages/mezo-protocol/source-lock.json
+    node: configuration:mezo-protocol-package
+    path_class: CONFIGURATION
+  - path: packages/mezo-protocol/tsconfig.json
+    node: configuration:mezo-protocol-package
+    path_class: CONFIGURATION
+  - path: packages/mezo-protocol/src/index.ts
+    node: runtime:mezo-protocol
+    path_class: RUNTIME_SOURCE
+  - path: packages/mezo-protocol/vendor/MUSD.matsnet.json
+    node: runtime:mezo-protocol
+    path_class: FIXTURE_DATA
+  - path: packages/mezo-protocol/LICENSE.upstream
+    node: document:mezo-protocol-provenance
+    path_class: DOCUMENTATION
+  - path: packages/mezo-protocol/NOTICE.md
+    node: document:mezo-protocol-provenance
+    path_class: DOCUMENTATION
+  - path: packages/mezo-protocol/README.md
+    node: document:mezo-protocol-provenance
+    path_class: DOCUMENTATION
+  - path: apps/mezo-gateway/.gitignore
+    node: configuration:mezo-gateway-package
+    path_class: CONFIGURATION
+  - path: apps/mezo-gateway/package.json
+    node: configuration:mezo-gateway-package
+    path_class: CONFIGURATION
+  - path: apps/mezo-gateway/package-lock.json
+    node: configuration:mezo-gateway-package
+    path_class: CONFIGURATION
+  - path: apps/mezo-gateway/tsconfig.json
+    node: configuration:mezo-gateway-package
+    path_class: CONFIGURATION
+  - path: apps/mezo-gateway/migrations/001_ledger.sql
+    node: contract:liqvera-gateway-ledger
+    path_class: MIGRATION
+  - path: apps/mezo-gateway/scripts/copy-resources.mjs
+    node: artifact:liqvera-gateway
+    path_class: BUILD_PACKAGING
+  - path: apps/mezo-gateway/README.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: apps/mezo-gateway/src/adapters/artifacts.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/adapters/contracts.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/adapters/http.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/adapters/mezo-rpc.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/adapters/postgres.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/adapters/report-service.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/adapters/x402.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/application/gateway.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/application/presenters.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/config.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/domain/model.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/domain/states.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/main.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/migrate.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/ports/index.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/routes/app.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/security/input.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/security/middleware.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/security/observability.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/workers/builds.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/workers/reconciliation.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/workers/retention.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/workers/scheduler.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/.gitignore
+    node: configuration:mezo-web-package
+    path_class: CONFIGURATION
+  - path: apps/mezo-web/package.json
+    node: configuration:mezo-web-package
+    path_class: CONFIGURATION
+  - path: apps/mezo-web/package-lock.json
+    node: configuration:mezo-web-package
+    path_class: CONFIGURATION
+  - path: apps/mezo-web/tsconfig.json
+    node: configuration:mezo-web-package
+    path_class: CONFIGURATION
+  - path: apps/mezo-web/vite.config.ts
+    node: configuration:mezo-web-package
+    path_class: CONFIGURATION
+  - path: apps/mezo-web/README.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: apps/mezo-web/index.html
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/api.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/contracts.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/main.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/session.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/style.css
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/wallet.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/x402.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: deploy/mezo-evidence/.gitignore
+    node: configuration:liqvera-deployment
+    path_class: CONFIGURATION
+  - path: deploy/mezo-evidence/env/fixture.env.example
+    node: configuration:liqvera-deployment
+    path_class: CONFIGURATION
+  - path: deploy/mezo-evidence/env/live.env.example
+    node: configuration:liqvera-deployment
+    path_class: CONFIGURATION
+  - path: deploy/mezo-evidence/Dockerfile.capture
+    node: artifact:liqvera-images
+    path_class: BUILD_PACKAGING
+  - path: deploy/mezo-evidence/Dockerfile.capture.dockerignore
+    node: artifact:liqvera-images
+    path_class: BUILD_PACKAGING
+  - path: deploy/mezo-evidence/Dockerfile.edge
+    node: artifact:liqvera-images
+    path_class: BUILD_PACKAGING
+  - path: deploy/mezo-evidence/Dockerfile.edge.dockerignore
+    node: artifact:liqvera-images
+    path_class: BUILD_PACKAGING
+  - path: deploy/mezo-evidence/Dockerfile.gateway
+    node: artifact:liqvera-images
+    path_class: BUILD_PACKAGING
+  - path: deploy/mezo-evidence/Dockerfile.gateway.dockerignore
+    node: artifact:liqvera-images
+    path_class: BUILD_PACKAGING
+  - path: deploy/mezo-evidence/Dockerfile.report
+    node: artifact:liqvera-images
+    path_class: BUILD_PACKAGING
+  - path: deploy/mezo-evidence/Dockerfile.report.dockerignore
+    node: artifact:liqvera-images
+    path_class: BUILD_PACKAGING
+  - path: deploy/mezo-evidence/Dockerfile.web
+    node: artifact:liqvera-images
+    path_class: BUILD_PACKAGING
+  - path: deploy/mezo-evidence/Dockerfile.web.dockerignore
+    node: artifact:liqvera-images
+    path_class: BUILD_PACKAGING
+  - path: deploy/mezo-evidence/compose.yaml
+    node: artifact:liqvera-compose
+    path_class: COMPOSE
+  - path: deploy/mezo-evidence/Caddyfile
+    node: deployment:liqvera-mezo-evidence
+    path_class: DEPLOYMENT_ENTRYPOINT
+  - path: deploy/mezo-evidence/gateway-entrypoint.js
+    node: deployment:liqvera-mezo-evidence
+    path_class: DEPLOYMENT_ENTRYPOINT
+  - path: deploy/mezo-evidence/nginx-web.conf
+    node: deployment:liqvera-mezo-evidence
+    path_class: DEPLOYMENT_ENTRYPOINT
+  - path: deploy/mezo-evidence/secrets/README.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: services/evidence-capture/README.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: services/evidence-report/README.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: schemas/mezo-evidence/v1/algorithm.schema.json
+    node: contract:liqvera-evidence-runtime
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/bundle-manifest.schema.json
+    node: contract:liqvera-evidence-runtime
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/capture-evidence.schema.json
+    node: contract:liqvera-evidence-runtime
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/acceptance-result.schema.json
+    node: contract:liqvera-acceptance
+    path_class: SCHEMA_MANIFEST
+  - path: tools/mezo_acceptance/__init__.py
+    node: runtime:mezo-acceptance
+    path_class: TOOL_SOURCE
+  - path: tools/mezo_acceptance/cases.py
+    node: runtime:mezo-acceptance
+    path_class: TOOL_SOURCE
+  - path: tools/mezo_acceptance/runner.py
+    node: runtime:mezo-acceptance
+    path_class: TOOL_SOURCE
+  - path: scripts/run-mezo-acceptance.py
+    node: runtime:mezo-acceptance
+    path_class: TOOL_SOURCE
+  - path: scripts/build-liqvera-python-distributions.py
+    node: runtime:liqvera-factory
+    path_class: TOOL_SOURCE
+  - path: docs/superpowers/plans/2026-09-24-liqvera-complete-local-mvp.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/superpowers/plans/2026-09-24-liqvera-f3-f7-code-completion.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/competition/README.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/competition/demo-script.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/competition/description.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/competition/submission-checklist.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/runbooks/README.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/runbooks/artifact-recovery.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/runbooks/backup-restore.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/runbooks/incident.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/runbooks/observability.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/runbooks/payment-recovery.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/runbooks/startup-shutdown.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
+  - path: docs/runbooks/testnet-demo.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
   exclusions:
   - path: research/goodcryptox/.gitignore
     reason_code: RESEARCH_ONLY

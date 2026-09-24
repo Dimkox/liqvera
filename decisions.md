@@ -103,3 +103,51 @@ The owner selected Liqvera with the tagline "Market reports you can verify." and
 ## 2026-09-24 — English is the default project language
 
 The owner requires English throughout project documentation and product content, regardless of the conversation language. Translate inherited prose as a documentation change while preserving technical identifiers, requirements, historical statuses, and the immutable initial import manifest. Record this default in `AGENTS.md` so future contributors do not infer localization from chat.
+
+## 2026-09-24 — Compatibility is independent of payment readiness
+
+Pin the entire F1 compatibility boundary in a closed lock, emit only an allowlisted summary, and retain `PAY_TO_MISSING` plus `FINALITY_RULE_UNVERIFIED` even when public probes succeed. Isolate npm metadata reads with fixed argv, PATH-only child environment, and temporary config/cache paths removed before return; this passed the live probe without reading operator credentials. Include offline compatibility tests in both default pytest and `make verify`, while keeping external probes separate.
+
+## 2026-09-24 — One transport enforces the full public endpoint boundary
+
+Task 4 review proved npm 11.19.0 ignores candidate redirect-limit flags, so the controller approved replacing npm-view with four literal version-metadata URLs through the same Python transport; this supersedes the temporary npm config/cache approach above. Explicitly disable ambient proxies, forbid redirects, request identity encoding, and validate response framing within the 2 MiB bound before interpreting metadata. Real proxy-routing, loopback redirect, and HTTPResponse fixtures cover those behaviors, and the live probe passed with unchanged payment blockers.
+
+## 2026-09-24 — Bound the complete compatibility response and its duration
+
+Live Mezo bytecode uses chunked transfer, so a Content-Length-only policy would reject a legitimate fixed endpoint. Keep the strict reader private to the compatibility opener: bound framing independently of decoded data, reject chunk extensions/trailers and malformed CRLF, and enforce a synchronous total request deadline with no worker left running. Fail closed without POSIX timer support, outside the main thread, or when a caller already owns the real-time alarm; restore the previous handler on every exit.
+
+## 2026-09-24 — F2 contract planning follows existing inventory boundaries
+
+The F2 plan places versioned JSON contracts under `schemas/mezo-evidence/v1/` and tests under the already-collected `tests/contracts/`. Inspection confirmed that these paths use the existing schema/test classifiers, avoiding an unrelated discovery or classifier change. The planning document itself has an exact documentation binding and passes the graph check; contract implementation and runtime acceptance remain pending.
+
+## 2026-09-24 — F2 plan review preserves interoperable contracts and payment recovery
+
+The repaired plan uses standard JSON Schema pattern search with portable absolute-end assertions and an offline canonical URI registry, so test-only validation cannot silently strengthen wire contracts. Delivery requires the current quote, attempt and finality states together; retention covers authorization validity and preserves scope/dedup associations until deletion cannot enable replay. Closed vector shapes and an exact future-assertion registry carry these obligations to F3–F5 without claiming runtime acceptance or choosing unverified SDK semantics.
+
+## 2026-09-24 — Integrate independently reviewed F2 slices through one owner
+
+The owner approved the repaired plan and parallel artifact implementation in isolated worktrees, with one integration owner for graph and continuity files. Cherry-picking only each task's owned diff preserved the reviewed dependency fixes without duplicating them; exact inventory bindings keep contracts, test helpers and evidence separately classified. Static models and kernel characterization remain distinct from F3–F5 runtime acceptance.
+
+## 2026-09-24 — Preserve retained mapping validity semantics
+
+F2 vectors use the existing mapping contract's inclusive validity endpoint, rejecting the next millisecond. Reading the retained implementation before freezing boundary expectations prevented an unrelated semantic change; synthetic fixture hashes prove only retained fixture bytes, never live provenance.
+
+## 2026-09-24 — F2 graph edges describe context, not acceptance proof
+
+The graph checker requires implemented nodes to trace back to an approved requirement and positive edges to declare their proof scope. Link the exact-number contracts to existing DATA-005 with the closed `AGGREGATE_SEMANTIC_CONTEXT` marker on both context and validation edges, keeping the plan's empty requirement lists. This satisfies inventory traceability without manufacturing a requirement proof or changing inherited conflicts.
+
+## 2026-09-24 — Align public status contracts with the recovery model
+
+Whole-branch review requires evidence GET to expose a private 202 JSON recovery error and same-scope expired quotes to return 410 only after authentication/scope checks. Quote previews admit only eligible snapshots, while free rejection resources and simulated offline reports preserve their separate roles. Cross-contract vector status checks prevent endpoint declarations from diverging from recovery obligations without pretending an HTTP runtime exists.
+
+## 2026-09-24 — Exact instants and schema numbers preserve interoperable boundaries
+
+Compare UTC instants as integer seconds plus an exact fractional remainder, preserving every admitted fractional digit instead of relying on lexical order or microsecond truncation. Draft 2020-12 integer checks accept finite integral float/Decimal representations while retaining exact comparisons and rejecting boolean/nonfinite/fractional inputs; monetary schemas remain string-only. Closed resource schemas permit a future ready state only without blockers, and overall readiness requires all gates.
+
+## 2026-09-24 — Readiness is a complete state projection
+
+The canonical specification prohibits fictitious readiness and sale of fixture data, so capabilities must explain blocked payment readiness and may report ready only for live-public data without blockers. Overall readiness equals its gates and blocker emptiness in both directions, encoded with disjoint branches to support simultaneous failed gates. Truth-table tests preserve future legitimate readiness while rejecting contradictory projections.
+
+## 2026-09-24 — Keep Liqvera product factories separate from Stage A
+
+Preserve `wheels` and `product` as the reviewed three-wheel/two-image Stage A factory, and add explicit `liqvera-*` targets for the evidence, gateway, web, image, Compose, and acceptance surfaces. Packaging schemas, migrations, protocol metadata, and demo assets with their owning artifacts avoids hidden source-checkout dependencies without turning unexecuted builds into acceptance evidence.

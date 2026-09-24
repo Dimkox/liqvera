@@ -115,13 +115,23 @@
         "expiry_conflict": {"type": "string", "minLength": 1},
         "required_from": {"enum": ["precommit", "merge", "release", "promotion", "deployment"]},
         "required_lifecycle": {"enum": ["DECLARED", "IMPLEMENTED", "VERIFIED", "REALIZED", "RETIRED"]},
-        "profile": {"enum": ["contracts", "public-capture", "readonly-analyzer", "go-test-only", "execution"]},
+        "profile": {
+          "enum": [
+            "contracts", "public-capture", "readonly-analyzer", "go-test-only", "execution",
+            "mezo-protocol", "evidence-report", "capture-service", "report-service",
+            "mezo-gateway", "mezo-web", "local-demo", "acceptance", "liqvera-factory",
+            "liqvera-deploy"
+          ]
+        },
         "capabilities": {
           "type": "array",
           "uniqueItems": true,
           "items": {
             "enum": [
               "public-venue", "capture-write", "capture-read", "analysis-write",
+              "artifact-read", "ledger-write", "payment-verify", "payment-settle",
+              "report-request", "rpc-read", "public-api-read", "user-wallet-request",
+              "evidence-read",
               "signer", "wallet", "private", "account", "order", "cancel",
               "transfer", "withdrawal", "n8n", "live", "deploy"
             ]

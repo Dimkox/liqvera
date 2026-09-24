@@ -1,0 +1,42 @@
+{
+  "schema": "liqvera-mezo-protocol-source-lock/v1",
+  "sources": {
+    "musd": {
+      "repository": "https://github.com/mezo-org/musd",
+      "commit": "aa25fd6defbe6c1385940e183ea7a0a3df4533d8",
+      "license": "GPL-3.0-only",
+      "vendored": [
+        {
+          "upstream_path": "solidity/artifacts/deployments/matsnet/MUSD.json",
+          "local_path": "vendor/MUSD.matsnet.json",
+          "git_blob": "1d52bfccd0c60439cbb89e3969fbb4e8f44d9169",
+          "sha256": "9e6f944b6cd80ad9743e5120f1c06cd5cb42090b524f0781dcf723cb45386296"
+        },
+        {
+          "upstream_path": "LICENSE",
+          "local_path": "LICENSE.upstream",
+          "git_blob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+        }
+      ]
+    },
+    "mezod": {
+      "repository": "https://github.com/mezo-org/mezod",
+      "commit": "a5b390c80408b23f7579ffef0e0a1f5c336ad624",
+      "reference_paths": [
+        "chain/testnet/mezo_31611-1/genesis.json",
+        "x/evm/keeper/keeper.go"
+      ]
+    },
+    "documentation": {
+      "repository": "https://github.com/mezo-org/documentation",
+      "commit": "222891407f85e419b4c6c323f8392f08887d0f8a",
+      "reference_paths": [
+        "src/content/docs/docs/developers/getting-started/configure-environment.md",
+        "src/content/docs/docs/developers/getting-started/musd-payments-x402/index.mdx",
+        "src/content/docs/docs/developers/getting-started/musd-payments-x402/x402-quickstart.mdx",
+        "src/content/docs/docs/users/resources/contracts-reference.md"
+      ]
+    }
+  }
+}

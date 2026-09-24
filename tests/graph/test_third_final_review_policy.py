@@ -37,6 +37,18 @@ from tools.graph_checker.model import (
         ("docs/operator-runbook.md", PathClass.DOCUMENTATION),
         ("README.md", PathClass.DOCUMENTATION),
         ("SECURITY.md", PathClass.DOCUMENTATION),
+        (
+            "engineering/changes/2026-09-24-mezo-evidence/brief.md",
+            PathClass.DOCUMENTATION,
+        ),
+        (
+            "engineering/changes/2026-09-24-mezo-evidence/state.json",
+            PathClass.DOCUMENTATION,
+        ),
+        (
+            "provenance/import-manifest.json",
+            PathClass.DOCUMENTATION,
+        ),
         ("ops/windows/promote.ps1", PathClass.POWERSHELL),
         ("compose.stage-a.yaml", PathClass.COMPOSE),
         ("future_runtime/module.wasm", PathClass.RUNTIME_SOURCE),
@@ -77,6 +89,25 @@ def test_top_level_governance_documents_have_explicit_active_inventory_authority
 
     assert binding.path_class is PathClass.DOCUMENTATION
     assert authority.id == "document:graph-authority-handoff"
+    assert authority.kind == "ADR" and authority.active
+
+
+@pytest.mark.parametrize(
+    "path",
+    (
+        "PROVENANCE.md",
+        "docs/planning/LIQVERA_FACTORY_TZ.md",
+        "docs/planning/MEE_MEZO_EVIDENCE_FACTORY_TZ.md",
+        "provenance/import-manifest.json",
+    ),
+)
+def test_liqvera_publication_files_have_document_authority(path: str) -> None:
+    graph = load_graph(Path("architecture"))
+    binding = next(item for item in graph.artifact_bindings if item.path == path)
+
+    assert binding.path_class is PathClass.DOCUMENTATION
+    assert binding.node_id == "document:graph-authority-handoff"
+    authority = graph.node(binding.node_id)
     assert authority.kind == "ADR" and authority.active
 
 

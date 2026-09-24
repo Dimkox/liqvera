@@ -57,6 +57,33 @@ _RUNTIME_PROFILE_CAPABILITIES = {
     (NodeKind.SOURCE_MODULE, "readonly-analyzer"): frozenset(
         {"capture-read", "analysis-write"}
     ),
+    (NodeKind.SOURCE_MODULE, "mezo-protocol"): frozenset(),
+    (NodeKind.SOURCE_MODULE, "evidence-report"): frozenset(
+        {"capture-read", "analysis-write"}
+    ),
+    (NodeKind.SOURCE_MODULE, "capture-service"): frozenset(
+        {"public-venue", "capture-write"}
+    ),
+    (NodeKind.SOURCE_MODULE, "report-service"): frozenset(
+        {"capture-read", "analysis-write"}
+    ),
+    (NodeKind.SOURCE_MODULE, "mezo-gateway"): frozenset(
+        {
+            "artifact-read",
+            "ledger-write",
+            "payment-verify",
+            "payment-settle",
+            "report-request",
+            "rpc-read",
+        }
+    ),
+    (NodeKind.SOURCE_MODULE, "mezo-web"): frozenset(
+        {"public-api-read", "user-wallet-request"}
+    ),
+    (NodeKind.SOURCE_MODULE, "local-demo"): frozenset(),
+    (NodeKind.SOURCE_MODULE, "acceptance"): frozenset({"evidence-read"}),
+    (NodeKind.SOURCE_MODULE, "liqvera-factory"): frozenset(),
+    (NodeKind.DEPLOYMENT, "liqvera-deploy"): frozenset(),
     (NodeKind.SOURCE_MODULE, "go-test-only"): frozenset(),
     (NodeKind.ARTIFACT, "execution"): frozenset(),
 }
@@ -81,6 +108,15 @@ _KNOWN_CAPABILITIES = frozenset(
         "capture-write",
         "capture-read",
         "analysis-write",
+        "artifact-read",
+        "ledger-write",
+        "payment-verify",
+        "payment-settle",
+        "report-request",
+        "rpc-read",
+        "public-api-read",
+        "user-wallet-request",
+        "evidence-read",
         *_FORBIDDEN_CAPABILITIES,
     }
 )
@@ -88,6 +124,14 @@ _ALLOWED_RUNTIME_DEPENDENCIES = frozenset(
     {
         ("public-capture", "contracts"),
         ("readonly-analyzer", "contracts"),
+        ("evidence-report", "contracts"),
+        ("evidence-report", "readonly-analyzer"),
+        ("evidence-report", "public-capture"),
+        ("capture-service", "contracts"),
+        ("capture-service", "public-capture"),
+        ("report-service", "evidence-report"),
+        ("mezo-gateway", "mezo-protocol"),
+        ("mezo-web", "mezo-protocol"),
     }
 )
 _MIGRATABLE_KINDS = frozenset(
@@ -472,7 +516,6 @@ def _check_repository_inventory(graph: ArchitectureGraph) -> list[Diagnostic]:
 def _binding_authority_allowed(path_class: PathClass, node: GraphNode) -> bool:
     if path_class in {
         PathClass.EXECUTION_SOURCE,
-        PathClass.DEPLOYMENT_ENTRYPOINT,
         PathClass.POWERSHELL,
     }:
         return (
@@ -481,9 +524,31 @@ def _binding_authority_allowed(path_class: PathClass, node: GraphNode) -> bool:
             and not node.active
             and Classification.QUARANTINED in node.classifications
         )
+    if path_class is PathClass.DEPLOYMENT_ENTRYPOINT:
+        return (
+            node.kind is NodeKind.DEPLOYMENT
+            and node.active
+            and node.profile == "liqvera-deploy"
+        ) or (
+            node.kind is NodeKind.ARTIFACT
+            and node.profile == "execution"
+            and not node.active
+            and Classification.QUARANTINED in node.classifications
+        )
     if path_class is PathClass.RUNTIME_SOURCE:
         return node.kind is NodeKind.SOURCE_MODULE and node.active and node.profile in {
-            "contracts", "public-capture", "readonly-analyzer"
+            "contracts",
+            "public-capture",
+            "readonly-analyzer",
+            "mezo-protocol",
+            "evidence-report",
+            "capture-service",
+            "report-service",
+            "mezo-gateway",
+            "mezo-web",
+            "local-demo",
+            "acceptance",
+            "liqvera-factory",
         }
     if path_class is PathClass.GO_SOURCE:
         return (

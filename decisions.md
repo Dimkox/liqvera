@@ -95,3 +95,7 @@ Path classification runs execution-token checks on the stem before `tests/` is c
 ## 2026-09-24 — Public Mezo repository import
 
 Publish a privacy-reviewed source snapshot in an independent repository with a new root commit and per-file provenance. Retain technical source/tests and original proprietary metadata; keep inherited Actions disabled. This preserves a usable baseline without disclosing private Git history or claiming the Mezo application is implemented.
+
+## 2026-09-24 — Liqvera brand
+
+The owner selected Liqvera with the tagline "Market reports you can verify." and attribution to MEZO ₿ — The Mezo Buildathon (https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10). The canonical repository is `Dimkox/liqvera`; documentation uses the new brand while inherited runtime identifiers and the immutable import manifest remain stable. The former specification path points to `docs/planning/LIQVERA_FACTORY_TZ.md` so existing factory links keep working.

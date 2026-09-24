@@ -1,4 +1,6 @@
-# Maintained Master Plan Pointer
+# Liqvera — planning entry point
+
+Начать с [актуального ТЗ Liqvera](docs/planning/LIQVERA_FACTORY_TZ.md) и [handoff](handoff.md). Liqvera создаётся для [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10). Ниже сохранены ссылки и исследовательский контекст технической основы Multi-Exchange Engine.
 
 [Repository README](README.md) · [Documentation index](docs/README.md) · [Research index](docs/research/README.md) · [Market demand and JTBD](docs/research/user-needs/README.md)
 
@@ -21,7 +23,7 @@ This file is a stable navigation entry point. It is not the full current plan an
 - [`docs/CLEANUP_AUDIT.md`](docs/CLEANUP_AUDIT.md) — implementation safety findings and remaining blockers.
 - [`SECURITY.md`](SECURITY.md) — secret handling and live-trading restrictions.
 
-## Current strategic statement
+## Inherited upstream strategy
 
 The generic “multi-DEX mobile/Telegram terminal” thesis is rejected as insufficiently differentiated. The strongest current market hypothesis is an evidence and integrity sequence:
 

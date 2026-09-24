@@ -1,4 +1,10 @@
-# MEE Evidence × Mezo
+# Liqvera
+
+**Market reports you can verify.**
+
+Рыночные отчёты, которые можно проверить.
+
+Создано для [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
 
 Проверяемые отчёты по снимку стакана BTC-perpetual на Hyperliquid с планируемой оплатой доступа тестовыми MUSD в Mezo Testnet.
 
@@ -10,13 +16,13 @@
 
 ## Начать здесь
 
-- [ТЗ MEE Evidence × Mezo](docs/planning/MEE_MEZO_EVIDENCE_FACTORY_TZ.md) — сценарий, этапы F0–F7 и 30 приёмочных проверок.
+- [ТЗ Liqvera](docs/planning/LIQVERA_FACTORY_TZ.md) — сценарий, этапы F0–F7 и 30 приёмочных проверок.
 - [Handoff](handoff.md) — актуальный статус и следующий шаг.
 - [Документация](docs/README.md) — техническая основа и архив исходного проекта.
 - [Security](SECURITY.md) — ограничения работы с данными и торговлей.
 - [Происхождение и проверка публикации](PROVENANCE.md).
 
-Раздел 0 исходного ТЗ описывает исторический блокер публикации на момент его написания. Актуальный статус переноса находится в handoff и PROVENANCE.
+Актуальный план Liqvera — [этапы F0–F7 в ТЗ](docs/planning/LIQVERA_FACTORY_TZ.md). Публичный перенос F0 выполнен; следующий этап — проверка основы F1. Статус и происхождение файлов описаны в handoff и PROVENANCE.
 
 ```mermaid
 graph LR

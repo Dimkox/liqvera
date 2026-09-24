@@ -1,4 +1,4 @@
-# Security
+# Liqvera security
 
 [Repository README](README.md) · [Roadmap](docs/ROADMAP.md) · [Architecture invariants](docs/architecture.md) · [Technical strategy](docs/research/TECHNICAL_STRATEGY.md) · [Repository audit](docs/research/REPOSITORY_CONNECTIVITY_AUDIT.md)
 

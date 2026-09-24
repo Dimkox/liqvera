@@ -1,4 +1,6 @@
-# Architecture and Safety Invariants
+# Liqvera — architecture and safety invariants
+
+Архитектура конкурсного продукта Liqvera описана в [актуальном ТЗ](planning/LIQVERA_FACTORY_TZ.md). Этот документ сохраняет инварианты и историю технической основы Multi-Exchange Engine.
 
 [Repository README](../README.md) · [Accepted Python ADR](adr/0001-python-universal-arbitrage-core.md) · [Roadmap](ROADMAP.md) · [Technical strategy](research/TECHNICAL_STRATEGY.md) · [Repository audit](research/REPOSITORY_CONNECTIVITY_AUDIT.md)
 

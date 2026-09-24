@@ -1,6 +1,6 @@
-# Source provenance
+# Liqvera — source provenance
 
-Import date: 2026-09-24. Destination: `Dimkox/mee-mezo-evidence`.
+Import date: 2026-09-24. Destination: `Dimkox/liqvera`.
 
 ## Source and history boundary
 
@@ -10,7 +10,9 @@ Import date: 2026-09-24. Destination: `Dimkox/mee-mezo-evidence`.
 - This repository starts with its own root commit. No upstream commits, branches, tags, issues, PR discussions, workflow runs, secrets or environments are imported.
 - A new isolated local clone was used. Its working tree was clean before export. Existing user checkouts were not touched. No push or visibility change was made to the upstream repository.
 
-The initial commit imports the reviewed technical baseline. A separate documentation commit adds the exact Mezo specification bytes and its declared architecture node, and updates project entry points. The old specification's publication-blocked statement records its original preparation date; the current project status is in `README.md` and `handoff.md`.
+The initial commit imports the reviewed technical baseline. Commit `2ca6b524dbc3d4cc288c1e8ffcec2a32e8cf075b` added the original specification byte-for-byte with its declared architecture node. That original remains available in [the import history](https://github.com/Dimkox/liqvera/blob/2ca6b524dbc3d4cc288c1e8ffcec2a32e8cf075b/docs/planning/MEE_MEZO_EVIDENCE_FACTORY_TZ.md).
+
+The owner subsequently adopted **Liqvera** and **Market reports you can verify.**, with attribution to [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10). The repository was renamed from `mee-mezo-evidence` to `liqvera`. The current specification is [LIQVERA_FACTORY_TZ.md](docs/planning/LIQVERA_FACTORY_TZ.md); its branding and publication status were updated, and the old path is a compatibility pointer. Source SHAs and the initial import manifest remain unchanged.
 
 ## File inventory and transformations
 

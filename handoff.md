@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24T19:17:59Z. Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24 (F2 plan review repair). Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f2-contracts` (stacked on verified F1).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -18,15 +18,25 @@ The [F2 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f2-contra
 now exists and awaits plan review/approval. Its six tasks cover closed JSON
 Schemas/OpenAPI, public reasons, separate request/quote/payment state graphs,
 exact BUY/SELL vectors, and payment atomic-unit/idempotency/auth obligations.
-F2 is not implemented. Next: review and approve the plan before starting its
-task-by-task implementation. Runtime acceptance remains unrun or externally
-blocked; F1 payment/finality and Trivy blockers remain unchanged.
+Initial independent review of plan commit `66fe042` identified six Important
+and four Minor findings. The planning repair addresses portable schema
+patterns/base URIs, discriminated request status, no-broadcast expiry,
+joint delivery/finality guards, authorization-aware retention, raw ZIP/header
+correlation, concrete vector shapes, and conditional continuity. These fixes
+are pending independent re-review and plan approval; F2 is not implemented.
+Next: re-review the repaired plan, then obtain approval before task-by-task
+implementation. Runtime acceptance remains unrun or externally blocked; F1
+payment/finality and Trivy blockers remain unchanged.
 
-Planning verification: `git diff --check` and `make graph` passed; graph
+Planning verification: `git diff --check`, authoring-placeholder scan and
+`make graph` passed for the repair; graph
 verification retains the seven inherited declared conflicts. The new plan has
 an exact DOCUMENTATION inventory binding. No product files changed and no
 new `make verify`, Grok receipt, runtime acceptance, payment, or release result
 is claimed by this planning step.
+The repair's 11 JSON snippets parse; all nine primitive patterns reject the
+four tested trailing line terminators (LF, CRLF, U+2028 and U+2029). These are
+plan-snippet checks, not implemented API or payment acceptance.
 
 The full delivery sequence is contracts → verifiable report → API/ledger →
 testnet settlement → UI/operations → acceptance. The canonical specification

@@ -62,3 +62,7 @@ The reviewed transport bounded decoded JSON and individual socket operations, le
 
 **Symptom:** GitGuardian flagged a synthetic proxy URI as a Basic Auth secret even though the values were non-secret test markers.
 **Root cause:** The test embedded the complete `scheme://user:marker@host` shape as one literal. Preserve the behavioral test while assembling synthetic user-info from separate non-secret components so repository-history scanners do not treat fixtures as credentials.
+
+## 2026-09-24 — F2 plan validated local pieces without their shared boundaries
+
+Initial review found that a full-match test helper would enforce stronger string constraints than the published JSON Schema, while separate state tables omitted joint delivery and retention/replay predicates. The root cause was checking each contract in isolation instead of testing interoperability and cross-machine invariants against adverse traces. The planning repair specifies standard regex/URI behavior, discriminated status payloads, joint confirmation eligibility, retention floors and concrete future vectors; independent re-review remains pending.

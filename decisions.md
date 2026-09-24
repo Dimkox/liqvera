@@ -119,3 +119,7 @@ Live Mezo bytecode uses chunked transfer, so a Content-Length-only policy would 
 ## 2026-09-24 — F2 contract planning follows existing inventory boundaries
 
 The F2 plan places versioned JSON contracts under `schemas/mezo-evidence/v1/` and tests under the already-collected `tests/contracts/`. Inspection confirmed that these paths use the existing schema/test classifiers, avoiding an unrelated discovery or classifier change. The planning document itself has an exact documentation binding and passes the graph check; contract implementation and runtime acceptance remain pending.
+
+## 2026-09-24 — F2 plan review preserves interoperable contracts and payment recovery
+
+The repaired plan uses standard JSON Schema pattern search with portable absolute-end assertions and an offline canonical URI registry, so test-only validation cannot silently strengthen wire contracts. Delivery requires the current quote, attempt and finality states together; retention covers authorization validity and preserves scope/dedup associations until deletion cannot enable replay. Closed vector shapes and an exact future-assertion registry carry these obligations to F3–F5 without claiming runtime acceptance or choosing unverified SDK semantics.

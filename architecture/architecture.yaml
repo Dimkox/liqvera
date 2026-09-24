@@ -13380,6 +13380,12 @@ phase_policy_times:
   deployment: '2026-08-11T00:00:00Z'
 repository_inventory:
   bindings:
+  - path: docs/adr/0002-liqvera-report-payment-boundary.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/evidence/f1-verification.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/2026-09-24-mezo-evidence/evidence/f1-compatibility.json
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

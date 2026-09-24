@@ -4,9 +4,9 @@
   "title": "Liqvera Mezo Evidence",
   "route_id": null,
   "route_status": "absent_in_public_clone",
-  "status": "scoped",
+  "status": "implementing",
   "created_at": "2026-09-24T15:46:33Z",
-  "updated_at": "2026-09-24T15:57:05Z",
+  "updated_at": "2026-09-24T17:32:53Z",
   "history": [
     {
       "from": null,
@@ -19,6 +19,12 @@
       "to": "scoped",
       "at": "2026-09-24T15:57:05Z",
       "reason": "Written design approved by the user; F1 implementation plan authored for review"
+    },
+    {
+      "from": "scoped",
+      "to": "implementing",
+      "at": "2026-09-24T17:32:53Z",
+      "reason": "F1 implementation and compatibility package complete-with-blockers at 68dafdba76ee5aaf9dc2d5c28719f26f849bf1f6; make verify passes, BLOCKED_TRIVY_HEALTHCHECK_POLICY remains, payment readiness is false with PAY_TO_MISSING and FINALITY_RULE_UNVERIFIED; F2 contracts plan is next and F2-F7 remain open"
     }
   ]
 }

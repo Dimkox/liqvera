@@ -2,6 +2,28 @@
 
 ## Active blockers
 
+### BLOCKED_TRIVY_HEALTHCHECK_POLICY
+
+Fresh F1 verification at `68dafdba76ee5aaf9dc2d5c28719f26f849bf1f6` passes
+`make verify`, but `grok_verify.py --mode pr --no-record` exits 1.
+`trivy config --exit-code 1 .` confirms exactly two LOW `DS-0026` findings:
+`deploy/images/Dockerfile.public-capture` and
+`deploy/images/Dockerfile.readonly-analyzer` lack HEALTHCHECK instructions.
+
+Read-only inspection shows finite CLI entrypoints returning exit codes and
+`compose.stage-a.yml` using `service_completed_successfully` with
+`restart: "no"`. There is no long-running readiness endpoint to probe.
+Repeating capture in a healthcheck could rewrite evidence; a trivial success
+command would not prove job success. A periodic process check would not
+validate successful completion of these short-lived jobs.
+
+No meaningful minimal healthcheck follows from the current job contract.
+The proper scanner-policy/job-health decision needs a separately scoped,
+reviewed change; Dockerfiles and scanner policy are outside Task 5. No
+healthcheck, ignore, severity filter, or waiver was added. This remains a
+local verification blocker. F1 closes complete-with-blockers and is not
+declared fully green or release-ready.
+
 ### Public salvage source object unavailable
 
 Commit `7fe6918690f8bc1da5826c67e3619de4126e4f54` is not present in the public
@@ -36,7 +58,8 @@ these checks and record `BLOCKED_EXTERNAL` rather than rely on F1 observations.
   URLs after installed npm failed the redirect-refusal experiment. All public
   reads now share disabled proxies, redirect refusal, identity encoding, and
   bounded framing validation. The repeated live probe passed with unchanged
-  sanitized evidence; independent re-review remains required.
+  sanitized evidence. Tasks 1–4 passed independent controller review before
+  Task 5; closure documentation requires its own independent review.
 - Task 4 verified the locked public Hyperliquid/Mezo/facilitator/npm boundary;
   no `BLOCKED_EXTERNAL` remains from this probe. Initial local npm isolation
   failure was corrected and rerun successfully, without weakening any lock.

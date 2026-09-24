@@ -2,34 +2,51 @@
 
 **Market reports you can verify.**
 
-Рыночные отчёты, которые можно проверить.
+Built for [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
 
-Создано для [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
+Verifiable reports from public Hyperliquid BTC perpetual order-book snapshots,
+with planned access payments in test MUSD on Mezo Testnet.
 
-Проверяемые отчёты по снимку стакана BTC-perpetual на Hyperliquid с планируемой оплатой доступа тестовыми MUSD в Mezo Testnet.
+## Project state
 
-## Состояние проекта
+F0 imported a public technical snapshot with independent Git history. F1 is
+complete-with-blockers: publication inventory, public salvage verification,
+the pinned Python development toolchain, and the public compatibility lock
+are implemented. [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md)
+accepts only the runtime and payment boundary. The overall change remains
+`implementing`; the next step is a separate F2 contracts plan.
 
-Отдельный публичный репозиторий подготовлен из технического снимка Multi-Exchange Engine. Здесь есть Python-ядро Stage A, сбор публичных данных, анализ, тесты, конфигурация сборки и полное ТЗ для Mezo. HTTP API, платёжный шлюз и интерфейс Mezo ещё предстоит реализовать. Публикация репозитория не подтверждает готовность приложения или успешную testnet-оплату.
+At implementation commit `68dafdba76ee5aaf9dc2d5c28719f26f849bf1f6`,
+`make verify` passed with 623 tests and 85 subtests. The command
+`grok_verify.py --mode pr --no-record` exited 1 due to two pre-existing LOW
+Trivy `DS-0026` findings in the one-shot Stage A Dockerfiles
+(`BLOCKED_TRIVY_HEALTHCHECK_POLICY`). No scanner exception or artificial
+healthcheck was added. See
+[verification evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-verification.md).
 
-Исходная приватная Git-история не перенесена. Источник, контрольные суммы и изменения для публикации перечислены в [PROVENANCE.md](PROVENANCE.md). Унаследованные GitHub Actions отключены; secrets и environments исходного проекта не перенесены.
+The live public probe returned `COMPATIBILITY_PASS_PAYMENT_BLOCKED`.
+`PAY_TO_MISSING` and `FINALITY_RULE_UNVERIFIED` remain open; payment readiness
+is false. The HTTP gateway, payment ledger, paid-report flow, and Mezo UI are
+future work. No testnet payment or deployment has been performed.
 
-## Начать здесь
+Current metadata: root project `0.1.0.dev0`, Stage A packages `0.1.0`.
+There is no root `VERSION` file or F1 release. Inherited `mee-*` identifiers
+are preserved.
 
-- [ТЗ Liqvera](docs/planning/LIQVERA_FACTORY_TZ.md) — сценарий, этапы F0–F7 и 30 приёмочных проверок.
-- [Handoff](handoff.md) — актуальный статус и следующий шаг.
-- [Документация](docs/README.md) — техническая основа и архив исходного проекта.
-- [Security](SECURITY.md) — ограничения работы с данными и торговлей.
-- [Происхождение и проверка публикации](PROVENANCE.md).
+## Start here
 
-Актуальный план Liqvera — [этапы F0–F7 в ТЗ](docs/planning/LIQVERA_FACTORY_TZ.md). Публичный перенос F0 выполнен; следующий этап — проверка основы F1. Статус и происхождение файлов описаны в handoff и PROVENANCE.
+- [Canonical specification](docs/planning/LIQVERA_FACTORY_TZ.md): stages F0–F7 and A01–A30.
+- [Handoff](handoff.md): current evidence, blockers, and next action.
+- [Documentation](docs/README.md): technical foundation and historical context.
+- [Security](SECURITY.md): data and trading restrictions.
+- [Provenance](PROVENANCE.md): source snapshot and public-import boundary.
 
 ```mermaid
 graph LR
     R[README] --- H[handoff]
-    R --- T[ТЗ]
+    R --- T[Specification]
     R --- P[PROVENANCE]
-    R --- D[Документация]
+    R --- D[Documentation]
     H --- T
     H --- P
     H --- D
@@ -38,27 +55,50 @@ graph LR
     P --- D
 ```
 
-## Техническая основа
+## Technical foundation
 
-| Пакет | Назначение |
-|---|---|
-| `packages/contracts` | Точные типы и контракты |
-| `packages/public-capture` | Получение публичных снимков |
-| `packages/readonly-analyzer` | Восстановление, проверка и расчёты |
+| Location | Responsibility |
+| --- | --- |
+| `packages/contracts` | Exact types and Stage A contracts |
+| `packages/public-capture` | Public capture and frozen evidence packages |
+| `packages/readonly-analyzer` | Reconstruction, validation, and exact analytics |
+| `tools/mezo_compatibility.py` | Closed compatibility validator and bounded public transport |
+| `docs/compatibility/mezo-evidence-v1.json` | Fixed testnet, token, protocol, and SDK boundary |
 
-Python — активное вычислительное ядро. Сохранённый Go-код относится к исторической основе. В ТЗ для новой версии предусмотрены отдельный TypeScript-шлюз x402, PostgreSQL и минимальный браузерный интерфейс; они не входят в текущую реализацию.
+Capture produces frozen packages consumed by the analyzer through shared
+contracts. Python is the active analytical runtime; retained Go code is
+historical executable specification. A future TypeScript/Express gateway will
+serve immutable Python artifacts and keep payment state in PostgreSQL.
 
-Команды проверки унаследованной основы для среды с Python 3.11+, Make и зависимостями:
+Use Python 3.12+ for the Stage A packages, Make, and an isolated environment:
 
 ```bash
-python3 -m pip install -e '.[dev]'
-make verify
+python3 -m venv .venv
+.venv/bin/python -m pip install -e '.[dev]'
+PATH="$PWD/.venv/bin:$PATH" make verify
 ```
 
-Для fixture-демо: `make demo`. Сборка контейнеров требует Docker: `make product`. Полный `make verify`, контейнерная сборка и платёжный сценарий при публикации не запускались; их выполнение относится к F1 и последующим этапам.
+`make demo` runs the fixture demonstration. `make product` requires Docker;
+container builds and the full clean-machine README/demo acceptance were not
+run during F1 closure. Public salvage verifies pinned target bytes and reports
+`source_objects=unavailable`; private-source verification is not claimed.
 
-## Границы
+The optional public compatibility probe is separate from offline verification:
 
-Только публичные рыночные данные и read-only аналитика. Планируемые платежи — только Mezo Testnet. Торговля, mainnet, хранение пользовательских средств и биржевые ключи исключены. Fixture-данные не являются live-отчётом.
+```bash
+PATH="$PWD/.venv/bin:$PATH" python -B scripts/check-mezo-compatibility.py \
+  --lock docs/compatibility/mezo-evidence-v1.json
+```
 
-В исходных Python-метаданных указано `Proprietary`; эта маркировка сохранена. Публичность репозитория сама по себе не предоставляет открытую лицензию. Новая лицензия не добавлялась.
+## Boundaries
+
+Only public market data and read-only analytics are implemented. Planned
+payments are testnet-only. Mainnet, trading, custody, merchant private keys,
+user secrets, and exchange credentials are excluded. Fixture data is simulated
+and cannot establish live-report or payment acceptance. Shadow-only remains
+the safety default.
+
+Private upstream Git history, secrets, and environments were not imported.
+Inherited GitHub Actions were disabled during publication; F1 made no remote
+settings changes. The original `Proprietary` metadata is retained; public
+visibility does not grant a new license.

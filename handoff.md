@@ -1,192 +1,134 @@
 # Liqvera — handoff
 
-Дата: 2026-09-24. Репозиторий: `Dimkox/liqvera`.
+Updated: 2026-09-24T17:32:53Z. Repository: `Dimkox/liqvera`.
+Branch: `feat/mezo-evidence-f1-impl`.
 
-## Бренд и конкурс
+**Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
+[The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
 
-**Market reports you can verify.**
+## Current state and next action
 
-Рыночные отчёты, которые можно проверить.
+F1 is **complete-with-blockers**. The overall Mezo change is `implementing`;
+F2–F7 remain open. The accepted
+[ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md) fixes only runtime,
+ledger, immutable-artifact, and testnet authority. It does not freeze API
+payloads or database schemas and does not authorize payment or release.
 
-Создано для [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
+Next: create a separate F2 contracts plan from the approved design, then
+review OpenAPI/JSON Schemas, reason codes, state graphs, exact BUY/SELL
+vectors, and payment atomic-unit/idempotency vectors before implementation.
+The full delivery sequence is contracts → verifiable report → API/ledger →
+testnet settlement → UI/operations → acceptance. The canonical specification
+is `docs/planning/LIQVERA_FACTORY_TZ.md`; its legacy filename remains a
+compatibility pointer. Preserve inherited `mee-*` names.
 
-Название Liqvera и слоган утверждены владельцем. Канонический репозиторий: [Dimkox/liqvera](https://github.com/Dimkox/liqvera). Актуальное ТЗ — `docs/planning/LIQVERA_FACTORY_TZ.md`; прежний путь оставлен как совместимый указатель для ссылок из фабрики. Технические имена пакетов `mee-*` и форматы данных сохранены.
+No active `.grok-stack/runtime/active-route.json` exists in this public
+worktree. `grok_status.py` reports null route/change and no receipt gaps,
+which is not factory approval. No factory receipt was created or claimed.
+Tasks 1–4 passed independent controller review; Task 5 closure must receive
+its own independent review.
 
-## Что подготовлено
+## Verified F1 implementation
 
-Ветка `main` содержит самостоятельный технический snapshot upstream `4f6583f8590ea091d8a465de0c607e59bfe611a5` с новой Git-историей. Отдельный документационный коммит перенёс ТЗ из `97f4c7c3b9e1783f4a898412b538a4d6310b902a` (upstream PR №55) и актуализировал точки входа. Секреты, environments, старые refs и история исходника не перенесены.
+Evidence is bound to literal implementation SHA
+`68dafdba76ee5aaf9dc2d5c28719f26f849bf1f6`, captured before Task 5
+documentation edits. See
+[F1 verification](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-verification.md)
+and [compatibility result](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-compatibility.json).
 
-Состав и контрольные суммы импорта: [PROVENANCE.md](PROVENANCE.md) и [manifest](provenance/import-manifest.json). Контактные данные автора и приватные инфраструктурные адреса из публикации удалены. Унаследованные workflow сохранены как часть технического снимка, но выполнение GitHub Actions на новом репозитории отключено.
+Fresh commands on 2026-09-24:
 
-## Следующее действие
+| Command | Exit | Result |
+| --- | ---: | --- |
+| `PATH="$PWD/.venv/bin:$PATH" make verify` | 0 | 623 tests, 85 subtests; Stage A verification passed |
+| `PATH="$PWD/.venv/bin:$PATH" python -B scripts/grok_verify.py --mode pr --no-record` | 1 | Only Trivy failed; all other applicable checks passed; coverage explicitly skipped by runner policy |
+| `trivy config --exit-code 1 .` | 1 | Exactly two LOW DS-0026 missing-HEALTHCHECK findings |
+| `PATH="$PWD/.venv/bin:$PATH" python -B scripts/check-mezo-compatibility.py --lock docs/compatibility/mezo-evidence-v1.json` | 0 | COMPATIBILITY_PASS_PAYMENT_BLOCKED |
+| `.venv/bin/python -m pip check` | 0 | No broken requirements |
 
-Локальная разработка начата в ветке `feat/mezo-evidence-f1`. Написан проект
-дизайна `docs/superpowers/specs/2026-09-24-mezo-evidence-design.md` и создан
-design-only change package `engineering/changes/2026-09-24-mezo-evidence/`.
-Активный route фабрики отсутствует, поэтому route ID и receipts не заявляются.
+Python 3.12.3, pytest 9.1.1, Hatchling 1.32.4, npm 11.19.0.
+Seven inherited declared graph conflicts remain; the precommit graph check
+permits their explicit declaration and does not resolve them.
+Closure documentation checks also passed: the exact architecture inventory,
+focused Ruff checks, and `git diff --check` all exited 0. The two new
+documents have explicit DOCUMENTATION bindings. Final post-commit checks
+are recorded in the Task 5 implementation report for controller review.
 
-Письменный дизайн одобрен. Детальный F1 implementation plan находится в
-`docs/superpowers/plans/2026-09-24-mezo-evidence-f1.md`; change package переведён
-в `scoped`. Пользователь выбрал subagent execution в изолированной ветке
-`feat/mezo-evidence-f1-impl`. Задачи F1 1–3 завершены; для Task 4 выполнен
-fix round 1 после transport review. После повторного независимого review
-следующий шаг — Task 5, narrow ADR и итоговая проверка F1.
+## Active blockers and limits
 
-После F1 отдельным планом реализовать F2, затем F3–F7: контракты → проверяемый
-отчёт → API/хранение → тестовая MUSD-оплата → интерфейс → приёмка.
+- `BLOCKED_TRIVY_HEALTHCHECK_POLICY`: Trivy rejects both one-shot Stage A
+  Dockerfiles for LOW `DS-0026`. Their CLI exit codes and Compose
+  `service_completed_successfully` conditions express job completion.
+  No long-running readiness contract exists. A meaningful policy decision
+  requires separate scope and review; no artificial healthcheck, ignore,
+  waiver, or severity filter was added. The full pipeline remains FAIL.
+- `PAY_TO_MISSING`: no non-zero operator-owned merchant receiver supplied.
+- `FINALITY_RULE_UNVERIFIED`: no approved finality rule or confirmation count.
+- A funded buyer, signature, testnet transfer, and receipt evidence are absent.
+  Payment readiness is false; A13–A14 remain blocked and other payment rows
+  remain not run. Compatibility is public technical evidence only.
+- Private salvage source commit
+  `7fe6918690f8bc1da5826c67e3619de4126e4f54` remains unavailable. Public
+  verification proves target bytes, not private provenance.
+- Docker image builds, full clean-machine README/demo acceptance, and fresh
+  anonymous publication checks were not run in Task 5. A28/A29 are not passed.
+  F7 must rerun acceptance against its final commit.
+- Public endpoints and SDK registry availability can change; later external
+  unavailability must become `BLOCKED_EXTERNAL`, not an inferred pass.
 
-Сохранить существующий Stage A verdict. Формальное provenance метаданных, синтетический capture timing и отсутствие готового платёжного сценария остаются задачами реализации. Mainnet, торговля и пользовательский капитал не разрешены.
+No payment, signature, private-source verification, factory receipt,
+deployment, push, merge, tag, or release occurred during F1 closure. Mainnet,
+custody, exchange mutation, merchant private keys, user secrets, and exchange
+credentials remain excluded. Shadow-only and the old Stage A verdict remain
+unchanged. Synthetic timing and placeholder live identity still require F3.
 
-## Граница проверки этого переноса
+## Completed F1 work and historical evidence
 
-Проверены происхождение файлов, новая история и локальные сканы. Финальный Gitleaks-скан дал ровно два срабатывания на хеши: одно подтверждено способом вычисления в коде, второе — совпадением с SHA-256 соответствующего файла. Неразобранных срабатываний не осталось. Публикация проверяется по публичной metadata, анонимному clone и совпадению дерева. Это проверка переноса; полный `make verify`, Docker и on-chain оплата не выполнялись.
+Initial public baseline `d7a60169985e3a697d7eb5cf29b19b00cb8c0f7a` failed:
+four publication paths were absent from graph inventory, salvage required a
+private Git object, and wheel tests lacked Hatchling. Its recorded suite had
+504 passed, 5 graph failures, 6 wheel errors, and 85 subtests; artifacts passed.
+[Initial evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/source-baseline.md)
+is preserved separately from the current results.
 
-Исторические документы исходника сохранены как контекст. При расхождении статуса нового репозитория руководствоваться этим handoff, README и PROVENANCE. Отсутствует локальный `.grok-stack/runtime/active-route.json`; receipts фабрики не создавались и не заявляются.
+- Task 1, `37d193b`: exact publication/provenance inventory bindings and graph
+  classification; 22 focused tests passed.
+- Task 2, `14b2ea4` and `4f8b0d7`: closed-schema salvage manifest verifies
+  four pinned target entries, including two entries for one reader file.
+  Default result is `items=4 targets=verified source_objects=unavailable`.
+  Strict mode requires actual source blob bytes; synthetic Git fixtures test
+  missing/corrupt payloads without private objects.
+- Task 3, `282616d`: pinned Hatchling 1.32.4 in the development extra,
+  ignored local environment, and compatible `eth-account==0.13.7` with
+  `hyperliquid-python-sdk==0.24.0`. The initial clean resolver rejected
+  eth-account 0.14.0; the corrected clean install and pip check passed.
+  The then-current suite passed 534 tests and 85 subtests.
+- Task 4, `3c09b44` and `68dafdb`: sanitized closed compatibility lock and
+  stdlib probe. Review found ambient proxies, npm redirects, and incomplete
+  HTTP framing. The approved repair uses four literal registry URLs,
+  disabled proxies, redirect refusal, identity encoding, bounded reads, and
+  strict Content-Length validation. 89 focused tests passed; final full
+  suite has 623 tests and 85 subtests. No npm subprocess/cache remains.
 
-## Baseline F1 — 2026-09-24
+The live probe confirms Mezo Testnet 31611, MUSD 18 decimals, x402 v2 exact,
+SDK family 2.16.0, and BTC book sides with 20 levels each. It stores no raw
+market values, HTTP bodies, credentials, or capabilities and never reads
+`PAY_TO`. Its two payment blockers remain mandatory.
 
-Исходный коммит `d7a60169985e3a697d7eb5cf29b19b00cb8c0f7a` проверен до
-изменений. `make artifacts` прошёл. `make verify` остановился на неполном
-architecture inventory публикационных файлов; отдельный Python-suite дал 504
-passed, 5 связанных graph failures и 6 wheel-build errors из-за отсутствующего
-`hatchling`. `make salvage` зависит от объекта приватной истории, которого нет
-в публичном clone. Эти результаты сохранены в change package и не выдаются за
-зелёный baseline.
+## Public snapshot continuity
 
-Read-only probes подтвердили доступность Hyperliquid BTC public metadata/book,
-Mezo Testnet chain ID 31611, bytecode и 18 decimals заданного MUSD, а также
-поддержку facilitator для x402 v2 exact. Реальная оплата не выполнялась;
-`PAY_TO`, funded buyer и testnet receipt остаются внешними блокерами.
+F0 imported upstream technical snapshot
+`4f6583f8590ea091d8a465de0c607e59bfe611a5` into independent public history.
+The specification came from
+`97f4c7c3b9e1783f4a898412b538a4d6310b902a` (upstream PR 55).
+[PROVENANCE.md](PROVENANCE.md) and the import manifest preserve source hashes,
+privacy transformations, publication checks, and scan limits. Upstream refs,
+secrets, environments, and private history were not imported. Inherited
+Actions were disabled at publication; F1 did not change remote settings.
 
-## F1 Task 1 — публикационный inventory
-
-В ветке `feat/mezo-evidence-f1-impl` четыре файла F0-публикации получили
-явные bindings к активному `document:graph-authority-handoff`:
-`PROVENANCE.md`, оба ТЗ в `docs/planning/` и
-`provenance/import-manifest.json`. Классификатор относит `provenance/` к
-`DOCUMENTATION`. Регрессионные тесты (22 passed) и precommit graph check
-прошли; graph check вывел только ожидаемые declared conflicts. Проблемы
-публично воспроизводимого `make salvage` и полного development toolchain
-остаются открытыми для следующих задач F1; полный F1 baseline пока не
-объявляется зелёным.
-
-Дополнительный полный pytest дал 516 passed и 6 wheel-build errors из-за
-отсутствующего `hatchling`, без новых graph failures. `grok_verify --mode pr`
-также остаётся красным: pytest упирается в тот же toolchain, а Trivy сообщает
-по одному LOW `DS-0026` для двух Stage A Dockerfile.
-
-## F1 Task 2 — проверка salvage в публичном clone
-
-Манифест PR №21 фиксирует SHA-256 четырёх строк импортированных целевых файлов
-(два правила указывают на один `reader.py`). `make salvage` проверяет наличие и
-байты этих файлов без приватной Git-истории: `items=4 targets=verified
-source_objects=unavailable`. Это проверка целевых байтов по манифесту, а не
-доказательство происхождения из приватного исходника. Режим
-`--require-source-objects` требует исходный commit и сверяет его blob SHA;
-при отсутствии объектов он завершается ошибкой.
-
-TDD-проверка зафиксировала исходный RED (4 failed), затем 5 focused tests,
-прямой вызов verifier и `make salvage` прошли. Полный pytest: 519 passed и 6
-wheel-build errors из-за отсутствующего `hatchling`. `grok_verify --mode pr`
-остаётся красным по pytest и Trivy; остальные профили прошли. Следующее
-действие F1 — Task 3: завершить документированный development toolchain.
-
-Review Task 2 выявил две ошибки первой реализации: проверка commit не читала
-blob payload, а текстовый parser мог принять неверные YAML metadata. Исправление
-читает байты каждого исходного blob до статуса `source_objects=verified` и
-проверяет YAML по закрытой схеме; отсутствие payload в strict-режиме завершается
-ошибкой. Регрессионный тест использует только синтетический локальный Git fixture,
-не приватные объекты. Публичный результат выше остаётся проверкой целевых
-байтов, а не подтверждением происхождения из исходного репозитория.
-
-## F1 Task 3 — воспроизводимая среда разработки
-
-Корневой `dev` extra теперь содержит тот же `hatchling==1.32.4`, что и
-`build-system.requires`; `.venv/` исключён из Git, а тест синхронизации
-привязан к `test:runtime-boundaries`. Чистая установка `-e '.[dev]'` сначала
-обнаружила несовместимые исходные pins: `eth-account==0.14.0` и
-`hyperliquid-python-sdk==0.24.0`, который требует `eth-account<0.14.0`.
-Корневой pin исправлен на точный `eth-account==0.13.7`, совместимость пары
-проверена resolver и регрессионным тестом. `pip check` не выявил нарушенных
-зависимостей; установленный Hatchling имеет версию 1.32.4.
-
-`PATH="$PWD/.venv/bin:$PATH" make verify` прошёл: 534 tests passed, 85 subtests
-passed, без прежних wheel-build errors и предупреждений pytest о неизвестных
-настройках. Graph check по-прежнему печатает известные declared conflicts;
-`make salvage` подтверждает target bytes и сообщает
-`source_objects=unavailable`. Следующее действие F1 — Task 4: sanitized Mezo
-compatibility lock и read-only probe.
-
-Дополнительный `grok_verify.py --mode pr` прошёл по pytest, Ruff, Bandit,
-secret scan и остальным применимым профилям, но общий результат остаётся
-`FAIL`: Trivy требует HEALTHCHECK в двух прежних Stage A Dockerfile (по одному
-LOW `DS-0026`). Эти файлы не входят в Task 3 и не изменялись.
-
-## F1 Task 4 — фиксированная compatibility boundary
-
-Добавлен `docs/compatibility/mezo-evidence-v1.json` и stdlib-only read-only probe
-`scripts/check-mezo-compatibility.py`. Lock закрыт для изменения endpoint,
-network, asset, coin, версии SDK и payment policy; pure validator выдаёт только
-sanitized summary или стабильный reason code. CLI принимает `--lock` и
-необязательный `--output`; без output печатает canonical JSON в stdout.
-Redirects и ambient proxies запрещены для всех HTTP probes; каждый сетевой
-вызов ограничен 12 секундами. После fix round 1 registry metadata читается
-через четыре фиксированных URL тем же transport, без npm subprocess/cache.
-`PAY_TO` не читается.
-
-Live probe 2026-09-24 прошёл: `COMPATIBILITY_PASS_PAYMENT_BLOCKED`, Mezo Testnet
-31611, MUSD 18 decimals, x402 v2 exact, четыре пакета 2.16.0, BTC 20/20 levels.
-Результат сохранён и привязан к graph в
-`engineering/changes/2026-09-24-mezo-evidence/evidence/f1-compatibility.json`.
-`PAY_TO_MISSING` и `FINALITY_RULE_UNVERIFIED` остаются обязательными blockers.
-Raw HTTP responses, market values, npm stderr, credentials и capabilities
-не включены в результат; test fixtures используют только синтетические данные.
-
-TDD: исходный collection RED из-за отсутствующего модуля, затем 39 validator
-tests passed; CLI RED 27 failed, затем 66 passed. Дополнительный RED подтвердил
-необходимость sanitization для truncated HTTP response; итоговые 68 focused
-tests и Ruff прошли. Precommit graph check прошёл с прежними declared conflicts.
-По решению controller `Makefile` также включает offline compatibility tests в
-`make verify`; live network probe остаётся отдельной командой.
-
-Итоговый `PATH="$PWD/.venv/bin:$PATH" make verify`: 602 passed, 85 subtests
-passed; `stage-a verify passed`. `grok_verify.py --mode pr` подтвердил pytest,
-Ruff, Bandit, secret scan и остальные применимые проверки, но сохранил общий
-`FAIL` только по двум прежним LOW `DS-0026` в
-`deploy/images/Dockerfile.public-capture` и
-`deploy/images/Dockerfile.readonly-analyzer`. Эти Dockerfile не изменялись.
-
-### Task 4 review — fix round 1
-
-Независимый review обнаружил три transport-дефекта: urllib наследует proxy
-settings/credentials из окружения; npm следует redirect после fixed registry;
-bounded `HTTPResponse.read(amount)` может принять неполный Content-Length.
-Предыдущие 68 tests и live success не доказывают закрытие этих security gates.
-
-Проверка npm 11.19.0 на локальном loopback HTTP fixture подтвердила: исходный
-вызов и варианты `--max-redirects=0`, `--max-redirect=0`, `--follow=0`,
-`--redirect=error` завершаются с exit 0 и делают по одному запросу к redirect
-target. В установленном npm нет соответствующего config definition;
-`npm-registry-fetch` не передаёт redirect/follow options в fetch.
-Controller разрешил scoped alternative: заменить `npm view` четырьмя literal
-percent-encoded registry URLs для версии 2.16.0. Это сохраняет точные package
-pins и проверку availability, устраняя npm redirect/cache/config behavior.
-
-Общий opener теперь явно задаёт `ProxyHandler({})` и `NoRedirect`. Transport
-запрашивает identity encoding, отвергает сжатие и неоднозначное framing,
-проверяет valid Content-Length до чтения и совпадение длины после него;
-сохраняется предел 2 MiB. Registry adapter проверяет exact name/version и
-возвращает только прежний mapping версий. Raw registry metadata не пишется
-на диск, subprocess полностью удалён.
-
-Новые регрессии зафиксировали RED: 22 failed, 67 passed; после исправления
-89 focused tests и Ruff прошли. Loopback server проверяет все пять redirect
-status codes без обращения к target; реальный HTTPResponse воспроизводит
-Content-Length truncation. Live probe повторно прошёл тем же sanitized
-результатом `COMPATIBILITY_PASS_PAYMENT_BLOCKED`; JSON не изменился побайтово.
-Оба payment blockers сохранены. Повторный независимый review ещё необходим.
-
-Итоговый `make verify` после fix round 1: 623 passed, 85 subtests passed;
-`stage-a verify passed`. `grok_verify.py --mode pr`: pytest, Ruff, Bandit,
-secret scan и остальные применимые проверки прошли; общий `FAIL` остаётся
-только из-за прежних двух LOW Trivy `DS-0026` в Stage A Dockerfile.
+The final F0 secret scan had two reviewed digest false positives and no
+unresolved findings. Its publication checks are historical F0 evidence,
+not current F1 application or payment verification. Root project metadata is
+`0.1.0.dev0`; Stage A packages are `0.1.0`; no root VERSION file exists.
+Historical documentation remains context; use this handoff, README,
+the change package, runtime tests, and accepted ADRs for current state.

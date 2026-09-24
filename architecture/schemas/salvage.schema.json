@@ -16,7 +16,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["source_path", "source_blob_sha", "target", "rule"],
+        "required": ["source_path", "source_blob_sha", "target", "target_sha256", "rule"],
         "properties": {
           "source_path": { "type": "string", "minLength": 1 },
           "source_blob_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
@@ -24,6 +24,7 @@
             "type": "string",
             "pattern": "^packages/readonly-analyzer/"
           },
+          "target_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
           "rule": { "type": "string", "minLength": 1 }
         }
       }

@@ -72,3 +72,19 @@ Mezo Testnet chain ID 31611, bytecode и 18 decimals заданного MUSD, а
 отсутствующего `hatchling`, без новых graph failures. `grok_verify --mode pr`
 также остаётся красным: pytest упирается в тот же toolchain, а Trivy сообщает
 по одному LOW `DS-0026` для двух Stage A Dockerfile.
+
+## F1 Task 2 — проверка salvage в публичном clone
+
+Манифест PR №21 фиксирует SHA-256 четырёх строк импортированных целевых файлов
+(два правила указывают на один `reader.py`). `make salvage` проверяет наличие и
+байты этих файлов без приватной Git-истории: `items=4 targets=verified
+source_objects=unavailable`. Это проверка целевых байтов по манифесту, а не
+доказательство происхождения из приватного исходника. Режим
+`--require-source-objects` требует исходный commit и сверяет его blob SHA;
+при отсутствии объектов он завершается ошибкой.
+
+TDD-проверка зафиксировала исходный RED (4 failed), затем 5 focused tests,
+прямой вызов verifier и `make salvage` прошли. Полный pytest: 519 passed и 6
+wheel-build errors из-за отсутствующего `hatchling`. `grok_verify --mode pr`
+остаётся красным по pytest и Trivy; остальные профили прошли. Следующее
+действие F1 — Task 3: завершить документированный development toolchain.

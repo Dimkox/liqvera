@@ -34,7 +34,7 @@
   "$defs": {
     "state": {"type": "string", "pattern": "^[A-Z][A-Z_]*(?![\\s\\S])"},
     "event": {"type": "string", "pattern": "^[a-z][a-z_]*(?![\\s\\S])"},
-    "symbol": {"type": "string", "pattern": "^[a-z][a-z_]*(?![\\s\\S])"},
+    "symbol": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?![\\s\\S])"},
     "transition": {
       "type": "object",
       "additionalProperties": false,

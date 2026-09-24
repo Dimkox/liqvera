@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import mezo_evidence_support as c
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2] / "schemas" / "mezo-evidence" / "v1"
@@ -179,6 +180,19 @@ def test_state_schema_closes_every_record_and_fixes_unresolved_bindings():
     assert schema["$defs"]["authorization_binding"]["properties"]["status"] == {
         "const": "UNRESOLVED"
     }
+
+
+def test_published_state_document_validates_against_its_schema():
+    c.validate(c.load("states.schema.json"), c.load("states.json"),
+               document="states.schema.json")
+
+
+@pytest.mark.parametrize("symbol", ["256hash", "report-sha256", "report_sha２５６",
+                                     "report_sha256\n", "report_sha256\r\n",
+                                     "report_sha256\u2028", "report_sha256\u2029"])
+def test_state_symbols_reject_unsafe_names(symbol):
+    with pytest.raises(c.ContractError):
+        c.validate({"$ref": "#/$defs/symbol"}, symbol, document="states.schema.json")
 
 
 def test_report_readback_is_the_only_chargeable_quote_origin():

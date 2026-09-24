@@ -33,10 +33,26 @@ found no remaining Critical or Important issue.
 
 - [x] Author the [F2 implementation plan](../../../docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md) for review.
 - [x] Complete scoped independent plan re-review at `50f16225c23f5fde046b483321f86bb7d6bbf4f1`: all ten findings addressed; no new Critical or Important issue.
-- [ ] Obtain human review and approval of the F2 plan before implementation.
+- [x] Obtain human review and approval of the F2 plan before implementation.
+- [x] Integrate the six isolated artifact slices and Task 1/3 scoped review repairs.
+- [x] Add exact schema/test/evidence graph bindings and clarify the 202 recovery body.
 - [ ] Freeze OpenAPI, JSON Schemas, reason codes, and state graphs.
 - [ ] Add exact BUY/SELL vectors and invalid-input contract tests.
 - [ ] Add payment atomic-unit and idempotency vectors.
+- [x] Integrate Task 6 on-disk vector-envelope repair and fix state-schema self-validation.
+- [ ] Complete scoped repair re-review and whole-branch independent review.
+- [x] Pass integrated graph, focused tests, Ruff, `make verify` and bare pytest; classify Grok's inherited Trivy failure.
+- [ ] Complete independent whole-branch review before F2 closure.
+
+F2 status: **independent review pending**. The owner approved the repaired
+plan and parallel task implementation; shared-file integration has one owner.
+The artifacts above exist, but final freeze and acceptance await independent
+review. Integration passed 329 focused tests and two full 970-test/85-subtest
+runs; only the inherited Trivy policy blocks Grok. Tasks 1 and 3 passed scoped repair re-review; Task 2 was
+approved, Task 4's shared-file findings are addressed by integration, and
+Task 5's approved Minor wording is corrected. Task 6's vector-envelope repair
+and integration's state-schema repair await final review. Runtime vectors remain `NOT_RUN`, A13–A14
+remain `BLOCKED_EXTERNAL`, and no receipt, payment or release is authorized.
 
 ## F3 — evidence report
 

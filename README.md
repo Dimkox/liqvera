@@ -14,7 +14,10 @@ complete-with-blockers: publication inventory, public salvage verification,
 the pinned Python development toolchain, and the public compatibility lock
 are implemented. [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md)
 accepts only the runtime and payment boundary. The overall change remains
-`implementing`; the next step is a separate F2 contracts plan.
+`implementing`. The approved F2 plan's six contract slices are integrated;
+329 focused contract tests and the full suite of 970 tests plus 85 subtests
+pass. Grok still fails only the inherited Trivy policy gate. Independent
+whole-branch review remains pending, so F2 is not yet closed.
 
 At implementation commit `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`,
 `make verify` passed with 641 tests and 85 subtests. The command
@@ -64,11 +67,15 @@ graph LR
 | `packages/readonly-analyzer` | Reconstruction, validation, and exact analytics |
 | `tools/mezo_compatibility.py` | Closed compatibility validator and bounded public transport |
 | `docs/compatibility/mezo-evidence-v1.json` | Fixed testnet, token, protocol, and SDK boundary |
+| `schemas/mezo-evidence/v1/` | F2 JSON Schemas, OpenAPI, state graphs and exact/future runtime vectors |
+| `tests/contracts/test_mezo_*.py` | Offline F2 contract consistency and existing arithmetic characterization |
 
 Capture produces frozen packages consumed by the analyzer through shared
 contracts. Python is the active analytical runtime; retained Go code is
 historical executable specification. A future TypeScript/Express gateway will
 serve immutable Python artifacts and keep payment state in PostgreSQL.
+F2 contracts define that future boundary; their `NOT_RUN` runtime obligations
+do not establish an HTTP service, ledger, report builder or settlement flow.
 
 Use Python 3.12+ for the Stage A packages, Make, and an isolated environment:
 

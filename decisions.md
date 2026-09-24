@@ -123,3 +123,15 @@ The F2 plan places versioned JSON contracts under `schemas/mezo-evidence/v1/` an
 ## 2026-09-24 — F2 plan review preserves interoperable contracts and payment recovery
 
 The repaired plan uses standard JSON Schema pattern search with portable absolute-end assertions and an offline canonical URI registry, so test-only validation cannot silently strengthen wire contracts. Delivery requires the current quote, attempt and finality states together; retention covers authorization validity and preserves scope/dedup associations until deletion cannot enable replay. Closed vector shapes and an exact future-assertion registry carry these obligations to F3–F5 without claiming runtime acceptance or choosing unverified SDK semantics.
+
+## 2026-09-24 — Integrate independently reviewed F2 slices through one owner
+
+The owner approved the repaired plan and parallel artifact implementation in isolated worktrees, with one integration owner for graph and continuity files. Cherry-picking only each task's owned diff preserved the reviewed dependency fixes without duplicating them; exact inventory bindings keep contracts, test helpers and evidence separately classified. Static models and kernel characterization remain distinct from F3–F5 runtime acceptance.
+
+## 2026-09-24 — Preserve retained mapping validity semantics
+
+F2 vectors use the existing mapping contract's inclusive validity endpoint, rejecting the next millisecond. Reading the retained implementation before freezing boundary expectations prevented an unrelated semantic change; synthetic fixture hashes prove only retained fixture bytes, never live provenance.
+
+## 2026-09-24 — F2 graph edges describe context, not acceptance proof
+
+The graph checker requires implemented nodes to trace back to an approved requirement and positive edges to declare their proof scope. Link the exact-number contracts to existing DATA-005 with the closed `AGGREGATE_SEMANTIC_CONTEXT` marker on both context and validation edges, keeping the plan's empty requirement lists. This satisfies inventory traceability without manufacturing a requirement proof or changing inherited conflicts.

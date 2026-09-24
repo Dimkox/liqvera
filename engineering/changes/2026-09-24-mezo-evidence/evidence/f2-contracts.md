@@ -1,12 +1,80 @@
-# F2 contracts evidence — Task 6 artifact branch draft
+# F2 contracts evidence — integration draft
 
-Status: **PARALLEL ARTIFACT BRANCH; INTEGRATION PENDING**. This document is not
+Status: **INTEGRATION VERIFIED; INDEPENDENT REVIEW PENDING**. This document is not
 whole-branch approval, a factory receipt, or F3–F5 runtime acceptance.
 
-Task 6 owns only `vectors.schema.json`, `vectors.json`,
-`tests/contracts/test_mezo_vectors.py`, and this draft. The integration owner
-must update the shared graph inventory, handoff, task ledger and README, run
-whole-branch verification, and obtain independent review before F2 closure.
+The owner approved the repaired plan and parallel task implementation. All six
+task slices, Task 1/3 review repairs and Task 6's complete-envelope validation
+repair are integrated on `feat/mezo-evidence-f2-contracts`. The single
+integration owner added exact graph bindings for 11 JSON artifacts, seven
+test/helper files and this evidence file, plus current continuity records.
+Both new graph nodes retain empty requirement lists and use context-only
+DATA-005/validation edges; the seven inherited conflicts are unchanged.
+
+Integration corrected Task 5's Minor description to "without paid report
+fields" while preserving its JSON 202 recovery body. A direct state-schema
+check also exposed the symbol pattern's rejection of `report_sha256`; a
+complete-document regression failed before the pattern allowed ASCII digits
+after its first letter, then all 22 state tests passed. No state transition
+or payment authority changed. Independent whole-branch review is still pending.
+
+The isolated Task 6 results below are historical task evidence, including its
+then-missing graph bindings and Task 3 Ruff failure. They do not describe the
+integrated tree. The final integration results follow; F2 remains open until
+review and verification are assessed together.
+
+## Integration verification — 2026-09-24
+
+Source base: `d5216f469f0a94c169aa11d3f8963b44567f4ba6`. The last integrated
+task commit before the integration-owned changes is
+`0632211aa540926292ba01771d4a66cb0e3b7548`. No cherry-pick conflict occurred;
+Task 2's helper extension auto-merged with Task 1's numeric repair.
+
+Checks ran in `/home/pall/projects/liqvera/.worktrees/mezo-evidence-f1-impl`,
+using its `.venv/bin` first on PATH: Python 3.12.3, pytest 9.1.1 and Ruff
+0.16.8. The final checks started by `2026-09-24T20:16:55Z` and completed by
+`2026-09-24T20:23:54Z` (the separate Trivy confirmation followed).
+
+| Command | Exit | Result |
+| --- | ---: | --- |
+| `git diff --check` and `git diff --cached --check` | 0 | No whitespace errors |
+| `make graph` | 0 | Exactly seven inherited declared conflicts; no new graph diagnostic |
+| `python -B -m pytest tests/contracts/test_mezo_states.py -q` regression RED | 1 | 1 failed, 21 passed; the real document's `report_sha256` violated the symbol pattern |
+| Same state regression after repair | 0 | 22 passed in 1.53s |
+| Six focused contract modules, command below | 0 | 329 passed in 179.24s |
+| Ruff on the helper and six F2 test modules | 0 | All checks passed |
+| `make verify` | 0 | 970 passed, 85 subtests passed in 311.17s; Stage A verification passed |
+| `python -B -m pytest -q` | 0 | 970 passed, 85 subtests passed in 311.25s |
+| `python -B scripts/grok_verify.py --mode pr --no-record` | 1 | Only `trivy-config` failed; all other applicable checks passed; coverage explicitly skipped by runner policy |
+| `trivy config --exit-code 1 .` | 1 | Exactly two LOW DS-0026 missing-HEALTHCHECK findings in the existing one-shot Stage A Dockerfiles |
+
+```bash
+PATH="$PWD/.venv/bin:$PATH" python -B -m pytest tests/contracts/test_mezo_primitives.py tests/contracts/test_mezo_requests.py tests/contracts/test_mezo_resources.py tests/contracts/test_mezo_states.py tests/contracts/test_mezo_openapi.py tests/contracts/test_mezo_vectors.py -q
+PATH="$PWD/.venv/bin:$PATH" ruff check tests/contracts/mezo_evidence_support.py tests/contracts/test_mezo_primitives.py tests/contracts/test_mezo_requests.py tests/contracts/test_mezo_resources.py tests/contracts/test_mezo_states.py tests/contracts/test_mezo_openapi.py tests/contracts/test_mezo_vectors.py
+```
+
+Grok reported `profiles=base`, `changed=9` for its integration working-diff
+snapshot, and zero potential secrets. Its secret-scan result is not a new
+whole-history audit. This run created no receipt. No new unresolved failure
+was observed; `BLOCKED_TRIVY_HEALTHCHECK_POLICY` remains unchanged.
+
+The code/schema/graph tree was stable during these checks. Its staged tree
+before verification-record edits was
+`f1d03ae65de433073e030127b462cb751bdedfcb`; later changes update only evidence
+and continuity prose. A reproducible fingerprint excluding that prose is
+`7c55d6f27a9a8c1f09901c14b25e0e89490cd7640251b36c5765deed7397d12d`, obtained
+by the following command after staging the integration artifacts:
+
+```bash
+git ls-files -s -- architecture/architecture.yaml schemas/mezo-evidence/v1 tests/contracts/mezo_evidence_support.py tests/contracts/test_mezo_primitives.py tests/contracts/test_mezo_requests.py tests/contracts/test_mezo_resources.py tests/contracts/test_mezo_states.py tests/contracts/test_mezo_openapi.py tests/contracts/test_mezo_vectors.py | sha256sum
+```
+
+This binds contract consistency and existing-kernel characterization only.
+Task 1/3 repairs passed scoped independent re-review; Task 2 was approved;
+Task 4's graph/handoff gap and cross-task state validation are now addressed;
+Task 5's approved Minor wording is repaired. Task 6's envelope repair is
+integrated, with final independent review still pending. No F2 closure or
+F3–F5 runtime PASS follows from these results.
 
 ## Source and environment
 

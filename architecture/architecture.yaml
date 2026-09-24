@@ -1,5 +1,15 @@
 manifest_version: 2
 nodes:
+- id: contract:mezo-evidence-v1
+  kind: Contract
+  owner: contracts
+  lifecycle: IMPLEMENTED
+  requirements: []
+- id: test:mezo-evidence-contracts
+  kind: TestOrEval
+  owner: contracts
+  lifecycle: IMPLEMENTED
+  requirements: []
 - id: contract:architecture-authority
   kind: Contract
   owner: architecture
@@ -6281,6 +6291,14 @@ nodes:
   requirements:
   - HOST-013
 edges:
+- from: requirement:DATA-005
+  to: contract:mezo-evidence-v1
+  kind: specified_by
+  non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
+- from: contract:mezo-evidence-v1
+  to: test:mezo-evidence-contracts
+  kind: validated_by
+  non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
 - from: requirement:PROD-001
   to: approval:m0-owner-approved
   kind: approved_by
@@ -13380,6 +13398,63 @@ phase_policy_times:
   deployment: '2026-08-11T00:00:00Z'
 repository_inventory:
   bindings:
+  - path: schemas/mezo-evidence/v1/primitives.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/reasons.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/error.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/quote-request.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/report.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/resources.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/states.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/states.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/openapi.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/vectors.schema.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: schemas/mezo-evidence/v1/vectors.json
+    node: contract:mezo-evidence-v1
+    path_class: SCHEMA_MANIFEST
+  - path: tests/contracts/mezo_evidence_support.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_primitives.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_requests.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_resources.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_states.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_openapi.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_mezo_vectors.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: docs/adr/0002-liqvera-report-payment-boundary.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

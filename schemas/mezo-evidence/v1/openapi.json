@@ -129,7 +129,7 @@
     "/v1/reports/{report_id}": {
       "get": {
         "operationId": "getReport", "security": [{"CapabilityBearer": []}],
-        "description": "Unpaid access yields 402. Only this route may receive PAYMENT-SIGNATURE and start one durable settlement. Paid delivery requires current confirmed receipt, finality, matching entitlement and intact artifact; uncertainty yields 202 without body.",
+        "description": "Unpaid access yields 402. Only this route may receive PAYMENT-SIGNATURE and start one durable settlement. Paid delivery requires current confirmed receipt, finality, matching entitlement and intact artifact; uncertainty yields 202 without paid report fields.",
         "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, {"name": "PAYMENT-SIGNATURE", "in": "header", "required": false, "description": "Opaque SDK-produced x402 v2 authorization. F5 checks decoded payload at most 16 KiB and scheme-specific identity, replay domain and quote binding. Never log or reflect this header.", "schema": {"type": "string", "minLength": 1}, "x-liqvera-decoded-max-bytes": 16384}],
         "responses": {
           "200": {"description": "Entitled immutable report and final receipt", "headers": {"X-Request-ID": {"required": true, "schema": {"$ref": "primitives.schema.json#/$defs/id"}}, "Cache-Control": {"required": true, "schema": {"type": "string", "const": "private, no-store"}}, "PAYMENT-RESPONSE": {"required": true, "description": "Opaque base64 SDK receipt, emitted only after verified finality; never logged", "schema": {"type": "string", "minLength": 1}}}, "content": {"application/json": {"schema": {"$ref": "resources.schema.json#/$defs/paid_report"}}}},

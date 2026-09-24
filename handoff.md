@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 independent plan review closure). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24 (F2 integration verified; independent review pending). Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f2-contracts` (stacked on verified F1).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -14,22 +14,43 @@ F2–F7 remain open. The accepted
 ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
 
-The [F2 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md)
-now exists and awaits human plan approval. Its six tasks cover closed JSON
-Schemas/OpenAPI, public reasons, separate request/quote/payment state graphs,
-exact BUY/SELL vectors, and payment atomic-unit/idempotency/auth obligations.
-Initial independent review of plan commit `66fe042` identified six Important
-and four Minor findings. The planning repair addresses portable schema
-patterns/base URIs, discriminated request status, no-broadcast expiry,
-joint delivery/finality guards, authorization-aware retention, raw ZIP/header
-correlation, concrete vector shapes, and conditional continuity. Scoped
-independent re-review approved all ten findings as addressed, with no new
-Critical or Important issue, specifically against reviewed plan commit
-`50f16225c23f5fde046b483321f86bb7d6bbf4f1`. The reviewed plan is unchanged by
-this closure. Human plan approval remains pending; F2 implementation has not
-started. Next: obtain human approval before task-by-task implementation.
-Runtime acceptance remains unrun or externally blocked; F1
-payment/finality and Trivy blockers remain unchanged.
+The owner approved the repaired [F2 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md)
+after its independent re-review at `50f16225c23f5fde046b483321f86bb7d6bbf4f1`
+and authorized parallel implementation in isolated task worktrees. The six
+artifact slices and Task 1/3 review repairs are now integrated in task order;
+one integration owner maintains the shared graph, handoff and task records.
+The published contracts cover closed schemas/OpenAPI, public reasons,
+request/quote/payment/delivery states, exact BUY/SELL vectors, and payment
+atomic-unit/idempotency/auth obligations. They add no runtime service.
+
+Task 1's three Important numeric-semantics findings and Task 3's HTTPS
+evidence-reference finding passed scoped re-review after repair. Task 2 was
+approved. Task 4's artifacts were found coherent; its missing shared graph
+and handoff bindings are addressed here, with vector linkage still requiring
+integrated verification. Task 5 was approved with one Minor wording issue;
+the 202 description now says "without paid report fields" and retains the
+JSON recovery error body. Its existing response-schema assertion covers that
+body, so no prose-matching test was added. Task 6 review found one Important
+gap in validating the on-disk vector envelope; its test-only repair is now
+integrated. Integration also reproduced and repaired a state-schema symbol
+pattern that rejected its own `report_sha256` field, adding full document
+validation and unsafe-name regressions. These repairs await final review.
+
+F2 remains **independent review pending**, not complete. Next: obtain an
+independent whole-branch review including the integration state-schema repair.
+Runtime acceptance stays `NOT_RUN`, with
+A13–A14 `BLOCKED_EXTERNAL`; F1 payment/finality and Trivy blockers remain.
+
+Integrated verification on 2026-09-24 passed `git diff --check`, `make graph`
+(the same seven declared conflicts), changed-Python Ruff, all six F2 contract
+modules (329 passed in 179.24s), `make verify` (970 passed and 85 subtests in
+311.17s), and bare pytest (970 passed and 85 subtests in 311.25s). Grok PR
+verification with `--no-record` exited 1 only for Trivy; every other applicable
+check passed, zero potential secrets were reported, and coverage was skipped
+by runner policy. Direct Trivy inspection confirmed exactly two inherited LOW
+DS-0026 findings. No waiver or artificial healthcheck was added. See the
+[integration draft evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md)
+for the verified artifact fingerprint and historical isolated-task results.
 
 Planning verification: `git diff --check`, authoring-placeholder scan and
 `make graph` passed for the repair; graph
@@ -51,7 +72,7 @@ compatibility pointer. Preserve inherited `mee-*` names.
 No active `.grok-stack/runtime/active-route.json` exists in this public
 worktree. `grok_status.py` reports null route/change and no receipt gaps,
 which is not factory approval. No factory receipt was created or claimed.
-Tasks 1–5 and the final whole-branch transport repair passed independent
+F1 Tasks 1–5 and the final whole-branch transport repair passed independent
 review. No Critical or Important finding remains open from F1.
 
 ## Verified F1 implementation

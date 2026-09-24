@@ -66,3 +66,23 @@ The reviewed transport bounded decoded JSON and individual socket operations, le
 ## 2026-09-24 — F2 plan validated local pieces without their shared boundaries
 
 Initial review found that a full-match test helper would enforce stronger string constraints than the published JSON Schema, while separate state tables omitted joint delivery and retention/replay predicates. The root cause was checking each contract in isolation instead of testing interoperability and cross-machine invariants against adverse traces. The planning repair specifies standard regex/URI behavior, discriminated status payloads, joint confirmation eligibility, retention floors and concrete future vectors; independent re-review remains pending.
+
+## 2026-09-24 — Test-helper assumptions masked portable schema defects
+
+Task 1 review exposed Python-specific number equality/bounds and JSON exponent overflow; Task 3 review exposed reliance on the helper's HTTPS-only URI format. The root cause was treating helper behavior as proof that published JSON Schema had the same semantics in other validators. Numeric regressions and an explicit HTTPS pattern with a format-independent test now cover those repaired boundaries.
+
+## 2026-09-24 — Task 6 exploratory verification raced dependency arrival
+
+An exploratory full test run overlapped incoming task cherry-picks and produced transient missing-interface failures. The root cause was verifying a changing dependency tree; later stable checks superseded that result, and integration verification runs only after the selected artifact commits and repairs are present.
+
+## 2026-09-24 — F2 node instructions omitted required graph context
+
+The first integration graph check rejected two orphan nodes and an unscoped validation edge despite all exact file bindings being present. The root cause was following the plan's node/edge sketch without accounting for the existing reverse-requirement and proof-scope checks. Context-only DATA-005 linkage and the existing non-proof marker resolve the missing graph metadata without asserting runtime acceptance.
+
+## 2026-09-24 — State schema was inspected without validating its own document
+
+Integration found that the symbol pattern rejected the existing `report_sha256` uniqueness field. The root cause was testing schema structure and graph semantics separately while the parallel task lacked the shared checker. A failing complete-document regression now validates the actual state file; allowing ASCII digits after the first letter repairs the schema while unsafe names remain rejected.
+
+## 2026-09-24 — Reconstructed vector envelopes hid invalid root fields
+
+Task 6 initially extracted the vector array and rebuilt a known-valid envelope before schema validation. The root cause was validating transformed test data instead of the original loaded document, allowing a wrong/missing schema version or extra root field to escape detection. The loading-path repair validates the original document first and rejects each corruption through real file-loading regressions.

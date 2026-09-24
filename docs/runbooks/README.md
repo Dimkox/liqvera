@@ -28,7 +28,9 @@ and gateway (UID 10003) share only evidence GID 10001. Capture/report publish
 directories as `0750` and files as `0640`, so the report can read captures
 and the gateway can read completed artifacts without sharing a write UID.
 The gateway has read-only artifact access;
-it and its one-shot migration job are the only PostgreSQL clients. Capture alone has public Hyperliquid
+it and its one-shot migration job are the only PostgreSQL clients. Report and
+gateway alone receive the profile-specific internal report token file.
+Capture alone has public Hyperliquid
 egress; report and database have no external network. Network ACLs on the host
 must constrain capture to approved Hyperliquid endpoints and gateway to the
 approved facilitator/RPC; Compose bridge networks do not enforce destination
@@ -43,7 +45,7 @@ digests and record the built image hashes before any actual release.
 
 No environment file may contain database passwords, private keys, wallet
 seeds, bearer capabilities, signatures, or exchange credentials. Local
-PostgreSQL secret-file handling is described in
+PostgreSQL and internal report-token handling are described in
 [`deploy/mezo-evidence/secrets/README.md`](../../deploy/mezo-evidence/secrets/README.md).
 The merchant `LIQVERA_PAY_TO` address is public configuration, never a
 private key. Blank `PAY_TO`, `FINALITY_RULE_UNVERIFIED`, absent canonical authorization

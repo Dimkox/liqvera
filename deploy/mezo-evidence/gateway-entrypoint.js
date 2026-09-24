@@ -10,6 +10,13 @@ url.password = password;
 
 const command = process.argv[2] || 'npm';
 const args = process.argv.length > 2 ? process.argv.slice(3) : ['start'];
+const isMigration = command === 'npm' && args[0] === 'run' && args[1] === 'migrate';
+if (!isMigration) {
+  const reportTokenPath = process.env.REPORT_SERVICE_TOKEN_FILE;
+  if (!reportTokenPath || !readFileSync(reportTokenPath, 'utf8').trim()) {
+    throw new Error('Internal report token file is missing or empty');
+  }
+}
 const child = spawn(command, args, {
   cwd: '/app',
   env: { ...process.env, DATABASE_URL: url.toString() },

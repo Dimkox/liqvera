@@ -29,7 +29,8 @@ be the correct fail-closed state during development but blocks a paid demo.
 Structured logs should carry stable error codes, UTC timestamps, safe
 request/quote/report/attempt correlation IDs, source mode, and image/source
 version. Do not log bearer capabilities, cookies, `PAYMENT-SIGNATURE`, raw
-authorization payloads, database URLs/passwords, private keys, or participant
-email. Sanitize any transaction evidence before attaching it to acceptance
-or incident reports. Limit log retention and access independently from the
+authorization payloads, database URLs/passwords, internal report-service
+tokens, private keys, or participant email. Sanitize any transaction evidence
+before attaching it to acceptance or incident reports. Limit log retention
+and access independently from the
 paid artifact retention policy.

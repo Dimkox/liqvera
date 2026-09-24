@@ -64,6 +64,7 @@ x-postgres: &postgres
   init: true
   restart: unless-stopped
   user: "70:70"
+  group_add: ["10001"]
   read_only: true
   cap_drop: [ALL]
   security_opt: [no-new-privileges:true]
@@ -214,6 +215,9 @@ services:
   report-fixture:
     <<: *report
     profiles: [fixture]
+    secrets:
+      - source: report_token_fixture
+        target: report_service_token
     environment:
       LIQVERA_SOURCE_MODE: fixture
       LIQVERA_CAPTURE_URL: http://evidence-capture:8081
@@ -221,12 +225,16 @@ services:
       LIQVERA_ARTIFACT_ROOT: /data/artifacts
       LIQVERA_REPORT_PORT: "8082"
       LIQVERA_ENGINE_COMMIT: ${LIQVERA_ENGINE_COMMIT:?set a 40-character lowercase Git commit}
+      LIQVERA_INTERNAL_TOKEN_FILE: /run/secrets/report_service_token
     depends_on:
       evidence-capture-fixture: { condition: service_healthy }
 
   report-live:
     <<: *report
     profiles: [live]
+    secrets:
+      - source: report_token_live
+        target: report_service_token
     environment:
       LIQVERA_SOURCE_MODE: live-public
       LIQVERA_CAPTURE_URL: http://evidence-capture:8081
@@ -234,6 +242,7 @@ services:
       LIQVERA_ARTIFACT_ROOT: /data/artifacts
       LIQVERA_REPORT_PORT: "8082"
       LIQVERA_ENGINE_COMMIT: ${LIQVERA_ENGINE_COMMIT:?set a 40-character lowercase Git commit}
+      LIQVERA_INTERNAL_TOKEN_FILE: /run/secrets/report_service_token
     depends_on:
       evidence-capture-live: { condition: service_healthy }
 
@@ -275,9 +284,12 @@ services:
     secrets:
       - source: postgres_password_fixture
         target: postgres_password
+      - source: report_token_fixture
+        target: report_service_token
     environment:
       SOURCE_MODE: fixture
       REPORT_SERVICE_URL: http://report:8082
+      REPORT_SERVICE_TOKEN_FILE: /run/secrets/report_service_token
       ARTIFACT_ROOT: /data/artifacts
       PUBLIC_BASE_URL: http://localhost:8080
       CORS_ORIGINS: http://localhost:8080
@@ -293,9 +305,12 @@ services:
     secrets:
       - source: postgres_password_live
         target: postgres_password
+      - source: report_token_live
+        target: report_service_token
     environment:
       SOURCE_MODE: live-public
       REPORT_SERVICE_URL: http://report:8082
+      REPORT_SERVICE_TOKEN_FILE: /run/secrets/report_service_token
       ARTIFACT_ROOT: /data/artifacts
       PUBLIC_BASE_URL: ${LIQVERA_PUBLIC_ORIGIN:-}
       CORS_ORIGINS: ${LIQVERA_PUBLIC_ORIGIN:-}
@@ -341,6 +356,10 @@ secrets:
     file: ./secrets/fixture_postgres_password
   postgres_password_live:
     file: ./secrets/live_postgres_password
+  report_token_fixture:
+    file: ./secrets/fixture_report_service_token
+  report_token_live:
+    file: ./secrets/live_report_service_token
 
 volumes:
   captures: {}

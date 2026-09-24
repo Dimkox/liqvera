@@ -18,9 +18,11 @@ return a source error and keep the live profile from using fixture data.
 
 For a suspected secret exposure, remove the exposed material from service
 access, retain an incident record without copying its value, and have the
-owner rotate it using the relevant provider. A repository cleanup alone does
-not revoke a secret. Do not post a bearer capability, signature, wallet key,
-database password, or raw authorization into chat, tickets, or dashboards.
+owner rotate it using the relevant provider. Rotate a report-service token in
+report and gateway together; capture must never receive it. A repository
+cleanup alone does not revoke a secret. Do not post a bearer capability,
+signature, wallet key, database password, or raw authorization into chat,
+tickets, or dashboards.
 
 ## Diagnosis and return to service
 

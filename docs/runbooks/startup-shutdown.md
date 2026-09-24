@@ -14,10 +14,14 @@ lowercase SHA of the exact source build. For live, set a real HTTPS public
 origin and matching Caddy DNS name. The operator must establish DNS, TLS
 reachability, host firewall rules, outbound destination allowlists, and a
 backup location before exposing port 80/443. Do not put secrets in an env
-file. Create random `secrets/fixture_postgres_password` and
-`secrets/live_postgres_password` with restrictive host permissions. Compose
-may resolve both secret declarations while parsing either profile, so keep
-both files present; use different values.
+file. Create random `secrets/fixture_postgres_password`,
+`secrets/live_postgres_password`, `secrets/fixture_report_service_token`, and
+`secrets/live_report_service_token` with owner-only write and group-only read
+permissions (host group GID `10001`, mode `0640`). Keep
+database passwords and internal report tokens distinct for each profile.
+Compose may resolve all secret declarations while parsing either profile, so
+keep all four files present. The report token must be mounted only into report
+and gateway; never pass it to capture.
 
 The code-completion phase explicitly defers execution. When verification is
 authorized, first inspect the resolved configuration without pasting its

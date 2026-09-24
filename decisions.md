@@ -103,3 +103,7 @@ The owner selected Liqvera with the tagline "Market reports you can verify." and
 ## 2026-09-24 — Compatibility is independent of payment readiness
 
 Pin the entire F1 compatibility boundary in a closed lock, emit only an allowlisted summary, and retain `PAY_TO_MISSING` plus `FINALITY_RULE_UNVERIFIED` even when public probes succeed. Isolate npm metadata reads with fixed argv, PATH-only child environment, and temporary config/cache paths removed before return; this passed the live probe without reading operator credentials. Include offline compatibility tests in both default pytest and `make verify`, while keeping external probes separate.
+
+## 2026-09-24 — One transport enforces the full public endpoint boundary
+
+Task 4 review proved npm 11.19.0 ignores candidate redirect-limit flags, so the controller approved replacing npm-view with four literal version-metadata URLs through the same Python transport; this supersedes the temporary npm config/cache approach above. Explicitly disable ambient proxies, forbid redirects, request identity encoding, and validate response framing within the 2 MiB bound before interpreting metadata. Real proxy-routing, loopback redirect, and HTTPResponse fixtures cover those behaviors, and the live probe passed with unchanged payment blockers.

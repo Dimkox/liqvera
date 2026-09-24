@@ -6,7 +6,6 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 import tempfile
 import urllib.error
@@ -20,6 +19,13 @@ FACILITATOR_URL = "https://facilitator.vativ.io"
 MUSD_ADDRESS = "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"
 PACKAGES = ("@x402/core", "@x402/evm", "@x402/express", "@x402/paywall")
 SDK_VERSION = "2.16.0"
+REGISTRY_METADATA = (
+    ("@x402/core", "https://registry.npmjs.org/%40x402%2Fcore/2.16.0"),
+    ("@x402/evm", "https://registry.npmjs.org/%40x402%2Fevm/2.16.0"),
+    ("@x402/express", "https://registry.npmjs.org/%40x402%2Fexpress/2.16.0"),
+    ("@x402/paywall", "https://registry.npmjs.org/%40x402%2Fpaywall/2.16.0"),
+)
+MAX_RESPONSE_BYTES = 2 * 1024 * 1024
 
 
 class CompatibilityError(ValueError):
@@ -196,17 +202,42 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         raise CompatibilityError("HTTP_REDIRECT_BLOCKED")
 
 
+def _build_opener():
+    return urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+
+
 def _request_json(opener, url: str, payload: dict | None, reason: str) -> object:
     request = urllib.request.Request(
         url,
         data=None if payload is None else json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json", "User-Agent": "Liqvera-Compatibility-Probe/1"},
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "Liqvera-Compatibility-Probe/1",
+            "Accept-Encoding": "identity",
+        },
         method="GET" if payload is None else "POST",
     )
     try:
         with opener.open(request, timeout=12) as response:
-            body = response.read(2 * 1024 * 1024 + 1)
-        _require(len(body) <= 2 * 1024 * 1024, reason)
+            lengths = response.headers.get_all("Content-Length", [])
+            encodings = response.headers.get_all("Content-Encoding", [])
+            transfers = response.headers.get_all("Transfer-Encoding", [])
+            _require(
+                not encodings or [value.lower() for value in encodings] == ["identity"], reason
+            )
+            _require(not transfers or [value.lower() for value in transfers] == ["chunked"], reason)
+            _require(not (lengths and transfers), reason)
+            expected_length = None
+            if lengths:
+                _require(
+                    len(lengths) == 1 and re.fullmatch(r"[0-9]{1,10}", lengths[0]) is not None,
+                    reason,
+                )
+                expected_length = int(lengths[0])
+                _require(expected_length <= MAX_RESPONSE_BYTES, reason)
+            body = response.read(MAX_RESPONSE_BYTES + 1)
+            _require(expected_length is None or len(body) == expected_length, reason)
+        _require(len(body) <= MAX_RESPONSE_BYTES, reason)
         return json.loads(body)
     except (OSError, urllib.error.URLError, HTTPException, ValueError, RecursionError) as error:
         if isinstance(error, CompatibilityError):
@@ -233,55 +264,22 @@ def _rpc(opener, method: str, params: list) -> object:
     return response["result"]
 
 
-def _npm_versions() -> dict[str, object]:
+def _registry_versions(opener) -> dict[str, str]:
+    """Read literal registry URLs and project only validated package identities."""
     versions = {}
-    # Empty cwd/configs and a minimal environment prevent local npm credentials
-    # or registry overrides from entering these public metadata reads. npm's
-    # transient metadata cache is removed before returning; nothing is installed.
-    try:
-        with tempfile.TemporaryDirectory(prefix="liqvera-npm-metadata-") as directory:
-            temporary = Path(directory)
-            for package in PACKAGES:
-                response = subprocess.run(
-                    [
-                        "npm",
-                        "view",
-                        f"{package}@{SDK_VERSION}",
-                        "version",
-                        "--json",
-                        "--registry=https://registry.npmjs.org",
-                        f"--userconfig={temporary / 'user.npmrc'}",
-                        f"--globalconfig={temporary / 'global.npmrc'}",
-                        f"--cache={temporary / 'cache'}",
-                        "--logs-max=0",
-                        "--fetch-retries=0",
-                        "--fetch-timeout=12000",
-                        "--update-notifier=false",
-                        "--prefer-online",
-                        "--no-audit",
-                        "--no-fund",
-                    ],
-                    shell=False,
-                    cwd=directory,
-                    env={"PATH": os.environ.get("PATH", os.defpath)},
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.DEVNULL,
-                    timeout=12,
-                    check=False,
-                )
-                _require(response.returncode == 0, "X402_REGISTRY_UNAVAILABLE")
-                versions[package] = json.loads(response.stdout)
-    except (OSError, ValueError, subprocess.SubprocessError) as error:
-        if isinstance(error, CompatibilityError):
-            raise
-        raise CompatibilityError("X402_REGISTRY_UNAVAILABLE") from None
+    for package, url in REGISTRY_METADATA:
+        response = _request_json(opener, url, None, "X402_REGISTRY_UNAVAILABLE")
+        _require(isinstance(response, dict), "X402_SDK_VERSION_MISSING")
+        # Registry metadata has other fields; none are retained or interpreted.
+        identity = {"name": response.get("name"), "version": response.get("version")}
+        _require(identity == {"name": package, "version": SDK_VERSION}, "X402_SDK_VERSION_MISSING")
+        versions[package] = SDK_VERSION
     return versions
 
 
 def collect_observations() -> dict:
     """Fixed read-only requests; callers must publish only the validated summary."""
-    opener = urllib.request.build_opener(NoRedirect())
+    opener = _build_opener()
     return {
         "chain_id": _rpc(opener, "eth_chainId", []),
         "token_code": _rpc(opener, "eth_getCode", [MUSD_ADDRESS, "latest"]),
@@ -303,7 +301,7 @@ def collect_observations() -> dict:
             {"type": "l2Book", "coin": "BTC"},
             "HYPERLIQUID_UNAVAILABLE",
         ),
-        "npm_versions": _npm_versions(),
+        "npm_versions": _registry_versions(opener),
     }
 
 

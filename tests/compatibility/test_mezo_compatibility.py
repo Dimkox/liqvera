@@ -3,10 +3,12 @@
 import io
 import json
 import runpy
-import subprocess
+import threading
+from http.client import HTTPResponse
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.request import Request
+from urllib.request import HTTPSHandler, Request
 
 import pytest
 
@@ -14,6 +16,18 @@ from tools import mezo_compatibility as compatibility
 from tools.mezo_compatibility import CompatibilityError, verify_observations
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def wire_response(body, headers=None):
+    """Exercise the real HTTPResponse reader with synthetic wire bytes."""
+
+    class Socket:
+        def makefile(self, mode):
+            return io.BytesIO(b"HTTP/1.1 200 OK\r\n" + (headers or b"") + b"\r\n" + body)
+
+    response = HTTPResponse(Socket())
+    response.begin()
+    return response
 
 
 @pytest.fixture
@@ -307,10 +321,12 @@ def test_collect_uses_only_fixed_readonly_requests(observations, monkeypatch):
         observations["facilitator"],
         observations["meta"],
         observations["book"],
+        {"name": "@x402/core", "version": "2.16.0"},
+        {"name": "@x402/evm", "version": "2.16.0"},
+        {"name": "@x402/express", "version": "2.16.0"},
+        {"name": "@x402/paywall", "version": "2.16.0"},
     ]
     requests = []
-    commands = []
-    transient_directories = []
 
     class Opener:
         def open(self, request, timeout):
@@ -318,44 +334,14 @@ def test_collect_uses_only_fixed_readonly_requests(observations, monkeypatch):
             requests.append(
                 (request.full_url, request.method, request.data, dict(request.header_items()))
             )
-            return io.BytesIO(json.dumps(replies[len(requests) - 1]).encode())
+            return wire_response(json.dumps(replies[len(requests) - 1]).encode())
 
     def build_opener(*handlers):
         assert any(isinstance(handler, compatibility.NoRedirect) for handler in handlers)
         return Opener()
 
-    def npm(command, **kwargs):
-        commands.append(command)
-        directory = Path(kwargs["cwd"])
-        transient_directories.append(directory)
-        assert directory.is_dir()
-        assert command[5:] == [
-            "--registry=https://registry.npmjs.org",
-            f"--userconfig={directory / 'user.npmrc'}",
-            f"--globalconfig={directory / 'global.npmrc'}",
-            f"--cache={directory / 'cache'}",
-            "--logs-max=0",
-            "--fetch-retries=0",
-            "--fetch-timeout=12000",
-            "--update-notifier=false",
-            "--prefer-online",
-            "--no-audit",
-            "--no-fund",
-        ]
-        cache = directory / "cache"
-        cache.mkdir(exist_ok=True)
-        (cache / "synthetic-response").write_text("synthetic-cache-marker")
-        assert kwargs["shell"] is False
-        assert kwargs["timeout"] == 12
-        assert kwargs["stderr"] == subprocess.DEVNULL
-        assert kwargs["stdout"] == subprocess.PIPE
-        assert set(kwargs["env"]) == {"PATH"}
-        return subprocess.CompletedProcess(command, 0, stdout=b'"2.16.0"\n')
-
     monkeypatch.setattr(compatibility.urllib.request, "build_opener", build_opener)
-    monkeypatch.setattr(compatibility.subprocess, "run", npm)
     assert compatibility.collect_observations() == observations
-    assert all(not directory.exists() for directory in transient_directories)
     assert [
         (url, method, json.loads(body) if body else None) for url, method, body, _ in requests
     ] == [
@@ -390,14 +376,13 @@ def test_collect_uses_only_fixed_readonly_requests(observations, monkeypatch):
         ("https://facilitator.vativ.io/supported", "GET", None),
         ("https://api.hyperliquid.xyz/info", "POST", {"type": "meta"}),
         ("https://api.hyperliquid.xyz/info", "POST", {"type": "l2Book", "coin": "BTC"}),
+        ("https://registry.npmjs.org/%40x402%2Fcore/2.16.0", "GET", None),
+        ("https://registry.npmjs.org/%40x402%2Fevm/2.16.0", "GET", None),
+        ("https://registry.npmjs.org/%40x402%2Fexpress/2.16.0", "GET", None),
+        ("https://registry.npmjs.org/%40x402%2Fpaywall/2.16.0", "GET", None),
     ]
     assert all(headers["User-agent"] == "Liqvera-Compatibility-Probe/1" for *_, headers in requests)
-    assert [command[:5] for command in commands] == [
-        ["npm", "view", "@x402/core@2.16.0", "version", "--json"],
-        ["npm", "view", "@x402/evm@2.16.0", "version", "--json"],
-        ["npm", "view", "@x402/express@2.16.0", "version", "--json"],
-        ["npm", "view", "@x402/paywall@2.16.0", "version", "--json"],
-    ]
+    assert all(headers["Accept-encoding"] == "identity" for *_, headers in requests)
 
 
 @pytest.mark.parametrize(
@@ -425,7 +410,7 @@ def test_transport_errors_are_sanitized(error):
 def test_invalid_or_oversized_remote_json_is_sanitized(body):
     class Opener:
         def open(self, request, timeout):
-            return io.BytesIO(body)
+            return wire_response(body)
 
     with pytest.raises(CompatibilityError, match="^MEZO_RPC_UNAVAILABLE$"):
         compatibility._request_json(
@@ -434,30 +419,138 @@ def test_invalid_or_oversized_remote_json_is_sanitized(body):
 
 
 @pytest.mark.parametrize(
-    "result",
+    "metadata",
     [
-        subprocess.CompletedProcess([], 1, stdout=b"PRIVATE-MARKER"),
-        subprocess.CompletedProcess([], 0, stdout=b"PRIVATE-MARKER"),
-        subprocess.TimeoutExpired([], 12, output=b"PRIVATE-MARKER"),
-        FileNotFoundError("PRIVATE-MARKER"),
+        None,
+        [],
+        {},
+        {"version": "2.16.0"},
+        {"name": "@x402/core", "version": "latest"},
+        {"name": "@x402/evm", "version": "2.16.0"},
+        {"name": "@x402/core", "version": ["2.16.0"]},
     ],
 )
-def test_npm_failures_are_sanitized(result, monkeypatch):
-    directories = []
+def test_registry_metadata_must_identify_exact_package_and_version(metadata):
+    class Opener:
+        def open(self, request, timeout):
+            return wire_response(json.dumps(metadata).encode())
 
-    def npm(*args, **kwargs):
-        directory = Path(kwargs["cwd"])
-        directories.append(directory)
-        (directory / "cache").mkdir()
-        (directory / "cache" / "synthetic-response").write_text("synthetic-cache-marker")
-        if isinstance(result, Exception):
-            raise result
-        return result
+    with pytest.raises(CompatibilityError, match="^X402_SDK_VERSION_MISSING$"):
+        compatibility._registry_versions(Opener())
 
-    monkeypatch.setattr(compatibility.subprocess, "run", npm)
+
+def test_registry_failure_is_sanitized():
+    class Opener:
+        def open(self, request, timeout):
+            raise URLError("PRIVATE-MARKER")
+
     with pytest.raises(CompatibilityError, match="^X402_REGISTRY_UNAVAILABLE$"):
-        compatibility._npm_versions()
-    assert directories and all(not directory.exists() for directory in directories)
+        compatibility._registry_versions(Opener())
+
+
+def test_ambient_proxy_credentials_never_reach_transport(monkeypatch):
+    proxy_user = "synthetic-user"
+    proxy_marker = "synthetic-marker"
+    proxy_url = "http://" + proxy_user + ":" + proxy_marker + "@proxy.invalid:8080"
+    for name in ("https_proxy", "HTTPS_PROXY"):
+        monkeypatch.setenv(name, proxy_url)
+    monkeypatch.setenv("no_proxy", "")
+    monkeypatch.setenv("NO_PROXY", "")
+    requests = []
+    original = compatibility.urllib.request.build_opener
+
+    class CaptureHTTPS(HTTPSHandler):
+        def https_open(self, request):
+            requests.append((request.host, request.get_header("Proxy-authorization")))
+            raise CompatibilityError("TEST_TRANSPORT_STOP")
+
+    def build_opener(*handlers):
+        return original(*handlers, CaptureHTTPS())
+
+    monkeypatch.setattr(compatibility.urllib.request, "build_opener", build_opener)
+    with pytest.raises(CompatibilityError, match="^TEST_TRANSPORT_STOP$"):
+        compatibility.collect_observations()
+    assert requests == [("rpc.test.mezo.org", None)]
+
+
+@pytest.mark.parametrize("status", [301, 302, 303, 307, 308])
+def test_real_redirect_never_contacts_target(status):
+    visits = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+        def do_GET(self):
+            visits.append(self.path)
+            self.send_response(status if self.path == "/registry" else 200)
+            self.send_header("Location", "/target")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+    with ThreadingHTTPServer(("127.0.0.1", 0), Handler) as server:
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with pytest.raises(CompatibilityError, match="^HTTP_REDIRECT_BLOCKED$"):
+                compatibility._request_json(
+                    compatibility._build_opener(),
+                    f"http://127.0.0.1:{server.server_port}/registry",
+                    None,
+                    "X402_REGISTRY_UNAVAILABLE",
+                )
+            assert visits == ["/registry"]
+        finally:
+            server.shutdown()
+            thread.join(timeout=2)
+
+
+@pytest.mark.parametrize(
+    "headers",
+    [
+        b"Content-Length: 20\r\n",
+        b"Content-Length: -1\r\n",
+        b"Content-Length: invalid\r\n",
+        b"Content-Length: 2097153\r\n",
+        b"Content-Length: 2\r\nContent-Length: 20\r\n",
+        b"Content-Encoding: gzip\r\n",
+        b"Transfer-Encoding: gzip\r\n",
+        b"Content-Length: 2\r\nTransfer-Encoding: chunked\r\n",
+    ],
+)
+def test_real_http_response_rejects_incomplete_or_ambiguous_framing(headers):
+    class Opener:
+        def open(self, request, timeout):
+            return wire_response(b"{}", headers)
+
+    with pytest.raises(CompatibilityError, match="^MEZO_RPC_UNAVAILABLE$"):
+        compatibility._request_json(
+            Opener(), "https://rpc.test.mezo.org", {}, "MEZO_RPC_UNAVAILABLE"
+        )
+
+
+@pytest.mark.parametrize(
+    "body,headers",
+    [
+        (b"{}", b"Content-Length: 2\r\n"),
+        (b"{}", b"Content-Encoding: identity\r\n"),
+        (b"2\r\n{}\r\n0\r\n\r\n", b"Transfer-Encoding: chunked\r\n"),
+    ],
+)
+def test_real_http_response_accepts_complete_identity_payload(body, headers):
+    class Opener:
+        def open(self, request, timeout):
+            return wire_response(body, headers)
+
+    assert (
+        compatibility._request_json(
+            Opener(),
+            "https://rpc.test.mezo.org",
+            {},
+            "MEZO_RPC_UNAVAILABLE",
+        )
+        == {}
+    )
 
 
 def test_truncated_http_response_is_sanitized():

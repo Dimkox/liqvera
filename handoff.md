@@ -28,8 +28,9 @@ design-only change package `engineering/changes/2026-09-24-mezo-evidence/`.
 Письменный дизайн одобрен. Детальный F1 implementation plan находится в
 `docs/superpowers/plans/2026-09-24-mezo-evidence-f1.md`; change package переведён
 в `scoped`. Пользователь выбрал subagent execution в изолированной ветке
-`feat/mezo-evidence-f1-impl`. Задачи F1 1–4 реализованы; после независимого review
-Task 4 следующий шаг — Task 5, narrow ADR и итоговая проверка F1.
+`feat/mezo-evidence-f1-impl`. Задачи F1 1–3 завершены; для Task 4 выполнен
+fix round 1 после transport review. После повторного независимого review
+следующий шаг — Task 5, narrow ADR и итоговая проверка F1.
 
 После F1 отдельным планом реализовать F2, затем F3–F7: контракты → проверяемый
 отчёт → API/хранение → тестовая MUSD-оплата → интерфейс → приёмка.
@@ -128,9 +129,10 @@ LOW `DS-0026`). Эти файлы не входят в Task 3 и не измен
 network, asset, coin, версии SDK и payment policy; pure validator выдаёт только
 sanitized summary или стабильный reason code. CLI принимает `--lock` и
 необязательный `--output`; без output печатает canonical JSON в stdout.
-Redirects запрещены для HTTP probes; сетевые вызовы и npm ограничены 12 секундами.
-Npm получает только фиксированные package/version arguments, отдельные временные
-config/cache paths и PATH; cache удаляется до возврата. `PAY_TO` не читается.
+Redirects и ambient proxies запрещены для всех HTTP probes; каждый сетевой
+вызов ограничен 12 секундами. После fix round 1 registry metadata читается
+через четыре фиксированных URL тем же transport, без npm subprocess/cache.
+`PAY_TO` не читается.
 
 Live probe 2026-09-24 прошёл: `COMPATIBILITY_PASS_PAYMENT_BLOCKED`, Mezo Testnet
 31611, MUSD 18 decimals, x402 v2 exact, четыре пакета 2.16.0, BTC 20/20 levels.
@@ -153,3 +155,38 @@ Ruff, Bandit, secret scan и остальные применимые прове�
 `FAIL` только по двум прежним LOW `DS-0026` в
 `deploy/images/Dockerfile.public-capture` и
 `deploy/images/Dockerfile.readonly-analyzer`. Эти Dockerfile не изменялись.
+
+### Task 4 review — fix round 1
+
+Независимый review обнаружил три transport-дефекта: urllib наследует proxy
+settings/credentials из окружения; npm следует redirect после fixed registry;
+bounded `HTTPResponse.read(amount)` может принять неполный Content-Length.
+Предыдущие 68 tests и live success не доказывают закрытие этих security gates.
+
+Проверка npm 11.19.0 на локальном loopback HTTP fixture подтвердила: исходный
+вызов и варианты `--max-redirects=0`, `--max-redirect=0`, `--follow=0`,
+`--redirect=error` завершаются с exit 0 и делают по одному запросу к redirect
+target. В установленном npm нет соответствующего config definition;
+`npm-registry-fetch` не передаёт redirect/follow options в fetch.
+Controller разрешил scoped alternative: заменить `npm view` четырьмя literal
+percent-encoded registry URLs для версии 2.16.0. Это сохраняет точные package
+pins и проверку availability, устраняя npm redirect/cache/config behavior.
+
+Общий opener теперь явно задаёт `ProxyHandler({})` и `NoRedirect`. Transport
+запрашивает identity encoding, отвергает сжатие и неоднозначное framing,
+проверяет valid Content-Length до чтения и совпадение длины после него;
+сохраняется предел 2 MiB. Registry adapter проверяет exact name/version и
+возвращает только прежний mapping версий. Raw registry metadata не пишется
+на диск, subprocess полностью удалён.
+
+Новые регрессии зафиксировали RED: 22 failed, 67 passed; после исправления
+89 focused tests и Ruff прошли. Loopback server проверяет все пять redirect
+status codes без обращения к target; реальный HTTPResponse воспроизводит
+Content-Length truncation. Live probe повторно прошёл тем же sanitized
+результатом `COMPATIBILITY_PASS_PAYMENT_BLOCKED`; JSON не изменился побайтово.
+Оба payment blockers сохранены. Повторный независимый review ещё необходим.
+
+Итоговый `make verify` после fix round 1: 623 passed, 85 subtests passed;
+`stage-a verify passed`. `grok_verify.py --mode pr`: pytest, Ruff, Bandit,
+secret scan и остальные применимые проверки прошли; общий `FAIL` остаётся
+только из-за прежних двух LOW Trivy `DS-0026` в Stage A Dockerfile.

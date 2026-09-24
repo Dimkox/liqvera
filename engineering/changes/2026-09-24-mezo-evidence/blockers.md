@@ -32,6 +32,11 @@ these checks and record `BLOCKED_EXTERNAL` rather than rely on F1 observations.
 ## Resolved prerequisites
 
 - F0 public repository and provenance exist.
+- Task 4 fix round 1 replaced npm-view with controller-approved fixed registry
+  URLs after installed npm failed the redirect-refusal experiment. All public
+  reads now share disabled proxies, redirect refusal, identity encoding, and
+  bounded framing validation. The repeated live probe passed with unchanged
+  sanitized evidence; independent re-review remains required.
 - Task 4 verified the locked public Hyperliquid/Mezo/facilitator/npm boundary;
   no `BLOCKED_EXTERNAL` remains from this probe. Initial local npm isolation
   failure was corrected and rerun successfully, without weakening any lock.

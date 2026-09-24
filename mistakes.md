@@ -44,3 +44,7 @@ The first F1 compatibility probe failed locally at npm because the implementatio
 ## 2026-09-24 — Large pytest parameter generated an unbounded failure label
 
 A 2 MiB synthetic response fixture became its own default pytest parameter ID and inflated RED output. Give large or sensitive-shaped fixtures short explicit IDs so diagnostic output stays bounded.
+
+## 2026-09-24 — Fixed initial URLs did not constrain the full transport
+
+The initial compatibility implementation treated fixed urllib URLs and npm registry argv as proof of endpoint isolation, while urllib inherited ambient proxy credentials and npm followed redirects. The injected IncompleteRead test also missed that real bounded HTTP reads can silently return fewer bytes than Content-Length. Test actual transport behavior and dependency defaults, including proxy selection, redirect follow-up requests, and real HTTPResponse framing, before claiming a fail-closed boundary.

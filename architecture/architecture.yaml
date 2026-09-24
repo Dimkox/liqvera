@@ -13734,7 +13734,13 @@ repository_inventory:
   - path: README.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: PROVENANCE.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: SECURITY.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: provenance/import-manifest.json
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
   - path: architecture/architecture.yaml
@@ -13855,6 +13861,12 @@ repository_inventory:
     node: document:unified-program-sprint-status
     path_class: DOCUMENTATION
   - path: docs/n8n-stage-a.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: docs/planning/LIQVERA_FACTORY_TZ.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: docs/planning/MEE_MEZO_EVIDENCE_FACTORY_TZ.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
   - path: docs/planning/epics.md

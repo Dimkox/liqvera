@@ -55,3 +55,20 @@ Read-only probes подтвердили доступность Hyperliquid BTC p
 Mezo Testnet chain ID 31611, bytecode и 18 decimals заданного MUSD, а также
 поддержку facilitator для x402 v2 exact. Реальная оплата не выполнялась;
 `PAY_TO`, funded buyer и testnet receipt остаются внешними блокерами.
+
+## F1 Task 1 — публикационный inventory
+
+В ветке `feat/mezo-evidence-f1-impl` четыре файла F0-публикации получили
+явные bindings к активному `document:graph-authority-handoff`:
+`PROVENANCE.md`, оба ТЗ в `docs/planning/` и
+`provenance/import-manifest.json`. Классификатор относит `provenance/` к
+`DOCUMENTATION`. Регрессионные тесты (22 passed) и precommit graph check
+прошли; graph check вывел только ожидаемые declared conflicts. Проблемы
+публично воспроизводимого `make salvage` и полного development toolchain
+остаются открытыми для следующих задач F1; полный F1 baseline пока не
+объявляется зелёным.
+
+Дополнительный полный pytest дал 516 passed и 6 wheel-build errors из-за
+отсутствующего `hatchling`, без новых graph failures. `grok_verify --mode pr`
+также остаётся красным: pytest упирается в тот же toolchain, а Trivy сообщает
+по одному LOW `DS-0026` для двух Stage A Dockerfile.

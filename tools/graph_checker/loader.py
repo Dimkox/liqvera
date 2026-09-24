@@ -548,7 +548,7 @@ def _classify_repository_path(path: str) -> PathClass:
         normalized.startswith("internal/") and name.endswith("_test.go")
     ):
         return PathClass.TEST_SOURCE
-    if normalized.startswith(("docs/", "engineering/changes/")) or (
+    if normalized.startswith(("docs/", "engineering/changes/", "provenance/")) or (
         "/" not in normalized and name.endswith(".md")
     ):
         return PathClass.DOCUMENTATION

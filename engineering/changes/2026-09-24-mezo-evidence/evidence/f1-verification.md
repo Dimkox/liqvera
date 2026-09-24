@@ -79,6 +79,28 @@ Ruff, Bandit, and pytest. Coverage was explicitly skipped because pytest owns
 the selected tests. Zero contracts checked is not F2 contract validation.
 No receipt was recorded because `--no-record` was used and no route exists.
 
+## PR integration and history hygiene
+
+The feature branch was synchronized with the English-documentation baseline
+from `origin/main` in merge commit
+`94cb8ab2ccba21dfcb8c902814ed3728ba42ab7d`. Before that merge, the commit
+that introduced a Basic Auth-shaped synthetic proxy URI was rewritten so the
+test assembles its non-secret user and marker from separate literals. The
+behavioral proxy-isolation assertion is unchanged.
+
+Fresh checks on the merge tree completed on 2026-09-24 before 18:33:25Z:
+
+| Command | Exit | Result |
+| --- | ---: | --- |
+| `git merge-base --is-ancestor 68dafdba76ee5aaf9dc2d5c28719f26f849bf1f6 HEAD` | 1 | Expected: the old GitGuardian-triggering commit is not reachable |
+| `git log -p origin/main..HEAD -- tests/compatibility/test_mezo_compatibility.py` followed by the Basic Auth URI pattern check | 1 | Expected: no credentials-shaped URL literal exists in the PR range |
+| `PATH="$PWD/.venv/bin:$PATH" make verify` | 0 | 641 passed, 85 subtests passed in 129.26s; stage-a verify passed |
+| `PATH="$PWD/.venv/bin:$PATH" python -B scripts/grok_verify.py --mode pr --no-record` | 1 | Secret scan reported 0 potential secrets; every applicable check except `trivy-config` passed |
+
+This history cleanup changes commit identities, not the verified production
+transport bytes. The implementation evidence remains bound to rewritten
+implementation SHA `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`.
+
 ## Compatibility evidence binding
 
 The fresh stdout result matched the committed sanitized result:

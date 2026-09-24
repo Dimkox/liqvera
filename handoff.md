@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24T18:27:54Z. Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24T18:33:25Z. Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f1-impl`.
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -54,6 +54,14 @@ permits their explicit declaration and does not resolve them.
 The exact architecture inventory, focused Ruff checks, and `git diff --check`
 passed against the implementation tree. Existing DOCUMENTATION bindings are
 unchanged. Final review found no remaining Critical or Important issue.
+
+PR integration merge `94cb8ab2ccba21dfcb8c902814ed3728ba42ab7d`
+incorporates the English-documentation baseline from `origin/main`. A fresh
+`make verify` passed 641 tests and 85 subtests in 129.26 seconds. The Grok PR
+profile reported zero potential secrets and passed every applicable check
+except the already named Trivy policy blocker. The synthetic proxy credential
+fixture is assembled at runtime; the Basic Auth-shaped literal and its old
+introducing commit are absent from the rewritten PR history.
 
 ## Active blockers and limits
 

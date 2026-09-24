@@ -57,3 +57,8 @@ The initial compatibility implementation treated fixed urllib URLs and npm regis
 ## 2026-09-24 — Decoded-body and socket-operation limits were incomplete
 
 The reviewed transport bounded decoded JSON and individual socket operations, leaving HTTP chunk trailers and total elapsed request time insufficiently bounded. Test real wire framing and slow-drip responses, budget framing separately from payload, and use one total deadline that covers every transport phase.
+
+## 2026-09-24 — Used a credentials-shaped literal in a security regression test
+
+**Symptom:** GitGuardian flagged a synthetic proxy URI as a Basic Auth secret even though the values were non-secret test markers.
+**Root cause:** The test embedded the complete `scheme://user:marker@host` shape as one literal. Preserve the behavioral test while assembling synthetic user-info from separate non-secret components so repository-history scanners do not treat fixtures as credentials.

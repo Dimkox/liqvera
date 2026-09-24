@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import fcntl
 import os
 import shutil
 import stat
@@ -198,7 +199,7 @@ def publish_artifact(root: Path, built: BuiltReport) -> PublishedArtifact:
         raise EvidenceRejected("STORAGE_UNAVAILABLE")
     target = root / report_id
     lock = root / f".{report_id}.lock"
-    lock_fd = os.open(lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    lock_fd = _open_report_lock(lock)
     staging = None
     try:
         if os.path.lexists(target):
@@ -226,7 +227,6 @@ def publish_artifact(root: Path, built: BuiltReport) -> PublishedArtifact:
         if staging is not None and staging.exists():
             shutil.rmtree(staging)
         os.close(lock_fd)
-        lock.unlink()
 
 
 def read_published(root: Path, report_id: str) -> tuple[BuiltReport, PublishedArtifact]:
@@ -246,6 +246,92 @@ def read_published(root: Path, report_id: str) -> tuple[BuiltReport, PublishedAr
     # The deterministic regenerated ZIP is byte-identical to the verified input.
     bundle = build_bundle(built)
     return built, PublishedArtifact(report_id, built.report_sha256, digest(bundle), len(report_bytes), len(bundle))
+
+
+def delete_published(root: Path, report_id: str) -> bool:
+    """Remove one guarded report directory, without recursive traversal.
+
+    The caller owns ledger retention authorization. The filesystem boundary
+    accepts only the two known regular artifact files, including a subset left
+    by interrupted deletion. Neither a link nor an unexpected member is removed.
+    """
+    identifier(report_id)
+    root = Path(root)
+    if not root.is_absolute():
+        raise EvidenceRejected("STORAGE_UNAVAILABLE")
+    root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    lock_name = f".{report_id}.lock"
+    lock_fd = None
+    directory_fd = None
+    try:
+        # Use the publication lock across processes, and descriptor-relative
+        # operations so no supplied path can escape the configured root.
+        lock_fd = _open_report_lock(lock_name, root_fd=root_fd)
+        try:
+            before = os.stat(report_id, dir_fd=root_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            return False
+        if not stat.S_ISDIR(before.st_mode):
+            raise EvidenceRejected("ARTIFACT_INTEGRITY_FAILED")
+        directory_fd = os.open(report_id, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                               dir_fd=root_fd)
+        opened = os.fstat(directory_fd)
+        if (opened.st_dev, opened.st_ino) != (before.st_dev, before.st_ino):
+            raise EvidenceRejected("ARTIFACT_INTEGRITY_FAILED")
+        names = set(os.listdir(directory_fd))
+        if not names <= {"report.json", "evidence.zip"}:
+            raise EvidenceRejected("ARTIFACT_INTEGRITY_FAILED")
+        entries = {}
+        # Preflight the entire directory before the first unlink; never descend
+        # into any member and never invoke a recursive cleanup utility.
+        for name in names:
+            entry = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+            if not stat.S_ISREG(entry.st_mode):
+                raise EvidenceRejected("ARTIFACT_INTEGRITY_FAILED")
+            entries[name] = (entry.st_dev, entry.st_ino)
+        for name in sorted(names):
+            current = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+            if (not stat.S_ISREG(current.st_mode)
+                    or (current.st_dev, current.st_ino) != entries[name]):
+                raise EvidenceRejected("ARTIFACT_INTEGRITY_FAILED")
+            os.unlink(name, dir_fd=directory_fd)
+        os.fsync(directory_fd)
+        current_directory = os.stat(report_id, dir_fd=root_fd, follow_symlinks=False)
+        if (not stat.S_ISDIR(current_directory.st_mode)
+                or (current_directory.st_dev, current_directory.st_ino)
+                != (opened.st_dev, opened.st_ino)):
+            raise EvidenceRejected("ARTIFACT_INTEGRITY_FAILED")
+        os.rmdir(report_id, dir_fd=root_fd)
+        os.fsync(root_fd)
+        return True
+    finally:
+        try:
+            if directory_fd is not None:
+                os.close(directory_fd)
+            if lock_fd is not None:
+                os.close(lock_fd)
+        finally:
+            os.close(root_fd)
+
+
+def _open_report_lock(path: str | Path, *, root_fd: int | None = None) -> int:
+    """Use a stable lock inode; process exit automatically releases ownership."""
+    fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK,
+                 0o600, dir_fd=root_fd)
+    try:
+        metadata = os.fstat(fd)
+        if not stat.S_ISREG(metadata.st_mode) or metadata.st_nlink != 1:
+            raise EvidenceRejected("ARTIFACT_INTEGRITY_FAILED")
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise FileExistsError("report operation already in progress") from None
+    except BaseException:
+        os.close(fd)
+        raise
+    # Never unlink the lock inode: another process may already have it open.
+    # Reusing it prevents independent locks after crash recovery or contention.
+    return fd
 
 
 def _fsync_directory(path: Path) -> None:

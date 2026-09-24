@@ -9,8 +9,16 @@ Configuration: `LIQVERA_CAPTURE_ROOT` (read-only raw volume),
 40 lowercase hex source commit), `LIQVERA_SOURCE_MODE` (`fixture` by default),
 `LIQVERA_CAPTURE_URL` (`http://evidence-capture:8081`),
 `LIQVERA_REPORT_HOST` (`0.0.0.0`), and `LIQVERA_REPORT_PORT` (8082).
+`LIQVERA_INTERNAL_TOKEN_FILE` is required: an absolute path to a mounted regular
+secret file containing a dedicated internal bearer token (32–256 printable ASCII
+bytes, no whitespace; one terminal LF is permitted). Mount the same credential
+into the gateway. The token is loaded at startup, never returned or logged, and
+rotation requires coordinated restart. A missing or malformed secret prevents
+startup. Both report POST and DELETE require exactly one matching
+`Authorization: Bearer <internal token>` header; failures return 401.
 Network policy must allow the internal capture service and deny external egress.
-The service rejects gateway credential/payment/database environment names.
+The token-file variable is the only exception to the credential-name guard;
+gateway payment, wallet, and database credentials remain forbidden here.
 
 `POST /internal/v1/reports` accepts exactly:
 
@@ -31,6 +39,31 @@ The success body contains `report_id`, `report_sha256`, `bundle_sha256`,
 filesystem path is returned. A repeated identical ID/request verifies and returns
 the retained artifact; a changed request or conflicting immutable output fails.
 The gateway must independently verify file hashes before settlement and delivery.
+
+`DELETE /internal/v1/reports/{report_id}` accepts a canonical lowercase UUID path
+and no body, query, extra path segment, or URL encoding. Only the gateway may call
+this internal endpoint, after its ledger-locked retention guards exclude retained
+entitlements and pending/unknown payments. The report service is the sole artifact
+writer and deleter; the gateway keeps a read-only artifact mount.
+
+Successful cleanup returns 200 JSON `{"report_id":"<UUID>","deleted":true}`.
+An already absent directory also returns 200, with `deleted:false`, allowing
+recovery after a lost response. The gateway marks its ledger row DELETED only
+after this success response. Active publication/deletion returns 409.
+Bad paths return 400; unexpected artifact contents return 409;
+storage failures return 503. None of these errors authorizes ledger deletion.
+
+Cleanup opens the configured root and exact report directory without following
+links, obtains the same per-report filesystem lock as publication, requires
+regular `report.json`/`evidence.zip` members, unlinks only those two allowed names,
+then removes that exact directory and flushes it. A subset of those files is
+accepted to recover interrupted cleanup. Symlinks, non-directory report entries,
+subdirectories, and unexpected files are rejected. There is no recursive cleanup,
+capture deletion, root deletion, or public deletion route. Hidden staging requires
+operator recovery and is not silently removed. Report lock files use a stable
+inode and nonblocking POSIX advisory locks; a crashed process releases ownership.
+The empty lock files remain in the owned root and are reused, never unlinked during
+normal operation, so concurrent writers cannot acquire different lock inodes.
 
 Errors contain `code` and `retryable`; input failures use 422, internal source or
 storage failures 503, and ID/build conflicts 409. At most four requests execute
@@ -72,9 +105,10 @@ relative to supplied evidence; it does not authenticate Hyperliquid or establish
 execution, profitability, payment validity, or a trusted source-code signature.
 
 Publication flushes files and directories, checks hashes and bundle reproduction,
-and renames staging only when complete. Hidden staging and orphan locks stay
-non-ready after crashes. Recovery must match the original digest and must never
-charge again. No automatic deletion or overwrite is implemented here; retain
+and renames staging only when complete. Hidden staging stays non-ready after
+crashes; a lock filename never indicates readiness. Recovery must match the original digest and must never
+charge again. Cleanup occurs only through the authenticated gateway request
+described above; no automatic schedule or overwrite is implemented here. Retain
 inputs and follow the gateway entitlement/unknown-payment retention policy.
 Published directories use mode 0750 and files 0640. The report and gateway
 containers need the same artifact-reader group; the gateway mount is read-only.

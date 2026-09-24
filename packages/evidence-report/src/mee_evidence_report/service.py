@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import hmac
 import http.client
 import os
 import re
+import stat
 import threading
 import time
 from dataclasses import asdict
@@ -14,14 +16,34 @@ from urllib.parse import urlsplit
 from uuid import uuid4
 
 from mee_evidence_report.canonical import canonical_json_bytes
-from mee_evidence_report.evidence_bundle import publish_artifact, read_published
-from mee_evidence_report.evidence_io import EvidenceRejected, strict_json
+from mee_evidence_report.evidence_bundle import delete_published, publish_artifact, read_published
+from mee_evidence_report.evidence_io import EvidenceRejected, identifier, strict_json
 from mee_evidence_report.report import build_report, parse_request
 
 PUBLIC_CODES = {"INVALID_INPUT", "INVALID_DATASET", "SOURCE_UNAVAILABLE", "STALE_SOURCE",
                 "CLOCK_SKEW", "IDENTITY_UNVERIFIED", "IDENTITY_MISMATCH", "CROSSED_BOOK",
                 "DEPTH_INSUFFICIENT", "UNSUPPORTED_INSTRUMENT", "ARTIFACT_INTEGRITY_FAILED",
                 "STORAGE_UNAVAILABLE", "REPORT_ALREADY_EXISTS"}
+
+
+def _internal_token(path: str) -> str:
+    """Load one narrowly scoped internal credential without logging its value."""
+    try:
+        if not path or not Path(path).is_absolute():
+            raise ValueError()
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        with os.fdopen(fd, "rb") as stream:
+            if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+                raise ValueError()
+            raw = stream.read(258)
+        # Secret managers commonly append one LF; other surrounding whitespace
+        # and embedded controls are not token normalization rules.
+        token = raw.removesuffix(b"\n")
+        if not 32 <= len(token) <= 256 or any(byte < 33 or byte > 126 for byte in token):
+            raise ValueError()
+        return token.decode("ascii")
+    except (OSError, ValueError, UnicodeError):
+        raise ValueError("invalid internal authentication configuration") from None
 
 
 def _capture(origin: str, capture_id: str, timeout: float) -> dict:
@@ -52,8 +74,10 @@ def _capture(origin: str, capture_id: str, timeout: float) -> dict:
 def main() -> int:
     forbidden = ("SECRET", "TOKEN", "PASSWORD", "PRIVATE", "WALLET", "SIGNER", "API_KEY",
                  "APIKEY", "DATABASE", "PAY_TO", "FACILITATOR", "RPC_URL")
-    if any(any(marker in key.upper() for marker in forbidden) for key in os.environ):
+    if any(any(marker in key.upper() for marker in forbidden)
+           for key in os.environ if key != "LIQVERA_INTERNAL_TOKEN_FILE"):
         raise ValueError("report service must not receive gateway credentials or payment configuration")
+    internal_token = _internal_token(os.environ.get("LIQVERA_INTERNAL_TOKEN_FILE", ""))
     capture_root = Path(os.environ.get("LIQVERA_CAPTURE_ROOT", "/var/lib/liqvera/captures"))
     artifact_root = Path(os.environ.get("LIQVERA_ARTIFACT_ROOT", "/var/lib/liqvera/artifacts"))
     engine_commit = os.environ.get("LIQVERA_ENGINE_COMMIT", "")
@@ -101,6 +125,14 @@ def main() -> int:
         def log_message(self, format: str, *args: object) -> None:
             pass
 
+        def authorized(self) -> bool:
+            values = self.headers.get_all("Authorization", [])
+            if (len(values) != 1 or not values[0].isascii()
+                    or not hmac.compare_digest(values[0], "Bearer " + internal_token)):
+                self.reply(401, {"code": "UNAUTHORIZED", "retryable": False})
+                return False
+            return True
+
         def reply(self, status: int, document: dict) -> None:
             raw = canonical_json_bytes(document)
             self.send_response(status)
@@ -126,6 +158,8 @@ def main() -> int:
         def do_POST(self) -> None:
             if self.path != "/internal/v1/reports":
                 self.reply(404, {"code": "NOT_FOUND", "retryable": False})
+                return
+            if not self.authorized():
                 return
             report_id = None
             acquired = False
@@ -181,6 +215,43 @@ def main() -> int:
             except FileExistsError:
                 self.reply(409, {"code": "REPORT_ALREADY_EXISTS", "retryable": False})
             except (OSError, ValueError, TypeError, KeyError):
+                self.reply(503, {"code": "STORAGE_UNAVAILABLE", "retryable": False})
+            finally:
+                if acquired:
+                    with active_lock:
+                        active.discard(report_id)
+
+        def do_DELETE(self) -> None:
+            if not self.authorized():
+                return
+            prefix = "/internal/v1/reports/"
+            report_id = None
+            acquired = False
+            try:
+                if not self.path.startswith(prefix):
+                    self.reply(404, {"code": "NOT_FOUND", "retryable": False})
+                    return
+                # Do not percent-decode, normalize traversal, accept query
+                # parameters, or consume a caller-supplied filesystem path.
+                report_id = identifier(self.path[len(prefix):])
+                lengths = self.headers.get_all("Content-Length", [])
+                if (self.headers.get("Transfer-Encoding") is not None
+                        or lengths not in ([], ["0"])):
+                    raise EvidenceRejected("INVALID_INPUT")
+                with active_lock:
+                    if report_id in active:
+                        self.reply(409, {"code": "BUILD_IN_PROGRESS", "retryable": True})
+                        return
+                    active.add(report_id)
+                    acquired = True
+                deleted = delete_published(artifact_root, report_id)
+                self.reply(200, {"report_id": report_id, "deleted": deleted})
+            except EvidenceRejected as error:
+                status = 400 if error.code == "INVALID_INPUT" else 409
+                self.reply(status, {"code": error.code, "retryable": False})
+            except FileExistsError:
+                self.reply(409, {"code": "BUILD_IN_PROGRESS", "retryable": True})
+            except OSError:
                 self.reply(503, {"code": "STORAGE_UNAVAILABLE", "retryable": False})
             finally:
                 if acquired:

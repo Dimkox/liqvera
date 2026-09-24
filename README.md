@@ -18,7 +18,7 @@ accepts only the runtime and payment boundary. The overall change remains
 approved at `3729bdc131ca4ac971ab04e735da2e113d68ad71`: 446 contract tests
 and 1087 full-suite tests plus 85 subtests pass. See the
 [bound F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md).
-F3 planning is in review; F3–F7 remain open. The
+F3 has a fixture-only CLI prototype; canonical F3–F7 remain open. The
 [F3 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f3-evidence-report.md)
 defines fixed public capture, exact report construction, deterministic bundles,
 and offline verification without claiming implementation. All 156 vectors remain
@@ -97,9 +97,9 @@ container builds and the full clean-machine README/demo acceptance were not
 run during F1 closure. Public salvage verifies pinned target bytes and reports
 `source_objects=unavailable`; private-source verification is not claimed.
 
-## F3 MVP prototype
+## Local MVP prototypes
 
-The in-progress F3 branch includes an intentionally unhardened, fixture-only
+The current branch includes an intentionally unhardened, fixture-only
 prototype of the future report flow:
 
 ```bash
@@ -111,10 +111,36 @@ and writes `.mvp/output/report.json` plus `.mvp/output/evidence.zip`. Optional
 `MVP_SIDE` and `MVP_QUANTITY` environment variables default to `BUY` and
 `0.15`. Each run replaces only `.mvp/package` and `.mvp/output`.
 
-This prototype is **SIMULATED** and **UNVERIFIED**. Payments and live
-verification are not implemented. It does not establish F3 completion,
-runtime acceptance, report chargeability, testnet settlement, or permission
-for live exchange mutations.
+`make mvp` remains the CLI artifact demo. The separate interactive local
+product demo is being integrated from isolated implementation slices. Once
+`scripts/run-mvp-web.py`, the local store, and `web/` are present together,
+start it with:
+
+```bash
+make mvp-web
+```
+
+Open <http://127.0.0.1:8765>. Choose `BUY` or `SELL`, enter an exact BTC
+quantity and an illustrative expected payer address, then create a run. The
+page shows a fixture-backed preview and quote. Select the explicit
+**Confirm simulated unlock — NO TRANSFER** action to view the full report and
+download its JSON and evidence ZIP. Reloading the page in the same browser
+session recovers the active run. The expected payer is display-only; no wallet
+authentication or payment occurs.
+
+The server binds to `127.0.0.1:8765` by default. Set `MVP_HOST` and/or
+`MVP_PORT` in the environment to override the bind address and port, for
+example `MVP_PORT=9000 make mvp-web`. The browser demo keeps its local fixture
+package in `.mvp/store/package`, SQLite state in `.mvp/store/ledger.sqlite3`,
+and immutable reports and ZIPs under `.mvp/store/artifacts/<report_id>/`.
+Stop the foreground server with Ctrl-C; local state remains for the next run.
+
+Both demos are **SIMULATED**, **UNVERIFIED**, read-only analytics over fixture
+data. The browser unlock transfers nothing and is not x402 or settlement.
+Neither demo establishes canonical F3–F7 completion, runtime acceptance,
+report chargeability, testnet payment, or permission for live exchange
+mutations. The interactive demo is not yet an integrated, verified runtime at
+this documentation commit.
 
 The optional public compatibility probe is separate from offline verification:
 

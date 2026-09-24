@@ -1,4 +1,4 @@
-.PHONY: verify verify-packages graph salvage artifacts wheels product demo mvp prod
+.PHONY: verify verify-packages graph salvage artifacts wheels product demo mvp mvp-web prod
 
 PYTHON ?= python3
 
@@ -38,6 +38,10 @@ demo:
 mvp:
 	PYTHONPATH=$(CURDIR)/packages/contracts/src:$(CURDIR)/packages/public-capture/src:$(CURDIR)/packages/readonly-analyzer/src:$(CURDIR)/packages/evidence-report/src \
 		$(PYTHON) -B scripts/run-f3-mvp.py
+
+mvp-web:
+	PYTHONPATH=$(CURDIR)/packages/contracts/src:$(CURDIR)/packages/public-capture/src:$(CURDIR)/packages/readonly-analyzer/src:$(CURDIR)/packages/evidence-report/src \
+		$(PYTHON) -B scripts/run-mvp-web.py
 
 prod: product
 	docker compose -f compose.stage-a.yml run --rm --no-deps prepare-data

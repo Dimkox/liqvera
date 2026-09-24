@@ -11,6 +11,7 @@ import shutil
 import tempfile
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from importlib.resources import files
 from pathlib import Path
 from urllib.parse import urlsplit
 from uuid import UUID
@@ -49,6 +50,29 @@ _CAPABILITIES = {
         "Local unlock only: NO TRANSFER, wallet signature, receipt, or settlement.",
     ],
 }
+
+
+def _web_root() -> Path:
+    source = _REPOSITORY_ROOT / "web"
+    if source.is_dir() and not source.is_symlink():
+        return source
+    packaged = files("mee_evidence_report").joinpath("resources", "demo-web")
+    root = Path(str(packaged))
+    if not root.is_dir() or root.is_symlink():
+        raise RuntimeError("Liqvera local demo web assets are unavailable")
+    return root
+
+
+def _state_root() -> Path:
+    configured = os.environ.get("MVP_STATE_ROOT")
+    if configured:
+        root = Path(configured).expanduser()
+        if not root.is_absolute():
+            raise RuntimeError("MVP_STATE_ROOT must be an absolute path")
+        return root
+    if (_REPOSITORY_ROOT / ".git").exists():
+        return _REPOSITORY_ROOT / ".mvp"
+    return Path.cwd() / ".mvp"
 
 
 class DemoHttpError(Exception):
@@ -122,7 +146,7 @@ class DemoServer(ThreadingHTTPServer):
 
     def __init__(self, address: tuple[str, int], flow: LocalDemoFlow) -> None:
         self.flow = flow
-        self.web_root = _REPOSITORY_ROOT / "web"
+        self.web_root = _web_root()
         super().__init__(address, DemoHandler)
 
 
@@ -389,13 +413,17 @@ class DemoHandler(BaseHTTPRequestHandler):
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Serve the fixture-only Liqvera local MVP")
-    parser.add_argument("--host", default=os.environ.get("MVP_WEB_HOST", "127.0.0.1"))
-    parser.add_argument("--port", type=int, default=os.environ.get("MVP_WEB_PORT", "8765"))
+    parser.add_argument(
+        "--host", default=os.environ.get("MVP_HOST", os.environ.get("MVP_WEB_HOST", "127.0.0.1"))
+    )
+    parser.add_argument(
+        "--port", type=int, default=os.environ.get("MVP_PORT", os.environ.get("MVP_WEB_PORT", "8765"))
+    )
     args = parser.parse_args()
     if args.host != "127.0.0.1" or not 1 <= args.port <= 65535:
         parser.error("the local demo binds only 127.0.0.1 on a port from 1 to 65535")
 
-    mvp_root = _real_directory(_REPOSITORY_ROOT / ".mvp")
+    mvp_root = _real_directory(_state_root())
     store_root = _real_directory(mvp_root / "store")
     artifact_root = _real_directory(store_root / "artifacts")
     package_root = _fixture_package(store_root)

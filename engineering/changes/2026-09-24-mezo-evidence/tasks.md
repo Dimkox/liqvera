@@ -64,7 +64,7 @@ counts above are historical, not current receipts. Final results: 130 resource
 tests, 446 F2 tests, 1087 tests plus 85 subtests in both full runs;
 graph/Ruff/diff pass and Grok exits 1 only for two inherited LOW DS-0026 findings.
 
-The overall change stays `implementing`; F3–F7 remain open and F3 is next.
+At F2 closure the overall change stayed `implementing`; F3–F7 were still open.
 All 156 vectors and A02–A06/A10–A12/A15–A20 remain `NOT_RUN`; A13–A14 remain
 `BLOCKED_EXTERNAL`. Payment readiness is false. Trivy, PAY_TO_MISSING,
 FINALITY_RULE_UNVERIFIED, funded buyer and SDK/canonical authorization identity
@@ -78,23 +78,23 @@ or factory receipt.
 - [x] Implement the exact BUY/SELL `SIMULATED` report kernel over an existing frozen fixture package.
 - [x] Add the fixture-only CLI and deterministic prototype ZIP containing `report.json` plus `sealed-input/`.
 - [x] Add `make mvp` and run one local end-to-end fixture smoke test.
-- [ ] Harden and verify canonical F3 after the planned factory update.
+- [x] Implement canonical capture, report, bundle, verifier, publication, and internal service surfaces.
+- [x] Bind the evidence package and services into the separate Liqvera factory and graph.
+- [ ] Execute and repair canonical F3 in the deferred verification phase.
 
-F3 status: **fixture MVP implemented; canonical F3 remains open**. `make mvp`
+F3 status: **IMPLEMENTED_UNVERIFIED**. `make mvp`
 produced a schema-shaped `SIMULATED` report and an eight-member deterministic
 prototype ZIP. This is unverified, non-chargeable output with execution
-authority `NONE`. Hardened verification, runtime schema validation, live
-capture, identity approval, A08/A09, runtime results, and acceptance claims are
-deferred. The local browser MVP implementation is tracked below; canonical
-payment, gateway, and database work, factory/graph integration, deployment,
-and release are deferred. F2 closure, all 156 `NOT_RUN`
+authority `NONE`. Canonical runtime and factory code now exists; hardened
+verification, live identity approval, A08/A09 runtime results, and acceptance
+claims are deferred. Payment remains fail-closed. F2 closure, all 156 `NOT_RUN`
 vector statuses, and existing blockers are unchanged.
 
 ### Local browser MVP — implementation slices
 
 - [x] Add `make mvp-web` wiring and document the local browser flow, overrides, storage, and stop behavior.
 - [x] Integrate the isolated SQLite demo flow, HTTP adapter, and browser assets into one tree.
-- [ ] Update factory and architecture graph bindings for the integrated files.
+- [x] Update factory and architecture graph bindings for the integrated files.
 - [ ] Verify the integrated runtime and repair defects in the deferred phase.
 
 The complete local MVP implementation is now integrated: SQLite-backed scoped
@@ -102,29 +102,35 @@ runs, immutable per-report artifacts, the `/demo/*` HTTP adapter, and the
 English browser UI. No browser smoke test, factory receipt, canonical F3–F7
 completion, or runtime acceptance is claimed. The local demo uses fixture data
 and an explicitly simulated `NO TRANSFER` unlock outside the chargeable
-`/v1/*` states. Factory integration, verification, and defect repair are next.
+`/v1/*` states. Factory integration is present; verification and defect repair are next.
 
 ## F4 — API and ledger
 
-- [ ] Add gateway, migrations, capability authorization, and quote creation.
-- [ ] Add protected unpaid 402 flow without real settlement.
+- [x] Add gateway, migrations, capability authorization, and quote creation.
+- [x] Add protected unpaid 402 flow with a fail-closed payment readiness gate.
 - [ ] Add integration, concurrency, and artifact-loss tests.
 
 ## F5 — x402 settlement
 
-- [ ] Add pinned SDK adapter and runtime readiness checks.
-- [ ] Add durable verify/settle/reconciliation/entitlement state transitions.
+- [x] Add pinned SDK adapter and runtime readiness checks.
+- [x] Add durable verify/settle/reconciliation/entitlement state transitions.
 - [ ] Pass mocked replay, timeout, crash, and duplicate-attempt tests.
 - [ ] Run separately approved controlled testnet payment.
 
 ## F6 — UI and operations
 
-- [ ] Implement one-page English testnet flow.
-- [ ] Add isolated Compose, limits, observability, and runbooks.
+- [x] Implement one-page English testnet flow.
+- [x] Add isolated Compose, limits, observability, and runbooks.
 - [ ] Test cancel, wrong network, wallet switch, reload, and recovery.
 
 ## F7 — acceptance
 
 - [ ] Run full verification and independent reviews.
-- [ ] Complete A01–A30 evidence report against the final commit.
-- [ ] Prepare demo script and competition materials without unsupported claims.
+- [x] Implement the A01–A30 result runner without fabricating PASS evidence.
+- [ ] Execute the A01–A30 report against the final verified commit.
+- [x] Prepare demo script and competition materials without unsupported claims.
+
+F3–F7 code status: **IMPLEMENTED_UNVERIFIED**. Gateway and web lock resolution
+ran with lifecycle scripts disabled; no build, test, graph, container, browser,
+acceptance, live request, payment, deployment, release, or push ran. Payment
+readiness and all existing vector/acceptance blockers remain unchanged.

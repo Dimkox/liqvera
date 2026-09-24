@@ -10,6 +10,11 @@
 
 **Spec:** `docs/planning/LIQVERA_FACTORY_TZ.md`, ADR-0002, and the frozen F2 schemas under `schemas/mezo-evidence/v1/`.
 
+**Implementation status (2026-09-24):** Tasks 0–6 are present in the repository
+and remain `IMPLEMENTED_UNVERIFIED`. Only dependency lock resolution was run,
+with lifecycle scripts disabled. The deferred verification phase, acceptance,
+payment, deployment, release, and defect repair have not started.
+
 ## Global Constraints
 
 - Keep all project artifacts and product copy in English.

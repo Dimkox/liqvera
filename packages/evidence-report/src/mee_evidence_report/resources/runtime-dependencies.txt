@@ -1,5 +1,6 @@
 mee-contracts==0.1.0
 mee-readonly-analyzer==0.1.0
+mee-public-capture==0.1.0
 mee-evidence-report==0.1.0
 jsonschema==4.23.0
 referencing==0.35.1

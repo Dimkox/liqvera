@@ -16,6 +16,8 @@ dependencies = [
   "structlog==26.1.0",
   "hyperliquid-python-sdk==0.24.0",
   "eth-account==0.13.7",
+  "jsonschema==4.23.0",
+  "referencing==0.35.1",
 ]
 
 [project.optional-dependencies]
@@ -53,12 +55,14 @@ testpaths = [
   "tests/graph",
   "tests/installed",
   "tests/artifact",
+  "tests/evidence_report",
 ]
 pythonpath = [
   ".",
   "packages/contracts/src",
   "packages/public-capture/src",
   "packages/readonly-analyzer/src",
+  "packages/evidence-report/src",
 ]
 addopts = "-m 'not live'"
 markers = [
@@ -74,6 +78,11 @@ include = [
   "tests/public_capture/**/*.py",
   "tests/readonly_analyzer/**/*.py",
   "tests/conformance/**/*.py",
+  "tests/evidence_report/**/*.py",
+  "tools/mezo_acceptance/**/*.py",
+  "scripts/build-liqvera-python-distributions.py",
+  "scripts/run-mezo-acceptance.py",
+  "scripts/run-mvp-web.py",
   "tools/conformance/**/*.py",
 ]
 
@@ -83,4 +92,10 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-packages = ["mee_contracts", "mee_public_capture", "mee_readonly_analyzer"]
+packages = [
+  "mee_contracts",
+  "mee_public_capture",
+  "mee_readonly_analyzer",
+  "mee_evidence_report",
+  "tools.mezo_acceptance",
+]

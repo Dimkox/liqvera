@@ -20,6 +20,7 @@ from mee_evidence_report.sealed_input import InspectedInput, inspect_package
 VERSIONS = [
     {"name": "mee-contracts", "version": "0.1.0"},
     {"name": "mee-readonly-analyzer", "version": "0.1.0"},
+    {"name": "mee-public-capture", "version": "0.1.0"},
     {"name": "mee-evidence-report", "version": "0.1.0"},
     {"name": "jsonschema", "version": "4.23.0"},
     {"name": "referencing", "version": "0.35.1"},

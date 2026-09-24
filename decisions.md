@@ -147,3 +147,7 @@ Compare UTC instants as integer seconds plus an exact fractional remainder, pres
 ## 2026-09-24 — Readiness is a complete state projection
 
 The canonical specification prohibits fictitious readiness and sale of fixture data, so capabilities must explain blocked payment readiness and may report ready only for live-public data without blockers. Overall readiness equals its gates and blocker emptiness in both directions, encoded with disjoint branches to support simultaneous failed gates. Truth-table tests preserve future legitimate readiness while rejecting contradictory projections.
+
+## 2026-09-24 — Keep Liqvera product factories separate from Stage A
+
+Preserve `wheels` and `product` as the reviewed three-wheel/two-image Stage A factory, and add explicit `liqvera-*` targets for the evidence, gateway, web, image, Compose, and acceptance surfaces. Packaging schemas, migrations, protocol metadata, and demo assets with their owning artifacts avoids hidden source-checkout dependencies without turning unexecuted builds into acceptance evidence.

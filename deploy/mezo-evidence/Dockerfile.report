@@ -2,10 +2,14 @@
 FROM python:3.12.13-slim-bookworm AS wheels
 WORKDIR /src
 COPY packages/contracts packages/contracts
+COPY packages/public-capture packages/public-capture
 COPY packages/readonly-analyzer packages/readonly-analyzer
 COPY packages/evidence-report packages/evidence-report
+COPY schemas/mezo-evidence/v1 schemas/mezo-evidence/v1
+COPY web web
+COPY scripts/run-mvp-web.py scripts/run-mvp-web.py
 RUN python -m pip wheel --no-cache-dir --wheel-dir /wheels \
-    ./packages/contracts ./packages/readonly-analyzer ./packages/evidence-report
+    ./packages/contracts ./packages/public-capture ./packages/readonly-analyzer ./packages/evidence-report
 
 FROM python:3.12.13-slim-bookworm
 COPY --from=wheels /wheels /wheels

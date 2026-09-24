@@ -2,6 +2,9 @@
 !apps/
 !apps/mezo-web/
 !apps/mezo-web/**
+!packages/
+!packages/mezo-protocol/
+!packages/mezo-protocol/**
 !deploy/
 !deploy/mezo-evidence/
 !deploy/mezo-evidence/nginx-web.conf

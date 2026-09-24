@@ -8,12 +8,22 @@ import re
 import sqlite3
 import stat
 from contextlib import contextmanager
+from importlib.resources import files
 from pathlib import Path
 from typing import Iterator
 from uuid import UUID
 
-_MIGRATION = Path(__file__).resolve().parents[2] / "migrations" / "001_local_demo.sql"
 _CAPABILITY = re.compile(r"[0-9a-f]{64}\Z")
+
+
+def _migration_sql() -> str:
+    """Read the migration from the wheel resource or the source checkout."""
+
+    resource = files("mee_evidence_report").joinpath("migrations", "001_local_demo.sql")
+    if resource.is_file():
+        return resource.read_text(encoding="utf-8")
+    source = Path(__file__).resolve().parents[2] / "migrations" / "001_local_demo.sql"
+    return source.read_text(encoding="utf-8")
 
 
 class LocalDemoError(ValueError):
@@ -48,7 +58,7 @@ class LocalDemoStore:
         with self.connect() as connection:
             version = connection.execute("PRAGMA user_version").fetchone()[0]
             if version == 0:
-                connection.executescript(_MIGRATION.read_text(encoding="utf-8"))
+                connection.executescript(_migration_sql())
             elif version != 1:
                 raise RuntimeError(f"unsupported local demo ledger version: {version}")
 

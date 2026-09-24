@@ -8,6 +8,15 @@ The architecture of the Liqvera buildathon product is described in the [current 
 
 This document preserves the **Go Stage-0 foundation and its safety invariants**. It is no longer the authoritative runtime-language decision.
 
+The Liqvera F3–F7 implementation now adds a Python evidence/report layer, a
+TypeScript/Express gateway with PostgreSQL state, a separate Vite browser
+application, and an isolated Compose deployment. Those surfaces are
+`IMPLEMENTED_UNVERIFIED`: their graph identities and factories exist, but the
+deferred build, test, browser, container, security, fault, and acceptance phase
+has not run. The official Mezo protocol package supplies pinned read-only MUSD
+metadata to the gateway and browser; it does not grant minting, custody,
+administrative, mainnet, or exchange-mutation authority.
+
 The accepted forward runtime is the Python modular monolith in [`adr/0001-python-universal-arbitrage-core.md`](adr/0001-python-universal-arbitrage-core.md). Existing Go code remains `TEST_ONLY_EXECUTABLE_SPEC` until conformance and
 review make a row `ELIGIBLE`. The superseded `Dockerfile.a2` packaging owner
 is `RETIRED`. Retirement never makes Go packageable in Stage A.

@@ -2,7 +2,7 @@
 name = "mee-evidence-report"
 version = "0.1.0"
 description = "Liqvera exact evidence reports, bounded bundles, and offline verifier"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { text = "Proprietary" }
 authors = [
   { name = "Dimkox" },
@@ -10,6 +10,7 @@ authors = [
 dependencies = [
   "mee-contracts==0.1.0",
   "mee-readonly-analyzer==0.1.0",
+  "mee-public-capture==0.1.0",
   "jsonschema==4.23.0",
   "referencing==0.35.1",
 ]
@@ -19,6 +20,7 @@ mee-evidence-report = "mee_evidence_report.cli:main"
 mee-evidence-build = "mee_evidence_report.evidence_cli:build_main"
 mee-evidence-verify = "mee_evidence_report.evidence_cli:verify_main"
 mee-evidence-report-service = "mee_evidence_report.service:main"
+mee-evidence-demo = "mee_evidence_report.demo_server:main"
 
 [build-system]
 requires = ["hatchling==1.31.0"]
@@ -30,3 +32,5 @@ packages = ["src/mee_evidence_report"]
 [tool.hatch.build.targets.wheel.force-include]
 "../../schemas/mezo-evidence/v1" = "mee_evidence_report/resources/schemas"
 "migrations" = "mee_evidence_report/migrations"
+"../../web" = "mee_evidence_report/resources/demo-web"
+"../../scripts/run-mvp-web.py" = "mee_evidence_report/demo_server.py"

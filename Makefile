@@ -1,4 +1,6 @@
-.PHONY: verify verify-packages graph salvage artifacts wheels product demo mvp mvp-web prod
+.PHONY: verify verify-packages graph salvage artifacts wheels product demo mvp mvp-web prod \
+	liqvera-python liqvera-gateway liqvera-web liqvera-images liqvera-compose \
+	liqvera-acceptance liqvera-product
 
 PYTHON ?= python3
 
@@ -42,6 +44,37 @@ mvp:
 mvp-web:
 	PYTHONPATH=$(CURDIR)/packages/contracts/src:$(CURDIR)/packages/public-capture/src:$(CURDIR)/packages/readonly-analyzer/src:$(CURDIR)/packages/evidence-report/src \
 		$(PYTHON) -B scripts/run-mvp-web.py
+
+# The Liqvera targets are deliberately separate from the frozen Stage A
+# three-wheel factory above. They are implementation surfaces until the
+# deferred verification phase executes them and records acceptance evidence.
+liqvera-python:
+	$(PYTHON) -B scripts/build-liqvera-python-distributions.py \
+		--source-sha $$(git rev-parse HEAD) --out dist/liqvera/python
+
+liqvera-gateway:
+	npm ci --ignore-scripts --prefix apps/mezo-gateway
+	apps/mezo-gateway/node_modules/.bin/tsc -p packages/mezo-protocol/tsconfig.json
+	npm run --prefix apps/mezo-gateway build
+
+liqvera-web:
+	npm ci --ignore-scripts --prefix apps/mezo-web
+	apps/mezo-web/node_modules/.bin/tsc -p packages/mezo-protocol/tsconfig.json
+	npm run --prefix apps/mezo-web build
+
+liqvera-images:
+	docker compose -f deploy/mezo-evidence/compose.yaml build
+
+liqvera-compose:
+	docker compose -f deploy/mezo-evidence/compose.yaml config --quiet
+
+liqvera-acceptance:
+	@test -n "$(ACCEPTANCE_OUTPUT)" || \
+		(echo "ACCEPTANCE_OUTPUT is required and must name a new JSON result" >&2; exit 2)
+	$(PYTHON) -B scripts/run-mezo-acceptance.py --mode offline --output "$(ACCEPTANCE_OUTPUT)"
+
+liqvera-product: liqvera-python liqvera-gateway liqvera-web liqvera-images liqvera-compose
+	@echo "Liqvera product artifacts built; acceptance remains a separate explicit target"
 
 prod: product
 	docker compose -f compose.stage-a.yml run --rm --no-deps prepare-data

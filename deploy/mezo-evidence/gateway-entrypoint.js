@@ -18,7 +18,7 @@ if (!isMigration) {
   }
 }
 const child = spawn(command, args, {
-  cwd: '/app',
+  cwd: '/workspace/apps/mezo-gateway',
   env: { ...process.env, DATABASE_URL: url.toString() },
   stdio: 'inherit',
 });

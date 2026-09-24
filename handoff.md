@@ -1,65 +1,72 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 complete; complete local browser MVP integrated). Repository: `Dimkox/liqvera`.
-Branch: `feat/mezo-evidence-f3-report` (stacked on verified F2).
+Updated: 2026-09-24 (F3–F7 code and factory integrated, verification deferred). Repository: `Dimkox/liqvera`.
+Branch: `feat/full-factory` (stacked on verified F2 and the local MVP).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
 [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
 
 ## Current state and next action
 
-F1 is **complete-with-blockers**. The overall Mezo change is `implementing`;
-F2's static contract phase is complete; F3–F7 remain open. The accepted
+F1 is **complete-with-blockers** and F2's static contract phase is complete.
+F3–F7 are now **IMPLEMENTED_UNVERIFIED**. The accepted
 [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md) fixes only runtime,
 ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
 
-The fixture-only F3 MVP is implemented. `make mvp` creates a frozen Stage A
-fixture package, reuses the exact BUY/SELL sweep, writes a schema-shaped
-`SIMULATED` `report.json`, and creates a deterministic `ZIP_STORED` archive
-containing the report plus the unchanged `sealed-input/` tree. The ZIP is a
-prototype: unverified, non-chargeable, unsuitable for untrusted input, and not
-canonical F3 completion.
+The integrated tree now contains:
 
-The complete local browser MVP is integrated. `make mvp-web` starts a
-dependency-free server and English single-page UI for a fixture-backed BTC
-perpetual preview, an explicit simulated `NO TRANSFER` unlock, report viewing,
-and JSON/ZIP downloads. SQLite retains capability-scoped idempotent runs and
-immutable artifacts under `.mvp/store/`; browser session storage supports
-reload recovery. `MVP_HOST` and `MVP_PORT` configure the listener, which stops
-with Ctrl-C.
+- pinned official `mezo-org/musd` material plus recorded `mezod` and
+  documentation revisions in `packages/mezo-protocol`;
+- fixed public Hyperliquid capture, strict evidence inspection, exact report
+  assembly, deterministic bounded bundles, offline verification, atomic
+  publication, and internal capture/report services;
+- the F2 Express API, PostgreSQL ledger/migration, capability and idempotency
+  boundaries, immutable artifact adapters, reconciliation/retention workers,
+  and official x402 adapter boundary;
+- the Mezo Testnet Vite browser application, isolated Compose/images, Caddy,
+  environment examples, secret-file conventions, and operations runbooks;
+- the result-producing A01–A30 acceptance runner and honest competition
+  drafts; and
+- exact architecture inventory bindings plus separate `liqvera-python`,
+  `liqvera-gateway`, `liqvera-web`, `liqvera-images`, `liqvera-compose`, and
+  `liqvera-acceptance` targets. Existing `wheels`/`product` Stage A semantics
+  remain the original three Python distributions and two images.
 
-Implementation commits are `dfa8fbb` (SQLite flow), `6561b53` (HTTP adapter),
-`d8f0e28` (browser UI), and `a5f504e` (command/docs wiring). Per the owner's
-direction, the integrated server and browser flow were not started or tested.
-No end-to-end result, compatibility claim, or bug-free claim is recorded.
-The next phase is factory/graph integration, then verification and defect
-repair.
+The earlier fixture MVP evidence remains historical and unchanged: its focused
+slices reported 6 builder, 6 CLI/bundle, and 3 demo-contract tests passing;
+`make mvp` exited 0 for BUY `0.15`, VWAP `1.1`, notional `0.165`,
+`snapshot_status=SIMULATED`, and `execution_authority=NONE`. That run produced
+report SHA-256 `998ada1362a523f8abfbbddd26bd43f04d08a5d0388c35837fc084c215dcf0f3`
+and ZIP SHA-256 `e320026264d42046b39650a7e1376430891ece631dd722a6f160603db449fda1`.
+It does not verify the newer canonical F3–F7 code or factory integration.
 
-The MVP explicitly excludes live capture, hardened offline verification,
-production runtime schema validation, identity approval, A08/A09, runtime
-results, and acceptance claims. Canonical payments, gateway, and database
-work, factory/architecture-graph integration, deployment, and release are
-deferred.
-F2 closure, all 156 `NOT_RUN` vector statuses, `PAY_TO_MISSING`,
-`FINALITY_RULE_UNVERIFIED`, funded buyer/signature/receipt and SDK identity
-gaps, A13–A14 `BLOCKED_EXTERNAL`, and inherited Trivy findings remain unchanged.
+The evidence-report wheel now carries its schemas, SQLite demo migration,
+runtime dependency declaration, and local demo web assets. Gateway builds copy
+their schema and migration resources; web builds retain their Vite-owned static
+bundle. Gateway and web `package-lock.json` files were generated using
+`npm install --package-lock-only --ignore-scripts`; no `node_modules` trees or
+build outputs were retained. Resolution reported 32 gateway vulnerabilities
+(29 moderate, 3 high) and 31 web vulnerabilities (27 moderate, 4 high). These
+counts are unresolved audit input for the deferred verification phase, not a
+security acceptance result.
 
-The three parallel implementation slices reported 6 report-kernel tests, 6
-CLI/bundle tests, and 3 demo-contract tests passing. Integration then ran only
-`make mvp`, as requested: it exited 0, emitted a BUY `0.15` report with VWAP
-`1.1`, notional `0.165`, `snapshot_status=SIMULATED`, reason
-`SIMULATED_SOURCE`, and `execution_authority=NONE`, plus an eight-member ZIP.
-The smoke report SHA-256 was
-`998ada1362a523f8abfbbddd26bd43f04d08a5d0388c35837fc084c215dcf0f3` and the
-ZIP SHA-256 was
-`e320026264d42046b39650a7e1376430891ece631dd722a6f160603db449fda1`.
+Per the owner's instruction, no graph command, Python test, typecheck, wheel or
+web build, Docker build, Compose render/start, acceptance execution, live
+capture, facilitator/RPC mutation, testnet payment, Grok receipt, independent
+review, deployment, release, or push ran for this code-completion integration.
+The next action is the deferred verification and defect-repair phase in
+dependency order: factory/resource builds, typechecks, graph, focused/full
+tests, browser, Compose/security/fault checks, then separately authorized live
+acceptance.
 
-Per the owner's fast-MVP direction, no full product suite, graph/factory
-validation, Grok receipt, independent hardening review, live request, payment,
-deployment, release, or push ran. The new package is intentionally not yet
-bound into the architecture graph or Stage A wheel factory; that work is the
-next planned factory update rather than evidence for this prototype.
+Payment remains deliberately disabled. `PAY_TO_MISSING`, canonical
+authorization identity, facilitator compatibility, `FINALITY_RULE_UNVERIFIED`,
+funded buyer/signature/receipt evidence, and inherited Trivy findings remain
+open. All 156 vectors remain `NOT_RUN`; A13–A14 remain `BLOCKED_EXTERNAL`.
+Fixture reports remain `SIMULATED`, non-chargeable, and
+`execution_authority=NONE`. Unknown settlement remains `PAYMENT_UNCERTAIN`,
+and no second payment may be offered.
 
 The owner approved the repaired [F2 implementation plan](docs/superpowers/plans/2026-09-24-liqvera-f2-contracts.md)
 after its independent re-review at `50f16225c23f5fde046b483321f86bb7d6bbf4f1`
@@ -93,10 +100,9 @@ mathematically integral JSON number validation, and coherent readiness gates.
 The approved plan now reflects those corrections; simulated offline reports
 remain valid and no runtime layer or SDK identity rule was introduced.
 
-F2 is **static-contract complete**. The fixture CLI and complete local browser
-MVP are integrated; next is the separately requested factory update, followed
-by verification, hardening, and defect cleanup without treating this prototype
-as canonical F3 acceptance.
+F2 is **static-contract complete**. The fixture CLI, local browser MVP, and
+separate Liqvera factory are integrated; verification, hardening, and defect
+cleanup remain without treating implementation as canonical F3 acceptance.
 The [final F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md)
 binds implementation `3729bdc131ca4ac971ab04e735da2e113d68ad71`, tree
 `155d7fb44f5953f814f5463c381dde14932a8ab3`, and fingerprint

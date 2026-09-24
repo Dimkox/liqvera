@@ -1,0 +1,136 @@
+name: Run exact Story 1.2 Phase B probe
+run-name: run-story-1-2-phase-b-probe pr=${{ github.event.client_payload.pr_number }} head=${{ github.event.client_payload.expected_head_sha }} comment=${{ github.event.client_payload.approval_comment_id }}
+on:
+  repository_dispatch:
+    types: [run-story-1-2-phase-b-probe]
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+jobs:
+  probe:
+    if: github.actor == github.repository_owner
+    runs-on: [self-hosted, claw, claw-engine-runner]
+    timeout-minutes: 30
+    env:
+      RUNNER_NAME: claw-engine-runner
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {ref: "${{ github.sha }}", persist-credentials: false, clean: true}
+      - name: Trusted closed controller sequence
+        shell: bash
+        env:
+          PR_NUMBER: ${{ github.event.client_payload.pr_number }}
+          EXPECTED_HEAD_SHA: ${{ github.event.client_payload.expected_head_sha }}
+          APPROVAL_COMMENT_ID: ${{ github.event.client_payload.approval_comment_id }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo authority=NONE
+          test "${RUNNER_NAME}" = claw-engine-runner
+          controller_sha=$(git rev-parse HEAD); test "$controller_sha" = "${GITHUB_SHA}"
+          controller_tree=$(git rev-parse 'HEAD^{tree}')
+          workflow_blob=$(git hash-object .github/workflows/run-claw-sandbox-probe.yml)
+          umask 077; api="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}"
+          auth=(-H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28")
+          curl --fail --silent --show-error "${auth[@]}" "$api" -o "$RUNNER_TEMP/repo.json"
+          curl --fail --silent --show-error "${auth[@]}" "$api/pulls/${PR_NUMBER}" -o "$RUNNER_TEMP/pr.json"
+          curl --fail --silent --show-error "${auth[@]}" "$api/commits/${EXPECTED_HEAD_SHA}" -o "$RUNNER_TEMP/commit.json"
+          curl --fail --silent --show-error "${auth[@]}" "$api/compare/${controller_sha}...${EXPECTED_HEAD_SHA}" -o "$RUNNER_TEMP/compare.json"
+          curl --fail --silent --show-error "${auth[@]}" "$api/issues/comments/${APPROVAL_COMMENT_ID}" -o "$RUNNER_TEMP/approval.json"
+          : > "$RUNNER_TEMP/files.pages"; for page in 1 2 3; do
+            curl --fail --silent --show-error "${auth[@]}" "$api/pulls/${PR_NUMBER}/files?per_page=100&page=${page}" -o "$RUNNER_TEMP/files-${page}.json"
+            python3 -B - "$RUNNER_TEMP/files-${page}.json" "$RUNNER_TEMP/files.pages" <<'PY'
+          import json,sys
+          a=json.load(open(sys.argv[1])); assert isinstance(a,list); open(sys.argv[2],'a').write(json.dumps(a)+'\n')
+          PY
+            test "$(python3 -c "import json;print(len(json.load(open('$RUNNER_TEMP/files-${page}.json'))))")" -eq 100 || break
+            test "$page" != 3 || { echo SOURCE_CONTROLLER_ERROR:PR_FILES_PAGINATION_LIMIT >&2; exit 2; }
+          done
+          python3 -B - "$RUNNER_TEMP/files.pages" "$RUNNER_TEMP/files.json" <<'PY'
+          import json,sys
+          out=[]
+          for line in open(sys.argv[1]): out.extend(json.loads(line))
+          open(sys.argv[2],'w').write(json.dumps(out,separators=(',',':')))
+          PY
+          python3 -B scripts/verify_same_repo_pr.py full --pr "$RUNNER_TEMP/pr.json" --commit "$RUNNER_TEMP/commit.json" --compare "$RUNNER_TEMP/compare.json" --repository "$GITHUB_REPOSITORY" --pr-number "$PR_NUMBER" --expected-head "$EXPECTED_HEAD_SHA" --controller-sha "$controller_sha" --output "$RUNNER_TEMP/pr-proof.json"
+          mapfile -t allowed < <(python3 -c "import json;print(*json.loads(json.load(open('$RUNNER_TEMP/approval.json'))['body'])['allowed_paths'],sep='\n')")
+          approval_args=(); for p in "${allowed[@]}"; do approval_args+=(--allowed-path "$p"); done
+          python3 -B scripts/verify_github_bootstrap_approval.py --approval-comment "$RUNNER_TEMP/approval.json" --repository-metadata "$RUNNER_TEMP/repo.json" --changed-files "$RUNNER_TEMP/files.json" --repository "$GITHUB_REPOSITORY" --pr-number "$PR_NUMBER" --expected-head "$EXPECTED_HEAD_SHA" --approval-comment-id "$APPROVAL_COMMENT_ID" --expected-decision APPROVE_TOFU_SANDBOX_PHASE_B_PROBE --expected-workflow-path .github/workflows/run-claw-sandbox-probe.yml --expected-workflow-blob-sha "$workflow_blob" "${approval_args[@]}" --check claw-phase-b-probe --output "$RUNNER_TEMP/approval-proof.json"
+          python3 -B - "$RUNNER_TEMP" "$controller_sha" "$controller_tree" <<'PY'
+          import datetime,json,os,sys
+          r=sys.argv[1]; a=json.load(open(r+'/approval-proof.json')); p=json.load(open(r+'/pr-proof.json'))
+          for k in ('repository','pr_number'): assert a[k]==p[k]
+          assert a['commit_id']==p['head_sha'] and a['head_tree']==p['head_tree'] and a['controller_sha']==sys.argv[2] and a['controller_tree']==sys.argv[3]
+          v={'schema_version':'bootstrap-nonce-consumption-v1','repository':a['repository'],'approval_comment_id':a['approval_comment_id'],'approval_body_sha256':a['approval_body_sha256'],'nonce':a['nonce'],'controller_sha':sys.argv[2],'controller_tree':sys.argv[3],'probe_pr_number':a['pr_number'],'probe_head_sha':a['commit_id'],'probe_head_tree':a['head_tree'],'run_id':int(os.environ['GITHUB_RUN_ID']),'run_attempt':int(os.environ['GITHUB_RUN_ATTEMPT']),'runner_name':'claw-engine-runner','consumed_at':datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),'status':'CONSUMED'}
+          open(r+f"/claim-{v['run_id']}-{v['run_attempt']}.json",'w').write(json.dumps(v,sort_keys=True,separators=(',',':'))+'\n')
+          PY
+          tree_sha=$(python3 -c "import json;print(json.load(open('$RUNNER_TEMP/commit.json'))['commit']['tree']['sha'])")
+          curl --fail --silent --show-error "${auth[@]}" "$api/git/trees/${tree_sha}?recursive=1" -o "$RUNNER_TEMP/tree.json"
+          python3 -B - "$RUNNER_TEMP/tree.json" "$RUNNER_TEMP/projection.json" <<'PY'
+          import json,sys
+          t=json.load(open(sys.argv[1])); assert t.get('truncated') is False; out={}
+          for x in t['tree']:
+            if x['type']=='tree': continue
+            if x['type']!='blob' or x['mode'] not in ('100644','100755'): raise SystemExit('TREE_MEMBER_INVALID')
+            out[x['path']]={'mode':x['mode'],'type':'blob','oid':x['sha']}
+          open(sys.argv[2],'w').write(json.dumps(out,sort_keys=True,separators=(',',':'))+'\n')
+          PY
+          python3 -B scripts/materialize_verified_source_tree.py --repository "$GITHUB_REPOSITORY" --sha "$EXPECTED_HEAD_SHA" --expected-tree "$tree_sha" --tree-projection "$RUNNER_TEMP/projection.json" --destination "$RUNNER_TEMP/verified-source" --output "$RUNNER_TEMP/materialization.json"
+          job_id=$(curl --fail --silent --show-error "${auth[@]}" "$api/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}/jobs?per_page=100" | python3 -c "import json,sys; x=[j['id'] for j in json.load(sys.stdin)['jobs'] if j['name']=='probe']; assert len(x)==1; print(x[0])")
+          TOKEN="$GITHUB_TOKEN" python3 -B - "$GITHUB_REPOSITORY" "$PR_NUMBER" "$APPROVAL_COMMENT_ID" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$job_id" <<'PY' | sudo -n /usr/local/libexec/mee-controller-ledger-write
+          import json,os,sys
+          print(json.dumps({'token':os.environ['TOKEN'],'repository':sys.argv[1],'pr_number':int(sys.argv[2]),'comment_id':int(sys.argv[3]),'run_id':int(sys.argv[4]),'run_attempt':int(sys.argv[5]),'job_id':int(sys.argv[6])},sort_keys=True,separators=(',',':')))
+          PY
+          unset GITHUB_TOKEN TOKEN
+          ci/claw/reconcile-owned-resources.sh
+          export MEE_SOURCE_DIR="$RUNNER_TEMP/verified-source" MEE_OUTPUT_DIR="$RUNNER_TEMP/probe-output"
+          mkdir -m 700 "$MEE_OUTPUT_DIR" "$RUNNER_TEMP/sealed"
+          repo_digest=$(printf %s "$GITHUB_REPOSITORY"|sha256sum|cut -c1-16); export MEE_RESOURCE_NAME="mee-${repo_digest}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}-job-probe-shard-0"
+          export MEE_COMMAND_MANIFEST="$RUNNER_TEMP/sealed/command-manifest.json"
+          ci/claw/run-disposable-validation.sh > "$RUNNER_TEMP/sealed/result.json"
+          command_sha=$(sha256sum "$MEE_COMMAND_MANIFEST"|cut -d' ' -f1)
+          result_sha=$(sha256sum "$RUNNER_TEMP/sealed/result.json"|cut -d' ' -f1)
+          python3 -B scripts/check-architecture-graph.py --manifest-root "$MEE_SOURCE_DIR/architecture" --phase precommit --format json --allow-declared-conflicts > "$RUNNER_TEMP/sealed/graph-result.json"
+          graph_sha=$(sha256sum "$RUNNER_TEMP/sealed/graph-result.json"|cut -d' ' -f1)
+          python3 -B - "$RUNNER_TEMP" "$controller_sha" "$controller_tree" "$workflow_blob" "$tree_sha" "$command_sha" "$result_sha" <<'PY'
+          import hashlib,json,os,sys
+          r=sys.argv[1]; h=lambda p:hashlib.sha256(open(p,'rb').read()).hexdigest()
+          v={'schema_version':'validation-receipt-v1','repository':os.environ['GITHUB_REPOSITORY'],'pr_number':int(os.environ['PR_NUMBER']),'head_sha':os.environ['EXPECTED_HEAD_SHA'],'head_tree':sys.argv[5],'controller_sha':sys.argv[2],'controller_tree':sys.argv[3],'workflow_blob_sha':sys.argv[4],'archive_sha256':json.load(open(r+'/materialization.json'))['archive_sha256'],'policy_sha256':h('ci/claw/sandbox-policy.json'),'image_digest':json.load(open('ci/claw/sandbox-policy.json'))['image'],'command_set_sha256':sys.argv[6],'run_id':int(os.environ['GITHUB_RUN_ID']),'run_attempt':int(os.environ['GITHUB_RUN_ATTEMPT']),'job':'probe','shard':'0','result_sha256':sys.argv[7],'status':'VALIDATION_SUCCEEDED'}
+          open(r+'/validation-input.json','w').write(json.dumps(v))
+          PY
+          python3 -B -m scripts.write_validation_receipt --input "$RUNNER_TEMP/validation-input.json" --output "$RUNNER_TEMP/sealed/validation.json"
+          python3 -B -m scripts.verify_validation_receipt --receipt "$RUNNER_TEMP/sealed/validation.json" --expected "$RUNNER_TEMP/validation-input.json"
+          validation_sha=$(sha256sum "$RUNNER_TEMP/sealed/validation.json"|cut -d' ' -f1)
+          ci/claw/reconcile-owned-resources.sh
+          rm -rf -- "$MEE_SOURCE_DIR" "$MEE_OUTPUT_DIR" "$RUNNER_TEMP/claim-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+          test ! -e "$MEE_SOURCE_DIR"; test ! -e "$MEE_OUTPUT_DIR"; ! podman container exists "$MEE_RESOURCE_NAME"
+          python3 -B - "$RUNNER_TEMP" "$validation_sha" <<'PY'
+          import json,os,sys
+          c={'schema_version':'validation-cleanup-receipt-v1','repository':os.environ['GITHUB_REPOSITORY'],'head_sha':os.environ['EXPECTED_HEAD_SHA'],'run_id':int(os.environ['GITHUB_RUN_ID']),'run_attempt':int(os.environ['GITHUB_RUN_ATTEMPT']),'job':'probe','shard':'0','owned_resources':[os.environ['MEE_RESOURCE_NAME']],'workspace_removed':True,'output_secrets_removed':True,'absence_proven':True,'validation_receipt_sha256':sys.argv[2],'status':'CLEANUP_VERIFIED'}
+          open(sys.argv[1]+'/cleanup-input.json','w').write(json.dumps(c))
+          PY
+          python3 -B -m scripts.write_validation_cleanup_receipt --input "$RUNNER_TEMP/cleanup-input.json" --output "$RUNNER_TEMP/sealed/cleanup.json"
+          python3 -B -m scripts.verify_validation_cleanup_receipt --receipt "$RUNNER_TEMP/sealed/cleanup.json" --expected "$RUNNER_TEMP/cleanup-input.json"
+          cleanup_sha=$(sha256sum "$RUNNER_TEMP/sealed/cleanup.json"|cut -d' ' -f1)
+          python3 -B - "$RUNNER_TEMP" "$controller_sha" "$controller_tree" "$workflow_blob" "$tree_sha" "$result_sha" "$graph_sha" "$validation_sha" "$cleanup_sha" <<'PY'
+          import hashlib,json,os,sys
+          h=lambda p:hashlib.sha256(open(p,'rb').read()).hexdigest()
+          v={'schema_version':'controller-self-validation-receipt-v1','repository':os.environ['GITHUB_REPOSITORY'],'controller_sha':sys.argv[2],'controller_tree':sys.argv[3],'workflow_blob_sha':sys.argv[4],'probe_head_sha':os.environ['EXPECTED_HEAD_SHA'],'probe_head_tree':sys.argv[5],'actionlint_sha256':sys.argv[6],'graph_result_sha256':sys.argv[7],'sandbox_policy_sha256':h('ci/claw/sandbox-policy.json'),'validation_receipt_sha256':sys.argv[8],'cleanup_receipt_sha256':sys.argv[9],'run_id':int(os.environ['GITHUB_RUN_ID']),'run_attempt':int(os.environ['GITHUB_RUN_ATTEMPT']),'runner_name':'claw-engine-runner','status':'SELF_VALIDATION_VERIFIED'}
+          open(sys.argv[1]+'/self-input.json','w').write(json.dumps(v))
+          PY
+          python3 -B -m scripts.write_controller_self_validation_receipt --input "$RUNNER_TEMP/self-input.json" --output "$RUNNER_TEMP/sealed/self-validation.json"
+          python3 -B -m scripts.verify_controller_self_validation --receipt "$RUNNER_TEMP/sealed/self-validation.json" --expected "$RUNNER_TEMP/self-input.json"
+      - name: Always reconcile exact owned resources
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          ci/claw/reconcile-owned-resources.sh || rc=1
+          rm -rf -- "$RUNNER_TEMP/verified-source" || rc=1
+          rm -rf -- "$RUNNER_TEMP/probe-output" || rc=1
+          rm -f -- "$RUNNER_TEMP/claim-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json" || rc=1
+          test ! -e "$RUNNER_TEMP/verified-source" || rc=1
+          test ! -e "$RUNNER_TEMP/probe-output" || rc=1
+          exit "$rc"

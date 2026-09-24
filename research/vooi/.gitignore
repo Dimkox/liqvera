@@ -1,0 +1,22 @@
+# Public-source acquisition output (intentionally local)
+artifacts/
+downloads/
+vendor/
+
+# Never commit captured authenticated traffic or credentials
+.env
+.env.*
+!.env.example
+*.har
+*.pcap
+*.pcapng
+*cookies*
+*session*
+*token*
+*secret*
+SOURCE-METADATA.local.json
+
+# Local reports
+observables.local.json
+__pycache__/
+*.pyc

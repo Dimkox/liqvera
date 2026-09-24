@@ -1,0 +1,215 @@
+{
+  "id": "stageAOrchestrator01",
+  "name": "Stage A HL+Lighter - ORCHESTRATOR (NO EXECUTION)",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-start",
+      "name": "Manual start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 240]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "five-minute-schedule",
+      "name": "Every 5 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 400]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "stage-a-base-url",
+              "name": "stage_a_base_url",
+              "value": "http://stage-a-falsifier:8080",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "stage-a-config",
+      "name": "Stage A config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [240, 320]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://stage-a-falsifier:8080/healthz",
+        "options": {}
+      },
+      "id": "get-health",
+      "name": "GET health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 320]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://stage-a-falsifier:8080/readyz",
+        "options": {}
+      },
+      "id": "get-ready",
+      "name": "GET ready",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 320]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://stage-a-falsifier:8080/v1/experiment/status",
+        "options": {}
+      },
+      "id": "get-experiment-status",
+      "name": "GET experiment status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 320]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://stage-a-falsifier:8080/v1/ops/data-quality",
+        "options": {}
+      },
+      "id": "get-data-quality",
+      "name": "GET data quality",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 320]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://stage-a-falsifier:8080/v1/business/operator-revenue",
+        "options": {}
+      },
+      "id": "get-operator-revenue",
+      "name": "GET operator revenue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1440, 320]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = (nodeName) => {\n  const items = $items(nodeName);\n  if (!items || items.length !== 1) {\n    throw new Error(`missing or ambiguous response from ${nodeName}`);\n  }\n  return items[0].json;\n};\n\nconst experiment = response('GET experiment status');\nconst revenueResponse = response('GET operator revenue');\nif (experiment.execution_available !== false || revenueResponse.execution_available !== false) {\n  throw new Error('execution_available must be false');\n}\n\nconst operatorRevenue = revenueResponse.data?.operator_revenue;\nif (operatorRevenue?.contract_complete !== true) {\n  throw new Error('operator revenue contract is incomplete');\n}\nfor (const field of ['source', 'rate', 'turnover_basis', 'payout_terms', 'collection_mechanism', 'infrastructure_cost']) {\n  if (operatorRevenue[field] === undefined || operatorRevenue[field] === null || operatorRevenue[field] === '') {\n    throw new Error(`operator revenue contract lacks ${field}`);\n  }\n}\n\nreturn [{\n  json: {\n    mode: experiment.mode,\n    execution_available: false,\n    operator_revenue_contract_complete: true\n  }\n}];"
+      },
+      "id": "fail-closed-gate",
+      "name": "Fail-closed gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1680, 320]
+    }
+  ],
+  "connections": {
+    "Manual start": {
+      "main": [
+        [
+          {
+            "node": "Stage A config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every 5 minutes": {
+      "main": [
+        [
+          {
+            "node": "Stage A config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage A config": {
+      "main": [
+        [
+          {
+            "node": "GET health",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET health": {
+      "main": [
+        [
+          {
+            "node": "GET ready",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET ready": {
+      "main": [
+        [
+          {
+            "node": "GET experiment status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET experiment status": {
+      "main": [
+        [
+          {
+            "node": "GET data quality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET data quality": {
+      "main": [
+        [
+          {
+            "node": "GET operator revenue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET operator revenue": {
+      "main": [
+        [
+          {
+            "node": "Fail-closed gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "dca_states": ["INIT", "WAIT", "ENTRY_INIT", "ENTRY_WAIT", "SETUP", "IDLE", "REBALANCE", "ENTER", "ENTERING", "ENTERED", "STOPPED", "STOPPED_TP", "STOPPED_SL", "ERROR", "STOPPING", "CHECK_POS", "CLOSING", "CANCEL_FOR_TP", "WAIT_FOR_TP"],
+  "strategy_statuses": ["PENDING", "OPEN", "LAUNCHING", "COOLDOWN", "WAITING", "RUNNING", "CANCELED", "COMPLETED", "CLOSED", "ERROR", "STOPPING"],
+  "launch_conditions": ["signals", "manual", "webhook-tv"],
+  "strategy_actions": ["stop", "refresh", "nextit", "to-chart", "to-single-view", "token-info", "duplicate", "report", "share", "restore-avg"],
+  "order_types": ["limit", "gc-dca", "market", "gc-grid", "gems-order", "dex-limit", "stop-limit", "stop-market", "gc-stop-limit", "trailing-stop", "gc-stop-market", "gc-repeat-trail", "gc-trailing-stop", "gc-trailing-reverse", "gc-trailing-stop-limit", "gc-trailing-reverse-limit"],
+  "webhook_actions": ["cancel", "trigger", "sl-trigger", "sl-cancel", "sl-activate", "tp-trigger", "tp-cancel", "tp-activate", "activate", "activate-buy", "activate-sell", "end-iter"],
+  "execution_instructions": ["webhook", "trigger-webhook", "webhook-sl", "webhook-tp", "tp-activate", "trigger-internal", "connected2"],
+  "dex_form_categories": ["SWAP", "LIMIT", "TRAILING", "DCA", "STRATEGY"],
+  "networks": [
+    {"name": "Ethereum", "code": "XETH"},
+    {"name": "Base", "code": "XBSE"},
+    {"name": "BNB Chain", "code": "XBSC"},
+    {"name": "Arbitrum", "code": "XARB"},
+    {"name": "Solana", "code": "XSOL"},
+    {"name": "Sepolia", "code": "XETH-test"},
+    {"name": "Arbitrum Sepolia", "code": "XARB-test"},
+    {"name": "Goerli", "code": "legacy-test"}
+  ],
+  "limits": {
+    "dex_connected_tp_levels": 5,
+    "cex_default_dca_levels": 11,
+    "cex_max_dca_levels": 10,
+    "cex_default_grid_levels": 5,
+    "cex_max_grid_levels": 15,
+    "private_response_timeout_ms": 30000,
+    "order_new_timeout_ms": 90000,
+    "dex_route_timeout_ms": 60000,
+    "dex_route_freshness_ms": 10000,
+    "private_public_reconnect_ms": 5000,
+    "private_ping_ms": 1000,
+    "private_stale_ms": 9000,
+    "nonce_ttl_ms": 19000
+  }
+}

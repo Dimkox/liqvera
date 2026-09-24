@@ -1,0 +1,11 @@
+# syntax=docker/dockerfile:1@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89
+
+FROM python:3.12.13-alpine3.23@sha256:601d3d3797e90e2534782e69c85fafb7971b43f24c7b1b079b7e48dd435e458d
+COPY dist/mee_contracts-0.1.0-py3-none-any.whl /wheels/
+COPY dist/mee_readonly_analyzer-0.1.0-py3-none-any.whl /wheels/
+RUN python -m pip install --no-cache-dir --no-index --find-links=/wheels mee-readonly-analyzer==0.1.0 \
+    && mkdir -p /data && chown 65534:65534 /data
+USER 65534:65534
+ENV MEE_FROZEN_PACKAGE=/data
+VOLUME ["/data"]
+ENTRYPOINT ["mee-readonly-analyzer"]

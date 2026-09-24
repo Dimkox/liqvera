@@ -1,0 +1,51 @@
+# Stage A public-evidence stack. No credentials. No live trading.
+name: mee-stage-a
+
+volumes:
+  package:
+    name: mee-stage-a-data
+
+services:
+  prepare-data:
+    image: mee-public-capture:stage-a
+    user: "0:0"
+    network_mode: "none"
+    read_only: true
+    entrypoint:
+      - /bin/sh
+      - -c
+      - find /data -mindepth 1 -maxdepth 1 -exec rm -rf {} +; chown 65534:65534 /data
+    volumes:
+      - package:/data
+    restart: "no"
+
+  capture:
+    image: mee-public-capture:stage-a
+    depends_on:
+      prepare-data:
+        condition: service_completed_successfully
+    environment:
+      MEE_CAPTURE_OUT: /data
+      MEE_CAPTURE_SOURCE: fixture
+    user: "65534:65534"
+    network_mode: "none"
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - package:/data
+    restart: "no"
+
+  analyzer:
+    image: mee-readonly-analyzer:stage-a
+    depends_on:
+      capture:
+        condition: service_completed_successfully
+    environment:
+      MEE_FROZEN_PACKAGE: /data
+    user: "65534:65534"
+    network_mode: "none"
+    read_only: true
+    volumes:
+      - package:/data:ro
+    restart: "no"

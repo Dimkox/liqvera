@@ -1,0 +1,160 @@
+{
+  "schema_version": "claw-host-deployment-install-manifest-v1",
+  "authority": "NONE",
+  "artifacts": [
+    {
+      "operation": "install_library",
+      "source": "scripts/claw_host_deployment_contract.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/claw_host_deployment_contract.py",
+      "mode": 420,
+      "sha256": "e9036aaa21aad0112892260fcc0a51e06c111b43f081bddac36634ab3366bb25"
+    },
+    {
+      "operation": "install_verifier",
+      "source": "scripts/verify_claw_host_deployment_approval.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/verify_claw_host_deployment_approval.py",
+      "mode": 420,
+      "sha256": "0fe3f09372f3ecaaf4fd64e561e85e3d60b3159fa4097669468446d30d973c09"
+    },
+    {
+      "operation": "install_inventory_collector",
+      "source": "scripts/collect_claw_host_inventory.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/collect_claw_host_inventory.py",
+      "mode": 420,
+      "sha256": "bdb58168041c51983349c6b8ebadd06f80975b23a325bf73016db7eb3c5e4832"
+    },
+    {
+      "operation": "install_inventory_verifier",
+      "source": "scripts/verify_claw_host_inventory.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/verify_claw_host_inventory.py",
+      "mode": 420,
+      "sha256": "7a02aa7ab61789b961f172fea8fd33f66b3b869825868488cc401f5e1e199ec9"
+    },
+    {
+      "operation": "install_oci_library",
+      "source": "scripts/oci_evidence_v2.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/oci_evidence_v2.py",
+      "mode": 420,
+      "sha256": "f71bbd019d7c72ca035e96ffa5297afe8f88e7079ebf99a65ea05f3424654772"
+    },
+    {
+      "operation": "install_oci_verifier",
+      "source": "scripts/verify_oci_evidence_approval.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/verify_oci_evidence_approval.py",
+      "mode": 420,
+      "sha256": "865ba0bdda9fca1430acb96492a447bb59c7504a31a0dad4dd6cd4fd809f84c8"
+    },
+    {
+      "operation": "install_oci_builder_source",
+      "source": "scripts/build_oci_evidence_v2.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/build_oci_evidence_v2.py",
+      "mode": 420,
+      "sha256": "ac9004a80624a91c45d8d275b03b90891e02136caac435fe367d3bcf45b27737"
+    },
+    {
+      "operation": "install_oci_independent_verifier_source",
+      "source": "scripts/verify_oci_evidence_v2.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/verify_oci_evidence_v2.py",
+      "mode": 420,
+      "sha256": "f91d8ac34ec894d91fb083e8b8df1b800489e2e0c6c21d110f969d8365380c3d"
+    },
+    {
+      "operation": "install_oci_schema",
+      "source": "schemas/oci-evidence-v2.schema.json",
+      "target": "/usr/local/libexec/schemas/oci-evidence-v2.schema.json",
+      "mode": 420,
+      "sha256": "23e24e8b8502a74e1c391a4c71c5fb4ae4054394228e558cd68dfd3bce533bb0"
+    },
+    {
+      "operation": "install_policy",
+      "source": "ci/claw/host-bootstrap-policy.json",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/host-bootstrap-policy.json",
+      "mode": 420,
+      "sha256": "53c42ec2e4b9dc8c993245170b1590444f64239adc7710cf28e9661c33daa3f4"
+    },
+    {
+      "operation": "install_closure",
+      "source": "ci/claw/host-package-closure.json",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/host-package-closure.json",
+      "mode": 420,
+      "sha256": "575c380ef0525fd7fd398488796c8e777a525fa5d923dd2191a473b3a5dab501"
+    },
+    {
+      "operation": "install_oci_approval",
+      "source": "ci/claw/oci-evidence-approval.json",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/oci-evidence-approval.json",
+      "mode": 420,
+      "sha256": "fc6783286c486b3eed2957179af22e178ac5481b4c4bd0245b13702477203d47"
+    },
+    {
+      "operation": "install_controller",
+      "source": "scripts/claw_host_deployment_controller.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy",
+      "mode": 493,
+      "sha256": "1ba11c515d549a50626bb6551fb2406fdf7b5bebe6a374e131379029991fcd58"
+    },
+    {
+      "operation": "install_host_transaction",
+      "source": "scripts/claw_host_bootstrap_transaction.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/claw_host_bootstrap_transaction.py",
+      "mode": 420,
+      "sha256": "057fe5a8d8c11b7ab520735f5ba76350ffd2988de6c892799a896d6741ba87d1"
+    },
+    {
+      "operation": "install_receipt_writer",
+      "source": "scripts/write_claw_host_bootstrap_receipt.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/write_claw_host_bootstrap_receipt.py",
+      "mode": 420,
+      "sha256": "a32072d2799ad9c79c9f53da95462aa7ac16a03d031bc8424478b7c178215fd9"
+    },
+    {
+      "operation": "install_receipt_verifier",
+      "source": "scripts/verify_claw_host_bootstrap_receipt.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/verify_claw_host_bootstrap_receipt.py",
+      "mode": 420,
+      "sha256": "1bd31eff03c4c3acb2fd22fed77b6bbae885fd823e2201c344b9881ce7415296"
+    },
+    {
+      "operation": "install_runner_verifier",
+      "source": "scripts/verify_claw_runner_api_canary.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-lib/verify_claw_runner_api_canary.py",
+      "mode": 420,
+      "sha256": "739fc95a70a4a8ef23157eb3d7aa328738131d88077eac050c99411bbb2e7ae9"
+    },
+    {
+      "operation": "install_client",
+      "source": "scripts/claw_host_deployment_client.py",
+      "target": "/usr/local/libexec/mee-claw-host-deploy-client",
+      "mode": 493,
+      "sha256": "ffc9ff3aeeb5a4a21ce9c3a08d93369763c27591feefb19349ac40e9cbdb1ea2"
+    },
+    {
+      "operation": "install_socket",
+      "source": "ci/claw/systemd/mee-claw-host-deploy.socket",
+      "target": "/etc/systemd/system/mee-claw-host-deploy.socket",
+      "mode": 420,
+      "sha256": "1b55ce061bedf21b603a96fc057502722f7b63ffe96593c619276f4bdb5cb94b"
+    },
+    {
+      "operation": "install_service",
+      "source": "ci/claw/systemd/mee-claw-host-deploy@.service",
+      "target": "/etc/systemd/system/mee-claw-host-deploy@.service",
+      "mode": 420,
+      "sha256": "4bea65484c025be115bbda939e031f256457dd3365cda5ad796009c63c132295"
+    },
+    {
+      "operation": "install_reconcile_service",
+      "source": "ci/claw/systemd/mee-claw-host-deploy-reconcile.service",
+      "target": "/etc/systemd/system/mee-claw-host-deploy-reconcile.service",
+      "mode": 420,
+      "sha256": "1873f2c5f60596c59fe25ec501471664a2b5489f493879a59603d1504ec08f05"
+    },
+    {
+      "operation": "install_reconcile_timer",
+      "source": "ci/claw/systemd/mee-claw-host-deploy-reconcile.timer",
+      "target": "/etc/systemd/system/mee-claw-host-deploy-reconcile.timer",
+      "mode": 420,
+      "sha256": "8fe7b23be88ba87f2a20d1bd2f6396be103c4fa6a98a996ceae5d2d8d25784f6"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mee.local/schemas/pr21-salvage.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source_pr", "source_head", "items"],
+  "properties": {
+    "source_pr": { "type": "integer", "const": 21 },
+    "source_head": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_path", "source_blob_sha", "target", "rule"],
+        "properties": {
+          "source_path": { "type": "string", "minLength": 1 },
+          "source_blob_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+          "target": {
+            "type": "string",
+            "pattern": "^packages/readonly-analyzer/"
+          },
+          "rule": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "rejected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_path", "source_blob_sha", "reason"],
+        "properties": {
+          "source_path": { "type": "string" },
+          "source_blob_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+          "reason": { "type": "string" }
+        }
+      }
+    }
+  }
+}

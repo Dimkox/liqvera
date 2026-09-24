@@ -1,0 +1,62 @@
+[
+  {
+    "venue": "hyperliquid",
+    "market_id": "200",
+    "venue_symbol": "PUMP",
+    "canonical_id": "PUMP",
+    "base_unit": "PUMP",
+    "quote_unit": "USDT",
+    "contract_multiplier": "1",
+    "tick_size": "0.000001",
+    "lot_size": "1",
+    "min_base": "1",
+    "min_quote_usd": "10",
+    "mapping_state": "provisional",
+    "evidence_hash": ""
+  },
+  {
+    "venue": "lighter",
+    "market_id": "45",
+    "venue_symbol": "PUMP",
+    "canonical_id": "PUMP",
+    "base_unit": "PUMP",
+    "quote_unit": "USDC",
+    "contract_multiplier": "1",
+    "tick_size": "0.000001",
+    "lot_size": "1",
+    "min_base": "2000",
+    "min_quote_usd": "10",
+    "mapping_state": "provisional",
+    "evidence_hash": ""
+  },
+  {
+    "venue": "hyperliquid",
+    "market_id": "12",
+    "venue_symbol": "DOGE",
+    "canonical_id": "DOGE",
+    "base_unit": "DOGE",
+    "quote_unit": "USDT",
+    "contract_multiplier": "1",
+    "tick_size": "0.000001",
+    "lot_size": "1",
+    "min_base": "1",
+    "min_quote_usd": "10",
+    "mapping_state": "provisional",
+    "evidence_hash": ""
+  },
+  {
+    "venue": "lighter",
+    "market_id": "3",
+    "venue_symbol": "DOGE",
+    "canonical_id": "DOGE",
+    "base_unit": "DOGE",
+    "quote_unit": "USDC",
+    "contract_multiplier": "1",
+    "tick_size": "0.000001",
+    "lot_size": "1",
+    "min_base": "10",
+    "min_quote_usd": "10",
+    "mapping_state": "provisional",
+    "evidence_hash": ""
+  }
+]

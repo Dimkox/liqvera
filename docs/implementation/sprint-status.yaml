@@ -1,0 +1,69 @@
+# generated: 2026-08-11T19:56:31.2251102+03:00
+# last_updated: 2026-08-13T13:33:35+03:00
+# project: Multi-Exchange Engine Unified Strategy Evidence Graph
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: docs/implementation
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic: backlog -> in-progress -> done
+# Story: backlog -> ready-for-dev -> in-progress -> review -> done
+# Retrospective: optional <-> done
+# Action items: open -> in-progress -> done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic becomes in-progress when its first story file is created.
+# - Sequential execution is the default; parallel work requires dependency closure.
+# - A story reaches done only after review, exact-SHA Claw receipt, graph closure,
+#   handoff evidence, and rollback/replacement evidence.
+
+generated: "2026-08-11T19:56:31.2251102+03:00"
+last_updated: "2026-08-13T13:33:35+03:00"
+project: "Multi-Exchange Engine Unified Strategy Evidence Graph"
+project_key: "NOKEY"
+tracking_system: "file-system"
+story_location: "docs/implementation"
+
+development_status:
+  epic-1: in-progress
+  1-1-bootstrap-trusted-default-branch-pr-identity-controller: done
+  1-2-vypolnyat-validation-v-disposable-multi-project-claw-sandbox: in-progress
+  1-2a-claw-engine-runner-host-transition: review
+  1-3-zapustit-capability-isolated-public-capture-iz-canonical-distribution: backlog
+  1-4-zaregistrirovat-immutable-capturerun-i-evidence-do-partition-admission: backlog
+  1-5-svyazat-evidence-tipizirovannymi-edges-i-globalnymi-logical-keys: backlog
+  1-6-zapisyvat-capture-evidence-tolko-cherez-atomarnyi-constrained-writer: backlog
+  1-7-race-safe-zapechatat-capturerun-i-zafiksirovat-terminal-identity: backlog
+  1-8-chitat-capture-evidence-cherez-deterministic-least-privilege-postgresql-contract: backlog
+  1-9-eksportirovat-i-semanticheski-proverit-immutable-frozen-package: backlog
+  1-10-razreshat-retention-tolko-cherez-verified-frozenpackagereceipt: backlog
+  epic-1-retrospective: optional
+  epic-2: backlog
+  2-1-sopostavit-instrumenty-po-exact-economic-identity: backlog
+  2-2-determinirovanno-vosstanovit-fail-closed-venue-books: backlog
+  2-3-izmerit-polnyi-chetyrekh-leg-lifecycle-cherez-full-depth-vwap: backlog
+  epic-2-retrospective: optional
+  epic-3: backlog
+  3-1-zamorozit-admitted-strategy-universe-i-otdelnye-policy-contracts: backlog
+  3-2-atributirovat-delayed-legs-failures-residuals-i-polnyi-cost-ledger: backlog
+  3-3-vydelit-nezavisimye-episodes-i-blokirovat-virtual-capital: backlog
+  3-4-otsenit-executable-basis-convergence-lifecycle: backlog
+  3-5-otsenit-realized-funding-carry-po-fakticheskim-settlements: backlog
+  3-6-sravnit-paired-basis-trailing-tolko-kak-diagnostic: backlog
+  3-7-sobrat-frozen-universe-portfolio-aggregate-bez-masking: backlog
+  3-8-dokazat-quarantine-unsupported-strategy-runtime: backlog
+  epic-3-retrospective: optional
+  epic-4: backlog
+  4-1-sozdat-i-izolirovanno-zapechatat-immutable-analysisrun: backlog
+  4-2-vydat-odin-stage-a-verdict-po-strogoi-fail-closed-precedence: backlog
+  4-3-vosproizvesti-byte-identical-report-i-analysis-replay-receipt: backlog
+  4-4-ogranichit-reshenie-vnutrennei-stage-a-gipotezoi: backlog
+  4-5-zafiksirovat-versioned-schemas-causal-release-graph: backlog
+  4-6-sobrat-i-proskanirovat-exact-release-candidate-na-claw: backlog
+  4-7-materializovat-exact-app-stack-i-dokazat-db-contract: backlog
+  4-8-avtorizovat-promotion-i-zavershit-final-release-receipt: backlog
+  4-9-razvernut-i-nablyudat-tolko-mee-a2-v-izolirovannoi-claw-test-srede: backlog
+  4-10-vosstanovit-exact-prior-mee-a2-release-i-dokazat-cleanup: backlog
+  epic-4-retrospective: optional

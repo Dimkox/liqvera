@@ -1,0 +1,30 @@
+# Local-only binary and decompilation outputs
+*.apk
+*.apkm
+*.xapk
+*.dex
+*.so
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+artifacts/
+decompiled/
+pretty/
+work/
+
+# Captured traffic / secrets
+*.har
+*.pcap
+*.pcapng
+.env
+.env.*
+*token*
+*secret*
+*password*
+
+# Python / editor
+__pycache__/
+*.pyc
+.DS_Store

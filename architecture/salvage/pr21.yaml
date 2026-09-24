@@ -1,0 +1,26 @@
+source_pr: 21
+source_head: 7fe6918690f8bc1da5826c67e3619de4126e4f54
+items:
+  - source_path: multi_exchange_engine/shadow_economics/_frozen_types.py
+    source_blob_sha: 040d742663eeb968d5e6e4f168930e1d57dde48c
+    target: packages/readonly-analyzer/src/mee_readonly_analyzer/frozen_package/types.py
+    rule: rewrite error codes onto mee-readonly-frozen-package/v1; drop writer/publication capability
+  - source_path: multi_exchange_engine/shadow_economics/_frozen_io.py
+    source_blob_sha: aa963935e47caf40d88e3abe60f839fbfc2cd14e
+    target: packages/readonly-analyzer/src/mee_readonly_analyzer/frozen_package/codec.py
+    rule: keep canonical JSON and hashing; drop writer helpers
+  - source_path: multi_exchange_engine/shadow_economics/_frozen_reader.py
+    source_blob_sha: 9fc5061ba602d4362593527a89e48540a0df07e8
+    target: packages/readonly-analyzer/src/mee_readonly_analyzer/frozen_package/reader.py
+    rule: rewrite imports to mee_contracts.evidence and keep final replay network-free
+  - source_path: multi_exchange_engine/shadow_economics/_frozen_records.py
+    source_blob_sha: abd1d8f5c66fec804b616fdc24ba8d8428635e1c
+    target: packages/readonly-analyzer/src/mee_readonly_analyzer/frozen_package/reader.py
+    rule: map records onto mee_contracts EvidenceReader types; do not keep fee-config methods
+rejected:
+  - source_path: multi_exchange_engine/shadow_economics/_frozen_writer.py
+    source_blob_sha: 6b05ce7fcb6d2861af14699cc01d7c57f6d8bf74
+    reason: writer algorithms stay out of the analyzer wheel
+  - source_path: multi_exchange_engine/shadow_economics/frozen_package.py
+    source_blob_sha: 55cfdd473e0ff1e350f31a15db55e349868e1aba
+    reason: facade re-exports write_frozen_package

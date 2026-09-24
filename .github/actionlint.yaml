@@ -1,0 +1,4 @@
+self-hosted-runner:
+  labels:
+    - claw
+    - claw-engine-runner

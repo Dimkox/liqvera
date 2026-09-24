@@ -1,0 +1,480 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/Dimkox/multi-exchange-engine/schemas/claw-host-inventory-observation-v2.schema.json",
+    "title": "Claw host inventory observation v2",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "schema_version",
+        "authority",
+        "status",
+        "not_host_receipt",
+        "repository",
+        "controller_sha",
+        "controller_tree",
+        "collection_mode",
+        "collector_path",
+        "collector_sha256",
+        "collection_id",
+        "runner_name",
+        "observed_at",
+        "policy_sha256",
+        "package_closure_sha256",
+        "oci_archive_sha256",
+        "os",
+        "cgroup_v2",
+        "engine",
+        "app",
+        "paths",
+        "target_identity",
+        "subids",
+        "packages",
+        "podman",
+        "preflight_blockers",
+        "inventory_payload_sha256"
+    ],
+    "properties": {
+        "schema_version": {
+            "const": "claw-host-inventory-observation-v2"
+        },
+        "authority": {
+            "const": "NONE"
+        },
+        "status": {
+            "const": "HOST_INVENTORY_OBSERVED"
+        },
+        "not_host_receipt": {
+            "const": true
+        },
+        "repository": {
+            "const": "Dimkox/multi-exchange-engine"
+        },
+        "controller_sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+        },
+        "controller_tree": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+        },
+        "collection_mode": {
+            "const": "DIRECT_CLAW"
+        },
+        "collector_path": {
+            "const": "scripts/collect_claw_host_inventory.py"
+        },
+        "collector_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+        },
+        "collection_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+        },
+        "runner_name": {
+            "const": "claw-engine-runner"
+        },
+        "observed_at": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+        },
+        "policy_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+        },
+        "package_closure_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+        },
+        "oci_archive_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+        },
+        "os": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "version_id",
+                "architecture",
+                "kernel"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "version_id": {
+                    "type": "string"
+                },
+                "architecture": {
+                    "type": "string"
+                },
+                "kernel": {
+                    "type": "string"
+                }
+            }
+        },
+        "cgroup_v2": {
+            "const": true
+        },
+        "engine": {
+            "$ref": "#/$defs/unit"
+        },
+        "app": {
+            "$ref": "#/$defs/unit"
+        },
+        "paths": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "prefixItems": [
+                {
+                    "$ref": "#/$defs/path"
+                },
+                {
+                    "$ref": "#/$defs/missing_path"
+                },
+                {
+                    "$ref": "#/$defs/path"
+                }
+            ],
+            "items": false
+        },
+        "target_identity": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "user_present",
+                "group_present",
+                "uid",
+                "gid",
+                "uid_occupant",
+                "gid_occupant"
+            ],
+            "properties": {
+                "user_present": {
+                    "const": false
+                },
+                "group_present": {
+                    "const": false
+                },
+                "uid": {
+                    "type": "null"
+                },
+                "gid": {
+                    "type": "null"
+                },
+                "uid_occupant": {
+                    "type": "null"
+                },
+                "gid_occupant": {
+                    "type": "null"
+                }
+            }
+        },
+        "subids": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "subuid_target",
+                "subgid_target",
+                "subuid_overlaps",
+                "subgid_overlaps"
+            ],
+            "properties": {
+                "subuid_target": {
+                    "type": "array",
+                    "maxItems": 128,
+                    "items": {
+                        "$ref": "#/$defs/subid"
+                    }
+                },
+                "subgid_target": {
+                    "type": "array",
+                    "maxItems": 128,
+                    "items": {
+                        "$ref": "#/$defs/subid"
+                    }
+                },
+                "subuid_overlaps": {
+                    "type": "array",
+                    "maxItems": 128,
+                    "items": {
+                        "$ref": "#/$defs/subid"
+                    }
+                },
+                "subgid_overlaps": {
+                    "type": "array",
+                    "maxItems": 128,
+                    "items": {
+                        "$ref": "#/$defs/subid"
+                    }
+                }
+            }
+        },
+        "packages": {
+            "type": "array",
+            "minItems": 10,
+            "maxItems": 10,
+            "items": {
+                "$ref": "#/$defs/package"
+            }
+        },
+        "podman": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "present",
+                "version"
+            ],
+            "properties": {
+                "present": {
+                    "type": "boolean"
+                },
+                "version": {
+                    "type": "null"
+                }
+            }
+        },
+        "preflight_blockers": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "enum": [
+                    "PACKAGE_BASELINE_PRESENT",
+                    "PODMAN_ALREADY_PRESENT",
+                    "SUBID_RANGE_OVERLAP",
+                    "TARGET_SUBID_PRESENT"
+                ]
+            }
+        },
+        "inventory_payload_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+        }
+    },
+    "$defs": {
+        "unit": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "unit",
+                "load_state",
+                "active_state",
+                "sub_state",
+                "fragment_path",
+                "user",
+                "group",
+                "main_pid",
+                "exec_start_path_sha256",
+                "working_directory"
+            ],
+            "properties": {
+                "unit": {
+                    "type": "string"
+                },
+                "load_state": {
+                    "const": "loaded"
+                },
+                "active_state": {
+                    "const": "active"
+                },
+                "sub_state": {
+                    "const": "running"
+                },
+                "fragment_path": {
+                    "type": "string",
+                    "pattern": "^/etc/systemd/system/"
+                },
+                "user": {
+                    "const": "pall"
+                },
+                "group": {
+                    "const": "pall"
+                },
+                "main_pid": {
+                    "type": "integer",
+                    "minimum": 2
+                },
+                "exec_start_path_sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                },
+                "working_directory": {
+                    "type": "string",
+                    "pattern": "^/home/pall/"
+                }
+            }
+        },
+        "path": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "path",
+                "realpath",
+                "kind",
+                "uid",
+                "gid",
+                "mode",
+                "device",
+                "inode",
+                "link_count"
+            ],
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "pattern": "^/(?:home|var)/"
+                },
+                "realpath": {
+                    "type": "string",
+                    "pattern": "^/(?:home|var)/"
+                },
+                "kind": {
+                    "const": "directory"
+                },
+                "uid": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "gid": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "mode": {
+                    "type": "string",
+                    "pattern": "^0[0-7]{3}$"
+                },
+                "device": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "inode": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "link_count": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "missing_path": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "path",
+                "realpath",
+                "kind",
+                "uid",
+                "gid",
+                "mode",
+                "device",
+                "inode",
+                "link_count"
+            ],
+            "properties": {
+                "path": {
+                    "const": "/var/lib/claw-engine-runner"
+                },
+                "realpath": {
+                    "const": ""
+                },
+                "kind": {
+                    "const": "missing"
+                },
+                "uid": {
+                    "type": "null"
+                },
+                "gid": {
+                    "type": "null"
+                },
+                "mode": {
+                    "type": "null"
+                },
+                "device": {
+                    "type": "null"
+                },
+                "inode": {
+                    "type": "null"
+                },
+                "link_count": {
+                    "type": "null"
+                }
+            }
+        },
+        "subid": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "name",
+                "start",
+                "count"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                },
+                "start": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 4294967295
+                },
+                "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 4294967295
+                }
+            }
+        },
+        "package": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "name",
+                "status",
+                "version",
+                "architecture",
+                "selection"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "status": {
+                    "enum": [
+                        "absent",
+                        "installed",
+                        "other"
+                    ]
+                },
+                "version": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9.+:~_-]+$"
+                },
+                "architecture": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "maxLength": 32,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                },
+                "selection": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "maxLength": 4,
+                    "pattern": "^[A-Za-z?+ -]{3,4}$"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,23 @@
+name: Reconcile MEE-owned Claw sandboxes
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+permissions:
+  contents: read
+jobs:
+  reconcile:
+    runs-on: [self-hosted, claw, claw-engine-runner]
+    timeout-minutes: 10
+    env:
+      RUNNER_NAME: claw-engine-runner
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - shell: bash
+        run: |
+          test "${RUNNER_NAME}" = claw-engine-runner
+          echo authority=NONE
+          ci/claw/reconcile-owned-resources.sh

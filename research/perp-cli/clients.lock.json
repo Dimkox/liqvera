@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "snapshot_at": "2026-08-10T11:44:00Z",
+  "scope": {
+    "definition": "Publicly verifiable distributions, executable entry points, bundled agent surfaces, mirrors and registry/index listings that can reasonably be tied to hypurrquant/perp-cli.",
+    "rules": [
+      "The official hypurrquant/perp-cli repository and its package metadata are primary evidence.",
+      "Source is already public under MIT; no decompilation is necessary to recover the official TypeScript source.",
+      "Acquisition scripts perform unauthenticated public GET/git fetch only and never execute downloaded package code.",
+      "Private keys, API keys, cookies, bearer tokens, wallet signatures and authenticated traffic are out of scope."
+    ]
+  },
+  "official_components": [
+    {
+      "id": "hypurrquant-perp-cli-source",
+      "kind": "source_repository",
+      "repo": "https://github.com/hypurrquant/perp-cli.git",
+      "commit": "ed94cfd46259ff9186bf4f2489252a4f8f773e31",
+      "default_branch": "main",
+      "version": "0.13.0",
+      "license": "MIT",
+      "language": "TypeScript / Node.js",
+      "classification": "authoritative_source",
+      "notes": [
+        "Current source tree exposes CLI, MCP server, guardrail entry point, exchange adapters, strategy/risk/funds logic and a bundled agent skill.",
+        "Latest observed main commit is later than the v0.13.0 release tag and contains post-release numeric-validation hardening."
+      ],
+      "evidence": [
+        "https://github.com/hypurrquant/perp-cli",
+        "https://github.com/hypurrquant/perp-cli/blob/main/package.json",
+        "https://github.com/hypurrquant/perp-cli/blob/main/CHANGELOG.md",
+        "https://github.com/hypurrquant/perp-cli/blob/main/LICENSE"
+      ]
+    },
+    {
+      "id": "npm-perp-cli",
+      "kind": "npm_distribution",
+      "package": "perp-cli",
+      "version": "0.13.0",
+      "registry_metadata": "https://registry.npmjs.org/perp-cli/0.13.0",
+      "classification": "official_binary_distribution",
+      "notes": [
+        "Package.json publishes dist/ and skills/ and exposes three bin entry points.",
+        "The acquisition script resolves the tarball URL from npm registry metadata instead of invoking npm lifecycle scripts."
+      ],
+      "evidence": [
+        "https://www.npmjs.com/package/perp-cli",
+        "https://github.com/hypurrquant/perp-cli/blob/main/package.json"
+      ]
+    },
+    {
+      "id": "perp-cli-bin",
+      "kind": "cli_entrypoint",
+      "name": "perp",
+      "target": "dist/index.js",
+      "version": "0.13.0",
+      "classification": "official_executable_surface",
+      "notes": [
+        "Commander-based multi-DEX CLI with structured JSON/NDJSON output, dry-run and wallet/signing support."
+      ]
+    },
+    {
+      "id": "perp-mcp-bin",
+      "kind": "mcp_entrypoint",
+      "name": "perp-mcp",
+      "target": "dist/mcp-server.js",
+      "version": "0.13.0",
+      "classification": "official_agent_surface",
+      "notes": [
+        "Current source file describes advisor mode and says it does not execute trades directly; it exposes public market reads plus account/advisor functionality.",
+        "External indexes and older README snapshots may report different tool counts; treat source at the pinned commit as authoritative."
+      ]
+    },
+    {
+      "id": "perp-guardrail-bin",
+      "kind": "guardrail_entrypoint",
+      "name": "perp-guardrail",
+      "target": "dist/guardrail/perp-guardrail.js",
+      "version": "0.13.0",
+      "classification": "official_safety_surface",
+      "notes": [
+        "Third executable published by package.json at v0.13.0."
+      ]
+    },
+    {
+      "id": "perp-cli-agent-skill",
+      "kind": "agent_skill_bundle",
+      "path": "skills/perp-cli",
+      "version": "0.13.0",
+      "classification": "official_agent_instructions",
+      "notes": [
+        "Bundled in the npm package and installable into Claude Code/Cursor/Codex/Gemini-style agent environments."
+      ],
+      "evidence": [
+        "https://github.com/hypurrquant/perp-cli/tree/main/skills/perp-cli"
+      ]
+    }
+  ],
+  "supported_exchanges": [
+    {
+      "id": "pacifica",
+      "chain": "solana",
+      "aliases": [
+        "pac"
+      ],
+      "adapter": "src/exchanges/pacifica.ts",
+      "public_api": "https://api.pacifica.fi/api/v1/info/prices"
+    },
+    {
+      "id": "hyperliquid",
+      "chain": "evm",
+      "aliases": [
+        "hl"
+      ],
+      "adapter": "src/exchanges/hyperliquid.ts",
+      "public_api": "https://api.hyperliquid.xyz/info"
+    },
+    {
+      "id": "lighter",
+      "chain": "ethereum",
+      "aliases": [
+        "lt"
+      ],
+      "adapter": "src/exchanges/lighter.ts",
+      "public_api": "https://mainnet.zklighter.elliot.ai"
+    },
+    {
+      "id": "aster",
+      "chain": "bnb",
+      "aliases": [
+        "ast"
+      ],
+      "adapter": "src/exchanges/aster.ts",
+      "public_api": null
+    }
+  ],
+  "third_party_surfaces": [
+    {
+      "id": "iflow-mcp-github-mirror",
+      "kind": "third_party_repository",
+      "repo": "https://github.com/iflow-mcp/hypurrquant-perp-cli.git",
+      "commit": "cae9101d182407d684d6c557db8d4b1947d90ffa",
+      "default_branch": "main",
+      "observed_version": "0.9.8",
+      "classification": "non_authoritative_mirror_or_fork",
+      "notes": [
+        "Repository/package metadata is older than current upstream; do not treat it as source of truth for 0.13.x behavior."
+      ]
+    },
+    {
+      "id": "iflow-mcp-npm",
+      "kind": "third_party_npm_distribution",
+      "package": "@iflow-mcp/hypurrquant-perp-cli",
+      "version": "0.9.8",
+      "registry_metadata": "https://registry.npmjs.org/%40iflow-mcp%2Fhypurrquant-perp-cli/0.9.8",
+      "classification": "non_authoritative_republication"
+    },
+    {
+      "id": "glama-mcp-index",
+      "kind": "directory_listing",
+      "url": "https://glama.ai/mcp/servers/hypurrquant/perp-cli",
+      "classification": "third_party_index"
+    },
+    {
+      "id": "claudepluginhub",
+      "kind": "agent_plugin_directory",
+      "url": "https://www.claudepluginhub.com/plugins/hypurrquant-perp-cli",
+      "classification": "third_party_index"
+    },
+    {
+      "id": "unyly-mcp-index",
+      "kind": "directory_listing",
+      "url": "https://unyly.org/mcp/hypurrquant-perp-cli",
+      "classification": "third_party_index"
+    },
+    {
+      "id": "mcp-so-index",
+      "kind": "directory_listing",
+      "url": "https://chat.mcp.so/server/perp-cli/hypurrquant",
+      "classification": "third_party_index"
+    }
+  ],
+  "unrelated_name_collisions": [
+    {
+      "id": "perpetual-protocol-at-perp-cli",
+      "package": "@perp/cli",
+      "version": "0.2.6",
+      "url": "https://www.npmjs.com/package/@perp/cli",
+      "classification": "not_related_to_hypurrquant_perp_cli",
+      "notes": [
+        "Historical Perpetual Protocol CLI. Similar command name, different package, codebase, authorship and protocol scope."
+      ]
+    }
+  ],
+  "negative_findings": [
+    {
+      "target": "native Android / APK client",
+      "result": "not_verified",
+      "qualification": "No first-party Android package or APK distribution was identified in the official repository/package/documented install surfaces."
+    },
+    {
+      "target": "native iOS App Store client",
+      "result": "not_verified",
+      "qualification": "No first-party iOS package was identified in the official repository/package/documented install surfaces."
+    },
+    {
+      "target": "desktop GUI application",
+      "result": "not_verified",
+      "qualification": "The project includes CLI/terminal/dashboard-related code, but no separately distributed native desktop application was verified."
+    },
+    {
+      "target": "browser extension",
+      "result": "not_verified",
+      "qualification": "No official browser-extension distribution was verified."
+    }
+  ]
+}

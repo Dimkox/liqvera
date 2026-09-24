@@ -1,0 +1,81 @@
+{
+  "schema_version": "claw-host-helper-manifest-v1",
+  "authority": "NONE",
+  "target_runner": "claw-engine-runner",
+  "state_root": "/var/lib/mee-controller",
+  "state_retention": "PRESERVE_FORENSIC_LEDGER",
+  "artifacts": [
+    {
+      "source": "scripts/write_bootstrap_nonce_consumption.py",
+      "target": "/usr/local/libexec/mee-controller-ledger-write",
+      "owner": "root",
+      "group": "root",
+      "mode": "0755",
+      "sha256": "4e985f0349f56117970773c9561ec0e5dce83e1db6a3b471d6a0dfbf573336e3"
+    },
+    {
+      "source": "ci/claw/reconcile-owned-resources.sh",
+      "target": "/usr/local/libexec/mee-controller-reconcile",
+      "owner": "root",
+      "group": "root",
+      "mode": "0755",
+      "sha256": "ae5614e9ade95fdf2a4574c7a66935a37a3ec4337c4e29fa8b119367db6f8ae1"
+    },
+    {
+      "source": "ci/claw/systemd/mee-controller-reconcile.service",
+      "target": "/etc/systemd/system/mee-controller-reconcile.service",
+      "owner": "root",
+      "group": "root",
+      "mode": "0644",
+      "sha256": "109c76d0a2c7ff978cb0d1e0fa31456d6e17011b19c94175ee6b51e42b9e2d30"
+    },
+    {
+      "source": "ci/claw/systemd/mee-controller-reconcile.timer",
+      "target": "/etc/systemd/system/mee-controller-reconcile.timer",
+      "owner": "root",
+      "group": "root",
+      "mode": "0644",
+      "sha256": "5b53a3100ba0068aa0ff14f81473fb9179e73082d7d366c53c4a8779e8992c47"
+    },
+    {
+      "source": "ci/claw/sudoers/mee-controller-ledger",
+      "target": "/etc/sudoers.d/mee-controller-ledger",
+      "owner": "root",
+      "group": "root",
+      "mode": "0440",
+      "sha256": "27a5bad18a1042376a82698b1d33cf9088a49a110acf9c9e6bbcf5d9044d1a5d"
+    },
+    {
+      "source": "ci/claw/install-controller-host-helper.sh",
+      "target": "review-only/install",
+      "owner": "root",
+      "group": "root",
+      "mode": "0755",
+      "sha256": "7bf58234a576a38d675ec0011a792913d7fea4fa44154ec619badb672e25fbc9"
+    },
+    {
+      "source": "scripts/claw_helper_install_transaction.py",
+      "target": "review-only/helper-wal-controller",
+      "owner": "root",
+      "group": "root",
+      "mode": "0755",
+      "sha256": "ad88400592179f3675c5b450aa4df877561fef2de70783fe8bfa77a000655729"
+    },
+    {
+      "source": "ci/claw/uninstall-controller-host-helper.sh",
+      "target": "review-only/uninstall",
+      "owner": "root",
+      "group": "root",
+      "mode": "0755",
+      "sha256": "77ca000f399e6ff08ad3a23efdd07ad1b88d8f4de30469da4fd90eeb0934274f"
+    },
+    {
+      "source": "scripts/verify_github_bootstrap_approval.py",
+      "target": "/usr/local/libexec/verify_github_bootstrap_approval.py",
+      "owner": "root",
+      "group": "root",
+      "mode": "0644",
+      "sha256": "0d5ca612dfef7e4eae5d8166edf763c9db02a609d61fa035b06aa347634aa169"
+    }
+  ]
+}

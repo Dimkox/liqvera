@@ -1,0 +1,27 @@
+method,path,schema_auth,risk_class,multi_exchange_engine_policy,notes,source
+DELETE,/broker/exchanges/{exchange},schema_unspecified,admin_or_broker,forbidden,Remove broker exchange settings,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/broker/orders,schema_unspecified,admin_or_broker,forbidden,Broker-user order history,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/broker/stats,schema_unspecified,admin_or_broker,forbidden,Aggregated broker-user statistics,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/broker/trades,schema_unspecified,admin_or_broker,forbidden,Broker-user trade history,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/broker/users/stats,schema_unspecified,admin_or_broker,forbidden,Broker-user volume ranking,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/broker/exchanges,schema_unspecified,admin_or_broker,forbidden,List broker exchange settings,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+PUT,/broker/exchanges,schema_unspecified,admin_or_broker,forbidden,Set broker key and fee,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/broker/users,schema_unspecified,admin_or_broker,forbidden,Register broker user,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+PUT,/broker/users/public-key,schema_unspecified,admin_or_broker,forbidden,Set/remove user public key,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/broker-statistics/daily-orders,schema_unspecified,admin_or_broker,forbidden,Daily API order count,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/broker-statistics/daily-traders,schema_unspecified,admin_or_broker,forbidden,Daily API trader count,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/broker-statistics/daily-volume,schema_unspecified,admin_or_broker,forbidden,Daily API volume,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/deposit,bearer,funds_movement_prepare,forbidden,Returns deposit transactions for signing,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+DELETE,/user/tokens,schema_unspecified,credential_mutation,forbidden,Delete API token,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/user/tokens,bearer,credential_read,forbidden,List named API tokens,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/user/tokens,schema_unspecified,credential_mutation,forbidden,Create API token,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/user,bearer,account_read,forbidden,Current user info,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/funding-strategies,schema_unspecified,public_or_semi_public_read,candidate_read_only_adapter,Current funding arbitrage strategies,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/funding-strategies/funding-rate-history,schema_unspecified,public_or_semi_public_read,candidate_read_only_adapter,Hourly normalized funding history,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/funding-strategies/spread-chart,schema_unspecified,public_or_semi_public_read,candidate_read_only_adapter,Hourly normalized long/short spread history,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+DELETE,/exchange/batch-orders,bearer,trading_mutation,forbidden,Cancel multiple orders,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/batch-orders,bearer,trading_mutation,forbidden,Create multiple orders,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+DELETE,/exchange/all-orders,bearer,broad_cancel,strictly_forbidden,Lighter-only cancel-all; conflicts with exact ownership invariant,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+DELETE,/exchange/orders,bearer,trading_mutation,forbidden,Cancel one order,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/orders,bearer,private_account_read,forbidden,Order history,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/orders,bearer,trading_mutation,forbidden,Create one order,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts

@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodic MEE controller reconciliation
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=15min
+RandomizedDelaySec=2min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

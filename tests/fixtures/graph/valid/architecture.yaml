@@ -1,0 +1,56 @@
+manifest_version: 2
+nodes:
+- {id: "requirement:GRAPH-006", kind: Requirement, owner: architecture, lifecycle: DECLARED, requirement_id: GRAPH-006, approval: owner-approved, requirement_class: NON_PRODUCT}
+- {id: "requirement:GRAPH-008", kind: Requirement, owner: architecture, lifecycle: DECLARED, requirement_id: GRAPH-008, approval: owner-approved, requirement_class: NON_PRODUCT}
+- {id: "requirement:GRAPH-011", kind: Requirement, owner: architecture, lifecycle: DECLARED, requirement_id: GRAPH-011, approval: owner-approved, requirement_class: NON_PRODUCT}
+- {id: "approval:graph-fixture", kind: Approval, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-006, GRAPH-008, GRAPH-011]}
+- {id: "module:graph-checker", kind: SourceModule, owner: architecture, lifecycle: IMPLEMENTED, requirements: [GRAPH-006, GRAPH-008, GRAPH-011], shared_proof: true}
+- {id: "artifact:repository-tooling", kind: Artifact, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-006, GRAPH-008, GRAPH-011]}
+- {id: "contract:graph-manifest-v1", kind: Contract, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-006]}
+- {id: "dataflow:graph-fixture", kind: DataFlow, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-006]}
+- {id: "test:graph-checker", kind: TestOrEval, owner: architecture, lifecycle: IMPLEMENTED, requirements: [GRAPH-006]}
+- {id: "gate:graph-check", kind: ClawGate, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-006]}
+- {id: "evidence:graph-check", kind: Evidence, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-006]}
+- {id: "rollback:graph-checker", kind: Rollback, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-006]}
+- {id: "contract:graph-008", kind: Contract, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-008]}
+- {id: "dataflow:graph-008", kind: DataFlow, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-008]}
+- {id: "test:graph-008", kind: TestOrEval, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-008]}
+- {id: "gate:graph-008", kind: ClawGate, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-008]}
+- {id: "evidence:graph-008", kind: Evidence, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-008]}
+- {id: "rollback:graph-008", kind: Rollback, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-008]}
+- {id: "contract:graph-011", kind: Contract, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-011]}
+- {id: "dataflow:graph-011", kind: DataFlow, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-011]}
+- {id: "test:graph-011", kind: TestOrEval, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-011]}
+- {id: "gate:graph-011", kind: ClawGate, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-011]}
+- {id: "evidence:graph-011", kind: Evidence, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-011]}
+- {id: "rollback:graph-011", kind: Rollback, owner: architecture, lifecycle: DECLARED, requirements: [GRAPH-011]}
+edges:
+- {from: "requirement:GRAPH-006", to: "approval:graph-fixture", kind: approved_by, proof_for: GRAPH-006}
+- {from: "requirement:GRAPH-008", to: "approval:graph-fixture", kind: approved_by, proof_for: GRAPH-008}
+- {from: "requirement:GRAPH-011", to: "approval:graph-fixture", kind: approved_by, proof_for: GRAPH-011}
+- {from: "requirement:GRAPH-006", to: "contract:graph-manifest-v1", kind: specified_by, proof_for: GRAPH-006}
+- {from: "contract:graph-manifest-v1", to: "module:graph-checker", kind: implements, proof_for: GRAPH-006}
+- {from: "module:graph-checker", to: "dataflow:graph-fixture", kind: produces, proof_for: GRAPH-006}
+- {from: "dataflow:graph-fixture", to: "test:graph-checker", kind: validated_by, proof_for: GRAPH-006}
+- {from: "test:graph-checker", to: "gate:graph-check", kind: gated_by, proof_for: GRAPH-006}
+- {from: "gate:graph-check", to: "artifact:repository-tooling", kind: packaged_in, proof_for: GRAPH-006}
+- {from: "artifact:repository-tooling", to: "evidence:graph-check", kind: evidenced_by, proof_for: GRAPH-006}
+- {from: "evidence:graph-check", to: "rollback:graph-checker", kind: rolled_back_by, proof_for: GRAPH-006}
+- {from: "requirement:GRAPH-008", to: "contract:graph-008", kind: specified_by, proof_for: GRAPH-008}
+- {from: "contract:graph-008", to: "module:graph-checker", kind: implements, proof_for: GRAPH-008}
+- {from: "module:graph-checker", to: "dataflow:graph-008", kind: produces, proof_for: GRAPH-008}
+- {from: "dataflow:graph-008", to: "test:graph-008", kind: validated_by, proof_for: GRAPH-008}
+- {from: "test:graph-008", to: "gate:graph-008", kind: gated_by, proof_for: GRAPH-008}
+- {from: "gate:graph-008", to: "artifact:repository-tooling", kind: packaged_in, proof_for: GRAPH-008}
+- {from: "artifact:repository-tooling", to: "evidence:graph-008", kind: evidenced_by, proof_for: GRAPH-008}
+- {from: "evidence:graph-008", to: "rollback:graph-008", kind: rolled_back_by, proof_for: GRAPH-008}
+- {from: "requirement:GRAPH-011", to: "contract:graph-011", kind: specified_by, proof_for: GRAPH-011}
+- {from: "contract:graph-011", to: "module:graph-checker", kind: implements, proof_for: GRAPH-011}
+- {from: "module:graph-checker", to: "dataflow:graph-011", kind: produces, proof_for: GRAPH-011}
+- {from: "dataflow:graph-011", to: "test:graph-011", kind: validated_by, proof_for: GRAPH-011}
+- {from: "test:graph-011", to: "gate:graph-011", kind: gated_by, proof_for: GRAPH-011}
+- {from: "gate:graph-011", to: "artifact:repository-tooling", kind: packaged_in, proof_for: GRAPH-011}
+- {from: "artifact:repository-tooling", to: "evidence:graph-011", kind: evidenced_by, proof_for: GRAPH-011}
+- {from: "evidence:graph-011", to: "rollback:graph-011", kind: rolled_back_by, proof_for: GRAPH-011}
+receipts:
+- {node: "gate:graph-check", required_from: merge, evidence_type: ClawValidationReceipt, status: prospective}

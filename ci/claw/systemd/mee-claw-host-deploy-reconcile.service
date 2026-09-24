@@ -1,0 +1,16 @@
+[Unit]
+Description=MEE Claw host deployment deadline reconciliation
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/local/libexec/mee-claw-host-deploy --reconcile
+TimeoutStartSec=15min
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=false
+ProtectHome=tmpfs
+BindPaths=/home/pall/actions-runner-engine
+UMask=0077

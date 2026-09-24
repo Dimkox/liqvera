@@ -1,0 +1,69 @@
+direction,event,wrapper,payload_shape,file,line_start,line_end
+client_to_server,user-params-set,Et,"[""{ params: o }""]",index-DHlB7G7_.js,1010,1010
+client_to_server,hello,Ja,"[""{ version: I.app.version }""]",index-DHlB7G7_.js,1740,1740
+client_to_server,nonce-response,Et,[],index-DHlB7G7_.js,1936,1936
+client_to_server,balances,Et,[],index-DHlB7G7_.js,2102,2102
+client_to_server,user-keys-status,Et,[],index-DHlB7G7_.js,2103,2103
+client_to_server,balances-import,Et,[],index-DHlB7G7_.js,2104,2104
+client_to_server,orders-history,Et,"[""a"",""e""]",index-DHlB7G7_.js,2105,2105
+client_to_server,user-login,Et,"[""{ verified: Pe().emailVerified }""]",index-DHlB7G7_.js,2113,2113
+client_to_server,user-key-set,Et,"[""{ name: r, value: e, backfill: t ? !0 : void 0 }""]",index-DHlB7G7_.js,2114,2114
+client_to_server,order-status,Et,"[""{ order: r }""]",index-DHlB7G7_.js,2115,2115
+client_to_server,orders-short,Et,"[""r""]",index-DHlB7G7_.js,2116,2116
+client_to_server,positions,Et,"[""{ active: \"active\" in r ? r.active : void 0, exchange: r.exchange || void 0, account: r.exchange ? r.account : void 0, symbol: r.symbol || void 0 }"",""e""]",index-DHlB7G7_.js,2117,2117
+client_to_server,position-status,Et,"[""{ type: \"subscribe\", filter: r }""]",index-DHlB7G7_.js,2118,2118
+client_to_server,position-status,Ja,"[""{ type: \"unsubscribe\" }""]",index-DHlB7G7_.js,2119,2119
+client_to_server,position-refresh,Et,"[""{ position: { exchange: r, symbol: e, account_id: t, detailed: !0 } }""]",index-DHlB7G7_.js,2120,2120
+client_to_server,balances-all-history,Et,"[""{ currency: (r = v.baseCurrencies[v.currency]) == null ? void 0 : r.id, type: \"subscribe\" }""]",index-DHlB7G7_.js,2121,2121
+client_to_server,balances-all-history,Ja,"[""{ type: \"unsubscribe\" }""]",index-DHlB7G7_.js,2122,2122
+client_to_server,balances-asset-history,Et,"[""{ currency: (e = v.baseCurrencies[v.currency]) == null ? void 0 : e.id, type: \"subscribe\", key: r }""]",index-DHlB7G7_.js,2123,2123
+client_to_server,balances-asset-history,Ja,"[""{ type: \"unsubscribe\" }""]",index-DHlB7G7_.js,2124,2124
+client_to_server,balances-exchange-history,Et,"[""{ currency: (e = v.baseCurrencies[v.currency]) == null ? void 0 : e.id, type: \"subscribe\", key: r }""]",index-DHlB7G7_.js,2125,2125
+client_to_server,balances-exchange-history,Ja,"[""{ type: \"unsubscribe\" }""]",index-DHlB7G7_.js,2126,2126
+client_to_server,balances-history,Et,"[""{ currency: (e = v.baseCurrencies[v.currency]) == null ? void 0 : e.id, type: \"subscribe\", key: r }""]",index-DHlB7G7_.js,2127,2127
+client_to_server,balances-history,Ja,"[""{ type: \"unsubscribe\" }""]",index-DHlB7G7_.js,2128,2128
+client_to_server,balances-all-changes,Et,"[""{ currency: (r = v.baseCurrencies[v.currency]) == null ? void 0 : r.id, type: \"subscribe\" }""]",index-DHlB7G7_.js,2129,2129
+client_to_server,balances-all-changes,Ja,"[""{ type: \"unsubscribe\" }""]",index-DHlB7G7_.js,2130,2130
+client_to_server,nonce,Et,[],index-DHlB7G7_.js,2131,2131
+client_to_server,limits,Et,[],index-DHlB7G7_.js,2132,2132
+client_to_server,orders-refresh,Et,[],index-DHlB7G7_.js,2133,2133
+client_to_server,user-alerts-list,Et,[],index-DHlB7G7_.js,2134,2134
+client_to_server,user-alerts-set,Et,"[""i""]",index-DHlB7G7_.js,2135,2135
+client_to_server,user-alerts-set,Et,"[""t""]",index-DHlB7G7_.js,2136,2136
+client_to_server,user-alerts-enable,Et,"[""{ aid: r, enable: +!!e }""]",index-DHlB7G7_.js,2137,2137
+client_to_server,user-alerts-persist,Et,"[""{ aid: r, persist: +!!e }""]",index-DHlB7G7_.js,2138,2138
+client_to_server,user-alerts-threshold,Et,"[""{ aid: r, threshold: e }""]",index-DHlB7G7_.js,2139,2139
+client_to_server,user-alerts-del,Et,"[""{ aid: r }""]",index-DHlB7G7_.js,2140,2140
+client_to_server,user-transactions-list,Et,"[""{ start: i, limit: a, asset: t || void 0, exchange: e, account: r, types: s }""]",index-DHlB7G7_.js,2141,2141
+client_to_server,user-transactions-list,Et,"[""{ exchange: r, account: e, start: t, limit: i, types: s, request: l, asset: a || void 0 }""]",index-DHlB7G7_.js,2142,2142
+client_to_server,user-transaction,Et,"[""{ txid: r }""]",index-DHlB7G7_.js,2143,2143
+client_to_server,user-accounts-list,Et,[],index-DHlB7G7_.js,2144,2144
+client_to_server,user-accounts-set,Et,"[""{ exchange: r, name: t, title: e ? ho.encode(e) : void 0, history: i ? 1 : void 0, keys: a, session: o }"",""!0""]",index-DHlB7G7_.js,2145,2145
+client_to_server,user-params-get,Et,[],index-DHlB7G7_.js,2146,2146
+client_to_server,x-route,Et,"[""{ order: r, session: i }""]",index-DHlB7G7_.js,2147,2147
+client_to_server,x-quote,Et,"[""{ order: r, session: i }""]",index-DHlB7G7_.js,2148,2148
+client_to_server,user-accounts-rename,Et,"[""{ exchange: r, aid: +e, title: t ? ho.encode(t) : void 0, name: i === void 0 ? void 0 : i }""]",index-DHlB7G7_.js,2149,2149
+client_to_server,user-accounts-del,Et,"[""{ exchange: r, aid: e }""]",index-DHlB7G7_.js,2150,2150
+client_to_server,user-wallets-list,Et,[],index-DHlB7G7_.js,2151,2151
+client_to_server,webhook-create,Et,"[""t""]",index-DHlB7G7_.js,2152,2152
+client_to_server,user-wallets-set,Et,"[""{ type: r, wallet: e, name: i, title: ho.encode(t), history: +!!a, session: o }"",""!0""]",index-DHlB7G7_.js,2153,2153
+client_to_server,user-wallets-rename,Et,"[""{ wid: +r, title: ho.encode(e) }""]",index-DHlB7G7_.js,2154,2154
+client_to_server,user-wallets-del,Et,"[""{ wid: r }""]",index-DHlB7G7_.js,2155,2155
+client_to_server,portfolio-config-get,Et,[],index-DHlB7G7_.js,2156,2156
+client_to_server,portfolio-config-set,Et,"[""{ currency: e, hours: r }""]",index-DHlB7G7_.js,2157,2157
+client_to_server,strategy-new,Et,"[""{ strategy: r, session: i }""]",index-DHlB7G7_.js,2158,2158
+client_to_server,strategy-list,Et,"[""{ exchange: r, account: e, limit: n, start: o, session: s, types: t.types }""]",index-DHlB7G7_.js,2159,2159
+client_to_server,strategy-status,Et,"[""{ strategy: r }""]",index-DHlB7G7_.js,2160,2160
+client_to_server,strategy-pause,Et,"[""{ strategy: { strategy_id: r } }""]",index-DHlB7G7_.js,2161,2161
+client_to_server,strategy-resume,Et,"[""{ strategy: { strategy_id: r } }""]",index-DHlB7G7_.js,2162,2162
+client_to_server,strategy-stop,Et,"[""{ strategy: { strategy_id: r } }""]",index-DHlB7G7_.js,2163,2163
+client_to_server,strategy-params,Et,"[""{ strategy: { strategy_id: r, params: e } }""]",index-DHlB7G7_.js,2164,2164
+client_to_server,order-new,Et,"[""{ order: e, signature: t, ts: +new Date }"",""!0""]",index-DHlB7G7_.js,2165,2165
+client_to_server,order-modify,Et,"[""i""]",index-DHlB7G7_.js,2166,2166
+client_to_server,order-modify-meta,Et,"[""s""]",index-DHlB7G7_.js,2167,2167
+client_to_server,order-action,Et,"[""s""]",index-DHlB7G7_.js,2168,2168
+client_to_server,strategy-action,Et,"[""s""]",index-DHlB7G7_.js,2169,2169
+client_to_server,order-cancel,Et,"[""{ order: e, signature: await hs(e), ts: +new Date }"",""!0""]",index-DHlB7G7_.js,2170,2170
+client_to_server,order-refresh,Et,"[""{ order: e, signature: await hs(e), ts: +new Date }"",""!0""]",index-DHlB7G7_.js,2171,2171
+client_to_server,user-refresh,Et,"[""e"",""!0""]",index-DHlB7G7_.js,2173,2173
+client_to_server,position-modify-leverage,Et,"[""{ position: n, signature: await hs(n), ts: +new Date }""]",index-DHlB7G7_.js,2174,2174

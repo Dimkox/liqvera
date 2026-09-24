@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+  <exclude domain="sharedpref" path="appsflyer-data">
+  </exclude>
+  <exclude domain="sharedpref" path="appsflyer-purchase-data">
+  </exclude>
+  <exclude domain="database" path="afpurchases.db">
+  </exclude>
+</full-backup-content>

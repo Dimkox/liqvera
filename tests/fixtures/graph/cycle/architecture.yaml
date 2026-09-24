@@ -1,0 +1,119 @@
+manifest_version: 2
+nodes:
+- id: requirement:GRAPH-002
+  kind: Requirement
+  owner: architecture
+  lifecycle: DECLARED
+  requirement_id: GRAPH-002
+  requirement_class: NON_PRODUCT
+  approval: owner-approved
+- id: approval:runtime-cycle
+  kind: Approval
+  owner: architecture
+  lifecycle: DECLARED
+  requirements:
+  - GRAPH-002
+- id: contract:runtime-cycle
+  kind: Contract
+  owner: architecture
+  lifecycle: DECLARED
+  requirements:
+  - GRAPH-002
+- id: module:a
+  kind: SourceModule
+  owner: architecture
+  lifecycle: DECLARED
+  requirements:
+  - GRAPH-002
+- id: module:b
+  kind: SourceModule
+  owner: architecture
+  lifecycle: DECLARED
+  requirements:
+  - GRAPH-002
+- id: dataflow:runtime-cycle
+  kind: DataFlow
+  owner: architecture
+  lifecycle: DECLARED
+  requirements:
+  - GRAPH-002
+- id: test:runtime-cycle
+  kind: TestOrEval
+  owner: architecture
+  lifecycle: DECLARED
+  requirements:
+  - GRAPH-002
+- id: gate:runtime-cycle
+  kind: ClawGate
+  owner: architecture
+  lifecycle: DECLARED
+  requirements:
+  - GRAPH-002
+- id: artifact:runtime-cycle
+  kind: Artifact
+  owner: architecture
+  lifecycle: DECLARED
+  requirements:
+  - GRAPH-002
+- id: evidence:runtime-cycle
+  kind: Evidence
+  owner: architecture
+  lifecycle: DECLARED
+  requirements:
+  - GRAPH-002
+- id: rollback:runtime-cycle
+  kind: Rollback
+  owner: architecture
+  lifecycle: DECLARED
+  requirements:
+  - GRAPH-002
+edges:
+- from: requirement:GRAPH-002
+  to: approval:runtime-cycle
+  kind: approved_by
+  proof_for: GRAPH-002
+- from: requirement:GRAPH-002
+  to: contract:runtime-cycle
+  kind: specified_by
+  proof_for: GRAPH-002
+- from: contract:runtime-cycle
+  to: module:a
+  kind: implements
+  proof_for: GRAPH-002
+- from: contract:runtime-cycle
+  to: module:b
+  kind: implements
+  proof_for: GRAPH-002
+- from: module:a
+  to: dataflow:runtime-cycle
+  kind: produces
+  proof_for: GRAPH-002
+- from: module:b
+  to: dataflow:runtime-cycle
+  kind: produces
+  proof_for: GRAPH-002
+- from: dataflow:runtime-cycle
+  to: test:runtime-cycle
+  kind: validated_by
+  proof_for: GRAPH-002
+- from: test:runtime-cycle
+  to: gate:runtime-cycle
+  kind: gated_by
+  proof_for: GRAPH-002
+- from: gate:runtime-cycle
+  to: artifact:runtime-cycle
+  kind: packaged_in
+  proof_for: GRAPH-002
+- from: artifact:runtime-cycle
+  to: evidence:runtime-cycle
+  kind: evidenced_by
+  proof_for: GRAPH-002
+- from: evidence:runtime-cycle
+  to: rollback:runtime-cycle
+  kind: rolled_back_by
+  proof_for: GRAPH-002
+runtime_dependencies:
+- from: module:a
+  to: module:b
+- from: module:b
+  to: module:a

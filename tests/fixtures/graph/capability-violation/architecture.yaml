@@ -1,0 +1,74 @@
+manifest_version: 1
+nodes:
+- id: requirement:SEC-001
+  kind: Requirement
+  owner: security
+  lifecycle: DECLARED
+  requirement_id: SEC-001
+  approval: owner-approved
+  requirement_class: NON_PRODUCT
+- id: runtime:contracts
+  kind: SourceModule
+  owner: contracts
+  lifecycle: DECLARED
+  profile: contracts
+  capabilities:
+  - public-venue
+- id: runtime:public-capture
+  kind: SourceModule
+  owner: capture
+  lifecycle: DECLARED
+  profile: public-capture
+  capabilities:
+  - public-venue
+  - capture-write
+  - signer
+- id: runtime:readonly-analyzer
+  kind: SourceModule
+  owner: analyzer
+  lifecycle: DECLARED
+  profile: readonly-analyzer
+  capabilities:
+  - capture-read
+  - analysis-write
+- id: runtime:unknown
+  kind: SourceModule
+  owner: runtime
+  lifecycle: DECLARED
+  profile: unsupported-profile
+  capabilities: []
+- id: runtime:unprofiled
+  kind: SourceModule
+  owner: runtime
+  lifecycle: DECLARED
+- id: artifact:stage-a-execution
+  kind: Artifact
+  owner: security
+  lifecycle: DECLARED
+  classifications:
+  - QUARANTINED
+  active: false
+  profile: execution
+  capabilities:
+  - order
+edges:
+- from: requirement:SEC-001
+  to: runtime:contracts
+  kind: specified_by
+- from: requirement:SEC-001
+  to: runtime:public-capture
+  kind: specified_by
+- from: requirement:SEC-001
+  to: runtime:readonly-analyzer
+  kind: specified_by
+- from: requirement:SEC-001
+  to: runtime:unknown
+  kind: specified_by
+- from: requirement:SEC-001
+  to: artifact:stage-a-execution
+  kind: conflicts_with
+runtime_dependencies:
+- from: runtime:readonly-analyzer
+  to: runtime:public-capture
+- from: runtime:public-capture
+  to: runtime:unprofiled

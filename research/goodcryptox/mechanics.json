@@ -1,0 +1,137 @@
+{
+  "schema": "mee-research-goodcryptox-token-mechanics/v1",
+  "snapshot_date": "2026-08-10",
+  "scope": "research_only",
+  "runtime_authority": {
+    "wallet_access": false,
+    "signing": false,
+    "token_purchase": false,
+    "swap_submission": false,
+    "account_access": false,
+    "order_submission": false,
+    "live_execution": false
+  },
+  "source_policy": {
+    "official_docs_only": true,
+    "app_dashboard_overrides_documented_reward_rates": true,
+    "dynamic_token_price_included": false,
+    "dynamic_apy_included": false
+  },
+  "token": {
+    "name": "goodcryptoX",
+    "ticker": "GOOD",
+    "chain": "Solana",
+    "mint": "goodX4LG92UAcRdFRUykfP2fAfzQAVttrToEPxtxSkp",
+    "fixed_max_supply_good": "1000000000"
+  },
+  "revenue_share_eligibility": {
+    "minimum_good": "10000",
+    "wallet_scope": "goodcryptox_built_in_solana_wallet",
+    "external_wallets_eligible": false,
+    "staking_required": false,
+    "separate_lock_transaction_required": false,
+    "epoch_seconds": 86400,
+    "full_epoch_required": true,
+    "continuous_threshold_rule": "balance_must_be_at_least_minimum_good_for_entire_epoch",
+    "mid_epoch_threshold_crossing_eligible_for_current_epoch": false
+  },
+  "revenue_share_distribution": {
+    "headline_holder_fraction": "0.50",
+    "documented_base": "shareable_revenue",
+    "detailed_shareable_revenue_text": "total swap fees collected minus token-burn allocation and referral revenue-share allocation",
+    "allocation_basis": "pro_rata_weighted_eligible_good",
+    "ultimate_nft_balance_multiplier": "1.5",
+    "payout_wallet": "goodcryptox_built_in_solana_wallet",
+    "automatic_reinvestment_default": true,
+    "gross_fee_accounting_conflict": {
+      "status": "unresolved_external_documentation_inconsistency",
+      "revenue_sharing_page": "50_percent_of_shareable_revenue_after_burn_and_referral_deductions",
+      "dex_swap_fee_page": "50_percent_of_collected_swap_fee_plus_separate_10_percent_burn_summary",
+      "engine_policy": "do_not_book_forecast_cash_from_gross_fee_percentage_without_platform_epoch_evidence_or_reviewed_versioned_contract"
+    }
+  },
+  "trading_rewards": {
+    "delivery_frequency": "weekly",
+    "eligibility": "fee_generating_volume_only",
+    "zero_fee_volume_eligible": false,
+    "fee_rebated_volume_eligible": false,
+    "rates": [
+      {
+        "activity": "dex_spot",
+        "good_awarded": "1",
+        "eligible_volume_usd": "100",
+        "eligible_volume_usd_for_10000_good": "1000000"
+      },
+      {
+        "activity": "dex_spot_good_token",
+        "good_awarded": "2",
+        "eligible_volume_usd": "100",
+        "eligible_volume_usd_for_10000_good": "500000"
+      },
+      {
+        "activity": "dex_futures",
+        "good_awarded": "1",
+        "eligible_volume_usd": "1000",
+        "eligible_volume_usd_for_10000_good": "10000000"
+      },
+      {
+        "activity": "cex_spot",
+        "good_awarded": "1",
+        "eligible_volume_usd": "1000",
+        "eligible_volume_usd_for_10000_good": "10000000"
+      },
+      {
+        "activity": "cex_futures",
+        "good_awarded": "1",
+        "eligible_volume_usd": "10000",
+        "eligible_volume_usd_for_10000_good": "100000000"
+      }
+    ]
+  },
+  "holding_discounts": {
+    "wallet_scope": "goodcryptox_built_in_solana_wallet",
+    "tiers": [
+      {
+        "minimum_good": "10000",
+        "dex_swap_fee_discount": "0.10"
+      },
+      {
+        "minimum_good": "50000",
+        "dex_swap_fee_discount": "0.20"
+      },
+      {
+        "minimum_good": "100000",
+        "dex_swap_fee_discount": "0.30"
+      },
+      {
+        "minimum_good": "500000",
+        "dex_swap_fee_discount": "0.40"
+      },
+      {
+        "minimum_good": "1000000",
+        "dex_swap_fee_discount": "0.50"
+      }
+    ]
+  },
+  "dex_swap_fees": {
+    "base_spot_fraction": "0.01",
+    "base_futures_fraction": "0.001",
+    "discount_composition": "multiplicative"
+  },
+  "acquisition": {
+    "recommended_route": "goodcryptox_built_in_solana_swap_via_jupiter",
+    "external_routes": [
+      "Jupiter",
+      "Raydium"
+    ],
+    "external_purchase_requires_transfer_to_built_in_wallet_for_benefits": true
+  },
+  "engine_accounting_policy": {
+    "good_is_venue_collateral": false,
+    "projected_unpaid_revshare_realized_revenue": false,
+    "unverified_wallet_balance_gets_discount": false,
+    "unverified_wallet_balance_gets_revshare": false,
+    "external_wallet_balance_gets_platform_benefits": false,
+    "token_ticker_alone_is_valid_identity": false
+  }
+}

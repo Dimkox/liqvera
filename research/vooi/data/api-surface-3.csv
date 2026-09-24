@@ -1,0 +1,26 @@
+method,path,schema_auth,risk_class,multi_exchange_engine_policy,notes,source
+DELETE,/user-exchange/{exchange},bearer,credential_or_account_mutation,forbidden,Disconnect exchange,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/user-exchange,bearer,private_account_read,forbidden,List connected exchanges,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/user-exchange/aster,bearer,credential_or_account_mutation,forbidden,Connect Aster,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/user-exchange/extended,bearer,credential_or_account_mutation,forbidden,Connect Extended,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/user-exchange/hyperliquid,bearer,credential_or_account_mutation,forbidden,Connect Hyperliquid,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/user-exchange/lighter,bearer,credential_or_account_mutation,forbidden,Connect Lighter,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/extended/points/earned,bearer,private_account_read,forbidden,Extended points earned by season/epoch,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/extended/points,bearer,private_account_read,forbidden,Extended points summary,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/extended/use-referral-code,bearer,account_mutation,forbidden,Apply Extended referral code,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/kinetiq/enable,bearer,account_mutation,forbidden,Enable Kinetiq points via signature,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/kinetiq/points,bearer,private_account_read,forbidden,Read Kinetiq points,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/kinetiq/status,bearer,private_account_read,forbidden,Read Kinetiq enablement status,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+DELETE,/mcp,bearer_documented,agent_tool_transport,forbidden_in_engine_runtime,Remote Streamable HTTP MCP transport,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/mcp,bearer_documented,agent_tool_transport,forbidden_in_engine_runtime,Remote Streamable HTTP MCP transport,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/mcp,bearer_documented,agent_tool_transport,forbidden_in_engine_runtime,Remote Streamable HTTP MCP transport,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/transfer/execute,bearer,funds_movement,strictly_forbidden,Execute prepared margin transfer,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/transfer/history,bearer,private_account_read,strictly_forbidden,Margin transfer history,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/transfer/status,bearer,private_account_read,strictly_forbidden,Margin transfer status,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/transfer/arbitrum,bearer,funds_movement,strictly_forbidden,Prepare Arbitrum-to-exchange transfer,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/transfer/prepare,bearer,funds_movement,strictly_forbidden,Prepare cross-exchange transfer,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/withdraw/execute,bearer,funds_movement,strictly_forbidden,Execute prepared withdrawal,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/withdraw/prepare,bearer,funds_movement,strictly_forbidden,Prepare withdrawal,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/withdraw/extended/execute,bearer,funds_movement,strictly_forbidden,Execute Extended withdrawal,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/withdraw/extended/quote,bearer,funds_movement,strictly_forbidden,Quote Extended withdrawal,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/time,schema_unspecified,public_read,candidate_read_only_adapter,Server time,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts

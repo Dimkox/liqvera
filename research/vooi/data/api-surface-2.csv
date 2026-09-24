@@ -1,0 +1,27 @@
+method,path,schema_auth,risk_class,multi_exchange_engine_policy,notes,source
+POST,/exchange/updates-token,bearer,session_token_mutation,forbidden,Create one-time updates token,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/account-info,bearer,private_account_read,forbidden,Venue-specific account settings,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/accounts,bearer,private_account_read,forbidden,Account balances,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/markets,schema_unspecified,market_data_read,candidate_read_only_adapter,Authoritative market list according to official examples,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/market-settings,bearer,private_account_read,forbidden,Current leverage/margin settings,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/open-orders,bearer,private_account_read,forbidden,Open orders,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/positions,bearer,private_account_read,forbidden,Open positions,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/quotes,bearer,market_quote_read,research_only_until_contract_review,Executable quote surface; can reveal fees/slippage,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/estimate-slippage,bearer,market_quote_read,research_only_until_contract_review,Estimate slippage for notional and side,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/top-volume-symbols-quotes,schema_unspecified,market_data_read,candidate_read_only_adapter,Top markets by 24h volume,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/trades,bearer,private_account_read,forbidden,Private trade history,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/leverage,bearer,account_setting_mutation,forbidden,Set leverage,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/margin-mode,bearer,account_setting_mutation,forbidden,Set cross/isolated margin mode,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/updates-orderbook,schema_unspecified,market_data_stream,candidate_read_only_adapter,SSE order-book updates,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/updates,tokenized_sse,private_or_market_stream,forbidden_until_stream_contract_split,Real-time SSE updates; official clients use a one-time token,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/broker/execute,bearer,wallet_signature_or_permission,forbidden,Submit signed broker approval,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/exchange/broker/approved,bearer,wallet_signature_or_permission,forbidden,Check broker approval,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/broker/prepare,bearer,wallet_signature_or_permission,forbidden,Build broker-approval signing payload,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/hyperliquid/send-asset/execute,bearer,funds_or_account_mutation,strictly_forbidden,Submit signed Hyperliquid sendAsset,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/hyperliquid/set-abstraction/execute,bearer,funds_or_account_mutation,strictly_forbidden,Submit signed abstraction-mode change,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/hyperliquid/send-asset/prepare,bearer,funds_or_account_mutation,strictly_forbidden,Build sendAsset EIP-712 data,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/hyperliquid/set-abstraction/prepare,bearer,funds_or_account_mutation,strictly_forbidden,Build abstraction-mode EIP-712 data,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/exchange/hyperliquid/stablecoins-swap,bearer,funds_or_account_mutation,strictly_forbidden,Swap stablecoins on Hyperliquid spot,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/user-exchange/{exchange}/register/execute,bearer,credential_or_account_mutation,forbidden,Submit signed exchange registration,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+GET,/user-exchange/{exchange}/register/status,schema_unspecified,private_account_read,forbidden,Registration status,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts
+POST,/user-exchange/{exchange}/register/prepare,bearer,credential_or_account_mutation,forbidden,Prepare exchange registration,vooi-app/vooi-mm-bot-example@879d15c677e9840dfe4164e3e700bf54c72d5082:src/client/sdk.gen.ts

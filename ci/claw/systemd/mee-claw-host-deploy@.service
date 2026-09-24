@@ -1,0 +1,20 @@
+[Unit]
+Description=MEE Claw host deployment request
+Requires=mee-claw-host-deploy.socket
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+StandardInput=socket
+StandardOutput=socket
+StandardError=journal
+ExecStart=/usr/bin/python3.14 /usr/local/libexec/mee-claw-host-deploy
+TimeoutStartSec=30min
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=false
+ProtectHome=tmpfs
+BindPaths=/home/pall/actions-runner-engine
+UMask=0077

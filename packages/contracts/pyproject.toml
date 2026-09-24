@@ -1,0 +1,17 @@
+[project]
+name = "mee-contracts"
+version = "0.1.0"
+description = "Pure Stage A contracts and exact domain kernel"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+authors = [
+  { name = "Dimkox" },
+]
+dependencies = []
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mee_contracts"]

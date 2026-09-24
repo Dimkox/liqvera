@@ -1,0 +1,26 @@
+target-version = "py311"
+line-length = 100
+
+include = [
+  "packages/**/*.py",
+  "tests/contracts/**/*.py",
+  "tests/public_capture/**/*.py",
+  "tests/readonly_analyzer/**/*.py",
+  "tests/installed/**/*.py",
+  "tests/conformance/**/*.py",
+  "tests/artifact/**/*.py",
+  "tools/conformance/**/*.py",
+]
+
+exclude = [
+  ".git",
+  ".grok-stack/runtime",
+  "dist",
+  "engineering",
+  "examples",
+  "__pycache__",
+]
+
+[lint]
+select = ["E4", "E7", "E9", "F", "I"]
+ignore = ["E402"]

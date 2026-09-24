@@ -1,0 +1,98 @@
+"""Pure Stage A contracts and exact domain kernel."""
+
+from mee_contracts.decision import StageADecision, StageADecisionCode, StageAReasonCode
+from mee_contracts.economics import STAGE_A_SEALED_ECONOMICS_SCHEMA, SealedStageAEconomics
+from mee_contracts.evidence import (
+    CaptureManifest,
+    CaptureTerminal,
+    ControlEvidenceRecord,
+    EvidenceReader,
+    MappingSnapshot,
+    QualityMinuteRecord,
+    RawBatchRecord,
+    RawPublicEnvelope,
+)
+from mee_contracts.exact import (
+    DecimalRenderingError,
+    ExactDecimal,
+    ExactDivisionError,
+    ExactError,
+    ExactOverflowError,
+    ExactPrecisionError,
+    decimal_from_fraction,
+    fraction_from_decimal,
+    fraction_lcm,
+    is_multiple,
+    is_terminating_fraction,
+    round_up_to_multiple,
+)
+from mee_contracts.market import (
+    BookLevel,
+    CommonMarket,
+    InstrumentIdentity,
+    OrderBookSnapshot,
+    VenueMarket,
+    discover_common_markets,
+)
+from mee_contracts.provenance import (
+    CostComponent,
+    EntryCostModel,
+    ExactEntryCosts,
+    FeeEvidence,
+    FeeRoundingRule,
+    LiquidityRole,
+    MappingDecision,
+    MarketMappingEvidence,
+    calculate_entry_costs,
+    validate_mapping_pair,
+)
+from mee_contracts.reasons import SHADOW_REASON_ORDER, ShadowRejectCode
+
+__all__ = [
+    "BookLevel",
+    "CaptureManifest",
+    "CaptureTerminal",
+    "CommonMarket",
+    "ControlEvidenceRecord",
+    "CostComponent",
+    "DecimalRenderingError",
+    "EntryCostModel",
+    "ExactDecimal",
+    "ExactDivisionError",
+    "ExactError",
+    "ExactOverflowError",
+    "ExactPrecisionError",
+    "EvidenceReader",
+    "ExactEntryCosts",
+    "FeeEvidence",
+    "FeeRoundingRule",
+    "InstrumentIdentity",
+    "LiquidityRole",
+    "MappingDecision",
+    "MappingSnapshot",
+    "MarketMappingEvidence",
+    "OrderBookSnapshot",
+    "QualityMinuteRecord",
+    "RawBatchRecord",
+    "RawPublicEnvelope",
+    "SHADOW_REASON_ORDER",
+    "STAGE_A_SEALED_ECONOMICS_SCHEMA",
+    "SealedStageAEconomics",
+    "ShadowRejectCode",
+    "StageADecision",
+    "StageADecisionCode",
+    "StageAReasonCode",
+    "VenueMarket",
+    "__version__",
+    "calculate_entry_costs",
+    "decimal_from_fraction",
+    "discover_common_markets",
+    "fraction_from_decimal",
+    "fraction_lcm",
+    "is_multiple",
+    "is_terminating_fraction",
+    "round_up_to_multiple",
+    "validate_mapping_pair",
+]
+
+__version__ = "0.1.0"

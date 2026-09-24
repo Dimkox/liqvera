@@ -1,0 +1,28 @@
+manifest_version: 2
+nodes:
+- id: contract:raw-public-evidence
+  kind: Contract
+  owner: data
+  lifecycle: DECLARED
+  requirements: []
+- id: contract:frozen-package-reader
+  kind: Contract
+  owner: data
+  lifecycle: DECLARED
+  requirements: []
+- id: contract:exact-economic-identity
+  kind: Contract
+  owner: data
+  lifecycle: DECLARED
+  requirements: []
+- id: dataflow:capture-to-frozen-package
+  kind: DataFlow
+  owner: data
+  lifecycle: DECLARED
+  requirements: []
+- id: test:data-contracts
+  kind: TestOrEval
+  owner: data
+  lifecycle: DECLARED
+  requirements: []
+edges: []

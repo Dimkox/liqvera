@@ -1,0 +1,38 @@
+backend,key_or_prefix,purpose,evidence
+IndexedDB,store/dictionary,generic key-value store,index-DHlB7G7_.js:107-127
+localStorage,settings.,application settings namespace,storage wrapper and direct accesses
+localStorage,data.,cached application data namespace,storage wrapper
+localStorage,.checksum,integrity marker suffix,storage wrapper
+localStorage,.exp,expiration marker suffix,storage wrapper
+Firebase Realtime Database,/users/{uid}/settings/{key},cross-device settings synchronization,settings store
+Firebase Realtime Database,/users/{uid}/keys,RSA encryption/signing key delivery,index-DHlB7G7_.js:3601
+localStorage,settings.locale,locale,direct AST/string reference
+localStorage,settings.baseCurrency,base currency,direct AST/string reference
+localStorage,settings.pc-futures,futures price comparison,direct AST/string reference
+localStorage,settings.pc-tabs,price comparison tabs,direct AST/string reference
+localStorage,settings.review-asked,review prompt state,direct AST/string reference
+localStorage,settings.watchlist,watchlist,direct AST/string reference
+localStorage,settings.enableBlur,privacy blur,direct AST/string reference
+localStorage,settings.subFlags,subscription flags,direct AST/string reference
+localStorage,settings.isPermissionRequested,permission prompt state,direct AST/string reference
+localStorage,settings.hasPermission,notification permission state,direct AST/string reference
+localStorage,settings.symbolSelectorWatchlist,symbol selector watchlist,direct AST/string reference
+localStorage,settings.notificationDontAsk,notification suppression,direct AST/string reference
+localStorage,settings.latestTheme,theme feature state,direct AST/string reference
+localStorage,settings.last-version,last seen version,direct AST/string reference
+localStorage,settings.auto-dark,automatic dark mode,direct AST/string reference
+localStorage,settings.is-enabled-fingerprint,biometric preference,direct AST/string reference
+localStorage,settings.trade-desktop-layout,trade layout,direct AST/string reference
+localStorage,settings.cost-mode,order cost mode,direct AST/string reference
+localStorage,settings.personalNotifications,personal notification preferences,direct AST/string reference
+localStorage,settings.x-gems-filters,DEX gems filters,direct AST/string reference
+localStorage,settings.x-addrss-vis-state,wallet address visibility,direct AST/string reference
+localStorage,pinia.banxa,Banxa state,direct AST/string reference
+localStorage,server,private WS override,direct AST/string reference
+localStorage,pserver,public WS override,direct AST/string reference
+localStorage,xOrderFormSettings,DEX order form state,direct AST/string reference
+localStorage,pathWhenClosed,resume path,direct AST/string reference
+localStorage,dl.registerDeepLink,AppsFlyer deep-link payload cache,direct AST/string reference
+localStorage,user-keys-status,exchange key status cache,direct AST/string reference
+localStorage,proInfoMock,developer subscription mock state,direct AST/string reference
+localStorage,isActiveTradeTVChart,TradingView activation state,direct AST/string reference

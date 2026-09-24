@@ -1,0 +1,13 @@
+[Unit]
+Description=MEE Claw host deployment control socket
+
+[Socket]
+ListenStream=/run/mee-claw-host-deploy/control.sock
+Accept=yes
+SocketUser=root
+SocketGroup=root
+SocketMode=0600
+RemoveOnStop=true
+
+[Install]
+WantedBy=sockets.target

@@ -1,0 +1,30 @@
+{
+  "private_websocket": {
+    "url": "wss://me.goodcrypto.app",
+    "authentication": "Firebase ID token is supplied as WebSocket subprotocol and duplicated in authenticated message payloads",
+    "connect_reference": "index-DHlB7G7_.js:1721-1729",
+    "message_wrapper_reference": "index-DHlB7G7_.js:2106-2112",
+    "heartbeat_ms": 1000,
+    "stale_timeout_ms": 9000,
+    "reconnect_ms": 5000
+  },
+  "public_market_websocket": {
+    "url": "wss://md.goodcrypto.app/ws",
+    "reference": "index-DHlB7G7_.js:3410-3449",
+    "channels": ["MT,<exchange>,<symbol>", "A,<blockchain>", "AP,<blockchain>", "AC,<interval>,<exchange_id>,<gc_ticker>", "BK,<exchange>,<pair>"]
+  },
+  "dex_market_websocket": {
+    "url": "wss://md.goodcrypto.app/ws/dex",
+    "reference": "index-DHlB7G7_.js:10462"
+  },
+  "market_data_rest": {
+    "base_url": "https://md.goodcrypto.app/api",
+    "timeout_ms": 15000,
+    "reference": "index-DHlB7G7_.js:14-15"
+  },
+  "firebase_realtime_database": {
+    "host": "crypttoapp.firebaseio.com",
+    "purpose": ["user profile/settings synchronization", "RSA key delivery", "web3/session state", "notifications/subscriptions"],
+    "client_configuration_values": "not reproduced; project identifier only is discussed in report"
+  }
+}

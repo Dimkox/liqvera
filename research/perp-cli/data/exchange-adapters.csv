@@ -1,0 +1,5 @@
+exchange,alias,chain,adapter_source,public_api,capability_family,multi_exchange_engine_policy
+pacifica,pac,solana,src/exchanges/pacifica.ts,https://api.pacifica.fi/api/v1/info/prices,market+account+trade+risk,read_allowlist_only
+hyperliquid,hl,evm,src/exchanges/hyperliquid.ts,https://api.hyperliquid.xyz/info,market+account+trade+risk+HIP-3,read_allowlist_only
+lighter,lt,ethereum,src/exchanges/lighter.ts,https://mainnet.zklighter.elliot.ai,market+account+trade+risk,read_allowlist_only
+aster,ast,bnb,src/exchanges/aster.ts,,market+account+trade+risk,read_allowlist_only

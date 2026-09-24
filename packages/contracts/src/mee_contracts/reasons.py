@@ -1,0 +1,18 @@
+"""Stable normalized-pair shadow rejection reasons."""
+
+from enum import StrEnum
+
+
+class ShadowRejectCode(StrEnum):
+    """Versioned pair-domain rejection codes."""
+
+    MARKET_MAPPING_REJECTED = "MARKET_MAPPING_REJECTED"
+    UNSUPPORTED_PAYOFF = "UNSUPPORTED_PAYOFF"
+    COST_MODEL_INCOMPLETE = "COST_MODEL_INCOMPLETE"
+    TARGET_OVERSHOOT = "TARGET_OVERSHOOT"
+    QUANTITY_UNSUPPORTED = "QUANTITY_UNSUPPORTED"
+    DEPTH_INSUFFICIENT = "DEPTH_INSUFFICIENT"
+    NON_POSITIVE_AFTER_COSTS = "NON_POSITIVE_AFTER_COSTS"
+
+
+SHADOW_REASON_ORDER = tuple(ShadowRejectCode)

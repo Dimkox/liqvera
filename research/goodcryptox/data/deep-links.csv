@@ -1,0 +1,13 @@
+component,filter_index,auto_verify,actions,categories,scheme,host,path
+app.goodcrypto.MainActivity,2,true,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",https,link.goodcrypto.app,
+app.goodcrypto.MainActivity,3,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",https,goodcrypto.onelink.me,
+app.goodcrypto.MainActivity,4,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",https,click.goodcrypto.app,
+app.goodcrypto.MainActivity,5,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",https,app.goodcrypto.app,
+app.goodcrypto.MainActivity,6,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",https,auth.goodcrypto.app,/__/auth/callback
+app.goodcrypto.MainActivity,7,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",https,crypttoapp.firebaseapp.com,/__/auth/callback
+app.goodcrypto.MainActivity,8,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",app.goodcrypto,,
+app.goodcrypto.MainActivity,9,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",goodcryptox,,
+com.facebook.CustomTabActivity,1,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",@0x7f12006d,,
+com.facebook.CustomTabActivity,2,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",fbconnect,cct.app.goodcrypto,
+com.google.firebase.auth.internal.GenericIdpActivity,1,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",genericidp,firebase.auth,/
+com.google.firebase.auth.internal.RecaptchaActivity,1,,"[""android.intent.action.VIEW""]","[""android.intent.category.DEFAULT"",""android.intent.category.BROWSABLE""]",recaptcha,firebase.auth,/

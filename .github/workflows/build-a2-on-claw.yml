@@ -1,0 +1,274 @@
+name: Build A2 candidate on Claw
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: a2-claw-build
+  cancel-in-progress: false
+
+jobs:
+  verify-a2-candidate:
+    name: Verify A2 candidate (${{ matrix.postgres_name }})
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, claw]
+    timeout-minutes: 30
+    env:
+      POSTGRES_NAME: ${{ matrix.postgres_name }}
+      POSTGRES_IMAGE: ${{ matrix.postgres_image }}
+      CLAW_WORKSPACE_SHARD: ${{ matrix.postgres_shard }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - postgres_name: postgres-16.11
+            postgres_shard: postgres_16_11
+            postgres_image: postgres:16.11-alpine@sha256:4327b9fd295502f326f44153a1045a7170ddbfffed1c3829798328556cfd09e2
+          - postgres_name: postgres-17.7
+            postgres_shard: postgres_17_7
+            postgres_image: postgres:17.7-alpine@sha256:bb377b7239d2774ac8cc76f481596ce96c5a6b5e9d141f6d0a0ee371a6e7c0f2
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+      - name: Start isolated PostgreSQL
+        id: postgres_runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          install -d -m 0700 "${workspace_root}"
+          postgres_identity="a2_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}_${job_name}_${workspace_shard}"
+          postgres_container="a2-pg-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          postgres_password="$(openssl rand -hex 32)"
+          printf '::add-mask::%s\n' "${postgres_password}"
+          printf 'postgres_password=%s\n' "${postgres_password}" >>"${GITHUB_OUTPUT}"
+          env_file="${workspace_root}/postgres-container.env"
+          runtime_file="${workspace_root}/postgres-runtime.env"
+          printf 'POSTGRES_DB=%s\nPOSTGRES_USER=%s\nPOSTGRES_PASSWORD=%s\n' "${postgres_identity}" "${postgres_identity}" "${postgres_password}" >"${env_file}"
+          chmod 0600 "${env_file}"
+          docker run --detach --name "${postgres_container}" --env-file "${env_file}" --publish 127.0.0.1::5432 --health-cmd "pg_isready -U ${postgres_identity} -d ${postgres_identity}" --health-interval 5s --health-timeout 3s --health-retries 12 "${POSTGRES_IMAGE}"
+          port_projection="$(docker port "${postgres_container}" 5432/tcp)"
+          [[ "${port_projection}" =~ ^127\.0\.0\.1:([0-9]{1,5})$ ]]
+          postgres_port="${BASH_REMATCH[1]}"
+          (( postgres_port >= 1 && postgres_port <= 65535 ))
+          printf 'postgres_identity=%q\npostgres_password=%q\npostgres_port=%q\npostgres_container=%q\n'             "${postgres_identity}" "${postgres_password}" "${postgres_port}" "${postgres_container}" >"${runtime_file}"
+          chmod 0600 "${runtime_file}"
+          for attempt in {1..60}; do
+            [[ "$(docker inspect --format '{{.State.Health.Status}}' "${postgres_container}")" == healthy ]] && exit 0
+            sleep 1
+          done
+          exit 2
+
+
+      - name: Validate architecture graph
+        shell: bash
+        run: python3 scripts/check-architecture-graph.py --manifest-root architecture --phase merge
+
+      - name: Validate Claw workflow policy
+        shell: bash
+        run: python3 -m pytest tests/graph/test_workflow_policy.py -q
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Create isolated Python environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          venv_dir="${workspace_root}/a2-venv-${POSTGRES_NAME}"
+          install -d -m 0700 "${workspace_root}"
+          python -m venv "${venv_dir}"
+          "${venv_dir}/bin/python" -m pip --version
+
+      - name: Install exact A2 dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          venv_dir="${workspace_root}/a2-venv-${POSTGRES_NAME}"
+          "${venv_dir}/bin/python" -m pip install --disable-pip-version-check --no-cache-dir --no-deps -r requirements-a2.txt
+          "${venv_dir}/bin/python" -m pip check
+
+      - name: Run PostgreSQL integration gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          source "${workspace_root}/postgres-runtime.env"
+          A2_TEST_DATABASE_URL="postgresql://${postgres_identity}:${postgres_password}@127.0.0.1:${postgres_port}/${postgres_identity}"
+          export A2_TEST_DATABASE_URL
+          venv_dir="${workspace_root}/a2-venv-${POSTGRES_NAME}"
+          "${venv_dir}/bin/python" scripts/run-a2-postgres-tests.py
+
+      - name: Run A2 unit and replay suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          venv_dir="${workspace_root}/a2-venv-${POSTGRES_NAME}"
+          "${venv_dir}/bin/python" -B -m unittest discover -s tests/a2 -t . -v
+          "${venv_dir}/bin/python" -B -m unittest tests.a2.test_replay -v
+
+      - name: Run A2 fault matrix and boundary gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          source "${workspace_root}/postgres-runtime.env"
+          A2_TEST_DATABASE_URL="postgresql://${postgres_identity}:${postgres_password}@127.0.0.1:${postgres_port}/${postgres_identity}"
+          export A2_TEST_DATABASE_URL
+          venv_dir="${workspace_root}/a2-venv-${POSTGRES_NAME}"
+          "${venv_dir}/bin/python" -B -m unittest tests.a2.integration.test_fault_matrix -v
+          "${venv_dir}/bin/python" scripts/check-a2-boundary.py
+
+      - name: Cleanup isolated PostgreSQL
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          postgres_container="a2-pg-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          docker rm --force "${postgres_container}" >/dev/null 2>&1 || true
+          test -z "$(docker ps -aq --filter "name=^/${postgres_container}$")"
+          rm -f -- "${workspace_root}/postgres-container.env" "${workspace_root}/postgres-runtime.env"
+
+
+      - name: Cleanup isolated workspace
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          scripts/cleanup-claw-workspace.sh "${workspace_root}"
+
+  build-a2-candidate:
+    name: Build and scan A2 candidate
+    needs: verify-a2-candidate
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, claw]
+    timeout-minutes: 30
+    env:
+      SOURCE_IMAGE: mee-a2:${{ github.sha }}
+      SOURCE_SHA: ${{ github.sha }}
+      CLAW_WORKSPACE_SHARD: build-a2-candidate
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Validate architecture graph
+        shell: bash
+        run: python3 scripts/check-architecture-graph.py --manifest-root architecture --phase merge
+
+      - name: Validate Claw workflow policy
+        shell: bash
+        run: python3 -m pytest tests/graph/test_workflow_policy.py -q
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Create isolated Python environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          venv_dir="${workspace_root}/a2-build-venv"
+          install -d -m 0700 "${workspace_root}"
+          python -m venv "${venv_dir}"
+          "${venv_dir}/bin/python" -m pip --version
+
+      - name: Build exact-SHA A2 images
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build --target verify -f Dockerfile.a2 -t mee-a2:verify .
+          docker build -f Dockerfile.a2 \
+            --build-arg VCS_REF="${SOURCE_SHA}" \
+            --build-arg VCS_SOURCE="https://github.com/${GITHUB_REPOSITORY}" \
+            -t "${SOURCE_IMAGE}" .
+
+      - name: Extract pinned scanner binaries without starting containers
+        shell: bash
+        run: |
+          set -euo pipefail
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          syft_container="$(docker create anchore/syft:v1.49.0@sha256:13b53ebabe3d215268c90cf8fb9b875f0183908245f376fd4b3a2cb69d21d484)"
+          trivy_container="$(docker create aquasec/trivy:0.72.0@sha256:cffe3f5161a47a6823fbd23d985795b3ed72a4c806da4c4df16266c02accdd6f)"
+          trap 'docker rm "${syft_container}" "${trivy_container}" >/dev/null' EXIT
+          docker cp "${syft_container}:/syft" "${workspace_root}/syft"
+          docker cp "${trivy_container}:/usr/local/bin/trivy" "${workspace_root}/trivy"
+          chmod 0755 "${workspace_root}/syft" "${workspace_root}/trivy"
+          "${workspace_root}/syft" "${SOURCE_IMAGE}" -o cyclonedx-json="${workspace_root}/mee-a2.cdx.json"
+          "${workspace_root}/trivy" image --no-progress --severity HIGH,CRITICAL --exit-code 1 \
+            --format json --output "${workspace_root}/trivy-report.json" "${SOURCE_IMAGE}"
+
+      - name: Upload non-secret supply-chain reports
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: mee-a2-cyclonedx-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ env.CLAW_WORKSPACE_SHARD }}/mee-a2.cdx.json
+            ${{ runner.temp }}/${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ env.CLAW_WORKSPACE_SHARD }}/trivy-report.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Verify exact revision and registry mount boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_image="${SOURCE_IMAGE}"
+          revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "${source_image}")"
+          test "${revision}" = "${SOURCE_SHA}"
+          image_id="$(docker image inspect --format '{{.Id}}' "${source_image}")"
+          [[ "${image_id}" =~ ^sha256:[0-9a-f]{64}$ ]]
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          venv_dir="${workspace_root}/a2-build-venv"
+          "${venv_dir}/bin/python" -B scripts/smoke-a2-registry-mount.py --image "${source_image}"
+
+      - name: Cleanup isolated workspace
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          job_name="$(printf '%s' "${GITHUB_JOB}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_shard="$(printf '%s' "${CLAW_WORKSPACE_SHARD}" | tr -c 'A-Za-z0-9._-' '_')"
+          workspace_root="${RUNNER_TEMP}/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${job_name}-${workspace_shard}"
+          scripts/cleanup-claw-workspace.sh "${workspace_root}"

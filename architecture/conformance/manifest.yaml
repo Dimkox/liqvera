@@ -1,0 +1,44 @@
+manifest_version: 1
+execution_backend: python
+go_executed: false
+invariants:
+  - invariant_id: EXACT-001
+    reference_source: internal/fixed
+    contract_symbol: mee_contracts.exact.ExactDecimal
+    python_test: tests/conformance/test_exact_arithmetic.py
+    negative_tests: [reject_nonfinite, reject_binary_float]
+    claw_gate: python-conformance
+    retirement_state: BLOCKED
+    stage_a_packaging_allowed: false
+  - invariant_id: UNKNOWN-001
+    reference_source: internal/execution
+    contract_symbol: tests.conformance.invariants.unknown_blocks_retry
+    python_test: tests/conformance/test_fail_closed_unknown.py
+    negative_tests: [unknown_blocks_retry]
+    claw_gate: python-conformance
+    retirement_state: BLOCKED
+    stage_a_packaging_allowed: false
+  - invariant_id: OWNERSHIP-001
+    reference_source: internal/ownership
+    contract_symbol: tests.conformance.invariants.owned_keys_only
+    python_test: tests/conformance/test_ownership.py
+    negative_tests: [conflicting_claim_fails_closed]
+    claw_gate: python-conformance
+    retirement_state: BLOCKED
+    stage_a_packaging_allowed: false
+  - invariant_id: FILLS-001
+    reference_source: internal/execution
+    contract_symbol: tests.conformance.invariants.apply_cumulative
+    python_test: tests/conformance/test_monotonic_fills.py
+    negative_tests: [regression_and_overfill_fail_closed]
+    claw_gate: python-conformance
+    retirement_state: BLOCKED
+    stage_a_packaging_allowed: false
+  - invariant_id: RISK-001
+    reference_source: internal/risk
+    contract_symbol: tests.conformance.invariants.evaluate_reservation
+    python_test: tests/conformance/test_risk_reservation.py
+    negative_tests: [degraded_or_stale_request_fails_closed]
+    claw_gate: python-conformance
+    retirement_state: BLOCKED
+    stage_a_packaging_allowed: false

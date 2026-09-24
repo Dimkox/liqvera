@@ -1,0 +1,10 @@
+id,kind,version,distribution,mutation_capability,secret_dependency,classification,multi_exchange_engine_policy
+hypurrquant-perp-cli-source,source_repository,0.13.0,github,mixed,optional_for_reads_required_for_mutations,authoritative_source,allow_for_static_analysis
+npm-perp-cli,npm_distribution,0.13.0,npm,mixed,optional_for_public_reads,official_distribution,acquire_only_no_execution
+perp,cli_entrypoint,0.13.0,npm:dist/index.js,high,yes_for_account_or_mutation,official_executable,forbidden_in_shadow_runtime_except_explicit_read_subcommands
+perp-mcp,mcp_entrypoint,0.13.0,npm:dist/mcp-server.js,low_to_medium,no_for_public_market_reads_optional_for_account,official_agent_surface,review_tool_by_tool
+perp-guardrail,guardrail_entrypoint,0.13.0,npm:dist/guardrail/perp-guardrail.js,control_plane,unknown,official_safety_surface,review_before_reuse
+skills/perp-cli,agent_skill,0.13.0,npm:skills/perp-cli,instructional,no,official_agent_instructions,documentation_only
+iflow-mcp-github-mirror,third_party_repository,0.9.8,github,mixed,unknown,non_authoritative,do_not_use_as_ssot
+iflow-mcp-npm,third_party_npm_distribution,0.9.8,npm,mixed,unknown,non_authoritative,do_not_use_as_ssot
+@perp/cli,name_collision,0.2.6,npm,unrelated,unrelated,different_project,exclude

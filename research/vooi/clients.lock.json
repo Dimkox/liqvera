@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "snapshot_at": "2026-08-10T08:02:00Z",
+  "scope": {
+    "definition": "All VOOI client surfaces and official client repositories that were publicly verifiable on the snapshot date.",
+    "rules": [
+      "Official VOOI domains, official Telegram identities, and repositories in the verified vooi-app GitHub organization are primary evidence.",
+      "No authentication bypass, wallet connection, account access, order placement, transfer, withdrawal, or secret collection was performed.",
+      "Closed-source web bundles are not vendored; the acquisition tool records public GET responses and hashes in a local ignored directory."
+    ]
+  },
+  "web_clients": [
+    {
+      "id": "vooi-ultra",
+      "kind": "web_trading_terminal",
+      "url": "https://ultra.vooi.io/",
+      "observed_label": "VOOI Ultra Beta v1.0.1",
+      "status": "live",
+      "observed_at": "2026-08-10",
+      "notes": [
+        "Current primary VOOI trading surface.",
+        "Public UI exposes single-venue trading, hedge placement, positions/orders/history and arbitrage views.",
+        "The public changelog lists Arbitrage Desk v1.0.0 on 2026-07-23; the live footer was already v1.0.1 at capture time."
+      ],
+      "evidence": [
+        "https://ultra.vooi.io/",
+        "https://ultra.vooi.io/whats-new/",
+        "https://vooi.io/"
+      ]
+    },
+    {
+      "id": "vooi-pro",
+      "kind": "web_trading_terminal",
+      "url": "https://pro.vooi.io/",
+      "observed_label": "VOOI Pro v1.12.0",
+      "status": "live_legacy",
+      "observed_at": "2026-08-10",
+      "notes": [
+        "Professional terminal with market/limit/stop-limit order form, order book, chart and activity views.",
+        "Official release notes date v1.12.0 to 2025-12-18."
+      ],
+      "evidence": [
+        "https://pro.vooi.io/",
+        "https://docs.vooi.io/vooi-pro-v1/vooi_pro-releasenotes"
+      ]
+    },
+    {
+      "id": "vooi-light",
+      "kind": "web_account_migration_surface",
+      "url": "https://app.vooi.io/",
+      "observed_label": "VOOI Light v2.5.0",
+      "status": "shut_down_migration_only",
+      "observed_at": "2026-08-10",
+      "notes": [
+        "The live page states that VOOI Light has shut down and directs users to VOOI Ultra.",
+        "The remaining surface is sign-in/migration plus staking, sending and claiming VOOI."
+      ],
+      "evidence": [
+        "https://app.vooi.io/",
+        "https://docs.vooi.io/vooi-light-v2"
+      ]
+    },
+    {
+      "id": "vooi-telegram-mini-app",
+      "kind": "telegram_mini_app",
+      "url": "https://t.me/VooiAppBot/vooi",
+      "identity": "@VooiAppBot",
+      "observed_label": "VOOI App – Learn & Trade",
+      "status": "live",
+      "observed_at": "2026-08-10",
+      "notes": [
+        "Telegram-hosted WebApp entry point; it is not an Android APK.",
+        "Official release notes say a Telegram Mini App version of the trading terminal launched on 2024-10-01."
+      ],
+      "evidence": [
+        "https://t.me/VooiAppBot/vooi",
+        "https://t.me/vooiappbot",
+        "https://docs.vooi.io/vooi-pro-v1/vooi_pro-releasenotes"
+      ]
+    },
+    {
+      "id": "vooi-api-token-console",
+      "kind": "web_developer_console",
+      "url": "https://ultra.vooi.io/api-tokens",
+      "observed_label": "Ultra · API & MCP",
+      "status": "live",
+      "observed_at": "2026-08-10",
+      "notes": [
+        "Creates named API tokens and provides setup snippets for Claude, Codex, Cursor and other MCP clients.",
+        "The token value is intentionally never captured by this research package."
+      ],
+      "evidence": [
+        "https://ultra.vooi.io/api-tokens"
+      ]
+    },
+    {
+      "id": "vooi-perps-mcp",
+      "kind": "remote_mcp_service",
+      "url": "https://perps-api.vooi.io/mcp",
+      "observed_label": "VOOI Perps MCP",
+      "status": "live_bearer_auth",
+      "observed_at": "2026-08-10",
+      "notes": [
+        "Streamable HTTP MCP endpoint documented for GET, POST and DELETE.",
+        "Official setup requires an Authorization: Bearer token."
+      ],
+      "evidence": [
+        "https://github.com/vooi-app/mcp",
+        "https://ultra.vooi.io/api-tokens"
+      ]
+    }
+  ],
+  "programmatic_clients": [
+    {
+      "id": "vooi-mcp-config",
+      "repo": "https://github.com/vooi-app/mcp.git",
+      "commit": "9a5fc1aba5411a0c6e29822628b5ea834889caa7",
+      "default_branch": "main",
+      "license": "MIT",
+      "language": "Documentation/configuration",
+      "classification": "client_configuration_only",
+      "notes": [
+        "Contains README and LICENSE only; it does not contain the remote MCP server implementation."
+      ]
+    },
+    {
+      "id": "vooi-signals-bot-example",
+      "repo": "https://github.com/vooi-app/vooi-signals-bot-example.git",
+      "commit": "bb81ee0d5e48246f63b25f39a552622cc23af97d",
+      "default_branch": "main",
+      "license": "MIT",
+      "language": "Python",
+      "classification": "official_trading_client_example",
+      "notes": [
+        "Telegram ingestion, LLM signal parsing, PostgreSQL/Alembic state, async HTTP client, SSE listener, order/reconciliation/risk logic.",
+        "The client retries 429 and selected 5xx responses, respects Retry-After and redacts Authorization in logs."
+      ]
+    },
+    {
+      "id": "vooi-funding-bot-example",
+      "repo": "https://github.com/vooi-app/vooi-funding-bot-example.git",
+      "commit": "c3ceab29e80bb26fd6bde128280cb5da5428f3f1",
+      "default_branch": "main",
+      "license": "MIT with trading disclaimer",
+      "language": "Python",
+      "classification": "official_strategy_client_example",
+      "notes": [
+        "Delta-neutral funding arbitrage bot with SSE, strategy/risk/reporting modules and a read-only probe package.",
+        "Its license explicitly recommends dry-run first and warns that it can place real orders."
+      ]
+    },
+    {
+      "id": "vooi-mm-bot-example",
+      "repo": "https://github.com/vooi-app/vooi-mm-bot-example.git",
+      "commit": "879d15c677e9840dfe4164e3e700bf54c72d5082",
+      "default_branch": "main",
+      "license": "MIT",
+      "language": "TypeScript / Node.js >=18",
+      "classification": "official_market_making_client_example",
+      "notes": [
+        "Delta-neutral maker/hedge bot with generated @hey-api/openapi-ts client and SSE.",
+        "The pinned revision switched from Bun to Node because the authors reported API edge rejection under Bun's HTTP stack.",
+        "Virtual HIP-3 venues are mapped to Hyperliquid baseSymbol prefixes such as km: and xyz:."
+      ]
+    }
+  ],
+  "official_non_client_repositories": [
+    {
+      "repo": "https://github.com/vooi-app/vooi-assets",
+      "classification": "assets"
+    },
+    {
+      "repo": "https://github.com/vooi-app/DefiLlama-Adapters",
+      "classification": "archived_analytics_adapter"
+    },
+    {
+      "repo": "https://github.com/vooi-app/dimension-adapters",
+      "classification": "archived_analytics_adapter"
+    },
+    {
+      "repo": "https://github.com/vooi-app/scw-contracts",
+      "classification": "archived_contracts"
+    },
+    {
+      "repo": "https://github.com/vooi-app/.github",
+      "classification": "organization_profile"
+    },
+    {
+      "repo": "https://github.com/vooi-app/react-iconsax",
+      "classification": "ui_dependency_fork"
+    },
+    {
+      "repo": "https://github.com/vooi-app/assets",
+      "classification": "archived_asset_fork"
+    }
+  ],
+  "negative_findings": [
+    {
+      "target": "native Android APK / Google Play client",
+      "result": "not_verified",
+      "qualification": "No official package name, Play listing or APK download was found in official VOOI properties or indexed store searches as of the snapshot date. This is not proof that no private or delisted build exists."
+    },
+    {
+      "target": "native iOS App Store client",
+      "result": "not_verified",
+      "qualification": "No official App Store listing was found in official VOOI properties or indexed store searches as of the snapshot date."
+    },
+    {
+      "target": "browser extension",
+      "result": "not_verified",
+      "qualification": "No official Chrome/Firefox extension was found in official VOOI properties as of the snapshot date."
+    }
+  ]
+}

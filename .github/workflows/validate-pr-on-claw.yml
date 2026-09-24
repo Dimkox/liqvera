@@ -1,0 +1,183 @@
+name: Materialize exact owner-approved PR source on Claw
+
+on:
+  repository_dispatch:
+    types: [validate-pr-source]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: source-controller-${{ github.run_id }}-${{ github.run_attempt }}
+  cancel-in-progress: false
+
+jobs:
+  materialize-source:
+    if: github.actor == github.repository_owner
+    runs-on: [self-hosted, claw, claw-engine-runner]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout trusted default-branch controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Prove controller and parse closed payload
+        shell: bash
+        env:
+          PR_NUMBER: ${{ github.event.client_payload.pr_number }}
+          EXPECTED_HEAD_SHA: ${{ github.event.client_payload.expected_head_sha }}
+          APPROVAL_COMMENT_ID: ${{ github.event.client_payload.approval_comment_id }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          umask 077
+          printf '{"pr_number":%s,"expected_head_sha":"%s","approval_comment_id":%s}\n' "${PR_NUMBER}" "${EXPECTED_HEAD_SHA}" "${APPROVAL_COMMENT_ID}" > "${RUNNER_TEMP}/source-payload.json"
+          python3 -B scripts/verify_same_repo_pr.py payload "${RUNNER_TEMP}/source-payload.json" > "${RUNNER_TEMP}/closed-payload.json"
+
+      - name: Verify exact owner approval comment
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.client_payload.pr_number }}
+          EXPECTED_HEAD_SHA: ${{ github.event.client_payload.expected_head_sha }}
+          APPROVAL_COMMENT_ID: ${{ github.event.client_payload.approval_comment_id }}
+        run: |
+          set -euo pipefail
+          umask 077
+          api="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}"
+          auth=(-H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28")
+          curl --fail --silent --show-error "${auth[@]}" "${api}" -o "${RUNNER_TEMP}/repository.json"
+          curl --fail --silent --show-error "${auth[@]}" "${api}/issues/comments/${APPROVAL_COMMENT_ID}" -o "${RUNNER_TEMP}/approval-comment.json"
+          curl --fail --silent --show-error "${auth[@]}" "${api}/pulls/${PR_NUMBER}/files?per_page=100" -D "${RUNNER_TEMP}/files.headers" -o "${RUNNER_TEMP}/files.json"
+          if grep -qi '^link:.*rel="next"' "${RUNNER_TEMP}/files.headers"; then
+            echo 'SOURCE_CONTROLLER_ERROR:PR_FILES_PAGINATION_FORBIDDEN' >&2
+            exit 2
+          fi
+          python3 -B scripts/verify_github_bootstrap_approval.py \
+            --approval-comment "${RUNNER_TEMP}/approval-comment.json" --repository-metadata "${RUNNER_TEMP}/repository.json" --changed-files "${RUNNER_TEMP}/files.json" \
+            --repository "${GITHUB_REPOSITORY}" --pr-number "${PR_NUMBER}" --expected-head "${EXPECTED_HEAD_SHA}" --approval-comment-id "${APPROVAL_COMMENT_ID}" \
+            --allowed-path .github/workflows/validate-pr-on-claw.yml \
+            --allowed-path ci/claw/host-deployment-controller-manifest.json \
+            --allowed-path docs/superpowers/plans/2026-08-13-claw-host-deployment-controller.md \
+            --allowed-path docs/superpowers/specs/2026-08-13-claw-host-deployment-controller-design.md \
+            --allowed-path handoff.md \
+            --allowed-path scripts/claw_host_deployment_contract.py \
+            --allowed-path scripts/claw_host_deployment_controller.py \
+            --allowed-path tests/release/test_claw_host_deployment_contract.py \
+            --allowed-path tests/release/test_claw_host_deployment_finalize.py \
+            --allowed-path tests/release/test_claw_source_controller_policy.py \
+            --expected-decision APPROVE_TOFU_SANDBOX_CONTROLLER_INSTALL \
+            --check independent-source-trust-review --check graph-governance-review --max-ttl-seconds 3600 \
+            --output "${RUNNER_TEMP}/verified-approval.json"
+          python3 -B - "${RUNNER_TEMP}/verified-approval.json" <<'PY'
+          import json,subprocess,sys
+          approval=json.load(open(sys.argv[1])); workflow=approval['workflow_path']
+          actual_tree=subprocess.check_output(['git','rev-parse','HEAD^{tree}'],text=True).strip()
+          actual_blob=subprocess.check_output(['git','hash-object',workflow],text=True).strip()
+          if approval['controller_sha'] != subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(): raise SystemExit('SOURCE_CONTROLLER_ERROR:APPROVAL_CONTROLLER_MISMATCH')
+          if approval['controller_tree'] != actual_tree or approval['workflow_blob_sha'] != actual_blob: raise SystemExit('SOURCE_CONTROLLER_ERROR:APPROVAL_CONTROLLER_CONTENT_MISMATCH')
+          PY
+
+      - name: Resolve exact PR and tree projection
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.client_payload.pr_number }}
+          EXPECTED_HEAD_SHA: ${{ github.event.client_payload.expected_head_sha }}
+        run: |
+          set -euo pipefail
+          umask 077
+          api="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}"
+          auth=(-H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28")
+          curl --fail --silent --show-error "${auth[@]}" "${api}/pulls/${PR_NUMBER}" -o "${RUNNER_TEMP}/pr.json"
+          curl --fail --silent --show-error "${auth[@]}" "${api}/commits/${EXPECTED_HEAD_SHA}" -o "${RUNNER_TEMP}/commit.json"
+          curl --fail --silent --show-error "${auth[@]}" "${api}/compare/${GITHUB_SHA}...${EXPECTED_HEAD_SHA}" -o "${RUNNER_TEMP}/compare.json"
+          python3 -B - "${RUNNER_TEMP}" <<'PY'
+          import json,os,sys
+          from pathlib import Path
+          from scripts.verify_same_repo_pr import verify_pull_request
+          root=Path(sys.argv[1]); pr=json.loads((root/'pr.json').read_text()); commit=json.loads((root/'commit.json').read_text()); compare=json.loads((root/'compare.json').read_text()); approval=json.loads((root/'verified-approval.json').read_text())
+          tree=commit.get('commit',{}).get('tree',{}).get('sha')
+          identity=verify_pull_request(pr,repository=os.environ['GITHUB_REPOSITORY'],pr_number=int(os.environ['PR_NUMBER']),expected_head=os.environ['EXPECTED_HEAD_SHA'],controller_sha=os.environ['GITHUB_SHA'],head_tree=tree,expected_tree=approval['head_tree'],ancestry_proven=compare.get('status') in {'ahead','identical'},compare=compare)
+          (root/'identity.json').write_text(json.dumps(identity,sort_keys=True,separators=(',',':'))+'\n')
+          PY
+          tree_sha="$(python3 -c "import json; print(json.load(open('${RUNNER_TEMP}/verified-approval.json'))['head_tree'])")"
+          curl --fail --silent --show-error "${auth[@]}" "${api}/git/trees/${tree_sha}?recursive=1" -o "${RUNNER_TEMP}/tree.json"
+          python3 -B - "${RUNNER_TEMP}/tree.json" "${RUNNER_TEMP}/projection.json" <<'PY'
+          import json,sys
+          source=json.load(open(sys.argv[1])); out={}
+          if source.get('truncated') is not False: raise SystemExit('SOURCE_CONTROLLER_ERROR:TREE_TRUNCATED')
+          for item in source.get('tree',[]):
+              if item.get('type') == 'tree': continue
+              if item.get('type') != 'blob' or item.get('mode') not in {'100644','100755'}: raise SystemExit('SOURCE_CONTROLLER_ERROR:TREE_MEMBER_FORBIDDEN')
+              if set(item) < {'path','mode','type','sha'}: raise SystemExit('SOURCE_CONTROLLER_ERROR:TREE_ITEM_INVALID')
+              out[item['path']]={'mode':item['mode'],'type':'blob','oid':item['sha']}
+          open(sys.argv[2],'w').write(json.dumps(out,sort_keys=True,separators=(',',':'))+'\n')
+          PY
+
+      - name: Fused fetch verify and atomic extract exact source
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.client_payload.expected_head_sha }}
+        run: |
+          set -euo pipefail
+          expected_tree="$(python3 -c "import json; print(json.load(open('${RUNNER_TEMP}/verified-approval.json'))['head_tree'])")"
+          test "${RUNNER_NAME}" = claw-engine-runner
+          python3 -B scripts/materialize_verified_source_tree.py --repository "${GITHUB_REPOSITORY}" --sha "${EXPECTED_HEAD_SHA}" --expected-tree "${expected_tree}" --tree-projection "${RUNNER_TEMP}/projection.json" --destination "${RUNNER_TEMP}/verified-source" --output "${RUNNER_TEMP}/source-materialization.json"
+
+      - name: Prove source cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - "${RUNNER_TEMP}" <<'PY'
+          import hashlib,json,subprocess,sys
+          from pathlib import Path
+          root=Path(sys.argv[1]); identity=json.loads((root/'identity.json').read_text()); material=json.loads((root/'source-materialization.json').read_text()); approval=json.loads((root/'verified-approval.json').read_text())
+          digest=lambda value: hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+          core={"schema_version":"source-materialization-observation-v1","authority":"NONE",**identity,
+            "controller_tree":approval['controller_tree'],"workflow_path":approval['workflow_path'],"workflow_blob_sha":approval['workflow_blob_sha'],
+            "action_set_sha256":digest(["actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1","actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"]),"input_sha256":digest(identity),
+            "archive_sha256":material['archive_sha256'],"member_policy_sha256":digest({"links":False,"modes":["100644","100755"],"redirect_hosts":["codeload.github.com"],"max_members":10000,"max_member":33554432,"max_total":268435456}),
+            "approval_comment_id":approval['approval_comment_id'],"approval_comment_url":approval['approval_comment_url'],"approval_owner_id":approval['approval_owner_id'],"approval_owner_login":approval['approval_owner_login'],"approval_body_sha256":approval['approval_body_sha256'],"approval_nonce":approval['nonce'],"approval_created_at":approval['approval_created_at']}
+          (root/'observation-core.json').write_text(json.dumps(core,sort_keys=True,separators=(',',':'))+'\n')
+          PY
+          rm -rf -- "${RUNNER_TEMP}/verified-source"
+          rm -f -- "${RUNNER_TEMP}/source-payload.json" "${RUNNER_TEMP}/closed-payload.json" "${RUNNER_TEMP}/repository.json" "${RUNNER_TEMP}/approval-comment.json" "${RUNNER_TEMP}/files.headers" "${RUNNER_TEMP}/files.json" "${RUNNER_TEMP}/verified-approval.json" "${RUNNER_TEMP}/pr.json" "${RUNNER_TEMP}/commit.json" "${RUNNER_TEMP}/compare.json" "${RUNNER_TEMP}/tree.json" "${RUNNER_TEMP}/projection.json" "${RUNNER_TEMP}/identity.json" "${RUNNER_TEMP}/source-materialization.json"
+          for path in source-payload.json closed-payload.json repository.json approval-comment.json files.headers files.json verified-approval.json pr.json commit.json compare.json tree.json projection.json identity.json source-materialization.json; do
+            test ! -e "${RUNNER_TEMP}/${path}"
+          done
+
+      - name: Write non-authoritative materialization observation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - "${RUNNER_TEMP}" <<'PY'
+          import json,sys
+          from pathlib import Path
+          from scripts.write_source_materialization_receipt import write_observation
+          root=Path(sys.argv[1]); value=json.loads((root/'observation-core.json').read_text()); value['cleanup']={'intent':'REMOVE_ALL','outcome':'REMOVED'}
+          write_observation(value,root/'source-materialization-observation.json')
+          PY
+
+      - name: Upload non-authoritative observation
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: source-materialization-observation-${{ github.event.client_payload.expected_head_sha }}
+          path: ${{ runner.temp }}/source-materialization-observation.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Final always cleanup
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf -- "${RUNNER_TEMP}/verified-source"
+          rm -f -- "${RUNNER_TEMP}/source-payload.json" "${RUNNER_TEMP}/closed-payload.json" "${RUNNER_TEMP}/repository.json" "${RUNNER_TEMP}/approval-comment.json" "${RUNNER_TEMP}/files.headers" "${RUNNER_TEMP}/files.json" "${RUNNER_TEMP}/verified-approval.json" "${RUNNER_TEMP}/pr.json" "${RUNNER_TEMP}/commit.json" "${RUNNER_TEMP}/compare.json" "${RUNNER_TEMP}/tree.json" "${RUNNER_TEMP}/projection.json" "${RUNNER_TEMP}/identity.json" "${RUNNER_TEMP}/source-materialization.json" "${RUNNER_TEMP}/observation-core.json" "${RUNNER_TEMP}/source-materialization-observation.json"
+          test ! -e "${RUNNER_TEMP}/source-materialization-observation.json"

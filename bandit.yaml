@@ -1,0 +1,22 @@
+exclude_dirs:
+  - tests
+  - engineering
+  - dist
+  - examples
+  - .grok-stack
+  - .grok
+  - .agents
+  - _bmad
+  - src
+  - multi_exchange_engine
+  - research
+  - scripts
+  - tools
+  - cmd
+  - internal
+  - experiments
+skips:
+  - B101
+  - B404
+  - B603
+  - B607

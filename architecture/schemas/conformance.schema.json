@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dimkox.github.io/multi-exchange-engine/conformance.schema.json",
+  "title": "Python-only invariant conformance manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifest_version", "execution_backend", "go_executed", "invariants"],
+  "properties": {
+    "manifest_version": {"const": 1},
+    "execution_backend": {"const": "python"},
+    "go_executed": {"const": false},
+    "invariants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/invariant"}
+    }
+  },
+  "$defs": {
+    "invariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "invariant_id",
+        "reference_source",
+        "contract_symbol",
+        "python_test",
+        "negative_tests",
+        "claw_gate",
+        "retirement_state",
+        "stage_a_packaging_allowed"
+      ],
+      "properties": {
+        "invariant_id": {"type": "string", "minLength": 1},
+        "reference_source": {"type": "string", "minLength": 1},
+        "contract_symbol": {"type": "string", "minLength": 1},
+        "python_test": {"type": "string", "pattern": "^tests/conformance/test_[a-z0-9_]+\\.py$"},
+        "negative_tests": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "claw_gate": {"const": "python-conformance"},
+        "retirement_state": {"enum": ["BLOCKED", "ELIGIBLE", "RETIRED"]},
+        "stage_a_packaging_allowed": {"const": false}
+      }
+    }
+  }
+}

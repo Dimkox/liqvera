@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "authority", "action", "transaction_id", "state", "receipt_sha256"],
+  "properties": {
+    "schema_version": {"const": "claw-host-deployment-response-v1"},
+    "authority": {"const": "NONE"},
+    "action": {"enum": ["begin", "finalize", "status", "rollback"]},
+    "transaction_id": {"type": ["string", "null"], "pattern": "^[0-9a-f]{32}$"},
+    "state": {"enum": ["D0_VERIFIED", "BEGIN_ACCEPTED", "HOST_APPLIED_PENDING_FINALIZE", "APPLYING", "VERIFYING", "FINALIZING", "COMMITTED", "ROLLING_BACK", "ROLLED_BACK", "ROLLBACK_BLOCKED"]},
+    "receipt_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}
+  }
+}

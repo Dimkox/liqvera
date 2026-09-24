@@ -13956,6 +13956,9 @@ repository_inventory:
   - path: docs/superpowers/plans/2026-08-13-claw-installed-approval-path.md
     node: document:ociapath-source-only-authority-none
     path_class: DOCUMENTATION
+  - path: docs/superpowers/plans/2026-09-24-mezo-evidence-f1.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: docs/superpowers/specs/2026-07-25-stage-a-operator-revenue-design.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

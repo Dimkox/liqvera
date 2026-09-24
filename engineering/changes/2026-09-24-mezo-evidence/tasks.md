@@ -9,6 +9,8 @@
 
 - [x] Capture initial baseline commands and failures.
 - [x] Probe Hyperliquid, Mezo RPC, MUSD, facilitator, and npm registry read-only.
+- [x] Write and approve the F1 design.
+- [x] Author the task-by-task F1 implementation plan.
 - [ ] Repair architecture inventory for publication files.
 - [ ] Make salvage evidence reproducible from a public clone without overstating provenance.
 - [ ] Create a pinned isolated Python development environment.

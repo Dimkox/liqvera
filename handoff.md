@@ -63,12 +63,13 @@ except the already named Trivy policy blocker. The synthetic proxy credential
 fixture is assembled at runtime; the Basic Auth-shaped literal and its old
 introducing commit are absent from the rewritten PR history.
 
-PR #2 (`feat/mezo-evidence-f1-impl` into `main`) is open and mergeable at
-`237ecbc21901ca7045663b090a537a1ad824a36d`. The local branch, remote branch,
-and pull-request head were verified at that exact SHA after the guarded
-force-push. GitHub reports `MERGEABLE`, and the rerun GitGuardian Security
-Checks conclusion is `SUCCESS` (completed 2026-09-24T18:36:51Z). No PR merge
-was performed.
+PR #2 (`feat/mezo-evidence-f1-impl` into `main`) is open and mergeable. The
+local branch, remote branch, and pull-request head were verified at rewritten
+pre-handoff snapshot `237ecbc21901ca7045663b090a537a1ad824a36d` after the
+guarded force-push; later commits in this section only record that result.
+GitHub reported `MERGEABLE`, and the rerun GitGuardian Security Checks
+conclusion was `SUCCESS` (completed 2026-09-24T18:36:51Z). No PR merge was
+performed.
 
 ## Active blockers and limits
 

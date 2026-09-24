@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 mee-public-capture = "mee_public_capture.__main__:main"
+mee-evidence-capture-service = "mee_public_capture.evidence_service:main"
 
 [build-system]
 requires = ["hatchling==1.31.0"]

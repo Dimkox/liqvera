@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/algorithm.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "calculation_version",
+    "policy_version",
+    "serialization_version",
+    "engine_commit",
+    "package_versions",
+    "dependency_lock_sha256",
+    "maximum_source_age_ms",
+    "maximum_future_skew_ms",
+    "maximum_metadata_age_ms",
+    "live_identity_approved",
+    "display_precision",
+    "display_rounding",
+    "boundary"
+  ],
+  "properties": {
+    "schema": {
+      "const": "mee-evidence-algorithm/v1"
+    },
+    "calculation_version": {
+      "const": "snapshot-sweep/v1"
+    },
+    "policy_version": {
+      "const": "snapshot-policy/v1"
+    },
+    "serialization_version": {
+      "const": "canonical-json/v1"
+    },
+    "engine_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+    },
+    "package_versions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "$ref": "report.schema.json#/$defs/package_version"
+      }
+    },
+    "dependency_lock_sha256": {
+      "$ref": "primitives.schema.json#/$defs/sha256"
+    },
+    "maximum_source_age_ms": {
+      "const": 5000
+    },
+    "maximum_future_skew_ms": {
+      "const": 1000
+    },
+    "maximum_metadata_age_ms": {
+      "const": 86400000
+    },
+    "live_identity_approved": {
+      "const": false
+    },
+    "display_precision": {
+      "const": 28
+    },
+    "display_rounding": {
+      "const": "ROUND_HALF_EVEN"
+    },
+    "boundary": {
+      "const": "Integrity and recalculation do not authenticate the exchange or promise execution."
+    }
+  }
+}
+

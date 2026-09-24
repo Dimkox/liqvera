@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/bundle-manifest.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "serialization_version",
+    "report_sha256",
+    "members"
+  ],
+  "properties": {
+    "schema": {
+      "const": "mee-evidence-bundle-manifest/v1"
+    },
+    "serialization_version": {
+      "const": "canonical-json/v1"
+    },
+    "report_sha256": {
+      "$ref": "primitives.schema.json#/$defs/sha256"
+    },
+    "members": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 31,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "length"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "report.schema.json#/$defs/safe_path"
+          },
+          "sha256": {
+            "$ref": "primitives.schema.json#/$defs/sha256"
+          },
+          "length": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4194304
+          }
+        }
+      }
+    }
+  }
+}
+

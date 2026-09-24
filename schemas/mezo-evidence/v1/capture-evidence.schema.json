@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/capture-evidence.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "capture_id",
+    "source_mode",
+    "identity_status",
+    "responses"
+  ],
+  "properties": {
+    "schema": {
+      "const": "mee-evidence-capture/v1"
+    },
+    "capture_id": {
+      "$ref": "primitives.schema.json#/$defs/id"
+    },
+    "source_mode": {
+      "enum": [
+        "fixture",
+        "live-public"
+      ]
+    },
+    "identity_status": {
+      "enum": [
+        "SIMULATED",
+        "UNVERIFIED"
+      ]
+    },
+    "responses": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "origin",
+          "method",
+          "request_body",
+          "source_mode",
+          "started_at_ms",
+          "received_at_ms",
+          "elapsed_ns",
+          "http_status",
+          "payload_path",
+          "payload_sha256",
+          "payload_length"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "metadata",
+              "book"
+            ]
+          },
+          "origin": {
+            "const": "https://api.hyperliquid.xyz/info"
+          },
+          "method": {
+            "const": "POST"
+          },
+          "request_body": {
+            "enum": [
+              "{\"type\":\"meta\"}",
+              "{\"type\":\"l2Book\",\"coin\":\"BTC\"}"
+            ]
+          },
+          "source_mode": {
+            "enum": [
+              "fixture",
+              "live-public"
+            ]
+          },
+          "started_at_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "received_at_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "elapsed_ns": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "http_status": {
+            "const": 200
+          },
+          "payload_path": {
+            "enum": [
+              "source/metadata.bin",
+              "source/book.bin"
+            ]
+          },
+          "payload_sha256": {
+            "$ref": "primitives.schema.json#/$defs/sha256"
+          },
+          "payload_length": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2097152
+          }
+        }
+      }
+    }
+  }
+}
+

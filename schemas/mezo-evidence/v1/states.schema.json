@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/states.schema.json",
+  "title": "Liqvera F2 state and future payment obligations",
+  "description": "Offline contract only; unresolved F5 bindings do not authorize settlement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "machines", "bindings", "uniqueness", "invariants"],
+  "properties": {
+    "schema": {"const": "mee-evidence-states/v1"},
+    "machines": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/machine"},
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "uniqueness": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/uniqueness"},
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true
+    },
+    "invariants": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/invariant"},
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "state": {"type": "string", "pattern": "^[A-Z][A-Z_]*(?![\\s\\S])"},
+    "event": {"type": "string", "pattern": "^[a-z][a-z_]*(?![\\s\\S])"},
+    "symbol": {"type": "string", "pattern": "^[a-z][a-z_]*(?![\\s\\S])"},
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "event", "to", "guards", "effects"],
+      "properties": {
+        "from": {"$ref": "#/$defs/state"},
+        "event": {"$ref": "#/$defs/event"},
+        "to": {"$ref": "#/$defs/state"},
+        "guards": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/symbol"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "effects": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/symbol"},
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "machine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "initial", "states", "transitions"],
+      "properties": {
+        "name": {"enum": ["report_request", "quote", "payment_attempt", "delivery"]},
+        "initial": {"$ref": "#/$defs/state"},
+        "states": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/state"},
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "transitions": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/transition"},
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "finality_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "code", "owner", "required_before"],
+      "properties": {
+        "status": {"const": "UNRESOLVED"},
+        "code": {"const": "FINALITY_RULE_UNVERIFIED"},
+        "owner": {"const": "F5"},
+        "required_before": {"const": "payment_bindings_verified"}
+      }
+    },
+    "authorization_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "code", "owner", "required_before", "requirements"],
+      "properties": {
+        "status": {"const": "UNRESOLVED"},
+        "code": {"const": "AUTHORIZATION_IDENTITY_UNVERIFIED"},
+        "owner": {"const": "F5"},
+        "required_before": {"const": "payment_bindings_verified"},
+        "requirements": {
+          "type": "array",
+          "items": {
+            "enum": ["canonical scheme-specific identity", "nonce semantics", "replay domain", "quote association", "chain correlation"]
+          },
+          "minItems": 5,
+          "maxItems": 5,
+          "uniqueItems": true
+        }
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["finality", "authorization_identity", "expiry_policy", "payment_ready"],
+      "properties": {
+        "finality": {"$ref": "#/$defs/finality_binding"},
+        "authorization_identity": {"$ref": "#/$defs/authorization_binding"},
+        "expiry_policy": {"$ref": "#/$defs/expiry_policy"},
+        "payment_ready": {"const": false}
+      }
+    },
+    "expiry_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["not_expired", "quote_not_expired", "quote_expired", "submitted_confirmation_after_expiry"],
+      "properties": {
+        "not_expired": {"const": "now < expires_at"},
+        "quote_not_expired": {"const": "now < expires_at"},
+        "quote_expired": {"const": "now >= expires_at"},
+        "submitted_confirmation_after_expiry": {"const": true}
+      }
+    },
+    "uniqueness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity", "fields", "invariant"],
+      "properties": {
+        "entity": {"enum": ["report_request", "payment_attempt", "chain_event", "entitlement", "active_attempt"]},
+        "fields": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/symbol"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "invariant": {"type": "string", "minLength": 1}
+      }
+    },
+    "invariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "owner", "expression"],
+      "properties": {
+        "name": {"enum": ["delivery_requires_current_confirmation", "retention_covers_authorization_validity", "deletion_cannot_enable_replay"]},
+        "owner": {"const": "F5"},
+        "expression": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

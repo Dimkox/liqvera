@@ -82,9 +82,34 @@ def strict_json(text):
     return json.loads(text, parse_float=Decimal, parse_constant=nonfinite, object_pairs_hook=pairs)
 
 
-def records():
+def vector_document():
     assert (ROOT / "vectors.json").is_file(), "exact vectors are missing"
-    return strict_json((ROOT / "vectors.json").read_text())["vectors"]
+    document = strict_json((ROOT / "vectors.json").read_text(encoding="utf-8"))
+    c = support()
+    c.validate(c.load("vectors.schema.json"), document, document="vectors.schema.json")
+    return document
+
+
+def records():
+    return vector_document()["vectors"]
+
+
+@pytest.mark.parametrize("mutation", ["wrong_version", "missing_version", "extra_field"])
+def test_records_rejects_invalid_on_disk_envelope(tmp_path, monkeypatch, mutation):
+    c = support()
+    document = strict_json((ROOT / "vectors.json").read_text())
+    if mutation == "wrong_version":
+        document["schema"] = "mee-evidence-vectors/v2"
+    elif mutation == "missing_version":
+        del document["schema"]
+    else:
+        document["unreviewed_override"] = True
+    (tmp_path / "vectors.json").write_text(json.dumps(document), encoding="utf-8")
+    # Data loads from the temporary directory; references use the real schema registry.
+    (tmp_path / "vectors.schema.json").write_bytes((ROOT / "vectors.schema.json").read_bytes())
+    monkeypatch.setitem(globals(), "ROOT", tmp_path)
+    with pytest.raises(c.ContractError):
+        records()
 
 
 def test_sell_nonterminating_vector_is_exact():
@@ -875,8 +900,7 @@ def check_document(document):
 
 
 def test_all_vector_shapes_semantics_and_assertion_registry():
-    document = {"schema": "mee-evidence-vectors/v1", "vectors": records()}
-    check_document(document)
+    check_document(vector_document())
     c = support()
     for owner, assertions in ASSERTIONS.items():
         assert (
@@ -902,7 +926,7 @@ def test_all_vector_shapes_semantics_and_assertion_registry():
     ],
 )
 def test_mutation_self_checks_reject_weakened_vectors(mutation):
-    document = {"schema": "mee-evidence-vectors/v1", "vectors": copy.deepcopy(records())}
+    document = copy.deepcopy(vector_document())
     sweep = next(v for v in document["vectors"] if v["id"] == "sell-two-levels")
     if mutation == "side":
         sweep["input"]["side"] = "BUY"

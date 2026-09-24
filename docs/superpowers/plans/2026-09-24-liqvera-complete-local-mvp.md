@@ -57,11 +57,11 @@ All stateful calls require `Authorization: Bearer <64 lowercase hex characters>`
 - `get_report(capability: str, run_id: UUID) -> bytes`
 - `get_evidence(capability: str, run_id: UUID) -> bytes`
 
-- [ ] Create the SQLite schema with access scopes, requests, reports, demo quotes, simulated grants, and append-only demo events.
-- [ ] Implement capability hashing, scoped idempotency, transactional artifact metadata, and restart-safe lookups.
-- [ ] Build through `build_simulated_report`, publish through `write_mvp_artifact`, and read back both digests before committing the run.
-- [ ] Implement one idempotent simulated unlock per scoped action key without payment-shaped fields.
-- [ ] Commit the slice without running tests or broad verification.
+- [x] Create the SQLite schema with access scopes, requests, reports, demo quotes, simulated grants, and append-only demo events.
+- [x] Implement capability hashing, scoped idempotency, transactional artifact metadata, and restart-safe lookups.
+- [x] Build through `build_simulated_report`, publish through `write_mvp_artifact`, and read back both digests before committing the run.
+- [x] Implement one idempotent simulated unlock per scoped action key without payment-shaped fields.
+- [x] Commit the slice without running tests or broad verification.
 
 ## Task 2: Local HTTP adapter
 
@@ -73,12 +73,12 @@ All stateful calls require `Authorization: Bearer <64 lowercase hex characters>`
 
 **Produces:** `ThreadingHTTPServer` on `127.0.0.1:8765` by default, serving the frozen demo API and `web/` assets.
 
-- [ ] Initialize `.mvp/store/package` once from the existing fixture capture API without accepting user paths.
-- [ ] Serve static files only from the repository `web/` directory with fixed content types and no directory traversal.
-- [ ] Implement strict JSON body size, exact field sets, capability/idempotency headers, stable JSON errors, and no-store responses.
-- [ ] Map demo conflicts/rejections to local HTTP statuses without claiming canonical F2 conformance.
-- [ ] Stream entitled ZIP bytes only from the store-selected allowlisted artifact path.
-- [ ] Commit the slice without running tests or broad verification.
+- [x] Initialize `.mvp/store/package` once from the existing fixture capture API without accepting user paths.
+- [x] Serve static files only from the repository `web/` directory with fixed content types and no directory traversal.
+- [x] Implement strict JSON body size, exact field sets, capability/idempotency headers, stable JSON errors, and no-store responses.
+- [x] Map demo conflicts/rejections to local HTTP statuses without claiming canonical F2 conformance.
+- [x] Stream entitled ZIP bytes only from the store-selected allowlisted artifact path.
+- [x] Commit the slice without running tests or broad verification.
 
 ## Task 3: Browser experience
 
@@ -90,13 +90,13 @@ All stateful calls require `Authorization: Bearer <64 lowercase hex characters>`
 
 **Consumes:** the frozen `/demo/*` API.
 
-- [ ] Build a single English page with permanent `SIMULATED`, `UNVERIFIED`, `NO TRANSFER`, fixture, and read-only analytics labels.
-- [ ] Collect side, exact BTC quantity, and an illustrative expected payer address.
-- [ ] Generate a 256-bit capability and idempotency key in the browser and retain them in `sessionStorage` with the active run ID.
-- [ ] Show preview, snapshot timestamp, historical/fixture limitations, and a clearly simulated confirmation step.
-- [ ] After confirmation, render VWAP, worst price, notional, consumed levels, limitations, and SHA-256 values; enable JSON and ZIP downloads.
-- [ ] Recover the active run on reload without rebuilding or reconfirming it.
-- [ ] Commit the slice without browser automation or verification.
+- [x] Build a single English page with permanent `SIMULATED`, `UNVERIFIED`, `NO TRANSFER`, fixture, and read-only analytics labels.
+- [x] Collect side, exact BTC quantity, and an illustrative expected payer address.
+- [x] Generate a 256-bit capability and idempotency key in the browser and retain them in `sessionStorage` with the active run ID.
+- [x] Show preview, snapshot timestamp, historical/fixture limitations, and a clearly simulated confirmation step.
+- [x] After confirmation, render VWAP, worst price, notional, consumed levels, limitations, and SHA-256 values; enable JSON and ZIP downloads.
+- [x] Recover the active run on reload without rebuilding or reconfirming it.
+- [x] Commit the slice without browser automation or verification.
 
 ## Task 4: One-command local product wiring
 
@@ -107,11 +107,11 @@ All stateful calls require `Authorization: Bearer <64 lowercase hex characters>`
 - Modify `engineering/changes/2026-09-24-mezo-evidence/tasks.md`
 - Modify `handoff.md`
 
-- [ ] Add `make mvp-web` with the four local package source roots on `PYTHONPATH`.
-- [ ] Document `http://127.0.0.1:8765`, the full browser flow, environment overrides, output locations, and stop behavior.
-- [ ] State that `make mvp` remains the CLI artifact demo and `make mvp-web` is the interactive local product demo.
-- [ ] Record implemented files and explicit deferrals without changing F2 acceptance status or claiming canonical F3–F7 completion.
-- [ ] Commit the integrated MVP state. Do not update factory/graph or run verification in this phase.
+- [x] Add `make mvp-web` with the four local package source roots on `PYTHONPATH`.
+- [x] Document `http://127.0.0.1:8765`, the full browser flow, environment overrides, output locations, and stop behavior.
+- [x] State that `make mvp` remains the CLI artifact demo and `make mvp-web` is the interactive local product demo.
+- [x] Record implemented files and explicit deferrals without changing F2 acceptance status or claiming canonical F3–F7 completion.
+- [x] Commit the integrated MVP state. Do not update factory/graph or run verification in this phase.
 
 ## Deferred Phase
 

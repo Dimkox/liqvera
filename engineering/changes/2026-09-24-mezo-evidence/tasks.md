@@ -93,15 +93,16 @@ vector statuses, and existing blockers are unchanged.
 ### Local browser MVP — implementation slices
 
 - [x] Add `make mvp-web` wiring and document the local browser flow, overrides, storage, and stop behavior.
-- [ ] Integrate the isolated SQLite demo flow, HTTP adapter, and browser assets into one tree.
+- [x] Integrate the isolated SQLite demo flow, HTTP adapter, and browser assets into one tree.
 - [ ] Update factory and architecture graph bindings for the integrated files.
 - [ ] Verify the integrated runtime and repair defects in the deferred phase.
 
-This docs/wiring commit contains the Makefile target and instructions only;
-`scripts/run-mvp-web.py` and its dependencies are pending integration. No
-browser smoke test, factory receipt, canonical F3–F7 completion, or runtime
-acceptance is claimed. The local demo uses fixture data and an explicitly
-simulated `NO TRANSFER` unlock, outside the chargeable `/v1/*` states.
+The complete local MVP implementation is now integrated: SQLite-backed scoped
+runs, immutable per-report artifacts, the `/demo/*` HTTP adapter, and the
+English browser UI. No browser smoke test, factory receipt, canonical F3–F7
+completion, or runtime acceptance is claimed. The local demo uses fixture data
+and an explicitly simulated `NO TRANSFER` unlock outside the chargeable
+`/v1/*` states. Factory integration, verification, and defect repair are next.
 
 ## F4 — API and ledger
 

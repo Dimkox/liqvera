@@ -111,10 +111,8 @@ and writes `.mvp/output/report.json` plus `.mvp/output/evidence.zip`. Optional
 `MVP_SIDE` and `MVP_QUANTITY` environment variables default to `BUY` and
 `0.15`. Each run replaces only `.mvp/package` and `.mvp/output`.
 
-`make mvp` remains the CLI artifact demo. The separate interactive local
-product demo is being integrated from isolated implementation slices. Once
-`scripts/run-mvp-web.py`, the local store, and `web/` are present together,
-start it with:
+`make mvp` remains the CLI artifact demo. The integrated interactive local
+product demo starts with:
 
 ```bash
 make mvp-web
@@ -139,8 +137,8 @@ Both demos are **SIMULATED**, **UNVERIFIED**, read-only analytics over fixture
 data. The browser unlock transfers nothing and is not x402 or settlement.
 Neither demo establishes canonical F3–F7 completion, runtime acceptance,
 report chargeability, testnet payment, or permission for live exchange
-mutations. The interactive demo is not yet an integrated, verified runtime at
-this documentation commit.
+mutations. The interactive implementation is integrated but deliberately not
+yet factory-bound or verified.
 
 The optional public compatibility probe is separate from offline verification:
 

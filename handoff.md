@@ -1,7 +1,7 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 complete; local browser MVP wiring slice pending integration). Repository: `Dimkox/liqvera`.
-Branch: `feat/mvp-ops` (isolated local MVP task worktree).
+Updated: 2026-09-24 (F2 complete; complete local browser MVP integrated). Repository: `Dimkox/liqvera`.
+Branch: `feat/mezo-evidence-f3-report` (stacked on verified F2).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
 [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
@@ -21,16 +21,20 @@ containing the report plus the unchanged `sealed-input/` tree. The ZIP is a
 prototype: unverified, non-chargeable, unsuitable for untrusted input, and not
 canonical F3 completion.
 
-This isolated docs/wiring slice adds `make mvp-web` with four local package
-source roots and documents the planned interactive browser demo in `README.md`.
-The command targets `scripts/run-mvp-web.py`; the SQLite flow, HTTP adapter,
-and `web/` assets are being built in separate slices and are not integrated in
-this worktree commit. The described flow uses a fixture-backed BTC perpetual
-preview, explicit simulated `NO TRANSFER` unlock, report view, and JSON/ZIP
-downloads. It keeps state under `.mvp/store/`, supports `MVP_HOST` and
-`MVP_PORT`, and stops with Ctrl-C. No browser run or end-to-end result is
-claimed for this slice. The next action is to integrate the implementation
-slices, then update factory/graph bindings and verify the combined runtime.
+The complete local browser MVP is integrated. `make mvp-web` starts a
+dependency-free server and English single-page UI for a fixture-backed BTC
+perpetual preview, an explicit simulated `NO TRANSFER` unlock, report viewing,
+and JSON/ZIP downloads. SQLite retains capability-scoped idempotent runs and
+immutable artifacts under `.mvp/store/`; browser session storage supports
+reload recovery. `MVP_HOST` and `MVP_PORT` configure the listener, which stops
+with Ctrl-C.
+
+Implementation commits are `dfa8fbb` (SQLite flow), `6561b53` (HTTP adapter),
+`d8f0e28` (browser UI), and `a5f504e` (command/docs wiring). Per the owner's
+direction, the integrated server and browser flow were not started or tested.
+No end-to-end result, compatibility claim, or bug-free claim is recorded.
+The next phase is factory/graph integration, then verification and defect
+repair.
 
 The MVP explicitly excludes live capture, hardened offline verification,
 production runtime schema validation, identity approval, A08/A09, runtime
@@ -89,10 +93,10 @@ mathematically integral JSON number validation, and coherent readiness gates.
 The approved plan now reflects those corrections; simulated offline reports
 remain valid and no runtime layer or SDK identity rule was introduced.
 
-F2 is **static-contract complete**. F3 now has the fixture-only MVP described
-above; next is local browser MVP slice integration, then the separately
-requested factory update, followed by hardening and defect cleanup without
-treating this prototype as canonical F3 acceptance.
+F2 is **static-contract complete**. The fixture CLI and complete local browser
+MVP are integrated; next is the separately requested factory update, followed
+by verification, hardening, and defect cleanup without treating this prototype
+as canonical F3 acceptance.
 The [final F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md)
 binds implementation `3729bdc131ca4ac971ab04e735da2e113d68ad71`, tree
 `155d7fb44f5953f814f5463c381dde14932a8ab3`, and fingerprint

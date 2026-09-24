@@ -27,8 +27,9 @@ design-only change package `engineering/changes/2026-09-24-mezo-evidence/`.
 
 Письменный дизайн одобрен. Детальный F1 implementation plan находится в
 `docs/superpowers/plans/2026-09-24-mezo-evidence-f1.md`; change package переведён
-в `scoped`. Следующее действие — review плана и выбор режима исполнения, затем
-последовательная реализация пяти F1-задач с TDD и отдельными коммитами.
+в `scoped`. Пользователь выбрал subagent execution в изолированной ветке
+`feat/mezo-evidence-f1-impl`. Задачи F1 1–4 реализованы; после независимого review
+Task 4 следующий шаг — Task 5, narrow ADR и итоговая проверка F1.
 
 После F1 отдельным планом реализовать F2, затем F3–F7: контракты → проверяемый
 отчёт → API/хранение → тестовая MUSD-оплата → интерфейс → приёмка.
@@ -119,3 +120,36 @@ compatibility lock и read-only probe.
 secret scan и остальным применимым профилям, но общий результат остаётся
 `FAIL`: Trivy требует HEALTHCHECK в двух прежних Stage A Dockerfile (по одному
 LOW `DS-0026`). Эти файлы не входят в Task 3 и не изменялись.
+
+## F1 Task 4 — фиксированная compatibility boundary
+
+Добавлен `docs/compatibility/mezo-evidence-v1.json` и stdlib-only read-only probe
+`scripts/check-mezo-compatibility.py`. Lock закрыт для изменения endpoint,
+network, asset, coin, версии SDK и payment policy; pure validator выдаёт только
+sanitized summary или стабильный reason code. CLI принимает `--lock` и
+необязательный `--output`; без output печатает canonical JSON в stdout.
+Redirects запрещены для HTTP probes; сетевые вызовы и npm ограничены 12 секундами.
+Npm получает только фиксированные package/version arguments, отдельные временные
+config/cache paths и PATH; cache удаляется до возврата. `PAY_TO` не читается.
+
+Live probe 2026-09-24 прошёл: `COMPATIBILITY_PASS_PAYMENT_BLOCKED`, Mezo Testnet
+31611, MUSD 18 decimals, x402 v2 exact, четыре пакета 2.16.0, BTC 20/20 levels.
+Результат сохранён и привязан к graph в
+`engineering/changes/2026-09-24-mezo-evidence/evidence/f1-compatibility.json`.
+`PAY_TO_MISSING` и `FINALITY_RULE_UNVERIFIED` остаются обязательными blockers.
+Raw HTTP responses, market values, npm stderr, credentials и capabilities
+не включены в результат; test fixtures используют только синтетические данные.
+
+TDD: исходный collection RED из-за отсутствующего модуля, затем 39 validator
+tests passed; CLI RED 27 failed, затем 66 passed. Дополнительный RED подтвердил
+необходимость sanitization для truncated HTTP response; итоговые 68 focused
+tests и Ruff прошли. Precommit graph check прошёл с прежними declared conflicts.
+По решению controller `Makefile` также включает offline compatibility tests в
+`make verify`; live network probe остаётся отдельной командой.
+
+Итоговый `PATH="$PWD/.venv/bin:$PATH" make verify`: 602 passed, 85 subtests
+passed; `stage-a verify passed`. `grok_verify.py --mode pr` подтвердил pytest,
+Ruff, Bandit, secret scan и остальные применимые проверки, но сохранил общий
+`FAIL` только по двум прежним LOW `DS-0026` в
+`deploy/images/Dockerfile.public-capture` и
+`deploy/images/Dockerfile.readonly-analyzer`. Эти Dockerfile не изменялись.

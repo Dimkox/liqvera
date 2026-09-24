@@ -15,7 +15,7 @@ artifacts:
 	$(PYTHON) -B scripts/check-stage-a-artifacts.py --forbid-path 'cmd/**' 'internal/**' 'go.mod' 'go.sum' --forbid-binary engine
 
 verify-packages:
-	$(PYTHON) -B -m pytest tests/contracts tests/public_capture tests/readonly_analyzer tests/conformance tests/graph tests/installed tests/artifact -q
+	$(PYTHON) -B -m pytest tests/contracts tests/public_capture tests/readonly_analyzer tests/conformance tests/graph tests/installed tests/artifact tests/compatibility -q
 
 verify: graph salvage artifacts verify-packages
 	@echo "stage-a verify passed"

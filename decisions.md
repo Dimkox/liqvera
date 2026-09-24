@@ -99,3 +99,7 @@ Publish a privacy-reviewed source snapshot in an independent repository with a n
 ## 2026-09-24 — Liqvera brand
 
 The owner selected Liqvera with the tagline "Market reports you can verify." and attribution to MEZO ₿ — The Mezo Buildathon (https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10). The canonical repository is `Dimkox/liqvera`; documentation uses the new brand while inherited runtime identifiers and the immutable import manifest remain stable. The former specification path points to `docs/planning/LIQVERA_FACTORY_TZ.md` so existing factory links keep working.
+
+## 2026-09-24 — Compatibility is independent of payment readiness
+
+Pin the entire F1 compatibility boundary in a closed lock, emit only an allowlisted summary, and retain `PAY_TO_MISSING` plus `FINALITY_RULE_UNVERIFIED` even when public probes succeed. Isolate npm metadata reads with fixed argv, PATH-only child environment, and temporary config/cache paths removed before return; this passed the live probe without reading operator credentials. Include offline compatibility tests in both default pytest and `make verify`, while keeping external probes separate.

@@ -13380,6 +13380,21 @@ phase_policy_times:
   deployment: '2026-08-11T00:00:00Z'
 repository_inventory:
   bindings:
+  - path: engineering/changes/2026-09-24-mezo-evidence/evidence/f1-compatibility.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: docs/compatibility/mezo-evidence-v1.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: tools/mezo_compatibility.py
+    node: runtime:public-capture
+    path_class: TOOL_SOURCE
+  - path: scripts/check-mezo-compatibility.py
+    node: runtime:public-capture
+    path_class: TOOL_SOURCE
+  - path: tests/compatibility/test_mezo_compatibility.py
+    node: test:data-contracts
+    path_class: TEST_SOURCE
   - path: docs/implementation/1-2a-claw-engine-runner-host-transition.md
     node: document:ociapath-source-only-authority-none
     path_class: DOCUMENTATION

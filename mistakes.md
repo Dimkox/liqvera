@@ -36,3 +36,11 @@ Root causes, not symptoms. Record only mistakes that caused a real problem.
 
 **Symptom:** `tests/conformance/test_stage_a_excludes_go.py` could not import the artifact scanner.
 **Root cause:** Inspection logic lived only in `scripts/check-stage-a-artifacts.py`. A hyphenated CLI name is not a Python module; shared logic belongs under `tools/`.
+
+## 2026-09-24 — Assumed /dev/null could isolate npm configuration and cache
+
+The first F1 compatibility probe failed locally at npm because the implementation used `/dev/null` as both config paths and a directory-backed cache. Use distinct temporary config paths and an isolated temporary cache, test cleanup on success and failure, and rerun before classifying a failure as external.
+
+## 2026-09-24 — Large pytest parameter generated an unbounded failure label
+
+A 2 MiB synthetic response fixture became its own default pytest parameter ID and inflated RED output. Give large or sensitive-shaped fixtures short explicit IDs so diagnostic output stays bounded.

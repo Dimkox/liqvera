@@ -39,9 +39,11 @@
 
 ## Execution and file map
 
-Status: owner-approved plan implemented through integration; consolidated
-final-review corrections are implemented and await scoped re-review. F2 is
-not closed; current verification/review status is recorded in handoff.md.
+Status: F2 static contract phase complete. The owner-approved plan, integrated
+slices and review repairs are independently approved at implementation
+`3729bdc131ca4ac971ab04e735da2e113d68ad71`; F3 is next. Runtime acceptance is
+unchanged. The original task steps below are execution instructions, not the
+current task ledger; final closure is recorded at the end and in handoff.md.
 The current branch is `feat/mezo-evidence-f2-contracts`, stacked on F1 at
 `d2d7923`. Read the spec, this plan, `AGENTS.md`, README, architecture,
 handoff, security, roadmap, and active route before execution. No route exists
@@ -1159,12 +1161,33 @@ forward-recover without deleting ledger/artifacts.
 - [x] Initial independent review repaired schema search/URI semantics, status
   discrimination, the safe no-broadcast expiry exception, joint delivery
   eligibility, retention/replay invariants, raw ZIP correlation, closed vector
-  shapes/registry and conditional continuity. These repairs await independent
-  re-review; this author check does not approve its own work.
+  shapes/registry and conditional continuity. Independent reviews and repair
+  re-reviews are now complete; this author check itself is not approval.
 - [x] Plan scanned for unresolved authoring instructions and incomplete steps.
   Remaining UNRESOLVED values are deliberate, fail-closed F5 bindings.
 
-The owner approved implementation after the independent plan repair review.
-The integrated artifacts and consolidated final-review corrections now await
-scoped re-review; see handoff.md for exact verification and remaining blockers.
-This plan's correction does not establish F2 closure or runtime acceptance.
+## F2 closure — 2026-09-24
+
+The owner approved implementation after independent plan repair review.
+Integration and all confirmed review corrections are complete. Code, security,
+edge and acceptance independently APPROVED implementation
+`3729bdc131ca4ac971ab04e735da2e113d68ad71` with no remaining findings, as
+recorded from session/subagent results in the closure handoff (not factory
+receipts or invented report files). Its tree is
+`155d7fb44f5953f814f5463c381dde14932a8ab3`; its graph/schema/test fingerprint is
+`2dd9403812ddcb5b3780ae314626316ee2381e27addaf3511b2c20be83d7138a`.
+
+Final verification: 130 resource tests, 446 F2 contract tests, and 1087 tests
+plus 85 subtests in each full run passed. Graph/Ruff/diff passed; Grok exited
+1 only for the two inherited LOW Trivy DS-0026 findings. Final targeted RED
+was nine failures/56 passes/65 deselected; GREEN was 65 passes/65 deselected.
+This documentation-only closure binds those implementation results without
+claiming another full product run. Earlier repair runs are historical only.
+
+F2's static contract phase is complete; overall change state stays
+`implementing`, with F3–F7 open and F3 next. All 156 vectors and
+A02–A06/A10–A12/A15–A20 remain `NOT_RUN`; A13–A14 remain `BLOCKED_EXTERNAL`.
+Payment readiness remains false. Trivy, PAY_TO_MISSING,
+FINALITY_RULE_UNVERIFIED, funded buyer and SDK/canonical authorization identity
+blockers remain. No payment, deploy, release, push, runtime acceptance or
+factory receipt is claimed.

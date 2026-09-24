@@ -14,11 +14,13 @@ complete-with-blockers: publication inventory, public salvage verification,
 the pinned Python development toolchain, and the public compatibility lock
 are implemented. [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md)
 accepts only the runtime and payment boundary. The overall change remains
-`implementing`. The approved F2 plan's six contract slices are integrated;
-the readiness micro-fix passes 446 contract tests and 1087 full-suite tests
-plus 85 subtests. The micro-fix is implemented and pending scoped re-review.
-Grok's inherited Trivy
-policy gate remains open; F2 is not yet closed.
+`implementing`. F2's static contract phase is complete and independently
+approved at `3729bdc131ca4ac971ab04e735da2e113d68ad71`: 446 contract tests
+and 1087 full-suite tests plus 85 subtests pass. See the
+[bound F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md).
+F3 is next; F3–F7 remain open. All 156 vectors remain `NOT_RUN`, and no runtime
+acceptance follows from contract tests. Grok's inherited Trivy policy gate
+remains open. This closure is documentation-only after the verified implementation.
 
 At implementation commit `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`,
 `make verify` passed with 641 tests and 85 subtests. The command

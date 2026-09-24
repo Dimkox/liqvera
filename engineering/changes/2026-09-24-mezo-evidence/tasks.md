@@ -36,34 +36,41 @@ found no remaining Critical or Important issue.
 - [x] Obtain human review and approval of the F2 plan before implementation.
 - [x] Integrate the six isolated artifact slices and Task 1/3 scoped review repairs.
 - [x] Add exact schema/test/evidence graph bindings and clarify the 202 recovery body.
-- [ ] Freeze OpenAPI, JSON Schemas, reason codes, and state graphs.
-- [ ] Add exact BUY/SELL vectors and invalid-input contract tests.
-- [ ] Add payment atomic-unit and idempotency vectors.
+- [x] Freeze OpenAPI, JSON Schemas, reason codes, and state graphs.
+- [x] Add exact BUY/SELL vectors and invalid-input contract tests.
+- [x] Add payment atomic-unit and idempotency vectors.
 - [x] Integrate Task 6 on-disk vector-envelope repair and fix state-schema self-validation.
-- [ ] Complete scoped repair re-review and whole-branch independent review.
+- [x] Complete scoped repair re-review and whole-branch independent review.
 - [x] Pass integrated graph, focused tests, Ruff, `make verify` and bare pytest; classify Grok's inherited Trivy failure.
 - [x] Complete independent whole-branch review of integration commit `644cb702ae879b9d7c8acac1039eb8c5bf37d2aa` and implement its consolidated repair.
 - [x] Verify the consolidated repair: 368 focused tests; 1009 tests and 85 subtests in both full runs; graph/Ruff pass, only inherited Trivy fails Grok.
-- [ ] Pass independent scoped re-review before F2 closure.
+- [x] Pass independent scoped re-review before F2 closure.
 - [x] Implement final follow-up: bidirectional reencoding coverage, arbitrary-precision fractional timestamps, and complete readiness truth tables.
 - [x] Verify the final follow-up: 445 contract tests; 1086 tests and 85 subtests in both full runs; graph/Ruff pass, only inherited Trivy fails Grok.
-- [ ] Obtain independent final follow-up re-review; leave the F2 evidence draft unfinalized.
+- [x] Obtain independent final follow-up re-review; retain draft evidence until all findings are addressed.
 - [x] Require a nonempty blocker explanation for false payment readiness in /readyz as well as capabilities.
 - [x] Verify the readiness micro-fix: 130 resource tests, 446 F2 tests, 1087 tests plus 85 subtests in both full runs; only inherited Trivy fails Grok.
-- [ ] Independently re-review the readiness micro-fix before F2 closure.
+- [x] Independently re-review the readiness micro-fix before F2 closure.
+- [x] Finalize SHA/tree/fingerprint-bound evidence in a documentation-only closure commit.
 
-F2 status: **readiness micro-fix implemented; scoped re-review pending**. The owner approved the repaired
-plan and parallel task implementation; shared-file integration has one owner.
-The artifacts above exist, but final freeze and acceptance await independent
-review. Integration passed 329 focused tests and two full 970-test/85-subtest
-runs; only the inherited Trivy policy blocks Grok. Tasks 1 and 3 passed scoped repair re-review; Task 2 was
-approved, Task 4's shared-file findings are addressed by integration, and
-Task 5's approved Minor wording is corrected. Whole-branch review then found
-endpoint/oracle, fixture/quote eligibility, numeric and readiness consistency
-gaps; the consolidated repair implements those corrections and exact timestamp
-comparisons without adding runtime behavior. The evidence draft awaits scoped
-re-review. Runtime vectors remain `NOT_RUN`, A13–A14
-remain `BLOCKED_EXTERNAL`, and no receipt, payment or release is authorized.
+F2 status: **static contract phase complete**. The owner approved the repaired
+plan and parallel task implementation; shared-file integration had one owner.
+Code/security/edge/acceptance final independent session reviews all APPROVED
+`3729bdc131ca4ac971ab04e735da2e113d68ad71` with no remaining findings. Final
+tree `155d7fb44f5953f814f5463c381dde14932a8ab3` and fingerprint
+`2dd9403812ddcb5b3780ae314626316ee2381e27addaf3511b2c20be83d7138a` are bound
+in [F2 evidence](evidence/f2-contracts.md); the earlier integration/repair
+counts above are historical, not current receipts. Final results: 130 resource
+tests, 446 F2 tests, 1087 tests plus 85 subtests in both full runs;
+graph/Ruff/diff pass and Grok exits 1 only for two inherited LOW DS-0026 findings.
+
+The overall change stays `implementing`; F3–F7 remain open and F3 is next.
+All 156 vectors and A02–A06/A10–A12/A15–A20 remain `NOT_RUN`; A13–A14 remain
+`BLOCKED_EXTERNAL`. Payment readiness is false. Trivy, PAY_TO_MISSING,
+FINALITY_RULE_UNVERIFIED, funded buyer and SDK/canonical authorization identity
+blockers remain. Closure changes documentation only after the approved
+implementation; it claims no payment, deploy, release, push, runtime acceptance
+or factory receipt.
 
 ## F3 — evidence report
 

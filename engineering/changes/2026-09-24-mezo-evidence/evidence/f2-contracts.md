@@ -1,7 +1,143 @@
-# F2 contracts evidence — integration draft
+# F2 contracts evidence — static phase complete
 
-Status: **INTEGRATION VERIFIED; INDEPENDENT REVIEW PENDING**. This document is not
-whole-branch approval, a factory receipt, or F3–F5 runtime acceptance.
+Status: **F2 STATIC CONTRACT PHASE COMPLETE** on 2026-09-24. The overall change
+remains `implementing`; F3–F7 are open and the next action is F3. This is
+contract-consistency evidence, not runtime acceptance or a factory receipt.
+
+## Approved implementation and binding
+
+- Implementation: `3729bdc131ca4ac971ab04e735da2e113d68ad71`.
+- Implementation tree: `155d7fb44f5953f814f5463c381dde14932a8ab3`.
+- Graph/schema/test index fingerprint:
+  `2dd9403812ddcb5b3780ae314626316ee2381e27addaf3511b2c20be83d7138a`.
+- Branch: `feat/mezo-evidence-f2-contracts`, stacked on F1.
+- Worktree: `/home/pall/projects/liqvera/.worktrees/mezo-evidence-f1-impl`.
+- Environment: Python 3.12.3, pytest 9.1.1, Ruff 0.16.8; `.venv/bin` first on PATH.
+
+This closure is a subsequent documentation-only commit. Verification and
+independent approval bind the implementation SHA/tree above, not a future
+closure commit containing its own hash. The implementation bytes remain
+unchanged; the fingerprint was recomputed for closure. No factory receipt
+was generated, and the absent active route was not replaced with an invented
+one. Prior integration/consolidated/follow-up results below are historical,
+not current receipts.
+
+Closure documentation checks: diff checks and `make graph` passed; all 226
+graph tests passed in 20.09s. A read-only Markdown check found balanced code
+fences in all five changed documents and 18 existing local link targets. No
+dedicated repository Markdown/link checker was present. No full-suite or
+Grok rerun is claimed for the documentation-only closure.
+
+```bash
+git ls-files -s -- architecture/architecture.yaml schemas/mezo-evidence/v1 tests/contracts/mezo_evidence_support.py tests/contracts/test_mezo_primitives.py tests/contracts/test_mezo_requests.py tests/contracts/test_mezo_resources.py tests/contracts/test_mezo_states.py tests/contracts/test_mezo_openapi.py tests/contracts/test_mezo_vectors.py | sha256sum
+```
+
+## Current verification — 2026-09-24
+
+The final readiness regression first demonstrated that false payment
+readiness lacked a blocker explanation. The focused test and corrected truth
+table were RED before the schema's `minItems: 1` repair and GREEN afterward.
+
+| Command | Exit | Result |
+| --- | ---: | --- |
+| `python -B -m pytest tests/contracts/test_mezo_resources.py -q -k 'unready_payment or followup_readiness_truth_table'` before repair | 1 | 9 failed, 56 passed, 65 deselected in 1.70s |
+| Same focused command after repair | 0 | 65 passed, 65 deselected in 1.58s |
+| `python -B -m pytest tests/contracts/test_mezo_resources.py -q` | 0 | 130 passed in 38.40s |
+| Six-module contract command below | 0 | 446 passed in 193.52s |
+| `make verify` | 0 | 1087 passed, 85 subtests passed in 326.32s; Stage A verification passed |
+| `python -B -m pytest -q` | 0 | 1087 passed, 85 subtests passed in 327.91s |
+| `make graph` | 0 | Exactly seven inherited declared conflicts; no new diagnostic |
+| `ruff check tests/contracts/test_mezo_resources.py` | 0 | All checks passed |
+| `git diff --check` and `git diff --cached --check` | 0 | No whitespace errors |
+| `python -B scripts/grok_verify.py --mode pr --no-record` | 1 | Only inherited trivy-config failure; all other applicable checks passed |
+| `trivy config --exit-code 1 .` | 1 | Exactly two inherited LOW DS-0026 findings |
+
+```bash
+PATH="$PWD/.venv/bin:$PATH" python -B -m pytest tests/contracts/test_mezo_primitives.py tests/contracts/test_mezo_requests.py tests/contracts/test_mezo_resources.py tests/contracts/test_mezo_states.py tests/contracts/test_mezo_openapi.py tests/contracts/test_mezo_vectors.py -q
+```
+
+Grok reported profiles=base, changed=6 during the stable test wave. Its
+git-diff-check, secret-scan (zero potential secrets), contract-structure (one
+contract), sql-safety (zero unsafe findings), Ruff, Bandit and pytest checks
+passed; coverage was explicitly skipped by existing runner policy. Subsequent
+README/tasks/handoff edits recorded results only, producing seven changed
+files in the implementation commit; graph/Ruff/diff checks were repeated.
+The two Trivy findings are in unchanged
+`deploy/images/Dockerfile.public-capture` and
+`deploy/images/Dockerfile.readonly-analyzer`. No waiver, filter or artificial
+healthcheck was introduced. BLOCKED_TRIVY_HEALTHCHECK_POLICY is a local policy
+blocker, not an unavailable external service; it prevents a fully green Grok
+result but does not conceal a new contract failure.
+
+Session-local logs are retained under the ignored directory
+`.superpowers/sdd/2026-09-24-liqvera-f2-contracts/` as `readiness-red.log`,
+`readiness-green.log`, `readiness-resource.log`, `readiness-contracts.log`,
+`readiness-make-verify.log`, `readiness-pytest.log`,
+`readiness-grok-verify.log` and `readiness-trivy.log`. They are not published
+repository-local receipts; this document records their results durably.
+
+## Independent review outcomes
+
+The independent session/subagent results below were consolidated by the
+coordinating agent and recorded in the closure handoff. No separate final
+review report files or factory receipts exist; no report path is invented.
+
+| Review | Exact final scope | Outcome and evidence |
+| --- | --- | --- |
+| Code | `74a7b6f25ea4fe947eca5748481ee247aa1c8f32..3729bdc131ca4ac971ab04e735da2e113d68ad71`, surrounding readiness schema/tests | APPROVED; no Critical, Important or Minor findings; 65 passed/65 deselected and diff check passed |
+| Security | Same final micro-diff and payment-readiness safety boundary | APPROVED; no findings; 78 passed/52 deselected and diff check passed |
+| Edge | Same final micro-diff and readiness boundary combinations | APPROVED; remaining blocker-list finding ADDRESSED, no remaining findings; 79 focused tests, six boundary probes and diff check passed |
+| Acceptance | Clean implementation SHA/tree above; artifact scope, runtime status and verification counts | APPROVED; no remaining findings (no Critical/Important); recomputed exact fingerprint and verified count/status logs |
+
+These scoped reviews follow whole-branch review and its repair waves; they
+are not claims that a reviewer reran every suite independently. Historical
+review progression: at `fd672f89`, code requested the reencoding correction,
+security/acceptance approved, and edge identified reencoding/readiness/
+timestamp gaps. At `74a7b6f`, code/security/acceptance approved while edge found
+the remaining /readyz blocker-list Minor. All four final reviews approved
+`3729bdc` with no remaining findings. The writer did not approve its own work.
+
+## Frozen scope and remaining authority
+
+F2 freezes the eleven JSON artifacts (OpenAPI, closed schemas, reasons,
+state graphs and vectors), seven test/helper files and exact graph bindings.
+It includes evidence 202 recovery, scope-before-expiry behavior, fixture and
+quote eligibility, exact numeric/UTC semantics, fail-closed reencoded
+authorization projections and coherent readiness. All 156 vectors remain
+`NOT_RUN`: static consistency, synthetic examples and retained-kernel
+characterization do not prove the future HTTP/payment/runtime behavior.
+
+- A02–A06, A10–A12 and A15–A20 remain `NOT_RUN`.
+- A13–A14 remain `BLOCKED_EXTERNAL`.
+- F3–F7 remain open; next is F3 report building, canonical serialization,
+  immutable evidence bundles and hardened offline verification.
+- Payment readiness remains false. PAY_TO_MISSING, FINALITY_RULE_UNVERIFIED,
+  absent funded buyer/signature/receipt, unresolved SDK/canonical authorization
+  identity, and BLOCKED_TRIVY_HEALTHCHECK_POLICY remain blockers.
+- No payment, deployment, release, push, runtime acceptance or factory receipt
+  is claimed. Shadow-only authority and all seven inherited graph conflicts
+  are unchanged.
+
+Rollback remains a coherent static contract/test revert. No persisted paid
+state exists; future ledger recovery must retain replay protection/artifacts.
+
+## Historical verification summary — not current receipts
+
+| Stage | Contract tests | Full runs | Notes |
+| --- | ---: | --- | --- |
+| Integration `644cb702` | 329 | 970 plus 85 subtests each | State-schema RED 1 failed/21 passed, then 22 passed |
+| Consolidated repair `fd672f89` | 368 | 1009 plus 85 subtests each | Targeted RED 23 failed/16 passed; GREEN 39 passed |
+| Final follow-up `74a7b6f` | 445 | 1086 plus 85 subtests each | Targeted RED 8 failed/69 passed; GREEN 77 passed |
+
+Every integrated historical run passed graph/Ruff/diff and failed Grok only
+on inherited Trivy. The isolated Task 6 history below also records its then
+missing integration inventory and import-order failure; those were resolved
+before the reviewed implementation. The archival material below describes
+its own earlier state only, including then-pending review and old fingerprints.
+
+## Historical integration draft — superseded by closure above
+
+Historical status: **INTEGRATION VERIFIED; INDEPENDENT REVIEW PENDING**.
 
 The owner approved the repaired plan and parallel task implementation. All six
 task slices, Task 1/3 review repairs and Task 6's complete-envelope validation

@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F2 readiness micro-fix implemented; re-review pending). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-24 (F2 static contracts complete; F3 next). Repository: `Dimkox/liqvera`.
 Branch: `feat/mezo-evidence-f2-contracts` (stacked on verified F1).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -9,7 +9,7 @@ Branch: `feat/mezo-evidence-f2-contracts` (stacked on verified F1).
 ## Current state and next action
 
 F1 is **complete-with-blockers**. The overall Mezo change is `implementing`;
-F2–F7 remain open. The accepted
+F2's static contract phase is complete; F3–F7 remain open. The accepted
 [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md) fixes only runtime,
 ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
@@ -46,17 +46,42 @@ mathematically integral JSON number validation, and coherent readiness gates.
 The approved plan now reflects those corrections; simulated offline reports
 remain valid and no runtime layer or SDK identity rule was introduced.
 
-F2 remains **scoped re-review pending**, not complete. Next: independent
-scoped re-review of the final readiness micro-fix.
-The F2 evidence document retains the earlier integration draft until review
-has passed; its fingerprints and counts do not cover the subsequent repair.
+F2 is **static-contract complete**. Next: F3 report building, canonical
+serialization, immutable evidence bundles and hardened offline verification.
+The [final F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md)
+binds implementation `3729bdc131ca4ac971ab04e735da2e113d68ad71`, tree
+`155d7fb44f5953f814f5463c381dde14932a8ab3`, and fingerprint
+`2dd9403812ddcb5b3780ae314626316ee2381e27addaf3511b2c20be83d7138a`.
+This closure commit changes documentation only; it does not rebind product
+verification to its own future hash or manufacture a factory receipt.
+
+Independent session/subagent code, security, edge and acceptance reviews all
+APPROVED the final implementation with no remaining findings. Code/security/
+edge inspected `74a7b6f..3729bdc`: code ran 65 focused tests (65 deselected),
+security 78 (52 deselected), and edge 79 plus six boundary probes; all passed
+their diff checks. Acceptance inspected the clean final SHA/tree, recomputed
+the fingerprint and verified scope/status/count logs. These results were
+consolidated by the coordinating agent; no separate final-review report files
+or repository-local receipts exist, and the writer did not self-approve.
+
+All 156 vectors remain `NOT_RUN`. A02–A06/A10–A12/A15–A20 remain `NOT_RUN`;
+A13–A14 remain `BLOCKED_EXTERNAL`. Payment readiness remains false, with
+PAY_TO_MISSING, FINALITY_RULE_UNVERIFIED, funded buyer/signature/receipt,
+SDK/canonical authorization identity and inherited Trivy blockers unchanged.
+No runtime acceptance, payment, deployment, release or push is claimed.
+
+Documentation-only closure checks passed: `git diff --check`, `make graph`
+(the same seven inherited conflicts), all 226 graph tests in 20.09s, and
+balanced-fence/local-link checks across five Markdown files (18 local links).
+The implementation fingerprint is unchanged. No new full-suite or Grok run
+is claimed for this documentation-only commit.
 
 Edge re-review of `74a7b6f25ea4fe947eca5748481ee247aa1c8f32` found that
 readiness still admitted payment_ready=false without a blocker explanation.
 The micro-fix adds the missing nonempty-blocker constraint and corrects the
 truth table; the focused regression and eight affected combinations failed
 before implementation. Healthy future readiness remains representable and
-the F2 evidence draft is untouched; independent re-review is pending.
+the final scoped re-reviews confirmed this finding is addressed.
 
 Readiness micro-fix verification: targeted RED exited 1 with nine failures,
 56 passes and 65 deselected in 1.70s; GREEN exited 0 with 65 passes and 65
@@ -74,6 +99,8 @@ fingerprint is
 Only verification prose changed afterward. Runtime remains NOT_RUN and no
 new unresolved failure or factory receipt is claimed.
 
+### Historical repair waves — not current receipts
+
 Scoped review of `fd672f89c6bde8d1b1170b2e7a8c631ebed4d793` found three
 remaining edge cases. The final follow-up now binds the reencoding scenario
 and flag in both directions, preserves exact timestamp fractions beyond
@@ -81,9 +108,9 @@ Python's decimal-string integer conversion limit, and closes readiness truth
 tables in both directions. Capabilities require an explanation when blocked
 and cannot report payment readiness for fixture data; overall readiness must
 equal all gates plus no blockers. The targeted regressions went from eight
-failures to 77 passes. Final follow-up verification is recorded below; scoped
-re-review is pending. The evidence draft remains untouched and runtime
-acceptance stays NOT_RUN.
+failures to 77 passes. Code/security/acceptance approved `74a7b6f`; edge
+identified the final blocker-list issue fixed and approved at `3729bdc`.
+The historical counts below do not replace the final implementation evidence.
 
 Final follow-up verification on 2026-09-24: targeted RED exited 1 with eight
 failures, 69 passes and 118 deselected (5.23s); GREEN exited 0 with 77 passes
@@ -115,8 +142,8 @@ The stable pre-verification-record staged tree was
 `c4a5bd7764e3b65def7251064b7f1a0739bd9fa5`; the graph/schema/test index
 fingerprint (using the command in the existing evidence draft) is
 `a6c58a366d7b0354013f615f93a41862d4d34416d07a30212fc9bd514565cf7a`.
-Later edits only record verification in continuity prose; scoped re-review
-must bind the resulting repair commit before evidence closure.
+Later edits only recorded verification in continuity prose; the final approval
+and evidence binding above supersede this historical repair snapshot.
 Runtime acceptance stays `NOT_RUN`, with
 A13–A14 `BLOCKED_EXTERNAL`; F1 payment/finality and Trivy blockers remain.
 
@@ -128,8 +155,8 @@ verification with `--no-record` exited 1 only for Trivy; every other applicable
 check passed, zero potential secrets were reported, and coverage was skipped
 by runner policy. Direct Trivy inspection confirmed exactly two inherited LOW
 DS-0026 findings. No waiver or artificial healthcheck was added. See the
-[integration draft evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md)
-for the verified artifact fingerprint and historical isolated-task results.
+[F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md)
+for the final artifact fingerprint and historical isolated-task results.
 
 Planning verification: `git diff --check`, authoring-placeholder scan and
 `make graph` passed for the repair; graph

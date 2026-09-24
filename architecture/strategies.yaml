@@ -60,6 +60,11 @@ nodes:
   owner: strategy
   lifecycle: DECLARED
   requirements: []
+- id: document:mezo-evidence-factory-spec
+  kind: ADR
+  owner: product
+  lifecycle: DECLARED
+  requirements: []
 edges:
 - from: requirement:PROD-001
   to: document:kakao-korea-launch-gate
@@ -70,6 +75,18 @@ edges:
   kind: specified_by
   non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
 - from: document:kakao-korea-launch-gate
+  to: test:graph-repository-manifests
+  kind: validated_by
+  non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
+- from: requirement:PROD-001
+  to: document:mezo-evidence-factory-spec
+  kind: specified_by
+  non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
+- from: requirement:GRAPH-005
+  to: document:mezo-evidence-factory-spec
+  kind: specified_by
+  non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
+- from: document:mezo-evidence-factory-spec
   to: test:graph-repository-manifests
   kind: validated_by
   non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT

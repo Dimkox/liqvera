@@ -1,5 +1,9 @@
 # Documentation Index
 
+## MEE Evidence × Mezo
+
+Отдельный репозиторий подготовлен на основе технического snapshot. Начать с [ТЗ](planning/MEE_MEZO_EVIDENCE_FACTORY_TZ.md), [актуального handoff](../handoff.md) и [PROVENANCE](../PROVENANCE.md). Остальные разделы этого индекса относятся к унаследованной технической основе; они не доказывают реализацию Mezo API или оплаты.
+
 [Repository README](../README.md) · [Master Plan pointer](../MASTER_PLAN.md) · [Security](../SECURITY.md) · [Research index](research/README.md) · [Market demand and JTBD](research/user-needs/README.md) · [Kakao/Korea launch gate](research/MASTER_RESEARCH.md#kakaotalk-south-korea-launch-gate-2026-08-18)
 
 This is the maintained navigation entry point for `docs/`. Documents are grouped by authority and purpose so historical plans are not mistaken for current runtime truth.

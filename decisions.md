@@ -91,3 +91,7 @@ named volume (`mee-stage-a-data`) is the only way those sentences stay true.
 ## 2026-08-17 — Avoid the token `order` in a test filename stem
 
 Path classification runs execution-token checks on the stem before `tests/` is classified. `test_ownership.py` stays `TEST_SOURCE`; `test_order_ownership.py` would be `EXECUTION_SOURCE`.
+
+## 2026-09-24 — Public Mezo repository import
+
+Publish a privacy-reviewed source snapshot in an independent repository with a new root commit and per-file provenance. Retain technical source/tests and original proprietary metadata; keep inherited Actions disabled. This preserves a usable baseline without disclosing private Git history or claiming the Mezo application is implemented.

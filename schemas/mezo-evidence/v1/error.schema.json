@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/error.schema.json",
+  "title": "Liqvera public error envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "request_id", "code", "message"],
+  "properties": {
+    "schema": {"const": "mee-evidence-error/v1"},
+    "request_id": {"$ref": "primitives.schema.json#/$defs/id"},
+    "code": {"$ref": "reasons.schema.json"},
+    "message": {"type": "string", "minLength": 1, "maxLength": 256}
+  }
+}

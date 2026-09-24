@@ -12,6 +12,8 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
+from mee_contracts.exact import ExactDecimal, ExactError
+
 ROOT = Path(__file__).resolve().parents[2] / "schemas" / "mezo-evidence" / "v1"
 BASE = "https://schemas.liqvera.invalid/mezo-evidence/v1/"
 KEYWORDS = frozenset({
@@ -366,3 +368,35 @@ def validate(schema: dict, value: object, *, document: str) -> None:
     """Validate one instance against this project's supported schema subset."""
     assert_schema(schema, document=document)
     _validate_node(schema, value, document)
+
+
+def canonical_body(body: dict) -> dict:
+    """Specify the four-field request body used for future idempotency matching."""
+    validate(load("quote-request.schema.json"), body, document="quote-request.schema.json")
+    try:
+        quantity = ExactDecimal.parse(body["quantity_base"])
+    except (ExactError, TypeError) as error:
+        raise ContractError("INVALID_INPUT") from error
+    if quantity.scaled <= 0:
+        raise ContractError("INVALID_INPUT")
+
+    payer = body["expected_payer"].lower()
+    try:
+        payer_bytes = bytes.fromhex(payer[2:])
+    except ValueError as error:
+        raise ContractError("INVALID_INPUT") from error
+    if len(payer_bytes) != 20 or not any(payer_bytes):
+        raise ContractError("INVALID_INPUT")
+    return {
+        "instrument_id": body["instrument_id"],
+        "side": body["side"],
+        "quantity_base": str(quantity),
+        "expected_payer": payer,
+    }
+
+
+def canonical_bytes(body: dict) -> bytes:
+    """Encode normalized request data as deterministic UTF-8 JSON bytes."""
+    return json.dumps(
+        canonical_body(body), sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")

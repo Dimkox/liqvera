@@ -13977,7 +13977,46 @@ repository_inventory:
   - path: docs/superpowers/specs/2026-08-13-claw-host-deployment-controller-design.md
     node: document:ociapath-source-only-authority-none
     path_class: DOCUMENTATION
+  - path: docs/superpowers/specs/2026-09-24-mezo-evidence-design.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: docs/validation.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/acceptance-matrix.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/adr.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/blockers.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/evidence/source-baseline.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/2026-09-24-mezo-evidence/test-plan.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
   - path: experiments/lighter/README.md

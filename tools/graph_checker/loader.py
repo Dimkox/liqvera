@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import ast
-from datetime import datetime
-from functools import lru_cache
 import json
-from pathlib import Path
 import re
 import subprocess
+from datetime import datetime
+from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 import yaml
@@ -19,17 +19,17 @@ from .model import (
     Classification,
     GraphEdge,
     GraphNode,
-    Lifecycle,
     InventoryExclusionReason,
+    Lifecycle,
     NodeKind,
     PathClass,
     Phase,
     ReceiptRequirement,
-    RepositoryInventoryExclusion,
+    ReceiptValidationContext,
     RepositoryArtifact,
+    RepositoryInventoryExclusion,
     RequirementClass,
     RuntimeDependency,
-    ReceiptValidationContext,
     VerifiedReceiptRegistryEntry,
 )
 
@@ -548,7 +548,9 @@ def _classify_repository_path(path: str) -> PathClass:
         normalized.startswith("internal/") and name.endswith("_test.go")
     ):
         return PathClass.TEST_SOURCE
-    if normalized.startswith("docs/") or ("/" not in normalized and name.endswith(".md")):
+    if normalized.startswith(("docs/", "engineering/changes/")) or (
+        "/" not in normalized and name.endswith(".md")
+    ):
         return PathClass.DOCUMENTATION
     if normalized.startswith("architecture/"):
         return PathClass.SCHEMA_MANIFEST

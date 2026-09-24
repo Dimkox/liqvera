@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "change_id": "2026-09-24-mezo-evidence",
+  "title": "Liqvera Mezo Evidence",
+  "route_id": null,
+  "route_status": "absent_in_public_clone",
+  "status": "draft",
+  "created_at": "2026-09-24T15:46:33Z",
+  "updated_at": "2026-09-24T15:46:33Z",
+  "history": [
+    {
+      "from": null,
+      "to": "draft",
+      "at": "2026-09-24T15:46:33Z",
+      "reason": "Created after user approval of the F1-first delivery direction; written specification still requires review"
+    }
+  ]
+}

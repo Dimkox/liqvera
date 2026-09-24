@@ -37,6 +37,14 @@ from tools.graph_checker.model import (
         ("docs/operator-runbook.md", PathClass.DOCUMENTATION),
         ("README.md", PathClass.DOCUMENTATION),
         ("SECURITY.md", PathClass.DOCUMENTATION),
+        (
+            "engineering/changes/2026-09-24-mezo-evidence/brief.md",
+            PathClass.DOCUMENTATION,
+        ),
+        (
+            "engineering/changes/2026-09-24-mezo-evidence/state.json",
+            PathClass.DOCUMENTATION,
+        ),
         ("ops/windows/promote.ps1", PathClass.POWERSHELL),
         ("compose.stage-a.yaml", PathClass.COMPOSE),
         ("future_runtime/module.wasm", PathClass.RUNTIME_SOURCE),

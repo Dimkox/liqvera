@@ -228,13 +228,65 @@ def test_registry_rejects_mismatched_id_and_symlink(tmp_path, monkeypatch):
         c.resolve("#/$defs/id", document="primitives.schema.json")
 
 
-@pytest.mark.parametrize("payload", ['{"a":1,"a":2}', '{"a":NaN}', '{"a":Infinity}'])
+@pytest.mark.parametrize("payload", [
+    '{"a":1,"a":2}', '{"a":NaN}', '{"a":Infinity}',
+    '{"a":1e999}', '{"a":[-1e999]}',
+])
 def test_strict_json_loader_rejects_duplicate_or_nonfinite_values(tmp_path, monkeypatch, payload):
     # Break: parser ambiguity or non-JSON numerics enter the contract registry.
     (tmp_path / "malformed.json").write_text(payload)
     monkeypatch.setattr(c, "ROOT", tmp_path)
     with pytest.raises(c.ContractError):
         c.load("malformed.json")
+
+
+def test_strict_json_loader_accepts_finite_decimal_number(tmp_path, monkeypatch):
+    # Break: guarding overflow rejects ordinary finite JSON decimals too.
+    (tmp_path / "finite.json").write_text('{"a":1.5}')
+    monkeypatch.setattr(c, "ROOT", tmp_path)
+    assert c.load("finite.json") == {"a": 1.5}
+
+
+@pytest.mark.parametrize(
+    ("schema", "invalid", "boundary"),
+    [
+        ({"minimum": 2}, 1.5, 2.0),
+        ({"maximum": 2}, 2.5, 2.0),
+    ],
+)
+def test_numeric_bounds_apply_to_finite_float_instances(schema, invalid, boundary):
+    # Break: minimum/maximum silently skip JSON decimal numbers.
+    with pytest.raises(c.ContractError):
+        c.validate(schema, invalid, document="primitives.schema.json")
+    c.validate(schema, boundary, document="primitives.schema.json")
+
+
+def test_boolean_is_not_an_integer_instance():
+    # Break: Python bool passes numeric type checks through int inheritance.
+    with pytest.raises(c.ContractError):
+        c.validate({"type": "integer", "minimum": 0}, True,
+                   document="primitives.schema.json")
+
+
+@pytest.mark.parametrize("schema", [{"const": 1}, {"enum": [1]}])
+def test_json_numeric_equality_accepts_integer_decimal_equivalence(schema):
+    # Break: 1.0 is rejected despite equaling JSON numeric value 1.
+    c.validate(schema, 1.0, document="primitives.schema.json")
+
+
+@pytest.mark.parametrize("schema", [{"const": 1}, {"enum": [1]}])
+def test_json_numeric_equality_keeps_boolean_distinct(schema):
+    # Break: Python treats True as 1 in JSON const/enum membership.
+    with pytest.raises(c.ContractError):
+        c.validate(schema, True, document="primitives.schema.json")
+
+
+def test_unique_items_rejects_equivalent_integer_and_decimal():
+    # Break: numeric duplicates survive because their Python types differ.
+    schema = {"type": "array", "items": {}, "uniqueItems": True}
+    with pytest.raises(c.ContractError):
+        c.validate(schema, [1, 1.0], document="primitives.schema.json")
+    c.validate(schema, [1, True], document="primitives.schema.json")
 
 
 @pytest.mark.parametrize("value", [

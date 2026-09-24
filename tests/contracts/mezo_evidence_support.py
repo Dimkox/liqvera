@@ -42,6 +42,13 @@ def _reject_constant(value: str) -> None:
     raise ContractError(f"nonfinite JSON constant: {value}")
 
 
+def _parse_finite_float(value: str) -> float:
+    parsed = float(value)
+    if not math.isfinite(parsed):
+        raise ContractError("nonfinite JSON number")
+    return parsed
+
+
 def _safe_name(name: str) -> str:
     if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*[.]json", name):
         raise ContractError("document must be a local JSON filename")
@@ -59,7 +66,8 @@ def load(name: str) -> dict:
     try:
         parsed = json.loads(path.read_text(encoding="utf-8"),
                             object_pairs_hook=_reject_duplicate,
-                            parse_constant=_reject_constant)
+                            parse_constant=_reject_constant,
+                            parse_float=_parse_finite_float)
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise ContractError(f"invalid JSON document: {name}") from error
     if not isinstance(parsed, dict):
@@ -263,6 +271,8 @@ def _matches_type(kind: str, value: object) -> bool:
 
 
 def _equal(left: object, right: object) -> bool:
+    if type(left) in {int, float} and type(right) in {int, float}:
+        return left == right
     if type(left) is not type(right):
         return False
     if isinstance(left, dict):
@@ -345,7 +355,7 @@ def _validate_node(schema: dict, value: object, document: str) -> None:
             raise ContractError("pattern mismatch")
         if "format" in schema and not _format_valid(schema["format"], value):
             raise ContractError("format mismatch")
-    if type(value) is int:
+    if type(value) in {int, float}:
         if "minimum" in schema and value < schema["minimum"]:
             raise ContractError("below minimum")
         if "maximum" in schema and value > schema["maximum"]:

@@ -51,6 +51,11 @@ the inherited 26
 `IMPLEMENTATION_ORPHAN` findings plus six active declared conflicts; it has no
 cleanup-specific inventory, dangling-reference, or retired-Go error.
 
+A local `git clone --no-recurse-submodules` of implementation commit
+`058092d2c243d732eb4a44d876a46ae98b64c102` passed the ordinary repository
+boundary suite: `8 passed`. This proves fresh ordinary checks do not require an
+initialized Adaptive Grok checkout; strict runtime checks remain explicit.
+
 An isolated repository-local `.venv` supplies the exact v2.0.19 runner
 versions and declared build backend without changing the global interpreter.
 The stale README heading and public-capture metadata expectations are repaired.

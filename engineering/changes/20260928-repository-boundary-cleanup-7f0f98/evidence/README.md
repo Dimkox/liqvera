@@ -36,6 +36,13 @@ aggregate reported `272 passed`; the strict tooling slice reported `11 passed`.
 A direct 22-worker diagnostic reported `1122 passed, 85 subtests passed in
 53.38s`.
 
+A local fresh clone of implementation commit
+`058092d2c243d732eb4a44d876a46ae98b64c102`, created with
+`--no-recurse-submodules`, passed
+`tests/conformance/test_repository_boundary.py`: `8 passed`. The three emitted
+warnings were host pytest configuration warnings for an absent optional asyncio
+plugin, not test failures.
+
 The final bounded PR-verifier run recorded `pytest-xdist workers=22` and passed
 diff, change-spec, secret, contract, SQL, Ruff, Bandit, source-stability, and
 the recurring Trivy gate. Trivy dynamically discovered nine tracked inputs:

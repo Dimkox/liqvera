@@ -59,14 +59,16 @@ A local fresh clone of implementation commit
 warnings were host pytest configuration warnings for an absent optional asyncio
 plugin, not test failures.
 
-The exact measured command at clean commit `2a8144a` used 22 xdist workers and
-reported `1133 passed, 85 subtests passed`, with branch-aware coverage of
-59.18% across every Liqvera-owned source path declared in `.coveragerc`. Its
-only exit-1 cause was the inherited `fail_under=74`, which had belonged to the
-removed vendored Grok/scripts measurement surface. The corrected initial gate
-is `fail_under=59`: it neither excludes product code nor rounds above observed
-coverage, must not regress, and is explicit roadmap debt to raise. A green
-receipt remains pending the post-commit full verifier.
+The complete-inventory measured command used 22 xdist workers and reported
+`1134 passed, 85 subtests passed`, with branch-aware coverage of 36.16% across
+10,413 statements. All tracked owned Python under `packages/`, `scripts/`,
+`tools/`, and `tooling/` is included, including zero-covered scripts; precise
+omits cover tests, the eight external Grok symlink entrypoints, generated build
+paths, and the pinned submodule. The earlier 59.18% result omitted owned
+scripts, standalone tools, and project-owned tooling and is invalidated. The
+corrected initial gate is `fail_under=36`, the integer below observation; it
+must not regress and is explicit roadmap debt to raise. A green receipt remains
+pending the post-commit full verifier.
 
 Trivy dynamically discovered nine tracked inputs: seven Dockerfiles and two
 Compose files; all passed the blocking `MEDIUM,HIGH,CRITICAL` threshold. A

@@ -40,8 +40,8 @@ Exit condition: either a measurable proprietary-economics or paying-buyer wedge 
 P0 is the implementation foundation for the `MEE Evidence` hypothesis. The packaging name does not expand the Stage A capability boundary.
 
 - deterministic CI;
-- preserve the branch-aware Liqvera-owned coverage baseline measured at 59.18%
-  with a 59% blocking floor, then raise the floor as targeted tests cover the
+- preserve the complete branch-aware Liqvera-owned coverage baseline measured
+  at 36.16% with a 36% blocking floor, then raise the floor as targeted tests cover the
   current product debt; never lower it to admit a regression;
 - current venue metadata and order books;
 - canonical economic instrument and quantity mapping;

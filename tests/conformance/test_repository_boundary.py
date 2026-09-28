@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import configparser
+import fnmatch
 import hashlib
 import importlib.util
 import json
@@ -176,20 +177,65 @@ def test_parallel_verifier_is_explicitly_enabled() -> None:
     assert (ROOT / "tooling/grok-verify.py").is_file()
 
 
-def test_coverage_baseline_measures_only_liqvera_owned_sources() -> None:
+def test_coverage_policy_matches_all_tracked_liqvera_python_sources() -> None:
     config = configparser.ConfigParser()
     config.read(ROOT / ".coveragerc")
-
-    assert {line.strip() for line in config.get("run", "source").splitlines() if line.strip()} == {
-        "packages/contracts/src/mee_contracts",
-        "packages/public-capture/src/mee_public_capture",
-        "packages/readonly-analyzer/src/mee_readonly_analyzer",
-        "packages/evidence-report/src/mee_evidence_report",
-        "tools/conformance",
-        "tools/graph_checker",
-        "tools/mezo_acceptance",
+    sources = {
+        line.strip()
+        for line in config.get("run", "source").splitlines()
+        if line.strip()
     }
-    assert config.getint("report", "fail_under") == 59
+    omits = {
+        line.strip()
+        for line in config.get("run", "omit").splitlines()
+        if line.strip()
+    }
+    external_grok_links = {
+        "scripts/grok_approve.py",
+        "scripts/grok_change.py",
+        "scripts/grok_deploy.py",
+        "scripts/grok_doctor.py",
+        "scripts/grok_review.py",
+        "scripts/grok_route.py",
+        "scripts/grok_status.py",
+        "scripts/grok_verify.py",
+    }
+    tracked = {
+        Path(path)
+        for path in _git("ls-files", "*.py").splitlines()
+    }
+
+    def is_owned_production_or_tool(path: Path) -> bool:
+        if "tests" in path.parts or path.name.startswith("test_"):
+            return False
+        return len(path.parts) == 1 or path.parts[0] in {
+            "apps",
+            "packages",
+            "scripts",
+            "services",
+            "tooling",
+            "tools",
+        }
+
+    expected = {
+        path.as_posix()
+        for path in tracked
+        if is_owned_production_or_tool(path)
+        and path.as_posix() not in external_grok_links
+    }
+    covered = {
+        path.as_posix()
+        for path in tracked
+        if any(path == Path(source) or path.is_relative_to(source) for source in sources)
+        and not any(fnmatch.fnmatch(path.as_posix(), pattern) for pattern in omits)
+    }
+
+    assert sources == {"packages", "scripts", "tooling", "tools"}
+    assert external_grok_links <= omits
+    assert "scripts/research/tests/*" in omits
+    assert "tooling/adaptive-grok-build-pro/*" in omits
+    assert covered == expected
+    assert config.getint("report", "fail_under") == 36
 
 
 def test_bmad_is_locked_but_not_vendored() -> None:

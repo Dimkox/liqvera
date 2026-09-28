@@ -70,15 +70,17 @@ initialized Adaptive Grok checkout; strict runtime checks remain explicit.
 An isolated repository-local `.venv` supplies the exact v2.0.19 runner
 versions and declared build backend without changing the global interpreter.
 The stale README heading and public-capture metadata expectations are repaired.
-A clean exact 22-worker measured diagnostic at commit `2a8144a` reported
-`1133 passed, 85 subtests passed` and 59.18% branch-aware coverage over every
-Liqvera-owned package/tool path declared in `.coveragerc`. Its sole exit-1 cause
-was the inherited 74% floor, which had measured the removed vendored
-Grok/scripts surface rather than this ownership set. The truthful initial
-blocking floor is now 59%: it neither excludes product source nor rounds above
-the observed baseline, must not regress, and is roadmap debt to raise with
-targeted tests. The next action is one clean full PR-verifier run on the
-committed baseline. The recurring
+A complete-inventory 22-worker measured diagnostic reports
+`1134 passed, 85 subtests passed` and 36.16% branch-aware coverage across
+10,413 statements. The denominator includes all tracked Python below
+`packages/`, `scripts/`, `tools/`, and `tooling/`, including zero-covered owned
+modules; it omits only tests, the eight external Grok symlink entrypoints,
+generated build paths, and the pinned submodule. The prior 59.18% result is
+invalid because it omitted owned scripts, standalone tools, and project-owned
+tooling. The truthful initial floor is 36%, the integer below the observed
+result; it must not regress and is roadmap debt to raise with targeted tests.
+The next action is one clean full PR-verifier run on the committed baseline.
+The recurring
 gate dynamically found nine tracked container inputs (seven Dockerfiles and
 two Compose files) and passed all at the explicit
 `MEDIUM,HIGH,CRITICAL` threshold. A separate LOW audit retains the inherited

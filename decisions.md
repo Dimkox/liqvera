@@ -182,7 +182,8 @@ non-runtime archives without hashing 120 MB per hook.
 
 ## 2026-09-28 — Baseline coverage follows Liqvera source ownership
 
-The clean 22-worker measured suite covers all declared Liqvera-owned product
-and tool paths at 59.18%, so the initial non-regression floor is 59 rather than
-the inherited vendored-tooling floor of 74. Do not exclude product paths or
-lower this floor; raise it through the P0 targeted-test debt.
+The complete 22-worker inventory covers all tracked owned Python below
+`packages/`, `scripts/`, `tools/`, and `tooling/` at 36.16%, including
+zero-covered modules. The initial non-regression floor is therefore 36; omit
+only tests, external Grok links, generated paths, and the pinned submodule, then
+raise the floor through the P0 targeted-test debt.

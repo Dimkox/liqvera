@@ -130,7 +130,8 @@ packages and release evidence on every hook.
 
 ## 2026-09-28 — Retained a coverage floor after changing its ownership set
 
-The cleanup replaced vendored Grok/scripts coverage with Liqvera-owned sources
-but initially kept the old 74% floor without measuring the new denominator. A
-clean exact run measured 59.18%; coverage ownership and its initial blocking
-floor must be rebaselined together, then raised without excluding product code.
+The cleanup first replaced vendored Grok/scripts coverage with a cherry-picked
+set of Liqvera packages/tools, producing an invalid 59.18% denominator that
+still omitted owned scripts, standalone tools, and project-owned tooling. The
+complete tracked inventory measures 36.16%; coverage ownership and its blocking
+floor must be derived together and guarded by an inventory comparison.

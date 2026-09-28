@@ -75,7 +75,10 @@ Compose files; all passed the blocking `MEDIUM,HIGH,CRITICAL` threshold. A
 separate LOW audit found only the inherited `DS-0026` missing-`HEALTHCHECK`
 Dockerfile finding.
 
-Route receipts and independent reviews are still pending. A v2.0.19 state
-transition reached `scoped` and then failed closed because the pre-existing
-active route does not contain the gate declaration required by this newer
-kernel; no approval or receipt was fabricated.
+Four reviewer-provided PASS reports are stored as `code-review.md`,
+`test-review.md`, `security-review.md`, and `data-review.md`. Each names the
+clean reviewed fingerprint `aa5925f320da68843a52362e1654549d3a658899`, reports
+no findings, and preserves the reviewer's receipt-ready evidence summary. This
+report-only commit changes the repository fingerprint, so all five typed
+evidence obligations remain `not_run` until final verification and
+fingerprint-bound receipt recording. No approval or receipt was fabricated.

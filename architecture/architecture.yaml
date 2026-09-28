@@ -14161,6 +14161,18 @@ repository_inventory:
   - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-task_analyst.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/code-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/data-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/security-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/test-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/release.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

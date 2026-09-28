@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-28 (repository boundary review repairs implemented; full verification red). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-28 (repository boundary verification and reviews passed; report-only fingerprint pending receipts). Repository: `Dimkox/liqvera`.
 Branch: `chore/repository-cleanup` (based on merged main and the F3–F7 integration).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -14,11 +14,12 @@ commit `0c2cb97f8048f7da8bd193634f4502f24b0e541e`. Route
 `engineering/changes/20260928-repository-boundary-cleanup-7f0f98/` cover a
 repository-only retirement of inherited Go Stage-0 and vendored agent tooling.
 Six parallel read-only analyses and the route-selected implementation are
-complete. Focused conformance, graph, and strict tooling-integration tests
-pass. The first independent reviews found fail-open hooks, a recursive-clone
-assumption, a direct-verifier pin bypass, and lost recurring container-scan
-coverage; those defects are repaired and await independent re-review. Full
-route verification remains red. No product runtime, payment, deployment,
+complete. Full route verification passed at clean fingerprint
+`aa5925f320da68843a52362e1654549d3a658899`. Independent code, test, security,
+and data re-reviews all passed that same fingerprint with no findings; their
+reviewer-provided summaries are stored under the active change package. This
+report-only commit changes the fingerprint, so receipt recording awaits final
+verification of the report-only HEAD. No product runtime, payment, deployment,
 release, or acceptance status has changed.
 
 The retired Go unit is `go.mod`, `cmd/`, `internal/`, the root Go
@@ -79,13 +80,15 @@ generated build paths, and the pinned submodule. The prior 59.18% result is
 invalid because it omitted owned scripts, standalone tools, and project-owned
 tooling. The truthful initial floor is 36%, the integer below the observed
 result; it must not regress and is roadmap debt to raise with targeted tests.
-The next action is one clean full PR-verifier run on the committed baseline.
-The recurring
+The full PR verifier passed the committed denominator baseline at fingerprint
+`aa5925f320da68843a52362e1654549d3a658899`; the recurring
 gate dynamically found nine tracked container inputs (seven Dockerfiles and
 two Compose files) and passed all at the explicit
 `MEDIUM,HIGH,CRITICAL` threshold. A separate LOW audit retains the inherited
-`DS-0026` missing-`HEALTHCHECK` finding on each Dockerfile. Route-selected
-independent re-review remains pending.
+`DS-0026` missing-`HEALTHCHECK` finding on each Dockerfile. Four route-selected
+independent re-reviews passed with no findings. Their reports are stored, while
+the five machine receipts await final verification of this report-only
+fingerprint.
 
 F3–F7 remain `IMPLEMENTED_UNVERIFIED`; all 156 vectors remain `NOT_RUN`,
 A13–A14 remain `BLOCKED_EXTERNAL`, payment readiness remains false, and no

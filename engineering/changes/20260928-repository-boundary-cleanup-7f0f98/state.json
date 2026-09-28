@@ -15,6 +15,48 @@
       "to": "scoped"
     }
   ],
+  "human_gates": [],
+  "human_gates_digest": "a252652ad2c747acb1c679b13aa9ee18b98b8c40e4be0583949c305b85d983e2",
+  "evidence_accounting": {
+    "schema_version": 1,
+    "obligations": [
+      {
+        "id": "verification",
+        "kind": "receipt",
+        "receipt_kind": "verification",
+        "status": "not_run",
+        "reason": "reports persisted; fingerprint-bound receipt pending final verification"
+      },
+      {
+        "id": "code_review",
+        "kind": "receipt",
+        "receipt_kind": "code_review",
+        "status": "not_run",
+        "reason": "reports persisted; fingerprint-bound receipt pending final verification"
+      },
+      {
+        "id": "test_review",
+        "kind": "receipt",
+        "receipt_kind": "test_review",
+        "status": "not_run",
+        "reason": "reports persisted; fingerprint-bound receipt pending final verification"
+      },
+      {
+        "id": "security_review",
+        "kind": "receipt",
+        "receipt_kind": "security_review",
+        "status": "not_run",
+        "reason": "reports persisted; fingerprint-bound receipt pending final verification"
+      },
+      {
+        "id": "data_review",
+        "kind": "receipt",
+        "receipt_kind": "data_review",
+        "status": "not_run",
+        "reason": "reports persisted; fingerprint-bound receipt pending final verification"
+      }
+    ]
+  },
   "route_id": "7f0f98e3cdda",
   "schema_version": 1,
   "status": "scoped",

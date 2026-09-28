@@ -2,23 +2,31 @@
 
 ## Current behavior
 
-Go Stage-0 remains an inactive executable specification coupled to the graph
-and conformance metadata. BMad and Adaptive Grok implementation payloads are
-vendored as 403 tooling paths; product code does not import either layer.
+Go Stage-0 was an inactive executable specification coupled to the graph and
+conformance metadata. BMad and Adaptive Grok implementation payloads were
+vendored as hundreds of tooling paths; product code did not import either
+layer.
 
 ## Proposed behavior
 
 Go is absent from the active tree and referenced only by immutable historical
-provenance. BMad is optional and external at exact version `6.10.0`. Product
-verification stays repository-owned and offline. Adaptive Grok has no honest
-external identity yet, so implementation must use one of two explicit designs:
+provenance. BMad is optional and external at the exact `bmad-method@6.10.0`
+npm identity and SRI recorded in `tooling/tooling-lock.json`. Product
+verification stays repository-owned and offline.
 
-1. retire adaptive route/receipt automation and replace its safety obligations
-   with project-owned policy and verification; or
-2. retain a characterization-tested minimal local kernel as temporary debt.
+Adaptive Grok is a submodule/gitlink at
+`tooling/adaptive-grok-build-pro`, pinned to annotated tag `v2.0.19` and
+commit `cb9af4073ba6c3d515145164d771c75ebdfa3224`; `.gitmodules` uses the
+portable public repository URL. The pinned object was selected from the local
+repository without reading its dirty working tree. Version 2.0.19 is required
+because it supplies the bounded parallel pytest verifier; older releases run
+verification sequentially and are materially slower.
 
-The owner decision is pending. A Grok CLI version, hook behavior label, or
-private source commit is not an acceptable substitute for a package pin.
+`tooling/run-adaptive-grok.py` is the only project-owned execution boundary.
+Before delegating to the framework it validates the lock, parent gitlink,
+submodule HEAD, tag target, VERSION, and clean checkout, then executes only an
+allowlisted Grok command or hook. Thin symlinks retain script, hook, agent, and
+skill discovery without retaining copied framework implementation.
 
 ## Components and boundaries
 
@@ -26,17 +34,18 @@ private source commit is not an acceptable substitute for a package pin.
   deployment manifests, contracts, and acceptance runner.
 - Historical Go: immutable import commit plus current Python characterization
   tests; no active compiler/build/image/database surface.
-- BMad: exact optional npm artifact installed only by an explicit command into
-  an ignored local directory.
-- Adaptive workflow: either formally retired or reduced to the minimum local
-  implementation that proves route/policy/receipt behavior.
+- BMad: exact optional npm artifact identity; installation is outside product
+  builds and verification and no generated package payload is tracked.
+- Adaptive workflow: immutable external gitlink plus a small fail-closed
+  Liqvera launcher and compatibility symlinks.
 - Verification: `make verify` remains independent; product Dockerfile/Compose
   scanning becomes explicit when the root Go Dockerfile disappears.
 
 ## Data flow
 
-No runtime data flow changes. Tool bootstrap, if retained, is an explicit
-developer action and cannot run from product build, import, tests, or hooks.
+No runtime data flow changes. Submodule initialization is an explicit
+developer action and cannot run from product build, import, or tests. Grok
+hooks use only the validated pinned checkout.
 
 ## API and event contracts
 
@@ -55,7 +64,8 @@ No API, event, payment, state-machine, or artifact contract changes.
   ledger.
 - Remove only `migrations/000001_init.*`; retain A2
   `migrations/000002_a2_raw_capture.*` and every Liqvera migration.
-- Never infer an Adaptive Grok pin from unrelated version labels.
+- Pin Adaptive Grok `v2.0.19` because it is the first selected release with
+  bounded parallel verification; validate the commit and version at runtime.
 - Keep product verification authoritative over any optional agent framework.
 
 ## Risks and mitigations
@@ -64,7 +74,8 @@ No API, event, payment, state-machine, or artifact contract changes.
   product Dockerfile and Compose inputs.
 - Dangling graph/conformance references: retire or rebind them in the same
   coherent commit as source deletion.
-- Supply-chain drift: exact package identity and integrity are mandatory;
-  missing tooling fails clearly without affecting product checks.
+- Supply-chain drift: exact package/git identities and integrity are mandatory;
+  missing, dirty, or wrong-version tooling fails clearly without affecting
+  product checks.
 - Status inflation: preserve `IMPLEMENTED_UNVERIFIED`, 156 `NOT_RUN` vectors,
   and all payment/acceptance blockers.

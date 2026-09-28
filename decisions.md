@@ -157,3 +157,10 @@ Do not replace vendored tooling with a version string or a host CLI that is not
 the same artifact. Require an immutable locator plus integrity digest; when no
 such identity exists, either retain the minimum proven kernel or explicitly
 retire the integration contract.
+
+## 2026-09-28 — Pin Adaptive Grok as a validated gitlink
+
+Keep repository-development frameworks outside the product tree as immutable
+gitlinks; use `v2.0.19` specifically because it adds bounded, cgroup-aware
+pytest-xdist sharding. Validate commit, tag, VERSION, and checkout cleanliness
+before execution, while keeping ordinary product verification independent.

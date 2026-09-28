@@ -54,7 +54,7 @@ The official Hyperliquid `l2Book` returns at most 20 levels per side [S3]. The U
 
 Include one instrument—Hyperliquid BTC linear perpetual—one payment network—Mezo Testnet—BUY/SELL, quantity in BTC, a JSON API, a browser payment flow, an evidence bundle, and an offline verifier. The instrument name must explicitly include `perpetual` and must not suggest a spot BTC purchase.
 
-Exclude Lighter live, cross-venue comparison, arbitrage, trades, exchange API keys, funding/net P&L, borrowing, leverage, swap routing, bridges, MEZO trading, custom smart contracts, custody, mainnet, Telegram/Kakao, email registration, CRM, paid AI services, and subscriptions. Do not rewrite the retained Go code; it is not the active runtime. Do not create GitHub Actions or automatically enable inherited workflows.
+Exclude Lighter live, cross-venue comparison, arbitrage, trades, exchange API keys, funding/net P&L, borrowing, leverage, swap routing, bridges, MEZO trading, custom smart contracts, custody, mainnet, Telegram/Kakao, email registration, CRM, paid AI services, and subscriptions. The retired Go baseline is historical provenance, not the active runtime. Do not create GitHub Actions or automatically enable inherited workflows.
 
 Two environments are required: `fixture` for deterministic checks without a network and `live-public + mezo-testnet` for the final demonstration. Fixture results are marked `SIMULATED`; the published paid demo configuration must not sell a fixture as live data.
 

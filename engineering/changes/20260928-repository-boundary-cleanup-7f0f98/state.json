@@ -7,11 +7,17 @@
       "from": null,
       "reason": "created",
       "to": "draft"
+    },
+    {
+      "at": "2026-09-28T20:36:53+00:00",
+      "from": "draft",
+      "reason": "Analysis completed and scope frozen.",
+      "to": "scoped"
     }
   ],
   "route_id": "7f0f98e3cdda",
   "schema_version": 1,
-  "status": "draft",
+  "status": "scoped",
   "title": "Repository boundary cleanup",
-  "updated_at": "2026-09-28T19:57:52+00:00"
+  "updated_at": "2026-09-28T20:36:53+00:00"
 }

@@ -2,19 +2,19 @@
 
 ## Acceptance criteria
 
-- [ ] No tracked Go source, module, root Go image, or Stage-0-only migration
+- [x] No tracked Go source, module, root Go image, or Stage-0-only migration
   remains, while the historical source is reachable by immutable commit.
-- [ ] The five carried safety invariants remain covered by Python conformance
+- [x] The five carried safety invariants remain covered by Python conformance
   tests with no deleted-path references.
-- [ ] No generated BMad payload remains tracked; any optional install is exact,
-  integrity checked, explicit, ignored, and unrelated to product verification.
-- [ ] Adaptive automation is either honestly retired or reduced to a tested
-  minimal kernel; no fictitious external pin or silent fail-open completion.
-- [ ] Current graph inventory is exact and product container scanning remains
+- [x] No generated BMad payload remains tracked; its optional external identity
+  is exact, integrity pinned, and unrelated to product verification.
+- [x] Adaptive automation uses a tested fail-closed launcher over the exact
+  `v2.0.19` gitlink; no copied kernel or dirty/floating source is accepted.
+- [x] Current graph inventory is exact and product container scanning remains
   explicit after root Dockerfile removal.
-- [ ] Protected migrations, schemas, vectors, fixtures, product source, and the
+- [x] Protected migrations, schemas, vectors, fixtures, product source, and the
   import manifest are unchanged.
-- [ ] F3-F7, vector, payment, acceptance, deployment, and release status claims
+- [x] F3-F7, vector, payment, acceptance, deployment, and release status claims
   remain unchanged.
 
 ## Failure and edge cases
@@ -30,6 +30,6 @@
 - Security: no silent download/execute path; integrity mismatch fails closed;
   no secret or production access.
 - Reliability: ordinary product checks work without agent tooling or network.
-- Performance: tracked file and byte reductions are measured before/after.
+- Performance: the selected v2.0.19 verifier uses bounded pytest-xdist workers.
 - Observability: verification and independent review evidence names the exact
   final commit and reports inherited failures without waiver.

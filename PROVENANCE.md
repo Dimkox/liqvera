@@ -28,6 +28,15 @@ The manifest marks every changed baseline file. Windows archive line-ending conv
 
 Subsequent documentation commits establish English as the default project language and translate Russian prose in the current documentation, inherited plans, research, and archives. These translations preserve the historical status and technical requirements of those documents. They are post-import changes: the initial manifest and source SHAs remain unchanged, and the original imported text remains available in Git history.
 
+The repository-boundary cleanup later removed the imported Go Stage-0 source,
+its root image, and the unused `migrations/000001_init.*` files from the active
+tree. The exact source remains recoverable at immutable import commit
+`8734907d489168a8a6567b93bc85920001fefd85`; the initial import manifest is
+preserved byte-for-byte. Adaptive Grok and BMad implementation files were also
+removed from the parent repository: Adaptive Grok is now a pinned Git submodule
+and BMad is an exact optional package identity. These post-import changes do not
+alter what the manifest says was originally imported.
+
 No baseline file is omitted. The source contained no tracked symlinks, submodules, LFS pointers, `.gitmodules`, generated binary archives, database dumps, private-key files or runtime log files in the reviewed inventory. The tracked `.env.example` is an example, not a copied runtime environment.
 
 ## Local secret scanning

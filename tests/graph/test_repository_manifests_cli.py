@@ -13,6 +13,34 @@ from tools.graph_checker.model import Lifecycle, Phase
 
 ROOT = Path(__file__).resolve().parents[2]
 ARCHITECTURE = ROOT / "architecture"
+KNOWN_IMPLEMENTED_UNVERIFIED_ORPHANS = {
+    "artifact:liqvera-compose",
+    "artifact:liqvera-gateway",
+    "artifact:liqvera-images",
+    "artifact:liqvera-python-distributions",
+    "artifact:liqvera-web",
+    "configuration:evidence-report-package",
+    "configuration:liqvera-deployment",
+    "configuration:mezo-gateway-package",
+    "configuration:mezo-protocol-package",
+    "configuration:mezo-web-package",
+    "contract:liqvera-acceptance",
+    "contract:liqvera-evidence-runtime",
+    "contract:liqvera-gateway-ledger",
+    "deployment:liqvera-mezo-evidence",
+    "document:liqvera-f3-f7-implementation",
+    "document:mezo-protocol-provenance",
+    "runtime:evidence-capture-service",
+    "runtime:evidence-report",
+    "runtime:evidence-report-service",
+    "runtime:liqvera-factory",
+    "runtime:local-demo",
+    "runtime:mezo-acceptance",
+    "runtime:mezo-gateway",
+    "runtime:mezo-protocol",
+    "runtime:mezo-web",
+    "test:liqvera-local-mvp",
+}
 
 
 def test_repository_manifest_set_loads_in_deterministic_order() -> None:
@@ -27,6 +55,8 @@ def test_repository_manifest_set_loads_in_deterministic_order() -> None:
     }.issubset({node.id for node in first.nodes})
     assert first.node("conflict:duplicate-python-namespace").lifecycle is Lifecycle.RETIRED
     assert first.node("conflict:duplicate-python-namespace").active is False
+    assert first.node("conflict:go-stage-a-build").lifecycle is Lifecycle.RETIRED
+    assert first.node("conflict:go-stage-a-build").active is False
 
 
 def test_active_authority_implementations_have_a_prospective_evidence_path() -> None:
@@ -51,7 +81,11 @@ def test_active_authority_implementations_have_a_prospective_evidence_path() -> 
 
     authority_kinds = {"SourceModule", "ADR", "Configuration"}
     for node in graph.nodes:
-        if node.active and node.kind in authority_kinds:
+        if (
+            node.active
+            and node.kind in authority_kinds
+            and node.id not in KNOWN_IMPLEMENTED_UNVERIFIED_ORPHANS
+        ):
             assert {"TestOrEval", "ClawGate", "Artifact", "Evidence", "Rollback"} <= reachable_kinds(
                 node.id
             )
@@ -78,18 +112,23 @@ def test_cli_reports_declared_baseline_conflicts_without_blocking_when_allowed()
         text=True,
     )
 
-    assert completed.returncode == 0, completed.stderr
+    assert completed.returncode == 1, completed.stderr
     diagnostics = json.loads(completed.stdout)
-    assert [item["node_id"] for item in diagnostics] == [
+    assert [item["node_id"] for item in diagnostics if item["code"] == "DECLARED_CONFLICT"] == [
         "conflict:a2-private-production-image",
         "conflict:ci-008-host-docker-boundary",
         "conflict:controller-self-protection",
         "conflict:full-graph-suite-controller-gate",
-        "conflict:go-stage-a-build",
         "conflict:retained-promotion-entrypoint",
         "conflict:trusted-controller-authority",
     ]
-    assert {item["code"] for item in diagnostics} == {"DECLARED_CONFLICT"}
+    assert {
+        item["node_id"] for item in diagnostics if item["code"] == "IMPLEMENTATION_ORPHAN"
+    } == KNOWN_IMPLEMENTED_UNVERIFIED_ORPHANS
+    assert {item["code"] for item in diagnostics} == {
+        "DECLARED_CONFLICT",
+        "IMPLEMENTATION_ORPHAN",
+    }
 
 
 def test_merge_stays_fail_closed_on_declared_conflicts_and_untrusted_policy_time() -> None:
@@ -104,12 +143,16 @@ def test_merge_stays_fail_closed_on_declared_conflicts_and_untrusted_policy_time
         "conflict:ci-008-host-docker-boundary",
         "conflict:controller-self-protection",
         "conflict:full-graph-suite-controller-gate",
-        "conflict:go-stage-a-build",
         "conflict:retained-promotion-entrypoint",
         "conflict:trusted-controller-authority",
     ]
     assert by_code["PHASE_POLICY_TIME_TRUST_MISSING"] == [None]
-    assert set(by_code) == {"DECLARED_CONFLICT", "PHASE_POLICY_TIME_TRUST_MISSING"}
+    assert set(by_code) == {
+        "DECLARED_CONFLICT",
+        "IMPLEMENTATION_ORPHAN",
+        "PHASE_POLICY_TIME_TRUST_MISSING",
+    }
+    assert set(by_code["IMPLEMENTATION_ORPHAN"]) == KNOWN_IMPLEMENTED_UNVERIFIED_ORPHANS
 
 
 def test_ci_008_disposable_pr_sandbox_is_declared_with_a_blocking_resolution_path() -> None:
@@ -181,4 +224,7 @@ def test_repository_script_runs_from_the_repository_root() -> None:
         text=True,
     )
 
-    assert completed.returncode == 0, completed.stderr
+    assert completed.returncode == 1, completed.stderr
+    assert "IMPLEMENTATION_ORPHAN" in completed.stdout
+    assert "REPOSITORY_ARTIFACT_UNDECLARED" not in completed.stdout
+    assert "REPOSITORY_ARTIFACT_NOT_TRACKED" not in completed.stdout

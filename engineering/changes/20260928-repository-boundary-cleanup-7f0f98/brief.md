@@ -26,10 +26,10 @@ Git provenance, and no product status or safety boundary is promoted.
 - Preserve the five useful invariants through current Python tests and an
   immutable reference to import commit
   `8734907d489168a8a6567b93bc85920001fefd85`.
-- Remove the generated BMad installation and replace it with an optional,
-  integrity-pinned `bmad-method@6.10.0` local bootstrap.
-- Decide whether to retire Adaptive Grok automation or retain only a minimal
-  local kernel until a real external artifact exists.
+- Remove the generated BMad installation and record the exact external
+  `bmad-method@6.10.0` package identity and integrity value.
+- Replace copied Adaptive Grok source with a portable gitlink pinned to local
+  tag `v2.0.19` / commit `cb9af4073ba6c3d515145164d771c75ebdfa3224`.
 - Update current graph, documentation, provenance, verification, and local
   worktree hygiene to match the chosen boundary.
 
@@ -38,7 +38,7 @@ Git provenance, and no product status or safety boundary is promoted.
 - F3-F7 behavior, acceptance closure, payment, deployment, or release.
 - Product API, schema, vector, fixture, PostgreSQL ledger, SQLite demo, or A2
   migration changes.
-- Publishing a new external factory artifact or inventing an upstream pin.
+- Publishing a new external factory artifact or using a dirty/floating pin.
 - Rewriting Git history or deleting historical planning/evidence.
 
 ## Constraints

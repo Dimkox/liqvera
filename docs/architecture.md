@@ -6,7 +6,9 @@ The architecture of the Liqvera buildathon product is described in the [current 
 
 ## Status
 
-This document preserves the **Go Stage-0 foundation and its safety invariants**. It is no longer the authoritative runtime-language decision.
+This document preserves the **retired Go Stage-0 foundation and its safety
+invariants**. The Go source is no longer present in the active tree and is not
+the authoritative runtime-language decision.
 
 The Liqvera F3–F7 implementation now adds a Python evidence/report layer, a
 TypeScript/Express gateway with PostgreSQL state, a separate Vite browser
@@ -17,13 +19,17 @@ has not run. The official Mezo protocol package supplies pinned read-only MUSD
 metadata to the gateway and browser; it does not grant minting, custody,
 administrative, mainnet, or exchange-mutation authority.
 
-The accepted forward runtime is the Python modular monolith in [`adr/0001-python-universal-arbitrage-core.md`](adr/0001-python-universal-arbitrage-core.md). Existing Go code remains `TEST_ONLY_EXECUTABLE_SPEC` until conformance and
-review make a row `ELIGIBLE`. The superseded `Dockerfile.a2` packaging owner
-is `RETIRED`. Retirement never makes Go packageable in Stage A.
+The accepted forward runtime is the Python modular monolith in
+[`adr/0001-python-universal-arbitrage-core.md`](adr/0001-python-universal-arbitrage-core.md).
+The former Go implementation remains a historical `TEST_ONLY_EXECUTABLE_SPEC`
+at import commit `8734907d489168a8a6567b93bc85920001fefd85`; its five conformance
+rows are `RETIRED` and point to that immutable Git object. The superseded Go
+image and `Dockerfile.a2` packaging owner are retired. Retirement never makes
+Go packageable in Stage A.
 
 Do not infer that a live adapter, trading endpoint or production execution path exists from either architecture document.
 
-## Retained Go foundation decision
+## Retired Go foundation decision
 
 The first implemented foundation was a Go modular monolith with two future deployment boundaries:
 
@@ -33,6 +39,17 @@ The first implemented foundation was a Go modular monolith with two future deplo
 They remained one binary until isolation or measured load required a split. PostgreSQL was the authoritative state store. Redis, NATS, and a Python sidecar were intentionally absent from that foundation.
 
 The active Python design reuses the invariants below while changing the runtime and package structure.
+
+## Development tooling boundary
+
+Adaptive Grok Build Pro is linked as a tooling-only Git submodule at exact
+release `v2.0.19`/commit `cb9af4073ba6c3d515145164d771c75ebdfa3224`.
+Liqvera owns only policy/configuration, runtime state, discovery links, and a
+launcher that validates the gitlink, tag, version, and clean checkout before
+execution. `.grok-test-runner.json` opts into the release's bounded parallel
+Python runner. BMad is not installed in the repository; only the exact
+`bmad-method@6.10.0` artifact identity and SRI are retained. Neither tool is a
+runtime architecture node or product dependency.
 
 ## Safety invariants
 

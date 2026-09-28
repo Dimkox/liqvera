@@ -2,13 +2,13 @@
 
 - [x] Complete route-selected repository, requirements, architecture,
   documentation, integration, and data analysis.
-- [ ] Obtain the owner decision: retire Adaptive Grok automation or retain a
-  temporary minimal local kernel.
-- [ ] Write and approve the cleanup design specification.
-- [ ] Write and approve the implementation plan.
-- [ ] Freeze contracts and expected behavior.
-- [ ] Add failing test or characterization test.
-- [ ] Implement the smallest vertical change.
+- [x] Record the owner decision to use local Adaptive Grok tag `v2.0.19` as an
+  immutable portable gitlink.
+- [x] Write and approve the cleanup design specification.
+- [x] Write and approve the implementation plan.
+- [x] Freeze contracts and expected behavior.
+- [x] Add failing boundary and characterization tests.
+- [x] Implement the smallest vertical change.
 - [ ] Run selected quality profile.
 - [ ] Complete independent reviews.
 - [ ] Bind evidence to the final tree fingerprint.

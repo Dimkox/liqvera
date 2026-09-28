@@ -5,7 +5,7 @@
 - Product-path digest changes outside approved repository-boundary metadata.
 - Graph or conformance references dangle after deletion.
 - Product verification loses a required check or depends on agent tooling.
-- Optional tooling cannot prove exact source and integrity.
+- External tooling cannot prove exact source, version, and integrity.
 
 ## Application rollback
 

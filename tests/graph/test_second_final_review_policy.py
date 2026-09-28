@@ -615,19 +615,13 @@ def test_repository_inventory_rejects_binding_for_untracked_artifact() -> None:
     }
 
 
-def test_go_reference_cannot_escape_test_only_classification() -> None:
+def test_go_reference_is_replaced_by_historical_source_provenance() -> None:
     graph = load_graph(Path("architecture"))
-    graph = replace(
-        graph,
-        nodes=tuple(
-            replace(node, classifications=()) if node.id == "runtime:go-reference" else node
-            for node in graph.nodes
-        ),
-    )
-
-    assert ("RUNTIME_GO_PROFILE_INVALID", "runtime:go-reference") in {
-        (item.code, item.node_id) for item in check_graph(graph, Phase.PRECOMMIT)
-    }
+    reference = graph.node("source:retired-go-stage-zero-provenance")
+    assert reference.kind.value == "SourceModule"
+    assert reference.lifecycle is Lifecycle.IMPLEMENTED
+    assert reference.active is True
+    assert not any(node.id == "runtime:go-reference" for node in graph.nodes)
 
 
 @pytest.mark.parametrize(

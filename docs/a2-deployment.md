@@ -6,9 +6,9 @@ Stage A images are `deploy/images/Dockerfile.public-capture` and
 They do not install `multi_exchange_engine`, do not run Go, and do not
 authorize trading.
 
-The repository-root `Dockerfile` still packages the Go reference engine as
-`TEST_ONLY_EXECUTABLE_SPEC`. That image is not a Stage A artifact and is
-not part of `make verify`.
+The former repository-root Go `Dockerfile` was retired with the inherited
+Stage-0 source. It remains available in Git history and is not a Stage A
+artifact or part of `make verify`.
 
 The Stage A image uses the digest-pinned base
 `python:3.12.13-alpine3.23@sha256:601d3d3797e90e2534782e69c85fafb7971b43f24c7b1b079b7e48dd435e458d`

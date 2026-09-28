@@ -102,3 +102,11 @@ Scoped review showed that scenario flags and readiness declarations were constra
 ## 2026-09-24 — A complete truth table retained an incomplete expectation
 
 The readiness truth table covered every boolean combination but incorrectly allowed false payment readiness without blockers, preserving the schema omission. The root cause was applying the complete-explanation rule only to capabilities instead of both resource projections. A focused /readyz regression and corrected truth-table expectation now require a blocker whenever payment readiness is false.
+
+## 2026-09-28 — Artifact search stopped before the owner's local repository
+
+The initial analysis concluded that Adaptive Grok had no trustworthy external
+identity because it compared only Liqvera's copied labels and public package
+metadata. The authoritative local repository contains annotated `v2.0.19`;
+future boundary analysis must inspect owner-provided source repositories before
+declaring an artifact unavailable.

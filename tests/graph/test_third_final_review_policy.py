@@ -426,7 +426,7 @@ def test_repository_inventory_covers_all_tracked_paths_exactly_once() -> None:
         item.path for item in graph.inventory_exclusions
     ]
 
-    assert len(graph.repository_artifacts) >= 626
+    assert len(graph.repository_artifacts) >= 600
     assert len(declarations) == len(graph.repository_artifacts)
     assert len(set(declarations)) == len(graph.repository_artifacts)
     assert {item.path for item in graph.repository_artifacts} == set(declarations)
@@ -707,7 +707,7 @@ def test_story_1_2_four_phase_readiness_contract_is_graph_bound() -> None:
     assert graph.has_edge(binding.node_id, "validated_by", "test:graph-repository-manifests")
 
 
-def test_vendored_tooling_exclusions_are_exact_and_inactively_authorized() -> None:
+def test_no_vendored_tooling_implementation_is_excluded_from_inventory() -> None:
     graph = load_graph(Path("architecture"))
     vendored = [
         item
@@ -715,12 +715,9 @@ def test_vendored_tooling_exclusions_are_exact_and_inactively_authorized() -> No
         if item.path_class.value == "VENDORED_TOOLING"
     ]
 
-    assert len(vendored) == 403
-    assert all(item.reason_code.value == "VENDORED_TOOLING" for item in vendored)
-    assert {item.authority_node_id for item in vendored} == {
-        "artifact:vendored-agent-tooling"
-    }
+    assert vendored == []
     authority = graph.node("artifact:vendored-agent-tooling")
+    assert authority.lifecycle is Lifecycle.RETIRED
     assert not authority.active
 
 

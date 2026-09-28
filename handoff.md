@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-28 (repository boundary verification and reviews passed; report-only fingerprint pending receipts). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-28 (repository boundary change package advanced to ready; final fingerprint refresh pending). Repository: `Dimkox/liqvera`.
 Branch: `chore/repository-cleanup` (based on merged main and the F3–F7 integration).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -17,10 +17,15 @@ Six parallel read-only analyses and the route-selected implementation are
 complete. Full route verification passed at clean fingerprint
 `aa5925f320da68843a52362e1654549d3a658899`. Independent code, test, security,
 and data re-reviews all passed that same fingerprint with no findings; their
-reviewer-provided summaries are stored under the active change package. This
-report-only commit changes the fingerprint, so receipt recording awaits final
-verification of the report-only HEAD. No product runtime, payment, deployment,
-release, or acceptance status has changed.
+reviewer-provided summaries are stored under the active change package. The
+v2.0.19 change CLI advanced the durable package through `approved`,
+`implementing`, `verifying`, and `reviewing` to `ready`; no human gates are
+declared. It generated and mirrored a clean implementation checkpoint at
+`f7401a903d53c8ecb34415ce474a63f110a4ccdb`. These transition-only repository
+changes make the five pre-transition receipts stale, so final verifier and
+independent-review refresh remains pending for the state-close fingerprint.
+No product runtime, payment, deployment, release, or acceptance status has
+changed.
 
 The retired Go unit is `go.mod`, `cmd/`, `internal/`, the root Go
 `Dockerfile`, and the historical Stage-0-only `migrations/000001_init.*`.
@@ -86,9 +91,9 @@ gate dynamically found nine tracked container inputs (seven Dockerfiles and
 two Compose files) and passed all at the explicit
 `MEDIUM,HIGH,CRITICAL` threshold. A separate LOW audit retains the inherited
 `DS-0026` missing-`HEALTHCHECK` finding on each Dockerfile. Four route-selected
-independent re-reviews passed with no findings. Their reports are stored, while
-the five machine receipts await final verification of this report-only
-fingerprint.
+independent re-reviews passed with no findings. Their reports are stored. The
+durable change package is now `ready`; its transition-only fingerprint still
+requires a final verifier and review-receipt refresh before closure.
 
 F3–F7 remain `IMPLEMENTED_UNVERIFIED`; all 156 vectors remain `NOT_RUN`,
 A13–A14 remain `BLOCKED_EXTERNAL`, payment readiness remains false, and no

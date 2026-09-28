@@ -82,3 +82,39 @@ no findings, and preserves the reviewer's receipt-ready evidence summary. This
 report-only commit changes the repository fingerprint, so all five typed
 evidence obligations remain `not_run` until final verification and
 fingerprint-bound receipt recording. No approval or receipt was fabricated.
+
+## State closure
+
+The pinned v2.0.19 change CLI advanced the durable package through
+`scoped -> approved -> implementing -> verifying -> reviewing -> ready`. No
+human gates are declared. The CLI generated and mirrored the clean
+implementation checkpoint below at
+`f7401a903d53c8ecb34415ce474a63f110a4ccdb`.
+
+The transition history and checkpoint are repository changes, so runtime
+diagnostics now correctly report all five pre-transition receipts as stale.
+The typed durable obligations remain `not_run` pending a final verifier and
+independent-review refresh bound to the state-close fingerprint; no receipt or
+human approval was invented.
+
+<!-- checkpoint:implementation -->
+## Implementation checkpoint
+
+Local observation only; not verification or publication evidence.
+
+```json
+{
+  "kind": "implementation",
+  "change_id": "20260928-repository-boundary-cleanup-7f0f98",
+  "route_id": "7f0f98e3cdda",
+  "observed_at": "2026-09-28T22:21:06+00:00",
+  "branch": "chore/repository-cleanup",
+  "head": "f7401a903d53c8ecb34415ce474a63f110a4ccdb",
+  "detached": false,
+  "git_available": true,
+  "git_findings": [],
+  "dirty_product_state": "clean",
+  "dirty_product_paths": [],
+  "note": "implementation started; preserve work before handoff"
+}
+```

@@ -1,6 +1,63 @@
 {
   "change_id": "20260928-repository-boundary-cleanup-7f0f98",
+  "checkpoint_mirror_pending": false,
+  "checkpoints": [
+    {
+      "branch": "chore/repository-cleanup",
+      "change_id": "20260928-repository-boundary-cleanup-7f0f98",
+      "detached": false,
+      "dirty_product_paths": [],
+      "dirty_product_state": "clean",
+      "git_available": true,
+      "git_findings": [],
+      "head": "f7401a903d53c8ecb34415ce474a63f110a4ccdb",
+      "kind": "implementation",
+      "note": "implementation started; preserve work before handoff",
+      "observed_at": "2026-09-28T22:21:06+00:00",
+      "route_id": "7f0f98e3cdda"
+    }
+  ],
   "created_at": "2026-09-28T19:57:52+00:00",
+  "evidence_accounting": {
+    "obligations": [
+      {
+        "id": "verification",
+        "kind": "receipt",
+        "reason": "reports persisted; fingerprint-bound receipt pending final verification",
+        "receipt_kind": "verification",
+        "status": "not_run"
+      },
+      {
+        "id": "code_review",
+        "kind": "receipt",
+        "reason": "reports persisted; fingerprint-bound receipt pending final verification",
+        "receipt_kind": "code_review",
+        "status": "not_run"
+      },
+      {
+        "id": "test_review",
+        "kind": "receipt",
+        "reason": "reports persisted; fingerprint-bound receipt pending final verification",
+        "receipt_kind": "test_review",
+        "status": "not_run"
+      },
+      {
+        "id": "security_review",
+        "kind": "receipt",
+        "reason": "reports persisted; fingerprint-bound receipt pending final verification",
+        "receipt_kind": "security_review",
+        "status": "not_run"
+      },
+      {
+        "id": "data_review",
+        "kind": "receipt",
+        "reason": "reports persisted; fingerprint-bound receipt pending final verification",
+        "receipt_kind": "data_review",
+        "status": "not_run"
+      }
+    ],
+    "schema_version": 1
+  },
   "history": [
     {
       "at": "2026-09-28T19:57:52+00:00",
@@ -13,53 +70,43 @@
       "from": "draft",
       "reason": "Analysis completed and scope frozen.",
       "to": "scoped"
+    },
+    {
+      "at": "2026-09-28T22:21:05+00:00",
+      "from": "scoped",
+      "reason": "Scope and design are frozen; no human gates are declared.",
+      "to": "approved"
+    },
+    {
+      "at": "2026-09-28T22:21:06+00:00",
+      "from": "approved",
+      "reason": "Implementation and review repairs are complete.",
+      "to": "implementing"
+    },
+    {
+      "at": "2026-09-28T22:21:06+00:00",
+      "from": "implementing",
+      "reason": "Implementation checkpoint recorded; verification passed the pre-transition fingerprint.",
+      "to": "verifying"
+    },
+    {
+      "at": "2026-09-28T22:21:06+00:00",
+      "from": "verifying",
+      "reason": "Independent code, test, security, and data reviews passed the pre-transition fingerprint.",
+      "to": "reviewing"
+    },
+    {
+      "at": "2026-09-28T22:21:07+00:00",
+      "from": "reviewing",
+      "reason": "Required checks and reviews passed; transition-only changes await final fingerprint refresh.",
+      "to": "ready"
     }
   ],
   "human_gates": [],
   "human_gates_digest": "a252652ad2c747acb1c679b13aa9ee18b98b8c40e4be0583949c305b85d983e2",
-  "evidence_accounting": {
-    "schema_version": 1,
-    "obligations": [
-      {
-        "id": "verification",
-        "kind": "receipt",
-        "receipt_kind": "verification",
-        "status": "not_run",
-        "reason": "reports persisted; fingerprint-bound receipt pending final verification"
-      },
-      {
-        "id": "code_review",
-        "kind": "receipt",
-        "receipt_kind": "code_review",
-        "status": "not_run",
-        "reason": "reports persisted; fingerprint-bound receipt pending final verification"
-      },
-      {
-        "id": "test_review",
-        "kind": "receipt",
-        "receipt_kind": "test_review",
-        "status": "not_run",
-        "reason": "reports persisted; fingerprint-bound receipt pending final verification"
-      },
-      {
-        "id": "security_review",
-        "kind": "receipt",
-        "receipt_kind": "security_review",
-        "status": "not_run",
-        "reason": "reports persisted; fingerprint-bound receipt pending final verification"
-      },
-      {
-        "id": "data_review",
-        "kind": "receipt",
-        "receipt_kind": "data_review",
-        "status": "not_run",
-        "reason": "reports persisted; fingerprint-bound receipt pending final verification"
-      }
-    ]
-  },
   "route_id": "7f0f98e3cdda",
   "schema_version": 1,
-  "status": "scoped",
+  "status": "ready",
   "title": "Repository boundary cleanup",
-  "updated_at": "2026-09-28T20:36:53+00:00"
+  "updated_at": "2026-09-28T22:21:07+00:00"
 }

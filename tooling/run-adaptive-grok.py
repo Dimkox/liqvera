@@ -7,6 +7,8 @@ import os
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True
+
 TOOLING = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLING))
 
@@ -71,6 +73,7 @@ def main() -> int:
     if not target.is_file() or target.is_symlink():
         print(f"Adaptive Grok entrypoint is unavailable: {target}", file=sys.stderr)
         return 2
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
     os.execv(sys.executable, [sys.executable, str(target), *arguments])
     return 2
 

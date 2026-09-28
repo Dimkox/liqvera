@@ -21,6 +21,7 @@
 
 - Missing/offline/corrupt optional tool artifact.
 - Dirty or wrong-version local tool cache.
+- Index flags or ignored importable files hiding byte/mode drift from status.
 - Dangling Go path or obsolete vendor-count assertion.
 - Product checks silently losing Trivy coverage.
 - Cleanup diff touching a protected schema, migration, vector, or fixture.

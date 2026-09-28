@@ -172,3 +172,9 @@ recursive clone; `make verify-tooling` owns runtime tag, VERSION, HEAD,
 clean-tree, hook, and direct-entrypoint checks. Both execution entrypoints use
 one fail-closed validator so an absent or untrusted checkout cannot become an
 allow response.
+
+## 2026-09-28 — Verify external-tool bytes independently of Git status
+
+Treat status as diagnostics because index hints can suppress worktree changes.
+Reject optimization flags, compare every tracked blob and executable mode with
+HEAD, and exclude ignored importable files from all Python execution roots.

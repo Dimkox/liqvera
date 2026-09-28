@@ -12,9 +12,13 @@ make verify-tooling
 ```
 
 The entrypoint validates the gitlink, checkout commit, tag, version, and clean
-worktree before executing a hook or `scripts/grok_*.py` command. It never
-fetches tooling implicitly. Version 2.0.19 is intentional: Liqvera opts into
-its bounded `pytest-xdist` runner with `.grok-test-runner.json`; earlier local
+worktree before executing a hook or `scripts/grok_*.py` command. Validation
+rejects `assume-unchanged`/`skip-worktree` index flags, verifies every tracked
+blob and executable mode directly against HEAD, and rejects ignored importable
+code in Python execution roots. It never fetches tooling implicitly. Python
+bytecode generation is disabled at the boundary so validation cannot create an
+ignored import path. Version 2.0.19 is intentional: Liqvera opts into its
+bounded `pytest-xdist` runner with `.grok-test-runner.json`; earlier local
 versions executed the Python suite sequentially.
 
 The thin Liqvera override in `grok-verify.py` supplies the four package source
@@ -27,9 +31,10 @@ submodule.
 Ordinary product tests and `make verify-packages` validate the static gitlink
 and lock without requiring a recursive clone. `make verify-tooling` is the
 strict initialized-submodule suite: it exercises commit/tag/VERSION/clean-tree
-validation, direct-entrypoint rejection, fail-closed hooks, and recurring
-container scanning. Hooks never synthesize an allow/empty response when the
-pin is unavailable or invalid.
+and HEAD byte/mode validation, index-flag and import-hijack rejection,
+direct-entrypoint rejection, fail-closed hooks, and recurring container
+scanning. Hooks never synthesize an allow/empty response when the pin is
+unavailable or invalid.
 
 Every PR verification discovers all tracked Dockerfiles and Compose files and
 passes each to Trivy. The recurring blocking threshold is

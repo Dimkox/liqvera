@@ -30,6 +30,12 @@ executes only an allowlisted Grok command or hook. Thin symlinks retain script,
 hook, agent, and skill discovery without retaining copied framework
 implementation.
 
+Clean status is diagnostic, not the integrity root: Git index optimization
+flags are forbidden, and the validator independently compares every tracked
+blob hash and executable mode with HEAD. Ignored Python/importable files are
+forbidden under `.grok-stack`, `scripts`, and `.grok/hooks`; both entrypoints
+disable bytecode generation before framework import or execution.
+
 ## Components and boundaries
 
 - Product: unchanged Python/TypeScript packages, services, applications,

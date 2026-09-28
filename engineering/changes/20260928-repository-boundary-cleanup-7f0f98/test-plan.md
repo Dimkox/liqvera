@@ -8,7 +8,7 @@
 | P0 | Product contracts/data remain byte-identical | base/final digest comparison |
 | P0 | Python safety invariants still pass | focused conformance suite |
 | P0 | Product container scan still covers every Dockerfile/Compose input | explicit-input regression plus Trivy output |
-| P0 | Hooks and both entrypoints reject missing, dirty/untracked, wrong-HEAD, or wrong-version gitlink state without allow output | strict tooling integration tests |
+| P0 | Hooks and both entrypoints reject missing, dirty/untracked, wrong-HEAD, wrong-version, index-hidden byte/mode drift, or ignored importable code without allow output | strict tooling integration tests |
 | P1 | BMad has an exact external package identity without copied source | lock/inventory test |
 | P1 | Product verification is independent of agent tooling | boundary test and product suite |
 

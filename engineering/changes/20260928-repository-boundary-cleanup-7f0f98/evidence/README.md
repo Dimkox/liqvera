@@ -31,10 +31,19 @@ now fail before hook or verifier execution and cannot emit an allow result.
 
 An isolated local `.venv` supplies the exact v2.0.19 runner versions plus the
 declared Hatchling backend without changing the global interpreter. The stale
-README and public-capture metadata assertions were corrected. The final focused
-aggregate reported `272 passed`; the strict tooling slice reported `11 passed`.
-A direct 22-worker diagnostic reported `1122 passed, 85 subtests passed in
-53.38s`.
+README and public-capture metadata assertions were corrected. The focused
+aggregate before final security repair reported `272 passed`. A direct
+22-worker diagnostic reported `1122 passed, 85 subtests passed in 53.38s`.
+
+Final security re-review demonstrated a status bypass: marking
+`scripts/grok_verify.py` `assume-unchanged` and modifying its bytes left status
+clean and validation successful. RED also reproduced `skip-worktree`, a hidden
+executable-mode change, and ignored bytecode in an import root. The validator
+now rejects index flags, independently hashes all tracked blobs and compares
+their executable modes to HEAD, and rejects ignored importable files in the
+three executable roots. The repaired strict suite reports `17 passed`,
+including direct byte and mode comparisons. The focused aggregate before those
+last two assertions reported `276 passed`.
 
 A local fresh clone of implementation commit
 `058092d2c243d732eb4a44d876a46ae98b64c102`, created with

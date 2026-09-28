@@ -45,9 +45,15 @@ Ordinary product/conformance tests validate the static lock and gitlink and do
 not require an initialized submodule. The separately invoked
 `make verify-tooling` suite exercises the initialized runtime, missing,
 wrong-lock, wrong-HEAD, and dirty/untracked states, direct execution, hooks,
-and dynamic Trivy discovery. The final focused aggregate reports `272 passed`;
-the strict tooling slice reports `11 passed`. The graph CLI still reports only
-the inherited 26
+and dynamic Trivy discovery. A final security re-review then demonstrated that
+Git's `assume-unchanged` flag could hide modified verifier bytes from status.
+The shared validator now rejects all index optimization/state flags, hashes
+every tracked worktree blob and verifies its executable mode against HEAD, and
+rejects ignored importable code in the framework's Python execution roots.
+Entry points disable bytecode generation so validation does not create its own
+ignored code. The strict tooling slice now reports `17 passed`; the focused
+aggregate before the two direct HEAD-comparison assertions reported
+`276 passed`. The graph CLI still reports only the inherited 26
 `IMPLEMENTATION_ORPHAN` findings plus six active declared conflicts; it has no
 cleanup-specific inventory, dangling-reference, or retired-Go error.
 

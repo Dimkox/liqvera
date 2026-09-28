@@ -118,3 +118,10 @@ validation failures into successful empty or allow hook responses, while
 ordinary tests also imported the optional checkout. Safety hooks must propagate
 validation failure; static clone tests and initialized-tooling integration
 tests are separate contracts.
+
+## 2026-09-28 — Treated clean Git status as content integrity
+
+The first validator trusted `git status`, which honors `assume-unchanged` and
+`skip-worktree` hints and therefore accepted hidden verifier byte/mode changes.
+External executable tooling requires direct HEAD blob/mode comparison plus
+rejection of index hints and ignored importable files.

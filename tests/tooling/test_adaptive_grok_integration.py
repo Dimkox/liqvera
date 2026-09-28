@@ -197,6 +197,84 @@ def test_direct_verifier_rejects_untrusted_tooling_before_import(
     assert "Traceback" not in completed.stderr
 
 
+@pytest.mark.parametrize(
+    ("state", "target"),
+    [
+        ("assume-bytes", "scripts/grok_verify.py"),
+        ("skip-bytes", "scripts/grok_verify.py"),
+        ("assume-mode", "VERSION"),
+    ],
+)
+def test_direct_verifier_rejects_index_hidden_byte_and_mode_changes(
+    tmp_path: Path, state: str, target: str
+) -> None:
+    root = _pinned_fixture(tmp_path)
+    source = root / "tooling/adaptive-grok-build-pro"
+    flag = "--skip-worktree" if state == "skip-bytes" else "--assume-unchanged"
+    subprocess.run(["git", "update-index", flag, target], cwd=source, check=True)
+    if state.endswith("bytes"):
+        with (source / target).open("a", encoding="utf-8") as stream:
+            stream.write("\n# hidden tamper\n")
+    else:
+        (source / target).chmod(0o755)
+    assert (
+        subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=all"],
+            cwd=source,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+        == ""
+    )
+
+    completed = _run_direct_verify(root)
+
+    assert completed.returncode == 2
+    assert "Adaptive Grok pin validation failed" in completed.stderr
+
+
+@pytest.mark.parametrize("state", ["bytes", "mode"])
+def test_direct_verifier_compares_worktree_bytes_and_mode_to_head(
+    tmp_path: Path, state: str
+) -> None:
+    root = _pinned_fixture(tmp_path)
+    source = root / "tooling/adaptive-grok-build-pro"
+    target = source / ("scripts/grok_verify.py" if state == "bytes" else "VERSION")
+    if state == "bytes":
+        with target.open("a", encoding="utf-8") as stream:
+            stream.write("\n# visible tamper\n")
+    else:
+        subprocess.run(
+            ["git", "config", "core.filemode", "false"], cwd=source, check=True
+        )
+        target.chmod(0o755)
+
+    completed = _run_direct_verify(root)
+
+    assert completed.returncode == 2
+    expected = "tracked bytes differ" if state == "bytes" else "tracked mode differs"
+    assert f"{expected} from HEAD" in completed.stderr
+
+
+def test_direct_verifier_rejects_ignored_importable_files(tmp_path: Path) -> None:
+    root = _pinned_fixture(tmp_path)
+    source = root / "tooling/adaptive-grok-build-pro"
+    ignored = source / ".grok-stack/adaptive_grok/__pycache__/hijack.pyc"
+    ignored.parent.mkdir()
+    ignored.write_bytes(b"not trusted bytecode")
+    assert subprocess.run(
+        ["git", "check-ignore", "--quiet", str(ignored.relative_to(source))],
+        cwd=source,
+        check=False,
+    ).returncode == 0
+
+    completed = _run_direct_verify(root)
+
+    assert completed.returncode == 2
+    assert "Adaptive Grok pin validation failed" in completed.stderr
+
+
 def test_recurring_trivy_gate_discovers_container_configs_and_threshold(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

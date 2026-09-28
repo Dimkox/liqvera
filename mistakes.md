@@ -127,3 +127,10 @@ External executable/instruction inputs require direct HEAD blob/mode comparison
 plus rejection of index hints and ignored importable files. That comparison
 must follow an explicit bounded trust closure rather than rereading historical
 packages and release evidence on every hook.
+
+## 2026-09-28 — Retained a coverage floor after changing its ownership set
+
+The cleanup replaced vendored Grok/scripts coverage with Liqvera-owned sources
+but initially kept the old 74% floor without measuring the new denominator. A
+clean exact run measured 59.18%; coverage ownership and its initial blocking
+floor must be rebaselined together, then raised without excluding product code.

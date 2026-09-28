@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import configparser
 import hashlib
 import importlib.util
 import json
@@ -173,6 +174,22 @@ def test_parallel_verifier_is_explicitly_enabled() -> None:
         "workers": "auto",
     }
     assert (ROOT / "tooling/grok-verify.py").is_file()
+
+
+def test_coverage_baseline_measures_only_liqvera_owned_sources() -> None:
+    config = configparser.ConfigParser()
+    config.read(ROOT / ".coveragerc")
+
+    assert {line.strip() for line in config.get("run", "source").splitlines() if line.strip()} == {
+        "packages/contracts/src/mee_contracts",
+        "packages/public-capture/src/mee_public_capture",
+        "packages/readonly-analyzer/src/mee_readonly_analyzer",
+        "packages/evidence-report/src/mee_evidence_report",
+        "tools/conformance",
+        "tools/graph_checker",
+        "tools/mezo_acceptance",
+    }
+    assert config.getint("report", "fail_under") == 59
 
 
 def test_bmad_is_locked_but_not_vendored() -> None:

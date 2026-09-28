@@ -179,3 +179,10 @@ Treat status as diagnostics because index hints can suppress worktree changes.
 Reject optimization flags globally and compare the explicit, size-bounded
 runtime/instruction trust closure with HEAD; global dirty/untracked checks cover
 non-runtime archives without hashing 120 MB per hook.
+
+## 2026-09-28 — Baseline coverage follows Liqvera source ownership
+
+The clean 22-worker measured suite covers all declared Liqvera-owned product
+and tool paths at 59.18%, so the initial non-regression floor is 59 rather than
+the inherited vendored-tooling floor of 74. Do not exclude product paths or
+lower this floor; raise it through the P0 targeted-test debt.

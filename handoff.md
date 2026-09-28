@@ -70,18 +70,20 @@ initialized Adaptive Grok checkout; strict runtime checks remain explicit.
 An isolated repository-local `.venv` supplies the exact v2.0.19 runner
 versions and declared build backend without changing the global interpreter.
 The stale README heading and public-capture metadata expectations are repaired.
-A direct 22-worker diagnostic then reported `1122 passed, 85 subtests passed`.
-The final bounded PR-verifier run passed diff, change-spec, secret, contract,
-SQL, Ruff, Bandit, source-stability, and the recurring Trivy gate, but its
-measured pytest and coverage processes still exited 1. The upstream runner
-removed its temporary current-run artifact before return, so that remaining
-failure is neither waived nor assigned an unsupported cause. The recurring
+A clean exact 22-worker measured diagnostic at commit `2a8144a` reported
+`1133 passed, 85 subtests passed` and 59.18% branch-aware coverage over every
+Liqvera-owned package/tool path declared in `.coveragerc`. Its sole exit-1 cause
+was the inherited 74% floor, which had measured the removed vendored
+Grok/scripts surface rather than this ownership set. The truthful initial
+blocking floor is now 59%: it neither excludes product source nor rounds above
+the observed baseline, must not regress, and is roadmap debt to raise with
+targeted tests. The next action is one clean full PR-verifier run on the
+committed baseline. The recurring
 gate dynamically found nine tracked container inputs (seven Dockerfiles and
 two Compose files) and passed all at the explicit
 `MEDIUM,HIGH,CRITICAL` threshold. A separate LOW audit retains the inherited
-`DS-0026` missing-`HEALTHCHECK` finding on each Dockerfile. The next actions are
-a single measured-run diagnosis, fresh non-recursive-clone proof, and
-route-selected independent re-review.
+`DS-0026` missing-`HEALTHCHECK` finding on each Dockerfile. Route-selected
+independent re-review remains pending.
 
 F3–F7 remain `IMPLEMENTED_UNVERIFIED`; all 156 vectors remain `NOT_RUN`,
 A13–A14 remain `BLOCKED_EXTERNAL`, payment readiness remains false, and no

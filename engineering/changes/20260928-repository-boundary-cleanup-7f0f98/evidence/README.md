@@ -59,15 +59,19 @@ A local fresh clone of implementation commit
 warnings were host pytest configuration warnings for an absent optional asyncio
 plugin, not test failures.
 
-The final bounded PR-verifier run recorded `pytest-xdist workers=22` and passed
-diff, change-spec, secret, contract, SQL, Ruff, Bandit, source-stability, and
-the recurring Trivy gate. Trivy dynamically discovered nine tracked inputs:
-seven Dockerfiles and two Compose files; all passed the blocking
-`MEDIUM,HIGH,CRITICAL` threshold. The measured pytest process nevertheless
-exited 1 after 67.786 seconds and its coverage report exited 1. The upstream
-runner removed its temporary current-run artifacts, so no unsupported failure
-cause or green receipt is claimed. A separate LOW audit found only the
-inherited `DS-0026` missing-`HEALTHCHECK` Dockerfile finding.
+The exact measured command at clean commit `2a8144a` used 22 xdist workers and
+reported `1133 passed, 85 subtests passed`, with branch-aware coverage of
+59.18% across every Liqvera-owned source path declared in `.coveragerc`. Its
+only exit-1 cause was the inherited `fail_under=74`, which had belonged to the
+removed vendored Grok/scripts measurement surface. The corrected initial gate
+is `fail_under=59`: it neither excludes product code nor rounds above observed
+coverage, must not regress, and is explicit roadmap debt to raise. A green
+receipt remains pending the post-commit full verifier.
+
+Trivy dynamically discovered nine tracked inputs: seven Dockerfiles and two
+Compose files; all passed the blocking `MEDIUM,HIGH,CRITICAL` threshold. A
+separate LOW audit found only the inherited `DS-0026` missing-`HEALTHCHECK`
+Dockerfile finding.
 
 Route receipts and independent reviews are still pending. A v2.0.19 state
 transition reached `scoped` and then failed closed because the pre-existing

@@ -123,5 +123,7 @@ tests are separate contracts.
 
 The first validator trusted `git status`, which honors `assume-unchanged` and
 `skip-worktree` hints and therefore accepted hidden verifier byte/mode changes.
-External executable tooling requires direct HEAD blob/mode comparison plus
-rejection of index hints and ignored importable files.
+External executable/instruction inputs require direct HEAD blob/mode comparison
+plus rejection of index hints and ignored importable files. That comparison
+must follow an explicit bounded trust closure rather than rereading historical
+packages and release evidence on every hook.

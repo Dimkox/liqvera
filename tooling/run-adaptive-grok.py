@@ -15,21 +15,13 @@ sys.path.insert(0, str(TOOLING))
 from adaptive_grok_pin import (  # noqa: E402
     COMMIT,
     TAG,
+    TRUSTED_SCRIPT_NAMES,
     VERSION,
     ToolingPinError,
     validate,
 )
 
-SCRIPTS = {
-    "grok_approve.py",
-    "grok_change.py",
-    "grok_deploy.py",
-    "grok_doctor.py",
-    "grok_review.py",
-    "grok_route.py",
-    "grok_status.py",
-    "grok_verify.py",
-}
+SCRIPTS = TRUSTED_SCRIPT_NAMES
 HOOKS = {
     "post_tool_use.py",
     "pre_compact.py",

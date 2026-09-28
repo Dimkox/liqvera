@@ -176,5 +176,6 @@ allow response.
 ## 2026-09-28 — Verify external-tool bytes independently of Git status
 
 Treat status as diagnostics because index hints can suppress worktree changes.
-Reject optimization flags, compare every tracked blob and executable mode with
-HEAD, and exclude ignored importable files from all Python execution roots.
+Reject optimization flags globally and compare the explicit, size-bounded
+runtime/instruction trust closure with HEAD; global dirty/untracked checks cover
+non-runtime archives without hashing 120 MB per hook.

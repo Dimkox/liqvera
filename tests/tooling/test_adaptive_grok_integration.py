@@ -257,6 +257,65 @@ def test_direct_verifier_compares_worktree_bytes_and_mode_to_head(
     assert f"{expected} from HEAD" in completed.stderr
 
 
+def test_trust_closure_is_explicit_and_bounded() -> None:
+    pin = _load(ROOT / "tooling/adaptive_grok_pin.py", "bounded_pin")
+    manifest = pin._trust_closure_manifest(SOURCE)
+    paths = {entry.relative.as_posix() for entry in manifest}
+
+    assert {
+        ".grok-stack/adaptive_grok/verification.py",
+        ".grok-stack/config/policy.json",
+        ".grok-stack/templates/change/change-spec.yaml",
+        ".grok/hooks/pre_tool_use.py",
+        ".grok/agents/security_reviewer.md",
+        ".grok/skills/adaptive-delivery/SKILL.md",
+        ".agents/skills/adaptive-delivery/SKILL.md",
+        "scripts/grok_verify.py",
+        "AGENTS.md",
+        "VERSION",
+    } <= paths
+    assert "packages/adaptive-grok-build-pro-v2.0.19.zip" not in paths
+    assert len(manifest) <= pin.MAX_TRUSTED_FILES
+    assert sum(entry.size for entry in manifest) <= pin.MAX_TRUSTED_BYTES
+    assert pin._is_trusted_path(Path("scripts/grok_verify.py"))
+    assert not pin._is_trusted_path(Path("scripts/bootstrap.sh"))
+    assert not pin._is_trusted_path(Path("scripts/grok_landing_publish.py"))
+    assert not pin._is_trusted_path(Path("packages/archive.zip"))
+
+
+def test_validation_does_not_read_large_release_archives(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    pin = _load(ROOT / "tooling/adaptive_grok_pin.py", "read_bounded_pin")
+    read_paths: list[str] = []
+    original = pin._read_tracked_bytes
+
+    def recording_read(source: Path, entry):
+        read_paths.append(entry.relative.as_posix())
+        return original(source, entry)
+
+    monkeypatch.setattr(pin, "_read_tracked_bytes", recording_read)
+
+    assert pin.validate(ROOT) == SOURCE
+    assert ".grok-stack/adaptive_grok/verification.py" in read_paths
+    assert "packages/adaptive-grok-build-pro-v2.0.19.zip" not in read_paths
+
+
+def test_instruction_tamper_inside_trust_closure_is_rejected(tmp_path: Path) -> None:
+    root = _pinned_fixture(tmp_path)
+    instruction = (
+        root
+        / "tooling/adaptive-grok-build-pro/.agents/skills/adaptive-delivery/SKILL.md"
+    )
+    with instruction.open("a", encoding="utf-8") as stream:
+        stream.write("\nUntrusted instruction.\n")
+
+    completed = _run_direct_verify(root)
+
+    assert completed.returncode == 2
+    assert "tracked bytes differ from HEAD" in completed.stderr
+
+
 def test_direct_verifier_rejects_ignored_importable_files(tmp_path: Path) -> None:
     root = _pinned_fixture(tmp_path)
     source = root / "tooling/adaptive-grok-build-pro"

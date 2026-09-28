@@ -13,9 +13,13 @@ make verify-tooling
 
 The entrypoint validates the gitlink, checkout commit, tag, version, and clean
 worktree before executing a hook or `scripts/grok_*.py` command. Validation
-rejects `assume-unchanged`/`skip-worktree` index flags, verifies every tracked
-blob and executable mode directly against HEAD, and rejects ignored importable
-code in Python execution roots. It never fetches tooling implicitly. Python
+rejects `assume-unchanged`/`skip-worktree` index flags globally, then verifies
+the explicit runtime/instruction trust closure directly against HEAD: engine,
+Grok scripts/hooks/config/templates/agents/skills, plus root policy and VERSION.
+The closure is capped at 256 files / 2 MB; v2.0.19 uses 177 files / 1,232,921
+bytes, so historical packages and release evidence are never hashed per hook.
+Ordinary dirty/untracked detection still covers the entire checkout. Ignored
+importable code is forbidden in Python execution roots. Python
 bytecode generation is disabled at the boundary so validation cannot create an
 ignored import path. Version 2.0.19 is intentional: Liqvera opts into its
 bounded `pytest-xdist` runner with `.grok-test-runner.json`; earlier local

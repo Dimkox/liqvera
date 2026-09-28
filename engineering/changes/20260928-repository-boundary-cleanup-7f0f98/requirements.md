@@ -31,6 +31,8 @@
 - Security: no silent download/execute path; integrity mismatch fails closed;
   no secret or production access.
 - Reliability: ordinary product checks work without agent tooling or network.
-- Performance: the selected v2.0.19 verifier uses bounded pytest-xdist workers.
+- Performance: the selected v2.0.19 verifier uses bounded pytest-xdist workers;
+  per-hook integrity hashing has explicit file and byte ceilings and excludes
+  historical packages/release evidence.
 - Observability: verification and independent review evidence names the exact
   final commit and reports inherited failures without waiver.

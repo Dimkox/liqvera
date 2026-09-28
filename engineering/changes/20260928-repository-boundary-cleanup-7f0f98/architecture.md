@@ -31,10 +31,15 @@ hook, agent, and skill discovery without retaining copied framework
 implementation.
 
 Clean status is diagnostic, not the integrity root: Git index optimization
-flags are forbidden, and the validator independently compares every tracked
-blob hash and executable mode with HEAD. Ignored Python/importable files are
-forbidden under `.grok-stack`, `scripts`, and `.grok/hooks`; both entrypoints
-disable bytecode generation before framework import or execution.
+flags are forbidden globally. The validator independently compares the bounded
+runtime/instruction trust closure's blob hashes and executable modes with HEAD:
+the engine, Grok scripts/hooks/config/templates/agents/skills, root policy, and
+VERSION. Historical packages/distributions/release evidence stay outside the
+per-hook hash set while global dirty/untracked checks still cover them. Closure
+file and byte ceilings fail closed on unexpected growth. Ignored
+Python/importable files are forbidden under `.grok-stack`, `scripts`, and
+`.grok/hooks`; both entrypoints disable bytecode generation before framework
+import or execution.
 
 ## Components and boundaries
 

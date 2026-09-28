@@ -39,11 +39,17 @@ Final security re-review demonstrated a status bypass: marking
 `scripts/grok_verify.py` `assume-unchanged` and modifying its bytes left status
 clean and validation successful. RED also reproduced `skip-worktree`, a hidden
 executable-mode change, and ignored bytecode in an import root. The validator
-now rejects index flags, independently hashes all tracked blobs and compares
-their executable modes to HEAD, and rejects ignored importable files in the
-three executable roots. The repaired strict suite reports `17 passed`,
-including direct byte and mode comparisons. The focused aggregate before those
-last two assertions reported `276 passed`.
+rejects index flags globally, independently hashes the explicit executable and
+instruction trust closure, compares executable modes to HEAD, and rejects
+ignored importable files in the three executable roots.
+
+Performance review measured the all-tree validator reading 3,937 blobs / about
+120.4 MB per hook, with a 0.67-second launcher baseline. The bounded closure is
+177 files / 1,232,921 bytes, capped structurally at 256 files / 2,000,000 bytes;
+three warm launcher measurements were 0.16 seconds each. Regression
+tests prove engine/instruction tamper rejection, explicit fail-closed closure
+membership, and that the 14.3 MB v2.0.19 release archive is never read. The
+final focused aggregate reports `281 passed`, including 20 tooling cases.
 
 A local fresh clone of implementation commit
 `058092d2c243d732eb4a44d876a46ae98b64c102`, created with

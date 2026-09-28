@@ -14136,6 +14136,54 @@ repository_inventory:
   - path: engineering/changes/2026-09-24-mezo-evidence/test-plan.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-data_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-docs_researcher.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-integration_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-repo_explorer.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-task_analyst.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/route.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/test-plan.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: experiments/lighter/README.md
     node: artifact:stage-a-execution
     path_class: EXECUTION_SOURCE

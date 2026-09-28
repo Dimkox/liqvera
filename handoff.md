@@ -6,6 +6,37 @@ Branch: `feat/mezo-evidence-f3-report` (stacked on verified F2 and the local MVP
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
 [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
 
+## Repository boundary cleanup analysis — 2026-09-28
+
+Branch `chore/repository-cleanup` is an isolated worktree based on merged main
+commit `0c2cb97f8048f7da8bd193634f4502f24b0e541e`. Route
+`7f0f98e3cdda` and change package
+`engineering/changes/20260928-repository-boundary-cleanup-7f0f98/` cover a
+repository-only retirement of inherited Go Stage-0 and vendored agent tooling.
+Six parallel read-only analyses are complete; no product runtime, schema,
+migration, payment, deployment, or acceptance behavior has changed.
+
+The Go removal unit is `go.mod`, `cmd/`, `internal/`, the root Go `Dockerfile`,
+and the historical Stage-0-only `migrations/000001_init.*`. Its five useful
+safety invariants already have Python characterization tests and can point to
+the immutable public import commit
+`8734907d489168a8a6567b93bc85920001fefd85` after active source retirement.
+The A2 `migrations/000002_a2_raw_capture.*`, gateway ledger, SQLite demo,
+schemas, vectors, fixtures, and `provenance/import-manifest.json` must remain
+unchanged.
+
+BMad has a reproducible external identity at `bmad-method@6.10.0`. The custom
+Adaptive Grok implementation has no trustworthy public artifact coordinate or
+digest: Grok CLI `1.0.4`, hook behavior label `2.0.4`, and local runtime
+version `2.0.11` identify different things. The next action is the owner design
+choice between explicitly retiring adaptive route/receipt automation or
+temporarily retaining a characterization-tested minimal local kernel until a
+separately published artifact exists. No external pin will be invented.
+
+F3–F7 remain `IMPLEMENTED_UNVERIFIED`; all 156 vectors remain `NOT_RUN`,
+A13–A14 remain `BLOCKED_EXTERNAL`, payment readiness remains false, and no
+testnet payment, deployment, release, or publication is claimed.
+
 ## Current state and next action
 
 F1 is **complete-with-blockers** and F2's static contract phase is complete.

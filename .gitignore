@@ -18,5 +18,7 @@ __pycache__/
 dist/
 .stage-a/
 .mvp/
+.grok-stack/runtime/*
+!.grok-stack/runtime/.gitkeep
 *.egg-info/
 .DS_Store

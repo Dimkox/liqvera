@@ -151,3 +151,9 @@ The canonical specification prohibits fictitious readiness and sale of fixture d
 ## 2026-09-24 — Keep Liqvera product factories separate from Stage A
 
 Preserve `wheels` and `product` as the reviewed three-wheel/two-image Stage A factory, and add explicit `liqvera-*` targets for the evidence, gateway, web, image, Compose, and acceptance surfaces. Packaging schemas, migrations, protocol metadata, and demo assets with their owning artifacts avoids hidden source-checkout dependencies without turning unexecuted builds into acceptance evidence.
+# 2026-09-28 — External tooling needs a real artifact identity
+
+Do not replace vendored tooling with a version string or a host CLI that is not
+the same artifact. Require an immutable locator plus integrity digest; when no
+such identity exists, either retain the minimum proven kernel or explicitly
+retire the integration contract.

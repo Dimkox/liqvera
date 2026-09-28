@@ -27,7 +27,14 @@ TRUSTED_PREFIXES = (
     Path(".grok-stack/templates"),
 )
 TRUSTED_FILES = frozenset(
-    {Path(".grok/config.toml"), Path(".grok/hooks.json"), Path("AGENTS.md"), Path("VERSION")}
+    {
+        Path(".grok/config.toml"),
+        Path(".grok/hooks.json"),
+        Path("schemas/change-spec-v1.schema.json"),
+        Path("schemas/change-spec.schema.json"),
+        Path("AGENTS.md"),
+        Path("VERSION"),
+    }
 )
 TRUSTED_SCRIPT_NAMES = frozenset(
     {
@@ -54,6 +61,8 @@ REQUIRED_TRUSTED_FILES = frozenset(
         Path(".grok-stack/config/routing.json"),
         Path(".grok-stack/templates/change/change-spec.yaml"),
         Path("scripts/grok_verify.py"),
+        Path("schemas/change-spec-v1.schema.json"),
+        Path("schemas/change-spec.schema.json"),
         Path("AGENTS.md"),
         Path("VERSION"),
     }

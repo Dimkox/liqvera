@@ -271,6 +271,8 @@ def test_trust_closure_is_explicit_and_bounded() -> None:
         ".grok/skills/adaptive-delivery/SKILL.md",
         ".agents/skills/adaptive-delivery/SKILL.md",
         "scripts/grok_verify.py",
+        "schemas/change-spec-v1.schema.json",
+        "schemas/change-spec.schema.json",
         "AGENTS.md",
         "VERSION",
     } <= paths
@@ -309,6 +311,23 @@ def test_instruction_tamper_inside_trust_closure_is_rejected(tmp_path: Path) -> 
     )
     with instruction.open("a", encoding="utf-8") as stream:
         stream.write("\nUntrusted instruction.\n")
+
+    completed = _run_direct_verify(root)
+
+    assert completed.returncode == 2
+    assert "tracked bytes differ from HEAD" in completed.stderr
+
+
+def test_change_spec_schema_tamper_inside_trust_closure_is_rejected(
+    tmp_path: Path,
+) -> None:
+    root = _pinned_fixture(tmp_path)
+    schema = (
+        root
+        / "tooling/adaptive-grok-build-pro/schemas/change-spec.schema.json"
+    )
+    with schema.open("a", encoding="utf-8") as stream:
+        stream.write("\n")
 
     completed = _run_direct_verify(root)
 

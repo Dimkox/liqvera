@@ -33,8 +33,9 @@ implementation.
 Clean status is diagnostic, not the integrity root: Git index optimization
 flags are forbidden globally. The validator independently compares the bounded
 runtime/instruction trust closure's blob hashes and executable modes with HEAD:
-the engine, Grok scripts/hooks/config/templates/agents/skills, root policy, and
-VERSION. Historical packages/distributions/release evidence stay outside the
+the engine, Grok scripts/hooks/config/templates/agents/skills, root policy,
+VERSION, and the exact current/legacy change-spec schemas loaded by `spec.py`.
+Historical packages/distributions/release evidence stay outside the
 per-hook hash set while global dirty/untracked checks still cover them. Closure
 file and byte ceilings fail closed on unexpected growth. Ignored
 Python/importable files are forbidden under `.grok-stack`, `scripts`, and

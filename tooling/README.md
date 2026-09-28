@@ -15,8 +15,9 @@ The entrypoint validates the gitlink, checkout commit, tag, version, and clean
 worktree before executing a hook or `scripts/grok_*.py` command. Validation
 rejects `assume-unchanged`/`skip-worktree` index flags globally, then verifies
 the explicit runtime/instruction trust closure directly against HEAD: engine,
-Grok scripts/hooks/config/templates/agents/skills, plus root policy and VERSION.
-The closure is capped at 256 files / 2 MB; v2.0.19 uses 177 files / 1,232,921
+Grok scripts/hooks/config/templates/agents/skills, root policy, VERSION, and
+the two change-spec schemas read by `adaptive_grok.spec`. The closure is capped
+at 256 files / 2 MB; v2.0.19 uses 179 files / 1,241,709
 bytes, so historical packages and release evidence are never hashed per hook.
 Ordinary dirty/untracked detection still covers the entire checkout. Ignored
 importable code is forbidden in Python execution roots. Python

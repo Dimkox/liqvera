@@ -49,14 +49,15 @@ and dynamic Trivy discovery. A final security re-review then demonstrated that
 Git's `assume-unchanged` flag could hide modified verifier bytes from status.
 The shared validator rejects all index optimization/state flags globally and
 hashes the explicit runtime/instruction trust closure against HEAD, including
-engine, Grok scripts/hooks/config/templates/agents/skills and root policy. It
-also rejects ignored importable code in Python execution roots. Historical
+engine, Grok scripts/hooks/config/templates/agents/skills, root policy, and the
+two change-spec schemas loaded by `spec.py`. It also rejects ignored importable
+code in Python execution roots. Historical
 packages, distributions, and release evidence remain subject to global
 dirty/untracked detection but are not reread for every hook. The bounded
-closure contains 177 files / 1,232,921 bytes (limits: 256 / 2,000,000), reducing
-warm launcher validation from 0.67 seconds to 0.16 seconds. Entry points
+closure contains 179 files / 1,241,709 bytes (limits: 256 / 2,000,000), reducing
+warm launcher validation from 0.67 seconds to 0.13–0.16 seconds. Entry points
 disable bytecode generation so validation does not create its own ignored
-code. The focused aggregate now reports `281 passed`, including 20 strict
+code. The final focused aggregate reports `282 passed`, including 21 strict
 tooling cases. The graph CLI still reports only the inherited 26
 `IMPLEMENTATION_ORPHAN` findings plus six active declared conflicts; it has no
 cleanup-specific inventory, dangling-reference, or retired-Go error.

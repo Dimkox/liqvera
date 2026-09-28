@@ -1,4 +1,4 @@
-.PHONY: verify verify-packages graph salvage artifacts wheels product demo mvp mvp-web prod \
+.PHONY: verify verify-packages verify-tooling graph salvage artifacts wheels product demo mvp mvp-web prod \
 	liqvera-python liqvera-gateway liqvera-web liqvera-images liqvera-compose \
 	liqvera-acceptance liqvera-product
 
@@ -18,6 +18,9 @@ artifacts:
 
 verify-packages:
 	$(PYTHON) -B -m pytest tests/contracts tests/public_capture tests/readonly_analyzer tests/conformance tests/graph tests/installed tests/artifact tests/compatibility -q
+
+verify-tooling:
+	$(PYTHON) -B -m pytest tests/tooling -q
 
 verify: graph salvage artifacts verify-packages
 	@echo "stage-a verify passed"

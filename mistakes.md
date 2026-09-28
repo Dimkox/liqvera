@@ -110,3 +110,11 @@ identity because it compared only Liqvera's copied labels and public package
 metadata. The authoritative local repository contains annotated `v2.0.19`;
 future boundary analysis must inspect owner-provided source repositories before
 declaring an artifact unavailable.
+
+## 2026-09-28 — Optional-tool fallbacks crossed a safety boundary
+
+The initial externalization retained shell fallbacks that converted pin
+validation failures into successful empty or allow hook responses, while
+ordinary tests also imported the optional checkout. Safety hooks must propagate
+validation failure; static clone tests and initialized-tooling integration
+tests are separate contracts.

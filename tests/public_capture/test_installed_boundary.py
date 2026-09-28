@@ -45,7 +45,8 @@ def test_public_capture_metadata_and_source_boundary() -> None:
     metadata = tomllib.loads((CAPTURE / "pyproject.toml").read_text(encoding="utf-8"))
     assert metadata["project"]["name"] == "mee-public-capture"
     assert metadata["project"]["scripts"] == {
-        "mee-public-capture": "mee_public_capture.__main__:main"
+        "mee-public-capture": "mee_public_capture.__main__:main",
+        "mee-evidence-capture-service": "mee_public_capture.evidence_service:main",
     }
     assert metadata["project"]["dependencies"] == [
         "mee-contracts==0.1.0",

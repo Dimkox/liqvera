@@ -1,12 +1,16 @@
 [run]
 branch = True
 source =
-    .grok-stack/adaptive_grok
-    scripts
+    packages/contracts/src/mee_contracts
+    packages/public-capture/src/mee_public_capture
+    packages/readonly-analyzer/src/mee_readonly_analyzer
+    packages/evidence-report/src/mee_evidence_report
+    tools/conformance
+    tools/graph_checker
+    tools/mezo_acceptance
 omit =
     tests/*
     */__pycache__/*
-    .grok-stack/runtime/*
     engineering/*
 
 [report]

@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-28 (repository boundary cleanup implemented; full verification pending). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-28 (repository boundary review repairs implemented; full verification red). Repository: `Dimkox/liqvera`.
 Branch: `chore/repository-cleanup` (based on merged main and the F3–F7 integration).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
@@ -14,9 +14,12 @@ commit `0c2cb97f8048f7da8bd193634f4502f24b0e541e`. Route
 `engineering/changes/20260928-repository-boundary-cleanup-7f0f98/` cover a
 repository-only retirement of inherited Go Stage-0 and vendored agent tooling.
 Six parallel read-only analyses and the route-selected implementation are
-complete. Focused conformance and graph tests pass; full route verification
-and independent review remain pending. No product runtime, payment,
-deployment, release, or acceptance status has changed.
+complete. Focused conformance, graph, and strict tooling-integration tests
+pass. The first independent reviews found fail-open hooks, a recursive-clone
+assumption, a direct-verifier pin bypass, and lost recurring container-scan
+coverage; those defects are repaired and await independent re-review. Full
+route verification remains red. No product runtime, payment, deployment,
+release, or acceptance status has changed.
 
 The retired Go unit is `go.mod`, `cmd/`, `internal/`, the root Go
 `Dockerfile`, and the historical Stage-0-only `migrations/000001_init.*`.
@@ -32,29 +35,37 @@ repository. Adaptive Grok is a portable gitlink at
 `tooling/adaptive-grok-build-pro`, pinned to local tag `v2.0.19` and commit
 `cb9af4073ba6c3d515145164d771c75ebdfa3224`. Version 2.0.19 was chosen
 specifically for its bounded parallel pytest verifier; the older releases run
-the suite sequentially and are materially slower. The project-owned launcher
-fails closed unless the gitlink, HEAD, tag, VERSION, and clean checkout all
-match the lock; thin symlinks preserve hook and skill discovery without
-copying framework source.
+the suite sequentially and are materially slower. Both project-owned execution
+entrypoints fail closed unless the gitlink, HEAD, tag, VERSION, and clean
+checkout all match the shared lock validator. Hooks no longer synthesize
+allow/empty output after validation failure; thin symlinks preserve hook and
+skill discovery without copying framework source.
 
-Focused evidence: `python3 tooling/run-adaptive-grok.py --check` reports the
-exact pin, and `python3 -m pytest tests/conformance tests/graph -q` reports
-257 passed. The graph CLI still reports only the inherited 26
+Ordinary product/conformance tests validate the static lock and gitlink and do
+not require an initialized submodule. The separately invoked
+`make verify-tooling` suite exercises the initialized runtime, missing,
+wrong-lock, wrong-HEAD, and dirty/untracked states, direct execution, hooks,
+and dynamic Trivy discovery. The final focused aggregate reports `272 passed`;
+the strict tooling slice reports `11 passed`. The graph CLI still reports only
+the inherited 26
 `IMPLEMENTATION_ORPHAN` findings plus six active declared conflicts; it has no
 cleanup-specific inventory, dangling-reference, or retired-Go error.
 
-The linked v2.0.19 PR verifier demonstrably starts
-`pytest-xdist workers=22` with `--dist=worksteal`; its policy, diff, change
-spec, secret, SQL, Ruff, Bandit, and source-stability checks pass. The full
-Python/coverage result remains red on pre-existing F3–F7 verification debt: two
-wheel fixtures cannot import the declared `hatchling` dev dependency from
-`/usr/bin/python3`, and the pre-existing installed-demo test expects a removed
-`## F3 MVP prototype` heading that is already absent from the base README.
-No cleanup-boundary test fails. Explicit Trivy scans reached all seven actual
-product Dockerfiles and each reports the inherited LOW `DS-0026` missing
-`HEALTHCHECK` finding; no higher-severity finding was reported. The next action
-is route-selected independent review, while the verifier/environment and
-Docker-health findings remain unwaived.
+An isolated repository-local `.venv` supplies the exact v2.0.19 runner
+versions and declared build backend without changing the global interpreter.
+The stale README heading and public-capture metadata expectations are repaired.
+A direct 22-worker diagnostic then reported `1122 passed, 85 subtests passed`.
+The final bounded PR-verifier run passed diff, change-spec, secret, contract,
+SQL, Ruff, Bandit, source-stability, and the recurring Trivy gate, but its
+measured pytest and coverage processes still exited 1. The upstream runner
+removed its temporary current-run artifact before return, so that remaining
+failure is neither waived nor assigned an unsupported cause. The recurring
+gate dynamically found nine tracked container inputs (seven Dockerfiles and
+two Compose files) and passed all at the explicit
+`MEDIUM,HIGH,CRITICAL` threshold. A separate LOW audit retains the inherited
+`DS-0026` missing-`HEALTHCHECK` finding on each Dockerfile. The next actions are
+a single measured-run diagnosis, fresh non-recursive-clone proof, and
+route-selected independent re-review.
 
 F3–F7 remain `IMPLEMENTED_UNVERIFIED`; all 156 vectors remain `NOT_RUN`,
 A13–A14 remain `BLOCKED_EXTERNAL`, payment readiness remains false, and no

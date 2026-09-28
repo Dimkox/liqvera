@@ -8,6 +8,7 @@ Adaptive Grok Build Pro is a Git submodule pinned to `v2.0.19` at commit
 ```bash
 git submodule update --init --recursive
 python3 tooling/run-adaptive-grok.py --check
+make verify-tooling
 ```
 
 The entrypoint validates the gitlink, checkout commit, tag, version, and clean
@@ -22,6 +23,18 @@ roots that the isolated upstream runner intentionally does not read from
 requested run degrades from `pytest-xdist` to a serial engine. The verification
 policy and receipt implementation continue to execute from the pinned
 submodule.
+
+Ordinary product tests and `make verify-packages` validate the static gitlink
+and lock without requiring a recursive clone. `make verify-tooling` is the
+strict initialized-submodule suite: it exercises commit/tag/VERSION/clean-tree
+validation, direct-entrypoint rejection, fail-closed hooks, and recurring
+container scanning. Hooks never synthesize an allow/empty response when the
+pin is unavailable or invalid.
+
+Every PR verification discovers all tracked Dockerfiles and Compose files and
+passes each to Trivy. The recurring blocking threshold is
+`MEDIUM,HIGH,CRITICAL`; LOW findings remain visible in explicit audit output
+without turning inherited health-check debt into an undocumented waiver.
 
 BMad is recorded only as the exact `bmad-method@6.10.0` npm artifact and SRI
 in `tooling-lock.json`. It is not installed or executed by product commands.

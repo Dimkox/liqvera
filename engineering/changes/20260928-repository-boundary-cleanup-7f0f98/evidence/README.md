@@ -21,18 +21,30 @@ Store human-readable review reports here. Machine receipts live under `.grok-sta
   and six still-active declared conflicts; no cleanup inventory, dangling-Go,
   or repository-boundary diagnostic remains.
 
-The v2.0.19 PR verifier starts `pytest-xdist workers=22` with
-`--dist=worksteal`. Diff, change-spec, secret, contract, SQL, Ruff, Bandit, and
-source-stability checks pass; Python and coverage remain red because two wheel
-fixtures cannot import the declared `hatchling` dev dependency from
-`/usr/bin/python3`, and a pre-existing installed-demo test expects the already
-absent `## F3 MVP prototype` README heading. A direct diagnostic reached
-`1001 passed`, `85 subtests passed`, and the two environment errors plus that
-one stale assertion before xdist stopped the run.
+Review-repair RED reproduced nine failures: safety hooks returned success after
+missing or invalid tooling, direct verification imported an unvalidated
+checkout, ordinary boundary tests required a recursive clone, and the PR gate
+had no explicit recurring container targets. The shared pin validator, strict
+tooling suite, static ordinary boundary checks, and dynamic Trivy gate repair
+those defects. Missing, wrong-lock, wrong-HEAD, and dirty/untracked checkouts
+now fail before hook or verifier execution and cannot emit an allow result.
 
-Trivy scanned all seven tracked product Dockerfiles explicitly. Each produced
-only the inherited LOW `DS-0026` missing-`HEALTHCHECK` finding (26 of 27 checks
-passed per file); none produced a medium, high, or critical finding.
+An isolated local `.venv` supplies the exact v2.0.19 runner versions plus the
+declared Hatchling backend without changing the global interpreter. The stale
+README and public-capture metadata assertions were corrected. The final focused
+aggregate reported `272 passed`; the strict tooling slice reported `11 passed`.
+A direct 22-worker diagnostic reported `1122 passed, 85 subtests passed in
+53.38s`.
+
+The final bounded PR-verifier run recorded `pytest-xdist workers=22` and passed
+diff, change-spec, secret, contract, SQL, Ruff, Bandit, source-stability, and
+the recurring Trivy gate. Trivy dynamically discovered nine tracked inputs:
+seven Dockerfiles and two Compose files; all passed the blocking
+`MEDIUM,HIGH,CRITICAL` threshold. The measured pytest process nevertheless
+exited 1 after 67.786 seconds and its coverage report exited 1. The upstream
+runner removed its temporary current-run artifacts, so no unsupported failure
+cause or green receipt is claimed. A separate LOW audit found only the
+inherited `DS-0026` missing-`HEALTHCHECK` Dockerfile finding.
 
 Route receipts and independent reviews are still pending. A v2.0.19 state
 transition reached `scoped` and then failed closed because the pre-existing

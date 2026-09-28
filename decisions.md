@@ -164,3 +164,11 @@ Keep repository-development frameworks outside the product tree as immutable
 gitlinks; use `v2.0.19` specifically because it adds bounded, cgroup-aware
 pytest-xdist sharding. Validate commit, tag, VERSION, and checkout cleanliness
 before execution, while keeping ordinary product verification independent.
+
+## 2026-09-28 — Separate static clone safety from strict tooling integration
+
+Ordinary tests validate the committed gitlink and lock without requiring a
+recursive clone; `make verify-tooling` owns runtime tag, VERSION, HEAD,
+clean-tree, hook, and direct-entrypoint checks. Both execution entrypoints use
+one fail-closed validator so an absent or untrusted checkout cannot become an
+allow response.

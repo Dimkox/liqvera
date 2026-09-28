@@ -145,7 +145,7 @@ They have not been executed yet. The gateway and web lockfiles were generated
 with lifecycle scripts disabled; dependency audit findings are deferred to the
 verification and defect-repair phase.
 
-## Local MVP prototypes
+## F3 MVP prototype
 
 The current branch includes an intentionally unhardened, fixture-only
 prototype of the future report flow:
@@ -184,7 +184,8 @@ The evidence-report wheel also exposes `mee-evidence-demo`; an installed run
 uses `$PWD/.mvp` unless `MVP_STATE_ROOT` names an absolute state directory.
 
 Both demos are **SIMULATED**, **UNVERIFIED**, read-only analytics over fixture
-data. The browser unlock transfers nothing and is not x402 or settlement.
+data. Payments and live verification are not implemented. The browser unlock
+transfers nothing and is not x402 or settlement.
 Neither demo establishes verified F3–F7 completion, runtime acceptance,
 report chargeability, testnet payment, or permission for live exchange
 mutations. The interactive implementation is factory-bound but deliberately

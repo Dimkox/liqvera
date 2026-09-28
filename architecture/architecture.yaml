@@ -14323,6 +14323,9 @@ repository_inventory:
   - path: tests/graph/test_third_final_review_policy.py
     node: test:graph-repository-manifests
     path_class: TEST_SOURCE
+  - path: tests/tooling/test_adaptive_grok_integration.py
+    node: test:python-conformance
+    path_class: TEST_SOURCE
   - path: tests/graph/test_workflow_policy.py
     node: test:graph-repository-manifests
     path_class: TEST_SOURCE
@@ -15091,6 +15094,9 @@ repository_inventory:
   - path: tooling/adaptive-grok-build-pro
     node: configuration:claw-workspace-isolation
     path_class: CONFIGURATION
+  - path: tooling/adaptive_grok_pin.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
   - path: tooling/grok-verify.py
     node: runtime:trusted-source-controller
     path_class: TOOL_SOURCE

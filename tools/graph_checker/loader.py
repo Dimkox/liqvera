@@ -522,7 +522,11 @@ def _classify_repository_path(path: str) -> PathClass:
     name = normalized.rsplit("/", 1)[-1].casefold()
     if normalized in _EXTERNAL_TOOLING_CONFIG or normalized.startswith(".grok-stack/config/"):
         return PathClass.CONFIGURATION
-    if normalized in {"tooling/grok-verify.py", "tooling/run-adaptive-grok.py"} or normalized.startswith("scripts/grok_"):
+    if normalized in {
+        "tooling/adaptive_grok_pin.py",
+        "tooling/grok-verify.py",
+        "tooling/run-adaptive-grok.py",
+    } or normalized.startswith("scripts/grok_"):
         return PathClass.TOOL_SOURCE
     if normalized == "tooling/README.md":
         return PathClass.DOCUMENTATION

@@ -6,11 +6,22 @@ from __future__ import annotations
 import json
 import os
 import runpy
+import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "tooling/adaptive-grok-build-pro"
+TOOLING = Path(__file__).resolve().parent
+sys.path.insert(0, str(TOOLING))
+
+from adaptive_grok_pin import ToolingPinError, validate  # noqa: E402
+
+try:
+    SOURCE = validate(ROOT)
+except ToolingPinError as exc:
+    print(f"Adaptive Grok pin validation failed: {exc}", file=sys.stderr)
+    raise SystemExit(2) from None
+
 sys.path.insert(0, str(SOURCE / ".grok-stack"))
 
 from adaptive_grok import python_test_runner, verification  # noqa: E402
@@ -21,6 +32,78 @@ PRODUCT_PYTHONPATH = (
     "packages/readonly-analyzer/src",
     "packages/evidence-report/src",
 )
+TRIVY_SEVERITY = "MEDIUM,HIGH,CRITICAL"
+
+
+def _container_config_targets(root: Path) -> tuple[str, ...]:
+    completed = subprocess.run(
+        ["git", "ls-files", "-z"],
+        cwd=root,
+        check=False,
+        capture_output=True,
+    )
+    if completed.returncode:
+        return ()
+    targets: list[str] = []
+    for raw in completed.stdout.split(b"\0"):
+        if not raw:
+            continue
+        relative = raw.decode("utf-8", "strict")
+        name = Path(relative).name.lower()
+        is_dockerfile = name.startswith("dockerfile") and not name.endswith(
+            ".dockerignore"
+        )
+        is_compose = (
+            name.startswith("compose.") or name.startswith("docker-compose.")
+        ) and name.endswith((".yaml", ".yml"))
+        if is_dockerfile or is_compose:
+            targets.append(relative)
+    return tuple(sorted(targets))
+
+
+def _explicit_trivy(root: Path) -> verification.CheckResult:
+    targets = _container_config_targets(root)
+    if not targets:
+        return verification.CheckResult(
+            "trivy-config", "fail", "no tracked container configuration targets"
+        )
+    if not verification.command_exists("trivy"):
+        return verification.CheckResult(
+            "trivy-config", "fail", "trivy is required for container configuration"
+        )
+    checks = [
+        verification._command_check(
+            root,
+            f"trivy-config:{target}",
+            [
+                "trivy",
+                "config",
+                "--exit-code",
+                "1",
+                "--severity",
+                TRIVY_SEVERITY,
+                target,
+            ],
+            300,
+        )
+        for target in targets
+    ]
+    failures = [item for item in checks if item.status != "pass"]
+    return verification.CheckResult(
+        "trivy-config",
+        "fail" if failures else "pass",
+        f"scanned={len(targets)} severity={TRIVY_SEVERITY} failures={len(failures)}",
+        stdout="\n".join(item.stdout for item in checks if item.stdout)[-12000:],
+        stderr="\n".join(item.stderr for item in checks if item.stderr)[-12000:],
+        details=[
+            {
+                "severity": "error" if item.status != "pass" else "info",
+                "path": target,
+                "message": item.summary,
+            }
+            for target, item in zip(targets, checks, strict=True)
+        ],
+    )
 
 
 def _parallel_python(root: Path, mode: str) -> list[verification.CheckResult]:
@@ -107,6 +190,7 @@ def _parallel_python(root: Path, mode: str) -> list[verification.CheckResult]:
 
 def main() -> None:
     verification._python = _parallel_python
+    verification._trivy_config = _explicit_trivy
     runpy.run_path(str(SOURCE / "scripts/grok_verify.py"), run_name="__main__")
 
 

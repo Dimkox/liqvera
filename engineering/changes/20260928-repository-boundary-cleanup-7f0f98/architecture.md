@@ -22,11 +22,13 @@ repository without reading its dirty working tree. Version 2.0.19 is required
 because it supplies the bounded parallel pytest verifier; older releases run
 verification sequentially and are materially slower.
 
-`tooling/run-adaptive-grok.py` is the only project-owned execution boundary.
-Before delegating to the framework it validates the lock, parent gitlink,
-submodule HEAD, tag target, VERSION, and clean checkout, then executes only an
-allowlisted Grok command or hook. Thin symlinks retain script, hook, agent, and
-skill discovery without retaining copied framework implementation.
+`tooling/adaptive_grok_pin.py` is the shared project-owned trust boundary. Both
+`tooling/run-adaptive-grok.py` and the direct `tooling/grok-verify.py`
+entrypoint validate the lock, parent gitlink, submodule HEAD, tag target,
+VERSION, and clean checkout before importing the framework. The launcher then
+executes only an allowlisted Grok command or hook. Thin symlinks retain script,
+hook, agent, and skill discovery without retaining copied framework
+implementation.
 
 ## Components and boundaries
 
@@ -38,8 +40,10 @@ skill discovery without retaining copied framework implementation.
   builds and verification and no generated package payload is tracked.
 - Adaptive workflow: immutable external gitlink plus a small fail-closed
   Liqvera launcher and compatibility symlinks.
-- Verification: `make verify` remains independent; product Dockerfile/Compose
-  scanning becomes explicit when the root Go Dockerfile disappears.
+- Verification: ordinary product tests remain independent of initialized
+  tooling; `make verify-tooling` is the explicit strict integration suite.
+  Every PR run discovers and scans all tracked Dockerfile/Compose inputs after
+  the root Go Dockerfile disappears.
 
 ## Data flow
 

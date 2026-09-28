@@ -111,7 +111,9 @@ def main() -> int:
 
     invoked = Path(sys.argv[0]).name
     arguments = sys.argv[1:]
-    if invoked in SCRIPTS:
+    if invoked == "grok_verify.py":
+        target = root / "tooling/grok-verify.py"
+    elif invoked in SCRIPTS:
         target = source / "scripts" / invoked
     elif arguments[:1] == ["--hook"] and len(arguments) >= 2 and arguments[1] in HOOKS:
         target = source / ".grok/hooks" / arguments[1]

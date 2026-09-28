@@ -41,6 +41,16 @@ def _load_launcher():
     return module
 
 
+def _load_verify_override():
+    spec = importlib.util.spec_from_file_location(
+        "liqvera_grok_verify_override", ROOT / "tooling/grok-verify.py"
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def test_inherited_go_stage_zero_is_not_tracked() -> None:
     tracked = set(_git("ls-files").splitlines())
 
@@ -195,6 +205,24 @@ def test_parallel_verifier_is_explicitly_enabled() -> None:
     )
     assert completed.returncode == 0, completed.stderr
     assert "route-selected verification" in completed.stdout
+
+    override = _load_verify_override()
+    requested = override.python_test_runner.selected_workers(ROOT)
+    if os.environ.get("_GROK_TEST_CHILD") == "1":
+        assert requested == 0
+    else:
+        assert requested is not None and requested > 1
+        effective, engine = override.python_test_runner.select_engine(
+            requested, measured=True
+        )
+        assert effective == requested
+        assert engine == "pytest-xdist"
+    assert override.PRODUCT_PYTHONPATH == (
+        "packages/contracts/src",
+        "packages/public-capture/src",
+        "packages/readonly-analyzer/src",
+        "packages/evidence-report/src",
+    )
 
 
 def test_bmad_is_locked_but_not_vendored() -> None:

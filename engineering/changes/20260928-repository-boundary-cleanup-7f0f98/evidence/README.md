@@ -21,8 +21,20 @@ Store human-readable review reports here. Machine receipts live under `.grok-sta
   and six still-active declared conflicts; no cleanup inventory, dangling-Go,
   or repository-boundary diagnostic remains.
 
-Full PR verification, explicit product-Dockerfile scanning, route receipts,
-and independent reviews are still pending. A v2.0.19 state transition reached
-`scoped` and then failed closed because the pre-existing active route does not
-contain the gate declaration required by this newer kernel; no approval or
-receipt was fabricated.
+The v2.0.19 PR verifier starts `pytest-xdist workers=22` with
+`--dist=worksteal`. Diff, change-spec, secret, contract, SQL, Ruff, Bandit, and
+source-stability checks pass; Python and coverage remain red because two wheel
+fixtures cannot import the declared `hatchling` dev dependency from
+`/usr/bin/python3`, and a pre-existing installed-demo test expects the already
+absent `## F3 MVP prototype` README heading. A direct diagnostic reached
+`1001 passed`, `85 subtests passed`, and the two environment errors plus that
+one stale assertion before xdist stopped the run.
+
+Trivy scanned all seven tracked product Dockerfiles explicitly. Each produced
+only the inherited LOW `DS-0026` missing-`HEALTHCHECK` finding (26 of 27 checks
+passed per file); none produced a medium, high, or critical finding.
+
+Route receipts and independent reviews are still pending. A v2.0.19 state
+transition reached `scoped` and then failed closed because the pre-existing
+active route does not contain the gate declaration required by this newer
+kernel; no approval or receipt was fabricated.

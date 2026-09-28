@@ -16,5 +16,12 @@ fetches tooling implicitly. Version 2.0.19 is intentional: Liqvera opts into
 its bounded `pytest-xdist` runner with `.grok-test-runner.json`; earlier local
 versions executed the Python suite sequentially.
 
+The thin Liqvera override in `grok-verify.py` supplies the four package source
+roots that the isolated upstream runner intentionally does not read from
+`pyproject.toml`, retains Liqvera's `tests/release` exclusion, and fails if the
+requested run degrades from `pytest-xdist` to a serial engine. The verification
+policy and receipt implementation continue to execute from the pinned
+submodule.
+
 BMad is recorded only as the exact `bmad-method@6.10.0` npm artifact and SRI
 in `tooling-lock.json`. It is not installed or executed by product commands.

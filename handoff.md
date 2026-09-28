@@ -41,9 +41,20 @@ Focused evidence: `python3 tooling/run-adaptive-grok.py --check` reports the
 exact pin, and `python3 -m pytest tests/conformance tests/graph -q` reports
 257 passed. The graph CLI still reports only the inherited 26
 `IMPLEMENTATION_ORPHAN` findings plus six active declared conflicts; it has no
-cleanup-specific inventory, dangling-reference, or retired-Go error. The next
-action is full PR verification, explicit scanning of every actual product
-Dockerfile, and route-selected independent reviews on one final fingerprint.
+cleanup-specific inventory, dangling-reference, or retired-Go error.
+
+The linked v2.0.19 PR verifier demonstrably starts
+`pytest-xdist workers=22` with `--dist=worksteal`; its policy, diff, change
+spec, secret, SQL, Ruff, Bandit, and source-stability checks pass. The full
+Python/coverage result remains red on pre-existing F3–F7 verification debt: two
+wheel fixtures cannot import the declared `hatchling` dev dependency from
+`/usr/bin/python3`, and the pre-existing installed-demo test expects a removed
+`## F3 MVP prototype` heading that is already absent from the base README.
+No cleanup-boundary test fails. Explicit Trivy scans reached all seven actual
+product Dockerfiles and each reports the inherited LOW `DS-0026` missing
+`HEALTHCHECK` finding; no higher-severity finding was reported. The next action
+is route-selected independent review, while the verifier/environment and
+Docker-health findings remain unwaived.
 
 F3–F7 remain `IMPLEMENTED_UNVERIFIED`; all 156 vectors remain `NOT_RUN`,
 A13–A14 remain `BLOCKED_EXTERNAL`, payment readiness remains false, and no

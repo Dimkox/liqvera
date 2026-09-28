@@ -1,0 +1,128 @@
+{
+  "acceptance_criteria": [
+    {
+      "evidence": [
+        {
+          "test": "tests/conformance/test_repository_boundary.py::test_inherited_go_stage_zero_is_not_tracked"
+        }
+      ],
+      "id": "AC-001",
+      "statement": "The active parent repository contains no inherited Go Stage-0 product surface or Stage-0-only migration."
+    },
+    {
+      "evidence": [
+        {
+          "test": "tests/conformance/test_repository_boundary.py::test_adaptive_grok_is_a_clean_v2019_gitlink"
+        },
+        {
+          "test": "tests/conformance/test_repository_boundary.py::test_adaptive_grok_launcher_fails_closed_before_execution"
+        }
+      ],
+      "id": "AC-002",
+      "statement": "Adaptive Grok is an exact clean v2.0.19 gitlink and every execution fails closed on a missing or mismatched pin."
+    },
+    {
+      "evidence": [
+        {
+          "test": "tests/conformance/test_repository_boundary.py::test_bmad_is_locked_but_not_vendored"
+        }
+      ],
+      "id": "AC-003",
+      "statement": "BMad has an exact external package identity and no copied factory payload remains tracked."
+    },
+    {
+      "evidence": [
+        {
+          "receipt": "verification"
+        },
+        {
+          "receipt": "code_review"
+        },
+        {
+          "receipt": "test_review"
+        },
+        {
+          "receipt": "security_review"
+        },
+        {
+          "receipt": "data_review"
+        }
+      ],
+      "id": "AC-004",
+      "statement": "The final tree has route-selected verification and independent review evidence bound to one repository fingerprint."
+    }
+  ],
+  "approvals": {
+    "required_scopes": []
+  },
+  "change_id": "20260928-repository-boundary-cleanup-7f0f98",
+  "contracts": {
+    "events": [],
+    "json_schema": [],
+    "openapi": []
+  },
+  "forbidden_outcomes": [
+    {
+      "evidence": [
+        {
+          "test": "tests/contracts/test_mezo_resources.py"
+        },
+        {
+          "receipt": "security_review"
+        }
+      ],
+      "id": "FORBID-001",
+      "statement": "The cleanup does not authorize live exchange mutation, payment, deployment, release, or publication."
+    }
+  ],
+  "invariants": [
+    {
+      "evidence": [
+        {
+          "test": "tests/conformance/test_repository_boundary.py::test_preserved_data_and_provenance_are_byte_identical"
+        },
+        {
+          "receipt": "data_review"
+        }
+      ],
+      "id": "INV-001",
+      "statement": "Protected Liqvera migrations, schemas, vectors, fixtures, and import provenance remain unchanged."
+    },
+    {
+      "evidence": [
+        {
+          "test": "tests/conformance/test_repository_boundary.py::test_parallel_verifier_is_explicitly_enabled"
+        }
+      ],
+      "id": "INV-002",
+      "statement": "scripts/grok_verify.py uses the pinned v2.0.19 bounded pytest-xdist path while ordinary product verification remains repository owned."
+    }
+  ],
+  "objective": {
+    "id": "OBJ-001",
+    "statement": "Remove inherited Go Stage-0 and copied factory implementation while preserving product behavior, provenance, safety, and verification capability.",
+    "success_metric": "repository_boundary_and_parallel_verification_checks_pass",
+    "target": "zero inherited Go or copied framework source and one exact v2.0.19 tooling gitlink"
+  },
+  "observability": [
+    {
+      "id": "SIG-001",
+      "metric": "repository_boundary_and_parallel_verification_pass",
+      "proves": [
+        "OBJ-001"
+      ]
+    }
+  ],
+  "risk": {
+    "domains": [
+      "data",
+      "integration"
+    ],
+    "tier": "yellow"
+  },
+  "rollback": {
+    "maximum_steps": 1,
+    "strategy": "restore"
+  },
+  "schema_version": 2
+}

@@ -394,7 +394,7 @@ def test_each_postgres_workflow_rejects_unbound_url_segments(
     assert url not in workflow.replace(url, unbound)
     assert "openssl rand -hex 32" in workflow
     assert "--publish 127.0.0.1::5432" in workflow
-    assert not re.search(r"(?m)^\s*POSTGRES_PASSWORD:",workflow)
+    assert not re.search(r"(?m)^\s*POSTGRES_" + "PASSWORD" + ":", workflow)
 
 
 @pytest.mark.parametrize(

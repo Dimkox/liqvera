@@ -14137,6 +14137,9 @@ repository_inventory:
   - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/brief.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/change-spec.yaml
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/README.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
@@ -15088,6 +15091,9 @@ repository_inventory:
   - path: tooling/adaptive-grok-build-pro
     node: configuration:claw-workspace-isolation
     path_class: CONFIGURATION
+  - path: tooling/grok-verify.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
   - path: tooling/run-adaptive-grok.py
     node: runtime:trusted-source-controller
     path_class: TOOL_SOURCE

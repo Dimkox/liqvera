@@ -57,6 +57,10 @@ older `# tests N`, so A30's closed observation correctly rejected a zero count.
 The parser now accepts both native TAP spellings. Status algebra also
 distinguishes a nonzero process failure from an exit-zero semantic-validation
 failure; both are FAIL, while an exit-zero timeout remains contradictory.
+The next local run reached the intended 5 PASS / 4 BLOCKED_EXTERNAL / 21
+NOT_RUN result. Direct invocation of the new verifier then found its script
+entry point lacked the repository root on `sys.path`; the entry point now adds
+the same explicit repository import root used by other checked-in scripts.
 
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts

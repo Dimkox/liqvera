@@ -12,6 +12,10 @@
   was issued and no public read was executed.
 - [x] Wire the operator live CLI to the real bounded P2 executor with closed,
   sealed A07/A29 observations and internally derived one-shot grant markers.
+- [x] Replace the transport-only P2 evidence with canonical semantics: A07 runs
+  the real gateway report adapter against a controlled 503 and proves no
+  fixture/artifact; A29 performs a bounded anonymous clone and proves exact
+  origin, commit and tree. The durable journal is independent of output roots.
 - [x] Add executable browser transport timeout, redirect, credential and byte-
   cap tests plus transactional fake restart/concurrency consumption coverage.
 - [x] Implement local P3 identity, twelve-confirmation finality, one-submit live

@@ -26,24 +26,24 @@ class LivePlan:
 
     @classmethod
     def canonical(cls):
-        body = b'{"type":"l2Book","coin":"BTC"}'
+        body = b'{"scenario":"source-unavailable","fallback":"forbidden"}'
         cases = {
             "A07": {
-                "action": "public_read",
-                "method": "POST",
-                "url": "https://api.hyperliquid.xyz/info",
+                "action": "gateway_source_unavailable_harness",
+                "method": "LOCAL_POST",
+                "url": "https://source.invalid/internal/v1/reports",
                 "body_sha256": hashlib.sha256(body).hexdigest(),
                 "timeout_seconds": 15,
                 "max_response_bytes": 2097152,
                 "maximum_attempts": 1,
             },
             "A29": {
-                "action": "public_read",
-                "method": "GET",
-                "url": "https://github.com/Dimkox/liqvera.git/info/refs?service=git-upload-pack",
+                "action": "anonymous_clone",
+                "method": "GIT_CLONE",
+                "url": "https://github.com/Dimkox/liqvera.git",
                 "body_sha256": hashlib.sha256(b"").hexdigest(),
                 "timeout_seconds": 15,
-                "max_response_bytes": 2097152,
+                "max_response_bytes": 52428800,
                 "maximum_attempts": 1,
             },
             "A13": {
@@ -148,7 +148,7 @@ def validate_live_bundle(raw, *, subject_commit, subject_tree, now):
                 case,
                 expected["method"],
                 expected["url"],
-                b'{"type":"l2Book","coin":"BTC"}' if case == "A07" else b"",
+                b'{"scenario":"source-unavailable","fallback":"forbidden"}' if case == "A07" else b"",
                 expected["timeout_seconds"],
                 expected["max_response_bytes"],
                 expected["maximum_attempts"],
@@ -194,7 +194,7 @@ def execute_live_cases(authority, public_executor, payment_executor, *, now):
     rows = {}
     for case in ("A07", "A29"):
         spec = authority.plan.cases[case]
-        body = b'{"type":"l2Book","coin":"BTC"}' if case == "A07" else b""
+        body = b'{"scenario":"source-unavailable","fallback":"forbidden"}' if case == "A07" else b""
         plan = PublicReadPlan(
             case,
             spec["method"],

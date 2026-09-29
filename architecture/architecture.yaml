@@ -15166,6 +15166,9 @@ repository_inventory:
   - path: apps/mezo-gateway/scripts/copy-resources.mjs
     node: artifact:liqvera-gateway
     path_class: BUILD_PACKAGING
+  - path: apps/mezo-gateway/scripts/a07-source-unavailable.mjs
+    node: runtime:mezo-gateway
+    path_class: TOOL_SOURCE
   - path: apps/mezo-gateway/README.md
     node: document:liqvera-f3-f7-implementation
     path_class: DOCUMENTATION
@@ -15421,10 +15424,16 @@ repository_inventory:
   - path: tools/mezo_acceptance/live.py
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE
+  - path: tools/mezo_acceptance/live_cases.py
+    node: runtime:mezo-acceptance
+    path_class: TOOL_SOURCE
   - path: tests/acceptance/test_public_read_grant.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: tests/acceptance/test_live_integration.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/acceptance/test_live_case_semantics.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: tests/contracts/test_live_grant_consumption.py

@@ -4,8 +4,14 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from tools.mezo_acceptance.public_read import GrantError, PublicReadGrant, PublicReadPlan, execute_public_read, validate_public_read_evidence
-
+from tools.mezo_acceptance.public_read import (
+    GrantError,
+    PublicReadGrant,
+    PublicReadPlan,
+    consume_public_read_grant,
+    execute_public_read,
+    validate_public_read_evidence,
+)
 
 NOW = datetime(2026, 9, 29, 14, 0, tzinfo=timezone.utc)
 COMMIT = "a" * 40
@@ -138,3 +144,16 @@ def test_executor_rechecks_expiry_and_dns_before_send(tmp_path) -> None:
     with pytest.raises(GrantError,match="^PUBLIC_READ_GRANT_EXPIRED$"):
         execute_public_read(plan(),parsed,subject_commit=COMMIT,subject_tree=TREE,now=lambda:later,
             environ={},resolver=lambda host:("8.8.8.8",),connection=lambda *args:None,state_dir=tmp_path)
+
+
+def test_replay_journal_rejects_symlink_and_non_private_directory(tmp_path) -> None:
+    parsed = PublicReadGrant.parse(grant(), now=NOW)
+    private = tmp_path / "private"
+    private.mkdir(mode=0o700)
+    link = tmp_path / "link"
+    link.symlink_to(private, target_is_directory=True)
+    with pytest.raises(GrantError, match="^PUBLIC_READ_STATE_DIR_INVALID$"):
+        consume_public_read_grant(link, parsed)
+    private.chmod(0o755)
+    with pytest.raises(GrantError, match="^PUBLIC_READ_STATE_DIR_INVALID$"):
+        consume_public_read_grant(private, parsed)

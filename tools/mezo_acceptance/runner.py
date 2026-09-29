@@ -2,6 +2,7 @@
 
 import argparse
 import hashlib
+import ipaddress
 import json
 import os
 import platform
@@ -19,28 +20,13 @@ from jsonschema import Draft202012Validator
 
 from .cases import CASES
 from .live import execute_live_cases, validate_live_bundle
-from .public_read import PublicReadPlan, execute_public_read
+from .live_cases import execute_a07, execute_a29
+from .public_read import PublicReadPlan
 
 
 def execute_authorized_live_cases(*args, **kwargs):
     """Runner-owned seam used by production adapters and deterministic fakes."""
     return execute_live_cases(*args, **kwargs)
-
-
-def validate_live_public_output(raw, plan, grant, identity):
-    fields = {"case", "method", "url", "status", "response_bytes", "response_sha256", "attempts",
-              "grant_id", "grant_digest", "plan_sha256", "subject_commit", "subject_tree"}
-    expected = {"case": plan.case, "method": plan.method, "url": plan.url, "status": 200, "attempts": 1,
-                "grant_id": grant.grant_id, "grant_digest": grant.digest, "plan_sha256": plan.digest,
-                "subject_commit": identity["commit"], "subject_tree": identity["tree"]}
-    if (not isinstance(raw, dict) or set(raw) != fields
-            or any(raw.get(key) != value for key, value in expected.items())
-            or type(raw.get("response_bytes")) is not int
-            or not 0 <= raw["response_bytes"] <= plan.max_response_bytes
-            or not isinstance(raw.get("response_sha256"), str)
-            or not re.fullmatch(r"[0-9a-f]{64}", raw["response_sha256"])):
-        raise ValueError("live public executor returned an unbound observation")
-    return raw
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -67,7 +53,7 @@ FAIL_REASONS = {
     "ASSERTION_EXECUTION_ERROR",
 }
 OBSERVATION_FIELDS = {
-    "A07": {"transport"},
+    "A07": {"result"},
     "A01": {"baseline", "current", "expected_delta"},
     "A08": {"checks", "subject_commit", "subject_tree"},
     "A09": {"checks", "subject_commit", "subject_tree"},
@@ -79,7 +65,7 @@ OBSERVATION_FIELDS = {
         "artifact_verifier",
         "fixture",
     },
-    "A29": {"transport"},
+    "A29": {"result"},
     "A30": {"checks", "subject_commit", "subject_tree"},
 }
 REQUIRED_CHECKS = {
@@ -505,17 +491,34 @@ def evidence_reference(
     ):
         raise ValueError("evidence observations do not match the case-specific schema")
     if case_id in {"A07", "A29"}:
-        transport = observations["transport"]
-        fields = {"case", "method", "url", "status", "response_bytes", "response_sha256",
-                  "attempts", "grant_id", "grant_digest", "plan_sha256", "subject_commit", "subject_tree"}
-        if (not isinstance(transport, dict) or set(transport) != fields
-                or transport["case"] != case_id or transport["status"] != 200
-                or transport["attempts"] != 1 or transport["subject_commit"] != identity["commit"]
-                or transport["subject_tree"] != identity["tree"]
-                or not re.fullmatch(r"[0-9a-f]{64}", transport["response_sha256"])
-                or not re.fullmatch(r"[0-9a-f]{64}", transport["grant_digest"])
-                or not re.fullmatch(r"[0-9a-f]{64}", transport["plan_sha256"])):
-            raise ValueError(f"{case_id} public-read evidence is not closed")
+        result = observations["result"]
+        common = {"grant_id", "grant_digest", "plan_sha256", "subject_commit", "subject_tree", "state_dir_identity"}
+        specific = ({"schema", "adapter", "request_count", "reason", "source_mode", "fixture_fallback_used",
+                     "artifact_emitted", "stdout_sha256", "build_stdout_sha256"} if case_id == "A07" else
+                    {"schema", "commit", "tree", "origin", "clone_size_bytes", "credential_prompt", "redirects_allowed",
+                     "resolved_addresses", "connected_address"})
+        if (not isinstance(result, dict) or set(result) != common | specific
+                or result["subject_commit"] != identity["commit"] or result["subject_tree"] != identity["tree"]
+                or any(not re.fullmatch(r"[0-9a-f]{64}", str(result[name]))
+                       for name in ("grant_digest", "plan_sha256", "state_dir_identity"))
+                or not re.fullmatch(r"[0-9a-f-]{36}", str(result["grant_id"]))):
+            raise ValueError(f"{case_id} semantic evidence is not closed")
+        if case_id == "A07" and not (result["schema"] == "liqvera-a07-source-unavailable/v1"
+                and result["adapter"] == "HttpReportService.build" and result["request_count"] == 1
+                and result["reason"] == "SOURCE_UNAVAILABLE" and result["source_mode"] == "live-public"
+                and result["fixture_fallback_used"] is False and result["artifact_emitted"] is False
+                and all(re.fullmatch(r"[0-9a-f]{64}", str(result[name]))
+                        for name in ("stdout_sha256", "build_stdout_sha256"))):
+            raise ValueError("A07 did not prove source-unavailable fail-closed semantics")
+        if case_id == "A29" and not (result["schema"] == "liqvera-a29-anonymous-clone/v1"
+                and result["commit"] == identity["commit"] and result["tree"] == identity["tree"]
+                and result["origin"] == "https://github.com/Dimkox/liqvera.git"
+                and type(result["clone_size_bytes"]) is int and 0 < result["clone_size_bytes"] <= 52_428_800
+                and result["credential_prompt"] is False and result["redirects_allowed"] is False
+                and isinstance(result["resolved_addresses"], list) and result["connected_address"] in result["resolved_addresses"]
+                and all(isinstance(value, str) and ipaddress.ip_address(value).is_global
+                        for value in result["resolved_addresses"])):
+            raise ValueError("A29 did not prove anonymous clone provenance")
         checks = []
     elif case_id == "A01":
         baseline, current = observations["baseline"], observations["current"]
@@ -836,6 +839,8 @@ def main() -> int:
     parser.add_argument(
         "--live-grants", type=Path, help="exact short-lived live grant bundle; never a boolean"
     )
+    parser.add_argument("--operator-state-dir", type=Path,
+                        help="pre-existing mode-0700 durable live-grant journal")
     args = parser.parse_args()
     try:
         identity = repo_identity()
@@ -846,6 +851,8 @@ def main() -> int:
         if args.mode == "live":
             if args.live_grants is None:
                 raise ValueError("live acceptance requires an exact grant bundle")
+            if args.operator_state_dir is None:
+                raise ValueError("live acceptance requires an operator state directory")
             info = os.lstat(args.live_grants)
             if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size > 65536:
                 raise ValueError("live grant bundle must be one bounded regular file")
@@ -861,9 +868,14 @@ def main() -> int:
             raise ValueError("output must be a new path outside the repository")
         evidence_root = output.parent
         evidence_root.mkdir(parents=True, mode=0o700, exist_ok=False)
-        state_dir = evidence_root / ".live-state"
+        state_dir = args.operator_state_dir.resolve() if args.operator_state_dir else None
         if args.mode == "live":
-            state_dir.mkdir(mode=0o700)
+            supplied_state_info = os.lstat(args.operator_state_dir)
+            state_info = os.lstat(state_dir)
+            if (stat.S_ISLNK(supplied_state_info.st_mode) or not stat.S_ISDIR(state_info.st_mode)
+                    or stat.S_IMODE(state_info.st_mode) != 0o700
+                    or state_dir.is_relative_to(ROOT)):
+                raise ValueError("operator state directory must be pre-existing, private and outside the repository")
         rows = []
         prior_payment = None
         started = utc_now()
@@ -871,19 +883,29 @@ def main() -> int:
             if case.execution_class == "public_read" and live_authority is not None:
                 started_at = utc_now()
                 spec = live_authority.plan.cases[case_id]
-                body = b'{"type":"l2Book","coin":"BTC"}' if case_id == "A07" else b""
+                body = b'{"scenario":"source-unavailable","fallback":"forbidden"}' if case_id == "A07" else b""
                 public_plan = PublicReadPlan(case_id, spec["method"], spec["url"], body,
                                              spec["timeout_seconds"], spec["max_response_bytes"], 1)
                 grant = live_authority.public_grant(case_id, now=datetime.now(timezone.utc))
-                observation = validate_live_public_output(execute_public_read(
-                    public_plan, grant, subject_commit=identity["commit"], subject_tree=identity["tree"],
-                    now=lambda: datetime.now(timezone.utc), environ=dict(os.environ), state_dir=state_dir,
-                ), public_plan, grant, identity)
+                try:
+                    observation = (execute_a07(public_plan, grant, identity=identity, state_dir=state_dir,
+                                               root=ROOT, now=lambda: datetime.now(timezone.utc))
+                                   if case_id == "A07" else
+                                   execute_a29(public_plan, grant, identity=identity, state_dir=state_dir,
+                                               now=lambda: datetime.now(timezone.utc)))
+                except (OSError, ValueError, subprocess.SubprocessError):
+                    command = ["builtin:public-read", case_id]
+                    row = {"case_id": case_id, "title": case.title, "status": "FAIL",
+                           "omissions": ["ASSERTION_EXECUTION_ERROR"], "command": command,
+                           "environment_names": [], "exit_code": None, "started_at": started_at,
+                           "ended_at": utc_now(), "execution_class": case.execution_class, "evidence": []}
+                    rows.append(row)
+                    continue
                 empty_digest = hashlib.sha256(b"").hexdigest()
                 document = {"case_id": case_id, "assertion": case.assertion,
                             "execution_class": case.execution_class, "claims": list(case.required_claims),
                             "subject": {"commit": identity["commit"], "tree": identity["tree"]},
-                            "observations": {"transport": observation},
+                            "observations": {"result": observation},
                             "transcript": {"stdout_sha256": canonical_sha256(observation),
                                            "stderr_sha256": empty_digest}}
                 evidence_dir = evidence_root / "evidence"

@@ -29,10 +29,11 @@ class GrantError(ValueError):
 _OID = re.compile(r"[0-9a-f]{40}\Z")
 _DIGEST = re.compile(r"[0-9a-f]{64}\Z")
 _ALLOWED = {
+    # Transport primitive characterization only; the acceptance runner never
+    # treats this response as A07 semantic evidence.
     ("A07", "POST", "https://api.hyperliquid.xyz/info"),
-    ("A07", "POST", "https://rpc.test.mezo.org"),
-    ("A07", "GET", "https://facilitator.vativ.io/supported"),
-    ("A29", "GET", "https://github.com/Dimkox/liqvera.git/info/refs?service=git-upload-pack"),
+    ("A07", "LOCAL_POST", "https://source.invalid/internal/v1/reports"),
+    ("A29", "GIT_CLONE", "https://github.com/Dimkox/liqvera.git"),
 }
 _FIELDS = {
     "schema", "grant_id", "subject_commit", "subject_tree", "plan_sha256", "case", "method",
@@ -106,7 +107,8 @@ class PublicReadGrant:
         if expires.tzinfo is None or expires <= now or expires > now + timedelta(minutes=15):
             raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
         limits = (raw.get("maximum_attempts"), raw.get("timeout_seconds"), raw.get("max_response_bytes"))
-        if any(type(value) is not int for value in limits) or not (limits[0] == 1 and 1 <= limits[1] <= 15 and 1 <= limits[2] <= 2_097_152):
+        maximum_bytes = 52_428_800 if case == "A29" else 2_097_152
+        if any(type(value) is not int for value in limits) or not (limits[0] == 1 and 1 <= limits[1] <= 15 and 1 <= limits[2] <= maximum_bytes):
             raise GrantError("PUBLIC_READ_GRANT_INVALID")
         body_sha256=raw.get("body_sha256")
         if not isinstance(body_sha256,str) or not _DIGEST.fullmatch(body_sha256):
@@ -184,11 +186,12 @@ def _resolve(host:str)->tuple[str,...]:
     return tuple(sorted({item[4][0] for item in socket.getaddrinfo(host,443,type=socket.SOCK_STREAM)}))
 
 
-def _consume(state_dir, grant:PublicReadGrant)->None:
+def consume_public_read_grant(state_dir, grant:PublicReadGrant)->str:
     state_dir = os.fspath(state_dir)
     info = os.lstat(state_dir)
     if not stat.S_ISDIR(info.st_mode) or stat.S_IMODE(info.st_mode) != 0o700:
         raise GrantError("PUBLIC_READ_STATE_DIR_INVALID")
+    identity = hashlib.sha256(f"{info.st_dev}:{info.st_ino}".encode()).hexdigest()
     marker = hashlib.sha256(f"{grant.grant_id}:{grant.digest}".encode()).hexdigest()
     path = os.path.join(state_dir, marker)
     try:
@@ -201,6 +204,7 @@ def _consume(state_dir, grant:PublicReadGrant)->None:
     directory = os.open(state_dir, os.O_RDONLY | os.O_DIRECTORY)
     try: os.fsync(directory)
     finally: os.close(directory)
+    return identity
 
 
 def execute_public_read(plan:PublicReadPlan,grant:PublicReadGrant,*,subject_commit:str,subject_tree:str,now,
@@ -211,7 +215,7 @@ def execute_public_read(plan:PublicReadPlan,grant:PublicReadGrant,*,subject_comm
     parsed=urlsplit(plan.url); before=tuple(resolver(parsed.hostname)); grant.validate_resolution(before,before)
     connected=tuple(resolver(parsed.hostname)); grant.validate_resolution(before,connected)
     if now()>=grant.expires_at: raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
-    _consume(state_dir,grant)
+    state_identity = consume_public_read_grant(state_dir,grant)
     client=connection(parsed.hostname,connected[0],plan.timeout_seconds)
     try:
         path=parsed.path+(f"?{parsed.query}" if parsed.query else "")
@@ -233,5 +237,5 @@ def execute_public_read(plan:PublicReadPlan,grant:PublicReadGrant,*,subject_comm
         reduced = validate_public_read_evidence(grant,evidence,environ=environ,now=now())
         return {**reduced, "grant_id": grant.grant_id, "grant_digest": grant.digest,
                 "plan_sha256": plan.digest, "subject_commit": subject_commit,
-                "subject_tree": subject_tree}
+                "subject_tree": subject_tree, "state_dir_identity": state_identity}
     finally: client.close()

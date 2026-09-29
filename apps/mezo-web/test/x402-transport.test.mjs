@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { boundedFetch, boundedResponseJson } from "../src/x402-transport.mjs";
+import { boundedFetch, boundedFetchJson, boundedResponseJson } from "../src/x402-transport.mjs";
 
 test("payment fetch enforces timeout and supplies no ambient credentials or redirects", async () => {
   let observed;
@@ -36,4 +36,12 @@ test("payment decoder rejects declared and streamed responses over the cap", asy
   );
   const stream = new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(9)); controller.close(); } });
   await assert.rejects(boundedResponseJson(new Response(stream), 8), /exceeds/);
+});
+
+test("payment deadline remains active while the response body is stalled", async () => {
+  const stalled = new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array([123])); } });
+  await assert.rejects(
+    boundedFetchJson(async () => new Response(stalled, { status: 200 }), "/paid", {}, 1024, 5),
+    /deadline exceeded/,
+  );
 });

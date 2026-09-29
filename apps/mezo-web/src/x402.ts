@@ -4,9 +4,9 @@ import type { Eip1193Provider } from "./wallet";
 import { x402Client, x402HTTPClient } from "@x402/core/client";
 import { ExactEvmScheme, type ClientEvmSigner } from "@x402/evm";
 import { validateDelivery } from "./api";
-import { boundedFetch, boundedResponseJson } from "./x402-transport.mjs";
+import { boundedFetchJson } from "./x402-transport.mjs";
 
-export { boundedFetch, boundedResponseJson } from "./x402-transport.mjs";
+export { boundedFetch, boundedFetchJson, boundedResponseJson } from "./x402-transport.mjs";
 
 /**
  * Only a reviewed implementation using the installed official x402 browser SDK
@@ -59,15 +59,17 @@ class ProductionX402BrowserAdapter implements OfficialX402BrowserAdapter {
     const protocol=new x402HTTPClient(new x402Client().register("eip155:31611",new ExactEvmScheme(signer)));
     const headers={Authorization:`Bearer ${input.bearerCapability}`,Accept:"application/json"};
     try {
-      const challenge=await boundedFetch(fetch,input.path,{headers});
+      const challengeRead=await boundedFetchJson(fetch,input.path,{headers},65_536);
+      const challenge=challengeRead.response;
       if(challenge.status!==402)throw new Error("Expected an exact payment challenge. No payment was submitted.");
-      const required=protocol.getPaymentRequiredResponse(name=>challenge.headers.get(name),await boundedResponseJson(challenge,65_536));
+      const required=protocol.getPaymentRequiredResponse(name=>challenge.headers.get(name),challengeRead.body);
       const payment=await protocol.createPaymentPayload(required);
-      const paid=await boundedFetch(fetch,input.path,{headers:{...headers,...protocol.encodePaymentSignatureHeader(payment)}});
+      const paidRead=await boundedFetchJson(fetch,input.path,{headers:{...headers,...protocol.encodePaymentSignatureHeader(payment)}},10_000_000);
+      const paid=paidRead.response;
       if(paid.status===202)return "recovering";
       if(!paid.ok)throw new Error("Payment outcome requires reconciliation.");
       await protocol.processPaymentResult(payment,name=>paid.headers.get(name),paid.status);
-      return validateDelivery(await boundedResponseJson(paid,10_000_000),input.quote.report_id);
+      return validateDelivery(paidRead.body,input.quote.report_id);
     } catch(error) {
       if(error instanceof X402CancelledBeforeSubmission)throw error;
       return "recovering";

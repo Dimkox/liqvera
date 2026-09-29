@@ -25,6 +25,10 @@
   UNKNOWN confirm-only behavior through injected deterministic executors.
 - Operator P2: actual CLI sealing with deterministic transport injection;
   response target, plan, grant, subject and byte-bound mutations fail closed.
+- P2 semantics: controlled gateway `SOURCE_UNAVAILABLE` through
+  `HttpReportService.build` with no fallback/artifact; shallow anonymous clone
+  in a fresh directory with exact origin/commit/tree and bounded bytes; a
+  second output directory with the same durable journal performs zero work.
 - Browser transport: executable timeout, redirect, ambient-credential and both
   declared/streamed response-cap tests. Durable consumption: concurrent and
   restarted adapters share one transactional fake store; real PostgreSQL proof

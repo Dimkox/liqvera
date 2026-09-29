@@ -8,6 +8,24 @@ export async function boundedFetch(fetcher, url, init, timeoutMs = 15_000) {
   } finally { clearTimeout(deadline); }
 }
 
+export async function boundedFetchJson(fetcher, url, init, maximum, timeoutMs = 15_000) {
+  const controller = new AbortController();
+  let deadline;
+  const timedOut = new Promise((_, reject) => {
+    deadline = setTimeout(() => {
+      controller.abort();
+      reject(new Error("Payment response deadline exceeded."));
+    }, timeoutMs);
+  });
+  try {
+    return await Promise.race([(async () => {
+      const response = await fetcher(url, { ...init, cache: "no-store", credentials: "omit", redirect: "error", signal: controller.signal });
+      if (response.status >= 300 && response.status < 400) throw new Error("Redirects are forbidden at the payment boundary.");
+      return { response, body: await boundedResponseJson(response, maximum) };
+    })(), timedOut]);
+  } finally { clearTimeout(deadline); }
+}
+
 export async function boundedResponseJson(response, maximum) {
   const declared = response.headers.get("content-length");
   if (declared !== null && (!/^[0-9]+$/.test(declared) || Number(declared) > maximum)) throw new Error("Response exceeds the payment boundary.");

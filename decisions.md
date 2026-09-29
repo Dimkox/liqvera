@@ -193,3 +193,9 @@ raise the floor through the P0 targeted-test debt.
 Model commit and tree values as the repository's canonical 40-hex Git OIDs;
 do not pad, hash, or relabel them as SHA-256. Keeping the separate schema type
 fixed the producer/consumer mismatch without weakening true 64-hex digests.
+
+## 2026-09-29 — Honor the SDK's strict upper dependency bound
+
+Keep `eth-account==0.13.7` with `hyperliquid-python-sdk==0.24.0`, whose metadata
+requires `eth-account<0.14.0`. The existing characterization was correct; the
+project's 0.14.0 pin was the incompatible stale value.

@@ -15,7 +15,7 @@ dependencies = [
   "orjson==3.12.0",
   "structlog==26.1.0",
   "hyperliquid-python-sdk==0.24.0",
-  "eth-account==0.14.0",
+  "eth-account==0.13.7",
   "jsonschema==4.26.0",
   "referencing==0.37.0",
 ]

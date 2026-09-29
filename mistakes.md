@@ -142,3 +142,11 @@ The first F3 full verifier completed its checks but could not record a receipt
 because the change spec named test directories and one nonexistent schema file.
 The root cause was copying human-readable suite labels into typed evidence
 instead of validating every entry as the required regular file path.
+
+## 2026-09-29 — Unpinned verifier interpreter looked like parallel races
+
+The full verifier was invoked with system `python3`, then missing project
+packages and Hatchling were misclassified as seven xdist build/import
+collisions. The root cause was not binding the command to the repository's
+pinned `.venv`; reproducing the exact slice under both interpreters showed the
+22-worker path is green and has no shared mutable-state failure.

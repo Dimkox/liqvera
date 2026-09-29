@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (offline F3 repair implemented; full verifier remains red on inherited dependency and parallel-factory failures). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (offline F3 repair implemented; dependency pin and verifier environment diagnosis completed). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F3 offline artifact verification repair — 2026-09-29
@@ -29,13 +29,15 @@ reports 738 passed and 85 subtests. The full PR verifier exposed and now has
 repairs for whitespace, typed evidence paths, and graph inventory ownership of
 the new package/tests. The final committed-tree run passes diff, both change
 specs, secret, contract, SQL, all nine Trivy targets, Ruff, Bandit, and source
-stability, but remains red. Its parallel pytest result is `2 failed, 1133
-passed, 7 errors, 85 subtests`: one deterministic inherited dependency-contract
-mismatch (`eth-account==0.14.0` in the project versus `0.13.7` in its test),
-plus parallel factory/import collisions that disappear in the focused 22-worker
-slice (`27 passed`, same dependency mismatch only). Because the suite is
-incomplete, measured coverage is 35.26% against the 36% floor. Verification is
-therefore recorded failed and independent reviews were correctly not started.
+stability. The apparent parallel factory/import collisions were reproduced and
+are not shared-state races: the failing command used `/usr/bin/python3`, which
+lacks the project packages and Hatchling. The same complete 20-test factory,
+installation, and canonical F3 slice passes with 22 workers in the pinned local
+environment. Hyperliquid SDK 0.24.0 declares `eth-account>=0.10.0,<0.14.0`, and
+the provisioned compatible version is 0.13.7, so the stale project pin was
+repaired from 0.14.0 to 0.13.7; its characterization and `pip check` now pass.
+A final full verifier run from the pinned environment is pending. Independent
+reviews remain unstarted until that result is green.
 Gateway/F4 through F7, graph orphan cleanup,
 network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
 start, deployment, release, and push remain outside this route. All 156 broad

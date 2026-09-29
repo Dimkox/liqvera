@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (F4 local gateway/ledger scope approved; TDD implementation is next). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (F4 gateway/ledger focused repair green; full route verification pending). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F4 local gateway and ledger verification — 2026-09-29
@@ -15,13 +15,24 @@ semantics against loopback HTTP and a uniquely disposable PostgreSQL database.
 The confirmed recovery defect is cross-component, not schema-level: the report
 service documents HTTP 200 `deleted:false` as authoritative already-absent
 success after a lost response, while the gateway currently accepts only
-`deleted:true`. The approved repair accepts either boolean only with a matching
-report ID and otherwise fails closed. Migration `001_ledger.sql` and the frozen
-vector catalog must remain byte-identical; no dependency upgrade, migration,
+`deleted:true`. The adapter regression reproduced that mismatch and acceptance
+of an unknown field. The minimum repair now accepts either boolean only in an
+exact matching two-field HTTP 200 body. The two reproduced TypeScript errors
+are repaired; typecheck, build, and three loopback cleanup tests pass.
+
+The first disposable PostgreSQL run passed migration/rerun and 20-way
+idempotency, then exposed SQLSTATE `42703`: migration 001's shared immutable
+identity function dereferences `OLD.tx_hash` for an artifact row, preventing
+the intended `AVAILABLE -> DELETED` update. The user explicitly answered
+“Делай”, approving only the required forward-only 002 function repair and
+local disposable verification. Migration `001_ledger.sql` and the frozen
+vector catalog remain byte-identical. The repaired disposable suite reports
+five passes: fresh 001-to-002 and rerun, 001-only upgrade, 20-way idempotency,
+fail-closed recovery, and lost-response convergence with artifact/payment
+immutability checks. No dependency upgrade, other migration,
 shared database, facilitator, RPC, wallet, chain, exchange, live capture,
-deployment, release, or payment action is in scope. The next step is a failing
-adapter regression, followed by the minimum compile and recovery repair, then a
-20-way disposable-ledger concurrency test and the pinned full verifier.
+deployment, release, or payment action is in scope. The next step is the pinned
+full verifier, then independent route-selected review.
 
 ## F3 offline artifact verification repair — 2026-09-29
 
@@ -185,14 +196,17 @@ independent re-reviews passed with no findings. Their reports are stored. The
 durable change package is now `ready`; its transition-only fingerprint still
 requires a final verifier and review-receipt refresh before closure.
 
-F3–F7 remain `IMPLEMENTED_UNVERIFIED`; all 156 vectors remain `NOT_RUN`,
+F3 is locally verified and `ready`; F4 has focused local evidence but awaits
+full verification/review. F5–F7 remain `IMPLEMENTED_UNVERIFIED`; all 156
+vectors remain `NOT_RUN`,
 A13–A14 remain `BLOCKED_EXTERNAL`, payment readiness remains false, and no
 testnet payment, deployment, release, or publication is claimed.
 
 ## Current state and next action
 
 F1 is **complete-with-blockers** and F2's static contract phase is complete.
-F3–F7 are now **IMPLEMENTED_UNVERIFIED**. The accepted
+F4 is **FOCUSED-VERIFIED / ROUTE-UNVERIFIED** and F5–F7 remain
+**IMPLEMENTED_UNVERIFIED**. The accepted
 [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md) fixes only runtime,
 ledger, immutable-artifact, and testnet authority. It does not freeze API
 payloads or database schemas and does not authorize payment or release.
@@ -229,8 +243,9 @@ runtime dependency declaration, and local demo web assets. Gateway builds copy
 their schema and migration resources; web builds retain their Vite-owned static
 bundle. Gateway and web `package-lock.json` files were generated using
 `npm install --package-lock-only --ignore-scripts`; no `node_modules` trees or
-build outputs were retained. Resolution reported 32 gateway vulnerabilities
-(29 moderate, 3 high) and 31 web vulnerabilities (27 moderate, 4 high). These
+build outputs were retained. The current gateway audit observation is 32
+advisories (28 moderate, 4 high); the retained web observation is 31 (27
+moderate, 4 high). These
 counts are unresolved audit input for the deferred verification phase, not a
 security acceptance result.
 

@@ -1,16 +1,17 @@
 # Liqvera gateway
 
-Status: **IMPLEMENTED_UNVERIFIED**. This code has not been built, typechecked,
-run, or accepted. The owner deferred execution and verification to the next
-phase. F2 vectors remain `NOT_RUN`; this implementation does not establish F4,
-F5, testnet settlement, or release acceptance.
+Status: **F4 LOCAL VERIFICATION IN PROGRESS**. The exact lock builds and
+typechecks locally, and the private cleanup adapter has executable loopback
+contract tests. Disposable-ledger verification is not yet complete. F2 vectors
+remain `NOT_RUN`; these focused checks do not establish F4/F5 acceptance,
+testnet settlement, deployment, or release acceptance.
 
 The Express process owns the frozen `/v1/*` HTTP surface, PostgreSQL ledger,
 and official x402 2.16.0 boundary. Python remains responsible for all analytics
 and immutable report construction. `@liqvera/mezo-protocol` supplies the
 provenance-backed Mezo chain, token, ABI, Transfer event, and permit metadata.
 
-## Build and start (deferred)
+## Build and start
 
 After the shared protocol package has been installed and built:
 
@@ -22,8 +23,10 @@ npm start
 ```
 
 The build copies frozen schemas and versioned SQL into `dist/`. Migrations
-use a PostgreSQL advisory lock, transaction, and checksum ledger. They create
-new tables only. Do not run migrations automatically from every HTTP request.
+use a PostgreSQL advisory lock, transaction, and checksum ledger. Migration
+001 creates the ledger; forward-only 002 replaces only the shared immutable
+identity trigger function so table-specific fields are never dereferenced for
+another table. Do not run migrations automatically from every HTTP request.
 
 Configuration: `DATABASE_URL` or `DATABASE_URL_FILE` (exactly one), `PAY_TO`,
 `SOURCE_MODE` (`fixture` by default), `ARTIFACT_ROOT` (`/data/artifacts`),
@@ -43,7 +46,10 @@ static volume. Current Python recovery is an explicit unbound adapter and
 returns false; paid-artifact corruption closes new sales and stays an incident.
 The artifact mount is read-only. Unpaid retention cleanup calls the isolated
 report service's idempotent `DELETE /internal/v1/reports/{report_id}` and
-expects `{ "report_id": "…", "deleted": true }`. It requires an internal
+accepts an exact matching HTTP 200 body with boolean `deleted`: `true` means
+removed now and `false` means already absent after an earlier attempt. Both
+authoritatively establish the same exact-report absence state; malformed,
+mismatched, non-200, and transport outcomes do not. It requires an internal
 service token loaded from `REPORT_SERVICE_TOKEN_FILE`; the token is also sent
 on build and health calls when present. Missing credentials keep retention
 mutation readiness false and cleanup blocked. The gateway never writes or
@@ -78,10 +84,10 @@ adapter under the locked ledger decision. Rollback after any payment state exist
 means stop new sales and forward-fix the ledger; never drop tables or restore
 an older ledger over newer authorization records.
 
-## Deferred verification obligations
+## Remaining verification obligations
 
-Compile and typecheck the exact lock, validate all F2 response schemas, run
-real PostgreSQL migration/rollback and 20-way idempotency races, compare state
+Validate all F2 response schemas, complete disposable PostgreSQL migration/
+invariant and 20-way idempotency races, compare state
 transitions with `states.json`, and execute the F2 payment/recovery vectors.
 Exercise crash-before-submit, crash-after-broadcast, missing transaction hash,
 settlement timeout, response loss, expiry during settlement, cross-scope reads,

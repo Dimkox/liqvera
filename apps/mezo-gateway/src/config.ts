@@ -1,12 +1,23 @@
 import { readFile } from 'node:fs/promises';
 import { address, PublicError } from './domain/model.js';
 import { fixedInternalUrl } from './adapters/http.js';
+import type { GatewayConfig } from './application/gateway.js';
+export interface RuntimeConfig extends GatewayConfig {
+  databaseUrl: string;
+  publicBase: URL;
+  origins: Set<string>;
+  port: number;
+  host: string;
+  artifactRoot: string;
+  reportToken: string | null;
+  reportUrl: URL;
+}
 export async function databaseUrl(env:NodeJS.ProcessEnv):Promise<string> {
   if(env.DATABASE_URL&&env.DATABASE_URL_FILE)throw new PublicError('INVALID_INPUT');
   const value=env.DATABASE_URL_FILE?(await readFile(env.DATABASE_URL_FILE,'utf8')).trim():env.DATABASE_URL;
   if(!value||!/^postgres(?:ql)?:\/\//.test(value))throw new PublicError('STORAGE_UNAVAILABLE');return value;
 }
-export async function loadConfig(env:NodeJS.ProcessEnv=process.env) {
+export async function loadConfig(env:NodeJS.ProcessEnv=process.env):Promise<RuntimeConfig> {
   const sourceMode=env.SOURCE_MODE??'fixture';if(sourceMode!=='fixture'&&sourceMode!=='live-public')throw new PublicError('INVALID_INPUT');
   const publicBase=new URL(env.PUBLIC_BASE_URL??'http://localhost:8080');
   if(publicBase.username||publicBase.password||publicBase.search||publicBase.hash||publicBase.pathname!=='/'||

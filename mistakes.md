@@ -150,3 +150,17 @@ packages and Hatchling were misclassified as seven xdist build/import
 collisions. The root cause was not binding the command to the repository's
 pinned `.venv`; reproducing the exact slice under both interpreters showed the
 22-worker path is green and has no shared mutable-state failure.
+
+## 2026-09-29 — Static trigger review missed cross-table record evaluation
+
+The initial F4 analyses declared the schema unchanged without executing the
+artifact state transition on PostgreSQL. The shared trigger's guarded
+`OLD.tx_hash` reference still evaluated for `artifacts`; future data-boundary
+analysis must run each approved mutation on both fresh and upgraded schemas.
+
+## 2026-09-29 — Immediate Docker absence check raced asynchronous removal
+
+The first green database suite was followed by an immediate `docker inspect`
+after stopping an auto-remove container, producing a false cleanup failure.
+Poll the exact validated container identity until absent before claiming local
+cleanup, while retaining the exit trap.

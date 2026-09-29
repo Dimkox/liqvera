@@ -14296,6 +14296,54 @@ repository_inventory:
   - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/test-plan.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/change-spec.yaml
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/evidence/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/evidence/analysis-architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/evidence/analysis-data_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/evidence/analysis-docs_researcher.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/evidence/analysis-integration_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/evidence/analysis-repo_explorer.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/route.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/test-plan.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: tests/contracts/test_acceptance_result.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
@@ -14851,7 +14899,13 @@ repository_inventory:
   - path: apps/mezo-gateway/tsconfig.json
     node: configuration:mezo-gateway-package
     path_class: CONFIGURATION
+  - path: apps/mezo-gateway/tsconfig.test.json
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/migrations/001_ledger.sql
+    node: contract:liqvera-gateway-ledger
+    path_class: MIGRATION
+  - path: apps/mezo-gateway/migrations/002_fix_immutable_ledger_identity.sql
     node: contract:liqvera-gateway-ledger
     path_class: MIGRATION
   - path: apps/mezo-gateway/scripts/copy-resources.mjs
@@ -14927,6 +14981,12 @@ repository_inventory:
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/src/workers/scheduler.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/test/postgres.test.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/test/report-service.test.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/.gitignore

@@ -18,17 +18,17 @@ accepts only the runtime and payment boundary. The overall change remains
 approved at `3729bdc131ca4ac971ab04e735da2e113d68ad71`: 446 contract tests
 and 1087 full-suite tests plus 85 subtests pass. See the
 [bound F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md).
-The F3–F7 code surfaces are now **IMPLEMENTED_UNVERIFIED**: fixed public
-capture, exact reports and offline verification, internal services, the F2
-gateway and PostgreSQL ledger, official x402 adapter boundaries, the browser
-application, isolated deployment definitions, runbooks, and the A01–A30
-acceptance runner exist in the tree. The local protocol package pins official
-Mezo MUSD material and recorded `mezo-org` source revisions. Separate Liqvera
-factory targets were added without changing the existing Stage A three-wheel
-factory. None of these new product targets, services, containers, browser
-flows, or acceptance cases has been executed in this code-completion phase.
-All 156 vectors remain `NOT_RUN`, and no runtime acceptance follows from the
-implementation. Grok's inherited Trivy policy gate remains open.
+F3's canonical offline artifact path is locally verified and `ready`. F4 local
+gateway/ledger verification is in progress: the exact lock builds and
+typechecks, strict cleanup-adapter regressions pass, and five disposable
+PostgreSQL checks cover fresh/upgrade migrations, 20-way idempotency,
+fail-closed recovery, and lost-response cleanup convergence. Full route
+verification and independent review are still pending. F5–F7 remain
+**IMPLEMENTED_UNVERIFIED**. The local protocol package pins official Mezo MUSD
+material and recorded `mezo-org` source revisions. Separate Liqvera factory
+targets do not change the existing Stage A three-wheel factory. All 156 frozen
+vectors remain `NOT_RUN`; focused local tests are not relabelled as vector,
+payment, deployment, or release acceptance.
 
 At implementation commit `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`,
 `make verify` passed with 641 tests and 85 subtests. The command
@@ -141,9 +141,13 @@ make liqvera-compose
 make liqvera-acceptance ACCEPTANCE_OUTPUT=/new/path/result.json
 ```
 
-They have not been executed yet. The gateway and web lockfiles were generated
-with lifecycle scripts disabled; dependency audit findings are deferred to the
-verification and defect-repair phase.
+`liqvera-gateway` has now been exercised locally through its exact lock,
+typecheck/build, loopback adapter suite, and disposable PostgreSQL tests. The
+other listed targets remain separately evidenced. The gateway and web
+lockfiles were generated with lifecycle scripts disabled; dependency audit
+findings remain release-risk input, not acceptance. The current gateway audit
+observation is 32 advisories (28 moderate, 4 high); the retained web observation
+is 31 (27 moderate, 4 high). No forced or breaking audit fix is included in F4.
 
 ## F3 MVP prototype
 

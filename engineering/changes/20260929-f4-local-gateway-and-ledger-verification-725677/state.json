@@ -15,6 +15,36 @@
       "note": "draft; implementation not started",
       "observed_at": "2026-09-29T08:16:51+00:00",
       "route_id": "725677143509"
+    },
+    {
+      "branch": "feat/f3-f7-verification",
+      "change_id": "20260929-f4-local-gateway-and-ledger-verification-725677",
+      "detached": false,
+      "dirty_product_paths": [
+        "README.md",
+        "apps/mezo-gateway/.gitignore",
+        "apps/mezo-gateway/README.md",
+        "apps/mezo-gateway/migrations/002_fix_immutable_ledger_identity.sql",
+        "apps/mezo-gateway/package.json",
+        "apps/mezo-gateway/src/adapters/contracts.ts",
+        "apps/mezo-gateway/src/adapters/report-service.ts",
+        "apps/mezo-gateway/src/config.ts",
+        "apps/mezo-gateway/test/postgres.test.ts",
+        "apps/mezo-gateway/test/report-service.test.ts",
+        "apps/mezo-gateway/tsconfig.test.json",
+        "architecture/architecture.yaml",
+        "decisions.md",
+        "handoff.md",
+        "mistakes.md"
+      ],
+      "dirty_product_state": "dirty",
+      "git_available": true,
+      "git_findings": [],
+      "head": "3f386bdbf9e2594bf541c17c2d63df573dd6859b",
+      "kind": "implementation",
+      "note": "implementation started; preserve work before handoff",
+      "observed_at": "2026-09-29T08:45:23+00:00",
+      "route_id": "725677143509"
     }
   ],
   "created_at": "2026-09-29T08:16:51+00:00",
@@ -69,13 +99,19 @@
       "from": "scoped",
       "reason": "No human gates are declared; bounded local design approved for TDD implementation.",
       "to": "approved"
+    },
+    {
+      "at": "2026-09-29T08:45:23+00:00",
+      "from": "approved",
+      "reason": "TDD regressions reproduced; bounded gateway and migration repairs implemented locally.",
+      "to": "implementing"
     }
   ],
   "human_gates": [],
   "human_gates_digest": "c80c81fef25f98ccee331c8391ed981406316868e0c0e85e3f3deaee6dc63d9a",
   "route_id": "725677143509",
   "schema_version": 1,
-  "status": "approved",
+  "status": "implementing",
   "title": "F4 local gateway and ledger verification",
-  "updated_at": "2026-09-29T08:25:07+00:00"
+  "updated_at": "2026-09-29T08:45:23+00:00"
 }

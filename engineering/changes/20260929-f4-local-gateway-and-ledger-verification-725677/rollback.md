@@ -16,11 +16,13 @@ and keep F4 unverified. Do not delete or rewrite ledger data as rollback.
 
 ## Data recovery / forward-fix
 
-The migration is unchanged and the verification database is disposable. If a
-deployed ledger ever contains affected `AVAILABLE` rows whose storage is
-already absent, disable new sales and forward-fix using authoritative exact-ID
-cleanup/reconciliation evidence. Preserve scopes, requests, quotes, dedup rows,
-and audit history.
+Migration 001 remains unchanged and every verification database is disposable.
+Migration 002 is forward-only: after application, rollback means disable new
+sales and deploy a reviewed corrective `CREATE OR REPLACE FUNCTION`, never
+restore 001's broken function or delete ledger data. For affected `AVAILABLE`
+rows whose storage is already absent, reconcile using authoritative exact-ID
+cleanup evidence while preserving scopes, requests, quotes, dedup rows, and
+audit history.
 
 ## Verification after rollback
 

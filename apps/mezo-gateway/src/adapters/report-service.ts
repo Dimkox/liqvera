@@ -36,6 +36,8 @@ export class HttpReportService implements ReportService {
     const value=await boundedJson(new URL(`/internal/v1/reports/${reportId}`,this.base),{method:'DELETE',signal,headers:this.headers()},4096,2000);
     if(!value||typeof value!=='object')return false;
     const body=value as Record<string,unknown>;
-    return body.report_id===reportId&&body.deleted===true;
+    const keys=Object.keys(body);
+    return keys.length===2&&keys.includes('report_id')&&keys.includes('deleted')&&
+      body.report_id===reportId&&typeof body.deleted==='boolean';
   }
 }

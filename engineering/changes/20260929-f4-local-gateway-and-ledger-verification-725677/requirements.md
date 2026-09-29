@@ -14,9 +14,12 @@
   the matching expired/unpaid artifact to `DELETED` and records one effective
   `UNPAID_ARTIFACT_REMOVED` event while retaining scope, request, quote, and
   deduplication rows.
-- [ ] A fresh disposable PostgreSQL database applies migration 001, a second
-  migrator run is a checksum-valid no-op, and relevant constraints/triggers
-  reject invalid mutation.
+- [ ] A fresh disposable PostgreSQL database applies migration 001 then the
+  approved forward-only 002 trigger repair; an independently prepared 001-only
+  database upgrades to 002; reruns are checksum-valid no-ops.
+- [ ] The repaired trigger permits only `artifacts.storage_state` mutation,
+  rejects other artifact identity mutation, and still rejects immutable
+  payment-attempt identity and transaction-association mutation.
 - [ ] Twenty simultaneous identical same-scope/key creates converge on one
   request/report ID and one rate-budget hit; a changed body conflicts and the
   same key in another scope remains isolated.
@@ -36,6 +39,7 @@
   two capability scopes.
 - Artifact read failure and unsuccessful recovery readback.
 - Migration rerun/checksum protection and immutable ledger/audit constraints.
+- Upgrade from 001-only state and fresh 001-to-002 application.
 
 ## Governance context
 
@@ -43,6 +47,8 @@ Canonical governance JSON under `governance/` remains separately reviewed author
 
 - Applicable rule IDs: canonical specification §§9–15, especially A15, A16,
   A21, A22 and the F4 stage boundary; ADR-0002.
+- Approval: the user explicitly approved the minimal forward migration on
+  2026-09-29 with “Делай”; this grants no shared/production database action.
 - Canonical-example deviations and evidence:
 - Intentional debt created, repaid, or accepted: characterize rather than fix
   equal build deadlines, erased build retryability, and retention I/O while

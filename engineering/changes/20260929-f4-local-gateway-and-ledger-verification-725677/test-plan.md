@@ -7,7 +7,7 @@
 | P0 | Reproduce both compile errors, then pass protocol/gateway typecheck and build from the existing lock | build log |
 | P0 | Matching HTTP 200 cleanup with `true` and `false`; reject malformed, mismatched, non-200 and timeout | adapter regression |
 | P0 | Lost first response then already-absent retry advances ledger once | disposable PostgreSQL retention regression |
-| P0 | Migration first apply/rerun/checksum and selected invariants | disposable PostgreSQL suite |
+| P0 | Fresh 001→002 apply, 001-only upgrade, rerun/checksums and selected invariants | disposable PostgreSQL suite |
 | P0 | 20-way same-scope/key/body convergence, conflicting body, cross-scope isolation | disposable PostgreSQL race test |
 | P1 | Missing/corrupt artifact stays fail closed in `RECOVERY` with zero payment/build action | characterization test |
 | P1 | Existing contracts/conformance and full selected PR profiles remain green | pinned verifier |
@@ -26,7 +26,8 @@
 ## Manual checks
 
 - Confirm the disposable database/container no longer exists after the test.
-- Inspect the final diff for no migration/vector/lockfile change, no external
-  URL, and no weakening of payment or shadow-only gates.
+- Inspect the final diff for only the approved 002 migration, no 001/vector/
+  lockfile change, no external URL, and no weakening of payment or shadow-only
+  gates.
 - Record Node/npm/PostgreSQL identities and exact pass/fail counts without
   marking frozen vectors `PASS` unless they were actually executed and mapped.

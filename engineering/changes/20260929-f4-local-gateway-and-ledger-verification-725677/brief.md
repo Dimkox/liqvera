@@ -33,6 +33,9 @@ enabled.
   200 boolean results and all negative response classes.
 - Apply and rerun the tracked `001_ledger.sql` through the gateway migrator on
   a uniquely identified disposable PostgreSQL instance.
+- Add one forward-only `002_*` migration that replaces the shared immutable
+  identity trigger function with table-specific nested guards. Exercise both a
+  fresh `001 -> 002` install and an upgrade from an already applied 001 state.
 - Prove database idempotency and scope isolation with at least 20 concurrent
   same-scope/key requests, plus lost cleanup-response ledger convergence.
 - Characterize artifact-loss recovery as a fail-closed incident state.
@@ -40,8 +43,9 @@ enabled.
 
 ### Out of scope
 
-- Editing or replacing `001_ledger.sql`, adding a migration, changing the
-  frozen F2 vector catalog, or performing a backfill.
+- Editing or replacing `001_ledger.sql`, adding any migration beyond the
+  explicitly approved trigger-function repair `002_*`, changing the frozen F2
+  vector catalog, or performing a backfill.
 - Facilitator, RPC, wallet, chain, exchange, live capture, shared database,
   Compose deployment, release, push, or any external mutation.
 - F5 authorization identity, settlement, confirmation, entitlement, or live

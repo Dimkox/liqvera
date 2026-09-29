@@ -205,3 +205,9 @@ project's 0.14.0 pin was the incompatible stale value.
 JSON Schema regex `$` follows host regex semantics that may match before a
 terminal newline. Exact `minLength`/`maxLength` plus lowercase-hex patterns keep
 Git OIDs and SHA-256 encodings canonical across validators.
+
+## 2026-09-29 — Repair applied trigger logic with a forward migration
+
+Keep ledger migration 001 immutable and use one idempotent 002
+`CREATE OR REPLACE FUNCTION` with nested table guards. Real 001-only upgrade
+and fresh-install tests prove the repair without rewriting applied history.

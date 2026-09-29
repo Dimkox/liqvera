@@ -4,9 +4,13 @@ import addFormats from 'ajv-formats';
 import { PublicError } from '../domain/model.js';
 import { StateMachines, type Machine } from '../domain/states.js';
 const BASE = 'https://schemas.liqvera.invalid/mezo-evidence/v1/';
+type FormatInstaller = (ajv: Ajv2020) => Ajv2020;
+const installFormats: FormatInstaller = typeof addFormats === 'function'
+  ? addFormats
+  : (addFormats as unknown as { default: FormatInstaller }).default;
 export class Contracts {
   private readonly ajv = new Ajv2020({ strict: false, allErrors: false });
-  private constructor(readonly states: StateMachines) { addFormats(this.ajv); }
+  private constructor(readonly states: StateMachines) { installFormats(this.ajv); }
   static async load(root: URL): Promise<Contracts> {
     const states = JSON.parse(await readFile(new URL('states.json',root),'utf8')) as { machines: Machine[] };
     const result = new Contracts(new StateMachines(states.machines));

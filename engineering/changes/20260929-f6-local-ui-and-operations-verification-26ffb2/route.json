@@ -1,0 +1,99 @@
+{
+  "allowed_agents": [
+    "repo_explorer",
+    "architect",
+    "docs_researcher",
+    "data_architect",
+    "code_reviewer",
+    "test_reviewer",
+    "security_reviewer",
+    "release_reviewer",
+    "data_reviewer",
+    "frontend_implementer"
+  ],
+  "analysis_agents": [
+    "repo_explorer",
+    "architect",
+    "docs_researcher",
+    "data_architect"
+  ],
+  "base_commit": "f07562eee1a33df74768e9fa4a3b074783d8c59e",
+  "base_fingerprint": "8832039e6efb3fd4a5a742202e408fa9aede314d403410c9e0c156a001ac91f5",
+  "complexity": "high-risk",
+  "created_at": "2026-09-29T10:02:13+00:00",
+  "delivery_expected": true,
+  "domains": [
+    "frontend",
+    "data"
+  ],
+  "human_gates": [
+    "scope_and_design_approval",
+    "migration_or_external_write_approval"
+  ],
+  "intent": "bugfix",
+  "matched_keywords": {
+    "frontend": [
+      "ui"
+    ]
+  },
+  "primary_skill": "adaptive-delivery",
+  "quality_profiles": [
+    "base",
+    "frontend",
+    "data"
+  ],
+  "rationale": [
+    "high-risk signal: payment",
+    "intent=bugfix",
+    "domains=frontend,data",
+    "repository=python",
+    "write-owner=frontend_implementer",
+    "analysis-wave=4/10"
+  ],
+  "repo": {
+    "bitrix_modules": [],
+    "domains": [
+      "data"
+    ],
+    "kind": "python",
+    "languages": [
+      "python"
+    ],
+    "package_scripts": [],
+    "signals": [
+      "python:project",
+      "data:migrations"
+    ]
+  },
+  "required_evidence": [
+    "verification",
+    "code_review",
+    "test_review",
+    "security_review",
+    "data_review",
+    "release_review"
+  ],
+  "review_agents": [
+    "code_reviewer",
+    "test_reviewer",
+    "security_reviewer",
+    "release_reviewer",
+    "data_reviewer"
+  ],
+  "risk": "high",
+  "route_id": "26ffb293d4ff",
+  "schema_version": 1,
+  "session_id": "f6-local-ui-operations-verification",
+  "status": "routed",
+  "task": "Verify and repair the Liqvera F6 local UI and operations boundary using deterministic browser tests, static configuration validation, and disposable local containers only: exercise cancel, wrong-network display, wallet account/chain switch, reload, quote recovery, no-resettlement behavior, fixture-profile isolation, health, resource limits, observability, and runbook accuracy. Preserve shadow-only safety; do not use a real wallet, RPC, facilitator, transfer, shared environment, deployment, release, exchange, live public capture, or testnet/mainnet payment.",
+  "task_domains": [
+    "frontend"
+  ],
+  "workflow_skills": [
+    "adaptive-delivery",
+    "bugfix-workflow",
+    "data-change",
+    "frontend-change"
+  ],
+  "write_agent": "frontend_implementer"
+}

@@ -1,0 +1,57 @@
+{
+  "acceptance_criteria": [
+    {"id":"AC-001","statement":"Deterministic browser tests drive production UI orchestration through fake EIP-1193, same-origin API, storage, crypto, timers, and a test-only adapter with no real or cross-origin I/O.","evidence":[{"test":"apps/mezo-web:test"},{"receipt":"test_review"}]},
+    {"id":"AC-002","statement":"Cancel, wrong-chain, account/chain switch, reload, quote recovery, uncertain states, paid report/evidence reuse, and no-resettlement behavior are visibly and exactly characterized.","evidence":[{"test":"apps/mezo-web:test"},{"receipt":"code_review"}]},
+    {"id":"AC-003","statement":"Resolved fixture Compose has exact fixture services, internal networks, loopback-only publication, resource/security bounds, and no external-egress membership; live resolution retains live-only egress.","evidence":[{"test":"tests:test_f6_operations"},{"receipt":"security_review"}]},
+    {"id":"AC-004","statement":"Metrics are observable only on a private operations boundary, are absent from host and Caddy routes, and use bounded safe labels distinct from payment readiness.","evidence":[{"test":"tests:test_f6_operations"},{"receipt":"release_review"}]},
+    {"id":"AC-005","statement":"The canonical restrictive CSP is present and compatible with built static assets; README, handoff, and runbooks state exact local-only evidence and non-claims.","evidence":[{"test":"tests:test_f6_operations"},{"receipt":"code_review"}]},
+    {"id":"AC-006","statement":"Exact-lock web checks and the pinned PR verifier pass while every frozen vector and A26/A30 remain NOT_RUN.","evidence":[{"receipt":"verification"},{"receipt":"data_review"}]}
+  ],
+  "approvals": {
+    "required_scopes": ["scope_and_design_approval"]
+  },
+  "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+  "contracts": {
+    "events": [],
+    "json_schema": [],
+    "openapi": []
+  },
+  "forbidden_outcomes": [
+    {"id":"FORBID-001","statement":"No real wallet, RPC, facilitator, x402 production adapter, transfer, payment, exchange mutation, live capture/profile, shared environment, deployment, release, push, or external request/write occurs.","evidence":[{"receipt":"verification"},{"receipt":"security_review"}]},
+    {"id":"FORBID-002","statement":"No container, database, schema, named volume, migration, backfill, or secret store is started, created, read, or changed in this phase.","evidence":[{"receipt":"data_review"},{"receipt":"release_review"}]},
+    {"id":"FORBID-003","statement":"Recovery, wallet events, or ambiguous outcomes never invoke a second payment adapter call, rebind a payer, or clear uncertainty without authoritative READY evidence.","evidence":[{"test":"apps/mezo-web:test"},{"receipt":"test_review"}]},
+    {"id":"FORBID-004","statement":"Fixture services have no external-egress network and metrics are never published to host or routed through Caddy.","evidence":[{"test":"tests:test_f6_operations"},{"receipt":"security_review"}]},
+    {"id":"FORBID-005","statement":"No frozen vector, A13/A14/A26/A28/A30, payment readiness, deployment, or release status is promoted by fake or static evidence.","evidence":[{"receipt":"code_review"},{"receipt":"data_review"}]}
+  ],
+  "invariants": [
+    {"id":"INV-001","statement":"Production keeps the reviewed x402 adapter unregistered and fixture capabilities non-chargeable.","evidence":[{"test":"apps/mezo-web:test"},{"receipt":"security_review"}]},
+    {"id":"INV-002","statement":"A payment guard is durable before the sole adapter invocation; ambiguous, pending, uncertain, manual-review, and paid recovery paths cannot resubmit.","evidence":[{"test":"apps/mezo-web:test"},{"receipt":"test_review"}]},
+    {"id":"INV-003","statement":"Reload reuses the version-1 capability, payer, request/quote identity, body, and idempotency key; server state remains authoritative.","evidence":[{"test":"apps/mezo-web:test"},{"receipt":"code_review"}]},
+    {"id":"INV-004","statement":"Fixture edge is loopback-only, fixture services have no external-egress membership, metrics are internal-only, and health never implies payment readiness.","evidence":[{"test":"tests:test_f6_operations"},{"receipt":"release_review"}]},
+    {"id":"INV-005","statement":"All 156 frozen vectors remain NOT_RUN and shadow-only safety remains intact.","evidence":[{"receipt":"verification"},{"receipt":"data_review"}]}
+  ],
+  "objective": {
+    "id": "OBJ-001",
+    "statement": "Verify and repair the Liqvera F6 local UI and operations boundary using deterministic browser tests, static configuration validation, and disposable local containers only: exercise cancel, wrong-network display, wallet account/chain switch, reload, quote recovery, no-resettlement behavior, fixture-profile isolation, health, resource limits, observability, and runbook accuracy. Preserve shadow-only safety; do not use a real wallet, RPC, facilitator, transfer, shared environment, deployment, release, exchange, live public capture, or testnet/mainnet payment.",
+    "success_metric": "Deterministic browser and resolved-configuration regression suites plus full PR verification pass with zero external actions",
+    "target": "Exact zero-or-one adapter invocation, GET-only recovery, fixture zero-egress membership, internal-only metrics, restrictive CSP, and truthful documentation"
+  },
+  "observability": [
+    {"id":"SIG-001","metric":"browser_api_and_adapter_call_trace","proves":["OBJ-001"]},
+    {"id":"SIG-002","metric":"saved_flow_guard_and_rendered_ui_state","proves":["OBJ-001"]},
+    {"id":"SIG-003","metric":"resolved_compose_service_network_port_and_limit_inventory","proves":["OBJ-001"]},
+    {"id":"SIG-004","metric":"private_metric_binding_safe_label_and_csp_assertions","proves":["OBJ-001"]}
+  ],
+  "risk": {
+    "domains": [
+      "data",
+      "frontend"
+    ],
+    "tier": "red"
+  },
+  "rollback": {
+    "maximum_steps": 1,
+    "strategy": "forward_fix"
+  },
+  "schema_version": 2
+}

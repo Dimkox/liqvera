@@ -1,0 +1,92 @@
+{
+  "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+  "checkpoint_mirror_pending": false,
+  "checkpoints": [
+    {
+      "branch": "feat/f3-f7-verification",
+      "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+      "detached": false,
+      "dirty_product_paths": [],
+      "dirty_product_state": "clean",
+      "git_available": true,
+      "git_findings": [],
+      "head": "4b783a2f153c96d4775eca899757f0f21f421e95",
+      "kind": "initial",
+      "note": "draft; implementation not started",
+      "observed_at": "2026-09-29T10:03:16+00:00",
+      "route_id": "26ffb293d4ff"
+    }
+  ],
+  "created_at": "2026-09-29T10:03:16+00:00",
+  "evidence_accounting": {
+    "obligations": [
+      {
+        "id": "verification",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "verification",
+        "status": "not_run"
+      },
+      {
+        "id": "code_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "code_review",
+        "status": "not_run"
+      },
+      {
+        "id": "test_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "test_review",
+        "status": "not_run"
+      },
+      {
+        "id": "security_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "security_review",
+        "status": "not_run"
+      },
+      {
+        "id": "data_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "data_review",
+        "status": "not_run"
+      },
+      {
+        "id": "release_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "release_review",
+        "status": "not_run"
+      }
+    ],
+    "schema_version": 1
+  },
+  "history": [
+    {
+      "at": "2026-09-29T10:03:16+00:00",
+      "from": null,
+      "reason": "created",
+      "to": "draft"
+    },
+    {
+      "at": "2026-09-29T10:08:54+00:00",
+      "from": "draft",
+      "reason": "four selected analyses synthesized; typed fake-browser and static-operations scope frozen; mandatory scope/design approval pending",
+      "to": "scoped"
+    }
+  ],
+  "human_gates": [
+    "scope_and_design_approval",
+    "migration_or_external_write_approval"
+  ],
+  "human_gates_digest": "14a58ca69c842145e025ab685eff53825c39f931f78d8db2c937855bff8782f2",
+  "route_id": "26ffb293d4ff",
+  "schema_version": 1,
+  "status": "scoped",
+  "title": "F6 local UI and operations verification",
+  "updated_at": "2026-09-29T10:08:54+00:00"
+}

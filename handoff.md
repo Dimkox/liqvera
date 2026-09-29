@@ -1,7 +1,36 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (F5 implementation and independent reviews PASS; durable receipt closure in progress). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (F5 closed; F6 scope/design awaiting mandatory human approval). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
+
+## F6 local UI and operations verification — 2026-09-29
+
+Route `26ffb293d4ff` and change package
+`engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/`
+have completed the four route-selected read-only analyses. The scoped design is
+strictly local: a deterministic browser harness with fake EIP-1193, same-origin
+API, storage, crypto, timers and test-only adapter; the smallest injectable UI
+seam; fixture-egress correction with resolved-profile assertions; internal-only
+metrics observability; the canonical restrictive CSP; and exact README,
+runbook, handoff and acceptance truth.
+
+No product/test/configuration implementation has started. The package is
+`scoped` and waits at the mandatory `scope_and_design_approval` gate. The
+proposed phase does not start containers or create a database/schema/volume,
+and performs no external write, so `migration_or_external_write_approval` is
+not applicable and remains unexercised. Any later need for those actions stops
+for a new exact approval.
+
+Confirmed gaps are: no executable browser A30 harness; fixture capture,
+gateway and edge inherit non-internal egress networks; gateway metrics are
+process-loopback and not collectible through a private operations boundary;
+and Caddy lacks the CSP required by the canonical specification. Production's
+x402 adapter remains deliberately unregistered and fixture payment remains
+fail closed. This route will not use a real wallet, RPC, facilitator, transfer,
+testnet/mainnet payment, live capture/profile, shared environment, deployment,
+release, exchange mutation, or push. Static evidence cannot establish runtime
+A26 acceptance: all 156 frozen vectors and A26/A30 remain `NOT_RUN`; A13/A14
+remain externally blocked.
 
 ## F5 local mocked state-machine verification — 2026-09-29
 

@@ -36,6 +36,30 @@
       "resource": null,
       "route_id": "26ffb293d4ff",
       "scope_digest": "12231c0f9d521bb91724f731ffd06e17d5deb16cf6a8aff83a456d8832f3ee01"
+    },
+    {
+      "action": null,
+      "actor": "repository owner via chat",
+      "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+      "decided_at": "2026-09-29T11:23:29+00:00",
+      "decision": "approved",
+      "gate": "scope_and_design_approval",
+      "reason": "User explicitly answered да for scope digest 20d2f1aae1a80242fa6b178e0416a1831dee03948c7f740cadf3ecea6a1ccb99; approval remains limited to production-main browser harness coverage, stronger static Compose/metrics/CSP assertions, and safe rollback documentation.",
+      "resource": null,
+      "route_id": "26ffb293d4ff",
+      "scope_digest": "20d2f1aae1a80242fa6b178e0416a1831dee03948c7f740cadf3ecea6a1ccb99"
+    },
+    {
+      "action": "migration-plan",
+      "actor": "repository owner via chat",
+      "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+      "decided_at": "2026-09-29T11:23:29+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "The re-approved F6 scope retains a no-op migration plan: no migration, database, volume, container runtime, or external write is authorized.",
+      "resource": null,
+      "route_id": "26ffb293d4ff",
+      "scope_digest": "20d2f1aae1a80242fa6b178e0416a1831dee03948c7f740cadf3ecea6a1ccb99"
     }
   ],
   "route_id": "26ffb293d4ff",

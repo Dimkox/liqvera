@@ -14,8 +14,9 @@ seam; fixture-egress correction with resolved-profile assertions; internal-only
 metrics observability; the canonical restrictive CSP; and exact README,
 runbook, handoff and acceptance truth.
 
-The repository owner approved exact scope digest
-`12231c0f9d521bb91724f731ffd06e17d5deb16cf6a8aff83a456d8832f3ee01`,
+The repository owner re-approved current exact scope digest
+`20d2f1aae1a80242fa6b178e0416a1831dee03948c7f740cadf3ecea6a1ccb99`
+after the typed evidence paths changed,
 and the package is `approved`. The recorded migration plan is explicitly a
 no-op: this phase does not start containers, create a database/schema/volume,
 or perform an external write. Any later need for those actions stops for a new

@@ -15,7 +15,11 @@ PowerShell are explicitly out of scope. The written spec is approved and its
 task-sized TDD plan is at
 `docs/superpowers/plans/2026-09-29-one-click-installer.md`. No installer scripts,
 Compose changes, dependency installation, privilege action, or external
-mutation were made; implementation still requires execution-method selection.
+mutation were made. Plan Task 1 now freezes the three closed Draft 2020-12
+release/config/state contracts and Linux-safe non-secret templates: product
+`0.0.2`, chain `31611`, shadow source mode, payment disabled, loopback ports,
+digest-only images, and exact migrations 001–005. No launcher or mutating
+installer behavior exists yet; Task 2 is the next implementation boundary.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

@@ -15523,6 +15523,24 @@ repository_inventory:
   - path: docs/superpowers/plans/2026-09-29-one-click-installer.md
     node: document:liqvera-f3-f7-implementation
     path_class: DOCUMENTATION
+  - path: installer/config/liqvera.env.template
+    node: manifest:runtime
+    path_class: CONFIGURATION
+  - path: installer/config/ports.env.template
+    node: manifest:runtime
+    path_class: CONFIGURATION
+  - path: installer/schemas/config.schema.json
+    node: contract:liqvera-evidence-runtime
+    path_class: SCHEMA_MANIFEST
+  - path: installer/schemas/install-state.schema.json
+    node: contract:liqvera-evidence-runtime
+    path_class: SCHEMA_MANIFEST
+  - path: installer/schemas/release-manifest.schema.json
+    node: contract:liqvera-evidence-runtime
+    path_class: SCHEMA_MANIFEST
+  - path: tests/installer/test_contracts.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
   - path: docs/competition/README.md
     node: document:liqvera-f3-f7-implementation
     path_class: DOCUMENTATION

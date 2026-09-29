@@ -524,6 +524,10 @@ def _classify_repository_path(path: str) -> PathClass:
         return PathClass.BUILD_PACKAGING
     if normalized.startswith("acceptance/") and name.endswith(".json"):
         return PathClass.CONFIGURATION
+    if normalized.startswith("installer/schemas/") and name.endswith(".schema.json"):
+        return PathClass.SCHEMA_MANIFEST
+    if normalized.startswith("installer/config/") and name.endswith(".template"):
+        return PathClass.CONFIGURATION
     if normalized in _EXTERNAL_TOOLING_CONFIG or normalized.startswith(".grok-stack/config/"):
         return PathClass.CONFIGURATION
     if normalized in {

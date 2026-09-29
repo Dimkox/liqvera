@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://liqvera.example/schemas/liqvera-install-config-v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "chain_id", "payment_enabled", "source_mode", "ports", "secret_files"],
+  "properties": {
+    "schema_version": {"const": "liqvera-install-config/v1"},
+    "chain_id": {"const": 31611},
+    "payment_enabled": {"const": false},
+    "source_mode": {"const": "shadow"},
+    "ports": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["web", "gateway", "metrics"],
+      "properties": {
+        "web": {"$ref": "#/$defs/web_port"},
+        "gateway": {"$ref": "#/$defs/gateway_port"},
+        "metrics": {"$ref": "#/$defs/metrics_port"}
+      }
+    },
+    "secret_files": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "DATABASE_PASSWORD_FILE": {"$ref": "#/$defs/secret_file"},
+        "P3_PAYMENT_PAYLOAD_FILE": {"$ref": "#/$defs/secret_file"},
+        "P3_LIVE_GRANTS_FILE": {"$ref": "#/$defs/secret_file"}
+      }
+    }
+  },
+  "$defs": {
+    "secret_file": {"type": "string", "minLength": 2, "maxLength": 4096, "pattern": "^/(?!.*(?:^|/)\\.\\.(?:/|$))[^\\n\\r\\u0000]+$"},
+    "web_port": {"type": "object", "additionalProperties": false, "required": ["host", "port"], "properties": {"host": {"const": "127.0.0.1"}, "port": {"const": 3000}}},
+    "gateway_port": {"type": "object", "additionalProperties": false, "required": ["host", "port"], "properties": {"host": {"const": "127.0.0.1"}, "port": {"const": 8080}}},
+    "metrics_port": {"type": "object", "additionalProperties": false, "required": ["host", "port"], "properties": {"host": {"const": "127.0.0.1"}, "port": {"const": 9090}}}
+  }
+}

@@ -17,7 +17,9 @@ def main() -> int:
     parser.add_argument("result", type=Path)
     parser.add_argument("--sha256", required=True)
     args = parser.parse_args()
-    result = verify_sealed_result(args.result.resolve(), args.sha256)
+    result = verify_sealed_result(
+        args.result.resolve(), args.sha256, require_current_repository=True
+    )
     print(f"VERIFIED: {result['overall_status']} {args.result.resolve()}")
     return 0
 

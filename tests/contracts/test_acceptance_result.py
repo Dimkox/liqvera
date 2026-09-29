@@ -205,11 +205,31 @@ def test_semantic_validation_error_is_a_real_fail_even_after_exit_zero(
     row.update({
         "status": "FAIL", "started_at": "2026-09-29T00:00:00Z",
         "ended_at": "2026-09-29T00:00:01Z", "command": ["offline"],
-        "exit_code": 0, "omissions": ["ASSERTION_INCOMPLETE:ValueError"],
+        "exit_code": 0, "omissions": ["ASSERTION_VALIDATION_ERROR"],
     })
     result["overall_status"] = "FAIL"
     runner.validate_result_semantics(result)
     row["omissions"] = ["ASSERTION_TIMEOUT"]
+    with pytest.raises(ValueError, match="contradictory failure"):
+        runner.validate_result_semantics(result)
+
+
+@pytest.mark.parametrize(
+    ("reason", "exit_code"),
+    [("BOGUS", 1), ("ASSERTION_EXIT_NONZERO", None),
+     ("ASSERTION_TIMEOUT", 1), ("ASSERTION_VALIDATION_ERROR", 1),
+     ("ASSERTION_EXECUTION_ERROR", 0)],
+)
+def test_fail_reason_algebra_rejects_unknown_and_contradictory_forms(
+    reason: str, exit_code: int | None, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    result = _generated_result(tmp_path, monkeypatch)
+    result["cases"][0].update({
+        "status": "FAIL", "started_at": "2026-09-29T00:00:00Z",
+        "ended_at": "2026-09-29T00:00:01Z", "command": ["offline"],
+        "exit_code": exit_code, "omissions": [reason],
+    })
+    result["overall_status"] = "FAIL"
     with pytest.raises(ValueError, match="contradictory failure"):
         runner.validate_result_semantics(result)
 
@@ -275,6 +295,33 @@ def test_evidence_links_are_rejected(tmp_path: Path, link_kind: str) -> None:
         )
 
 
+@pytest.mark.parametrize("case_id", ["A01", "A08", "A09", "A27", "A30"])
+def test_unrelated_passing_check_cannot_certify_configured_case(
+    tmp_path: Path, case_id: str
+) -> None:
+    case = runner.CASES[case_id]
+    observations = {
+        "checks": ["tests/unrelated.py::test_always_passes"],
+        "subject_commit": COMMIT,
+        "subject_tree": TREE,
+    }
+    if case_id == "A01":
+        observations["baseline_commit"] = "f07562eee1a33df74768e9fa4a3b074783d8c59e"
+    if case_id == "A27":
+        observations.update(vector_count=156, vector_sha256="a" * 64, go_runtime_paths=0)
+    document = {
+        "case_id": case_id, "assertion": case.assertion, "execution_class": "local",
+        "claims": [case.assertion], "subject": {"commit": COMMIT, "tree": TREE},
+        "observations": observations,
+        "transcript": {"stdout_sha256": "a" * 64, "stderr_sha256": "b" * 64},
+    }
+    path = tmp_path / f"{case_id}.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="required semantic test identities"):
+        runner.evidence_reference(tmp_path, path.name, case_id, case.assertion, "local",
+                                  {"commit": COMMIT, "tree": TREE})
+
+
 def test_post_seal_verifier_rejects_result_mutation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -288,3 +335,35 @@ def test_post_seal_verifier_rejects_result_mutation(
     os.chmod(output, 0o400)
     with pytest.raises(ValueError, match="digest mismatch"):
         runner.verify_sealed_result(output, digest)
+
+
+def test_sealed_tree_blocks_unlink_and_has_nonwritable_directories(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _generated_result(tmp_path, monkeypatch)
+    root = tmp_path / "run"
+    assert root.stat().st_mode & 0o222 == 0
+    assert (root / "evidence").stat().st_mode & 0o222 == 0
+    with pytest.raises(PermissionError):
+        (root / "acceptance.json").unlink()
+    os.chmod(root, 0o700)
+    os.chmod(root / "evidence", 0o700)
+
+
+def test_late_repository_drift_invalidates_published_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    output = tmp_path / "late" / "acceptance.json"
+    stable = {"repository": "Dimkox/liqvera", "origin": "UNSET", "commit": COMMIT,
+              "tree": TREE, "worktree": "CLEAN"}
+    drifted = {**stable, "commit": "a" * 40}
+    identities = iter((stable, stable, drifted))
+    monkeypatch.setattr(runner, "repo_identity", lambda: next(identities))
+    monkeypatch.setattr(sys, "argv", ["mezo-acceptance", "--mode", "offline", "--output", str(output)])
+    with pytest.raises(SystemExit) as exc:
+        runner.main()
+    assert exc.value.code == 2
+    assert not output.exists()
+    assert output.with_name("acceptance.json.invalid").is_file()
+    os.chmod(output.parent, 0o700)
+    os.chmod(output.parent / "evidence", 0o700)

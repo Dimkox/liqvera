@@ -62,6 +62,21 @@ NOT_RUN result. Direct invocation of the new verifier then found its script
 entry point lacked the repository root on `sys.path`; the entry point now adds
 the same explicit repository import root used by other checked-in scripts.
 
+The second review rejected the remaining hard-coded semantic booleans and a
+late post-publication Git race. Configured cases now retain the exact pytest or
+Node TAP identities observed in process output; the consumer requires a closed
+case-specific subset, binds observed subject commit/tree, and additionally
+checks the frozen route baseline or vector digest/count/Go-free tree where
+applicable. Five per-case unrelated-success mutants are rejected.
+
+FAIL reasons are now a closed four-value algebra with exact exit-code/timing
+relationships. Evidence directories are fsynced and sealed bottom-up mode
+0500; the root is sealed only after atomic result publication. Both producer
+and CLI verifier compare the current clean repository with the sealed subject.
+If drift appears in the late window, the canonical result name is atomically
+renamed with `.invalid` rather than left accepted. Regression tests cover that
+late mutation and post-seal unlink prevention.
+
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts
 plus `SHA256SUMS` from one frozen commit. Final acceptance/evidence stays

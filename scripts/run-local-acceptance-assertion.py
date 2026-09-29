@@ -12,12 +12,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PYTHON = os.environ.get("LIQVERA_ACCEPTANCE_PYTHON", sys.executable)
 COMMANDS = {
-    "A01": [PYTHON, "-m", "pytest", "-q", "tests/contracts/test_acceptance_result.py"],
-    "A08": [PYTHON, "-m", "pytest", "-q", "tests/evidence_report/test_canonical_f3.py"],
-    "A09": [PYTHON, "-m", "pytest", "-q", "tests/installed/test_canonical_f3_installed.py"],
-    "A27": [PYTHON, "-m", "pytest", "-q", "tests/contracts/test_mezo_vectors.py"],
+    "A01": [PYTHON, "-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"],
+    "A08": [PYTHON, "-m", "pytest", "-vv", "tests/evidence_report/test_canonical_f3.py"],
+    "A09": [PYTHON, "-m", "pytest", "-vv", "tests/installed/test_canonical_f3_installed.py"],
+    "A27": [PYTHON, "-m", "pytest", "-vv", "tests/contracts/test_mezo_vectors.py"],
     "A30": ["npm", "test"],
 }
+BASELINE_COMMIT = "f07562eee1a33df74768e9fa4a3b074783d8c59e"
 ASSERTIONS = {
     "A01": "before_after_checks",
     "A08": "bundle_tamper_rejected",
@@ -36,26 +37,27 @@ def _observations(case_id: str, stdout: bytes, before: tuple[str, str]) -> dict:
     after = (_git("rev-parse", "HEAD"), _git("rev-parse", "HEAD^{tree}"))
     if _git("status", "--porcelain", "--untracked-files=all") or after != before:
         raise RuntimeError("assertion changed the repository subject")
-    passed = re.findall(r"(?:^|\s)(\d+) passed(?:\s|$)", text)
-    node_tests = re.findall(r"(?:#|ℹ) tests (\d+)", text)
-    count = int(passed[-1]) if passed else int(node_tests[-1]) if node_tests else 0
-    common = {"test_count": count, "subject_unchanged": True}
+    pytest_checks = sorted(set(re.findall(r"^(tests/[^ ]+::[^ ]+) PASSED", text, re.MULTILINE)))
+    node_checks = sorted(set(re.findall(r"^[✔✓] (.+?) \([^)]+\)$", text, re.MULTILINE)))
+    checks = pytest_checks or node_checks
+    common = {"checks": checks, "subject_commit": after[0], "subject_tree": after[1]}
     if case_id == "A01":
-        return {**common, "baseline_checked": True, "final_tree_checked": True}
+        subprocess.run(["git", "-C", ROOT, "merge-base", "--is-ancestor", BASELINE_COMMIT, after[0]], check=True)
+        return {**common, "baseline_commit": BASELINE_COMMIT}
     if case_id == "A08":
-        return {**common, "corrupt_bundle_rejected": True, "unsafe_bundle_rejected": True}
+        return common
     if case_id == "A09":
-        return {**common, "isolated_install": True, "exact_digest_verified": True}
+        return common
     if case_id == "A27":
         vectors = json.loads((ROOT / "schemas/mezo-evidence/v1/vectors.json").read_text())
         go_paths = subprocess.check_output(
             ["git", "-C", ROOT, "ls-files", "*.go"], text=True
         ).splitlines()
         return {**common, "vector_count": len(vectors["vectors"]),
+                "vector_sha256": hashlib.sha256((ROOT / "schemas/mezo-evidence/v1/vectors.json").read_bytes()).hexdigest(),
                 "go_runtime_paths": len(go_paths)}
     if case_id == "A30":
-        return {**common, "wallet_cancel": True, "wallet_switch": True,
-                "wallet_reload": True, "wrong_chain": True}
+        return common
     raise ValueError("unsupported local assertion")
 
 

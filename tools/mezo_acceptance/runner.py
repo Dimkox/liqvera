@@ -28,12 +28,37 @@ SENSITIVE_VALUE = re.compile(r"Bearer\s+\S+|-----BEGIN [^-]*PRIVATE KEY-----|0x[
 RESULT_SCHEMA = ROOT / "schemas/mezo-evidence/v1/acceptance-result.schema.json"
 DISPATCHER = ROOT / "scripts/run-local-acceptance-assertion.py"
 BLOCKED_REASON = "EXACT_EXTERNAL_GRANT_ABSENT"
+FAIL_REASONS = {"ASSERTION_EXIT_NONZERO", "ASSERTION_TIMEOUT", "ASSERTION_VALIDATION_ERROR", "ASSERTION_EXECUTION_ERROR"}
 OBSERVATION_FIELDS = {
-    "A01": {"test_count", "subject_unchanged", "baseline_checked", "final_tree_checked"},
-    "A08": {"test_count", "subject_unchanged", "corrupt_bundle_rejected", "unsafe_bundle_rejected"},
-    "A09": {"test_count", "subject_unchanged", "isolated_install", "exact_digest_verified"},
-    "A27": {"test_count", "subject_unchanged", "vector_count", "go_runtime_paths"},
-    "A30": {"test_count", "subject_unchanged", "wallet_cancel", "wallet_switch", "wallet_reload", "wrong_chain"},
+    "A01": {"checks", "subject_commit", "subject_tree", "baseline_commit"},
+    "A08": {"checks", "subject_commit", "subject_tree"},
+    "A09": {"checks", "subject_commit", "subject_tree"},
+    "A27": {"checks", "subject_commit", "subject_tree", "vector_count", "vector_sha256", "go_runtime_paths"},
+    "A30": {"checks", "subject_commit", "subject_tree"},
+}
+REQUIRED_CHECKS = {
+    "A01": {
+        "tests/contracts/test_acceptance_result.py::test_runner_result_accepts_exact_git_object_ids",
+        "tests/contracts/test_acceptance_result.py::test_plan_snapshot_detects_replacement",
+        "tests/contracts/test_acceptance_result.py::test_post_seal_verifier_rejects_result_mutation",
+    },
+    "A08": {
+        "tests/evidence_report/test_canonical_f3.py::test_tampered_bundle_and_trusted_digest_are_rejected",
+        "tests/evidence_report/test_canonical_f3.py::test_standalone_report_tamper_cannot_split_from_verified_bundle",
+    },
+    "A09": {
+        "tests/installed/test_canonical_f3_installed.py::test_installed_canonical_f3_builds_and_verifies_outside_checkout",
+    },
+    "A27": {
+        "tests/contracts/test_mezo_vectors.py::test_required_adversarial_cases_cannot_disappear",
+        "tests/contracts/test_mezo_vectors.py::test_all_vector_shapes_semantics_and_assertion_registry",
+    },
+    "A30": {
+        "wrong network is explicit and switching never submits payment",
+        "typed pre-submit cancellation clears only with a fresh READY quote",
+        "reload recovery uses only the saved identity and exact create replay",
+        "one guarded invocation is the maximum across ambiguous outcome and reload",
+    },
 }
 
 
@@ -164,7 +189,44 @@ def _publish_exclusive(output: Path, encoded: bytes) -> None:
         temporary_path.unlink(missing_ok=True)
 
 
-def verify_sealed_result(output: Path, expected_result_sha256: str | None = None) -> dict:
+def _fsync_directory(path: Path) -> None:
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _seal_evidence_tree(root: Path) -> None:
+    evidence = root / "evidence"
+    if not evidence.is_dir() or evidence.is_symlink():
+        raise ValueError("evidence directory is missing or linked")
+    for directory, child_dirs, files in os.walk(evidence, topdown=False, followlinks=False):
+        current = Path(directory)
+        if child_dirs:
+            raise ValueError("nested evidence directories are not part of the closed layout")
+        for name in files:
+            path = current / name
+            info = os.lstat(path)
+            if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_mode & 0o222:
+                raise ValueError("evidence tree contains an unsafe file")
+        _fsync_directory(current)
+        os.chmod(current, 0o500)
+        _fsync_directory(current)
+
+
+def _invalidate_published(output: Path) -> None:
+    root = output.parent
+    os.chmod(root, 0o700)
+    invalid = output.with_name(f"{output.name}.invalid")
+    os.replace(output, invalid)
+    os.chmod(invalid, 0o400)
+    os.chmod(root, 0o500)
+    _fsync_directory(root)
+
+
+def verify_sealed_result(output: Path, expected_result_sha256: str | None = None,
+                         *, require_current_repository: bool = False) -> dict:
     info = os.lstat(output)
     if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_mode & 0o222:
         raise ValueError("sealed result must be one read-only regular file")
@@ -180,6 +242,8 @@ def verify_sealed_result(output: Path, expected_result_sha256: str | None = None
     if result["bindings"]["plan_sha256"] not in {empty_digest, file_sha256(plan)}:
         raise ValueError("sealed plan binding mismatch")
     root = output.parent
+    if os.lstat(root).st_mode & 0o222:
+        raise ValueError("sealed result directory must be non-writable")
     for row in result["cases"]:
         for reference in row["evidence"]:
             path = root / reference["file"]
@@ -187,9 +251,13 @@ def verify_sealed_result(output: Path, expected_result_sha256: str | None = None
             if (not stat.S_ISREG(item.st_mode) or item.st_nlink != 1 or item.st_mode & 0o222
                     or item.st_size != reference["size_bytes"] or file_sha256(path) != reference["sha256"]):
                 raise ValueError("sealed evidence integrity mismatch")
+            if os.lstat(path.parent).st_mode & 0o222:
+                raise ValueError("sealed evidence directory must be non-writable")
             evidence_reference(root, reference["file"], row["case_id"],
                                CASES[row["case_id"]].assertion, row["execution_class"],
                                result["repository"])
+    if require_current_repository and repo_identity() != result["repository"]:
+        raise ValueError("sealed subject no longer matches the current clean repository")
     return result
 
 
@@ -225,10 +293,14 @@ def validate_result_semantics(result: dict) -> None:
             if case.execution_class != "local" or expected_reason is None or row.get("omissions") != [expected_reason]:
                 raise ValueError(f"{case_id} has invalid local omission algebra")
         elif status == "FAIL":
+            reasons = row.get("omissions", [])
+            exit_code = row.get("exit_code")
             if (not row.get("started_at") or not row.get("ended_at") or row.get("command") is None
-                    or len(row.get("omissions", [])) != 1
-                    or (row.get("exit_code") == 0
-                        and not row["omissions"][0].startswith("ASSERTION_INCOMPLETE:"))):
+                    or len(reasons) != 1 or reasons[0] not in FAIL_REASONS
+                    or (reasons[0] == "ASSERTION_EXIT_NONZERO" and (type(exit_code) is not int or exit_code == 0))
+                    or (reasons[0] == "ASSERTION_TIMEOUT" and exit_code is not None)
+                    or (reasons[0] == "ASSERTION_VALIDATION_ERROR" and exit_code != 0)
+                    or (reasons[0] == "ASSERTION_EXECUTION_ERROR" and exit_code is not None)):
                 raise ValueError(f"{case_id} has contradictory failure algebra")
         if status == "PASS" or "payment_evidence" in row:
             payment = payment_reference(
@@ -269,12 +341,18 @@ def evidence_reference(root: Path, relative: str, case_id: str, assertion: str,
     expected_fields = OBSERVATION_FIELDS.get(case_id)
     if expected_fields is None or not isinstance(observations, dict) or set(observations) != expected_fields:
         raise ValueError("evidence observations do not match the case-specific schema")
-    if type(observations["test_count"]) is not int or observations["test_count"] < 1:
-        raise ValueError("evidence must report at least one observed test")
-    for key, value in observations.items():
-        if key not in {"test_count", "vector_count", "go_runtime_paths"} and value is not True:
-            raise ValueError("semantic observations must be affirmatively observed")
-    if case_id == "A27" and (observations["vector_count"] != 156 or observations["go_runtime_paths"] != 0):
+    checks = observations.get("checks")
+    if (not isinstance(checks, list) or any(not isinstance(item, str) for item in checks)
+            or not REQUIRED_CHECKS[case_id].issubset(checks)):
+        raise ValueError("evidence lacks required semantic test identities")
+    if (observations.get("subject_commit"), observations.get("subject_tree")) != (
+        identity["commit"], identity["tree"]
+    ):
+        raise ValueError("semantic observations do not bind to the subject")
+    if case_id == "A01" and observations["baseline_commit"] != "f07562eee1a33df74768e9fa4a3b074783d8c59e":
+        raise ValueError("A01 baseline observation is not the frozen route base")
+    if case_id == "A27" and (observations["vector_count"] != 156 or observations["go_runtime_paths"] != 0
+            or not re.fullmatch(r"[0-9a-f]{64}", observations["vector_sha256"])):
         raise ValueError("A27 must bind all 156 vectors and a Go-free runtime tree")
     transcript = document.get("transcript")
     if (not isinstance(transcript, dict) or set(transcript) != {"stdout_sha256", "stderr_sha256"}
@@ -353,6 +431,7 @@ def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict 
         "execution_class": case.execution_class,
         "exit_code": None, "evidence": [], "omissions": [],
     }
+    completed = None
     try:
         completed = subprocess.run(
             actual_argv, cwd=ROOT, env=env, capture_output=True,
@@ -362,7 +441,9 @@ def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict 
         row["stdout_sha256"] = hashlib.sha256(completed.stdout).hexdigest()
         row["stderr_sha256"] = hashlib.sha256(completed.stderr).hexdigest()
         if completed.returncode != 0:
-            raise ValueError("assertion command exited nonzero")
+            row["omissions"] = ["ASSERTION_EXIT_NONZERO"]
+            row["ended_at"] = utc_now()
+            return row
         if len(completed.stdout) > 65536:
             raise ValueError("assertion protocol exceeds 64 KiB")
         answer = json.loads(completed.stdout)
@@ -384,8 +465,10 @@ def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict 
         row["status"] = "PASS"
     except subprocess.TimeoutExpired:
         row["omissions"] = ["ASSERTION_TIMEOUT"]
-    except Exception as exc:
-        row["omissions"] = [f"ASSERTION_INCOMPLETE:{type(exc).__name__}"]
+    except OSError:
+        row["omissions"] = ["ASSERTION_EXECUTION_ERROR" if completed is None else "ASSERTION_VALIDATION_ERROR"]
+    except (ValueError, KeyError, TypeError, json.JSONDecodeError):
+        row["omissions"] = ["ASSERTION_VALIDATION_ERROR"]
     row["ended_at"] = utc_now()
     return row
 
@@ -440,6 +523,8 @@ def main() -> int:
                 os.chmod(path, 0o400)
         if plan_snapshot is not None:
             plan_snapshot.verify_unchanged()
+        (evidence_root / "evidence").mkdir(mode=0o700, exist_ok=True)
+        _seal_evidence_tree(evidence_root)
         final_identity = repo_identity()
         if final_identity != identity:
             raise ValueError("repository identity changed during acceptance")
@@ -453,8 +538,14 @@ def main() -> int:
         validate_result_semantics(result)
         encoded = (json.dumps(result, sort_keys=True, indent=2) + "\n").encode()
         _publish_exclusive(output, encoded)
-        verify_sealed_result(output, hashlib.sha256(encoded).hexdigest())
         os.chmod(evidence_root, 0o500)
+        _fsync_directory(evidence_root)
+        try:
+            verify_sealed_result(output, hashlib.sha256(encoded).hexdigest(),
+                                 require_current_repository=True)
+        except Exception:
+            _invalidate_published(output)
+            raise
         print(f"{overall}: {output}")
         return 0 if overall == "PASS" else 1
     except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:

@@ -222,3 +222,10 @@ case-specific observation contract. Acceptance PASS requires a closed consumer-
 validated observation shape, an exact execution capability, and independently
 replayable post-seal bindings; read-only permissions are only tamper resistance,
 not immutable storage.
+
+## 2026-09-29 — Semantic evidence still contained producer-authored booleans
+
+Closing an evidence object's keys did not make hard-coded `true` values
+observations; an unrelated successful command could still carry them. Derive
+acceptance facts from exact observed test identities or independently computed
+artifacts, and require those identities again in the consumer.

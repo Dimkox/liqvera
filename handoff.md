@@ -52,7 +52,9 @@ short, long, uppercase, non-hex, and terminal-newline matrix, while stdout,
 stderr, and evidence digests each reject terminal newlines at their exact error
 paths. The repaired focused slice reports `21 passed`. The original FAIL review
 reports are preserved as evidence; full verification and independent re-review
-must bind the new tree before closure.
+must bind the new tree before closure. The first post-review full run otherwise
+passed 1150 tests and coverage, but correctly rejected the three newly tracked
+review reports until their graph inventory ownership was declared.
 Gateway/F4 through F7, graph orphan cleanup,
 network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
 start, deployment, release, and push remain outside this route. All 156 broad

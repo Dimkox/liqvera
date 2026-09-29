@@ -14266,6 +14266,15 @@ repository_inventory:
   - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/evidence/analysis-repo_explorer.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/evidence/code-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/evidence/data-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/evidence/test-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/release.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

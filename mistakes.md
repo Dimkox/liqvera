@@ -213,3 +213,12 @@ runner's closed child environment omitted `PATH`, while the installed-boundary
 test intentionally creates and invokes a nested virtual environment. A closed
 acceptance environment must propagate the runner's non-secret executable path
 as internal process plumbing without advertising it as assertion input.
+
+## 2026-09-29 — Exit-zero assertions were mistaken for semantic acceptance
+
+The first F7 producer accepted a dispatcher-authored claim after only checking
+its process exit and evidence hash, so the producer and verifier shared no
+case-specific observation contract. Acceptance PASS requires a closed consumer-
+validated observation shape, an exact execution capability, and independently
+replayable post-seal bindings; read-only permissions are only tamper resistance,
+not immutable storage.

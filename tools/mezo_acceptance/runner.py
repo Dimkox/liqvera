@@ -6,8 +6,11 @@ import json
 import os
 import platform
 import re
+import stat
 import subprocess
 import sys
+import tempfile
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -23,6 +26,32 @@ SENSITIVE_ARG = re.compile(r"^--(?:password|secret|private-key|bearer|signature|
 SENSITIVE_FIELD = re.compile(r"(password|secret|private|bearer|signature|cookie|authorization|capability|seed|mnemonic|token)", re.I)
 SENSITIVE_VALUE = re.compile(r"Bearer\s+\S+|-----BEGIN [^-]*PRIVATE KEY-----|0x[0-9a-fA-F]{130,}", re.I)
 RESULT_SCHEMA = ROOT / "schemas/mezo-evidence/v1/acceptance-result.schema.json"
+DISPATCHER = ROOT / "scripts/run-local-acceptance-assertion.py"
+BLOCKED_REASON = "EXACT_EXTERNAL_GRANT_ABSENT"
+OBSERVATION_FIELDS = {
+    "A01": {"test_count", "subject_unchanged", "baseline_checked", "final_tree_checked"},
+    "A08": {"test_count", "subject_unchanged", "corrupt_bundle_rejected", "unsafe_bundle_rejected"},
+    "A09": {"test_count", "subject_unchanged", "isolated_install", "exact_digest_verified"},
+    "A27": {"test_count", "subject_unchanged", "vector_count", "go_runtime_paths"},
+    "A30": {"test_count", "subject_unchanged", "wallet_cancel", "wallet_switch", "wallet_reload", "wrong_chain"},
+}
+
+
+@dataclass(frozen=True)
+class PlanSnapshot:
+    path: Path
+    raw: bytes
+    digest: str
+    device: int
+    inode: int
+    size: int
+
+    def verify_unchanged(self) -> None:
+        info = os.lstat(self.path)
+        if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1
+                or (info.st_dev, info.st_ino, info.st_size) != (self.device, self.inode, self.size)
+                or hashlib.sha256(self.path.read_bytes()).hexdigest() != self.digest):
+            raise ValueError("acceptance plan changed after validation")
 
 
 def utc_now() -> str:
@@ -61,10 +90,24 @@ def repo_identity() -> dict[str, str]:
     }
 
 
-def read_plan(path: Path | None) -> dict[str, dict]:
+def read_plan(path: Path | None) -> tuple[dict[str, dict], PlanSnapshot | None]:
     if path is None:
-        return {}
-    doc = json.loads(path.read_text(encoding="utf-8"))
+        return {}, None
+    resolved = path.resolve(strict=True)
+    if resolved != ROOT / "acceptance/offline-plan.json":
+        raise ValueError("only the tracked reviewed offline plan is accepted")
+    info = os.lstat(path)
+    if resolved != path.absolute() or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+        raise ValueError("acceptance plan must be one regular non-linked file")
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        opened = os.fstat(descriptor)
+        raw = os.read(descriptor, 1_000_001)
+    finally:
+        os.close(descriptor)
+    if len(raw) > 1_000_000 or (opened.st_dev, opened.st_ino) != (info.st_dev, info.st_ino):
+        raise ValueError("acceptance plan is unsafe or too large")
+    doc = json.loads(raw)
     if not isinstance(doc, dict):
         raise ValueError("acceptance plan must be an object")
     if set(doc) != {"schema", "commands"} or doc["schema"] != "liqvera-acceptance-plan/v1":
@@ -81,21 +124,16 @@ def read_plan(path: Path | None) -> dict[str, dict]:
         if not isinstance(case_id, str) or case_id not in CASES or case_id in commands:
             raise ValueError(f"unknown or duplicate acceptance case: {case_id}")
         argv = item["argv"]
-        if not isinstance(argv, list) or not argv or any(
-            not isinstance(arg, str) or not SAFE_ARG.fullmatch(arg) or SENSITIVE_ARG.search(arg)
-            or "://" in arg
-            for arg in argv
-        ):
-            raise ValueError(f"unsafe command arguments for {case_id}; pass credentials by environment")
+        if argv != ["scripts/run-local-acceptance-assertion.py", case_id]:
+            raise ValueError(f"command is not the exact allowlisted dispatcher for {case_id}")
         if type(item["timeout_seconds"]) is not int or not 1 <= item["timeout_seconds"] <= 3600:
             raise ValueError(f"invalid timeout for {case_id}")
         names = item["environment"]
-        if not isinstance(names, list) or any(not isinstance(n, str) or not ENV_NAME.fullmatch(n) for n in names):
-            raise ValueError(f"invalid environment names for {case_id}")
-        if len(set(names)) != len(names):
-            raise ValueError(f"duplicate environment name for {case_id}")
+        if names != []:
+            raise ValueError(f"environment inputs are not approved for {case_id}")
         commands[case_id] = item
-    return commands
+    snapshot = PlanSnapshot(resolved, raw, hashlib.sha256(raw).hexdigest(), info.st_dev, info.st_ino, info.st_size)
+    return commands, snapshot
 
 
 def file_sha256(path: Path) -> str:
@@ -104,6 +142,55 @@ def file_sha256(path: Path) -> str:
 
 def canonical_sha256(value: object) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def _publish_exclusive(output: Path, encoded: bytes) -> None:
+    descriptor, temporary = tempfile.mkstemp(prefix=".acceptance-", dir=output.parent)
+    temporary_path = Path(temporary)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.chmod(temporary_path, 0o400)
+        os.link(temporary_path, output, follow_symlinks=False)
+        temporary_path.unlink()
+        directory = os.open(output.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+
+
+def verify_sealed_result(output: Path, expected_result_sha256: str | None = None) -> dict:
+    info = os.lstat(output)
+    if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_mode & 0o222:
+        raise ValueError("sealed result must be one read-only regular file")
+    raw = output.read_bytes()
+    if expected_result_sha256 and hashlib.sha256(raw).hexdigest() != expected_result_sha256:
+        raise ValueError("sealed result digest mismatch")
+    result = json.loads(raw)
+    validate_result_semantics(result)
+    if result["bindings"]["runner_sha256"] != file_sha256(Path(__file__)):
+        raise ValueError("sealed runner binding mismatch")
+    plan = ROOT / "acceptance/offline-plan.json"
+    empty_digest = hashlib.sha256(b"").hexdigest()
+    if result["bindings"]["plan_sha256"] not in {empty_digest, file_sha256(plan)}:
+        raise ValueError("sealed plan binding mismatch")
+    root = output.parent
+    for row in result["cases"]:
+        for reference in row["evidence"]:
+            path = root / reference["file"]
+            item = os.lstat(path)
+            if (not stat.S_ISREG(item.st_mode) or item.st_nlink != 1 or item.st_mode & 0o222
+                    or item.st_size != reference["size_bytes"] or file_sha256(path) != reference["sha256"]):
+                raise ValueError("sealed evidence integrity mismatch")
+            evidence_reference(root, reference["file"], row["case_id"],
+                               CASES[row["case_id"]].assertion, row["execution_class"],
+                               result["repository"])
+    return result
 
 
 def validate_result_semantics(result: dict) -> None:
@@ -115,17 +202,40 @@ def validate_result_semantics(result: dict) -> None:
     derived = "FAIL" if "FAIL" in statuses else "PASS" if statuses == {"PASS"} else "INCOMPLETE"
     if result.get("overall_status") != derived:
         raise ValueError("overall_status does not match derived case status")
+    prior_payment = None
     for case_id, row in zip(expected, rows, strict=True):
         case = CASES[case_id]
         if row["title"] != case.title or row.get("execution_class") != case.execution_class:
             raise ValueError(f"{case_id} does not match the frozen case contract")
-        if row["status"] == "PASS" and row.get("assertion_contract_sha256") != canonical_sha256({
-            "case_id": case_id,
-            "assertion": case.assertion,
-            "execution_class": case.execution_class,
-            "required_claims": list(case.required_claims),
-        }):
-            raise ValueError(f"{case_id} assertion contract digest mismatch")
+        status = row["status"]
+        if status == "PASS":
+            if row.get("assertion_contract_sha256") != canonical_sha256({
+                "case_id": case_id, "assertion": case.assertion,
+                "execution_class": case.execution_class,
+                "required_claims": list(case.required_claims),
+            }):
+                raise ValueError(f"{case_id} assertion contract digest mismatch")
+            if row.get("command") != ["scripts/run-local-acceptance-assertion.py", case_id] or row.get("environment_names") != []:
+                raise ValueError(f"{case_id} command capability is not closed")
+        elif status == "BLOCKED_EXTERNAL":
+            if case.execution_class == "local" or row.get("omissions") != [BLOCKED_REASON]:
+                raise ValueError(f"{case_id} has invalid external blocker algebra")
+        elif status == "NOT_RUN":
+            expected_reason = case.local_omission
+            if case.execution_class != "local" or expected_reason is None or row.get("omissions") != [expected_reason]:
+                raise ValueError(f"{case_id} has invalid local omission algebra")
+        elif status == "FAIL":
+            if (not row.get("started_at") or not row.get("ended_at") or row.get("command") is None
+                    or row.get("exit_code") == 0 or len(row.get("omissions", [])) != 1):
+                raise ValueError(f"{case_id} has contradictory failure algebra")
+        if status == "PASS" or "payment_evidence" in row:
+            payment = payment_reference(
+                case_id,
+                {"payment": row["payment_evidence"]} if "payment_evidence" in row else {},
+                prior_payment,
+            )
+            if case_id == "A13":
+                prior_payment = payment
     schema = json.loads(RESULT_SCHEMA.read_text(encoding="utf-8"))
     errors = list(Draft202012Validator(schema).iter_errors(result))
     if errors:
@@ -136,8 +246,12 @@ def evidence_reference(root: Path, relative: str, case_id: str, assertion: str,
                        execution_class: str, identity: dict[str, str]) -> dict[str, str | int]:
     if not isinstance(relative, str) or not relative.endswith(".json") or Path(relative).is_absolute():
         raise ValueError("evidence_file must be a relative JSON path")
-    path = (root / relative).resolve()
-    if not path.is_relative_to(root.resolve()) or not path.is_file() or path.is_symlink():
+    candidate = root / relative
+    link_info = os.lstat(candidate)
+    path = candidate.resolve()
+    info = path.stat()
+    if (not path.is_relative_to(root.resolve()) or not stat.S_ISREG(link_info.st_mode)
+            or not path.is_file() or info.st_nlink != 1):
         raise ValueError("evidence_file must be a regular file under the evidence directory")
     if path.stat().st_size > 10_000_000:
         raise ValueError("evidence_file exceeds 10 MB")
@@ -149,10 +263,22 @@ def evidence_reference(root: Path, relative: str, case_id: str, assertion: str,
         raise ValueError("evidence claims do not match the closed case contract")
     if document.get("subject") != {"commit": identity["commit"], "tree": identity["tree"]}:
         raise ValueError("evidence does not bind to the acceptance subject")
-    if not isinstance(document.get("observations"), list) or not document["observations"] or any(
-        not isinstance(item, str) or not item.strip() for item in document["observations"]
-    ):
-        raise ValueError("evidence document needs concrete observations")
+    observations = document.get("observations")
+    expected_fields = OBSERVATION_FIELDS.get(case_id)
+    if expected_fields is None or not isinstance(observations, dict) or set(observations) != expected_fields:
+        raise ValueError("evidence observations do not match the case-specific schema")
+    if type(observations["test_count"]) is not int or observations["test_count"] < 1:
+        raise ValueError("evidence must report at least one observed test")
+    for key, value in observations.items():
+        if key not in {"test_count", "vector_count", "go_runtime_paths"} and value is not True:
+            raise ValueError("semantic observations must be affirmatively observed")
+    if case_id == "A27" and (observations["vector_count"] != 156 or observations["go_runtime_paths"] != 0):
+        raise ValueError("A27 must bind all 156 vectors and a Go-free runtime tree")
+    transcript = document.get("transcript")
+    if (not isinstance(transcript, dict) or set(transcript) != {"stdout_sha256", "stderr_sha256"}
+            or any(not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)
+                   for value in transcript.values())):
+        raise ValueError("evidence transcript binding is invalid")
 
     def inspect(value: object) -> None:
         if isinstance(value, dict):
@@ -211,20 +337,23 @@ def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict 
              identity: dict[str, str]) -> dict:
     case = CASES[case_id]
     started = utc_now()
-    env = {name: os.environ[name] for name in spec["environment"] if name in os.environ}
-    env["LIQVERA_ACCEPTANCE_EVIDENCE_DIR"] = str(evidence_root)
-    env["LIQVERA_ACCEPTANCE_PYTHON"] = sys.executable
-    env["PATH"] = os.environ["PATH"]
-    internal_environment = {"LIQVERA_ACCEPTANCE_PYTHON", "PATH"}
+    env = {
+        "LIQVERA_ACCEPTANCE_EVIDENCE_DIR": str(evidence_root),
+        "LIQVERA_ACCEPTANCE_PYTHON": sys.executable,
+        "PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PIP_NO_INDEX": "1",
+    }
+    actual_argv = [sys.executable, "-B", str(DISPATCHER), case_id]
     row = {
         "case_id": case_id, "title": case.title, "status": "FAIL", "started_at": started,
-        "command": spec["argv"], "environment_names": sorted(name for name in env if name not in internal_environment),
+        "command": spec["argv"], "environment_names": [],
         "execution_class": case.execution_class,
         "exit_code": None, "evidence": [], "omissions": [],
     }
     try:
         completed = subprocess.run(
-            spec["argv"], cwd=ROOT, env=env, capture_output=True,
+            actual_argv, cwd=ROOT, env=env, capture_output=True,
             timeout=spec["timeout_seconds"], check=False,
         )
         row["exit_code"] = completed.returncode
@@ -266,11 +395,11 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--authorize-live", action="store_true", help="explicitly permit planned live commands")
     args = parser.parse_args()
-    if args.authorize_live and args.mode != "live":
-        parser.error("--authorize-live requires --mode live")
+    if args.mode == "live" or args.authorize_live:
+        parser.error("live execution requires an exact grant contract that is not implemented")
     try:
         identity = repo_identity()
-        commands = read_plan(args.plan)
+        commands, plan_snapshot = read_plan(args.plan)
         output = args.output.resolve()
         if output.exists() or output.is_relative_to(ROOT):
             raise ValueError("output must be a new path outside the repository")
@@ -280,14 +409,14 @@ def main() -> int:
         prior_payment = None
         started = utc_now()
         for case_id, case in CASES.items():
-            if case.execution_class != "local" and (args.mode != "live" or not args.authorize_live):
+            if case.execution_class != "local":
                 row = {"case_id": case_id, "title": case.title, "status": "BLOCKED_EXTERNAL",
-                       "omissions": ["LIVE_AUTHORIZATION_ABSENT"], "command": None,
+                       "omissions": [BLOCKED_REASON], "command": None,
                        "environment_names": [], "exit_code": None, "evidence": [],
                        "execution_class": case.execution_class}
             elif case_id not in commands:
                 row = {"case_id": case_id, "title": case.title, "status": "NOT_RUN",
-                       "omissions": ["ASSERTION_COMMAND_NOT_CONFIGURED"], "command": None,
+                       "omissions": [case.local_omission], "command": None,
                        "environment_names": [], "exit_code": None, "evidence": [],
                        "execution_class": case.execution_class}
             else:
@@ -297,9 +426,6 @@ def main() -> int:
                 prior_payment = row["payment_evidence"]
         statuses = {row["status"] for row in rows}
         overall = "FAIL" if "FAIL" in statuses else "PASS" if statuses == {"PASS"} else "INCOMPLETE"
-        final_identity = repo_identity()
-        if final_identity != identity:
-            raise ValueError("repository identity changed during acceptance")
         seen_evidence: set[str] = set()
         for row in rows:
             for reference in row["evidence"]:
@@ -309,7 +435,13 @@ def main() -> int:
                 path = evidence_root / reference["file"]
                 if file_sha256(path) != reference["sha256"] or path.stat().st_size != reference["size_bytes"]:
                     raise ValueError("evidence changed before result sealing")
-        plan_digest = file_sha256(args.plan.resolve()) if args.plan else hashlib.sha256(b"").hexdigest()
+                os.chmod(path, 0o400)
+        if plan_snapshot is not None:
+            plan_snapshot.verify_unchanged()
+        final_identity = repo_identity()
+        if final_identity != identity:
+            raise ValueError("repository identity changed during acceptance")
+        plan_digest = plan_snapshot.digest if plan_snapshot else hashlib.sha256(b"").hexdigest()
         result = {"schema": "liqvera-acceptance-result/v1", "mode": args.mode,
                   "repository": identity, "environment": {"platform": platform.platform(),
                   "python": platform.python_version()}, "started_at": started,
@@ -318,11 +450,9 @@ def main() -> int:
                   "cases": rows}
         validate_result_semantics(result)
         encoded = (json.dumps(result, sort_keys=True, indent=2) + "\n").encode()
-        descriptor = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
-        with os.fdopen(descriptor, "wb") as stream:
-            stream.write(encoded)
-            stream.flush()
-            os.fsync(stream.fileno())
+        _publish_exclusive(output, encoded)
+        verify_sealed_result(output, hashlib.sha256(encoded).hexdigest())
+        os.chmod(evidence_root, 0o500)
         print(f"{overall}: {output}")
         return 0 if overall == "PASS" else 1
     except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import subprocess
@@ -73,7 +74,7 @@ def test_local_a30_is_not_blocked_as_external(
     result = _generated_result(tmp_path, monkeypatch)
     row = next(item for item in result["cases"] if item["case_id"] == "A30")
     assert row["status"] == "NOT_RUN"
-    assert row["omissions"] == ["ASSERTION_COMMAND_NOT_CONFIGURED"]
+    assert row["omissions"] == ["WALLET_ASSERTION_PLAN_NOT_PROVIDED"]
 
 
 def test_runner_propagates_internal_python_and_path_without_claiming_them(
@@ -95,8 +96,8 @@ def test_runner_propagates_internal_python_and_path_without_claiming_them(
     )
 
     assert captured["LIQVERA_ACCEPTANCE_PYTHON"] == sys.executable
-    assert captured["PATH"] == os.environ["PATH"]
-    assert row["environment_names"] == ["LIQVERA_ACCEPTANCE_EVIDENCE_DIR"]
+    assert captured["PATH"] == f"{Path(sys.executable).parent}:/usr/bin:/bin"
+    assert row["environment_names"] == []
 
 
 def _result_with_passing_case(
@@ -176,3 +177,97 @@ def test_acceptance_result_rejects_noncanonical_git_object_ids(
     }))
 
     assert any(list(error.path) == ["repository", field] for error in errors)
+
+
+@pytest.mark.parametrize(
+    ("case_id", "status", "omissions", "message"),
+    [
+        ("A02", "NOT_RUN", ["ASSERTION_COMMAND_NOT_CONFIGURED"], "local omission"),
+        ("A07", "BLOCKED_EXTERNAL", ["LIVE_AUTHORIZATION_ABSENT"], "external blocker"),
+    ],
+)
+def test_status_reason_algebra_rejects_generic_or_unknown_reasons(
+    case_id: str, status: str, omissions: list[str], message: str,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    result = _generated_result(tmp_path, monkeypatch)
+    row = next(item for item in result["cases"] if item["case_id"] == case_id)
+    row.update(status=status, omissions=omissions)
+    with pytest.raises(ValueError, match=message):
+        runner.validate_result_semantics(result)
+
+
+def test_payment_replay_must_bind_to_exact_a13_receipt() -> None:
+    a13 = {
+        "payment": {
+            "tx_hash": "0x" + "1" * 64, "block_hash": "0x" + "2" * 64,
+            "log_index": 0, "buyer": "0x" + "3" * 40, "merchant": "0x" + "4" * 40,
+            "network": "eip155:31611", "asset": "0x118917a40faf1cd7a13db0ef56c86de7973ac503",
+            "amount_atomic": "10000000000000000",
+        }
+    }
+    receipt = runner.payment_reference("A13", a13, None)
+    with pytest.raises(ValueError, match="bind to passing A13"):
+        runner.payment_reference("A14", {"payment": {"tx_hash": "0x" + "9" * 64, "settlement_count": 1}}, receipt)
+
+
+def test_atomic_publish_leaves_no_result_after_interrupted_link(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    output = tmp_path / "result.json"
+    monkeypatch.setattr(runner.os, "link", lambda *args, **kwargs: (_ for _ in ()).throw(OSError("stop")))
+    with pytest.raises(OSError, match="stop"):
+        runner._publish_exclusive(output, b"payload")
+    assert not output.exists()
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_plan_symlink_is_rejected(tmp_path: Path) -> None:
+    link = tmp_path / "plan.json"
+    link.symlink_to(ROOT / "acceptance/offline-plan.json")
+    with pytest.raises(ValueError, match="regular non-linked"):
+        runner.read_plan(link)
+
+
+def test_plan_snapshot_detects_replacement(tmp_path: Path) -> None:
+    path = tmp_path / "plan.json"
+    path.write_bytes(b"one")
+    info = path.stat()
+    snapshot = runner.PlanSnapshot(
+        path, b"one", hashlib.sha256(b"one").hexdigest(),
+        info.st_dev, info.st_ino, info.st_size,
+    )
+    path.write_bytes(b"two")
+    with pytest.raises(ValueError, match="changed after validation"):
+        snapshot.verify_unchanged()
+
+
+@pytest.mark.parametrize("link_kind", ["symlink", "hardlink"])
+def test_evidence_links_are_rejected(tmp_path: Path, link_kind: str) -> None:
+    source = tmp_path / "source.json"
+    source.write_text("{}", encoding="utf-8")
+    linked = tmp_path / "linked.json"
+    if link_kind == "symlink":
+        linked.symlink_to(source)
+    else:
+        os.link(source, linked)
+    with pytest.raises(ValueError, match="regular file"):
+        runner.evidence_reference(
+            tmp_path, linked.name, "A01", "before_after_checks", "local",
+            {"commit": COMMIT, "tree": TREE},
+        )
+
+
+def test_post_seal_verifier_rejects_result_mutation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    result = _generated_result(tmp_path, monkeypatch)
+    output = tmp_path / "run" / "acceptance.json"
+    digest = hashlib.sha256(output.read_bytes()).hexdigest()
+    runner.verify_sealed_result(output, digest)
+    os.chmod(output.parent, 0o700)
+    os.chmod(output, 0o600)
+    output.write_text(json.dumps(result) + "\n", encoding="utf-8")
+    os.chmod(output, 0o400)
+    with pytest.raises(ValueError, match="digest mismatch"):
+        runner.verify_sealed_result(output, digest)

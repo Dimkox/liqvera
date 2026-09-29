@@ -28,8 +28,10 @@ guarded cancel, wrong-network and wallet changes, reload identity and
 no-resettlement, fixture zero-egress topology, internal-only metrics, resource
 and security bounds, and CSP; its route is locally verified and reviewed. F7
 P0 now hardens the acceptance producer with exact A01–A30 semantic reduction,
-closed per-case claims, create-only out-of-tree evidence, final clean Git
-revalidation, final evidence re-hashing, and local A30 classification. The
+closed case-specific observations, an exact pinned dispatcher capability,
+same-byte plan validation, final clean Git revalidation, atomic create-only
+publication, and a post-seal verifier. The output is tamper-evident and made
+read-only locally; filesystem permissions are not claimed as immutability. The
 checked-in offline plan intentionally executes only five currently bound local
 assertions; every other case remains truthful `NOT_RUN` or `BLOCKED_EXTERNAL`
 until its complete criterion has an approved dispatcher. F7 is therefore
@@ -155,7 +157,9 @@ make liqvera-acceptance ACCEPTANCE_OUTPUT=/new/path/result.json
 out-of-repository directory; the runner creates that directory mode 0700 and
 refuses overwrite. A local INCOMPLETE result is expected until every remaining
 criterion has complete executable evidence and the separately gated external
-phases are authorized.
+phases are authorized. Verify a retained result and every runner/plan/evidence
+binding with `make liqvera-acceptance-verify ACCEPTANCE_OUTPUT=/path/result.json
+ACCEPTANCE_RESULT_SHA256=<sha256>`.
 
 `liqvera-gateway` has now been exercised locally through its exact lock,
 typecheck/build, loopback adapter suite, and disposable PostgreSQL tests. The

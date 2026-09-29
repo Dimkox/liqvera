@@ -13,7 +13,7 @@ wallet interaction, payment, push, tag, release, or other external mutation
 occurred. The earlier local-only route `fd7ffd5cc17f` is coherently retained as
 cancelled before implementation. Current decision is **NO-GO**.
 
-P0 repairs the A01–A30 runner's semantic validation, immutable evidence, final
+P0 repairs the A01–A30 runner's semantic validation, tamper-evident evidence, final
 clean Git binding, local-vs-real A30 classification, and fault/mutation suite.
 P1 executes locally eligible cases into a fresh mode-0700 out-of-tree result;
 missing real prerequisites remain explicit. P2 permits only separately granted
@@ -25,50 +25,31 @@ maximum, and a numeric test-BTC gas cap. Any possible broadcast followed by
 timeout is `UNKNOWN`, never retryable; only exact confirmation reconciliation
 may continue.
 
-The P0 implementation defines explicit `local`, `public_read`, and
-`testnet_write` execution classes (A30 local; real wallet observation remains
-separate), exact canonical inventory/status validation, closed per-case claims,
-runner/plan/command/assertion digests, create-only mode-0700 out-of-tree output,
-final clean commit/tree equality, unique evidence paths, and final size/hash
-revalidation before an exclusive fsynced result write. The producer validates
-both JSON Schema and semantic algebra. A checked-in offline dispatcher/plan
-currently binds five full local commands (A01, A08, A09, A27, A30); remaining
-cases are deliberately not promoted from partial historical evidence.
+The first P0/P1 reviews failed because exit-zero test commands could certify
+their own prose claims, the plan accepted arbitrary command capability, status
+reasons were open, sealing was not atomic, and retained evidence lacked a
+standalone verifier. The repair keeps only five fully configured local cases
+(A01, A08, A09, A27, A30), validates a closed observation shape for each, and
+gives every other local case a canonical prerequisite-specific `NOT_RUN`
+reason. `BLOCKED_EXTERNAL` is restricted to non-local cases with the one
+canonical missing-grant reason; live mode remains unavailable because no exact
+grant contract exists.
 
-The first P1 diagnostic result correctly remained incomplete but exposed an
-interpreter-binding defect: four Python assertions ran under the dispatcher's
-system shebang while A30 passed. The runner now supplies its already pinned
-interpreter to the dispatcher through an internal environment binding that is
-excluded from the public evidence contract. The focused 16-test semantic suite
-and Ruff check pass; final clean-HEAD acceptance and full verification remain
-to be regenerated after this repair is committed.
+The only executable capability is the pinned current Python running the exact
+checked-in dispatcher and case ID with a constructed offline environment; plan
+shells, alternate argv, environment inputs, symlinks, hardlinks, replacement,
+and mutation are rejected. The runner hashes the exact parsed plan bytes,
+revalidates evidence and the plan, then performs its final clean commit/tree
+check immediately before atomic link publication. Results and evidence are
+made read-only and are **tamper-evident, not immutable**. The standalone
+verifier reloads schema and semantic algebra and rehashes the result, runner,
+plan, and every evidence object while rejecting linked/replaced files.
 
-The first full pinned verifier after that repair exposed one inventory defect
-introduced with the new offline plan: the closed classifier had no
-`acceptance/*.json` rule and its configuration binding incorrectly targeted a
-runtime source node. The resulting three graph-policy failures reproduced
-deterministically; the classifier and binding are now corrected, and the
-focused graph slice passes 32 tests. A fresh full verifier remains required on
-the repaired commit.
-
-That repaired commit passed the full pinned PR verifier. Its subsequent P1
-diagnostic produced 4 PASS (A01, A08, A27, A30), 1 FAIL (A09), 4
-BLOCKED_EXTERNAL, and 21 NOT_RUN at immutable path
-`/tmp/liqvera-f7-local-2fb67a1/result.json`. A09 showed that the runner's
-otherwise closed child environment omitted `PATH`, which its nested installed
-virtual-environment boundary needs. The runner now carries its existing
-non-secret `PATH` as internal plumbing, excludes it from public environment
-claims, and has a regression test; final verification and acceptance must be
-regenerated on the next clean commit.
-
-The repaired P1 run on `c6c7ff9` is semantically INCOMPLETE with no failures:
-5 PASS (A01, A08, A09, A27, A30), 4 BLOCKED_EXTERNAL (A07, A13, A14, A29),
-and 21 NOT_RUN because no complete local assertion command exists. It is bound
-to the clean commit/tree and records runner/plan plus per-command/assertion and
-evidence digests. P0/P1 are implemented; P0 reviews are intentionally not
-self-dispatched, and P2–P5 remain blocked by their explicit gates. Because this
-handoff/task accounting changes the subject tree, the final out-of-tree result
-and verifier receipt must be regenerated once more on the documentation commit.
+Regression coverage includes status contradictions, generic reasons, exact
+A13/A14 receipt linkage, plan/link mutation, evidence symlink/hardlink attacks,
+post-seal mutation, and interrupted publication. Final clean-HEAD acceptance
+and full verification must be regenerated after this repair commit. Reviews
+remain failed/stale until independent rerun; P2–P5 remain gated.
 
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts

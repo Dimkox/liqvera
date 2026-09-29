@@ -15391,6 +15391,9 @@ repository_inventory:
   - path: scripts/run-mezo-acceptance.py
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE
+  - path: scripts/verify-mezo-acceptance.py
+    node: runtime:mezo-acceptance
+    path_class: TOOL_SOURCE
   - path: scripts/run-local-acceptance-assertion.py
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE

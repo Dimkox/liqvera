@@ -78,6 +78,11 @@ liqvera-acceptance:
 		(echo "ACCEPTANCE_OUTPUT is required and must name a new JSON result" >&2; exit 2)
 	$(PYTHON) -B scripts/run-mezo-acceptance.py --mode offline --plan "$(ACCEPTANCE_PLAN)" --output "$(ACCEPTANCE_OUTPUT)"
 
+liqvera-acceptance-verify:
+	@test -n "$(ACCEPTANCE_RESULT_SHA256)" || \
+		(echo "ACCEPTANCE_RESULT_SHA256 is required" >&2; exit 2)
+	$(PYTHON) -B scripts/verify-mezo-acceptance.py "$(ACCEPTANCE_OUTPUT)" --sha256 "$(ACCEPTANCE_RESULT_SHA256)"
+
 liqvera-product: liqvera-python liqvera-gateway liqvera-web liqvera-images liqvera-compose
 	@echo "Liqvera product artifacts built; acceptance remains a separate explicit target"
 

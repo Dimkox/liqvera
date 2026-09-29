@@ -121,6 +121,12 @@
       "from": "reviewing",
       "reason": "Final verifier PASS; five independent reviews PASS including artifact-bound release review; A13/A14 complete with one settlement and zero buyer gas; truthful limitations retain INCOMPLETE acceptance, A29 and publication pending.",
       "to": "ready"
+    },
+    {
+      "at": "2026-09-29T20:22:59+00:00",
+      "from": "ready",
+      "reason": "Published GitHub Release v0.0.1 targets a0fd5f0884a3fd1a6663982ea5df387b47528bdd; public asset SHA-256 checks and anonymous credential-disabled recursive clone A29 passed; retained acceptance limitations remain explicit.",
+      "to": "released"
     }
   ],
   "human_gates": [
@@ -130,7 +136,7 @@
   "human_gates_digest": "1ab9adb5cb4d33f265090cb45b1793b25f1857203ce4733f5dc7ccbdef7b03f9",
   "route_id": "337ef5ec16a0",
   "schema_version": 1,
-  "status": "ready",
+  "status": "released",
   "title": "F7 live acceptance and release 0.0.1",
-  "updated_at": "2026-09-29T20:14:42+00:00"
+  "updated_at": "2026-09-29T20:22:59+00:00"
 }

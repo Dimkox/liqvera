@@ -5,6 +5,23 @@
 No hosted deployment. P5 only fast-forwards canonical `main`, creates annotated
 `v0.0.1`, and creates/publishes the GitHub Release after exact grants.
 
+## Published release
+
+Release `v0.0.1` is published at
+`https://github.com/Dimkox/liqvera/releases/tag/v0.0.1` and its tag targets
+`a0fd5f0884a3fd1a6663982ea5df387b47528bdd`.
+
+Public asset download verification passed:
+
+- `liqvera-0.0.1.zip`: `a6d8a6adb4350f1bf3f30c719e3f3c0e24527fc2289cb256fa50e2b9cc8ae2d8`
+- `RELEASE_NOTES.md`: `f1ddb3fa85a49c9cccc280d0bd8cf66d1f2b0a1428473174813ba3981bf27b7f`
+- `release-manifest.json`: `220a53603360adc43c27bd9a711440274239558ba2c1c2da0b0ffbe4cdd7100d`
+- `SHA256SUMS`: `b002e6b3bef3d5faa66c7ddbf8b8d07e157c6b76f4db33d0ce8d2c028827ec19`
+
+A29 passed through a credential-disabled anonymous recursive clone: root
+VERSION `0.0.1`, kernel VERSION `2.0.19`, submodule
+`cb9af4073ba6c3d515145164d771c75ebdfa3224`. No hosted deployment was made.
+
 ## Feature flags / staged rollout
 
 No bypass flag may enable payment. P0–P5 are sequential gates; public reads,
@@ -21,9 +38,9 @@ metrics or evidence.
 
 ## Go/no-go criteria
 
-Current: **NO-GO** for another payment, push, tag, or GitHub Release. One
-authorized Mezo Testnet settlement already occurred and is retained as scoped
-A13/A14 evidence; it does not authorize a retry or publication.
+Publication is complete. **NO-GO** remains for another payment or any mutation
+of the immutable tag/release/assets. One authorized Mezo Testnet settlement is
+retained as scoped A13/A14 evidence and does not authorize a retry.
 
 P0 GO requires scope approval plus green repair tests/verifier/reviews. P1 GO
 requires valid immutable local result and reviewed omissions. P2/P3/P5 each
@@ -44,9 +61,10 @@ corrected offline candidate SHA-256 is
 and is INCOMPLETE with no FAIL rows. See
 `evidence/acceptance-release-candidate.md`.
 
-`release-artifact-manifest.json` and `release-notes-v0.0.1.md` are preparation
-inputs. They intentionally mark the final release commit/tree, source archive,
-`SHA256SUMS`, verifier/reviews, and publication as pending. Build from the final
-reviewed clean commit, replace every pending field with observed values, verify
-extraction and hashes in a fresh directory, then obtain the separate publication
-approval. Do not tag or publish the current preparation commit.
+`release-artifact-manifest.json` and `release-notes-v0.0.1.md` remain historical
+pre-publication inputs and are not the downloaded release assets. The observed
+publication identity and hashes above are authoritative post-release evidence.
+The overall acceptance limitation remains truthful: the historical live result
+is FAIL outside its passing A13/A14 rows, while the corrected candidate is
+INCOMPLETE; all 156 frozen vectors remain NOT_RUN and no hosted deployment,
+mainnet, custody, private venue, or exchange mutation is claimed.

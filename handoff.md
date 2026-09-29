@@ -5,6 +5,25 @@ Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f075
 
 ## F7 live acceptance and release 0.0.1 — 2026-09-29
 
+Liqvera v0.0.1 is published at
+`https://github.com/Dimkox/liqvera/releases/tag/v0.0.1`; the immutable tag
+targets `a0fd5f0884a3fd1a6663982ea5df387b47528bdd`. Public re-download hashes
+passed: source zip `a6d8a6adb4350f1bf3f30c719e3f3c0e24527fc2289cb256fa50e2b9cc8ae2d8`,
+release notes `f1ddb3fa85a49c9cccc280d0bd8cf66d1f2b0a1428473174813ba3981bf27b7f`,
+manifest `220a53603360adc43c27bd9a711440274239558ba2c1c2da0b0ffbe4cdd7100d`,
+and `SHA256SUMS` `b002e6b3bef3d5faa66c7ddbf8b8d07e157c6b76f4db33d0ce8d2c028827ec19`.
+A credential-disabled anonymous recursive clone passed A29 and observed root
+VERSION `0.0.1`, kernel VERSION `2.0.19`, and submodule commit
+`cb9af4073ba6c3d515145164d771c75ebdfa3224`. The change package is now
+`released`. This post-release metadata commit is intentionally after the tag
+and does not alter published bytes.
+
+Remaining limitations are unchanged: the retained full live result is overall
+FAIL because of its historical A08/A09 interpreter defect even though A13/A14
+PASS; the corrected candidate is INCOMPLETE with honest NOT_RUN/BLOCKED cases;
+all 156 frozen vectors remain NOT_RUN; no hosted deployment, mainnet, custody,
+private venue, or exchange mutation is claimed.
+
 Release preparation now records two sealed results without copying their
 private paths, signatures, or payment payload. The live result
 `53830fe2…57e61` at `ca9e04c` has A13/A14 PASS on one transaction
@@ -14,8 +33,9 @@ status is nevertheless FAIL because A08/A09 accidentally used system Python.
 The corrected offline result `4799bce9…84d6` at `76c0b63` is INCOMPLETE with
 5 PASS (A01/A08/A09/A27/A30), 4 BLOCKED_EXTERNAL, 21 NOT_RUN, and no FAIL.
 Root product `VERSION` is now `0.0.1`; component versions remain unchanged.
-Draft notes and a truthful manifest mark release artifacts, checksums, final
-commit binding, A29, reviews, push, tag, and GitHub Release as not run.
+The preparation notes and tracked manifest are historical pre-publication
+inputs; the exact published hashes and A29 result above supersede their pending
+fields without rewriting the immutable tag.
 The first verifier on the preparation commit correctly rejected the four new
 tracked paths as absent from repository inventory. VERSION now has an explicit
 build-packaging classifier and all four paths have graph owners; the complete
@@ -84,11 +104,12 @@ tests passed without network, wallet, payment, or database activity.
 
 Route `337ef5ec16a0` and change package
 `engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/`
-are now `ready`. Four route-selected analyses were
-synthesized into sequential P0–P5 gates; no network read, database/container action,
-wallet interaction, payment, push, tag, release, or other external mutation
-occurred. The earlier local-only route `fd7ffd5cc17f` is coherently retained as
-cancelled before implementation. Current decision is **NO-GO**.
+are now `released`. Four route-selected analyses were synthesized into sequential
+P0–P5 gates. Their initial local-only phases performed no external mutation;
+the later explicitly authorized payment and publication produced the retained
+evidence summarized above. The earlier local-only route `fd7ffd5cc17f` is
+coherently retained as cancelled before implementation. Further payment or
+mutation of the immutable release remains **NO-GO**.
 
 P0 repairs the A01–A30 runner's semantic validation, tamper-evident evidence, final
 clean Git binding, local-vs-real A30 classification, and fault/mutation suite.
@@ -201,8 +222,8 @@ The local-only P2/P3 prerequisite slice now adds closed public-read grants bound
 to commit, tree, plan digest, case, exact HTTPS method/URL, limits and a maximum
 15-minute lifetime. It rejects credential-bearing URLs, private or reserved
 addresses, changed DNS answers, excess attempts/time/bytes, and unknown
-destinations. No grant was issued and no read was attempted; A07/A29 remain
-`BLOCKED_EXTERNAL`.
+destinations. During that local-only phase no grant was issued and A07/A29 were
+`BLOCKED_EXTERNAL`; the later publication run completed A29 as recorded above.
 
 The gateway now has explicit EIP-3009 identity and a twelve-confirmation
 canonical Mezo Testnet finality policy. A separate exact payment grant binds

@@ -38,6 +38,7 @@ from tools.graph_checker.loader import _classify_repository_path
         ("tests/readonly_analyzer/test_vwap.py", "TEST_SOURCE"),
         ("tests/readonly_analyzer/test_identity.py", "TEST_SOURCE"),
         ("Makefile", "CONFIGURATION"),
+        ("acceptance/offline-plan.json", "CONFIGURATION"),
         (".grok/hooks.json", "CONFIGURATION"),
         ("scripts/grok_verify.py", "TOOL_SOURCE"),
         ("tooling/adaptive-grok-build-pro", "CONFIGURATION"),

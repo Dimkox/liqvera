@@ -43,6 +43,14 @@ excluded from the public evidence contract. The focused 16-test semantic suite
 and Ruff check pass; final clean-HEAD acceptance and full verification remain
 to be regenerated after this repair is committed.
 
+The first full pinned verifier after that repair exposed one inventory defect
+introduced with the new offline plan: the closed classifier had no
+`acceptance/*.json` rule and its configuration binding incorrectly targeted a
+runtime source node. The resulting three graph-policy failures reproduced
+deterministically; the classifier and binding are now corrected, and the
+focused graph slice passes 32 tests. A fresh full verifier remains required on
+the repaired commit.
+
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts
 plus `SHA256SUMS` from one frozen commit. Final acceptance/evidence stays

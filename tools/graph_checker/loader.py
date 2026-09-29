@@ -520,6 +520,8 @@ _EXECUTION_PATHS = frozenset(
 def _classify_repository_path(path: str) -> PathClass:
     normalized = path.replace("\\", "/")
     name = normalized.rsplit("/", 1)[-1].casefold()
+    if normalized.startswith("acceptance/") and name.endswith(".json"):
+        return PathClass.CONFIGURATION
     if normalized in _EXTERNAL_TOOLING_CONFIG or normalized.startswith(".grok-stack/config/"):
         return PathClass.CONFIGURATION
     if normalized in {

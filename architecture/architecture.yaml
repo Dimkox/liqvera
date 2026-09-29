@@ -15395,7 +15395,7 @@ repository_inventory:
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE
   - path: acceptance/offline-plan.json
-    node: runtime:mezo-acceptance
+    node: manifest:runtime
     path_class: CONFIGURATION
   - path: scripts/build-liqvera-python-distributions.py
     node: runtime:liqvera-factory

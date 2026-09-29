@@ -277,8 +277,10 @@ address, metadata, EIP-712 domain and capabilities before declaring readiness.
 
 The P3 operator treated permission to submit and permission to reconcile as the
 same gate, so an expired grant could not read or confirm an already-consumed
-attempt. Parse replay inputs structurally, consult durable consumption first,
-and enforce the strict expiry window only on paths that could submit.
+attempt. The first repair returned early for consumed grants and accidentally
+skipped subject/tree/plan/buyer/payee binding too. Parse replay inputs
+structurally, always validate exact context, consult durable consumption, and
+waive only expiry on a digest-proven consumed path.
 
 ## 2026-09-29 — Full acceptance inherited the system Python
 

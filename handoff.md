@@ -71,7 +71,9 @@ durable-consumption lookup and can only return its retained `CONFIRMED` receipt
 or run confirm-only reconciliation; it cannot call settlement again. An
 unconsumed expired grant, including preflight, still fails with
 `LIVE_GRANT_EXPIRED`, and the 15-minute maximum lifetime remains enforced before
-every first submission. Local A08/A09 dispatch also uses the repository's
+every first submission. Context binding is enforced before either branch, so a
+consumed expired grant with a changed commit, tree, plan, buyer, or payee fails
+with `LIVE_GRANT_MISMATCH` rather than reaching retained evidence. Local A08/A09 dispatch also uses the repository's
 verified `.venv/bin/python` explicitly and fails closed if that runtime is
 missing, avoiding accidental `/usr/bin/python` execution. Focused regression
 tests passed without network, wallet, payment, or database activity.

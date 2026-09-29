@@ -139,6 +139,13 @@ test('expired consumed grant is confirm-only while expired unconsumed grant cann
   let settlementCalls=0;
   if(authorizeNewSettlement(grant,context,true))settlementCalls++;
   assert.equal(settlementCalls,0);
+  for(const mismatch of [
+    {subjectCommit:'0'.repeat(40)},
+    {subjectTree:'0'.repeat(40)},
+    {planSha256:'0'.repeat(64)},
+    {buyer:'0x3333333333333333333333333333333333333333'},
+    {payTo:'0x4444444444444444444444444444444444444444'},
+  ]) assert.throws(()=>authorizeNewSettlement(grant,{...context,...mismatch},true),/LIVE_GRANT_MISMATCH/);
   assert.throws(()=>{
     if(authorizeNewSettlement(grant,context,false))settlementCalls++;
   },/LIVE_GRANT_EXPIRED/);

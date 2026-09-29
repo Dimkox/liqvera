@@ -50,6 +50,7 @@ async function checkMigrations(pool:Pool):Promise<void>{
 }
 function output(value:unknown):void{process.stdout.write(`${JSON.stringify(value)}\n`)}
 export function authorizeNewSettlement(grant:LivePaymentGrant,context:{subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;now:Date},alreadyConsumed:boolean):boolean {
+  grant.assertContext(context);
   if(alreadyConsumed)return false;
   grant.authorize(context);
   return true;

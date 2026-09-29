@@ -113,6 +113,17 @@ commands exited 0. No dependency, lockfile, migration, vector, external, or
 payment boundary changed. A pinned full verifier is run only against the clean
 committed repair; independent review receipts remain coordinator-owned.
 
+## State closure
+
+After the reports were committed, pinned v2.0.19 verification passed and the
+three exact report paths were registered as PASS receipts. With no human gates,
+the v2.0.19 change CLI then advanced the durable package from `verifying` to
+`reviewing` and `ready`. Those tracked state transitions intentionally stale
+the preceding runtime receipts; the final verifier and all three review
+receipts are refreshed against the clean state-close commit. The tracked
+`evidence_accounting` remains a historical package baseline and does not
+replace the fingerprint-bound runtime receipts reported by `grok_status.py`.
+
 ## Full verification
 
 On clean implementation fingerprint

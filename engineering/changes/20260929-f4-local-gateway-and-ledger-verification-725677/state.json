@@ -111,13 +111,25 @@
       "from": "implementing",
       "reason": "Focused gateway/PostgreSQL checks and pinned full PR verification passed the implementation fingerprint.",
       "to": "verifying"
+    },
+    {
+      "at": "2026-09-29T09:09:18+00:00",
+      "from": "verifying",
+      "reason": "Pinned PR verification passed and all route-selected independent code, test, and data reviewers returned PASS with persisted reports.",
+      "to": "reviewing"
+    },
+    {
+      "at": "2026-09-29T09:09:18+00:00",
+      "from": "reviewing",
+      "reason": "Implementation is verified, all required independent reviews pass, and no human gates remain.",
+      "to": "ready"
     }
   ],
   "human_gates": [],
   "human_gates_digest": "c80c81fef25f98ccee331c8391ed981406316868e0c0e85e3f3deaee6dc63d9a",
   "route_id": "725677143509",
   "schema_version": 1,
-  "status": "verifying",
+  "status": "ready",
   "title": "F4 local gateway and ledger verification",
-  "updated_at": "2026-09-29T08:48:02+00:00"
+  "updated_at": "2026-09-29T09:09:18+00:00"
 }

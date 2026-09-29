@@ -9,4 +9,5 @@
 - [x] Repair the test-review P1 with deterministic internal-deadline and caller-
   abort cleanup regressions while retaining the production two-second default.
 - [x] Complete independent reviews and persist the reviewer-provided reports.
-- [ ] Bind evidence to the final tree fingerprint.
+- [x] Bind evidence to the final tree fingerprint (runtime receipts are
+  refreshed after the final state commit so they remain fingerprint-current).

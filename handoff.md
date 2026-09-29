@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (F4 independent re-reviews PASS and persisted; final fingerprint refresh pending). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (F4 independent re-reviews PASS; durable package ready; final runtime receipts refresh after this commit). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F4 local gateway and ledger verification — 2026-09-29
@@ -51,9 +51,13 @@ change. Independent code, test, and data reviewers then returned PASS with no
 findings on clean HEAD `587bf5c0a5edd1712c4cd3cd3e4ade258fff8ffe` and tree
 fingerprint `e88d85fbe2da4789b634f5d2c88bf73beeb9740274c566ba06297f8c1cb4c83b`.
 Their coordinator-provided reports are persisted in the active change evidence
-directory and registered in the architecture inventory. This report-only tree
-change requires a clean verifier and fingerprint-bound receipt refresh before
-the durable package can close; the implementation owner does not self-review.
+directory and registered in the architecture inventory. The report-bearing
+tree passed pinned verification, and its exact report paths were recorded as
+PASS receipts. With no human gate, the v2.0.19 change CLI advanced the durable
+package through `reviewing` to `ready`. That tracked state-close change makes
+the preceding receipts stale by design, so the verifier and all three review
+receipts are refreshed once more after this commit. The implementation owner
+does not self-review.
 
 ## F3 offline artifact verification repair — 2026-09-29
 

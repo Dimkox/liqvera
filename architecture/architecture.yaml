@@ -15181,6 +15181,9 @@ repository_inventory:
   - path: apps/mezo-web/src/wallet.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/wallet-events.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/src/x402.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE

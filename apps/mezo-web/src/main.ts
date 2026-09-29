@@ -2,10 +2,11 @@ import "./style.css";
 import { MEZO_TESTNET, MUSD_TESTNET } from "@liqvera/mezo-protocol";
 import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest } from "./api";
 import { canPay, paymentNotice, walletStatus } from "./browser-flow";
-import { bindWalletListeners, executePaymentAttempt, executeRecovery } from "./browser-orchestration";
+import { executePaymentAttempt, executeRecovery } from "./browser-orchestration";
 import { quoteIsPayable, receiptMatchesQuote, type Capabilities, type Delivery, type Quote, type RequestStatus, type Side } from "./contracts";
 import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./session";
 import { injectedWallet, switchToMezo, walletAccount, walletError, walletOnMezo, type Eip1193Provider } from "./wallet";
+import { bindWalletStateListeners, refreshWalletState, type WalletState } from "./wallet-events";
 import { requestPaidReport, x402Available, X402CancelledBeforeSubmission } from "./x402";
 
 const app = document.querySelector<HTMLDivElement>("#app");
@@ -498,11 +499,13 @@ async function connectWallet(): Promise<void> {
 
 async function refreshWallet(): Promise<void> {
   provider = injectedWallet();
-  if (!provider) { account = null; onChain = false; }
-  else {
-    try { account = await walletAccount(provider, false); onChain = await walletOnMezo(provider); }
-    catch { account = null; onChain = false; }
-  }
+  if (!provider) applyWalletState({ account: null, onMezo: false });
+  else try { await refreshWalletState(provider, { applyWalletState }); }
+  catch { applyWalletState({ account: null, onMezo: false }); }
+}
+
+function applyWalletState(state: WalletState): void {
+  account = state.account; onChain = state.onMezo;
   if (flow && account && account.toLowerCase() !== flow.payer.toLowerCase()) announcement("Wallet changed. The saved quote remains bound to its original payer.", "warning");
   updateControls();
   if (quote) renderQuote();
@@ -550,7 +553,7 @@ async function boot(): Promise<void> {
     el<HTMLInputElement>("#quantity").value = flow.quantity;
     el<HTMLInputElement>(`input[name="side"][value="${flow.side}"]`).checked = true;
   }
-  bindWalletListeners(provider, refreshWallet);
+  bindWalletStateListeners(provider, { applyWalletState });
   await refreshWallet();
   try {
     cap = await getCapabilities();

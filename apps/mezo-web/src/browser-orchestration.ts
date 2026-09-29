@@ -90,7 +90,12 @@ export async function executePaymentAttempt<T extends BrowserFlowState, Q extend
   _quote: Q,
   dependencies: PaymentDependencies<Q>,
 ): Promise<T> {
-  await dependencies.validateWallet();
+  try {
+    await dependencies.validateWallet();
+  } catch {
+    dependencies.notice("Wallet network or account changed before submission. No payment was submitted.");
+    return original;
+  }
   let flow = beginPayment(original);
   dependencies.persist(flow);
   dependencies.notice("Opening the reviewed x402 wallet flow.");
@@ -124,20 +129,4 @@ export async function executePaymentAttempt<T extends BrowserFlowState, Q extend
     dependencies.notice("Payment status needs checking. Do not pay again.");
     return flow;
   }
-}
-
-interface EventProvider {
-  on?(event: string, listener: (...args: unknown[]) => void): void;
-  removeListener?(event: string, listener: (...args: unknown[]) => void): void;
-}
-
-export function bindWalletListeners(provider: EventProvider | null, refresh: () => void | Promise<void>): () => void {
-  if (!provider?.on) return () => undefined;
-  const listener = (): void => { void refresh(); };
-  provider.on("accountsChanged", listener);
-  provider.on("chainChanged", listener);
-  return () => {
-    provider.removeListener?.("accountsChanged", listener);
-    provider.removeListener?.("chainChanged", listener);
-  };
 }

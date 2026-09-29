@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { bindWalletListeners, executePaymentAttempt, executeRecovery } from "../src/browser-orchestration.ts";
+import { executePaymentAttempt, executeRecovery } from "../src/browser-orchestration.ts";
+import { bindWalletStateListeners } from "../src/wallet-events.ts";
 
 const payer = "0x1111111111111111111111111111111111111111";
 const quoteId = "11111111-1111-4111-8111-111111111111";
@@ -92,18 +93,49 @@ test("typed cancel clears only after authoritative READY refresh", async () => {
   }
 });
 
-test("wallet events refresh state only and never call the adapter", async () => {
+test("wallet revalidation failure is visible and remains definitely pre-submit", async () => {
+  const h = harness();
+  let adapterCalls = 0;
+  const result = await executePaymentAttempt(baseFlow, ready, {
+    async validateWallet() { throw new Error("wallet changed"); },
+    async requestPaidReport() { adapterCalls++; return "submitted"; },
+    async refreshQuote() { throw new Error("must not refresh"); },
+    isPreSubmitCancellation() { return false; },
+    persist: h.persist,
+    notice: h.notice,
+  });
+  assert.equal(result.paymentGuard, "clear");
+  assert.equal(adapterCalls, 0);
+  assert.equal(h.saved.length, 0);
+  assert.match(h.notices.at(-1), /No payment was submitted/);
+});
+
+test("production wallet event boundary writes state only and has no payment dependency", async () => {
   const listeners = new Map();
   const provider = {
+    account: payer,
+    chain: "0x7b7b",
+    async request({ method }) {
+      if (method === "eth_accounts") return [this.account];
+      if (method === "eth_chainId") return this.chain;
+      throw new Error(`unplanned ${method}`);
+    },
     on(event, listener) { listeners.set(event, listener); },
     removeListener(event) { listeners.delete(event); },
   };
-  let refreshes = 0;
+  const states = [];
   let adapterCalls = 0;
-  const cleanup = bindWalletListeners(provider, async () => { refreshes++; });
+  const cleanup = bindWalletStateListeners(provider, { applyWalletState(state) { states.push(state); } });
+  provider.account = "0x2222222222222222222222222222222222222222";
   await listeners.get("accountsChanged")([payer]);
+  await new Promise(resolve => setTimeout(resolve, 0));
+  provider.chain = "0x1";
   await listeners.get("chainChanged")("0x1");
-  assert.equal(refreshes, 2);
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.deepEqual(states, [
+    { account: "0x2222222222222222222222222222222222222222", onMezo: true },
+    { account: "0x2222222222222222222222222222222222222222", onMezo: false },
+  ]);
   assert.equal(adapterCalls, 0);
   cleanup();
   assert.equal(listeners.size, 0);

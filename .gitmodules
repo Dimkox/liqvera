@@ -1,0 +1,3 @@
+[submodule "tooling/adaptive-grok-build-pro"]
+	path = tooling/adaptive-grok-build-pro
+	url = https://github.com/Dimkox/adaptive-grok-build-pro.git

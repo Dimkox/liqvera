@@ -1,10 +1,103 @@
 # Liqvera — handoff
 
-Updated: 2026-09-24 (F3–F7 code and factory integrated, verification deferred). Repository: `Dimkox/liqvera`.
-Branch: `feat/mezo-evidence-f3-report` (stacked on verified F2 and the local MVP).
+Updated: 2026-09-28 (repository boundary change package advanced to ready; final fingerprint refresh pending). Repository: `Dimkox/liqvera`.
+Branch: `chore/repository-cleanup` (based on merged main and the F3–F7 integration).
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
 [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
+
+## Repository boundary cleanup — 2026-09-28
+
+Branch `chore/repository-cleanup` is an isolated worktree based on merged main
+commit `0c2cb97f8048f7da8bd193634f4502f24b0e541e`. Route
+`7f0f98e3cdda` and change package
+`engineering/changes/20260928-repository-boundary-cleanup-7f0f98/` cover a
+repository-only retirement of inherited Go Stage-0 and vendored agent tooling.
+Six parallel read-only analyses and the route-selected implementation are
+complete. Full route verification passed at clean fingerprint
+`aa5925f320da68843a52362e1654549d3a658899`. Independent code, test, security,
+and data re-reviews all passed that same fingerprint with no findings; their
+reviewer-provided summaries are stored under the active change package. The
+v2.0.19 change CLI advanced the durable package through `approved`,
+`implementing`, `verifying`, and `reviewing` to `ready`; no human gates are
+declared. It generated and mirrored a clean implementation checkpoint at
+`f7401a903d53c8ecb34415ce474a63f110a4ccdb`. These transition-only repository
+changes make the five pre-transition receipts stale, so final verifier and
+independent-review refresh remains pending for the state-close fingerprint.
+No product runtime, payment, deployment, release, or acceptance status has
+changed.
+
+The retired Go unit is `go.mod`, `cmd/`, `internal/`, the root Go
+`Dockerfile`, and the historical Stage-0-only `migrations/000001_init.*`.
+Its five useful safety invariants remain covered by Python characterization
+tests and the immutable public import commit
+`8734907d489168a8a6567b93bc85920001fefd85`. The A2
+`migrations/000002_a2_raw_capture.*`, gateway ledger, SQLite demo, schemas,
+vectors, fixtures, and `provenance/import-manifest.json` remain unchanged.
+
+BMad is externalized at the exact `bmad-method@6.10.0` npm identity and SRI in
+`tooling/tooling-lock.json`; no BMad factory payload remains copied into the
+repository. Adaptive Grok is a portable gitlink at
+`tooling/adaptive-grok-build-pro`, pinned to local tag `v2.0.19` and commit
+`cb9af4073ba6c3d515145164d771c75ebdfa3224`. Version 2.0.19 was chosen
+specifically for its bounded parallel pytest verifier; the older releases run
+the suite sequentially and are materially slower. Both project-owned execution
+entrypoints fail closed unless the gitlink, HEAD, tag, VERSION, and clean
+checkout all match the shared lock validator. Hooks no longer synthesize
+allow/empty output after validation failure; thin symlinks preserve hook and
+skill discovery without copying framework source.
+
+Ordinary product/conformance tests validate the static lock and gitlink and do
+not require an initialized submodule. The separately invoked
+`make verify-tooling` suite exercises the initialized runtime, missing,
+wrong-lock, wrong-HEAD, and dirty/untracked states, direct execution, hooks,
+and dynamic Trivy discovery. A final security re-review then demonstrated that
+Git's `assume-unchanged` flag could hide modified verifier bytes from status.
+The shared validator rejects all index optimization/state flags globally and
+hashes the explicit runtime/instruction trust closure against HEAD, including
+engine, Grok scripts/hooks/config/templates/agents/skills, root policy, and the
+two change-spec schemas loaded by `spec.py`. It also rejects ignored importable
+code in Python execution roots. Historical
+packages, distributions, and release evidence remain subject to global
+dirty/untracked detection but are not reread for every hook. The bounded
+closure contains 179 files / 1,241,709 bytes (limits: 256 / 2,000,000), reducing
+warm launcher validation from 0.67 seconds to 0.13–0.16 seconds. Entry points
+disable bytecode generation so validation does not create its own ignored
+code. The final focused aggregate reports `282 passed`, including 21 strict
+tooling cases. The graph CLI still reports only the inherited 26
+`IMPLEMENTATION_ORPHAN` findings plus six active declared conflicts; it has no
+cleanup-specific inventory, dangling-reference, or retired-Go error.
+
+A local `git clone --no-recurse-submodules` of implementation commit
+`058092d2c243d732eb4a44d876a46ae98b64c102` passed the ordinary repository
+boundary suite: `8 passed`. This proves fresh ordinary checks do not require an
+initialized Adaptive Grok checkout; strict runtime checks remain explicit.
+
+An isolated repository-local `.venv` supplies the exact v2.0.19 runner
+versions and declared build backend without changing the global interpreter.
+The stale README heading and public-capture metadata expectations are repaired.
+A complete-inventory 22-worker measured diagnostic reports
+`1134 passed, 85 subtests passed` and 36.16% branch-aware coverage across
+10,413 statements. The denominator includes all tracked Python below
+`packages/`, `scripts/`, `tools/`, and `tooling/`, including zero-covered owned
+modules; it omits only tests, the eight external Grok symlink entrypoints,
+generated build paths, and the pinned submodule. The prior 59.18% result is
+invalid because it omitted owned scripts, standalone tools, and project-owned
+tooling. The truthful initial floor is 36%, the integer below the observed
+result; it must not regress and is roadmap debt to raise with targeted tests.
+The full PR verifier passed the committed denominator baseline at fingerprint
+`aa5925f320da68843a52362e1654549d3a658899`; the recurring
+gate dynamically found nine tracked container inputs (seven Dockerfiles and
+two Compose files) and passed all at the explicit
+`MEDIUM,HIGH,CRITICAL` threshold. A separate LOW audit retains the inherited
+`DS-0026` missing-`HEALTHCHECK` finding on each Dockerfile. Four route-selected
+independent re-reviews passed with no findings. Their reports are stored. The
+durable change package is now `ready`; its transition-only fingerprint still
+requires a final verifier and review-receipt refresh before closure.
+
+F3–F7 remain `IMPLEMENTED_UNVERIFIED`; all 156 vectors remain `NOT_RUN`,
+A13–A14 remain `BLOCKED_EXTERNAL`, payment readiness remains false, and no
+testnet payment, deployment, release, or publication is claimed.
 
 ## Current state and next action
 

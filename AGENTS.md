@@ -51,13 +51,16 @@ This repository uses an adaptive, task-routed Grok Build workflow. The `UserProm
 
 For every software-development task:
 
-1. Read `.grok-stack/runtime/active-route.json`.
-2. Invoke `/adaptive-delivery`.
-3. Use only agents listed in `allowed_agents`.
-4. Run analysis agents in parallel when independent.
-5. Use exactly one `write_agent` as the implementation owner.
-6. Run the listed review agents only after implementation and verification.
-7. Record fingerprint-bound receipts before declaring completion.
+1. Initialize `tooling/adaptive-grok-build-pro` from `.gitmodules` and run
+   `python3 tooling/run-adaptive-grok.py --check`; never substitute a dirty or
+   floating checkout. Ordinary product tests do not require this tooling.
+2. Read `.grok-stack/runtime/active-route.json`.
+3. Invoke `/adaptive-delivery`.
+4. Use only agents listed in `allowed_agents`.
+5. Run analysis agents in parallel when independent.
+6. Use exactly one `write_agent` as the implementation owner.
+7. Run the listed review agents only after implementation and verification.
+8. Record fingerprint-bound receipts before declaring completion.
 
 Do not bypass the route by using the built-in generic worker when a domain-specific write agent is selected.
 

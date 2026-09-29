@@ -93,10 +93,13 @@ graph LR
 Capture produces frozen packages consumed by the analyzer and report builder
 through shared contracts. Python owns evidence and exact analytics; the
 TypeScript/Express gateway serves immutable artifacts and keeps payment state
-in PostgreSQL; the Vite browser application owns user wallet interaction.
-Retained Go code remains historical executable specification. These components
-are code-complete but unverified, and their `NOT_RUN` obligations do not
-establish settlement or acceptance.
+in PostgreSQL; the Vite browser application owns user wallet interaction. The
+inherited Go Stage-0 implementation has been removed from the active tree; its
+source remains recoverable at import commit
+`8734907d489168a8a6567b93bc85920001fefd85`, while five safety invariants remain
+covered by Python conformance tests. These components are code-complete but
+unverified, and their `NOT_RUN` obligations do not establish settlement or
+acceptance.
 
 Use Python 3.12+ for the Stage A packages, Make, and an isolated environment:
 
@@ -105,6 +108,22 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -e '.[dev]'
 PATH="$PWD/.venv/bin:$PATH" make verify
 ```
+
+Adaptive Grok Build Pro is development tooling, not product source. It is a
+Git submodule pinned to `v2.0.19` commit
+`cb9af4073ba6c3d515145164d771c75ebdfa3224`; this version is selected for its
+bounded parallel Python verifier. After cloning, initialize and validate it
+explicitly—ordinary product commands never fetch it:
+
+```bash
+git submodule update --init --recursive
+python3 tooling/run-adaptive-grok.py --check
+```
+
+The exact BMad `6.10.0` npm identity is recorded for optional use, but no BMad
+implementation or generated skill tree is vendored. See
+[`tooling/README.md`](tooling/README.md) and
+[`tooling/tooling-lock.json`](tooling/tooling-lock.json).
 
 `make demo` runs the fixture demonstration. `make product` requires Docker;
 container builds and the full clean-machine README/demo acceptance were not
@@ -126,7 +145,7 @@ They have not been executed yet. The gateway and web lockfiles were generated
 with lifecycle scripts disabled; dependency audit findings are deferred to the
 verification and defect-repair phase.
 
-## Local MVP prototypes
+## F3 MVP prototype
 
 The current branch includes an intentionally unhardened, fixture-only
 prototype of the future report flow:
@@ -165,7 +184,8 @@ The evidence-report wheel also exposes `mee-evidence-demo`; an installed run
 uses `$PWD/.mvp` unless `MVP_STATE_ROOT` names an absolute state directory.
 
 Both demos are **SIMULATED**, **UNVERIFIED**, read-only analytics over fixture
-data. The browser unlock transfers nothing and is not x402 or settlement.
+data. Payments and live verification are not implemented. The browser unlock
+transfers nothing and is not x402 or settlement.
 Neither demo establishes verified F3–F7 completion, runtime acceptance,
 report chargeability, testnet payment, or permission for live exchange
 mutations. The interactive implementation is factory-bound but deliberately

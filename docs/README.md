@@ -16,7 +16,7 @@ This is the maintained navigation entry point for `docs/`. Documents are grouped
 
 - [`ROADMAP.md`](ROADMAP.md) — active implementation sequence, PMF gate and exit criteria.
 - [`adr/0001-python-universal-arbitrage-core.md`](adr/0001-python-universal-arbitrage-core.md) — accepted Python runtime direction.
-- [`architecture.md`](architecture.md) — retained Go-foundation invariants and active architecture boundary.
+- [`architecture.md`](architecture.md) — retired Go-foundation invariants, active architecture, and external tooling boundary.
 - [`CLEANUP_AUDIT.md`](CLEANUP_AUDIT.md) — implementation cleanup baseline and live-trading blockers.
 - [`../SECURITY.md`](../SECURITY.md) — credential, execution and legal safety boundary.
 
@@ -63,7 +63,10 @@ Archive material is preserved for provenance. It is not current product truth.
 
 ## Tooling and contributor material
 
-Repository-level `.agents/`, `_bmad/` and related files support contributor/agent workflows. They are not runtime features and are governed separately from product code.
+Repository-level discovery links resolve into the pinned Adaptive Grok
+submodule described in [`../tooling/README.md`](../tooling/README.md). BMad is
+recorded as an optional exact artifact, not copied into this tree. These tools
+are not runtime features and are governed separately from product code.
 
 ## Truth hierarchy
 

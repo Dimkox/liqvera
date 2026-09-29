@@ -2,6 +2,13 @@
 
 Snapshot: **2026-08-18**
 
+> **Superseding repository-boundary note (2026-09-28):** This file remains a
+> historical connectivity snapshot. The inherited Go Stage-0 tree and copied
+> Grok/BMad factory payload described below are no longer active-tree content;
+> current tooling is an exact Adaptive Grok `v2.0.19` gitlink plus external
+> `bmad-method@6.10.0` identity. See the root README and
+> `engineering/changes/20260928-repository-boundary-cleanup-7f0f98/`.
+
 [Research index](README.md) · [Master research](MASTER_RESEARCH.md) · [Kakao/Korea launch gate](MASTER_RESEARCH.md#kakaotalk-south-korea-launch-gate-2026-08-18) · [Source ledger](SOURCE_LEDGER.md) · [Repository README](../../README.md) · [Documentation index](../README.md) · [Roadmap](../ROADMAP.md)
 
 ## Scope and method

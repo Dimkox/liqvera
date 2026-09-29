@@ -242,7 +242,8 @@ nodes:
 - id: conflict:go-stage-a-build
   kind: Conflict
   owner: runtime
-  lifecycle: DECLARED
+  lifecycle: RETIRED
+  active: false
   requirements:
   - ARCH-GO-001
   - ARCH-GO-004
@@ -7588,7 +7589,7 @@ edges:
   kind: implements
   non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
 - from: contract:architecture-authority
-  to: runtime:go-reference
+  to: source:retired-go-stage-zero-provenance
   kind: implements
   non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
 - from: contract:architecture-authority
@@ -7671,7 +7672,7 @@ edges:
   to: dataflow:capture-to-frozen-package
   kind: produces
   non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
-- from: runtime:go-reference
+- from: source:retired-go-stage-zero-provenance
   to: dataflow:capture-to-frozen-package
   kind: produces
   non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
@@ -9283,10 +9284,10 @@ edges:
   kind: specified_by
   proof_for: ARCH-GO-001
 - from: contract:proof-ARCH-GO-001
-  to: runtime:go-reference
+  to: source:retired-go-stage-zero-provenance
   kind: implements
   proof_for: ARCH-GO-001
-- from: runtime:go-reference
+- from: source:retired-go-stage-zero-provenance
   to: dataflow:proof-ARCH-GO-001
   kind: produces
   proof_for: ARCH-GO-001
@@ -9319,10 +9320,10 @@ edges:
   kind: specified_by
   proof_for: ARCH-GO-002
 - from: contract:proof-ARCH-GO-002
-  to: runtime:go-reference
+  to: source:retired-go-stage-zero-provenance
   kind: implements
   proof_for: ARCH-GO-002
-- from: runtime:go-reference
+- from: source:retired-go-stage-zero-provenance
   to: dataflow:proof-ARCH-GO-002
   kind: produces
   proof_for: ARCH-GO-002
@@ -9355,10 +9356,10 @@ edges:
   kind: specified_by
   proof_for: ARCH-GO-003
 - from: contract:proof-ARCH-GO-003
-  to: runtime:go-reference
+  to: source:retired-go-stage-zero-provenance
   kind: implements
   proof_for: ARCH-GO-003
-- from: runtime:go-reference
+- from: source:retired-go-stage-zero-provenance
   to: dataflow:proof-ARCH-GO-003
   kind: produces
   proof_for: ARCH-GO-003
@@ -9391,10 +9392,10 @@ edges:
   kind: specified_by
   proof_for: ARCH-GO-004
 - from: contract:proof-ARCH-GO-004
-  to: runtime:go-reference
+  to: source:retired-go-stage-zero-provenance
   kind: implements
   proof_for: ARCH-GO-004
-- from: runtime:go-reference
+- from: source:retired-go-stage-zero-provenance
   to: dataflow:proof-ARCH-GO-004
   kind: produces
   proof_for: ARCH-GO-004
@@ -9427,10 +9428,10 @@ edges:
   kind: specified_by
   proof_for: ARCH-GO-005
 - from: contract:proof-ARCH-GO-005
-  to: runtime:go-reference
+  to: source:retired-go-stage-zero-provenance
   kind: implements
   proof_for: ARCH-GO-005
-- from: runtime:go-reference
+- from: source:retired-go-stage-zero-provenance
   to: dataflow:proof-ARCH-GO-005
   kind: produces
   proof_for: ARCH-GO-005
@@ -13809,9 +13810,6 @@ repository_inventory:
   - path: AGENTS.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
-  - path: Dockerfile
-    node: artifact:claw-workflow-policy
-    path_class: BUILD_PACKAGING
   - path: deploy/images/Dockerfile.public-capture
     node: artifact:public-capture-image
     path_class: BUILD_PACKAGING
@@ -13869,9 +13867,6 @@ repository_inventory:
   - path: architecture/strategies.yaml
     node: manifest:strategies
     path_class: SCHEMA_MANIFEST
-  - path: cmd/engine/main.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
   - path: compose.stage-a.yml
     node: artifact:public-capture-image
     path_class: COMPOSE
@@ -14136,87 +14131,75 @@ repository_inventory:
   - path: engineering/changes/2026-09-24-mezo-evidence/test-plan.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/change-spec.yaml
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-data_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-docs_researcher.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-integration_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-repo_explorer.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/analysis-task_analyst.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/code-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/data-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/security-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/evidence/test-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/route.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/test-plan.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: experiments/lighter/README.md
     node: artifact:stage-a-execution
     path_class: EXECUTION_SOURCE
-  - path: go.mod
-    node: runtime:go-reference
-    path_class: GO_SOURCE
   - path: handoff.md
     node: document:ociapath-source-only-authority-none
     path_class: DOCUMENTATION
-  - path: internal/config/config.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/config/config_test.go
-    node: test:graph-repository-manifests
-    path_class: TEST_SOURCE
-  - path: internal/domain/types.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/exchange/contracts.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/execution/group.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/execution/group_test.go
-    node: test:graph-repository-manifests
-    path_class: TEST_SOURCE
-  - path: internal/fixed/fixed.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/fixed/fixed_test.go
-    node: test:graph-repository-manifests
-    path_class: TEST_SOURCE
-  - path: internal/httpapi/server.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/httpapi/server_test.go
-    node: test:graph-repository-manifests
-    path_class: TEST_SOURCE
-  - path: internal/ownership/registry.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/ownership/registry_test.go
-    node: test:graph-repository-manifests
-    path_class: TEST_SOURCE
-  - path: internal/reconcile/decision.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/reconcile/decision_test.go
-    node: test:graph-repository-manifests
-    path_class: TEST_SOURCE
-  - path: internal/risk/reservation.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/risk/reservation_test.go
-    node: test:graph-repository-manifests
-    path_class: TEST_SOURCE
-  - path: internal/stagea/config/config.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/stagea/config/config_test.go
-    node: test:graph-repository-manifests
-    path_class: TEST_SOURCE
-  - path: internal/stagea/feasibility/capital.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/stagea/feasibility/capital_test.go
-    node: test:graph-repository-manifests
-    path_class: TEST_SOURCE
-  - path: internal/stagea/model/reasons.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: internal/stagea/model/types.go
-    node: runtime:go-reference
-    path_class: GO_SOURCE
-  - path: migrations/000001_init.down.sql
-    node: contract:raw-public-evidence
-    path_class: MIGRATION
-  - path: migrations/000001_init.up.sql
-    node: contract:raw-public-evidence
-    path_class: MIGRATION
   - path: migrations/000002_a2_raw_capture.down.sql
     node: contract:raw-public-evidence
     path_class: MIGRATION
@@ -14351,6 +14334,9 @@ repository_inventory:
     path_class: TEST_SOURCE
   - path: tests/graph/test_third_final_review_policy.py
     node: test:graph-repository-manifests
+    path_class: TEST_SOURCE
+  - path: tests/tooling/test_adaptive_grok_integration.py
+    node: test:python-conformance
     path_class: TEST_SOURCE
   - path: tests/graph/test_workflow_policy.py
     node: test:graph-repository-manifests
@@ -15003,6 +14989,135 @@ repository_inventory:
   - path: docs/runbooks/testnet-demo.md
     node: document:liqvera-f3-f7-implementation
     path_class: DOCUMENTATION
+  - path: .agents/skills
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .coveragerc
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .gitmodules
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-test-runner.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok/agents
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok/config.toml
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok/hooks
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok/hooks.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok/skills
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/adaptive_grok
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/managed.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/policy.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/python-test-requirements.txt
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/quality-profiles/ai.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/quality-profiles/base.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/quality-profiles/bitrix.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/quality-profiles/contracts.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/quality-profiles/data.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/quality-profiles/frontend.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/quality-profiles/infra.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/quality-profiles/integration.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/quality-profiles/php.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/routing.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/config/toolchain.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/runtime/.gitkeep
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: .grok-stack/templates
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: bandit.yaml
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: ruff.toml
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: scripts/grok_approve.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: scripts/grok_change.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: scripts/grok_deploy.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: scripts/grok_doctor.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: scripts/grok_review.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: scripts/grok_route.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: scripts/grok_status.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: scripts/grok_verify.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: tests/conformance/test_repository_boundary.py
+    node: test:python-conformance
+    path_class: TEST_SOURCE
+  - path: tooling/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: tooling/adaptive-grok-build-pro
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
+  - path: tooling/adaptive_grok_pin.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: tooling/grok-verify.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: tooling/run-adaptive-grok.py
+    node: runtime:trusted-source-controller
+    path_class: TOOL_SOURCE
+  - path: tooling/tooling-lock.json
+    node: configuration:claw-workspace-isolation
+    path_class: CONFIGURATION
   exclusions:
   - path: research/goodcryptox/.gitignore
     reason_code: RESEARCH_ONLY
@@ -15196,96 +15311,4 @@ repository_inventory:
     reason_code: RESEARCH_ONLY
     authority_node: document:graph-authority-handoff
     path_class: RESEARCH
-  - path: .coveragerc
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: bandit.yaml
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: post_tool_use.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: pre_compact.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: pre_tool_use.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: ruff.toml
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: scripts/grok_approve.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: scripts/grok_change.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: scripts/grok_deploy.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: scripts/grok_doctor.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: scripts/grok_review.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: scripts/grok_route.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: scripts/grok_status.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: scripts/grok_verify.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: session_end.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: session_start.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: stop_gate.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: subagent_start.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: subagent_stop.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  - path: user_prompt_submit.py
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-    path_class: VENDORED_TOOLING
-  exclusion_prefixes:
-  - prefix: .agents/
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-  - prefix: _bmad/
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-  - prefix: .grok/
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
-  - prefix: .grok-stack/
-    reason_code: VENDORED_TOOLING
-    authority_node: artifact:vendored-agent-tooling
+  exclusion_prefixes: []

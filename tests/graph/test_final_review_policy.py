@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -559,8 +560,12 @@ def test_declared_conflict_waiver_is_closed_to_precommit_m0_baseline(tmp_path: P
     merge = _run_graph_cli(baseline, "merge")
     unknown = _run_graph_cli(malicious, "precommit")
 
-    assert precommit.returncode == 0, precommit.stderr
+    assert precommit.returncode == 1, precommit.stderr
     assert "DECLARED_CONFLICT" in precommit.stdout
+    assert {item["code"] for item in json.loads(precommit.stdout)} == {
+        "DECLARED_CONFLICT",
+        "IMPLEMENTATION_ORPHAN",
+    }
     assert merge.returncode != 0
     assert unknown.returncode != 0
 

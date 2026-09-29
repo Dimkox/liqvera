@@ -151,3 +151,39 @@ The canonical specification prohibits fictitious readiness and sale of fixture d
 ## 2026-09-24 — Keep Liqvera product factories separate from Stage A
 
 Preserve `wheels` and `product` as the reviewed three-wheel/two-image Stage A factory, and add explicit `liqvera-*` targets for the evidence, gateway, web, image, Compose, and acceptance surfaces. Packaging schemas, migrations, protocol metadata, and demo assets with their owning artifacts avoids hidden source-checkout dependencies without turning unexecuted builds into acceptance evidence.
+# 2026-09-28 — External tooling needs a real artifact identity
+
+Do not replace vendored tooling with a version string or a host CLI that is not
+the same artifact. Require an immutable locator plus integrity digest; when no
+such identity exists, either retain the minimum proven kernel or explicitly
+retire the integration contract.
+
+## 2026-09-28 — Pin Adaptive Grok as a validated gitlink
+
+Keep repository-development frameworks outside the product tree as immutable
+gitlinks; use `v2.0.19` specifically because it adds bounded, cgroup-aware
+pytest-xdist sharding. Validate commit, tag, VERSION, and checkout cleanliness
+before execution, while keeping ordinary product verification independent.
+
+## 2026-09-28 — Separate static clone safety from strict tooling integration
+
+Ordinary tests validate the committed gitlink and lock without requiring a
+recursive clone; `make verify-tooling` owns runtime tag, VERSION, HEAD,
+clean-tree, hook, and direct-entrypoint checks. Both execution entrypoints use
+one fail-closed validator so an absent or untrusted checkout cannot become an
+allow response.
+
+## 2026-09-28 — Verify external-tool bytes independently of Git status
+
+Treat status as diagnostics because index hints can suppress worktree changes.
+Reject optimization flags globally and compare the explicit, size-bounded
+runtime/instruction trust closure with HEAD; global dirty/untracked checks cover
+non-runtime archives without hashing 120 MB per hook.
+
+## 2026-09-28 — Baseline coverage follows Liqvera source ownership
+
+The complete 22-worker inventory covers all tracked owned Python below
+`packages/`, `scripts/`, `tools/`, and `tooling/` at 36.16%, including
+zero-covered modules. The initial non-regression floor is therefore 36; omit
+only tests, external Grok links, generated paths, and the pinned submodule, then
+raise the floor through the P0 targeted-test debt.

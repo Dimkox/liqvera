@@ -121,6 +121,26 @@ _BINDING_KEYS = {"path", "node", "path_class"}
 _EXCLUSION_KEYS = {"path", "reason_code", "authority_node", "path_class"}
 _PREFIX_EXCLUSION_KEYS = {"prefix", "reason_code", "authority_node"}
 _VENDORED_PREFIXES = frozenset({".agents/", "_bmad/", ".grok/", ".grok-stack/"})
+_EXTERNAL_TOOLING_CONFIG = frozenset(
+    {
+        ".agents/skills",
+        ".gitmodules",
+        ".grok-test-runner.json",
+        ".grok/agents",
+        ".grok/config.toml",
+        ".grok/hooks",
+        ".grok/hooks.json",
+        ".grok/skills",
+        ".grok-stack/adaptive_grok",
+        ".grok-stack/runtime/.gitkeep",
+        ".grok-stack/templates",
+        ".coveragerc",
+        "bandit.yaml",
+        "ruff.toml",
+        "tooling/adaptive-grok-build-pro",
+        "tooling/tooling-lock.json",
+    }
+)
 _ADAPTIVE_GROK_SHIMS = frozenset(
     {
         "session_start.py",
@@ -500,6 +520,16 @@ _EXECUTION_PATHS = frozenset(
 def _classify_repository_path(path: str) -> PathClass:
     normalized = path.replace("\\", "/")
     name = normalized.rsplit("/", 1)[-1].casefold()
+    if normalized in _EXTERNAL_TOOLING_CONFIG or normalized.startswith(".grok-stack/config/"):
+        return PathClass.CONFIGURATION
+    if normalized in {
+        "tooling/adaptive_grok_pin.py",
+        "tooling/grok-verify.py",
+        "tooling/run-adaptive-grok.py",
+    } or normalized.startswith("scripts/grok_"):
+        return PathClass.TOOL_SOURCE
+    if normalized == "tooling/README.md":
+        return PathClass.DOCUMENTATION
     if normalized.startswith((".agents/", "_bmad/", ".grok/", ".grok-stack/")):
         return PathClass.VENDORED_TOOLING
     if normalized in _ADAPTIVE_GROK_SHIMS:

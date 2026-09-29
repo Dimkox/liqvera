@@ -84,7 +84,7 @@ nodes:
   - capture-read
   - analysis-write
   shared_proof: true
-- id: runtime:go-reference
+- id: source:retired-go-stage-zero-provenance
   kind: SourceModule
   owner: runtime
   lifecycle: IMPLEMENTED
@@ -154,7 +154,7 @@ nodes:
 - id: artifact:vendored-agent-tooling
   kind: Artifact
   owner: architecture
-  lifecycle: DECLARED
+  lifecycle: RETIRED
   active: false
   classifications:
   - QUARANTINED

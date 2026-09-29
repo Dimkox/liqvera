@@ -41,14 +41,19 @@ def test_go_executed_receipt_is_rejected() -> None:
     assert retirement_state(row) == BLOCKED
 
 
-def test_live_go_reference_owner_is_not_eligible_to_retire() -> None:
+def test_retired_go_reference_is_documented_and_recoverable_from_git() -> None:
     from pathlib import Path
 
     from tools.graph_checker.loader import load_graph
-    from tools.graph_checker.retirement import ReceiptSet, retirement_decision
+    from tools.graph_checker.model import Classification, Lifecycle, NodeKind
 
     graph = load_graph(Path("architecture"))
-    decision = retirement_decision(graph, "runtime:go-reference", ReceiptSet())
-    assert decision.allowed is False
-    assert "CONFORMANCE_RECEIPT_MISSING" in decision.reason_codes
-    assert "REVIEW_RESULT_MISSING" in decision.reason_codes
+    reference = graph.node("source:retired-go-stage-zero-provenance")
+    assert reference.kind is NodeKind.SOURCE_MODULE
+    assert reference.lifecycle is Lifecycle.IMPLEMENTED
+    assert reference.active is True
+    assert reference.classifications == (Classification.TEST_ONLY_EXECUTABLE_SPEC,)
+
+    manifest = Path("architecture/conformance/manifest.yaml").read_text(encoding="utf-8")
+    assert manifest.count("git:8734907d489168a8a6567b93bc85920001fefd85:") == 5
+    assert manifest.count("retirement_state: RETIRED") == 5

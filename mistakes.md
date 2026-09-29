@@ -102,3 +102,36 @@ Scoped review showed that scenario flags and readiness declarations were constra
 ## 2026-09-24 — A complete truth table retained an incomplete expectation
 
 The readiness truth table covered every boolean combination but incorrectly allowed false payment readiness without blockers, preserving the schema omission. The root cause was applying the complete-explanation rule only to capabilities instead of both resource projections. A focused /readyz regression and corrected truth-table expectation now require a blocker whenever payment readiness is false.
+
+## 2026-09-28 — Artifact search stopped before the owner's local repository
+
+The initial analysis concluded that Adaptive Grok had no trustworthy external
+identity because it compared only Liqvera's copied labels and public package
+metadata. The authoritative local repository contains annotated `v2.0.19`;
+future boundary analysis must inspect owner-provided source repositories before
+declaring an artifact unavailable.
+
+## 2026-09-28 — Optional-tool fallbacks crossed a safety boundary
+
+The initial externalization retained shell fallbacks that converted pin
+validation failures into successful empty or allow hook responses, while
+ordinary tests also imported the optional checkout. Safety hooks must propagate
+validation failure; static clone tests and initialized-tooling integration
+tests are separate contracts.
+
+## 2026-09-28 — Treated clean Git status as content integrity
+
+The first validator trusted `git status`, which honors `assume-unchanged` and
+`skip-worktree` hints and therefore accepted hidden verifier byte/mode changes.
+External executable/instruction inputs require direct HEAD blob/mode comparison
+plus rejection of index hints and ignored importable files. That comparison
+must follow an explicit bounded trust closure rather than rereading historical
+packages and release evidence on every hook.
+
+## 2026-09-28 — Retained a coverage floor after changing its ownership set
+
+The cleanup first replaced vendored Grok/scripts coverage with a cherry-picked
+set of Liqvera packages/tools, producing an invalid 59.18% denominator that
+still omitted owned scripts, standalone tools, and project-owned tooling. The
+complete tracked inventory measures 36.16%; coverage ownership and its blocking
+floor must be derived together and guarded by an inventory comparison.

@@ -150,6 +150,14 @@ before settlement. Ordinary startup still composes `null` authority and performs
 no external call. The migration was authored and tested structurally but not
 applied to any database in this local-only phase.
 
+The subsequent activation audit found the pinned facilitator SDK exposes only
+opaque `settlePayment()`, not a prepared request/transaction that can be gas-
+estimated and then proven byte-identical at submission. Caller-reported gas is
+therefore rejected as authority: even a structurally valid grant now stops with
+`LIVE_GAS_ENFORCEMENT_UNAVAILABLE`. P3 is technically blocked until a reviewed
+prepare → estimate → identical-submit API exists and durable concurrency is
+behaviorally proven against a disposable local database.
+
 The runner now exposes the same closed live-case orchestration used by the fake
 end-to-end suite. Its authority envelope binds the current commit/tree, an
 internally derived canonical plan, expiry, exact A07/A29 request bodies and

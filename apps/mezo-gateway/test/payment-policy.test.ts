@@ -67,3 +67,11 @@ test('production composition is grantless by default and rejects malformed harne
     context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,gasEstimateWei:1n},
   }),/LIVE_GRANT_INVALID/);
 });
+
+test('valid grant cannot activate the opaque facilitator gas path',()=>{
+  const raw={schema:'liqvera-mezo-payment-grant/v1',grant_id:'00000000-0000-4000-8000-000000000099',subject_commit:'a'.repeat(40),subject_tree:'b'.repeat(40),plan_sha256:'c'.repeat(64),network:NETWORK,chain_id:31611,asset:ASSET,amount_atomic:AMOUNT,buyer:payer,pay_to:payTo,maximum_settlement_submissions:1,max_gas_wei:'100000000000000',expires_at:'2026-09-29T00:05:00Z'};
+  assert.throws(()=>composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://reports.invalid'),{
+    grantBytes:new TextEncoder().encode(JSON.stringify(raw)),observedAt:new Date('2026-09-29T00:00:00Z'),
+    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,gasEstimateWei:1n},
+  }),/LIVE_GAS_ENFORCEMENT_UNAVAILABLE/);
+});

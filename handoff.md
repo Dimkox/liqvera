@@ -8,11 +8,14 @@ Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f075
 The approved one-click installer concept is now captured as a design-only spec
 at `docs/superpowers/specs/2026-09-29-one-click-installer-design.md`. It selects
 a Docker-first, checksum-bound v0.0.2 package with safe testnet/shadow defaults,
-cross-platform lifecycle commands, migrations 001–005, bounded recovery, and
-an isolated-host acceptance matrix. No installer scripts, Compose changes,
-dependency installation, privilege action, or external mutation were made.
-Implementation remains blocked on written-spec review followed by a separately
-approved implementation plan.
+Linux-only Bash lifecycle commands, Docker Engine/Compose v2, optional explicit
+user-level systemd integration with Compose fallback, migrations 001–005,
+bounded recovery, and an isolated Linux acceptance matrix. macOS, Windows, and
+PowerShell are explicitly out of scope. The written spec is approved and its
+task-sized TDD plan is at
+`docs/superpowers/plans/2026-09-29-one-click-installer.md`. No installer scripts,
+Compose changes, dependency installation, privilege action, or external
+mutation were made; implementation still requires execution-method selection.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

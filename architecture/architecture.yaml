@@ -15520,6 +15520,9 @@ repository_inventory:
   - path: docs/superpowers/plans/2026-09-24-liqvera-f3-f7-code-completion.md
     node: document:liqvera-f3-f7-implementation
     path_class: DOCUMENTATION
+  - path: docs/superpowers/plans/2026-09-29-one-click-installer.md
+    node: document:liqvera-f3-f7-implementation
+    path_class: DOCUMENTATION
   - path: docs/competition/README.md
     node: document:liqvera-f3-f7-implementation
     path_class: DOCUMENTATION

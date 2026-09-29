@@ -9,10 +9,10 @@ Target product release: v0.0.2
 ## Intent
 
 Provide a predictable first installation and lifecycle experience for a
-self-hosted Liqvera testnet/shadow stack. A Linux or macOS operator runs
-`install.sh`; a Windows operator runs `install.ps1`. Both consume the same
-versioned install package and produce the same Compose topology, configuration
-contract, migration state, health verdict, and lifecycle commands.
+self-hosted Liqvera testnet/shadow stack on Linux. The operator runs
+`install.sh`, which consumes one versioned install package and produces the
+declared Compose topology, configuration contract, migration state, health
+verdict, and lifecycle commands.
 
 Success means a clean supported host can verify a pinned v0.0.2 package,
 generate local configuration without committing secrets, start the stack,
@@ -29,7 +29,7 @@ dependency installation, privilege escalation, payment, deployment, or release.
   wallet-key generation, wallet-key storage, or automatic payment.
 - No silent `sudo`, package-manager invocation, firewall change, Docker daemon
   reconfiguration, port forwarding, or telemetry upload.
-- No replacement for Docker Desktop/Engine administration or host hardening.
+- No replacement for Docker Engine administration or host hardening.
 - No in-place database downgrade and no automatic deletion of volumes.
 - No promise that fixture or shadow evidence is live market acceptance.
 
@@ -41,21 +41,21 @@ and external writes remain separately gated operator actions.
 
 ### 1. Docker-first release package — selected
 
-Ship thin POSIX and PowerShell launchers around a versioned package containing
+Ship a thin Bash launcher around a versioned package containing
 Compose, configuration templates, lifecycle metadata, and checksums. Docker
 provides the runtime boundary; scripts handle preflight, verified materialization,
 configuration, lifecycle orchestration, and recovery.
 
-Advantages: one service topology across platforms, reuse of existing Compose
+Advantages: reuse of existing Compose
 and health contracts, no host-language dependency graph, bounded rollback by
 release directory, and clear separation between installer authority and
-container authority. Costs: Docker is a prerequisite, Docker Desktop behavior
-differs from native Linux, and filesystem/port semantics need platform tests.
+container authority. Costs: Docker Engine is a prerequisite and Linux
+filesystem, init-system, and port semantics need distribution coverage.
 
-### 2. Native per-platform packages
+### 2. Native distribution packages
 
-Build deb/rpm, Homebrew, and MSI packages that install Node, Python, PostgreSQL,
-and services directly. This gives deeper OS integration but multiplies service
+Build deb/rpm packages that install Node, Python, PostgreSQL, and services
+directly. This gives deeper OS integration but multiplies service
 managers, migration paths, permissions, signing systems, and rollback behavior.
 It is disproportionate for v0.0.2 and expands host mutation substantially.
 
@@ -77,9 +77,7 @@ The v0.0.2 GitHub Release contains:
 ```text
 liqvera-installer-0.0.2/
 ├── install.sh
-├── install.ps1
 ├── liqvera.sh
-├── liqvera.ps1
 ├── compose.yaml
 ├── config/
 │   ├── liqvera.env.template
@@ -107,7 +105,8 @@ file against `SHA256SUMS` and rejects
 missing, extra, duplicate, symlink, hardlink, traversal, or special-file entries.
 
 The release manifest binds product version `0.0.2`, exact Git commit/tree,
-Compose digest, image digests, migration names/checksums, supported platforms,
+Compose digest, image digests, migration names/checksums, supported Linux
+architectures/distributions,
 and launcher digests. Tags alone are not trusted. Mutable image tags are never
 accepted; Compose uses immutable image digests.
 
@@ -124,19 +123,17 @@ Trust boundaries:
 
 ## Installation layout and identity
 
-Default roots are `$XDG_DATA_HOME/liqvera` or `~/.local/share/liqvera` on
-Linux, `~/Library/Application Support/Liqvera` on macOS, and
-`%LOCALAPPDATA%\Liqvera` on Windows. An explicit `--install-dir` overrides the
+Default roots are `$XDG_DATA_HOME/liqvera` or `~/.local/share/liqvera`.
+An explicit `--install-dir` overrides the
 default after canonical-path validation. Network shares, symlinked roots,
 filesystem roots, existing non-Liqvera directories, and world-writable parent
 directories fail closed.
 
 ```text
 <install-root>/
-├── current -> releases/0.0.2/       # POSIX atomic link
-├── current.txt                       # Windows atomic version pointer
+├── current -> releases/0.0.2/        # atomic symlink
 ├── releases/0.0.2/                   # read-only verified package
-├── config/runtime.env                # mode 0600 / restricted ACL
+├── config/runtime.env                # mode 0600
 ├── state/install-state.json          # non-secret lifecycle state
 ├── state/migration-state.json        # names and checksums only
 ├── data/                              # Docker-managed persistent data
@@ -144,9 +141,9 @@ directories fail closed.
 └── rollback/previous.json             # prior version identity
 ```
 
-Only one pointer mechanism is active per platform. `install-state.json` records
+`install-state.json` records
 schema version, product version, release digest, commit/tree, install root,
-Compose project name, selected ports, platform, Docker identity, timestamps,
+Compose project name, selected ports, Linux distribution/architecture, Docker identity, timestamps,
 and last completed phase. It contains no secret values.
 
 ## Interfaces and command contract
@@ -156,8 +153,6 @@ Initial installation:
 ```text
 install.sh  --sha256 DIGEST [--version 0.0.2] [--install-dir PATH] [--config PATH]
             [--non-interactive] [--install-deps]
-install.ps1 -Sha256 DIGEST [-Version 0.0.2] [-InstallDir PATH] [-Config PATH]
-            [-NonInteractive] [-InstallDeps]
 ```
 
 Lifecycle wrapper:
@@ -178,24 +173,24 @@ Non-interactive mode requires all decisions explicitly; it never accepts a
 default that broadens authority.
 
 `--install-deps` is optional and explicit. Without it, missing Docker/Compose
-returns a platform-specific instruction and makes no host changes. With it, the
+returns a distribution-specific instruction and makes no host changes. With it, the
 launcher prints the exact package-manager command and asks for confirmation.
 Privilege elevation is initiated visibly by the operator; the installer never
-embeds credentials, bypasses policy, or silently invokes `sudo`/UAC. Unsupported
-platforms still fail before attempting dependency installation.
+embeds credentials, bypasses policy, or silently invokes `sudo`. Unsupported
+Linux distributions/architectures fail before dependency installation.
 
 ## Preflight
 
 Preflight is read-only and completes before creating the install root:
 
-- identify supported OS/architecture and shell/PowerShell version;
-- require Docker Engine/Desktop and Compose v2 with minimum reviewed versions;
+- identify supported Linux distribution/architecture and Bash version;
+- require Docker Engine and Compose v2 with minimum reviewed versions;
 - verify daemon reachability and sufficient disk/memory without changing it;
 - verify release URL is HTTPS on the exact allowed GitHub release host;
 - validate expected version and outer SHA-256;
 - resolve install root and reject unsafe ownership/link/filesystem conditions;
 - check configured ports by binding probes and report the owning conflict where
-  the platform permits it;
+  Linux permits it;
 - validate configuration schema, testnet network, shadow mode, paths, and
   secret-file references without opening secret contents unnecessarily;
 - inspect an existing install state and choose install, idempotent reconcile,
@@ -286,21 +281,19 @@ No automatic retry crosses an authority boundary. Downloads may be retried
 before verification; migrations, payments, and destructive cleanup are not
 blindly retried.
 
-## Platform behavior
+## Linux and service-manager behavior
 
-- Linux: POSIX shell compatible with reviewed Bash version; native Docker
-  Engine/Compose; mode and ownership checks are mandatory.
-- macOS: Docker Desktop; paths with spaces are first-class; GNU-only flags and
-  Linux `/proc` assumptions are forbidden; case-insensitive filesystem behavior
-  is tested.
-- Windows: PowerShell 7 is preferred and Windows PowerShell support is explicitly
-  version-gated; Docker Desktop Linux containers; ACLs replace POSIX modes;
-  path/drive/CRLF quoting is tested. WSL and native PowerShell installations are
-  separate identities and may not share one install root.
+The supported runtime is Linux with a reviewed Bash version, Docker Engine, and
+Compose v2. Mode and ownership checks are mandatory. Supported distributions
+are an explicit manifest allowlist; distribution-specific branches are limited
+to optional dependency-install command selection.
 
-The two launchers implement the same phase/state contract and consume shared
-JSON schemas and fixtures. Platform branches are limited to prerequisite
-discovery, permissions, atomic pointer implementation, and command invocation.
+When systemd is present and running, an explicit installer option may install a
+user-level Liqvera unit that invokes the lifecycle wrapper. The default does not
+write system units or call `systemctl`. Without usable systemd, lifecycle
+commands operate directly through Docker Compose and status reports
+`service_manager=compose`. A missing or unusable systemd never triggers root
+unit installation as a fallback.
 
 ## Observability and support
 
@@ -321,9 +314,9 @@ implementation unless separately approved.
 | --- | --- |
 | Ubuntu clean install | Verified v0.0.2 archive, generated restricted config, migrations 001–005 once, healthy safe-default stack |
 | Ubuntu reinstall | Same release reconciles idempotently; config/data preserved; migrations unchanged |
-| macOS clean install | Docker Desktop preflight, space-safe paths, healthy stack, equivalent state JSON |
-| PowerShell static/syntax | PSScriptAnalyzer/parser green on supported versions; no execution-policy bypass |
-| PowerShell mocked lifecycle | Deterministic mocks prove phase parity, quoting, ACL intent, and no unexpected commands |
+| Linux distribution matrix | Supported Ubuntu/Debian and documented RPM-family fixtures produce equivalent state/commands |
+| systemd present | Explicit user-unit option installs/validates only a user unit; no root unit writes |
+| systemd absent | Compose lifecycle fallback works and reports `service_manager=compose` |
 | Corrupt outer checksum | Fails before extraction/execution and leaves current install unchanged |
 | Corrupt inner file | Fails closed on `SHA256SUMS`; no Compose or migration call |
 | Occupied port | Preflight or startup race reports exact port; candidate stopped; current install preserved |
@@ -340,14 +333,14 @@ implementation unless separately approved.
 
 Tests use disposable temporary roots, fake Docker/Compose/process adapters, and
 disposable databases. Real clean-host acceptance runs only on isolated Ubuntu,
-macOS, and Windows workers. Dependency installation tests inspect planned
+supported Linux workers. Dependency installation tests inspect planned
 commands by default; any real package-manager mutation requires separate CI
 environment approval.
 
 ## Implementation boundaries for the later plan
 
 The later implementation plan should split shared schemas/state semantics,
-release packaging, POSIX launcher, PowerShell launcher, Compose integration,
+release packaging, Bash launcher, optional user-systemd integration, Compose integration,
 and isolated-host acceptance into reviewable steps. It must add failing tests
 before behavior, preserve the existing Compose/runtime security constraints,
 and require independent security/release review before publishing v0.0.2.

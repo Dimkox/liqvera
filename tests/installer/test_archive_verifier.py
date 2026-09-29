@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 import stat
 import subprocess
 import sys
@@ -191,6 +192,57 @@ def test_outer_digest_and_zip_validation_use_the_same_open_file(
     assert (destination / "LICENSE-NOTICE.md").read_bytes() == b"Liqvera test fixture\n"
 
 
+def test_in_place_mutation_after_snapshot_cannot_change_verified_bytes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive = tmp_path / "release.zip"
+    expected = write_archive(archive)
+    replacement = tmp_path / "replacement.zip"
+    replacement_files = valid_files()
+    replacement_files["LICENSE-NOTICE.md"] = b"unbound in-place replacement\n"
+    write_archive(replacement, replacement_files)
+    replacement_bytes = replacement.read_bytes()
+    original_snapshot = VERIFIER._capture_archive
+
+    def mutate_after_snapshot(path: Path):
+        snapshot = original_snapshot(path)
+        with path.open("r+b") as handle:
+            handle.write(replacement_bytes)
+            handle.truncate()
+        return snapshot
+
+    monkeypatch.setattr(VERIFIER, "_capture_archive", mutate_after_snapshot)
+    destination = tmp_path / "release"
+
+    VERIFIER.verify_installer(archive, expected, destination)
+
+    assert (destination / "LICENSE-NOTICE.md").read_bytes() == b"Liqvera test fixture\n"
+
+
+def test_raced_empty_destination_is_preserved_and_publication_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive = tmp_path / "release.zip"
+    expected = write_archive(archive)
+    destination = tmp_path / "release"
+    original_publish = VERIFIER._rename_noreplace
+    raced_inode: int | None = None
+
+    def race(parent_fd: int, temporary_name: str, destination_name: str) -> None:
+        nonlocal raced_inode
+        destination.mkdir()
+        raced_inode = destination.stat().st_ino
+        original_publish(parent_fd, temporary_name, destination_name)
+
+    monkeypatch.setattr(VERIFIER, "_rename_noreplace", race)
+
+    with pytest.raises(VERIFIER.VerificationError):
+        VERIFIER.verify_installer(archive, expected, destination)
+    assert destination.is_dir()
+    assert destination.stat().st_ino == raced_inode
+    assert list(destination.iterdir()) == []
+
+
 @pytest.mark.parametrize(
     "bad_name",
     [
@@ -267,6 +319,95 @@ def test_rejects_missing_extra_and_changed_inner_checksum(tmp_path: Path) -> Non
         archive = tmp_path / f"case-{index}.zip"
         expected = write_archive(archive, files, checksums=checksums)
         assert_failed_without_materialization(archive, expected, tmp_path / f"release-{index}")
+
+
+@pytest.mark.parametrize(
+    ("removed", "added"),
+    [
+        ("config/ports.env.template", None),
+        ("compose.yaml", None),
+        (None, "migrations/006_unapproved.sql"),
+        (None, "unauthorized.txt"),
+    ],
+)
+def test_rejects_rechecksummed_missing_or_extra_package_assets(
+    tmp_path: Path, removed: str | None, added: str | None
+) -> None:
+    files = valid_files()
+    if removed is not None:
+        files.pop(removed)
+    if added is not None:
+        files[added] = b"SELECT 6;\n"
+    archive = tmp_path / "invalid-inventory.zip"
+    expected = write_archive(archive, files)
+    assert_failed_without_materialization(archive, expected, tmp_path / "release")
+
+
+def test_rejects_nul_truncated_raw_zip_name(tmp_path: Path) -> None:
+    archive = tmp_path / "nul.zip"
+    expected = write_archive(
+        archive,
+        extra_entries=[(PREFIX + "nullXevil", b"bad", stat.S_IFREG | 0o600)],
+    )
+    raw = archive.read_bytes().replace(b"nullXevil", b"null\x00evil")
+    assert raw != archive.read_bytes()
+    archive.write_bytes(raw)
+    expected = sha(raw)
+    with zipfile.ZipFile(archive) as package:
+        crafted = package.infolist()[-1]
+        assert crafted.filename.endswith("/null")
+        assert crafted.orig_filename.endswith("/null\x00evil")
+    assert_failed_without_materialization(archive, expected, tmp_path / "release")
+
+
+@pytest.mark.parametrize("control", ["\x7f", "\x80", "\x9f"])
+def test_rejects_del_and_c1_control_names(tmp_path: Path, control: str) -> None:
+    archive = tmp_path / "control.zip"
+    expected = write_archive(
+        archive,
+        extra_entries=[(PREFIX + f"bad{control}name", b"bad", stat.S_IFREG | 0o600)],
+    )
+    assert_failed_without_materialization(archive, expected, tmp_path / "release")
+
+
+def test_fifo_input_fails_promptly_without_materialization(tmp_path: Path) -> None:
+    fifo = tmp_path / "archive.fifo"
+    os.mkfifo(fifo)
+    destination = tmp_path / "release"
+    completed = subprocess.run(
+        [sys.executable, str(SCRIPT), str(fifo), "0" * 64, str(destination)],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=2,
+    )
+    assert completed.returncode == 2
+    assert "ARCHIVE_INVALID" in completed.stderr
+    assert not destination.exists()
+
+
+def test_member_limit_is_rejected_before_zipfile_allocates_inventory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive = tmp_path / "many.zip"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_STORED) as package:
+        for index in range(VERIFIER.MAX_MEMBERS + 1):
+            info = zipfile.ZipInfo(PREFIX + f"tiny-{index:03d}")
+            info.create_system = 3
+            info.external_attr = (stat.S_IFREG | 0o600) << 16
+            package.writestr(info, b"")
+    expected = sha(archive.read_bytes())
+    called = False
+    original_zipfile = VERIFIER.zipfile.ZipFile
+
+    def forbidden_parser(*args, **kwargs):
+        nonlocal called
+        called = True
+        return original_zipfile(*args, **kwargs)
+
+    monkeypatch.setattr(VERIFIER.zipfile, "ZipFile", forbidden_parser)
+    assert_failed_without_materialization(archive, expected, tmp_path / "release")
+    assert called is False
 
 
 def test_rejects_oversized_member_and_aggregate_before_materialization(

@@ -27,8 +27,14 @@ now implemented as an offline-only ZIP verifier/materializer: it requires the
 independently supplied outer SHA-256, rejects unsafe/colliding/special/oversized
 members and incomplete or changed inner inventories, validates the closed
 release/migration identities, and publishes only a fully verified private
-directory without executing archive content. Task 3 Linux preflight remains
-the next implementation boundary.
+directory without executing archive content. Independent Task 2 review then
+closed six archive races/bounds: verification now snapshots bounded bytes from
+a nonblocking single-link descriptor before hashing/parsing; preflights the
+non-ZIP64 single-disk central directory before stdlib allocation; requires the
+exact approved asset/migration path set; rejects parser-altered NUL and all
+control names; and publishes through Linux `renameat2(RENAME_NOREPLACE)` against
+a bound parent directory. FIFO inputs and raced destinations fail without
+publication. Task 3 Linux preflight remains the next implementation boundary.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

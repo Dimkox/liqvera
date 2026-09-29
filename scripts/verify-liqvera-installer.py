@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
+import errno
 import hashlib
 import io
 import json
@@ -11,6 +13,7 @@ import os
 import re
 import shutil
 import stat
+import struct
 import sys
 import tempfile
 import unicodedata
@@ -30,6 +33,31 @@ MAX_TOTAL_BYTES = 64 * 1024 * 1024
 MAX_MEMBERS = 128
 MAX_METADATA_BYTES = 64 * 1024
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
+MIGRATION_NAMES = (
+    "001_ledger.sql",
+    "002_fix_immutable_ledger_identity.sql",
+    "003_live_grant_consumption.sql",
+    "004_receipt_confirmation_provenance.sql",
+    "005_receipt_confirmation_count.sql",
+)
+APPROVED_PATHS = frozenset(
+    {
+        "install.sh",
+        "liqvera.sh",
+        "compose.yaml",
+        "config/liqvera.env.template",
+        "config/ports.env.template",
+        "manifests/release-manifest.json",
+        "manifests/migration-checksums.json",
+        "LICENSE-NOTICE.md",
+        "SHA256SUMS",
+        *(f"migrations/{name}" for name in MIGRATION_NAMES),
+    }
+)
+_EOCD = struct.Struct("<4s4H2LH")
+_CENTRAL_HEADER = struct.Struct("<4s6H3L5H2L")
+_LIBC = ctypes.CDLL(None, use_errno=True)
+_RENAME_NOREPLACE = 1
 
 
 class VerificationError(ValueError):
@@ -53,21 +81,33 @@ class _Member:
     path: str
 
 
-def _open_bound_archive(path: Path) -> io.BufferedReader:
+def _capture_archive(path: Path) -> bytes:
     try:
-        descriptor = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        descriptor = os.open(
+            path,
+            os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW | os.O_NONBLOCK,
+        )
     except OSError as exc:
         raise VerificationError("ARCHIVE_INVALID: archive input cannot be opened safely") from exc
-    handle = os.fdopen(descriptor, "rb")
-    archive_stat = os.fstat(descriptor)
-    if (
-        not stat.S_ISREG(archive_stat.st_mode)
-        or archive_stat.st_nlink != 1
-        or archive_stat.st_size > MAX_ARCHIVE_BYTES
-    ):
-        handle.close()
-        raise VerificationError("ARCHIVE_INVALID: archive input is not a bounded single-link file")
-    return handle
+    with os.fdopen(descriptor, "rb") as handle:
+        archive_stat = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(archive_stat.st_mode)
+            or archive_stat.st_nlink != 1
+            or archive_stat.st_size > MAX_ARCHIVE_BYTES
+        ):
+            raise VerificationError(
+                "ARCHIVE_INVALID: archive input is not a bounded single-link file"
+            )
+        captured = bytearray()
+        while len(captured) <= MAX_ARCHIVE_BYTES:
+            chunk = handle.read(min(1024 * 1024, MAX_ARCHIVE_BYTES + 1 - len(captured)))
+            if not chunk:
+                break
+            captured.extend(chunk)
+        if len(captured) > MAX_ARCHIVE_BYTES:
+            raise VerificationError("ARCHIVE_INVALID: archive grew beyond size bound")
+    return bytes(captured)
 
 
 def _handle_sha256(handle: io.BufferedReader) -> str:
@@ -76,6 +116,50 @@ def _handle_sha256(handle: io.BufferedReader) -> str:
         digest.update(chunk)
     handle.seek(0)
     return digest.hexdigest()
+
+
+def _preflight_zip(data: bytes) -> None:
+    search_start = max(0, len(data) - (65535 + _EOCD.size))
+    offset = data.rfind(b"PK\x05\x06", search_start)
+    if offset < 0 or offset + _EOCD.size > len(data):
+        raise VerificationError("ARCHIVE_INVALID: missing bounded ZIP end record")
+    (
+        signature,
+        disk_number,
+        central_disk,
+        disk_entries,
+        total_entries,
+        central_size,
+        central_offset,
+        comment_size,
+    ) = _EOCD.unpack_from(data, offset)
+    if signature != b"PK\x05\x06" or offset + _EOCD.size + comment_size != len(data):
+        raise VerificationError("ARCHIVE_INVALID: inconsistent ZIP end record")
+    if disk_number != 0 or central_disk != 0 or disk_entries != total_entries:
+        raise VerificationError("ARCHIVE_INVALID: multidisk ZIP is forbidden")
+    if total_entries in {0xFFFF} or central_size == 0xFFFFFFFF or central_offset == 0xFFFFFFFF:
+        raise VerificationError("ARCHIVE_INVALID: ZIP64 is forbidden")
+    if total_entries == 0 or total_entries > MAX_MEMBERS:
+        raise VerificationError("ARCHIVE_INVALID: member count outside bounds")
+    if central_size > MAX_METADATA_BYTES or central_offset + central_size != offset:
+        raise VerificationError("ARCHIVE_INVALID: central directory outside bounds")
+
+    cursor = central_offset
+    central_end = central_offset + central_size
+    parsed = 0
+    while cursor < central_end:
+        if cursor + _CENTRAL_HEADER.size > central_end:
+            raise VerificationError("ARCHIVE_INVALID: truncated central directory")
+        fields = _CENTRAL_HEADER.unpack_from(data, cursor)
+        if fields[0] != b"PK\x01\x02" or fields[13] != 0:
+            raise VerificationError("ARCHIVE_INVALID: invalid central directory entry")
+        record_size = _CENTRAL_HEADER.size + fields[10] + fields[11] + fields[12]
+        cursor += record_size
+        parsed += 1
+        if cursor > central_end or parsed > MAX_MEMBERS:
+            raise VerificationError("ARCHIVE_INVALID: central directory exceeds bounds")
+    if cursor != central_end or parsed != total_entries:
+        raise VerificationError("ARCHIVE_INVALID: central directory count mismatch")
 
 
 def _normalized_member(raw_name: str) -> str:
@@ -93,7 +177,12 @@ def _normalized_member(raw_name: str) -> str:
     path = PurePosixPath(normalized)
     if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
         raise VerificationError("ARCHIVE_INVALID: path traversal")
-    if any(ord(character) < 32 for character in normalized):
+    if any(
+        ord(character) < 32
+        or 0x7F <= ord(character) <= 0x9F
+        or unicodedata.category(character) in {"Cf", "Cs"}
+        for character in normalized
+    ):
         raise VerificationError("ARCHIVE_INVALID: control character in path")
     return path.as_posix()
 
@@ -116,10 +205,16 @@ def _inspect_archive(archive: zipfile.ZipFile) -> dict[str, _Member]:
     members: dict[str, _Member] = {}
     collision_keys: set[str] = set()
     for info in infos:
-        metadata_bytes += len(info.filename.encode("utf-8")) + len(info.extra) + len(info.comment)
+        raw_name = info.orig_filename
+        if raw_name != info.filename or "\x00" in raw_name:
+            raise VerificationError("ARCHIVE_INVALID: parser-altered member name")
+        try:
+            metadata_bytes += len(raw_name.encode("utf-8")) + len(info.extra) + len(info.comment)
+        except UnicodeEncodeError as exc:
+            raise VerificationError("ARCHIVE_INVALID: invalid member name encoding") from exc
         if metadata_bytes > MAX_METADATA_BYTES:
             raise VerificationError("ARCHIVE_INVALID: metadata exceeds bound")
-        path = _normalized_member(info.filename)
+        path = _normalized_member(raw_name)
         collision_key = unicodedata.normalize("NFC", path).casefold()
         if collision_key in collision_keys:
             raise VerificationError("ARCHIVE_INVALID: normalized member collision")
@@ -131,6 +226,8 @@ def _inspect_archive(archive: zipfile.ZipFile) -> dict[str, _Member]:
         if total_bytes > MAX_TOTAL_BYTES:
             raise VerificationError("ARCHIVE_INVALID: archive exceeds aggregate bound")
         members[path] = _Member(info=info, path=path)
+    if set(members) != APPROVED_PATHS:
+        raise VerificationError("ARCHIVE_INVALID: package inventory mismatch")
     return members
 
 
@@ -175,7 +272,7 @@ def _validated_payloads(
     if sums_member is None:
         raise VerificationError("ARCHIVE_INVALID: missing SHA256SUMS")
     checksums = _parse_checksums(_read_member(archive, sums_member))
-    if set(checksums) != set(members) - {"SHA256SUMS"}:
+    if set(checksums) != APPROVED_PATHS - {"SHA256SUMS"}:
         raise VerificationError("ARCHIVE_INVALID: checksum inventory mismatch")
 
     payloads: dict[str, bytes] = {}
@@ -213,13 +310,51 @@ def _validated_payloads(
     return payloads, manifest
 
 
+def _rename_noreplace(parent_fd: int, temporary_name: str, destination_name: str) -> None:
+    renameat2 = getattr(_LIBC, "renameat2", None)
+    if renameat2 is None:
+        raise VerificationError("ARCHIVE_INVALID: atomic no-replace publication unavailable")
+    result = renameat2(
+        parent_fd,
+        os.fsencode(temporary_name),
+        parent_fd,
+        os.fsencode(destination_name),
+        _RENAME_NOREPLACE,
+    )
+    if result != 0:
+        error = ctypes.get_errno()
+        if error == errno.EEXIST:
+            raise VerificationError("ARCHIVE_INVALID: destination appeared during publication")
+        raise VerificationError(
+            f"ARCHIVE_INVALID: atomic publication failed with errno {error}"
+        )
+
+
 def _materialize(payloads: dict[str, bytes], destination: Path) -> None:
     parent = destination.parent
-    if destination.exists() or destination.is_symlink() or not parent.is_dir():
+    if not destination.name or not parent.is_dir():
         raise VerificationError("ARCHIVE_INVALID: destination must be new")
-    temporary = Path(tempfile.mkdtemp(prefix=f".{destination.name}.", dir=parent))
-    os.chmod(temporary, 0o700)
     try:
+        parent_fd = os.open(parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    except OSError as exc:
+        raise VerificationError("ARCHIVE_INVALID: destination parent is unsafe") from exc
+    parent_identity = os.fstat(parent_fd)
+    temporary: Path | None = None
+    try:
+        try:
+            os.stat(destination.name, dir_fd=parent_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            pass
+        else:
+            raise VerificationError("ARCHIVE_INVALID: destination already exists")
+        temporary = Path(tempfile.mkdtemp(prefix=f".{destination.name}.", dir=parent))
+        current_parent = parent.stat(follow_symlinks=False)
+        if (current_parent.st_dev, current_parent.st_ino) != (
+            parent_identity.st_dev,
+            parent_identity.st_ino,
+        ):
+            raise VerificationError("ARCHIVE_INVALID: destination parent changed")
+        os.chmod(temporary, 0o700)
         for relative, data in sorted(payloads.items()):
             target = temporary.joinpath(*PurePosixPath(relative).parts)
             target.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -228,10 +363,15 @@ def _materialize(payloads: dict[str, bytes], destination: Path) -> None:
                 handle.flush()
                 os.fsync(handle.fileno())
             os.chmod(target, 0o600)
-        os.rename(temporary, destination)
+        _rename_noreplace(parent_fd, temporary.name, destination.name)
+        os.fsync(parent_fd)
+        temporary = None
     except Exception:
-        shutil.rmtree(temporary, ignore_errors=True)
+        if temporary is not None:
+            shutil.rmtree(temporary, ignore_errors=True)
         raise
+    finally:
+        os.close(parent_fd)
 
 
 def verify_installer(
@@ -241,16 +381,16 @@ def verify_installer(
     destination = Path(destination)
     if not SHA256.fullmatch(expected_sha256):
         raise VerificationError("RELEASE_DIGEST_MISMATCH: expected digest is malformed")
-    if destination.exists() or destination.is_symlink():
-        raise VerificationError("ARCHIVE_INVALID: destination already exists")
     try:
-        with _open_bound_archive(archive) as archive_handle:
-            actual_sha256 = _handle_sha256(archive_handle)
-            if actual_sha256 != expected_sha256:
-                raise VerificationError("RELEASE_DIGEST_MISMATCH: outer digest mismatch")
-            with zipfile.ZipFile(archive_handle, "r") as package:
-                members = _inspect_archive(package)
-                payloads, manifest = _validated_payloads(package, members)
+        captured = _capture_archive(archive)
+        archive_handle = io.BytesIO(captured)
+        actual_sha256 = _handle_sha256(archive_handle)
+        if actual_sha256 != expected_sha256:
+            raise VerificationError("RELEASE_DIGEST_MISMATCH: outer digest mismatch")
+        _preflight_zip(captured)
+        with zipfile.ZipFile(archive_handle, "r") as package:
+            members = _inspect_archive(package)
+            payloads, manifest = _validated_payloads(package, members)
     except (OSError, zipfile.BadZipFile, RuntimeError) as exc:
         raise VerificationError("ARCHIVE_INVALID: unreadable ZIP") from exc
     try:

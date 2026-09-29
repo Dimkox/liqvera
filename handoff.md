@@ -209,7 +209,9 @@ remain active through complete body streaming; a stalled-body regression is
 covered. P3 remains blocked by `LIVE_GAS_ENFORCEMENT_UNAVAILABLE`.
 Focused repair checks pass: 69 acceptance/contract tests, 18 browser
 tests, and 24 gateway tests with five explicitly disposable-PostgreSQL skips.
-The full pinned PR verifier remains to be refreshed on the final clean commit.
+The clean pinned PR verifier passed 1,218 tests plus 85 subtests, coverage,
+Ruff, Bandit, secret scan, SQL safety, contract structure and configuration
+scan at fingerprint `2749fdfb20570131d0d15e80171eaa5a885fdf24a8bfd54b13003de4c173acc5`.
 No public read, clone, payment, database migration, secret access or other
 external action occurred.
 

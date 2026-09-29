@@ -37,8 +37,11 @@ and three static operations tests passing; gateway typecheck also passes.
 The exact web install/build is not yet evidenced: an offline
 lifecycle-disabled install stopped because the exact Vite 7.1.5 tarball is
 absent from the local npm cache, and this no-external route does not authorize
-a registry request. Full pinned verification and independent route reviews
-therefore remain next. Production's
+a registry request. The first full pinned verifier completed its checks but
+could not record a receipt because the typed spec used symbolic test labels;
+v2.0.19 requires existing repository paths. Those evidence references now
+point to the real browser and operations test files. A clean rerun and
+independent route reviews remain next. Production's
 x402 adapter remains deliberately unregistered and fixture payment remains
 fail closed. This route will not use a real wallet, RPC, facilitator, transfer,
 testnet/mainnet payment, live capture/profile, shared environment, deployment,

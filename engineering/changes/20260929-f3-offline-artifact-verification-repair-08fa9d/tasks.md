@@ -8,5 +8,6 @@
   and coverage pass in the pinned 22-worker environment).
 - [x] Repair first-review Git OID/tree and SHA-256 terminal-newline findings
   with exact-path regression coverage.
-- [ ] Complete independent reviews.
-- [ ] Bind evidence to the final tree fingerprint.
+- [x] Complete independent reviews.
+- [x] Bind evidence to the final tree fingerprint (runtime receipts are refreshed
+  after the final state commit so they remain fingerprint-current).

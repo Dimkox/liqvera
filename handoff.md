@@ -1,13 +1,13 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (identifier-boundary repair independently re-reviewed PASS; final workflow receipts are being bound). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (F3 offline repair independently re-reviewed PASS and advanced to `ready`; final runtime receipts are refreshed after the state commit). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F3 offline artifact verification repair — 2026-09-29
 
-Active route `08fa9d84745d` and change package
+Route `08fa9d84745d` and change package
 `engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/`
-are approved with no human gate because the scope is fixture-only and explicitly
+are `ready` with no human gate because the scope is fixture-only and explicitly
 forbids migrations and external writes. The superseded broad route
 `f6f2495b4648` was cancelled before implementation: its task wording introduced
 an inapplicable migration/external-write gate even though its approved scope
@@ -61,9 +61,13 @@ Independent code, test, and data re-reviews all PASS the repaired candidate
 `1e8ebe8852e4d569f7a4c6cf4b9a6a7618f540a5ee923a5bebbd0e6a81b67957`
 with no open findings. Their complete reports preserve the original failures,
 the repair probes, scratch identities, and `reviewed-tree-modified: no` claims.
-Persisting those final report updates changes the repository fingerprint, so
-the coordinator must run and bind final verification/review receipts before
-transitioning the package to ready.
+The final reports were persisted in `8fc0d3b`; the pinned verifier then passed
+`1155 passed, 85 subtests passed` in 66.13 seconds, plus coverage and every
+configured PR check. The package progressed through `verifying`, `reviewing`,
+and `ready`. Because those durable transitions change the tree fingerprint,
+the untracked runtime verification and review receipts are refreshed once more
+after committing this state; `scripts/grok_status.py` is authoritative for
+their fingerprint currency.
 Gateway/F4 through F7, graph orphan cleanup,
 network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
 start, deployment, release, and push remain outside this route. All 156 broad

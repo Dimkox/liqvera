@@ -94,13 +94,31 @@
       "from": "approved",
       "reason": "Failing Git OID regression reproduced the schema defect; minimal repair and canonical source/installed F3 regressions are green.",
       "to": "implementing"
+    },
+    {
+      "at": "2026-09-29T08:12:59+00:00",
+      "from": "implementing",
+      "reason": "Implementation and focused regressions are complete; pinned full PR verification passed on 8fc0d3b.",
+      "to": "verifying"
+    },
+    {
+      "at": "2026-09-29T08:13:05+00:00",
+      "from": "verifying",
+      "reason": "Pinned PR verification passed and all route-selected independent reviewers returned PASS on a24e1ed with persisted reports.",
+      "to": "reviewing"
+    },
+    {
+      "at": "2026-09-29T08:13:10+00:00",
+      "from": "reviewing",
+      "reason": "Implementation is verified, all required independent reviews pass, and no human gates remain.",
+      "to": "ready"
     }
   ],
   "human_gates": [],
   "human_gates_digest": "06064f840f21ad983c4a103a410f00783082f4ad871eb92ef8e2a4211cf108d8",
   "route_id": "08fa9d84745d",
   "schema_version": 1,
-  "status": "implementing",
+  "status": "ready",
   "title": "F3 offline artifact verification repair",
-  "updated_at": "2026-09-29T07:38:49+00:00"
+  "updated_at": "2026-09-29T08:13:10+00:00"
 }

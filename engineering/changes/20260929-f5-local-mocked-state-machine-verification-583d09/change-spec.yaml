@@ -1,0 +1,48 @@
+{
+  "acceptance_criteria": [
+    {"id":"AC-001","statement":"Real gateway and reconciliation orchestration are exercised with deterministic in-process fakes and temporary artifacts only.","verification":"Focused compiled Node tests invoke Gateway.read, reconcileOne, recoverUnsubmitted, and frozen state guards."},
+    {"id":"AC-002","statement":"A post-confirmation receipt-binding rejection immediately enters manual review without entitlement, delivery, or resettlement.","verification":"RED-first direct and reconciliation regression tests assert paired state, exact calls, and absent paid bytes."},
+    {"id":"AC-003","statement":"Duplicate use, pre-submit recovery, unknown outcome, bounded reconciliation, confirmation replay, finality, and reorg boundaries remain fail closed.","verification":"Deterministic scenario matrix asserts final state and exact settlement count."},
+    {"id":"AC-004","statement":"The exact-lock gateway checks and pinned PR verifier pass while migrations and 156 frozen vectors remain unchanged and NOT_RUN.","verification":"npm build/typecheck/test, repository diff checks, and grok_verify PR receipt."}
+  ],
+  "approvals": {
+    "required_scopes": []
+  },
+  "change_id": "20260929-f5-local-mocked-state-machine-verification-583d09",
+  "contracts": {
+    "events": [],
+    "json_schema": [],
+    "openapi": []
+  },
+  "forbidden_outcomes": [
+    "Any network, RPC, facilitator, wallet, transfer, exchange, database, migration, deployment, release, or push action",
+    "Any second settlement call during replay or reconciliation",
+    "Any entitlement or paid delivery from mismatched or non-final evidence",
+    "Any PASS claim for a frozen acceptance vector or production payment readiness"
+  ],
+  "invariants": [
+    "SUBMITTING is durable before the sole settlement call",
+    "Recovery and reconciliation never call settle",
+    "Receipt inconsistency retains evidence and immediately enters MANUAL_REVIEW",
+    "Entitlement and paid delivery require an exact final bound confirmation",
+    "Production identity and finality policies remain unresolved"
+  ],
+  "objective": {
+    "id": "OBJ-001",
+    "statement": "Verify and repair the Liqvera F5 local mocked state-machine boundary: exercise deterministic duplicate-use rejection, pre-submit failure, unknown outcome, retry prohibition, receipt mismatch, reorganization, finality, entitlement, and recovery transitions with in-process fakes and temporary local files only. No persistent store, migration, wallet, RPC, transfer, shared environment, deployment, release, exchange, or live execution.",
+    "success_metric": "Focused fake-only regression matrix and full PR verification pass with zero external actions",
+    "target": "Direct and reconciliation mismatch enter manual review with exactly one total settlement and no entitlement or delivery"
+  },
+  "observability": ["ordered fake call trace","settle/confirm/manual-review counters","final quote and attempt states","entitlement and delivered-byte presence"],
+  "risk": {
+    "domains": [
+      "data"
+    ],
+    "tier": "yellow"
+  },
+  "rollback": {
+    "maximum_steps": 1,
+    "strategy": "forward_fix"
+  },
+  "schema_version": 2
+}

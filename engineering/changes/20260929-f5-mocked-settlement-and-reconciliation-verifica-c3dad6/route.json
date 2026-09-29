@@ -1,0 +1,98 @@
+{
+  "allowed_agents": [
+    "repo_explorer",
+    "architect",
+    "docs_researcher",
+    "data_architect",
+    "code_reviewer",
+    "test_reviewer",
+    "security_reviewer",
+    "release_reviewer",
+    "data_reviewer",
+    "general_implementer"
+  ],
+  "analysis_agents": [
+    "repo_explorer",
+    "architect",
+    "docs_researcher",
+    "data_architect"
+  ],
+  "base_commit": "f07562eee1a33df74768e9fa4a3b074783d8c59e",
+  "base_fingerprint": "28df854aaac51128ec539c19ce5b7c1873b30b0c4518ad2452a5214c15bc16d3",
+  "complexity": "high-risk",
+  "created_at": "2026-09-29T09:12:45+00:00",
+  "delivery_expected": true,
+  "domains": [
+    "security",
+    "data"
+  ],
+  "human_gates": [
+    "scope_and_design_approval",
+    "migration_or_external_write_approval"
+  ],
+  "intent": "bugfix",
+  "matched_keywords": {
+    "security": [
+      "auth"
+    ]
+  },
+  "primary_skill": "adaptive-delivery",
+  "quality_profiles": [
+    "base",
+    "data"
+  ],
+  "rationale": [
+    "high-risk intent/domain: bugfix",
+    "intent=bugfix",
+    "domains=security,data",
+    "repository=python",
+    "write-owner=general_implementer",
+    "analysis-wave=4/10"
+  ],
+  "repo": {
+    "bitrix_modules": [],
+    "domains": [
+      "data"
+    ],
+    "kind": "python",
+    "languages": [
+      "python"
+    ],
+    "package_scripts": [],
+    "signals": [
+      "python:project",
+      "data:migrations"
+    ]
+  },
+  "required_evidence": [
+    "verification",
+    "code_review",
+    "test_review",
+    "security_review",
+    "data_review",
+    "release_review"
+  ],
+  "review_agents": [
+    "code_reviewer",
+    "test_reviewer",
+    "security_reviewer",
+    "release_reviewer",
+    "data_reviewer"
+  ],
+  "risk": "high",
+  "route_id": "c3dad647a9f8",
+  "schema_version": 1,
+  "session_id": "f5-mocked-settlement-verification",
+  "status": "routed",
+  "task": "Verify and repair the Liqvera F5 local mocked settlement and reconciliation boundary: exercise deterministic authorization reuse, pre-submit failure, unknown outcome, retry prohibition, receipt mismatch, reorganization, finality, entitlement, and recovery state transitions using in-process fakes and disposable local ledger state only. No wallet, chain RPC, facilitator, transfer, shared environment, deployment, release, exchange, or live execution.",
+  "task_domains": [
+    "security"
+  ],
+  "workflow_skills": [
+    "adaptive-delivery",
+    "bugfix-workflow",
+    "data-change",
+    "security-sensitive-change"
+  ],
+  "write_agent": "general_implementer"
+}

@@ -15167,8 +15167,8 @@ repository_inventory:
     node: artifact:liqvera-gateway
     path_class: BUILD_PACKAGING
   - path: apps/mezo-gateway/scripts/a07-source-unavailable.mjs
-    node: runtime:mezo-gateway
-    path_class: TOOL_SOURCE
+    node: artifact:liqvera-gateway
+    path_class: BUILD_PACKAGING
   - path: apps/mezo-gateway/README.md
     node: document:liqvera-f3-f7-implementation
     path_class: DOCUMENTATION

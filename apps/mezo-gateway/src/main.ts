@@ -5,13 +5,13 @@ import { Ledger } from './adapters/postgres.js';
 import { Contracts } from './adapters/contracts.js';
 import { HttpReportService } from './adapters/report-service.js';
 import { ImmutableArtifacts } from './adapters/artifacts.js';
-import { OfficialX402 } from './adapters/x402.js';
 import { MezoReadonlyRpc, MezoReceiptReader } from './adapters/mezo-rpc.js';
 import { Gateway } from './application/gateway.js';
 import { createApp } from './routes/app.js';
 import { startWorkers } from './workers/scheduler.js';
 import { logEvent, telemetryHandler } from './security/observability.js';
 import { MezoAuthorizationPolicy, MezoFinalityPolicy } from './security/payment-policy.js';
+import { composeOfficialX402 } from './security/live-composition.js';
 async function main():Promise<void> {
   const config=await loadConfig();
   const pool=new Pool({connectionString:config.databaseUrl,max:12,connectionTimeoutMillis:3000,idleTimeoutMillis:30000,
@@ -24,7 +24,7 @@ async function main():Promise<void> {
   // A short-lived exact grant is intentionally absent from ordinary startup.
   // Consequently initialize performs no network request and payment remains
   // blocked until a separately approved composition supplies that grant.
-  const payments=new OfficialX402(identity,finality,reader,config.publicBase,null);
+  const payments=composeOfficialX402(identity,finality,reader,config.publicBase,null);
   await payments.initialize();
   const gateway=new Gateway(new Ledger(pool),new HttpReportService(config.reportUrl,config.reportToken),new ImmutableArtifacts(config.artifactRoot),payments,contracts,config);
   const server=createServer({maxHeaderSize:32768,requestTimeout:20000,headersTimeout:10000},createApp(gateway,config.origins));

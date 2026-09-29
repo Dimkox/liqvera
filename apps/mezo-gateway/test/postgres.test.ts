@@ -20,6 +20,7 @@ const marker = process.env.TEST_DATABASE_DISPOSABLE === '1';
 const skipReason = databaseUrl && marker ? undefined : 'requires an explicitly disposable local PostgreSQL URL';
 const MIGRATION_001_SHA256 = 'bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b';
 const MIGRATION_002_SHA256 = '981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb';
+const MIGRATION_003_SHA256 = 'bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0';
 const BODY: QuoteInput = {
   instrument_id: 'hyperliquid:BTC:perpetual',
   side: 'BUY',
@@ -57,6 +58,7 @@ test('fresh migration applies 001 then 002 once, reruns by checksum, and keeps a
   assert.deepEqual(migrations.rows, [
     { name: '001_ledger.sql', sha256: MIGRATION_001_SHA256 },
     { name: '002_fix_immutable_ledger_identity.sql', sha256: MIGRATION_002_SHA256 },
+    { name: '003_live_grant_consumption.sql', sha256: MIGRATION_003_SHA256 },
   ]);
 
   const audit = await pool.query<{ id: string }>("INSERT INTO audit_events(event) VALUES('TEST_ONLY') RETURNING id");
@@ -107,6 +109,7 @@ test('an existing 001 ledger upgrades to 002 without replacing state', { skip: s
     assert.deepEqual((await upgrade.query('SELECT name,sha256 FROM gateway_migrations ORDER BY name')).rows, [
       { name: '001_ledger.sql', sha256: MIGRATION_001_SHA256 },
       { name: '002_fix_immutable_ledger_identity.sql', sha256: MIGRATION_002_SHA256 },
+      { name: '003_live_grant_consumption.sql', sha256: MIGRATION_003_SHA256 },
     ]);
   } finally {
     await upgrade.end();

@@ -138,6 +138,18 @@ an ambiguous post-signature result returns only recovery and is never retried.
 No network, wallet, RPC, facilitator, payment, database, release, or secret action
 occurred. A13/A14 remain blocked pending independent review and a new exact grant.
 
+The follow-up security repair removes process-local grant consumption. Migration
+003 adds an append-only one-to-one grant-digest/grant-ID/payment-attempt relation;
+the ledger consumes it atomically with `VERIFIED -> SUBMITTING`, before the sole
+facilitator call. A conflict leaves the attempt unsubmitted, while any committed
+row remains spent across restart and replicas. The reviewed EIP-3009 binding now
+decodes the exact `transferWithAuthorization` selector and all nine ABI words,
+including the signature commitment, rather than accepting a nonce substring.
+Grant expiry is rechecked during initialization, verification and immediately
+before settlement. Ordinary startup still composes `null` authority and performs
+no external call. The migration was authored and tested structurally but not
+applied to any database in this local-only phase.
+
 ## F6 local UI and operations verification — 2026-09-29
 
 Route `26ffb293d4ff` and change package

@@ -236,3 +236,11 @@ Exact argv validation accidentally treated the venv's absolute Python path as
 semantic evidence, preventing an otherwise identical system interpreter from
 replaying the seal. Bind interpreter implementation, version, and executable
 bytes separately from the exact portable argv tail.
+
+## 2026-09-29 — Process-local payment grant budget was not durable authority
+
+The first P3 prerequisite kept its one-submit counter inside one Node object and
+matched only a nonce substring in transaction calldata, so restart, replicas or
+a wrong selector could bypass the intended proof. Consume grant identity in the
+ledger transaction before submission and decode the complete reviewed ABI call;
+in-memory counters are never a payment authority boundary.

@@ -15160,6 +15160,9 @@ repository_inventory:
   - path: apps/mezo-gateway/migrations/002_fix_immutable_ledger_identity.sql
     node: contract:liqvera-gateway-ledger
     path_class: MIGRATION
+  - path: apps/mezo-gateway/migrations/003_live_grant_consumption.sql
+    node: contract:liqvera-gateway-ledger
+    path_class: MIGRATION
   - path: apps/mezo-gateway/scripts/copy-resources.mjs
     node: artifact:liqvera-gateway
     path_class: BUILD_PACKAGING
@@ -15224,6 +15227,9 @@ repository_inventory:
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/src/security/live-grant.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/security/live-composition.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/src/security/payment-policy.ts
@@ -15401,6 +15407,9 @@ repository_inventory:
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE
   - path: tests/acceptance/test_public_read_grant.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_live_grant_consumption.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: scripts/run-mezo-acceptance.py

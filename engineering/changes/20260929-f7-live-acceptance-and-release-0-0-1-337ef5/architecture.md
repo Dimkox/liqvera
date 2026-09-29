@@ -38,9 +38,12 @@ Acceptance assets describe R and are never committed back into R.
 ## API and event contracts
 
 P0 may strengthen result/evidence/plan schemas and semantic validation without
-weakening A01–A30. P3 may add reviewed production x402 identity/finality/browser
-adapters while preserving existing HTTP and ledger contracts. No migration is
-assumed; any discovered migration changes scope/digest and requires a new grant.
+weakening A01–A30. P3 adds reviewed production x402 identity/finality/browser
+adapters while preserving HTTP contracts. Migration 003 adds only an append-only
+one-shot grant-consumption relation: the grant digest, grant UUID and payment
+attempt are each unique. Its row is committed in the same ledger transaction
+as `VERIFIED -> SUBMITTING`, before facilitator I/O, so restart and replica races
+cannot create a second submission. It contains no secret or wallet material.
 
 ## Governance context
 

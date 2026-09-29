@@ -113,6 +113,12 @@ export class Ledger {
         await db.query("UPDATE payment_attempts SET state='REJECTED',updated_at=now() WHERE id=$1",[attempt.id]);
         await db.query("UPDATE quotes SET state='EXPIRED' WHERE id=$1",[attempt.quote_id]); return false;
       }
+      const grantDigest=current.correlation?.live_grant_digest;
+      const grantId=current.correlation?.live_grant_id;
+      if(typeof grantDigest!=='string'||!/^[0-9a-f]{64}$/.test(grantDigest)||typeof grantId!=='string')return false;
+      const consumed=await db.query(`INSERT INTO live_grant_consumptions(grant_digest,grant_id,payment_attempt_id)
+        VALUES($1,$2,$3) ON CONFLICT DO NOTHING RETURNING grant_digest`,[grantDigest,grantId,attempt.id]);
+      if(!consumed.rowCount)return false;
       await db.query("UPDATE payment_attempts SET state='SUBMITTING',submitted_at=now(),updated_at=now(),next_reconcile_at=now()+interval '30 seconds' WHERE id=$1",[attempt.id]);
       await db.query("INSERT INTO audit_events(quote_id,payment_attempt_id,event) VALUES($1,$2,'SUBMIT_COMMITTED')",[attempt.quote_id,attempt.id]);
       return true;

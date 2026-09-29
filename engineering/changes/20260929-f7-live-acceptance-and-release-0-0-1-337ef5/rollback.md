@@ -18,6 +18,11 @@ UNKNOWN preserves quote/attempt/artifacts and permits exact confirm-only
 reconciliation to confirmed or manual review. Suspected secret exposure stops
 publication and requires human rotation outside the agent boundary.
 
+Migration 003 is forward-only. Its consumption rows are audit/dedup evidence
+and must never be deleted during rollback. Disable new sales or revert the
+application while retaining the table; a failed or UNKNOWN submission remains
+spent and may only enter confirmation reconciliation.
+
 Partial publication is additive: if main pushed but tag/release failed, verify
 the pushed SHA and resume only the missing approved step. Never force-push or
 move a published tag. An incorrect published release is superseded by a new

@@ -26,15 +26,24 @@ export class MezoAuthorizationPolicy implements AuthorizationPolicy {
       typeof body.signature!=='string'||!/^0x[0-9a-f]{130}$/.test(body.signature))throw new PublicError('PAYMENT_REJECTED',409);
     const now=Math.floor(this.now().getTime()/1000); const before=Number(values.validBefore); const after=Number(values.validAfter);
     if(!Number.isSafeInteger(before)||!Number.isSafeInteger(after)||after>now||before<=now||before-now>600)throw new PublicError('PAYMENT_REJECTED',409);
-    const correlation={...values,network:NETWORK,asset:ASSET.toLowerCase(),quote_id:quote.id,report_id:quote.report_id,report_sha256:quote.report_sha256};
+    const signatureCommitment=createHash('sha256').update(body.signature).digest('hex');
+    const correlation={...values,signature_commitment:signatureCommitment,network:NETWORK,asset:ASSET.toLowerCase(),quote_id:quote.id,report_id:quote.report_id,report_sha256:quote.report_sha256};
     const identity=createHash('sha256').update(canonical(correlation)).digest('hex');
     return {identity,version:this.version,payer:values.from,valid_until:new Date(before*1000).toISOString(),correlation};
   }
   async bindsTransfer(attempt: Attempt,transactionValue: unknown,logValue: unknown): Promise<boolean> {
     if(attempt.identity_version!==this.version||attempt.correlation.network!==NETWORK||attempt.correlation.asset!==ASSET.toLowerCase()||attempt.correlation.value!==AMOUNT)return false;
-    const transaction=object(transactionValue); const log=object(logValue);
-    return transaction.hash===attempt.tx_hash&&log.transactionHash===attempt.tx_hash&&String(transaction.to).toLowerCase()===ASSET.toLowerCase()&&
-      typeof transaction.input==='string'&&transaction.input.toLowerCase().includes(attempt.correlation.nonce!.slice(2));
+    const transaction=object(transactionValue); const log=object(logValue); const input=transaction.input;
+    if(transaction.hash!==attempt.tx_hash||log.transactionHash!==attempt.tx_hash||String(transaction.to).toLowerCase()!==ASSET.toLowerCase()||
+      typeof input!=='string'||!/^0xe3ee160e[0-9a-f]{576}$/.test(input))return false;
+    const words=Array.from({length:9},(_,index)=>input.slice(10+index*64,10+(index+1)*64));
+    const addressWord=(value:string)=>value.slice(2).padStart(64,'0');
+    const uintWord=(value:string)=>BigInt(value).toString(16).padStart(64,'0');
+    const signature=`0x${words[7]!}${words[8]!}${words[6]!.slice(62)}`;
+    return words[0]===addressWord(attempt.correlation.from!)&&words[1]===addressWord(attempt.correlation.to!)&&
+      words[2]===uintWord(attempt.correlation.value!)&&words[3]===uintWord(attempt.correlation.validAfter!)&&
+      words[4]===uintWord(attempt.correlation.validBefore!)&&words[5]===attempt.correlation.nonce!.slice(2)&&
+      createHash('sha256').update(signature).digest('hex')===attempt.correlation.signature_commitment;
   }
 }
 

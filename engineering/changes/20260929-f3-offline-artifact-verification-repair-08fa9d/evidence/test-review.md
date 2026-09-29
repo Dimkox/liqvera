@@ -1,4 +1,50 @@
-# Test review — FAIL
+# Test review — PASS after repair
+
+## Final re-review
+
+- Reviewed HEAD: `a24e1ed2e373de14e45144c988a89d176384866c`
+- Reviewed tree fingerprint: `1e8ebe8852e4d569f7a4c6cf4b9a6a7618f540a5ee923a5bebbd0e6a81b67957`
+- Scratch path: `/tmp/liqvera-test-rereview-08fa9d.sQtHXx`
+- Reviewed-tree-modified: no product or test source modified by the reviewer; this report update is the only candidate-tree write
+- Findings: none open; the prior P1 finding is closed
+- Status: **PASS**
+
+The repaired regression parametrizes both `repository.commit` and
+`repository.tree` across 39-byte, 41-byte, uppercase, non-hex, and
+newline-suffixed values and asserts the exact failing path. SHA-256 coverage
+separately rejects trailing newlines on stdout, stderr, and evidence digests,
+so the Git-OID repair cannot weaken content-digest identity.
+
+Focused command:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest \
+  tests/contracts/test_acceptance_result.py \
+  tests/evidence_report/test_canonical_f3.py \
+  tests/installed/test_canonical_f3_installed.py -q
+```
+
+Observed: `21 passed in 11.23s`.
+
+Mutation probes in the private scratch copy:
+
+1. Replaced only the `tree` Git-OID reference with unconstrained string.
+   Acceptance suite result: `5 failed, 9 passed`; all five malformed tree
+   cases failed their exact-path assertion. Mutant outcome: **killed**.
+2. Removed `minLength`/`maxLength` from SHA-256 while retaining the `$`-ended
+   pattern. Acceptance suite result: `3 failed, 11 passed`; stdout, stderr,
+   and evidence trailing-newline cases failed. Mutant outcome: **killed**.
+
+The full verifier receipt at
+`.grok-stack/runtime/receipts/08fa9d84745d/verification.json` is `pass` and its
+tree fingerprint exactly matched the independently recomputed reviewed
+fingerprint before this report update. It records pytest-xdist with 22 workers,
+tests exit 0, coverage exit 0, Trivy over 9 targets PASS, and source stability
+PASS. Persisting this final verdict changes the fingerprint; the coordinator
+must rerun verification and record refreshed receipts after all reports are
+persisted.
+
+## Initial review history — FAIL
 
 - Reviewed HEAD: `7ce49b423ed8ef5f861bb4699387b539958e4a5e`
 - Reviewed tree fingerprint: `196617cb7e459c9e104361df7c26e4c543d4e60843549875b19c65d2e61fbcd0`
@@ -7,7 +53,7 @@
 - Findings: 1
 - Status: **FAIL**
 
-## Finding
+## Original finding (closed)
 
 ### P1 — malformed `repository.tree` Git OIDs have no negative regression
 

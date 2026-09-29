@@ -1,5 +1,53 @@
 # Data review — PASS
 
+## Final re-review — PASS
+
+- Final reviewed HEAD: `a24e1ed2e373de14e45144c988a89d176384866c`
+- Final tree fingerprint:
+  `1e8ebe8852e4d569f7a4c6cf4b9a6a7618f540a5ee923a5bebbd0e6a81b67957`
+- Repository state before this evidence-only update: clean
+- Delta reviewed from the original review HEAD:
+  `7ce49b423ed8ef5f861bb4699387b539958e4a5e..a24e1ed2e373de14e45144c988a89d176384866c`
+- Findings: none
+- Final recommendation: **PASS**
+
+The final schema hardening adds explicit `minLength` and `maxLength` bounds to
+the existing anchored patterns. Both `repository.commit` and `repository.tree`
+must now be exactly 40 lowercase hexadecimal characters, including under JSON
+Schema regex semantics where `$` alone can match before a trailing newline.
+Every content digest (`stdout_sha256`, `stderr_sha256`, and evidence-file
+`sha256`) must be exactly 64 lowercase hexadecimal characters. Tests cover both
+Git identity fields, wrong lengths, uppercase/non-hex input, and trailing
+newlines; all three content-digest locations have trailing-newline rejection
+coverage.
+
+The final delta contains no SQL, migration, database/store, ledger, fixture,
+artifact publication, or persistent-schema change. The original F3 artifact
+integrity, duplicate-publication/replay, partial-target, and atomic pre-rename
+conclusions below remain unchanged.
+
+Final commands run against the clean final HEAD:
+
+```text
+.venv/bin/pytest -q tests/contracts/test_acceptance_result.py \
+  tests/evidence_report/test_canonical_f3.py \
+  tests/installed/test_canonical_f3_installed.py
+21 passed in 9.05s
+
+.venv/bin/pytest -q tests/evidence_report \
+  tests/contracts/test_acceptance_result.py
+32 passed in 1.08s
+
+Draft202012Validator.check_schema(acceptance-result.schema.json)
+schema-valid; explicit exact lengths confirmed
+
+git diff --check f07562eee1a33df74768e9fa4a3b074783d8c59e..HEAD
+PASS (no output)
+```
+
+The remainder of this document preserves the original review at
+`7ce49b423ed8ef5f861bb4699387b539958e4a5e`.
+
 - Route: `08fa9d84745d`
 - Reviewed HEAD: `7ce49b423ed8ef5f861bb4699387b539958e4a5e`
 - Review role: independent `data_reviewer`

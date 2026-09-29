@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (first-review identifier-boundary findings repaired; full verification and re-review pending). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (identifier-boundary repair independently re-reviewed PASS; final workflow receipts are being bound). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F3 offline artifact verification repair — 2026-09-29
@@ -55,6 +55,15 @@ reports are preserved as evidence; full verification and independent re-review
 must bind the new tree before closure. The first post-review full run otherwise
 passed 1150 tests and coverage, but correctly rejected the three newly tracked
 review reports until their graph inventory ownership was declared.
+
+Independent code, test, and data re-reviews all PASS the repaired candidate
+`a24e1ed` at fingerprint
+`1e8ebe8852e4d569f7a4c6cf4b9a6a7618f540a5ee923a5bebbd0e6a81b67957`
+with no open findings. Their complete reports preserve the original failures,
+the repair probes, scratch identities, and `reviewed-tree-modified: no` claims.
+Persisting those final report updates changes the repository fingerprint, so
+the coordinator must run and bind final verification/review receipts before
+transitioning the package to ready.
 Gateway/F4 through F7, graph orphan cleanup,
 network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
 start, deployment, release, and push remain outside this route. All 156 broad

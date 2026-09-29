@@ -143,3 +143,91 @@ no scope-expansion finding observed.
   decisive blocker.
 - The review did not exercise live services or network dependencies; those are
   explicitly outside this change package.
+
+---
+
+## Final re-review — repaired candidate
+
+### Verdict
+
+**PASS** — the prior HIGH finding is resolved; no new actionable findings.
+
+Reviewed source:
+
+- HEAD: `a24e1ed2e373de14e45144c988a89d176384866c`
+- candidate tree fingerprint: `1e8ebe8852e4d569f7a4c6cf4b9a6a7618f540a5ee923a5bebbd0e6a81b67957`
+- prior reviewed HEAD: `7ce49b423ed8ef5f861bb4699387b539958e4a5e`
+- reviewed-tree-modified: no
+
+The candidate was clean at re-review start. Persisting this final section is the
+only reviewer modification; the coordinator must bind final receipts to the
+resulting report-bearing tree.
+
+### Prior finding resolution
+
+`git_oid` now has exact 40-character `minLength` and `maxLength` constraints,
+and `sha256` exact 64-character constraints. The character patterns continue to
+reject uppercase and non-hex values. Regression coverage now mutates both
+`repository.commit` and `repository.tree`, including the terminal-newline case,
+and all three SHA-256 locations present in an executed acceptance case.
+
+Probe command:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=.grok-stack .venv/bin/python - <<'PY'
+# Validate exact commit/tree values, their terminal-newline mutants, and
+# terminal-newline mutants for stdout, stderr, and evidence SHA-256 fields.
+PY
+```
+
+Observed output:
+
+```text
+fingerprint 1e8ebe8852e4d569f7a4c6cf4b9a6a7618f540a5ee923a5bebbd0e6a81b67957
+commit valid ACCEPT
+commit newline REJECT
+tree valid ACCEPT
+tree newline REJECT
+stdout_sha256 newline REJECT
+stderr_sha256 newline REJECT
+evidence.0.sha256 newline REJECT
+```
+
+Mutant outcome: **killed**. The prior HIGH finding is closed.
+
+### Focused regression suite
+
+Command:
+
+```bash
+.venv/bin/pytest -q tests/contracts/test_acceptance_result.py \
+  tests/evidence_report/test_canonical_f3.py \
+  tests/installed/test_canonical_f3_installed.py
+```
+
+Observed output: `21 passed in 11.21s`.
+
+This re-confirms the repaired identity contract together with the previously
+reviewed canonical publication, tamper rejection, immutability, failure cleanup,
+installed-wheel boundary, and verifier CLI paths. Mutant outcome: **killed** for
+the represented boundary, corruption, overwrite, and source-substitution paths.
+
+### Dependency and scope re-check
+
+Commands:
+
+```bash
+.venv/bin/pip check
+git diff --check bed18457b084f9c9f15dd8bee24c31a74323e639..HEAD
+git diff --name-status 7ce49b423ed8ef5f861bb4699387b539958e4a5e..HEAD
+```
+
+Observed output: dependency check reports `No broken requirements found`;
+`hyperliquid-python-sdk==0.24.0` still declares `eth-account>=0.10.0,<0.14.0`
+and installed `eth-account==0.13.7` satisfies it; diff check is empty. Since the
+prior review, product changes are confined to the acceptance schema and its
+contract tests. Other changes are review evidence, change-package/handoff state,
+decision history, and architecture inventory. No network, live-execution,
+payment, deployment, migration, or persistent-data behavior was added.
+
+Final actionable findings: **none**.

@@ -1,0 +1,36 @@
+{
+  "acceptance_criteria": [
+    {"id":"AC-001","statement":"The superseded local-only route remains cancelled before implementation and performs no product or external action.","evidence":[{"receipt":"security_review"},{"receipt":"release_review"}]}
+  ],
+  "approvals": {
+    "required_scopes": ["scope_and_design_approval","migration_or_external_write_approval"]
+  },
+  "change_id": "20260929-f7-local-acceptance-verification-fd7ffd",
+  "contracts": {
+    "events": [],
+    "json_schema": [],
+    "openapi": []
+  },
+  "forbidden_outcomes": [
+    {"id":"FORBID-001","statement":"The cancelled route authorizes no network, wallet, payment, database, deployment, push, tag, or release action.","evidence":[{"receipt":"security_review"},{"receipt":"release_review"}]}
+  ],
+  "invariants": [],
+  "objective": {
+    "id": "OBJ-001",
+    "statement": "Verify and repair the Liqvera F7 local acceptance boundary only: execute the A01-A30 result runner against the final local commit, aggregate existing F0-F6 evidence without fabricating PASS, run deterministic local fault and negative tests, validate competition/demo claims, and produce a truthful release-candidate readiness report. Keep every external, live-public, wallet, RPC, facilitator, transfer, testnet/mainnet payment, shared environment, deployment, publication, Git push, tag, merge, or GitHub Release action blocked and recorded as NOT_RUN or BLOCKED_EXTERNAL.",
+    "success_metric": "cancelled_before_implementation",
+    "target": "zero product or external changes under the superseded route"
+  },
+  "observability": [],
+  "risk": {
+    "domains": [
+      "data"
+    ],
+    "tier": "red"
+  },
+  "rollback": {
+    "maximum_steps": 1,
+    "strategy": "forward_fix"
+  },
+  "schema_version": 2
+}

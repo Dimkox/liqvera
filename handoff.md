@@ -3,6 +3,46 @@
 Updated: 2026-09-29 (F5 closed; F6 fake/static verification and independent reviews PASS). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
+## F7 live acceptance and release 0.0.1 — 2026-09-29
+
+Route `337ef5ec16a0` and change package
+`engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/`
+are scoped only. Four route-selected analyses were synthesized into sequential
+P0–P5 gates; no implementation, network read, database/container action,
+wallet interaction, payment, push, tag, release, or other external mutation
+occurred. The earlier local-only route `fd7ffd5cc17f` is coherently retained as
+cancelled before implementation. Current decision is **NO-GO**.
+
+P0 repairs the A01–A30 runner's semantic validation, immutable evidence, final
+clean Git binding, local-vs-real A30 classification, and fault/mutation suite.
+P1 executes locally eligible cases into a fresh mode-0700 out-of-tree result;
+missing real prerequisites remain explicit. P2 permits only separately granted
+allowlisted public reads. P3 first implements and independently reviews real
+authorization identity, finality, and browser x402 wiring, then requires a new
+exact grant for one human-confirmed Mezo Testnet envelope: chain 31611, pinned
+MUSD, exactly 0.01 test MUSD, distinct approved buyer/payee, one submission
+maximum, and a numeric test-BTC gas cap. Any possible broadcast followed by
+timeout is `UNKNOWN`, never retryable; only exact confirmation reconciliation
+may continue.
+
+P4 defines Liqvera product release `0.0.1` while retaining inherited/component
+package and API versions `0.1.0`, and builds scanned manifest-bound artifacts
+plus `SHA256SUMS` from one frozen commit. Final acceptance/evidence stays
+immutable outside that subject tree. P5 requires a separate exact publication
+grant for a fast-forward of `Dimkox/liqvera` main, annotated `v0.0.1`, draft
+GitHub Release, allowlisted asset upload/download re-hash, and final owner
+confirmation. Partial publication recovery is additive: never force-push or
+move a published tag.
+
+Both route gates remain pending: `scope_and_design_approval` must approve the
+current scoped digest before P0 implementation, while
+`migration_or_external_write_approval` is not a blanket grant and must be
+realized as short-lived exact P2, P3, and P5 action records. Any changed tree,
+plan, target, envelope, amount, gas cap, artifact, limitation, or remote OID
+invalidates its affected grant. Mainnet, real/user funds, custody, private keys,
+exchange mutation, deployment, unrelated repositories, and secret inspection
+remain forbidden.
+
 ## F6 local UI and operations verification — 2026-09-29
 
 Route `26ffb293d4ff` and change package

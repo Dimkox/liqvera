@@ -1,0 +1,98 @@
+{
+  "allowed_agents": [
+    "repo_explorer",
+    "architect",
+    "docs_researcher",
+    "data_architect",
+    "code_reviewer",
+    "test_reviewer",
+    "security_reviewer",
+    "release_reviewer",
+    "data_reviewer",
+    "general_implementer"
+  ],
+  "analysis_agents": [
+    "repo_explorer",
+    "architect",
+    "docs_researcher",
+    "data_architect"
+  ],
+  "base_commit": "f07562eee1a33df74768e9fa4a3b074783d8c59e",
+  "base_fingerprint": "4e03c743b86aedd22bde79c74b9620054a48f03f4e446997146fba9b5c23895c",
+  "complexity": "high-risk",
+  "created_at": "2026-09-29T12:02:25+00:00",
+  "delivery_expected": true,
+  "domains": [
+    "security",
+    "data"
+  ],
+  "human_gates": [
+    "scope_and_design_approval",
+    "migration_or_external_write_approval"
+  ],
+  "intent": "bugfix",
+  "matched_keywords": {
+    "security": [
+      "auth"
+    ]
+  },
+  "primary_skill": "adaptive-delivery",
+  "quality_profiles": [
+    "base",
+    "data"
+  ],
+  "rationale": [
+    "high-risk signal: payment",
+    "intent=bugfix",
+    "domains=security,data",
+    "repository=python",
+    "write-owner=general_implementer",
+    "analysis-wave=4/10"
+  ],
+  "repo": {
+    "bitrix_modules": [],
+    "domains": [
+      "data"
+    ],
+    "kind": "python",
+    "languages": [
+      "python"
+    ],
+    "package_scripts": [],
+    "signals": [
+      "python:project",
+      "data:migrations"
+    ]
+  },
+  "required_evidence": [
+    "verification",
+    "code_review",
+    "test_review",
+    "security_review",
+    "data_review",
+    "release_review"
+  ],
+  "review_agents": [
+    "code_reviewer",
+    "test_reviewer",
+    "security_reviewer",
+    "release_reviewer",
+    "data_reviewer"
+  ],
+  "risk": "high",
+  "route_id": "337ef5ec16a0",
+  "schema_version": 1,
+  "session_id": "f7-live-release-001",
+  "status": "routed",
+  "task": "Repair and complete Liqvera F7 acceptance, then perform a controlled live-public and Mezo Testnet demonstration and publish release 0.0.1. First repair the A01-A30 runner semantic validation, evidence immutability, exact final Git binding, local A30 classification, and deterministic local fault plan. Then execute all locally eligible acceptance cases on a clean commit; execute only approved public read probes and Mezo Testnet payment with test funds through the configured wallet/RPC/facilitator; keep mainnet, custody, exchange mutations, private market venues, real funds, and unrelated external writes forbidden. When required verification and independent reviews pass, update README and version metadata to 0.0.1, build release artifacts, push the authorized main branch and v0.0.1 tag to Dimkox/liqvera, and create GitHub Release v0.0.1 with truthful NOT_RUN/BLOCKED limitations.",
+  "task_domains": [
+    "security"
+  ],
+  "workflow_skills": [
+    "adaptive-delivery",
+    "bugfix-workflow",
+    "data-change",
+    "security-sensitive-change"
+  ],
+  "write_agent": "general_implementer"
+}

@@ -1,0 +1,90 @@
+{
+  "allowed_agents": [
+    "repo_explorer",
+    "architect",
+    "docs_researcher",
+    "data_architect",
+    "code_reviewer",
+    "test_reviewer",
+    "security_reviewer",
+    "release_reviewer",
+    "data_reviewer",
+    "general_implementer"
+  ],
+  "analysis_agents": [
+    "repo_explorer",
+    "architect",
+    "docs_researcher",
+    "data_architect"
+  ],
+  "base_commit": "f07562eee1a33df74768e9fa4a3b074783d8c59e",
+  "base_fingerprint": "51cf9703526e8599cbbf19ca8e0c92e3a12ed26349231540bde49977a4e5365d",
+  "complexity": "high-risk",
+  "created_at": "2026-09-29T11:53:49+00:00",
+  "delivery_expected": true,
+  "domains": [
+    "data"
+  ],
+  "human_gates": [
+    "scope_and_design_approval",
+    "migration_or_external_write_approval"
+  ],
+  "intent": "bugfix",
+  "matched_keywords": {},
+  "primary_skill": "adaptive-delivery",
+  "quality_profiles": [
+    "base",
+    "data"
+  ],
+  "rationale": [
+    "high-risk signal: payment",
+    "intent=bugfix",
+    "domains=data",
+    "repository=python",
+    "write-owner=general_implementer",
+    "analysis-wave=4/10"
+  ],
+  "repo": {
+    "bitrix_modules": [],
+    "domains": [
+      "data"
+    ],
+    "kind": "python",
+    "languages": [
+      "python"
+    ],
+    "package_scripts": [],
+    "signals": [
+      "python:project",
+      "data:migrations"
+    ]
+  },
+  "required_evidence": [
+    "verification",
+    "code_review",
+    "test_review",
+    "security_review",
+    "data_review",
+    "release_review"
+  ],
+  "review_agents": [
+    "code_reviewer",
+    "test_reviewer",
+    "security_reviewer",
+    "release_reviewer",
+    "data_reviewer"
+  ],
+  "risk": "high",
+  "route_id": "fd7ffd5cc17f",
+  "schema_version": 1,
+  "session_id": "f7-local-acceptance-verification",
+  "status": "routed",
+  "task": "Verify and repair the Liqvera F7 local acceptance boundary only: execute the A01-A30 result runner against the final local commit, aggregate existing F0-F6 evidence without fabricating PASS, run deterministic local fault and negative tests, validate competition/demo claims, and produce a truthful release-candidate readiness report. Keep every external, live-public, wallet, RPC, facilitator, transfer, testnet/mainnet payment, shared environment, deployment, publication, Git push, tag, merge, or GitHub Release action blocked and recorded as NOT_RUN or BLOCKED_EXTERNAL.",
+  "task_domains": [],
+  "workflow_skills": [
+    "adaptive-delivery",
+    "bugfix-workflow",
+    "data-change"
+  ],
+  "write_agent": "general_implementer"
+}

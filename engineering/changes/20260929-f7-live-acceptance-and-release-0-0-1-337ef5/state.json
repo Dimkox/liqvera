@@ -1,0 +1,92 @@
+{
+  "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+  "checkpoint_mirror_pending": false,
+  "checkpoints": [
+    {
+      "branch": "feat/f3-f7-verification",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "detached": false,
+      "dirty_product_paths": [],
+      "dirty_product_state": "clean",
+      "git_available": true,
+      "git_findings": [],
+      "head": "fe99c7d6a081ef503ddb8b98e22b2167ac8db38c",
+      "kind": "initial",
+      "note": "draft; implementation not started",
+      "observed_at": "2026-09-29T12:02:35+00:00",
+      "route_id": "337ef5ec16a0"
+    }
+  ],
+  "created_at": "2026-09-29T12:02:35+00:00",
+  "evidence_accounting": {
+    "obligations": [
+      {
+        "id": "verification",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "verification",
+        "status": "not_run"
+      },
+      {
+        "id": "code_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "code_review",
+        "status": "not_run"
+      },
+      {
+        "id": "test_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "test_review",
+        "status": "not_run"
+      },
+      {
+        "id": "security_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "security_review",
+        "status": "not_run"
+      },
+      {
+        "id": "data_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "data_review",
+        "status": "not_run"
+      },
+      {
+        "id": "release_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "release_review",
+        "status": "not_run"
+      }
+    ],
+    "schema_version": 1
+  },
+  "history": [
+    {
+      "at": "2026-09-29T12:02:35+00:00",
+      "from": null,
+      "reason": "created",
+      "to": "draft"
+    },
+    {
+      "at": "2026-09-29T12:09:52+00:00",
+      "from": "draft",
+      "reason": "Four analyses synthesized into sequential P0-P5 scope, red-risk invariants, version/artifact contract, exact short-lived grants, stop conditions, UNKNOWN/no-retry handling, and additive publication recovery; both human gates remain pending.",
+      "to": "scoped"
+    }
+  ],
+  "human_gates": [
+    "scope_and_design_approval",
+    "migration_or_external_write_approval"
+  ],
+  "human_gates_digest": "1ab9adb5cb4d33f265090cb45b1793b25f1857203ce4733f5dc7ccbdef7b03f9",
+  "route_id": "337ef5ec16a0",
+  "schema_version": 1,
+  "status": "scoped",
+  "title": "F7 live acceptance and release 0.0.1",
+  "updated_at": "2026-09-29T12:09:52+00:00"
+}

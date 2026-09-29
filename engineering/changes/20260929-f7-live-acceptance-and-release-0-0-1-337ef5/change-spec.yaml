@@ -1,0 +1,58 @@
+{
+  "acceptance_criteria": [
+    {"id":"AC-001","statement":"P0 derives truthful A01-A30 semantics, creates immutable unique evidence, and seals an atomic result only after final unchanged clean Git and digest binding.","evidence":[{"test":"tests/contracts/test_acceptance_result.py"},{"receipt":"test_review"},{"receipt":"security_review"}]},
+    {"id":"AC-002","statement":"P1 executes every locally eligible criterion out of tree on the reviewed commit and reports every unmet real prerequisite as NOT_RUN or BLOCKED_EXTERNAL without synthetic PASS.","evidence":[{"receipt":"verification"},{"receipt":"test_review"}]},
+    {"id":"AC-003","statement":"P2 public reads use only separately granted exact origins, methods, bodies, attempt/time/size limits, and retain sanitized content-addressed evidence.","evidence":[{"receipt":"security_review"},{"receipt":"data_review"}]},
+    {"id":"AC-004","statement":"P3 reviewed production identity, finality, and browser x402 wiring precedes at most one human-confirmed Mezo Testnet submission for exactly 0.01 test MUSD under an approved numeric test-BTC gas cap; unknown outcomes are never retried.","evidence":[{"receipt":"code_review"},{"receipt":"security_review"},{"receipt":"data_review"}]},
+    {"id":"AC-005","statement":"P4 defines Liqvera product release 0.0.1 while preserving component 0.1.0 versions and builds scanned, reproducible, manifest-bound artifacts plus SHA256SUMS from the exact release commit.","evidence":[{"receipt":"verification"},{"receipt":"release_review"}]},
+    {"id":"AC-006","statement":"P5 separately approved publication fast-forwards only Dimkox/liqvera main to the reviewed commit, creates annotated v0.0.1 at that commit, and publishes only re-hashed allowlisted GitHub Release assets with truthful limitations.","evidence":[{"receipt":"security_review"},{"receipt":"release_review"}]}
+  ],
+  "approvals": {
+    "required_scopes": [
+      "scope_and_design_approval",
+      "migration_or_external_write_approval"
+    ]
+  },
+  "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+  "contracts": {
+    "events": [],
+    "json_schema": ["schemas/mezo-evidence/v1/acceptance-result.schema.json","schemas/mezo-evidence/v1/states.json"],
+    "openapi": ["schemas/mezo-evidence/v1/openapi.json"]
+  },
+  "forbidden_outcomes": [
+    {"id":"FORBID-001","statement":"No phase reads secret values or accesses mainnet, real/user funds, custody, withdrawals, exchange/private-market mutation, unrelated repositories, or production deployment.","evidence":[{"receipt":"security_review"},{"receipt":"release_review"}]},
+    {"id":"FORBID-002","statement":"No PASS is inferred from exit zero, prose, old receipts, omitted prerequisites, NOT_RUN, BLOCKED_EXTERNAL, fixture evidence, or a non-final/mismatched receipt.","evidence":[{"test":"tests/contracts/test_acceptance_result.py"},{"receipt":"test_review"}]},
+    {"id":"FORBID-003","statement":"No possible post-submit payment outcome is retried; exactly one approved submission is the hard maximum and UNKNOWN permits confirmation-only reconciliation.","evidence":[{"receipt":"security_review"},{"receipt":"data_review"}]},
+    {"id":"FORBID-004","statement":"No publication force-pushes main, moves a published tag, overwrites assets/evidence, publishes unlisted bytes, or proceeds on stale identity, grant, review, result, or checksum.","evidence":[{"receipt":"code_review"},{"receipt":"release_review"}]}
+  ],
+  "invariants": [
+    {"id":"INV-001","statement":"P0 through P5 are sequential and fail closed; scope approval is not public-read, payment, or publication authority.","evidence":[{"receipt":"security_review"},{"receipt":"release_review"}]},
+    {"id":"INV-002","statement":"Every external grant is short-lived and binds exact subject digest, actor, target, method/action, bounds, expiry, evidence destination, and stop conditions; any change invalidates it.","evidence":[{"receipt":"security_review"}]},
+    {"id":"INV-003","statement":"Final result/evidence and release artifacts are immutable out-of-tree objects about release commit R; they never change R and are bound by hashes in tag/release metadata.","evidence":[{"receipt":"data_review"},{"receipt":"release_review"}]},
+    {"id":"INV-004","statement":"Liqvera product VERSION and tag are 0.0.1 while inherited mee identifiers and component versions remain 0.1.0 unless a new approved migration supersedes this scope.","evidence":[{"receipt":"code_review"},{"receipt":"release_review"}]}
+  ],
+  "objective": {
+    "id": "OBJ-001",
+    "statement": "Repair and complete Liqvera F7 acceptance, then perform a controlled live-public and Mezo Testnet demonstration and publish release 0.0.1. First repair the A01-A30 runner semantic validation, evidence immutability, exact final Git binding, local A30 classification, and deterministic local fault plan. Then execute all locally eligible acceptance cases on a clean commit; execute only approved public read probes and Mezo Testnet payment with test funds through the configured wallet/RPC/facilitator; keep mainnet, custody, exchange mutations, private market venues, real funds, and unrelated external writes forbidden. When required verification and independent reviews pass, update README and version metadata to 0.0.1, build release artifacts, push the authorized main branch and v0.0.1 tag to Dimkox/liqvera, and create GitHub Release v0.0.1 with truthful NOT_RUN/BLOCKED limitations.",
+    "success_metric": "one immutable semantically valid A01-A30 result and one exact checksummed v0.0.1 publication, with every omission truthful and every external action separately authorized",
+    "target": "P0-P5 complete in order with zero secret exposure, zero mainnet/exchange action, at most one approved 0.01 test-MUSD submission, and exact commit/tag/asset binding"
+  },
+  "observability": [
+    {"id":"SIG-001","metric":"acceptance_case_inventory_status_and_evidence_digests","proves":["OBJ-001"]},
+    {"id":"SIG-002","metric":"subject_commit_tree_plan_runner_assertion_and_grant_digests","proves":["OBJ-001"]},
+    {"id":"SIG-003","metric":"testnet_submission_count_and_canonical_transaction_block_log_identity","proves":["OBJ-001"]},
+    {"id":"SIG-004","metric":"release_artifact_names_sizes_sha256_and_remote_readback","proves":["OBJ-001"]}
+  ],
+  "risk": {
+    "domains": [
+      "data",
+      "security"
+    ],
+    "tier": "red"
+  },
+  "rollback": {
+    "maximum_steps": 1,
+    "strategy": "forward_fix"
+  },
+  "schema_version": 2
+}

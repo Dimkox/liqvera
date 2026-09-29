@@ -34,8 +34,15 @@ publication, and a post-seal verifier. The output is tamper-evident and made
 read-only locally; filesystem permissions are not claimed as immutability. The
 checked-in offline plan intentionally executes only five currently bound local
 assertions; every other case remains truthful `NOT_RUN` or `BLOCKED_EXTERNAL`
-until its complete criterion has an approved dispatcher. F7 is therefore
-**INCOMPLETE / NO-GO**. The local protocol package pins official Mezo MUSD
+until its complete criterion has an approved dispatcher. The corrected
+release-candidate result at `76c0b63` is **INCOMPLETE** with 5 PASS, 4
+`BLOCKED_EXTERNAL`, 21 `NOT_RUN`, and no FAIL. Separately retained sealed
+evidence records A13 and A14 PASS on Mezo Testnet using one settlement of 0.01
+test MUSD, 50 observed confirmations, and zero buyer native-gas spend. The
+earlier full result is not an overall PASS because A08/A09 used the system
+Python; the runner now pins the repository `.venv` for those cases. Final
+release-commit acceptance, A29, artifacts, reviews, tag, push, and GitHub
+Release remain unrun, so F7 is still **INCOMPLETE / NO-GO**. The local protocol package pins official Mezo MUSD
 material and recorded `mezo-org` source revisions. Separate Liqvera factory
 targets do not change the existing Stage A three-wheel factory. All 156 frozen
 vectors remain `NOT_RUN`; focused local tests are not relabelled as vector,
@@ -53,13 +60,15 @@ The historical live public probe returned `COMPATIBILITY_PASS_PAYMENT_BLOCKED`.
 F7 now implements an explicit Permit2 authorization identity with required
 EIP-2612 gas sponsorship, twelve-block canonical finality, an exact one-submit
 testnet grant, and pinned official x402 browser composition. Ordinary startup intentionally has no live grant, so
-payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`; no new public
-probe, testnet payment, wallet operation, or deployment has been performed.
+payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`. One explicitly
+authorized Mezo Testnet settlement is retained as sealed A13/A14 evidence; no
+mainnet payment, exchange mutation, custody action, deployment, tag, push, or
+release publication was performed.
 
-Current metadata: root project `0.1.0.dev0`; Stage A, evidence-report, protocol,
-gateway, and web packages `0.1.0`.
-There is no root `VERSION` file or F1 release. Inherited `mee-*` identifiers
-are preserved.
+Current product release identity: root `VERSION` is `0.0.1`; the root Python
+workspace remains `0.1.0.dev0`, and Stage A, evidence-report, protocol,
+gateway, and web component packages remain `0.1.0`. No tag or GitHub Release
+exists yet. Inherited `mee-*` identifiers are preserved.
 
 ## Start here
 

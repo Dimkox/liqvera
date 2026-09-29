@@ -5,6 +5,18 @@ Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f075
 
 ## F7 live acceptance and release 0.0.1 — 2026-09-29
 
+Release preparation now records two sealed results without copying their
+private paths, signatures, or payment payload. The live result
+`53830fe2…57e61` at `ca9e04c` has A13/A14 PASS on one transaction
+`0xfb5ab4a116966204dcece95a7ff099f53494074d84584ad072e140ff25453c06`,
+one settlement, 50 confirmations, and zero buyer native-gas spend; its overall
+status is nevertheless FAIL because A08/A09 accidentally used system Python.
+The corrected offline result `4799bce9…84d6` at `76c0b63` is INCOMPLETE with
+5 PASS (A01/A08/A09/A27/A30), 4 BLOCKED_EXTERNAL, 21 NOT_RUN, and no FAIL.
+Root product `VERSION` is now `0.0.1`; component versions remain unchanged.
+Draft notes and a truthful manifest mark release artifacts, checksums, final
+commit binding, A29, reviews, push, tag, and GitHub Release as not run.
+
 The local P3 authorization boundary now follows the facilitator capability
 observed by the approved analysis: exact Permit2 with the
 `eip2612GasSponsoring` extension, not the earlier EIP-3009 assumption. The
@@ -15,8 +27,9 @@ Transfer/finality evidence. The P3 plan and byte-exact grant bind the method,
 addresses, approval mode, required extension and identity-policy version. The
 browser uses the approved read-only RPC only to construct the off-chain permit;
 no buyer approval transaction is accepted. Local installed-SDK constants were
-verified; no live `eth_getCode`, payment, wallet or network action was run because
-no short-lived public-read/payment grant was provided. A13/A14 remain blocked.
+verified before the later authorized live run. That run subsequently produced
+the retained A13/A14 evidence summarized above; it did not include a buyer
+approval transaction.
 
 The first Permit2 review found three fail-closed interoperability defects and
 they are repaired locally: the Node operator's former copied plan digest could
@@ -188,8 +201,9 @@ commit/tree/plan, one settlement submission, a 15-minute ceiling and maximum
 performs no facilitator call, and reports `EXTERNAL_GRANT_REQUIRED`. The browser
 registers the pinned official core/EVM x402 client against an injected wallet;
 an ambiguous post-signature result returns only recovery and is never retried.
-No network, wallet, RPC, facilitator, payment, database, release, or secret action
-occurred. A13/A14 remain blocked pending independent review and a new exact grant.
+At that local-only prerequisite phase, no network, wallet, RPC, facilitator,
+payment, database, release, or secret action occurred. The later one-time grant
+was consumed by the retained A13/A14 run and cannot authorize another payment.
 
 The follow-up security repair removes process-local grant consumption. Migration
 003 adds an append-only one-to-one grant-digest/grant-ID/payment-attempt relation;
@@ -221,8 +235,9 @@ reuse its confirmed transaction, while UNKNOWN remains spent and blocks A14 in
 confirm-only state. The CLI accepts only `--live-grants`, never a boolean. With
 a valid exact bundle it can now execute only A07/A29 through the bounded
 production public-read transport and seal closed subject/plan/grant/target/
-response observations; A13/A14 remain `BLOCKED_EXTERNAL` with
-`EXACT_PAYMENT_GRANT_ABSENT`. Offline results remain externally blocked.
+response observations; without a one-time grant A13/A14 reduce to
+`BLOCKED_EXTERNAL` with `EXACT_PAYMENT_GRANT_ABSENT`. The retained authorized
+run is separate evidence and ordinary offline results remain externally blocked.
 Public-read grants now carry a canonical UUID and a digest derived from their
 entire closed grant document. The executor derives the one-shot marker name
 itself inside a mode-0700 state directory and fsyncs both marker and directory;
@@ -1091,6 +1106,6 @@ Actions were disabled at publication; F1 did not change remote settings.
 The final F0 secret scan had two reviewed digest false positives and no
 unresolved findings. Its publication checks are historical F0 evidence,
 not current F1 application or payment verification. Root project metadata is
-`0.1.0.dev0`; Stage A packages are `0.1.0`; no root VERSION file exists.
+`0.1.0.dev0`; Stage A packages are `0.1.0`; root product VERSION is now `0.0.1`.
 Historical documentation remains context; use this handoff, README,
 the change package, runtime tests, and accepted ADRs for current state.

@@ -279,3 +279,10 @@ The P3 operator treated permission to submit and permission to reconcile as the
 same gate, so an expired grant could not read or confirm an already-consumed
 attempt. Parse replay inputs structurally, consult durable consumption first,
 and enforce the strict expiry window only on paths that could submit.
+
+## 2026-09-29 — Full acceptance inherited the system Python
+
+The first full live runner allowed A08/A09 to resolve `/usr/bin/python`, even
+though the verified dependencies lived in the repository environment, producing
+two unrelated failures beside valid payment evidence. Acceptance wrappers must
+select the repository `.venv` explicitly and fail closed when it is unavailable.

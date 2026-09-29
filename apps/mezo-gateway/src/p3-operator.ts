@@ -13,6 +13,7 @@ import { OfficialX402 } from './adapters/x402.js';
 import { MezoAuthorizationPolicy, MezoFinalityPolicy } from './security/payment-policy.js';
 import { LivePaymentGrant } from './security/live-grant.js';
 import type { Attempt } from './domain/model.js';
+import { P3_PLAN_DIGEST } from './p3-plan.mjs';
 
 const migrations=new Map([
   ['001_ledger.sql','bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b'],
@@ -22,18 +23,6 @@ const migrations=new Map([
   ['005_receipt_confirmation_count.sql','e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11'],
 ]);
 const fields=['schema','quote_id','scope_hash','report_id','payment_signature','buyer','pay_to'];
-const paymentPlan={scheme:'exact',settlement_broadcaster:'facilitator',network:'eip155:31611',chain_id:31611,
-  asset:'0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503',amount_atomic:'10000000000000000',maximum_settlement_submissions:1,
-  max_buyer_native_gas_wei:'100000000000000',asset_transfer_method:'permit2',permit2_address:'0x000000000022D473030F116dDEE9F6B43aC78BA3',
-  permit2_proxy:'0x402085c248EeA27D92E8b30b2C58ed07f9E20001',approval_mode:'eip2612-gas-sponsoring',required_extension:'eip2612GasSponsoring',
-  authorization_identity_version:'liqvera-permit2-eip2612-identity/v1',facilitator_url:'https://facilitator.vativ.io/',rpc_url:'https://rpc.test.mezo.org/',
-  database_identity_kind:'sha256-credential-free-postgresql-endpoint/v1',database_host_policy:'loopback-only/v1'};
-function canonical(value:unknown):string {
-  if(Array.isArray(value))return `[${value.map(canonical).join(',')}]`;
-  if(value&&typeof value==='object')return `{${Object.entries(value as Record<string,unknown>).sort(([a],[b])=>a.localeCompare(b)).map(([key,item])=>`${JSON.stringify(key)}:${canonical(item)}`).join(',')}}`;
-  return JSON.stringify(value);
-}
-export const P3_PLAN_DIGEST=createHash('sha256').update(canonical({A13:paymentPlan,A14:paymentPlan})).digest('hex');
 function fail(message:string):never{throw new Error(message);}
 function exactObject(value:unknown):Record<string,unknown>{if(!value||typeof value!=='object'||Array.isArray(value))fail('P3_INPUT_INVALID');return value as Record<string,unknown>}
 function arg(name:string):string {const at=process.argv.indexOf(name);if(at<0||!process.argv[at+1])fail(`missing ${name}`);return process.argv[at+1]!}
@@ -124,6 +113,5 @@ async function main():Promise<void>{
   } finally {await pool.end();}
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
-  if(process.argv.length===3&&process.argv[2]==='--print-plan-digest')output(P3_PLAN_DIGEST);
-  else main().catch(error=>{process.stderr.write(`${error instanceof Error?error.message:'P3_OPERATOR_FAILED'}\n`);process.exitCode=1});
+  main().catch(error=>{process.stderr.write(`${error instanceof Error?error.message:'P3_OPERATOR_FAILED'}\n`);process.exitCode=1});
 }

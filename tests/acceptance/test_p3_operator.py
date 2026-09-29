@@ -22,14 +22,8 @@ TX = "0x" + "3" * 64
 
 
 def test_python_plan_digest_matches_compiled_node_operator():
-    subprocess.run(
-        ["npm", "--prefix", "apps/mezo-gateway", "run", "build"],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
     observed = subprocess.run(
-        ["node", "apps/mezo-gateway/dist/p3-operator.js", "--print-plan-digest"],
+        ["node", "apps/mezo-gateway/src/p3-plan.mjs", "--print-plan-digest"],
         check=True,
         capture_output=True,
         text=True,

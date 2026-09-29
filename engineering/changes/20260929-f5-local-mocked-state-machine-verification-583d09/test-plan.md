@@ -11,6 +11,12 @@
 | P1 | Confirmation, repeat read, reorg/finality | one entitlement; replay without settle; delivery withheld on inconsistency |
 | P1 | Frozen invalid guards | `StateMachines.next` rejects unmet guards |
 
+The frozen-guard case must load the packaged production contracts rather than
+constructing a test-only state machine. Null reconciliation must assert the
+event code and paired state both below the bound and when the leased SQL row
+returns `reconciliation_count=10`; mismatch traces must fail if delivery is
+inserted anywhere.
+
 ## Automated checks
 
 - Unit: focused compiled Node test file with deterministic doubles.

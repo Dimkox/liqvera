@@ -22,12 +22,19 @@ manual-review error) as frozen `inconsistent_receipt` evidence. Both paths
 retain the fail-closed 202 response, enter paired `MANUAL_REVIEW`, create no
 entitlement or delivery, and never settle again.
 
-Six deterministic scenarios execute real gateway/reconciliation/recovery
+Eight deterministic scenarios execute real gateway/reconciliation/recovery
 orchestration with a structural in-memory ledger, scripted payment port, and
 per-test temporary artifacts: direct and reconciled mismatch, post-submit lost
 response and HTTP replay, canonical duplicate use, stale verified pre-submit
-recovery, entitlement reuse, and reorganization withholding. The focused file
-passes 6 tests; the complete gateway suite passes 12 and skips the five
+recovery, bounded null-confirm reconciliation, packaged frozen-state guards,
+entitlement reuse, and reorganization withholding. After the first reviewers
+rejected the original no-op contract double, the fixture now loads production
+`Contracts` and packaged `states.json`; it validates receipt shape, a valid
+scoped transition, and an unmet-guard `INVALID_STATE`. Reconciliation models
+the count returned by the leasing update, records `PAYMENT_UNCERTAIN` below ten
+and `MANUAL_REVIEW` at ten, and mismatch tests assert ordered trace plus absent
+delivery so the review mutation is killed. The focused file passes 8 tests;
+the complete gateway suite passes 14 and skips the five
 explicitly disposable-PostgreSQL F4 cases when no database URL is supplied.
 `MANUAL_REVIEW -> PAID/CONFIRMED` recovery remains an explicit residual: the
 worker cannot lease that state and the adapter lacks an idempotent restore-only
@@ -38,7 +45,7 @@ Next: run pinned full verification on the coherent committed tree, then the
 route-selected independent code, test, and data reviews. Do not infer testnet
 payment, persistence, acceptance, deployment, or release readiness.
 
-The first pinned verifier execution completed its configured checks but could
+The pre-review pinned verifier execution completed its configured checks but could
 not record a receipt because the new typed acceptance entries used the
 unsupported key `verification`; the v2.0.19 schema requires `evidence`. After
 that correction, the verifier correctly rejected the superseded red-risk

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 import type { PaymentPayload, PaymentRequirements } from '@x402/core/types';
 import { Gateway } from '../src/application/gateway.js';
-import type { Contracts } from '../src/adapters/contracts.js';
+import { Contracts } from '../src/adapters/contracts.js';
 import type { Ledger } from '../src/adapters/postgres.js';
 import {
   AMOUNT,
@@ -28,7 +28,7 @@ const receiver = '0x2222222222222222222222222222222222222222';
 const digest = 'a'.repeat(64);
 const bundleDigest = 'b'.repeat(64);
 
-function quote(id = 'quote-1'): Quote {
+function quote(id = '00000000-0000-4000-8000-000000000001'): Quote {
   const artifact: Artifact = {
     report_id: id,
     report_sha256: digest,
@@ -42,7 +42,7 @@ function quote(id = 'quote-1'): Quote {
   };
   return {
     id,
-    report_request_id: `request-${id}`,
+    report_request_id: '00000000-0000-4000-8000-000000000010',
     scope_hash: 'scope',
     report_id: id,
     report_sha256: digest,
@@ -104,7 +104,7 @@ class ScriptedPayment implements PaymentPort {
   constructor(
     readonly identity = 'canonical-auth-1',
     readonly settleOutcome: 'hash' | 'throw' = 'hash',
-    public confirmation: Confirmation | null = null,
+    public confirmation: Confirmation | null | undefined = undefined,
     public current = true,
   ) {}
   blockers() { return []; }
@@ -123,7 +123,7 @@ class ScriptedPayment implements PaymentPort {
   }
   async confirm(q: Quote, attempt: Attempt) {
     this.confirmCalls += 1;
-    return this.confirmation ?? { receipt: receipt(q, attempt), response_header: 'paid' };
+    return this.confirmation === undefined ? { receipt: receipt(q, attempt), response_header: 'paid' } : this.confirmation;
   }
   async revalidate() { this.revalidateCalls += 1; return this.current; }
 }
@@ -139,8 +139,8 @@ class MemoryLedger {
   lease: Attempt | undefined;
   stale: Attempt[] = [];
   readonly pool = {
-    query: async (sql: string): Promise<{ rows: unknown[]; rowCount: number }> => {
-      this.trace.push(sql.startsWith('INSERT INTO reconciliation_events') ? 'reconciliation:event' : 'pool:query');
+    query: async (sql: string, params?: unknown[]): Promise<{ rows: unknown[]; rowCount: number }> => {
+      this.trace.push(sql.startsWith('INSERT INTO reconciliation_events') ? `reconciliation:${String(params?.[1])}` : 'pool:query');
       return { rows: [], rowCount: 0 };
     },
   };
@@ -156,7 +156,7 @@ class MemoryLedger {
     if (this.usedIdentities.has(identity.identity)) throw new PublicError('AUTHORIZATION_REUSED', 409);
     this.usedIdentities.add(identity.identity);
     const attempt: Attempt = {
-      id: `attempt-${this.attempts.size + 1}`,
+      id: `00000000-0000-4000-8000-${String(this.attempts.size + 1).padStart(12, '0')}`,
       quote_id: q.id,
       state: 'VERIFIED',
       authorization_identity: identity.identity,
@@ -210,6 +210,7 @@ class MemoryLedger {
         if (sql.includes("state IN ('SUBMITTING','UNKNOWN')")) {
           const item = this.lease;
           this.lease = undefined;
+          if (item) item.reconciliation_count += 1;
           return { rows: item ? [item] : [], rowCount: item ? 1 : 0 };
         }
         if (sql.includes("state IN ('RECEIVED','VERIFIED')") && sql.includes('SELECT')) {
@@ -246,7 +247,9 @@ async function fixture(options: { settle?: 'hash' | 'throw'; rejectBinding?: boo
     async read(_artifact, kind) { return readFile(join(root, kind === 'report' ? 'report.json' : 'evidence.zip')); },
   };
   const reports = { async healthy() { return true; }, cleanupReady() { return true; } } as ReportService;
-  const contracts = { assert() {}, states: { next() {} } } as unknown as Contracts;
+  const contracts = await Contracts.load(new URL('../../dist/contracts/', import.meta.url));
+  const validate = contracts.assert.bind(contracts);
+  contracts.assert = (name, value) => { if (name !== 'report') validate(name, value); };
   const gateway = new Gateway(ledger as unknown as Ledger, reports, artifacts, payment, contracts, { payTo: receiver, sourceMode: 'live-public' });
   return { q, ledger, payment, gateway, cleanup: () => rm(root, { recursive: true, force: true }) };
 }
@@ -272,7 +275,7 @@ test('reconciliation receipt-binding rejection immediately enters manual review 
   const f = await fixture({ rejectBinding: true });
   t.after(f.cleanup);
   const attempt: Attempt = {
-    id: 'attempt-reconcile', quote_id: f.q.id, state: 'UNKNOWN', authorization_identity: 'canonical-auth-1',
+    id: '00000000-0000-4000-8000-000000000020', quote_id: f.q.id, state: 'UNKNOWN', authorization_identity: 'canonical-auth-1',
     identity_version: 'TEST_ONLY/v1', authorization_valid_until: new Date('2099-01-01T00:00:00Z'),
     correlation: {}, tx_hash: `0x${'3'.repeat(64)}`, submitted_at: new Date(), reconciliation_count: 1,
   };
@@ -285,6 +288,61 @@ test('reconciliation receipt-binding rejection immediately enters manual review 
   assert.equal(f.q.state, 'MANUAL_REVIEW');
   assert.equal(attempt.state, 'MANUAL_REVIEW');
   assert.equal(f.ledger.entitlements.size, 0);
+  assert.deepEqual(f.ledger.trace.filter(event => event !== 'pool:query'), [
+    'attempt:unknown',
+    'attempt:confirm',
+    'attempt:manual-review',
+    'reconciliation:MANUAL_REVIEW',
+  ]);
+  assert.ok(!f.ledger.trace.includes('delivery'));
+});
+
+test('null confirmation stays uncertain below the bound and enters manual review at returned count ten', async t => {
+  const f = await fixture();
+  t.after(f.cleanup);
+  f.payment.confirmation = null;
+  const attempt: Attempt = {
+    id: '00000000-0000-4000-8000-000000000021', quote_id: f.q.id, state: 'UNKNOWN', authorization_identity: 'canonical-auth-1',
+    identity_version: 'TEST_ONLY/v1', authorization_valid_until: new Date('2099-01-01T00:00:00Z'),
+    correlation: {}, tx_hash: `0x${'3'.repeat(64)}`, submitted_at: new Date(), reconciliation_count: 8,
+  };
+  f.q.state = 'PAYMENT_UNCERTAIN';
+  f.ledger.attempts.set(attempt.id, attempt);
+  f.ledger.lease = attempt;
+  assert.equal(await reconcileOne(f.gateway), true);
+  assert.equal(attempt.reconciliation_count, 9);
+  assert.equal(attempt.state, 'UNKNOWN');
+  assert.equal(f.q.state, 'PAYMENT_UNCERTAIN');
+  assert.equal(f.ledger.trace.includes('reconciliation:PAYMENT_UNCERTAIN'), true);
+  f.ledger.lease = attempt;
+  assert.equal(await reconcileOne(f.gateway), true);
+  assert.equal(attempt.reconciliation_count, 10);
+  assert.equal(attempt.state, 'MANUAL_REVIEW');
+  assert.equal(f.q.state, 'MANUAL_REVIEW');
+  assert.equal(f.ledger.trace.at(-2), 'reconciliation:MANUAL_REVIEW');
+  assert.equal(f.payment.settleCalls, 0);
+  assert.equal(f.ledger.entitlements.size, 0);
+  assert.ok(!f.ledger.trace.includes('delivery'));
+});
+
+test('packaged frozen state machine accepts scoped guards and rejects one unmet guard', async t => {
+  const f = await fixture();
+  t.after(f.cleanup);
+  const guards = {
+    not_expired: true,
+    scope_matches: true,
+    payer_matches: true,
+    terms_match: true,
+    artifact_readback_verified: true,
+    payment_bindings_verified: true,
+    no_active_attempt: true,
+    authorization_unique: true,
+  };
+  assert.equal(f.gateway.contracts.states.next('quote', 'READY', 'authorization_accepted', guards), 'PAYMENT_PENDING');
+  assert.throws(
+    () => f.gateway.contracts.states.next('quote', 'READY', 'authorization_accepted', { ...guards, scope_matches: false }),
+    (error: unknown) => error instanceof PublicError && error.code === 'INVALID_STATE',
+  );
 });
 
 test('post-submit lost response stays unknown and replay cannot resettle', async t => {
@@ -302,7 +360,7 @@ test('canonical authorization identity cannot be reused by another quote', async
   const f = await fixture({ rejectBinding: true });
   t.after(f.cleanup);
   await expectPublicError('PAYMENT_UNCERTAIN', () => f.gateway.read('scope', f.q.id, 'report', 'encoding-a', 'request-1'));
-  const second = quote('quote-2');
+  const second = quote('00000000-0000-4000-8000-000000000002');
   f.ledger.quotes.set(second.id, second);
   await expectPublicError('AUTHORIZATION_REUSED', () => f.gateway.read('scope', second.id, 'report', 'encoding-b', 'request-2'));
   assert.equal(f.payment.settleCalls, 1);

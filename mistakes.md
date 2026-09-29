@@ -174,3 +174,11 @@ without first copying the established v2 acceptance shape from a validated
 change package. The subsequent run also found that a cancelled superseded
 package still participates in gate validation; validate every newly tracked
 spec, not only the active one, before invoking the full suite.
+
+## 2026-09-29 — F5 orchestration fixture bypassed frozen state evidence
+
+The first F5 tests invoked real gateway methods but supplied no-op contract and
+state-machine methods, so their final-state assertions could not prove the
+frozen guards and a delivery-call mutation survived. The root cause was
+optimizing the fake for orchestration reachability instead of loading the
+already packaged production contracts and asserting ordered negative effects.

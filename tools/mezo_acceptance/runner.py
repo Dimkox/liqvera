@@ -226,7 +226,9 @@ def validate_result_semantics(result: dict) -> None:
                 raise ValueError(f"{case_id} has invalid local omission algebra")
         elif status == "FAIL":
             if (not row.get("started_at") or not row.get("ended_at") or row.get("command") is None
-                    or row.get("exit_code") == 0 or len(row.get("omissions", [])) != 1):
+                    or len(row.get("omissions", [])) != 1
+                    or (row.get("exit_code") == 0
+                        and not row["omissions"][0].startswith("ASSERTION_INCOMPLETE:"))):
                 raise ValueError(f"{case_id} has contradictory failure algebra")
         if status == "PASS" or "payment_evidence" in row:
             payment = payment_reference(

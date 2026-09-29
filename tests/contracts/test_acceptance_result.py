@@ -197,6 +197,23 @@ def test_status_reason_algebra_rejects_generic_or_unknown_reasons(
         runner.validate_result_semantics(result)
 
 
+def test_semantic_validation_error_is_a_real_fail_even_after_exit_zero(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    result = _generated_result(tmp_path, monkeypatch)
+    row = result["cases"][0]
+    row.update({
+        "status": "FAIL", "started_at": "2026-09-29T00:00:00Z",
+        "ended_at": "2026-09-29T00:00:01Z", "command": ["offline"],
+        "exit_code": 0, "omissions": ["ASSERTION_INCOMPLETE:ValueError"],
+    })
+    result["overall_status"] = "FAIL"
+    runner.validate_result_semantics(result)
+    row["omissions"] = ["ASSERTION_TIMEOUT"]
+    with pytest.raises(ValueError, match="contradictory failure"):
+        runner.validate_result_semantics(result)
+
+
 def test_payment_replay_must_bind_to_exact_a13_receipt() -> None:
     a13 = {
         "payment": {

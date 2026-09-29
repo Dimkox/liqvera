@@ -51,6 +51,13 @@ post-seal mutation, and interrupted publication. Final clean-HEAD acceptance
 and full verification must be regenerated after this repair commit. Reviews
 remain failed/stale until independent rerun; P2–P5 remain gated.
 
+The first real producer→consumer run of the repair reached all five commands
+and exposed a Node 22 TAP-format boundary: npm reports `ℹ tests N`, not the
+older `# tests N`, so A30's closed observation correctly rejected a zero count.
+The parser now accepts both native TAP spellings. Status algebra also
+distinguishes a nonzero process failure from an exit-zero semantic-validation
+failure; both are FAIL, while an exit-zero timeout remains contradictory.
+
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts
 plus `SHA256SUMS` from one frozen commit. Final acceptance/evidence stays

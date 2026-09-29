@@ -37,7 +37,7 @@ def _observations(case_id: str, stdout: bytes, before: tuple[str, str]) -> dict:
     if _git("status", "--porcelain", "--untracked-files=all") or after != before:
         raise RuntimeError("assertion changed the repository subject")
     passed = re.findall(r"(?:^|\s)(\d+) passed(?:\s|$)", text)
-    node_tests = re.findall(r"# tests (\d+)", text)
+    node_tests = re.findall(r"(?:#|ℹ) tests (\d+)", text)
     count = int(passed[-1]) if passed else int(node_tests[-1]) if node_tests else 0
     common = {"test_count": count, "subject_unchanged": True}
     if case_id == "A01":

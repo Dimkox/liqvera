@@ -180,6 +180,12 @@ credentials omission, and declared/streamed response caps all fail closed.
 The first full verifier after adding these four files exposed only the expected
 repository-inventory omissions (five graph tests); all four paths are now bound
 to their existing runtime owners and the focused graph checks pass 5/5.
+After that repair, the pinned PR verifier passed: 1,217 Python tests plus 85
+subtests, coverage, secret scan, SQL safety, Ruff, Bandit and configuration
+scan. Focused evidence also includes 68 acceptance/contract tests, 17 browser
+tests and 24 gateway tests (five disposable-PostgreSQL tests intentionally
+skipped). No public read, payment, database migration, secret access or other
+external action occurred.
 
 ## F6 local UI and operations verification — 2026-09-29
 

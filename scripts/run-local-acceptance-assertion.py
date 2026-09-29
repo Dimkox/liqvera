@@ -4,6 +4,7 @@
 import hashlib
 import json
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -37,7 +38,10 @@ def _git(*args: str) -> str:
 def _command_result(command: list[str], cwd: Path) -> tuple[subprocess.CompletedProcess[bytes], dict]:
     completed = subprocess.run(command, cwd=cwd, capture_output=True, check=False, timeout=900)
     return completed, {
-        "argv": command, "exit_code": completed.returncode,
+        "interpreter": {"implementation": platform.python_implementation(),
+                        "version": platform.python_version(),
+                        "executable_sha256": hashlib.sha256(Path(command[0]).read_bytes()).hexdigest()},
+        "argv_tail": command[1:], "exit_code": completed.returncode,
         "stdout_sha256": hashlib.sha256(completed.stdout).hexdigest(),
         "stderr_sha256": hashlib.sha256(completed.stderr).hexdigest(),
     }
@@ -61,7 +65,10 @@ def _a01_observations(current: subprocess.CompletedProcess[bytes], after: tuple[
     return {
         "baseline": {**baseline_result, "commit": BASELINE_COMMIT, "tree": baseline_tree,
                      "status": "EXPECTED_HISTORICAL_FAILURE"},
-        "current": {"argv": COMMANDS["A01"], "exit_code": current.returncode,
+        "current": {"interpreter": {"implementation": platform.python_implementation(),
+                                     "version": platform.python_version(),
+                                     "executable_sha256": hashlib.sha256(Path(PYTHON).read_bytes()).hexdigest()},
+                    "argv_tail": COMMANDS["A01"][1:], "exit_code": current.returncode,
                     "stdout_sha256": hashlib.sha256(current.stdout).hexdigest(),
                     "stderr_sha256": hashlib.sha256(current.stderr).hexdigest(),
                     "commit": after[0], "tree": after[1], "status": "PASS", "checks": checks},
@@ -84,12 +91,22 @@ def _a27_observations(after: tuple[str, str], checks: list[str]) -> dict:
         raise RuntimeError("canonical Stage A artifact verifier failed")
     fixture = ROOT / "tests/fixtures/shadow-golden-v1.ndjson"
     terminal = ROOT / "tests/fixtures/shadow-golden-v1.terminal.sha256"
+    baseline_fixture = subprocess.check_output(
+        ["git", "-C", ROOT, "show", f"{BASELINE_COMMIT}:tests/fixtures/shadow-golden-v1.ndjson"]
+    )
+    baseline_terminal = subprocess.check_output(
+        ["git", "-C", ROOT, "show", f"{BASELINE_COMMIT}:tests/fixtures/shadow-golden-v1.terminal.sha256"]
+    ).decode().strip()
     return {
         "subject_commit": after[0], "subject_tree": after[1], "vector_checks": checks,
         "stage_a": {**stage_result, "checks": stage_checks,
                     "verdict": "INSUFFICIENT_EVIDENCE", "go_possible": False},
         "artifact_verifier": {**artifact_result, "status": "PASS"},
         "fixture": {"path": "tests/fixtures/shadow-golden-v1.ndjson",
+                    "baseline_commit": BASELINE_COMMIT,
+                    "baseline_sha256": hashlib.sha256(baseline_fixture).hexdigest(),
+                    "baseline_record_count": len(baseline_fixture.splitlines()),
+                    "baseline_terminal_sha256": baseline_terminal,
                     "sha256": hashlib.sha256(fixture.read_bytes()).hexdigest(),
                     "record_count": len(fixture.read_bytes().splitlines()),
                     "terminal_sha256": terminal.read_text().strip()},

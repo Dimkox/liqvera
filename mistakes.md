@@ -229,3 +229,10 @@ Closing an evidence object's keys did not make hard-coded `true` values
 observations; an unrelated successful command could still carry them. Derive
 acceptance facts from exact observed test identities or independently computed
 artifacts, and require those identities again in the consumer.
+
+## 2026-09-29 — Evidence command identity included an environment-local path
+
+Exact argv validation accidentally treated the venv's absolute Python path as
+semantic evidence, preventing an otherwise identical system interpreter from
+replaying the seal. Bind interpreter implementation, version, and executable
+bytes separately from the exact portable argv tail.

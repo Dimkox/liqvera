@@ -91,6 +91,15 @@ verifier and exact CLI decision/closed-enum tests. Evidence requires the frozen
 path, byte digest, terminal digest, and 38-record count. One-sided A01 evidence
 and vectors-only A27 evidence are explicit negative regressions.
 
+The fourth review found two portability/baseline gaps. Nested A01/A27 command
+evidence now records a portable CPython implementation/version/executable-byte
+identity plus exact argv tail, never an absolute interpreter path. A compatible
+system Python can therefore verify evidence produced through the repository
+venv while a different interpreter binary still fails closed. A27 now reads
+both fixture files directly from the frozen baseline commit and requires the
+current byte digest, record count, and terminal digest to equal that baseline;
+changing fixture and terminal together is an explicit rejected mutation.
+
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts
 plus `SHA256SUMS` from one frozen commit. Final acceptance/evidence stays

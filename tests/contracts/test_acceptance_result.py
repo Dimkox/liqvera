@@ -358,6 +358,57 @@ def test_a27_rejects_vectors_only_without_stage_a_verdict_and_fixture(tmp_path: 
                                   {"commit": COMMIT, "tree": TREE})
 
 
+def test_a27_rejects_fixture_and_terminal_mutated_together() -> None:
+    baseline = b'{"record":"frozen"}\n'
+    baseline_terminal = hashlib.sha256(baseline).hexdigest()
+    mutated = b'{"record":"mutated"}\n'
+    mutated_terminal = hashlib.sha256(mutated).hexdigest()
+    forged = {
+        "path": "tests/fixtures/shadow-golden-v1.ndjson",
+        "baseline_commit": "f07562eee1a33df74768e9fa4a3b074783d8c59e",
+        "baseline_sha256": hashlib.sha256(baseline).hexdigest(),
+        "baseline_record_count": 1,
+        "baseline_terminal_sha256": baseline_terminal,
+        "sha256": hashlib.sha256(mutated).hexdigest(),
+        "record_count": 1,
+        "terminal_sha256": mutated_terminal,
+    }
+    with pytest.raises(ValueError, match="byte-identical to the frozen baseline"):
+        runner.validate_fixture_stability(
+            forged, mutated, mutated_terminal, baseline, baseline_terminal
+        )
+
+
+def test_system_python_can_verify_venv_produced_seal(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _generated_result(tmp_path, monkeypatch)
+    output = tmp_path / "run" / "acceptance.json"
+    digest = hashlib.sha256(output.read_bytes()).hexdigest()
+    completed = subprocess.run(
+        ["/usr/bin/python3", "-B", "scripts/verify-mezo-acceptance.py", str(output),
+         "--sha256", digest, "--allow-detached-subject"],
+        cwd=ROOT, check=False, capture_output=True, text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+    os.chmod(output.parent, 0o700)
+    os.chmod(output.parent / "evidence", 0o700)
+
+
+def test_portable_interpreter_identity_ignores_compatible_executable_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    alias = tmp_path / "python-alias"
+    alias.symlink_to(Path(sys.executable).resolve())
+    identity = {
+        "implementation": runner.platform.python_implementation(),
+        "version": runner.platform.python_version(),
+        "executable_sha256": hashlib.sha256(Path(sys.executable).read_bytes()).hexdigest(),
+    }
+    monkeypatch.setattr(runner.sys, "executable", str(alias))
+    assert runner._portable_interpreter_valid(identity)
+
+
 def test_post_seal_verifier_rejects_result_mutation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

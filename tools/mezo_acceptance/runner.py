@@ -169,6 +169,40 @@ def canonical_sha256(value: object) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
+def _portable_interpreter_valid(value: object) -> bool:
+    return (
+        isinstance(value, dict)
+        and set(value) == {"implementation", "version", "executable_sha256"}
+        and value["implementation"] == platform.python_implementation()
+        and value["version"] == platform.python_version()
+        and value["executable_sha256"] == hashlib.sha256(Path(sys.executable).read_bytes()).hexdigest()
+    )
+
+
+def _fixture_identity(raw: bytes, terminal: str) -> dict[str, object]:
+    return {
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "record_count": len(raw.splitlines()),
+        "terminal_sha256": terminal.strip(),
+    }
+
+
+def validate_fixture_stability(fixture: dict, current_raw: bytes, current_terminal: str,
+                               baseline_raw: bytes, baseline_terminal: str) -> None:
+    baseline = _fixture_identity(baseline_raw, baseline_terminal)
+    current = _fixture_identity(current_raw, current_terminal)
+    expected = {
+        "path": "tests/fixtures/shadow-golden-v1.ndjson",
+        "baseline_commit": "f07562eee1a33df74768e9fa4a3b074783d8c59e",
+        "baseline_sha256": baseline["sha256"],
+        "baseline_record_count": baseline["record_count"],
+        "baseline_terminal_sha256": baseline["terminal_sha256"],
+        **current,
+    }
+    if baseline != current or fixture != expected:
+        raise ValueError("A27 fixture must be byte-identical to the frozen baseline")
+
+
 def _publish_exclusive(output: Path, encoded: bytes) -> None:
     descriptor, temporary = tempfile.mkstemp(prefix=".acceptance-", dir=output.parent)
     temporary_path = Path(temporary)
@@ -343,15 +377,17 @@ def evidence_reference(root: Path, relative: str, case_id: str, assertion: str,
         raise ValueError("evidence observations do not match the case-specific schema")
     if case_id == "A01":
         baseline, current = observations["baseline"], observations["current"]
-        execution_keys = {"argv", "exit_code", "stdout_sha256", "stderr_sha256", "commit", "tree", "status"}
+        execution_keys = {"interpreter", "argv_tail", "exit_code", "stdout_sha256", "stderr_sha256", "commit", "tree", "status"}
         if (not isinstance(baseline, dict) or set(baseline) != execution_keys
-                or baseline["argv"] != [sys.executable, "-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"]
+                or not _portable_interpreter_valid(baseline["interpreter"])
+                or baseline["argv_tail"] != ["-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"]
                 or baseline["commit"] != "f07562eee1a33df74768e9fa4a3b074783d8c59e"
                 or baseline["tree"] != "a1df248d000718c28c565d1d5b11bd425f83a055"
                 or baseline["status"] != "EXPECTED_HISTORICAL_FAILURE"
                 or baseline["exit_code"] != 4
                 or not isinstance(current, dict) or set(current) != execution_keys | {"checks"}
-                or current["argv"] != [sys.executable, "-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"]
+                or not _portable_interpreter_valid(current["interpreter"])
+                or current["argv_tail"] != ["-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"]
                 or current["commit"] != identity["commit"] or current["tree"] != identity["tree"]
                 or current["status"] != "PASS" or current["exit_code"] != 0
                 or observations["expected_delta"] != "BASELINE_LACKS_F7_ACCEPTANCE_CONTRACT_CURRENT_PASSES"):
@@ -367,22 +403,30 @@ def evidence_reference(root: Path, relative: str, case_id: str, assertion: str,
             "tests/readonly_analyzer/test_cli_decision.py::test_valid_package_emits_insufficient_evidence",
             "tests/contracts/test_decision.py::test_stage_a_decision_code_is_the_closed_four",
         }
-        canonical_fixture = ROOT / "tests/fixtures/shadow-golden-v1.ndjson"
         if (not isinstance(stage, dict) or stage.get("exit_code") != 0
-                or stage.get("argv") != [sys.executable, "-m", "pytest", "-vv",
+                or not _portable_interpreter_valid(stage.get("interpreter"))
+                or stage.get("argv_tail") != ["-m", "pytest", "-vv",
                     "tests/readonly_analyzer/test_cli_decision.py::test_valid_package_emits_insufficient_evidence",
                     "tests/contracts/test_decision.py::test_stage_a_decision_code_is_the_closed_four"]
                 or stage.get("verdict") != "INSUFFICIENT_EVIDENCE" or stage.get("go_possible") is not False
                 or set(stage.get("checks", [])) != expected_stage_checks
                 or artifact.get("exit_code") != 0 or artifact.get("status") != "PASS"
-                or artifact.get("argv") != [sys.executable, "-B", "scripts/check-stage-a-artifacts.py",
+                or not _portable_interpreter_valid(artifact.get("interpreter"))
+                or artifact.get("argv_tail") != ["-B", "scripts/check-stage-a-artifacts.py",
                     "--forbid-path", "cmd/**", "internal/**", "go.mod", "go.sum",
-                    "--forbid-binary", "engine"]
-                or fixture != {"path": "tests/fixtures/shadow-golden-v1.ndjson",
-                               "sha256": file_sha256(canonical_fixture),
-                               "record_count": len(canonical_fixture.read_bytes().splitlines()),
-                               "terminal_sha256": (ROOT / "tests/fixtures/shadow-golden-v1.terminal.sha256").read_text().strip()}):
+                    "--forbid-binary", "engine"]):
             raise ValueError("A27 must retain the canonical non-GO verdict and stable fixture")
+        baseline_raw = subprocess.check_output(["git", "-C", ROOT, "show",
+            "f07562eee1a33df74768e9fa4a3b074783d8c59e:tests/fixtures/shadow-golden-v1.ndjson"])
+        baseline_terminal = subprocess.check_output(["git", "-C", ROOT, "show",
+            "f07562eee1a33df74768e9fa4a3b074783d8c59e:tests/fixtures/shadow-golden-v1.terminal.sha256"]).decode()
+        validate_fixture_stability(
+            fixture,
+            (ROOT / "tests/fixtures/shadow-golden-v1.ndjson").read_bytes(),
+            (ROOT / "tests/fixtures/shadow-golden-v1.terminal.sha256").read_text(),
+            baseline_raw,
+            baseline_terminal,
+        )
         checks = observations["vector_checks"]
     else:
         if (observations.get("subject_commit"), observations.get("subject_tree")) != (

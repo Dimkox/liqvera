@@ -16,9 +16,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("result", type=Path)
     parser.add_argument("--sha256", required=True)
+    parser.add_argument("--allow-detached-subject", action="store_true",
+                        help="verify content bindings without requiring the current checkout identity")
     args = parser.parse_args()
     result = verify_sealed_result(
-        args.result.resolve(), args.sha256, require_current_repository=True
+        args.result.resolve(), args.sha256,
+        require_current_repository=not args.allow_detached_subject,
     )
     print(f"VERIFIED: {result['overall_status']} {args.result.resolve()}")
     return 0

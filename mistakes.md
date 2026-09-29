@@ -272,3 +272,10 @@ The first Permit2 readiness check looked for `assetTransferMethod` directly in
 `kind.extra`, but Vativ advertises it in the exact MUSD member of `extra.assets`.
 Characterize the real closed response shape and validate the selected asset's
 address, metadata, EIP-712 domain and capabilities before declaring readiness.
+
+## 2026-09-29 — Grant expiry was checked before durable replay state
+
+The P3 operator treated permission to submit and permission to reconcile as the
+same gate, so an expired grant could not read or confirm an already-consumed
+attempt. Parse replay inputs structurally, consult durable consumption first,
+and enforce the strict expiry window only on paths that could submit.

@@ -7,7 +7,7 @@ import { ExactEvmScheme, PERMIT2_ADDRESS, x402ExactPermit2ProxyABI, x402ExactPer
 import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type Quote } from '../src/domain/model.js';
 import { MezoAuthorizationPolicy, MezoFinalityPolicy } from '../src/security/payment-policy.js';
 import { LivePaymentGrant } from '../src/security/live-grant.js';
-import { databaseIdentity } from '../src/p3-operator.js';
+import { authorizeNewSettlement, databaseIdentity } from '../src/p3-operator.js';
 import { composeOfficialX402 } from '../src/security/live-composition.js';
 import { permit2Capability, settlementTransaction } from '../src/adapters/x402.js';
 
@@ -128,6 +128,28 @@ test('live grant binds exact facilitator-sponsored settlement and buyer gas auth
   assert.throws(()=>grant.authorize({subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,now:new Date('2026-09-29T00:05:00Z')}),/LIVE_GRANT_EXPIRED/);
   const bytes=new TextEncoder().encode(`${JSON.stringify(raw)}\n`);
   assert.notEqual(LivePaymentGrant.parseBytes(bytes,new Date('2026-09-29T00:00:00Z')).digest,grant.digest);
+});
+
+test('expired consumed grant is confirm-only while expired unconsumed grant cannot settle',()=>{
+  const bytes=new TextEncoder().encode(JSON.stringify(grantRaw()));
+  const expiredAt=new Date('2026-09-29T00:06:00Z');
+  assert.throws(()=>LivePaymentGrant.parseBytes(bytes,expiredAt),/LIVE_GRANT_EXPIRED/);
+  const grant=LivePaymentGrant.parseBytesForReconciliation(bytes,expiredAt);
+  const context={subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,now:expiredAt};
+  let settlementCalls=0;
+  if(authorizeNewSettlement(grant,context,true))settlementCalls++;
+  assert.equal(settlementCalls,0);
+  assert.throws(()=>{
+    if(authorizeNewSettlement(grant,context,false))settlementCalls++;
+  },/LIVE_GRANT_EXPIRED/);
+  assert.equal(settlementCalls,0);
+});
+
+test('reconciliation parser does not weaken first-settlement maximum grant lifetime',()=>{
+  const bytes=new TextEncoder().encode(JSON.stringify({...grantRaw(),expires_at:'2026-09-29T01:00:00Z'}));
+  const now=new Date('2026-09-29T00:00:00Z');
+  const grant=LivePaymentGrant.parseBytesForReconciliation(bytes,now);
+  assert.throws(()=>authorizeNewSettlement(grant,{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,now},false),/LIVE_GRANT_EXPIRED/);
 });
 
 test('operator database identity accepts only resolved loopback and binds port/database',async()=>{

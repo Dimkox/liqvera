@@ -955,14 +955,17 @@ def run_case(
 ) -> dict:
     case = CASES[case_id]
     started = utc_now()
+    case_python = str(ROOT / ".venv/bin/python") if case_id in {"A08", "A09"} else sys.executable
+    if case_id in {"A08", "A09"} and not os.access(case_python, os.X_OK):
+        raise ValueError("repository verified Python runtime is unavailable")
     env = {
         "LIQVERA_ACCEPTANCE_EVIDENCE_DIR": str(evidence_root),
-        "LIQVERA_ACCEPTANCE_PYTHON": sys.executable,
-        "PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin",
+        "LIQVERA_ACCEPTANCE_PYTHON": case_python,
+        "PATH": f"{Path(case_python).parent}:/usr/bin:/bin",
         "PYTHONDONTWRITEBYTECODE": "1",
         "PIP_NO_INDEX": "1",
     }
-    actual_argv = [sys.executable, "-B", str(DISPATCHER), case_id]
+    actual_argv = [case_python, "-B", str(DISPATCHER), case_id]
     row = {
         "case_id": case_id,
         "title": case.title,

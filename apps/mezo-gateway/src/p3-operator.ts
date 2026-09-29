@@ -49,6 +49,11 @@ async function checkMigrations(pool:Pool):Promise<void>{
   if(rows.length!==migrations.size||rows.some(row=>migrations.get(row.name)!==row.sha256))fail('P3_MIGRATION_MISMATCH');
 }
 function output(value:unknown):void{process.stdout.write(`${JSON.stringify(value)}\n`)}
+export function authorizeNewSettlement(grant:LivePaymentGrant,context:{subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;now:Date},alreadyConsumed:boolean):boolean {
+  if(alreadyConsumed)return false;
+  grant.authorize(context);
+  return true;
+}
 
 async function main():Promise<void>{
   const grantPath=arg('--grant'); const paymentPath=arg('--payment');
@@ -63,14 +68,14 @@ async function main():Promise<void>{
   if(Object.keys(cases).sort().join()!=='A13,A14')fail('LIVE_GRANT_INVALID');
   if(JSON.stringify(cases.A13)!==JSON.stringify(cases.A14))fail('LIVE_PAYMENT_LINK_MISMATCH');
   const grantBytes=new TextEncoder().encode(JSON.stringify(grantRaw,Object.keys(grantRaw).sort()));
-  const grant=LivePaymentGrant.parseBytes(grantBytes,new Date());
+  const grant=LivePaymentGrant.parseBytesForReconciliation(grantBytes,new Date());
   const payment=exactObject(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(rawPaymentBytes)));
   if(Object.keys(payment).sort().join()!==[...fields].sort().join()||payment.schema!=='liqvera-p3-signed-payment/v1'||payment.buyer!==grant.raw.buyer||payment.pay_to!==grant.raw.pay_to)fail('P3_PAYMENT_INPUT_INVALID');
-  grant.authorize({subjectCommit,subjectTree,planSha256,buyer:String(payment.buyer),payTo:String(payment.pay_to),now:new Date()});
   const root=resolve(dirname(fileURLToPath(import.meta.url)),'../../..');
   const git=(...args:string[])=>execFileSync('git',['-C',root,...args],{encoding:'utf8'}).trim();
   if(git('rev-parse','HEAD')!==subjectCommit||git('rev-parse','HEAD^{tree}')!==subjectTree||git('status','--porcelain','--untracked-files=all'))fail('P3_SUBJECT_MISMATCH');
   if(process.argv.includes('--preflight')){
+    authorizeNewSettlement(grant,{subjectCommit,subjectTree,planSha256,buyer:String(payment.buyer),payTo:String(payment.pay_to),now:new Date()},false);
     output({schema:'liqvera-p3-preflight/v1',subject_commit:subjectCommit,subject_tree:subjectTree,plan_sha256:planSha256,
       grant_id:grant.raw.grant_id,grant_digest:grant.digest,buyer:payment.buyer,pay_to:payment.pay_to,network:grant.raw.network,
       asset:grant.raw.asset,amount_atomic:grant.raw.amount_atomic,maximum_settlement_submissions:1,max_buyer_native_gas_wei:grant.raw.max_buyer_native_gas_wei,
@@ -93,8 +98,9 @@ async function main():Promise<void>{
       {subjectCommit,subjectTree,planSha256,buyer:String(payment.buyer),payTo:String(payment.pay_to)},()=>new Date(),facilitator);
     const consumed=(await pool.query<{payment_attempt_id:string}>(`SELECT payment_attempt_id FROM live_grant_consumptions WHERE grant_digest=$1`,[grant.digest])).rows[0];
     let attempt:Attempt;
-    if(consumed){attempt=(await pool.query<Attempt>('SELECT * FROM payment_attempts WHERE id=$1',[consumed.payment_attempt_id])).rows[0]??fail('P3_ATTEMPT_MISSING');}
+    if(consumed){authorizeNewSettlement(grant,{subjectCommit,subjectTree,planSha256,buyer:String(payment.buyer),payTo:String(payment.pay_to),now:new Date()},true);attempt=(await pool.query<Attempt>('SELECT * FROM payment_attempts WHERE id=$1',[consumed.payment_attempt_id])).rows[0]??fail('P3_ATTEMPT_MISSING');}
     else {
+      authorizeNewSettlement(grant,{subjectCommit,subjectTree,planSha256,buyer:String(payment.buyer),payTo:String(payment.pay_to),now:new Date()},false);
       await port.initialize(); const verified=await port.verify(String(payment.payment_signature),quote);
       attempt=await ledger.beginAttempt(quote,verified.identity);
       if(!await ledger.markSubmitting(attempt))fail('P3_GRANT_ALREADY_CONSUMED');

@@ -47,6 +47,17 @@ now requires exactly one matching MUSD entry with the pinned address, `MUSD`,
 the sole `eip2612GasSponsoring` extension. Missing, duplicate, malformed, or
 wrong-capability fixtures fail closed. No settlement was attempted during repair.
 
+The operator now separates grant parsing for durable replay from authority to
+start a settlement. An expired but structurally valid grant may reach the
+durable-consumption lookup and can only return its retained `CONFIRMED` receipt
+or run confirm-only reconciliation; it cannot call settlement again. An
+unconsumed expired grant, including preflight, still fails with
+`LIVE_GRANT_EXPIRED`, and the 15-minute maximum lifetime remains enforced before
+every first submission. Local A08/A09 dispatch also uses the repository's
+verified `.venv/bin/python` explicitly and fails closed if that runtime is
+missing, avoiding accidental `/usr/bin/python` execution. Focused regression
+tests passed without network, wallet, payment, or database activity.
+
 Route `337ef5ec16a0` and change package
 `engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/`
 are implementing approved local-only P0/P1. Four route-selected analyses were

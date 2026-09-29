@@ -81,6 +81,7 @@ def test_runner_propagates_internal_python_and_path_without_claiming_them(
     captured: dict = {}
 
     def fake_run(*args, **kwargs):
+        captured["argv"] = args[0]
         captured.update(kwargs["env"])
         return subprocess.CompletedProcess(args[0], 1, b"", b"")
 
@@ -93,9 +94,26 @@ def test_runner_propagates_internal_python_and_path_without_claiming_them(
         {"commit": COMMIT, "tree": TREE},
     )
 
-    assert captured["LIQVERA_ACCEPTANCE_PYTHON"] == sys.executable
-    assert captured["PATH"] == f"{Path(sys.executable).parent}:/usr/bin:/bin"
+    verified_python = str(runner.ROOT / ".venv/bin/python")
+    assert captured["argv"][0] == verified_python
+    assert captured["LIQVERA_ACCEPTANCE_PYTHON"] == verified_python
+    assert captured["PATH"] == f"{Path(verified_python).parent}:/usr/bin:/bin"
     assert row["environment_names"] == []
+
+
+def test_runner_fails_closed_when_verified_python_is_unavailable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(runner.os, "access", lambda _path, _mode: False)
+
+    with pytest.raises(ValueError, match="verified Python runtime is unavailable"):
+        runner.run_case(
+            "A08",
+            {"argv": ["offline"], "environment": [], "timeout_seconds": 1},
+            tmp_path,
+            None,
+            {"commit": COMMIT, "tree": TREE},
+        )
 
 
 def _result_with_passing_case(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict:

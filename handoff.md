@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (offline F3 regressions and Git OID contract repair implemented; full verification pending). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (offline F3 repair implemented; full verifier remains red on inherited dependency and parallel-factory failures). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F3 offline artifact verification repair — 2026-09-29
@@ -27,10 +27,15 @@ then exercises both installed F3 commands outside the checkout. The new focused
 slice reports 13 passed; the surrounding capture/analyzer/contracts slice
 reports 738 passed and 85 subtests. The full PR verifier exposed and now has
 repairs for whitespace, typed evidence paths, and graph inventory ownership of
-the new package/tests. A focused parallel artifact/installed run is green except
-for the pre-existing root dependency-contract mismatch (`eth-account==0.14.0`
-in the project versus `0.13.7` in its test). A final full run against the
-committed repair is still required; independent reviews remain pending.
+the new package/tests. The final committed-tree run passes diff, both change
+specs, secret, contract, SQL, all nine Trivy targets, Ruff, Bandit, and source
+stability, but remains red. Its parallel pytest result is `2 failed, 1133
+passed, 7 errors, 85 subtests`: one deterministic inherited dependency-contract
+mismatch (`eth-account==0.14.0` in the project versus `0.13.7` in its test),
+plus parallel factory/import collisions that disappear in the focused 22-worker
+slice (`27 passed`, same dependency mismatch only). Because the suite is
+incomplete, measured coverage is 35.26% against the 36% floor. Verification is
+therefore recorded failed and independent reviews were correctly not started.
 Gateway/F4 through F7, graph orphan cleanup,
 network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
 start, deployment, release, and push remain outside this route. All 156 broad

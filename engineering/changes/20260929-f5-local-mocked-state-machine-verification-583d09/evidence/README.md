@@ -31,6 +31,14 @@ returned reconciliation count, asserts event codes at nine and ten, and makes
 the mismatch trace reject any delivery. These are test-evidence repairs only;
 no vector, migration, or production transition changed.
 
+The test re-review then found one surviving successful-reconciliation mutant:
+an `unknown` write injected after `confirm` was invisible because only direct
+confirmation/replay was covered. A dedicated confirm-only worker case now
+asserts ordered `unknown -> confirm -> CONFIRMED event`, terminal paired
+`CONFIRMED`/`PAID`, exactly one entitlement, zero settle/delivery, and a second
+non-eligible lease returning false without another confirmation. This kills
+the late-demotion mutation without changing production behavior.
+
 <!-- checkpoint:initial -->
 ## Initial checkpoint
 

@@ -22,19 +22,23 @@ manual-review error) as frozen `inconsistent_receipt` evidence. Both paths
 retain the fail-closed 202 response, enter paired `MANUAL_REVIEW`, create no
 entitlement or delivery, and never settle again.
 
-Eight deterministic scenarios execute real gateway/reconciliation/recovery
+Nine deterministic scenarios execute real gateway/reconciliation/recovery
 orchestration with a structural in-memory ledger, scripted payment port, and
 per-test temporary artifacts: direct and reconciled mismatch, post-submit lost
 response and HTTP replay, canonical duplicate use, stale verified pre-submit
 recovery, bounded null-confirm reconciliation, packaged frozen-state guards,
-entitlement reuse, and reorganization withholding. After the first reviewers
+successful confirm-only reconciliation, entitlement reuse, and reorganization
+withholding. The worker success case asserts terminal `CONFIRMED`/`PAID`, one
+entitlement, ordered `unknown -> confirm -> CONFIRMED event`, zero settle or
+delivery, and no second eligible lease; this kills the test-reviewer's late
+`unknown` mutation. After the first reviewers
 rejected the original no-op contract double, the fixture now loads production
 `Contracts` and packaged `states.json`; it validates receipt shape, a valid
 scoped transition, and an unmet-guard `INVALID_STATE`. Reconciliation models
 the count returned by the leasing update, records `PAYMENT_UNCERTAIN` below ten
 and `MANUAL_REVIEW` at ten, and mismatch tests assert ordered trace plus absent
-delivery so the review mutation is killed. The focused file passes 8 tests;
-the complete gateway suite passes 14 and skips the five
+delivery so the earlier review mutation is killed. The focused file passes 9
+tests; the complete gateway suite passes 15 and skips the five
 explicitly disposable-PostgreSQL F4 cases when no database URL is supplied.
 `MANUAL_REVIEW -> PAID/CONFIRMED` recovery remains an explicit residual: the
 worker cannot lease that state and the adapter lacks an idempotent restore-only

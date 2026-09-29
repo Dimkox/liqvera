@@ -325,6 +325,38 @@ test('null confirmation stays uncertain below the bound and enters manual review
   assert.ok(!f.ledger.trace.includes('delivery'));
 });
 
+test('successful confirm-only reconciliation publishes one entitlement and is not leased twice', async t => {
+  const f = await fixture();
+  t.after(f.cleanup);
+  const attempt: Attempt = {
+    id: '00000000-0000-4000-8000-000000000022', quote_id: f.q.id, state: 'UNKNOWN',
+    authorization_identity: 'canonical-auth-1', identity_version: 'TEST_ONLY/v1',
+    authorization_valid_until: new Date('2099-01-01T00:00:00Z'), correlation: {},
+    tx_hash: `0x${'3'.repeat(64)}`, submitted_at: new Date(), reconciliation_count: 2,
+  };
+  f.q.state = 'PAYMENT_UNCERTAIN';
+  f.ledger.attempts.set(attempt.id, attempt);
+  f.ledger.lease = attempt;
+  assert.equal(await reconcileOne(f.gateway), true);
+  assert.equal(attempt.state, 'CONFIRMED');
+  assert.equal(f.q.state, 'PAID');
+  assert.equal(f.ledger.entitlements.size, 1);
+  assert.equal(f.payment.confirmCalls, 1);
+  assert.equal(f.payment.settleCalls, 0);
+  assert.deepEqual(f.ledger.trace.filter(event => event !== 'pool:query'), [
+    'attempt:unknown',
+    'attempt:confirm',
+    'reconciliation:CONFIRMED',
+  ]);
+  assert.ok(!f.ledger.trace.includes('delivery'));
+  assert.equal(await reconcileOne(f.gateway), false);
+  assert.equal(f.ledger.entitlements.size, 1);
+  assert.equal(f.payment.confirmCalls, 1);
+  assert.equal(f.payment.settleCalls, 0);
+  assert.equal(attempt.state, 'CONFIRMED');
+  assert.equal(f.q.state, 'PAID');
+});
+
 test('packaged frozen state machine accepts scoped guards and rejects one unmet guard', async t => {
   const f = await fixture();
   t.after(f.cleanup);

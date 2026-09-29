@@ -15,7 +15,10 @@ The frozen-guard case must load the packaged production contracts rather than
 constructing a test-only state machine. Null reconciliation must assert the
 event code and paired state both below the bound and when the leased SQL row
 returns `reconciliation_count=10`; mismatch traces must fail if delivery is
-inserted anywhere.
+inserted anywhere. Successful reconciliation must also prove the worker cannot
+demote the atomic confirmation afterward: terminal state is
+`CONFIRMED`/`PAID`, one entitlement is visible, the event is `CONFIRMED`, and
+an immediate second lease is empty.
 
 ## Automated checks
 

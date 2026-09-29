@@ -8,8 +8,9 @@ The runner can accept schema-shaped but semantically dishonest inventories,
 evidence is not finally re-bound/rehashed, A30 is coarsely classified live, and
 no checked-in executable plan exists. Production gateway identity/finality and
 browser payment wiring deliberately fail closed, so A13/A14 cannot run. No
-root VERSION now identifies the release candidate as `0.0.1`; the manifest is
-still pending final artifact bytes. No `v0.0.1` tag or GitHub Release exists.
+Published `v0.0.1` remains immutable at its reviewed commit and assets. Root
+VERSION now identifies the follow-up candidate as `0.0.2`; its manifest is
+pending final artifact bytes and no `v0.0.2` tag or GitHub Release exists.
 
 ## Proposed behavior
 

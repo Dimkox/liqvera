@@ -5,6 +5,27 @@ Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f075
 
 ## F7 live acceptance and release 0.0.1 — 2026-09-29
 
+Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
+component versions remain unchanged. New sealed A07 result
+`b31bc68310c471d35de079d1e0a13232aa39dff4e99b42a9d21b9ce2dbe770de`
+at commit `9f875a1ddc13cbf77242d5aadf6508b69756c022` / tree
+`37324fcf3ae4c9699bee8383f5755d7802634ed6` passed canonical
+`SOURCE_UNAVAILABLE`, with no fixture fallback or emitted artifact; its A07
+evidence hash is
+`66ed10ff63a57b66cdd222e733c7098609f82aaff12392aba281d711c490efdb`.
+
+| Case | Status | Exact evidence |
+| --- | --- | --- |
+| A07 | PASS | result `b31bc683…770de`, evidence `66ed10ff…efdb` |
+| A13 | PASS | retained live result `53830fe…57e61`, tx `0xfb5ab4a116966204dcece95a7ff099f53494074d84584ad072e140ff25453c06` |
+| A14 | PASS | same retained result and transaction; settlement count remains one |
+| A29 | PASS | v0.0.1 credential-disabled anonymous recursive clone |
+
+Together with local A01/A08/A09/A27/A30, the multi-result projection is 9
+PASS, 21 NOT_RUN, zero BLOCKED_EXTERNAL, and zero FAIL. It remains INCOMPLETE:
+the 21 cases were genuinely not executed, and no single runner has an overall
+PASS. No v0.0.2 build, push, tag, or release has occurred.
+
 Liqvera v0.0.1 is published at
 `https://github.com/Dimkox/liqvera/releases/tag/v0.0.1`; the immutable tag
 targets `a0fd5f0884a3fd1a6663982ea5df387b47528bdd`. Public re-download hashes
@@ -32,7 +53,8 @@ one settlement, 50 confirmations, and zero buyer native-gas spend; its overall
 status is nevertheless FAIL because A08/A09 accidentally used system Python.
 The corrected offline result `4799bce9…84d6` at `76c0b63` is INCOMPLETE with
 5 PASS (A01/A08/A09/A27/A30), 4 BLOCKED_EXTERNAL, 21 NOT_RUN, and no FAIL.
-Root product `VERSION` is now `0.0.1`; component versions remain unchanged.
+That historical candidate used root product VERSION `0.0.1`; the current
+follow-up candidate is `0.0.2`. Component versions remain unchanged.
 The preparation notes and tracked manifest are historical pre-publication
 inputs; the exact published hashes and A29 result above supersede their pending
 fields without rewriting the immutable tag.
@@ -1138,6 +1160,6 @@ Actions were disabled at publication; F1 did not change remote settings.
 The final F0 secret scan had two reviewed digest false positives and no
 unresolved findings. Its publication checks are historical F0 evidence,
 not current F1 application or payment verification. Root project metadata is
-`0.1.0.dev0`; Stage A packages are `0.1.0`; root product VERSION is now `0.0.1`.
+`0.1.0.dev0`; Stage A packages are `0.1.0`; root product VERSION is now `0.0.2`.
 Historical documentation remains context; use this handoff, README,
 the change package, runtime tests, and accepted ADRs for current state.

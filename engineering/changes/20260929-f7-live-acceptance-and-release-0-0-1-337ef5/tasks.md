@@ -37,14 +37,18 @@
 - [x] Apply forward-only migration 005 to the approved retained isolated DB,
   prove idempotency/schema/zero receipts, and pass all six PostgreSQL behaviors
   on a separately approved fresh disposable DB.
-- [ ] Obtain exact short-lived P2 public-read grant; execute allowlisted reads.
+- [x] Execute exact granted public evidence: A07 bounded source-unavailable
+  semantics and post-publication A29 anonymous recursive clone.
 - [x] Execute the one explicitly authorized P3 testnet settlement and retain
   linked A13/A14 evidence: one 0.01 test-MUSD settlement, zero buyer native gas,
   and no retry. This consumed authority does not permit another submission.
-- [ ] P4 set root product `VERSION=0.0.1`, preserve component `0.1.0`, build and
+- [x] P4 set root product `VERSION=0.0.1`, preserve component `0.1.0`, build and
   verify manifest, artifacts, checksums, notes, scans, verifier, and reviews.
-  VERSION, evidence projection, draft notes, and pending manifest are prepared;
-  final-commit artifacts/checksums and reviews are not yet run.
-- [ ] Obtain exact P5 publication grant; fast-forward main, tag `v0.0.1`, create
+  The v0.0.1 artifact set, checksums, and reviews passed before publication.
+- [x] Obtain exact P5 publication grant; fast-forward main, tag `v0.0.1`, create
   draft release/assets, re-hash, obtain final confirmation, and publish.
-- [ ] Bind final receipts/evidence to exact release commit and artifacts.
+- [x] Bind final receipts/evidence to exact v0.0.1 release commit and artifacts.
+
+Follow-up v0.0.2 preparation is separate: A07 is now retained as PASS and the
+external-case projection has zero blockers, but 21 cases remain NOT_RUN and no
+v0.0.2 artifact or publication exists.

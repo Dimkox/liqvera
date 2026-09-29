@@ -16,12 +16,27 @@ To execute assertions, supply `--plan <json-path>`. The plan has `schema: "liqve
 
 The evidence file must contain the same `case_id` and `assertion` plus a nonempty `observations` array. The runner checks that it is a regular JSON file below the evidence directory, caps it at 10 MB, rejects common secret fields and value patterns, and records its SHA-256 and size. Raw stdout, stderr, capabilities, signatures, and environment values are not copied into the result. A zero exit code and a correctly bound evidence file are both necessary for `PASS`; the assertion program remains responsible for actually testing every part of the named criterion. Review the evidence before sharing it; automated redaction cannot prove absence of every possible secret.
 
-For planned live cases, use `--mode live --authorize-live` only after the operator has authorized the exact read-only or limited testnet activity in the plan. Without both, A07, A13, A14, A29, and A30 stay `BLOCKED_EXTERNAL`. A13 additionally requires the confirmed Mezo Testnet MUSD Transfer's transaction hash, block hash, log index, distinct buyer/merchant addresses, network, asset and atomic amount. A14 must bind to the same transaction and show exactly one settlement. These fields are an evidence index, not independent chain verification; the assertion program and reviewer must check canonical receipt, finality and entitlement against the chain and ledger. The runner never signs, broadcasts, pays, trades, or substitutes fixture data for live data by itself.
+Live cases require exact short-lived grants and their dedicated operator paths;
+a boolean does not authorize them. Retained sealed evidence now records A07,
+A13, A14, and A29 PASS: A07 observed `SOURCE_UNAVAILABLE` without fixture
+fallback/artifact; A13/A14 bind one confirmed Mezo Testnet MUSD transaction and
+exactly one settlement; A29 is the credential-disabled anonymous recursive
+clone of published v0.0.1. Alongside the five local passing cases this is a
+multi-result projection of 9 PASS and 21 NOT_RUN, with zero remaining
+BLOCKED_EXTERNAL. It is not a single runner overall PASS. The runner never
+signs, broadcasts, pays, trades, or substitutes fixture data by itself; the
+dedicated payment operator and human-held wallet remain separately gated.
 
 The result shape is [`acceptance-result.schema.json`](../../schemas/mezo-evidence/v1/acceptance-result.schema.json). It records all thirty cases, command and environment names, start/end times, exit codes, explicit omissions, evidence digests, commit SHA and Git tree. A result with any omitted case is `INCOMPLETE`; no partial result should be described as F7 acceptance. Do not edit results to change statuses. Repeat the run after code changes and retain the prior result as historical evidence.
 
-## Current blockers
+## Current evidence and limitations
 
-The F1 compatibility probe found `PAY_TO_MISSING` and `FINALITY_RULE_UNVERIFIED`. A funded dedicated test buyer, confirmed receipt, full canonical authorization identity and live end-to-end test are still absent from retained evidence. A13–A14 cannot pass on a fixture or mocked settlement. Existing F2 contract vectors are `NOT_RUN` at runtime. The inherited Trivy healthcheck policy findings are a local verification blocker, not an external outage. See [`handoff.md`](../../handoff.md) and the [acceptance matrix](../../engineering/changes/2026-09-24-mezo-evidence/acceptance-matrix.md) for the last recorded state.
-
-No result file, video link, hosted-demo URL, testnet transaction, or release claim is supplied here. Add each only after it exists and has been independently checked.
+The historical F1 blockers were later closed by sealed A07, A13, A14, and A29
+evidence. Published v0.0.1 and the exact testnet transaction are indexed from
+the root handoff; this document does not duplicate wallet material or raw
+payloads. The follow-up v0.0.2 projection has 9 PASS, 21 NOT_RUN, zero
+BLOCKED_EXTERNAL, and zero FAIL across distinct sealed results. It remains
+INCOMPLETE and must not be called a single runner overall PASS. Existing F2
+contract vectors remain NOT_RUN at runtime, and no hosted-demo or video claim
+is supplied here. See [`handoff.md`](../../handoff.md) for exact hashes and the
+current release state.

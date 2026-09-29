@@ -1,5 +1,16 @@
 # Release plan — F7 live acceptance and release 0.0.1
 
+## Follow-up v0.0.2 candidate
+
+Root product VERSION is now `0.0.2`; component versions remain `0.1.0` and
+root workspace metadata remains `0.1.0.dev0`. New A07 sealed evidence plus the
+retained A13/A14 and A29 evidence closes the external-case set when projected
+across results: 9 PASS, 21 NOT_RUN, zero BLOCKED_EXTERNAL, zero FAIL. This is
+still INCOMPLETE and is not a single runner overall PASS. See
+`evidence/acceptance-v0.0.2.md`, `release-notes-v0.0.2.md`, and the pending
+`release-artifact-manifest-v0.0.2.json`. No v0.0.2 artifact, push, tag, or
+GitHub Release exists.
+
 ## Deployment
 
 No hosted deployment. P5 only fast-forwards canonical `main`, creates annotated
@@ -52,7 +63,8 @@ acceptance and cannot claim completed F7/payment readiness.
 
 ## Release-preparation evidence
 
-Root `VERSION` is `0.0.1`; component versions remain `0.1.0` and root workspace
+For the published v0.0.1 preparation, root `VERSION` was `0.0.1`; component
+versions remain `0.1.0` and root workspace
 metadata remains `0.1.0.dev0`. The retained live result SHA-256 is
 `53830fe2249e2754f3c0eeaab8d5292849b2ef55bd5f5c2ae51be7e081457e61`;
 only A13/A14 are accepted from it because its overall status is FAIL. The

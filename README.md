@@ -42,7 +42,11 @@ test MUSD, 50 observed confirmations, and zero buyer native-gas spend. The
 earlier full result is not an overall PASS because A08/A09 used the system
 Python; the runner now pins the repository `.venv` for those cases. Final
 release-commit acceptance, A29, artifacts, reviews, tag, push, and GitHub
-Release remain unrun, so F7 is still **INCOMPLETE / NO-GO**. The local protocol package pins official Mezo MUSD
+Release were subsequently completed for v0.0.1. A follow-up sealed A07 run now
+proves canonical `SOURCE_UNAVAILABLE` with no fixture fallback or artifact.
+Aggregating the distinct sealed sources yields 9 PASS, 21 `NOT_RUN`, zero
+`BLOCKED_EXTERNAL`, and zero FAIL; this is not a single runner overall PASS and
+remains **INCOMPLETE**. The local protocol package pins official Mezo MUSD
 material and recorded `mezo-org` source revisions. Separate Liqvera factory
 targets do not change the existing Stage A three-wheel factory. All 156 frozen
 vectors remain `NOT_RUN`; focused local tests are not relabelled as vector,
@@ -65,10 +69,11 @@ authorized Mezo Testnet settlement is retained as sealed A13/A14 evidence; no
 mainnet payment, exchange mutation, custody action, deployment, tag, push, or
 release publication was performed.
 
-Current product release identity: root `VERSION` is `0.0.1`; the root Python
+Current product candidate identity: root `VERSION` is `0.0.2`; published
+release v0.0.1 remains immutable. The root Python
 workspace remains `0.1.0.dev0`, and Stage A, evidence-report, protocol,
-gateway, and web component packages remain `0.1.0`. No tag or GitHub Release
-exists yet. Inherited `mee-*` identifiers are preserved.
+gateway, and web component packages remain `0.1.0`. No v0.0.2 tag or GitHub
+Release exists yet. Inherited `mee-*` identifiers are preserved.
 
 ## Start here
 

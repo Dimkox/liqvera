@@ -1,0 +1,33 @@
+{
+  "schema": "liqvera-release-artifact-manifest/v1",
+  "release": {
+    "product": "Liqvera",
+    "version": "0.0.2",
+    "tag": "v0.0.2",
+    "release_commit": "PENDING_FINAL_REVIEWED_COMMIT",
+    "release_tree": "PENDING_FINAL_REVIEWED_TREE"
+  },
+  "component_versions": {
+    "root_workspace": "0.1.0.dev0",
+    "stage_a_packages": "0.1.0",
+    "evidence_report": "0.1.0",
+    "mezo_protocol": "0.1.0",
+    "mezo_gateway": "0.1.0",
+    "mezo_web": "0.1.0"
+  },
+  "acceptance_projection": {
+    "status": "INCOMPLETE",
+    "single_runner_overall_pass": false,
+    "counts": {"PASS": 9, "BLOCKED_EXTERNAL": 0, "NOT_RUN": 21, "FAIL": 0},
+    "a07_result_sha256": "b31bc68310c471d35de079d1e0a13232aa39dff4e99b42a9d21b9ce2dbe770de",
+    "a07_evidence_sha256": "66ed10ff63a57b66cdd222e733c7098609f82aaff12392aba281d711c490efdb",
+    "a13_a14_result_sha256": "53830fe2249e2754f3c0eeaab8d5292849b2ef55bd5f5c2ae51be7e081457e61",
+    "offline_result_sha256": "4799bce919b3c7d2882ad0f67dee51e7945909664fe81dd95f120afced5d84d6",
+    "a29_source_release": "v0.0.1"
+  },
+  "artifacts": [
+    {"name": "liqvera-0.0.2.zip", "status": "NOT_BUILT", "size": null, "sha256": null},
+    {"name": "SHA256SUMS", "status": "NOT_BUILT", "size": null, "sha256": null}
+  ],
+  "publication": {"status": "NOT_RUN", "main_push": "NOT_RUN", "tag": "NOT_RUN", "github_release": "NOT_RUN"}
+}

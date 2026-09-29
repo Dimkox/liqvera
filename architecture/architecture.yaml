@@ -15250,6 +15250,9 @@ repository_inventory:
   - path: apps/mezo-gateway/test/postgres.test.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/test/live-grant-consumption.test.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/test/report-service.test.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
@@ -15310,10 +15313,19 @@ repository_inventory:
   - path: apps/mezo-web/src/x402.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/x402-transport.mjs
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/x402-transport.d.mts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/test/browser-flow.test.mjs
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/test/browser-orchestration.test.mjs
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/test/x402-transport.test.mjs
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/test/observability.test.mjs

@@ -177,6 +177,9 @@ itself inside a mode-0700 state directory and fsyncs both marker and directory;
 operators can no longer select an alternate marker filename to replay a grant.
 Browser transport bounds are executable tests: timeout, redirect rejection,
 credentials omission, and declared/streamed response caps all fail closed.
+The first full verifier after adding these four files exposed only the expected
+repository-inventory omissions (five graph tests); all four paths are now bound
+to their existing runtime owners and the focused graph checks pass 5/5.
 
 ## F6 local UI and operations verification — 2026-09-29
 

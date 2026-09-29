@@ -23,7 +23,6 @@ x-capture: &capture
     - captures:/data/captures
   networks:
     capture_report: { aliases: [evidence-capture] }
-    capture_egress: {}
   healthcheck:
     test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/healthz', timeout=2).read()"]
     interval: 15s
@@ -113,7 +112,7 @@ x-gateway: &gateway
     edge: { aliases: [gateway] }
     gateway_db: {}
     gateway_report: {}
-    payment_egress: {}
+    operations: { aliases: [gateway-metrics] }
   healthcheck:
     test: [CMD, node, -e, "fetch('http://127.0.0.1:8080/healthz', {signal: AbortSignal.timeout(2000)}).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
     interval: 15s
@@ -187,7 +186,6 @@ x-edge: &edge
     - caddy_config:/config
   networks:
     edge: {}
-    tls_egress: {}
   healthcheck:
     test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:2019/config/]
     interval: 15s
@@ -211,6 +209,9 @@ services:
       LIQVERA_SOURCE_MODE: live-public
       LIQVERA_CAPTURE_PORT: "8081"
       LIQVERA_CAPTURE_ROOT: /data/captures
+    networks:
+      capture_report: { aliases: [evidence-capture] }
+      capture_egress: {}
 
   report-fixture:
     <<: *report
@@ -295,6 +296,8 @@ services:
       CORS_ORIGINS: http://localhost:8080
       PAY_TO: ""
       PORT: "8080"
+      METRICS_HOST: gateway-metrics
+      METRICS_PORT: "9090"
     depends_on:
       migrate-fixture: { condition: service_completed_successfully }
       report-fixture: { condition: service_healthy }
@@ -316,6 +319,14 @@ services:
       CORS_ORIGINS: ${LIQVERA_PUBLIC_ORIGIN:-}
       PAY_TO: ${LIQVERA_PAY_TO:-}
       PORT: "8080"
+      METRICS_HOST: gateway-metrics
+      METRICS_PORT: "9090"
+    networks:
+      edge: { aliases: [gateway] }
+      gateway_db: {}
+      gateway_report: {}
+      operations: { aliases: [gateway-metrics] }
+      payment_egress: {}
     depends_on:
       migrate-live: { condition: service_completed_successfully }
       report-live: { condition: service_healthy }
@@ -347,6 +358,9 @@ services:
     ports:
       - "80:8080"
       - "443:8443"
+    networks:
+      edge: {}
+      tls_egress: {}
     depends_on:
       gateway-live: { condition: service_healthy }
       web-live: { condition: service_healthy }
@@ -373,6 +387,7 @@ networks:
   gateway_db: { internal: true }
   gateway_report: { internal: true }
   capture_report: { internal: true }
+  operations: { internal: true }
   capture_egress: {}
   payment_egress: {}
   tls_egress: {}

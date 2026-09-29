@@ -1,6 +1,7 @@
 import "./style.css";
 import { MEZO_TESTNET, MUSD_TESTNET } from "@liqvera/mezo-protocol";
 import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest } from "./api";
+import { beginPayment, canPay, paymentFailure, paymentNotice, recoveryRequest, walletStatus } from "./browser-flow";
 import { quoteIsPayable, receiptMatchesQuote, type Capabilities, type Delivery, type Quote, type RequestStatus, type Side } from "./contracts";
 import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./session";
 import { injectedWallet, switchToMezo, walletAccount, walletError, walletOnMezo, type Eip1193Provider } from "./wallet";
@@ -121,7 +122,7 @@ function updateControls(): void {
   el<HTMLButtonElement>("#new-button").disabled = busy || polling;
   el<HTMLButtonElement>("#switch-button").classList.toggle("hidden", !provider || onChain);
   el<HTMLElement>("#wallet-label").textContent = account ? `${account.slice(0, 8)}…${account.slice(-6)}` : "No wallet connected";
-  el<HTMLElement>("#chain-label").textContent = !provider ? "No injected EVM wallet found." : onChain ? "Mezo Testnet · chain 31611" : "Wrong network · switch to Mezo Testnet (31611).";
+  el<HTMLElement>("#chain-label").textContent = walletStatus(Boolean(provider), onChain);
   el<HTMLElement>("#create-note").textContent = !cap ? "Checking service capabilities…" :
     !cap.payment_ready ? "Payment and new quotes are currently unavailable." :
     !x402Available() ? "The browser payment adapter awaits SDK verification; no payment can be submitted." :
@@ -194,15 +195,17 @@ function renderQuote(): void {
   appendField(termsGrid, "Ledger retention", `At least ${q.retention.ledger_days} days`);
   terms.append(termsGrid);
   target.append(terms);
-  if (["PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "MANUAL_REVIEW"].includes(q.state) || flow?.paymentGuard !== "clear") {
-    target.append(node("p", "safety-note", "Checking the payment already submitted or possibly submitted. Do not pay again. Use Check status to recover this same report."));
+  const safetyNotice = paymentNotice(q.state, flow?.paymentGuard ?? null);
+  if (safetyNotice) {
+    target.append(node("p", "safety-note", safetyNotice));
   } else if (q.state === "EXPIRED") {
     target.append(node("p", "safety-note", "This quote expired. It cannot be paid. Start a new report only after the previous payment status is known."));
   } else if (q.state === "READY") {
-    const canPay = Boolean(cap?.payment_ready && account && onChain && flow?.paymentGuard === "clear" && quoteIsPayable(q, account ?? "") && x402Available());
+    const paymentAllowed = canPay({ flow, quoteState: q.state, connectedAccount: account, onMezo: onChain,
+      paymentReady: Boolean(cap?.payment_ready), adapterAvailable: x402Available() }) && quoteIsPayable(q, account ?? "");
     const button = node("button", "primary-button", "Confirm testnet payment in wallet");
     button.type = "button";
-    button.disabled = !canPay || busy;
+    button.disabled = !paymentAllowed || busy;
     button.addEventListener("click", () => { void submitPayment(); });
     target.append(button);
     if (!x402Available()) target.append(node("p", "form-note", "The reviewed x402 browser adapter is not installed. No payment can be submitted from this build."));
@@ -423,7 +426,8 @@ async function resumeFlow(): Promise<void> {
   if (!flow || !bearer || busy || polling) return;
   setBusy(true);
   try {
-    if (flow.quoteId) {
+    const recovery = recoveryRequest(flow);
+    if (recovery.kind === "quote") {
       await refreshQuote();
       if (quote && ["PAYMENT_PENDING", "PAYMENT_UNCERTAIN"].includes(quote.state)) {
         setBusy(false);
@@ -436,13 +440,14 @@ async function resumeFlow(): Promise<void> {
         return;
       }
     }
-    else if (flow.requestId) {
+    else if (recovery.kind === "request") {
       setBusy(false);
       await pollRequest();
       return;
     } else {
       // A network failure may have followed server commit. Reuse the same key and exact body.
-      const created = await createQuote(bearer, { side: flow.side, quantity: flow.quantity, payer: flow.payer, idempotencyKey: flow.idempotencyKey });
+      const created = await createQuote(bearer, { side: recovery.body.side, quantity: recovery.body.quantity,
+        payer: recovery.body.payer, idempotencyKey: recovery.idempotencyKey });
       if (created.schema === "mee-evidence-quote/v1") {
         rememberQuote(created);
         announcement("Quote recovered with the original idempotency key.");
@@ -467,19 +472,19 @@ async function submitPayment(): Promise<void> {
     if (!(await walletOnMezo(provider)) || (await walletAccount(provider, false))?.toLowerCase() !== quote.terms.expected_payer.toLowerCase()) {
       throw new Error("Wallet network or account changed. Reconnect the quoted payer before continuing.");
     }
-    flow.paymentGuard = "started";
+    flow = beginPayment(flow);
     saveFlow(flow);
     renderQuote();
     announcement("Opening the reviewed x402 wallet flow. Confirm only the displayed testnet terms.");
     const result = await requestPaidReport({ path: `/v1/reports/${quote.report_id}`, bearerCapability: bearer, quote, provider, payer: account });
     if (result === "recovering") {
-      flow.paymentGuard = "uncertain";
+      flow = paymentFailure(flow, "ambiguous", null);
       saveFlow(flow);
       announcement("Checking the payment already submitted. Do not pay again.", "warning");
     } else {
       await refreshQuote();
       if (quote?.state !== "PAID") {
-        flow.paymentGuard = "uncertain";
+        flow = paymentFailure(flow, "ambiguous", quote?.state ?? null);
         saveFlow(flow);
         announcement("The payment outcome is not yet confirmed. Check status; do not pay again.", "warning");
       }
@@ -489,16 +494,16 @@ async function submitPayment(): Promise<void> {
       const latest = await getQuote(bearer, quote.quote_id).catch(() => null);
       if (latest && latest.state === "READY") {
         rememberQuote(latest);
-        flow.paymentGuard = "clear";
+        flow = paymentFailure(flow, "cancelled-before-submission", latest.state);
         saveFlow(flow);
         announcement("Wallet payment was canceled before submission. The quote remains unpaid.", "warning");
       } else {
-        flow.paymentGuard = "uncertain";
+        flow = paymentFailure(flow, "cancelled-before-submission", latest?.state ?? null);
         saveFlow(flow);
         announcement("Payment status needs checking before another wallet action.", "warning");
       }
     } else {
-      flow.paymentGuard = "uncertain";
+      flow = paymentFailure(flow, "ambiguous", null);
       saveFlow(flow);
       announcement(`${readableError(error)} Check status before any new payment.`, "warning");
     }

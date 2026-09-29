@@ -23,8 +23,9 @@ Compose may resolve all secret declarations while parsing either profile, so
 keep all four files present. The report token must be mounted only into report
 and gateway; never pass it to capture.
 
-The code-completion phase explicitly defers execution. When verification is
-authorized, first inspect the resolved configuration without pasting its
+The local F6 phase statically resolves both profiles but explicitly defers
+container execution. When runtime verification is separately authorized,
+first inspect the resolved configuration without pasting its
 secret paths or values into public logs. Start only one profile per project:
 
 ```bash
@@ -47,6 +48,11 @@ Caddy TLS. `/healthz` proves process liveness only. `/readyz` must keep new
 payments closed if storage, chain, facilitator, recipient, authorization
 identity, or finality checks are missing. A live source failure must report
 `SOURCE_UNAVAILABLE`; it must never silently use fixture data.
+
+Fixture services have no `capture_egress`, `payment_egress`, or `tls_egress`
+membership. Live capture, gateway, and edge retain only their corresponding
+egress networks. Metrics remain private on the internal `operations` network
+at `gateway-metrics:9090/metrics`; Caddy and the host publish no metrics route.
 
 Before a demo, execute the repository's independent acceptance plan and
 record code SHA, image hashes, environment, UTC time, commands, exit codes,

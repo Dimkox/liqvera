@@ -15,6 +15,20 @@
       "note": "draft; implementation not started",
       "observed_at": "2026-09-29T10:03:16+00:00",
       "route_id": "26ffb293d4ff"
+    },
+    {
+      "branch": "feat/f3-f7-verification",
+      "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+      "detached": false,
+      "dirty_product_paths": [],
+      "dirty_product_state": "clean",
+      "git_available": true,
+      "git_findings": [],
+      "head": "d71cf5705367963f40db4b89c18d780f12560f41",
+      "kind": "implementation",
+      "note": "implementation started; preserve work before handoff",
+      "observed_at": "2026-09-29T10:57:23+00:00",
+      "route_id": "26ffb293d4ff"
     }
   ],
   "created_at": "2026-09-29T10:03:16+00:00",
@@ -83,6 +97,12 @@
       "from": "scoped",
       "reason": "Explicit user scope approval recorded; approved migration plan is no migration/no external write",
       "to": "approved"
+    },
+    {
+      "at": "2026-09-29T10:57:24+00:00",
+      "from": "approved",
+      "reason": "exact approved fake-browser and static-operations implementation started; no migration or external write",
+      "to": "implementing"
     }
   ],
   "human_gates": [
@@ -92,7 +112,7 @@
   "human_gates_digest": "14a58ca69c842145e025ab685eff53825c39f931f78d8db2c937855bff8782f2",
   "route_id": "26ffb293d4ff",
   "schema_version": 1,
-  "status": "approved",
+  "status": "implementing",
   "title": "F6 local UI and operations verification",
-  "updated_at": "2026-09-29T10:56:43+00:00"
+  "updated_at": "2026-09-29T10:57:24+00:00"
 }

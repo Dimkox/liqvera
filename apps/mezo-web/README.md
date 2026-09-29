@@ -6,4 +6,16 @@ Install the exact package versions in `package.json`, then run `npm run build`. 
 
 The official x402 browser boundary is isolated in `src/x402.ts`. F1 pinned `@x402/core`, `@x402/evm`, and `@x402/paywall` 2.16.0, but did not verify a browser fetch or EIP-1193 signing API. The adapter therefore fails closed until the installed SDK API is reviewed in the deferred verification phase. The caller never constructs or replays a `PAYMENT-SIGNATURE`. Payment can be enabled only when the gateway advertises `payment_ready=true`, a live public quote matches the fixed Mezo Testnet terms, and the connected account matches the quote. After a payment request has entered a verified SDK, an unknown outcome remains locally blocked pending recovery; the UI never automatically repeats it.
 
-Code is present but has not yet been installed, typechecked, built, browser-tested, or used for payment. The F3–F7 verification phase owns those checks and any SDK API adjustments required by the pinned installed package types.
+The F6 local test command uses Node's built-in runner and no browser, wallet,
+RPC, or network service:
+
+```bash
+npm test
+```
+
+It exercises the production-used browser policy seam with a deterministic
+EIP-1193 double and exact recovery/payment-guard plans. It covers wrong chain,
+account/chain switch, typed cancel, ambiguous outcome, reload,
+same-idempotency, fixture disable, and no-resettlement decisions. It does not
+prove a real wallet or x402 transfer. The exact-lock typecheck and Vite build
+remain required separately. No payment has been attempted.

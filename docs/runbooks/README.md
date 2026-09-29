@@ -1,7 +1,8 @@
 # Liqvera deployment runbooks
 
-These procedures describe the F6 code surface. The stack has not been built,
-started, or accepted in this code-completion phase. F3–F7 remain
+These procedures describe the F6 code surface. Both Compose profiles have
+been resolved and checked statically, but the stack has not been built,
+started, or accepted. F6–F7 remain
 `IMPLEMENTED_UNVERIFIED`; a green container healthcheck is not release or
 payment approval. Use the [canonical specification](../planning/LIQVERA_FACTORY_TZ.md)
 and [ADR-0002](../adr/0002-liqvera-report-payment-boundary.md) for the safety
@@ -30,8 +31,11 @@ and the gateway can read completed artifacts without sharing a write UID.
 The gateway has read-only artifact access;
 it and its one-shot migration job are the only PostgreSQL clients. Report and
 gateway alone receive the profile-specific internal report token file.
-Capture alone has public Hyperliquid
-egress; report and database have no external network. Network ACLs on the host
+In the live profile, capture has public Hyperliquid egress, gateway has
+payment/RPC egress, and edge has TLS egress. The fixture profile attaches none
+of those external networks. Report and database have no external network.
+Metrics bind only to the gateway's internal `operations` network and are not
+published on the host or routed by Caddy. Network ACLs on the host
 must constrain capture to approved Hyperliquid endpoints and gateway to the
 approved facilitator/RPC; Compose bridge networks do not enforce destination
 allowlists.

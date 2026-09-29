@@ -7,6 +7,13 @@ unverified facilitator or finality, unavailable storage, or other payment
 gates. Container healthchecks establish process liveness; they cannot prove
 settlement or report integrity.
 
+Prometheus text is served at `GET /metrics` on port 9090 bound to the
+gateway's `gateway-metrics` address on the internal `operations` network.
+Compose publishes no metrics port and Caddy has no `/metrics` route. An
+authorized operator may collect it only from an explicitly attached internal
+collector or bounded one-off probe. Do not add a host port or edge route. F6
+validates this topology statically and does not start a collector or container.
+
 Collect bounded metrics without wallet addresses as labels:
 
 | Signal | Watch for |

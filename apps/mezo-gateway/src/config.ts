@@ -11,6 +11,8 @@ export interface RuntimeConfig extends GatewayConfig {
   artifactRoot: string;
   reportToken: string | null;
   reportUrl: URL;
+  metricsHost: string;
+  metricsPort: number;
 }
 export async function databaseUrl(env:NodeJS.ProcessEnv):Promise<string> {
   if(env.DATABASE_URL&&env.DATABASE_URL_FILE)throw new PublicError('INVALID_INPUT');
@@ -27,9 +29,13 @@ export async function loadConfig(env:NodeJS.ProcessEnv=process.env):Promise<Runt
     const url=new URL(value);if(url.origin!==value||url.username||url.password||!['http:','https:'].includes(url.protocol))throw new PublicError('INVALID_INPUT');
   }
   const port=Number(env.PORT??'8080');if(!Number.isInteger(port)||port<1||port>65535)throw new PublicError('INVALID_INPUT');
+  const metricsHost=env.METRICS_HOST??'127.0.0.1';
+  if(!['127.0.0.1','gateway-metrics'].includes(metricsHost))throw new PublicError('INVALID_INPUT');
+  const metricsPort=Number(env.METRICS_PORT??'9090');
+  if(!Number.isInteger(metricsPort)||metricsPort<1||metricsPort>65535||metricsPort===port)throw new PublicError('INVALID_INPUT');
   const reportToken=env.REPORT_SERVICE_TOKEN_FILE?(await readFile(env.REPORT_SERVICE_TOKEN_FILE,'utf8')).trim():null;
   if(reportToken!==null&&(!/^[A-Za-z0-9_-]{32,256}$/.test(reportToken)))throw new PublicError('INVALID_INPUT');
   return {databaseUrl:await databaseUrl(env),sourceMode,payTo:env.PAY_TO?address(env.PAY_TO):null,publicBase,origins,port,
-    host:env.HOST??'0.0.0.0',artifactRoot:env.ARTIFACT_ROOT??'/data/artifacts',reportToken,
+    host:env.HOST??'0.0.0.0',artifactRoot:env.ARTIFACT_ROOT??'/data/artifacts',reportToken,metricsHost,metricsPort,
     reportUrl:fixedInternalUrl(env.REPORT_SERVICE_URL??'http://report:8082')};
 }

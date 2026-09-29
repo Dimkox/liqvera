@@ -26,8 +26,11 @@ async function main():Promise<void> {
   const server=createServer({maxHeaderSize:32768,requestTimeout:20000,headersTimeout:10000},createApp(gateway,config.origins));
   server.keepAliveTimeout=5000;server.maxRequestsPerSocket=100;
   const stopWorkers=startWorkers(gateway);
-  const telemetry=createServer((_req,res)=>{res.writeHead(200,{'Content-Type':'text/plain; version=0.0.4','Cache-Control':'no-store'});res.end(metrics.render());});
-  telemetry.listen(9090,'127.0.0.1');
+  const telemetry=createServer((req,res)=>{
+    if(req.method!=='GET'||req.url!=='/metrics'){res.writeHead(404,{'Cache-Control':'no-store'});res.end();return;}
+    res.writeHead(200,{'Content-Type':'text/plain; version=0.0.4','Cache-Control':'no-store'});res.end(metrics.render());
+  });
+  telemetry.listen(config.metricsPort,config.metricsHost);
   server.listen(config.port,config.host,()=>logEvent({event:'GATEWAY_STARTED'}));
   let shuttingDown=false;
   const shutdown=async()=>{

@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (F5 closed; F6 scope/design awaiting mandatory human approval). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (F5 closed; F6 fake/static implementation focused checks green). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F6 local UI and operations verification — 2026-09-29
@@ -14,18 +14,31 @@ seam; fixture-egress correction with resolved-profile assertions; internal-only
 metrics observability; the canonical restrictive CSP; and exact README,
 runbook, handoff and acceptance truth.
 
-No product/test/configuration implementation has started. The repository owner
-approved exact scope digest
+The repository owner approved exact scope digest
 `12231c0f9d521bb91724f731ffd06e17d5deb16cf6a8aff83a456d8832f3ee01`,
 and the package is `approved`. The recorded migration plan is explicitly a
 no-op: this phase does not start containers, create a database/schema/volume,
 or perform an external write. Any later need for those actions stops for a new
 exact approval.
 
-Confirmed gaps are: no executable browser A30 harness; fixture capture,
-gateway and edge inherit non-internal egress networks; gateway metrics are
-process-loopback and not collectible through a private operations boundary;
-and Caddy lacks the CSP required by the canonical specification. Production's
+The implementation adds a production-used pure browser policy seam and six
+deterministic Node scenarios for wrong chain/switch, payer-preserving account
+and chain changes, typed pre-submit cancellation, ambiguous outcomes, exact
+reload request/idempotency identity, fixture gating, and one-call
+no-resettlement. Three static operations tests resolve both Compose profiles
+and assert exact services, networks, loopback publication, secrets, resource
+and security limits, healthchecks, internal metrics, and CSP. Fixture capture,
+gateway, and edge no longer inherit live egress networks. Gateway metrics bind
+only to `gateway-metrics` on an internal operations network, accept only
+`GET /metrics`, and have no host/Caddy route. Caddy now sends the canonical
+restrictive CSP without `unsafe-inline`. Focused results are six browser tests
+and three static operations tests passing; gateway typecheck also passes.
+
+The exact web install/build is not yet evidenced: an offline
+lifecycle-disabled install stopped because the exact Vite 7.1.5 tarball is
+absent from the local npm cache, and this no-external route does not authorize
+a registry request. Full pinned verification and independent route reviews
+therefore remain next. Production's
 x402 adapter remains deliberately unregistered and fixture payment remains
 fail closed. This route will not use a real wallet, RPC, facilitator, transfer,
 testnet/mainnet payment, live capture/profile, shared environment, deployment,

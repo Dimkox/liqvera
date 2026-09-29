@@ -91,3 +91,25 @@ Initial evidence accounting (current records are in `state.json`):
   ]
 }
 ```
+
+<!-- checkpoint:implementation -->
+## Implementation checkpoint
+
+Local observation only; not verification or publication evidence.
+
+```json
+{
+  "kind": "implementation",
+  "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+  "route_id": "26ffb293d4ff",
+  "observed_at": "2026-09-29T10:57:23+00:00",
+  "branch": "feat/f3-f7-verification",
+  "head": "d71cf5705367963f40db4b89c18d780f12560f41",
+  "detached": false,
+  "git_available": true,
+  "git_findings": [],
+  "dirty_product_state": "clean",
+  "dirty_product_paths": [],
+  "note": "implementation started; preserve work before handoff"
+}
+```

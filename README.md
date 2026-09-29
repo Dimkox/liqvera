@@ -21,11 +21,13 @@ and 1087 full-suite tests plus 85 subtests pass. See the
 F3's canonical offline artifact path is locally verified and `ready`. F4 local
 gateway/ledger verification is `ready`: the exact lock, strict cleanup-adapter
 regressions, and five disposable PostgreSQL checks passed pinned verification
-and independent review. F5 now has a focused fake-only Node slice around the
-real gateway and reconciliation orchestration. It proves duplicate-use,
-pre-submit recovery, post-submit uncertainty/no-resettle, receipt-mismatch,
-entitlement replay, and reorganization withholding locally; its full route
-verification and independent review remain pending. F6–F7 remain
+and independent review. F5's focused fake-only Node slice around the real
+gateway and reconciliation orchestration is locally verified and `ready`.
+F6 now has deterministic browser-policy and static operations checks for
+guarded cancel, wrong-network and wallet changes, reload identity and
+no-resettlement, fixture zero-egress topology, internal-only metrics, resource
+and security bounds, and CSP. Focused checks pass; the exact-lock web build,
+full route verification, and independent review remain pending. F6–F7 remain
 **IMPLEMENTED_UNVERIFIED**. The local protocol package pins official Mezo MUSD
 material and recorded `mezo-org` source revisions. Separate Liqvera factory
 targets do not change the existing Stage A three-wheel factory. All 156 frozen

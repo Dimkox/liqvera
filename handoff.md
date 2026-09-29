@@ -51,6 +51,16 @@ deterministically; the classifier and binding are now corrected, and the
 focused graph slice passes 32 tests. A fresh full verifier remains required on
 the repaired commit.
 
+That repaired commit passed the full pinned PR verifier. Its subsequent P1
+diagnostic produced 4 PASS (A01, A08, A27, A30), 1 FAIL (A09), 4
+BLOCKED_EXTERNAL, and 21 NOT_RUN at immutable path
+`/tmp/liqvera-f7-local-2fb67a1/result.json`. A09 showed that the runner's
+otherwise closed child environment omitted `PATH`, which its nested installed
+virtual-environment boundary needs. The runner now carries its existing
+non-secret `PATH` as internal plumbing, excludes it from public environment
+claims, and has a regression test; final verification and acceptance must be
+regenerated on the next clean commit.
+
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts
 plus `SHA256SUMS` from one frozen commit. Final acceptance/evidence stays

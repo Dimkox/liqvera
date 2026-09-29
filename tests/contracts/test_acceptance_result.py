@@ -1,4 +1,6 @@
 import json
+import os
+import subprocess
 import sys
 from copy import deepcopy
 from pathlib import Path
@@ -72,6 +74,29 @@ def test_local_a30_is_not_blocked_as_external(
     row = next(item for item in result["cases"] if item["case_id"] == "A30")
     assert row["status"] == "NOT_RUN"
     assert row["omissions"] == ["ASSERTION_COMMAND_NOT_CONFIGURED"]
+
+
+def test_runner_propagates_internal_python_and_path_without_claiming_them(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    captured: dict = {}
+
+    def fake_run(*args, **kwargs):
+        captured.update(kwargs["env"])
+        return subprocess.CompletedProcess(args[0], 1, b"", b"")
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    row = runner.run_case(
+        "A09",
+        {"argv": ["offline"], "environment": [], "timeout_seconds": 1},
+        tmp_path,
+        None,
+        {"commit": COMMIT, "tree": TREE},
+    )
+
+    assert captured["LIQVERA_ACCEPTANCE_PYTHON"] == sys.executable
+    assert captured["PATH"] == os.environ["PATH"]
+    assert row["environment_names"] == ["LIQVERA_ACCEPTANCE_EVIDENCE_DIR"]
 
 
 def _result_with_passing_case(

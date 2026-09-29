@@ -205,3 +205,11 @@ so its `/usr/bin/env python3` shebang selected the system interpreter even
 though the acceptance runner itself was launched from the pinned `.venv`.
 Runner-owned child dispatch must explicitly propagate its current interpreter
 through an internal, non-evidence environment binding.
+
+## 2026-09-29 — Hermetic assertion environment omitted executable discovery
+
+After pinning Python, the second F7 diagnostic still failed A09 because the
+runner's closed child environment omitted `PATH`, while the installed-boundary
+test intentionally creates and invokes a nested virtual environment. A closed
+acceptance environment must propagate the runner's non-secret executable path
+as internal process plumbing without advertising it as assertion input.

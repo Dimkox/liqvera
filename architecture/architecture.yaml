@@ -14431,6 +14431,21 @@ repository_inventory:
   - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/analysis-repo_explorer.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/code-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/data-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/release-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/security-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/test-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/human-gates.json
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

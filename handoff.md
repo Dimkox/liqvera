@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (F5 closed; F6 fake/static implementation focused checks green). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (F5 closed; F6 fake/static verification and independent reviews PASS). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F6 local UI and operations verification — 2026-09-29
@@ -65,8 +65,13 @@ regression slice passes, and the repaired tree then passed the full pinned PR
 verifier before the first reviews. Those reviews correctly rejected helper-only
 browser coverage and shallow operations assertions. The current repair binds
 the harness to production `resumeFlow`, `submitPayment`, and wallet listeners;
-it also closes exact Compose, telemetry, and CSP mutation gaps. Focused/full
-verification must be rerun on the repaired tree before re-review. Production's
+it also closes exact Compose, telemetry, and CSP mutation gaps. Final clean
+HEAD `f1667511149c5062443cd2c518ce40d8492b7507` passed the full pinned verifier
+at fingerprint `292558635bb303d8cf302468899eba4ac82d2d742ccff8e4939e8cfe886c970b`.
+Independent code, test, security, data, and release reviewers all returned
+PASS with no findings on that exact fingerprint and did not modify the tree.
+Their reports are stored in the package; receipt registration and the durable
+`ready` transition remain. Production's
 x402 adapter remains deliberately unregistered and fixture payment remains
 fail closed. This route will not use a real wallet, RPC, facilitator, transfer,
 testnet/mainnet payment, live capture/profile, shared environment, deployment,

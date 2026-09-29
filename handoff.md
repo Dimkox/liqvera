@@ -1,7 +1,27 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (F3 offline repair independently re-reviewed PASS and advanced to `ready`; final runtime receipts are refreshed after the state commit). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (F4 local gateway/ledger scope approved; TDD implementation is next). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
+
+## F4 local gateway and ledger verification — 2026-09-29
+
+Route `725677143509` and change package
+`engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/`
+are `approved` with no human gate. Five route-selected read-only analyses agree
+on the bounded implementation: repair the two reproduced TypeScript build
+errors, add a gateway-owned Node test harness, and prove cleanup/idempotency
+semantics against loopback HTTP and a uniquely disposable PostgreSQL database.
+
+The confirmed recovery defect is cross-component, not schema-level: the report
+service documents HTTP 200 `deleted:false` as authoritative already-absent
+success after a lost response, while the gateway currently accepts only
+`deleted:true`. The approved repair accepts either boolean only with a matching
+report ID and otherwise fails closed. Migration `001_ledger.sql` and the frozen
+vector catalog must remain byte-identical; no dependency upgrade, migration,
+shared database, facilitator, RPC, wallet, chain, exchange, live capture,
+deployment, release, or payment action is in scope. The next step is a failing
+adapter regression, followed by the minimum compile and recovery repair, then a
+20-way disposable-ledger concurrency test and the pinned full verifier.
 
 ## F3 offline artifact verification repair — 2026-09-29
 

@@ -1,0 +1,90 @@
+{
+  "acceptance_criteria": [
+    {
+      "evidence": [{"test": "apps/mezo-gateway/test/report-service.test.ts"}, {"receipt": "test_review"}],
+      "id": "AC-001",
+      "statement": "The gateway cleanup adapter accepts only a matching HTTP 200 response with a boolean deleted field, treating both true and false as authoritative exact-report absence while rejecting malformed, mismatched, timed-out, disconnected, and non-200 responses."
+    },
+    {
+      "evidence": [{"test": "apps/mezo-gateway/test/postgres.test.ts"}, {"receipt": "data_review"}],
+      "id": "AC-002",
+      "statement": "A lost successful cleanup response followed by an already-absent response advances only the eligible artifact to DELETED once and preserves every ledger, scope, and idempotency identity."
+    },
+    {
+      "evidence": [{"test": "apps/mezo-gateway/test/postgres.test.ts"}, {"receipt": "test_review"}],
+      "id": "AC-003",
+      "statement": "On a fresh disposable PostgreSQL database, migration 001 applies and reruns safely, and twenty concurrent identical same-scope/key requests converge while conflicting bodies and sibling scopes remain isolated."
+    },
+    {
+      "evidence": [{"receipt": "verification"}, {"receipt": "code_review"}],
+      "id": "AC-004",
+      "statement": "The existing lock builds and typechecks the gateway, and focused checks plus the full pinned PR verifier pass against one final implementation fingerprint."
+    }
+  ],
+  "approvals": {
+    "required_scopes": []
+  },
+  "change_id": "20260929-f4-local-gateway-and-ledger-verification-725677",
+  "contracts": {
+    "events": [],
+    "json_schema": ["schemas/mezo-evidence/v1/resources.schema.json", "schemas/mezo-evidence/v1/error.schema.json", "schemas/mezo-evidence/v1/states.json"],
+    "openapi": ["schemas/mezo-evidence/v1/openapi.json"]
+  },
+  "forbidden_outcomes": [
+    {
+      "evidence": [{"receipt": "code_review"}, {"receipt": "data_review"}],
+      "id": "FORBID-001",
+      "statement": "No edit to migration 001 or the frozen vector catalog, no new migration, and no destructive/shared database operation occurs."
+    },
+    {
+      "evidence": [{"receipt": "verification"}, {"receipt": "test_review"}],
+      "id": "FORBID-002",
+      "statement": "No facilitator, RPC, wallet, chain, exchange, live capture, deployment, release, settlement, shared service, or other external mutation is invoked or enabled."
+    },
+    {
+      "evidence": [{"test": "apps/mezo-gateway/test/postgres.test.ts"}, {"receipt": "code_review"}],
+      "id": "FORBID-003",
+      "statement": "Artifact cleanup or recovery never deletes ledger identity, enables replay, rebuilds from a fresh snapshot, or opens payment readiness."
+    }
+  ],
+  "invariants": [
+    {
+      "evidence": [{"test": "apps/mezo-gateway/test/postgres.test.ts"}, {"receipt": "data_review"}],
+      "id": "INV-001",
+      "statement": "PostgreSQL remains the sole ledger source of truth and the gateway its sole writer; cleanup changes only eligible artifact state and append-only audit evidence."
+    },
+    {
+      "evidence": [{"test": "apps/mezo-gateway/test/postgres.test.ts"}, {"receipt": "test_review"}],
+      "id": "INV-002",
+      "statement": "Capability scope plus idempotency key identifies one immutable canonical request, and ambiguous cleanup or artifact recovery remains fail closed with zero payment action."
+    },
+    {
+      "evidence": [{"receipt": "verification"}, {"receipt": "code_review"}],
+      "id": "INV-003",
+      "statement": "Shadow-only, fixture non-chargeability, unresolved authorization identity, unresolved finality, and all existing public API contracts remain intact."
+    }
+  ],
+  "objective": {
+    "id": "OBJ-001",
+    "statement": "Verify and repair the Liqvera F4 local gateway and ledger boundary using disposable local fixtures only: build and typecheck the gateway, exercise API contract behavior, concurrent report creation, idempotency, artifact-loss reconciliation, and the lost cleanup-response recovery path. Use only ephemeral local state; no shared environment, external service, deployment, release, wallet, chain, exchange, or live execution.",
+    "success_metric": "local_f4_gateway_ledger_vertical_passes_without_external_io",
+    "target": "clean gateway build plus strict cleanup recovery and 20-way disposable-ledger idempotency evidence"
+  },
+  "observability": [
+    {"id": "SIG-001", "metric": "gateway_build_typecheck_and_test_outcomes", "proves": ["OBJ-001"]},
+    {"id": "SIG-002", "metric": "migration_checksum_and_postgres_invariant_queries", "proves": ["OBJ-001"]},
+    {"id": "SIG-003", "metric": "cleanup_transition_audit_count_and_zero_payment_calls", "proves": ["OBJ-001"]}
+  ],
+  "risk": {
+    "domains": [
+      "api",
+      "data"
+    ],
+    "tier": "yellow"
+  },
+  "rollback": {
+    "maximum_steps": 1,
+    "strategy": "forward_fix"
+  },
+  "schema_version": 2
+}

@@ -15401,7 +15401,7 @@ repository_inventory:
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE
   - path: tests/acceptance/test_public_read_grant.py
-    node: runtime:mezo-acceptance
+    node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: scripts/run-mezo-acceptance.py
     node: runtime:mezo-acceptance

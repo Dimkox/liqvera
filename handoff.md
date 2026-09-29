@@ -23,6 +23,11 @@ installer behavior exists yet. Independent Task 1 review removed the impossible
 self-referential outer archive digest from the embedded manifest, added exact
 launcher digest bindings, excluded P3 payment/grant inputs from installer
 authority, and closed image references against trailing whitespace. Task 2 is
+now implemented as an offline-only ZIP verifier/materializer: it requires the
+independently supplied outer SHA-256, rejects unsafe/colliding/special/oversized
+members and incomplete or changed inner inventories, validates the closed
+release/migration identities, and publishes only a fully verified private
+directory without executing archive content. Task 3 Linux preflight remains
 the next implementation boundary.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;

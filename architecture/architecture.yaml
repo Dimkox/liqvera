@@ -15538,6 +15538,12 @@ repository_inventory:
   - path: installer/schemas/release-manifest.schema.json
     node: contract:liqvera-evidence-runtime
     path_class: SCHEMA_MANIFEST
+  - path: scripts/verify-liqvera-installer.py
+    node: runtime:liqvera-factory
+    path_class: TOOL_SOURCE
+  - path: tests/installer/test_archive_verifier.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
   - path: tests/installer/test_contracts.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE

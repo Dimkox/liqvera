@@ -15223,6 +15223,12 @@ repository_inventory:
   - path: apps/mezo-gateway/src/security/observability.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/security/live-grant.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/security/payment-policy.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/src/workers/builds.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
@@ -15242,6 +15248,9 @@ repository_inventory:
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/test/state-machine.test.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/test/payment-policy.test.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/.gitignore
@@ -15388,6 +15397,12 @@ repository_inventory:
   - path: tools/mezo_acceptance/runner.py
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE
+  - path: tools/mezo_acceptance/public_read.py
+    node: runtime:mezo-acceptance
+    path_class: TOOL_SOURCE
+  - path: tests/acceptance/test_public_read_grant.py
+    node: runtime:mezo-acceptance
+    path_class: TEST_SOURCE
   - path: scripts/run-mezo-acceptance.py
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE

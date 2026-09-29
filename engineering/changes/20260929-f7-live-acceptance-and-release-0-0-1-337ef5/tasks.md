@@ -8,8 +8,11 @@
 - [x] P1 immutable out-of-tree local acceptance and omission review: five
   configured local assertions pass, four external cases are blocked, and 21
   deliberately unconfigured cases remain not run; no case fails.
+- [x] Implement local-only P2 public-read grant/allowlist/DNS boundary; no grant
+  was issued and no public read was executed.
+- [x] Implement local P3 identity, twelve-confirmation finality, one-submit live
+  grant, and pinned browser x402 wiring. Independent review remains pending.
 - [ ] Obtain exact short-lived P2 public-read grant; execute allowlisted reads.
-- [ ] P3 implement/review identity, finality, and browser x402 wiring.
 - [ ] Obtain exact short-lived P3 testnet-write grant including buyer/payee,
   amount, one-submit budget, and numeric BTC gas cap; human confirms wallet.
 - [ ] P4 set root product `VERSION=0.0.1`, preserve component `0.1.0`, build and

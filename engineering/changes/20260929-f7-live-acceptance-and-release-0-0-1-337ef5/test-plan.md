@@ -16,6 +16,10 @@
 
 - Unit: semantic validators, assertion dispatcher, evidence writer, identity and
   finality policies, release manifest/checksum tooling.
+- Local security: exact commit/tree/plan/case/request grant binding, 15-minute
+  expiry, HTTPS-only allowlist, public stable DNS resolution, exact EIP-3009
+  identity, twelve canonical confirmations, one submission and 0.0001 test-BTC
+  gas ceiling. These tests use fakes and perform no network or wallet action.
 - Integration: local PostgreSQL/container/browser only after P0; no ambient or
   shared service. Exact public/testnet integration only under P2/P3 grants.
 - Contract: schemas, frozen A01–A30 inventory, official pinned x402 types,

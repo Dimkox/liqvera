@@ -7,7 +7,9 @@ import { quoteIsPayable, receiptMatchesQuote, type Capabilities, type Delivery, 
 import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./session";
 import { injectedWallet, switchToMezo, walletAccount, walletError, walletOnMezo, type Eip1193Provider } from "./wallet";
 import { bindWalletStateListeners, refreshWalletState, type WalletState } from "./wallet-events";
-import { requestPaidReport, x402Available, X402CancelledBeforeSubmission } from "./x402";
+import { installProductionX402Adapter, requestPaidReport, x402Available, X402CancelledBeforeSubmission } from "./x402";
+
+installProductionX402Adapter();
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error("App root missing.");

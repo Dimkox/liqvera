@@ -114,12 +114,29 @@ The user approved `scope_and_design_approval` for exact gate scope digest
 this is distinct from the canonical spec-content digest. The external-write
 gate remains pending. `migration_or_external_write_approval` is not a blanket
 grant and must be
-`migration_or_external_write_approval` is not a blanket grant and must be
 realized as short-lived exact P2, P3, and P5 action records. Any changed tree,
 plan, target, envelope, amount, gas cap, artifact, limitation, or remote OID
 invalidates its affected grant. Mainnet, real/user funds, custody, private keys,
 exchange mutation, deployment, unrelated repositories, and secret inspection
 remain forbidden.
+
+The local-only P2/P3 prerequisite slice now adds closed public-read grants bound
+to commit, tree, plan digest, case, exact HTTPS method/URL, limits and a maximum
+15-minute lifetime. It rejects credential-bearing URLs, private or reserved
+addresses, changed DNS answers, excess attempts/time/bytes, and unknown
+destinations. No grant was issued and no read was attempted; A07/A29 remain
+`BLOCKED_EXTERNAL`.
+
+The gateway now has explicit EIP-3009 identity and a twelve-confirmation
+canonical Mezo Testnet finality policy. A separate exact payment grant binds
+chain 31611, pinned MUSD, exactly 0.01 test MUSD, distinct buyer/payee, candidate
+commit/tree/plan, one settlement submission, a 15-minute ceiling and maximum
+`100000000000000` wei (0.0001 test BTC) gas. Ordinary startup supplies no grant,
+performs no facilitator call, and reports `EXTERNAL_GRANT_REQUIRED`. The browser
+registers the pinned official core/EVM x402 client against an injected wallet;
+an ambiguous post-signature result returns only recovery and is never retried.
+No network, wallet, RPC, facilitator, payment, database, release, or secret action
+occurred. A13/A14 remain blocked pending independent review and a new exact grant.
 
 ## F6 local UI and operations verification — 2026-09-29
 

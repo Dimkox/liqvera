@@ -7,6 +7,7 @@ import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type Quote, type Rec
 import { paymentHeader } from '../security/input.js';
 import { boundedJson } from './http.js';
 import { MezoReceiptReader } from './mezo-rpc.js';
+import type { LivePaymentGrant } from '../security/live-grant.js';
 // Policy implementations require reviewed scheme-specific identity, nonce,
 // replay-domain, chain correlation and finality evidence. Configuration cannot
 // flip these defaults into an approval.
@@ -33,9 +34,9 @@ const transport={
 export class OfficialX402 implements PaymentPort {
   private readonly server=new x402ResourceServer(transport).register(NETWORK,new ExactEvmScheme());
   private initialized=false;
-  constructor(private readonly identity: AuthorizationPolicy,private readonly finality: FinalityPolicy,private readonly reader: MezoReceiptReader,private readonly publicBase: URL) {}
+  constructor(private readonly identity: AuthorizationPolicy,private readonly finality: FinalityPolicy,private readonly reader: MezoReceiptReader,private readonly publicBase: URL,private readonly grant: LivePaymentGrant|null=null) {}
   async initialize(): Promise<void> {
-    if(!this.identity.reviewed||!this.finality.reviewed)return;
+    if(!this.identity.reviewed||!this.finality.reviewed||!this.grant)return;
     await this.server.initialize();
     this.initialized=!!this.server.getSupportedKind(2,NETWORK,'exact');
   }
@@ -43,6 +44,7 @@ export class OfficialX402 implements PaymentPort {
     const reasons: Reason[]=[];
     if(!this.identity.reviewed)reasons.push('AUTHORIZATION_IDENTITY_UNVERIFIED');
     if(!this.finality.reviewed)reasons.push('FINALITY_RULE_UNVERIFIED');
+    if(!this.grant)reasons.push('EXTERNAL_GRANT_REQUIRED');
     if(!this.initialized)reasons.push('PAYMENT_SERVICE_UNAVAILABLE');
     return reasons;
   }
@@ -73,6 +75,7 @@ export class OfficialX402 implements PaymentPort {
   }
   async settle(payload: PaymentPayload,requirements: PaymentRequirements) {
     this.ready();
+    this.grant!.consume();
     const result=await this.server.settlePayment(payload,requirements);
     // Even success is only a transaction hint, not finality or entitlement.
     const tx=typeof result.transaction==='string'&&/^0x[0-9a-fA-F]{64}$/.test(result.transaction)?result.transaction.toLowerCase():null;

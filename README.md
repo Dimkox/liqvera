@@ -49,11 +49,12 @@ Trivy `DS-0026` findings in the one-shot Stage A Dockerfiles
 healthcheck was added. See
 [verification evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-verification.md).
 
-The live public probe returned `COMPATIBILITY_PASS_PAYMENT_BLOCKED`.
-`PAY_TO_MISSING`, canonical authorization identity, facilitator compatibility,
-and `FINALITY_RULE_UNVERIFIED` remain open; payment readiness is false. The
-gateway and UI therefore retain a fail-closed payment path. No testnet payment
-or deployment has been performed.
+The historical live public probe returned `COMPATIBILITY_PASS_PAYMENT_BLOCKED`.
+F7 now implements an explicit EIP-3009 authorization identity, twelve-block
+canonical finality policy, exact one-submit testnet grant, and pinned official
+x402 browser composition. Ordinary startup intentionally has no live grant, so
+payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`; no new public
+probe, testnet payment, wallet operation, or deployment has been performed.
 
 Current metadata: root project `0.1.0.dev0`; Stage A, evidence-report, protocol,
 gateway, and web packages `0.1.0`.
@@ -165,8 +166,10 @@ ACCEPTANCE_RESULT_SHA256=<sha256>`.
 typecheck/build, loopback adapter suite, and disposable PostgreSQL tests. The
 gateway-owned fake-only F5 suite additionally executes `Gateway.read`,
 `reconcileOne`, and `recoverUnsubmitted` without a database or network. These
-tests do not establish production payment readiness: authorization identity
-and finality policies remain unresolved and all 156 vectors remain `NOT_RUN`.
+tests do not establish production payment readiness: F7's concrete identity
+and finality policies plus browser composition remain externally unexercised
+and need independent review and an exact short-lived grant. All 156 vectors
+remain `NOT_RUN`.
 The
 other listed targets remain separately evidenced. The gateway and web
 lockfiles were generated with lifecycle scripts disabled; dependency audit

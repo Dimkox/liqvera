@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { executePaymentAttempt, executeRecovery } from "../src/browser-orchestration.ts";
@@ -139,4 +140,39 @@ test("production wallet event boundary writes state only and has no payment depe
   assert.equal(adapterCalls, 0);
   cleanup();
   assert.equal(listeners.size, 0);
+});
+
+test("wallet event failure clears state, does not poison the queue, and next event recovers", async () => {
+  const listeners = new Map();
+  let fail = true;
+  const provider = {
+    async request({ method }) {
+      if (fail) { fail = false; throw new Error("provider unavailable"); }
+      if (method === "eth_accounts") return [payer];
+      if (method === "eth_chainId") return "0x7b7b";
+      throw new Error(`unplanned ${method}`);
+    },
+    on(event, listener) { listeners.set(event, listener); },
+    removeListener(event) { listeners.delete(event); },
+  };
+  const states = [];
+  let paymentCapability = 0;
+  bindWalletStateListeners(provider, { applyWalletState(state) { states.push(state); } });
+  listeners.get("accountsChanged")([]);
+  await new Promise(resolve => setTimeout(resolve, 0));
+  listeners.get("chainChanged")("0x7b7b");
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.deepEqual(states, [
+    { account: null, onMezo: false },
+    { account: payer, onMezo: true },
+  ]);
+  assert.equal(paymentCapability, 0);
+});
+
+test("main composes wallet events directly with the state-only sink", async () => {
+  const main = await readFile(new URL("../src/main.ts", import.meta.url), "utf8");
+  const boundary = "bindWalletStateListeners(provider, { applyWalletState });";
+  assert.equal(main.split(boundary).length - 1, 1);
+  const eventModule = await readFile(new URL("../src/wallet-events.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(eventModule, /submitPayment|requestPaidReport|adapter/i);
 });

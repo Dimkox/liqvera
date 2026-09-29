@@ -23,7 +23,7 @@ or perform an external write. Any later need for those actions stops for a new
 exact approval.
 
 The implementation adds production-used browser policy and orchestration seams
-with twelve deterministic Node scenarios for wrong chain/switch, payer-preserving account
+with fourteen deterministic Node scenarios for wrong chain/switch, payer-preserving account
 and chain changes, typed pre-submit cancellation, ambiguous outcomes, exact
 reload request/idempotency identity, fixture gating, and one-call
 no-resettlement. The orchestration harness records the real recovery/payment
@@ -32,8 +32,12 @@ and adapter calls. Wallet events now bind through a provider-to-state-sink
 module whose production dependency surface has no payment callback; account or
 chain events can only refresh wallet state. A wallet revalidation failure is
 handled before the guarded submission try: it preserves the clear guard,
-persists nothing, invokes no adapter, and renders a no-payment warning. Four
-static operations tests resolve both Compose profiles
+persists nothing, invokes no adapter, and renders a no-payment warning.
+The production composition is structurally locked to the direct state-only
+sink call, so wrapping an event with `submitPayment` fails the focused suite.
+A provider rejection now applies fail-closed disconnected state without an
+unhandled rejection, resolves the serialized event queue, and permits the next
+wallet event to recover normally. Four static operations tests resolve both Compose profiles
 and assert exact services, networks, loopback publication, per-profile secret
 identity, exact users/tmpfs/mount modes/resources, healthchecks, internal
 metrics, and CSP. Fixture capture,

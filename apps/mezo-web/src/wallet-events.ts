@@ -29,8 +29,15 @@ export async function refreshWalletState(provider: WalletEventProvider, sink: Wa
 export function bindWalletStateListeners(provider: WalletEventProvider | null, sink: WalletStateSink): () => void {
   if (!provider?.on) return () => undefined;
   let queue = Promise.resolve();
+  const refresh = async (): Promise<void> => {
+    try { await refreshWalletState(provider, sink); }
+    catch {
+      try { sink.applyWalletState({ account: null, onMezo: false }); }
+      catch { /* A view failure must not poison provider event processing. */ }
+    }
+  };
   const listener = (): void => {
-    queue = queue.then(() => refreshWalletState(provider, sink));
+    queue = queue.then(refresh, refresh).catch(() => undefined);
   };
   provider.on("accountsChanged", listener);
   provider.on("chainChanged", listener);

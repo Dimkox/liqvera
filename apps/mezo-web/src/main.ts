@@ -1,7 +1,8 @@
 import "./style.css";
 import { MEZO_TESTNET, MUSD_TESTNET } from "@liqvera/mezo-protocol";
 import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest } from "./api";
-import { beginPayment, canPay, paymentFailure, paymentNotice, recoveryRequest, walletStatus } from "./browser-flow";
+import { canPay, paymentNotice, walletStatus } from "./browser-flow";
+import { bindWalletListeners, executePaymentAttempt, executeRecovery } from "./browser-orchestration";
 import { quoteIsPayable, receiptMatchesQuote, type Capabilities, type Delivery, type Quote, type RequestStatus, type Side } from "./contracts";
 import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./session";
 import { injectedWallet, switchToMezo, walletAccount, walletError, walletOnMezo, type Eip1193Provider } from "./wallet";
@@ -346,15 +347,6 @@ async function recoverDelivery(): Promise<"delivered" | "recovering" | "withheld
   return "delivered";
 }
 
-async function refreshQuote(): Promise<void> {
-  if (!bearer || !flow?.quoteId) return;
-  rememberQuote(await getQuote(bearer, flow.quoteId));
-  if (quote?.state === "PAID") await recoverDelivery();
-  else if (quote && ["PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "MANUAL_REVIEW"].includes(quote.state)) announcement("Checking the payment already submitted. No second payment is offered.", "warning");
-  else if (quote?.state === "EXPIRED") announcement("The quote has expired. No payment is available.", "warning");
-  else announcement("Quote status updated. Review the terms and current wallet before any action.");
-}
-
 async function pollQuote(): Promise<void> {
   if (!bearer || !flow?.quoteId || polling) return;
   polling = true;
@@ -426,39 +418,38 @@ async function resumeFlow(): Promise<void> {
   if (!flow || !bearer || busy || polling) return;
   setBusy(true);
   try {
-    const recovery = recoveryRequest(flow);
-    if (recovery.kind === "quote") {
-      await refreshQuote();
-      if (quote && ["PAYMENT_PENDING", "PAYMENT_UNCERTAIN"].includes(quote.state)) {
-        setBusy(false);
-        await pollQuote();
-        return;
-      }
-      if (quote?.state === "PAID" && !delivery) {
-        setBusy(false);
-        await pollPaidDelivery();
-        return;
-      }
+    const recovered = await executeRecovery(flow, {
+      getQuote: id => getQuote(bearer!, id),
+      getRequest: id => getRequest(bearer!, id),
+      createQuote: input => createQuote(bearer!, input),
+      getPaidDelivery: async id => {
+        const result = await getReport(bearer!, id);
+        if (result === "recovering" || result === "payment-required") return null;
+        return result;
+      },
+      onQuote: rememberQuote,
+      onRequest: status => {
+        if (flow && !flow.requestId) { flow.requestId = status.report_request_id; saveFlow(flow); }
+        renderRequest(status);
+      },
+      onDelivery: paid => {
+        if (!quote || !receiptMatchesQuote(paid.receipt, quote) || paid.report.report_id !== quote.report_id) {
+          throw new Error("Receipt does not match the quoted report. Delivery is withheld.");
+        }
+        delivery = paid;
+        if (flow) { flow.paymentGuard = "clear"; saveFlow(flow); }
+        renderDelivery();
+      },
+      notice: message => announcement(message),
+    });
+    if (recovered.kind === "request" && recovered.request.state === "PREPARING") {
+      setBusy(false); await pollRequest(); return;
     }
-    else if (recovery.kind === "request") {
-      setBusy(false);
-      await pollRequest();
-      return;
-    } else {
-      // A network failure may have followed server commit. Reuse the same key and exact body.
-      const created = await createQuote(bearer, { side: recovery.body.side, quantity: recovery.body.quantity,
-        payer: recovery.body.payer, idempotencyKey: recovery.idempotencyKey });
-      if (created.schema === "mee-evidence-quote/v1") {
-        rememberQuote(created);
-        announcement("Quote recovered with the original idempotency key.");
-      } else {
-        flow.requestId = created.report_request_id;
-        saveFlow(flow);
-        renderRequest(created);
-        setBusy(false);
-        await pollRequest();
-        return;
-      }
+    if (recovered.kind === "quote" && ["PAYMENT_PENDING", "PAYMENT_UNCERTAIN"].includes(recovered.quote.state)) {
+      setBusy(false); await pollQuote(); return;
+    }
+    if (recovered.kind === "quote" && recovered.quote.state === "PAID" && !delivery) {
+      setBusy(false); await pollPaidDelivery(); return;
     }
   } catch (error) { announcement(readableError(error), "error"); }
   finally { setBusy(false); }
@@ -469,44 +460,25 @@ async function submitPayment(): Promise<void> {
       flow.paymentGuard !== "clear" || !x402Available() || !quoteIsPayable(quote, account)) return;
   setBusy(true);
   try {
-    if (!(await walletOnMezo(provider)) || (await walletAccount(provider, false))?.toLowerCase() !== quote.terms.expected_payer.toLowerCase()) {
-      throw new Error("Wallet network or account changed. Reconnect the quoted payer before continuing.");
-    }
-    flow = beginPayment(flow);
-    saveFlow(flow);
-    renderQuote();
-    announcement("Opening the reviewed x402 wallet flow. Confirm only the displayed testnet terms.");
-    const result = await requestPaidReport({ path: `/v1/reports/${quote.report_id}`, bearerCapability: bearer, quote, provider, payer: account });
-    if (result === "recovering") {
-      flow = paymentFailure(flow, "ambiguous", null);
-      saveFlow(flow);
-      announcement("Checking the payment already submitted. Do not pay again.", "warning");
-    } else {
-      await refreshQuote();
-      if (quote?.state !== "PAID") {
-        flow = paymentFailure(flow, "ambiguous", quote?.state ?? null);
-        saveFlow(flow);
-        announcement("The payment outcome is not yet confirmed. Check status; do not pay again.", "warning");
-      }
-    }
-  } catch (error) {
-    if (error instanceof X402CancelledBeforeSubmission) {
-      const latest = await getQuote(bearer, quote.quote_id).catch(() => null);
-      if (latest && latest.state === "READY") {
+    const activeQuote = quote;
+    flow = await executePaymentAttempt(flow, activeQuote, {
+      validateWallet: async () => {
+        if (!(await walletOnMezo(provider!)) || (await walletAccount(provider!, false))?.toLowerCase() !== activeQuote.terms.expected_payer.toLowerCase()) {
+          throw new Error("Wallet network or account changed. Reconnect the quoted payer before continuing.");
+        }
+      },
+      requestPaidReport: async () => (await requestPaidReport({ path: `/v1/reports/${activeQuote.report_id}`,
+        bearerCapability: bearer!, quote: activeQuote, provider: provider!, payer: account! })) === "recovering" ? "recovering" : "submitted",
+      refreshQuote: async () => {
+        const latest = await getQuote(bearer!, activeQuote.quote_id);
         rememberQuote(latest);
-        flow = paymentFailure(flow, "cancelled-before-submission", latest.state);
-        saveFlow(flow);
-        announcement("Wallet payment was canceled before submission. The quote remains unpaid.", "warning");
-      } else {
-        flow = paymentFailure(flow, "cancelled-before-submission", latest?.state ?? null);
-        saveFlow(flow);
-        announcement("Payment status needs checking before another wallet action.", "warning");
-      }
-    } else {
-      flow = paymentFailure(flow, "ambiguous", null);
-      saveFlow(flow);
-      announcement(`${readableError(error)} Check status before any new payment.`, "warning");
-    }
+        if (latest.state === "PAID") await recoverDelivery();
+        return latest;
+      },
+      isPreSubmitCancellation: error => error instanceof X402CancelledBeforeSubmission,
+      persist: next => { saveFlow(next as SavedFlow); renderQuote(); },
+      notice: message => announcement(message, "warning"),
+    });
   } finally { setBusy(false); if (delivery) renderDelivery(); else renderQuote(); }
 }
 
@@ -578,8 +550,7 @@ async function boot(): Promise<void> {
     el<HTMLInputElement>("#quantity").value = flow.quantity;
     el<HTMLInputElement>(`input[name="side"][value="${flow.side}"]`).checked = true;
   }
-  provider?.on?.("accountsChanged", () => { void refreshWallet(); });
-  provider?.on?.("chainChanged", () => { void refreshWallet(); });
+  bindWalletListeners(provider, refreshWallet);
   await refreshWallet();
   try {
     cap = await getCapabilities();

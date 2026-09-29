@@ -19,6 +19,12 @@ class Metrics {
   }
 }
 export const metrics=new Metrics();
+interface TelemetryRequest { method?:string; url?:string }
+interface TelemetryResponse { writeHead(status:number,headers:Record<string,string>):unknown; end(body?:string):unknown }
+export function telemetryHandler(req:TelemetryRequest,res:TelemetryResponse):void {
+  if(req.method!=='GET'||req.url!=='/metrics'){res.writeHead(404,{'Cache-Control':'no-store'});res.end();return;}
+  res.writeHead(200,{'Content-Type':'text/plain; version=0.0.4','Cache-Control':'no-store'});res.end(metrics.render());
+}
 interface Event { event:string; request_id?:string; quote_id?:string; payment_attempt_id?:string; code?:string; component?:string; status?:number; duration_ms?:number }
 export function logEvent(event:Event):void {
   // Allowlist projection. Never serialize Error objects, URLs, bodies, wallets,

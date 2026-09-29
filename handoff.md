@@ -22,18 +22,23 @@ no-op: this phase does not start containers, create a database/schema/volume,
 or perform an external write. Any later need for those actions stops for a new
 exact approval.
 
-The implementation adds a production-used pure browser policy seam and six
-deterministic Node scenarios for wrong chain/switch, payer-preserving account
+The implementation adds production-used browser policy and orchestration seams
+with eleven deterministic Node scenarios for wrong chain/switch, payer-preserving account
 and chain changes, typed pre-submit cancellation, ambiguous outcomes, exact
 reload request/idempotency identity, fixture gating, and one-call
-no-resettlement. Three static operations tests resolve both Compose profiles
-and assert exact services, networks, loopback publication, secrets, resource
-and security limits, healthchecks, internal metrics, and CSP. Fixture capture,
+no-resettlement. The orchestration harness records the real recovery/payment
+decision path through fake API, session persistence, notices, wallet events,
+and adapter calls. Four static operations tests resolve both Compose profiles
+and assert exact services, networks, loopback publication, per-profile secret
+identity, exact users/tmpfs/mount modes/resources, healthchecks, internal
+metrics, and CSP. Fixture capture,
 gateway, and edge no longer inherit live egress networks. Gateway metrics bind
 only to `gateway-metrics` on an internal operations network, accept only
-`GET /metrics`, and have no host/Caddy route. Caddy now sends the canonical
-restrictive CSP without `unsafe-inline`. Focused results are six browser tests
-and three static operations tests passing; gateway typecheck also passes.
+`GET /metrics`, and have no host/Caddy route. Two executable gateway telemetry
+tests assert the exact label-free metric set, no high-cardinality identifiers,
+404 for other paths, and readiness independent of health. Caddy sends the exact
+canonical restrictive CSP including `frame-ancestors 'none'`, without
+`unsafe-inline`; source HTML has no incompatible inline script/style.
 
 The exact web install/build is not yet evidenced: an offline
 lifecycle-disabled install stopped because the exact Vite 7.1.5 tarball is
@@ -47,7 +52,12 @@ Python suite and exposed only missing architecture-inventory ownership for the
 new F6 package and tests: 1153 tests and 85 subtests passed, while five graph
 policy tests failed on the undeclared paths. The inventory now binds every F6
 package file and both new test/source artifacts; the exact five-test graph
-regression slice passes. Production's
+regression slice passes, and the repaired tree then passed the full pinned PR
+verifier before the first reviews. Those reviews correctly rejected helper-only
+browser coverage and shallow operations assertions. The current repair binds
+the harness to production `resumeFlow`, `submitPayment`, and wallet listeners;
+it also closes exact Compose, telemetry, and CSP mutation gaps. Focused/full
+verification must be rerun on the repaired tree before re-review. Production's
 x402 adapter remains deliberately unregistered and fixture payment remains
 fail closed. This route will not use a real wallet, RPC, facilitator, transfer,
 testnet/mainnet payment, live capture/profile, shared environment, deployment,

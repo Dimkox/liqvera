@@ -10,7 +10,7 @@ import { MezoReadonlyRpc, MezoReceiptReader } from './adapters/mezo-rpc.js';
 import { Gateway } from './application/gateway.js';
 import { createApp } from './routes/app.js';
 import { startWorkers } from './workers/scheduler.js';
-import { logEvent, metrics } from './security/observability.js';
+import { logEvent, telemetryHandler } from './security/observability.js';
 async function main():Promise<void> {
   const config=await loadConfig();
   const pool=new Pool({connectionString:config.databaseUrl,max:12,connectionTimeoutMillis:3000,idleTimeoutMillis:30000,
@@ -26,10 +26,7 @@ async function main():Promise<void> {
   const server=createServer({maxHeaderSize:32768,requestTimeout:20000,headersTimeout:10000},createApp(gateway,config.origins));
   server.keepAliveTimeout=5000;server.maxRequestsPerSocket=100;
   const stopWorkers=startWorkers(gateway);
-  const telemetry=createServer((req,res)=>{
-    if(req.method!=='GET'||req.url!=='/metrics'){res.writeHead(404,{'Cache-Control':'no-store'});res.end();return;}
-    res.writeHead(200,{'Content-Type':'text/plain; version=0.0.4','Cache-Control':'no-store'});res.end(metrics.render());
-  });
+  const telemetry=createServer(telemetryHandler);
   telemetry.listen(config.metricsPort,config.metricsHost);
   server.listen(config.port,config.host,()=>logEvent({event:'GATEWAY_STARTED'}));
   let shuttingDown=false;

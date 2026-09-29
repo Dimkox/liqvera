@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import re
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -101,17 +102,60 @@ def test_fixture_publication_resource_security_health_and_secret_boundaries() ->
     assert "ports" not in gateway
 
 
+def test_exact_users_tmpfs_mount_modes_resources_and_profile_secrets() -> None:
+    fixture = rendered("fixture")["services"]
+    live = rendered("live")["services"]
+    assert isinstance(fixture, dict) and isinstance(live, dict)
+    expected = {
+        "evidence-capture": ("10001:10001", ["/tmp:rw,noexec,nosuid,size=32m"], 402653184, 0.5, 128),
+        "report": ("10002:10001", ["/tmp:rw,noexec,nosuid,size=64m"], 536870912, 1.0, 128),
+        "postgres": ("70:70", ["/tmp:rw,noexec,nosuid,size=64m", "/var/run/postgresql:rw,nosuid,size=8m"], 805306368, 1.0, 128),
+        "migrate": ("10003:10001", ["/tmp:rw,noexec,nosuid,size=32m"], 268435456, 0.5, 128),
+        "gateway": ("10003:10001", ["/tmp:rw,noexec,nosuid,size=64m"], 536870912, 1.0, 256),
+        "web": ("101:101", ["/tmp:rw,noexec,nosuid,size=8m", "/var/cache/nginx:rw,nosuid,size=8m", "/var/run:rw,nosuid,size=8m"], 134217728, 0.25, 64),
+        "edge": ("10001:10001", ["/tmp:rw,noexec,nosuid,size=16m"], 201326592, 0.5, 128),
+    }
+    for profile, services in (("fixture", fixture), ("live", live)):
+        for role, (user, tmpfs, memory, cpus, pids) in expected.items():
+            service = services[f"{role}-{profile}"]
+            assert service["user"] == user
+            assert service["tmpfs"] == tmpfs
+            assert int(service["mem_limit"]) == memory
+            assert float(service["cpus"]) == cpus
+            assert service["pids_limit"] == pids
+        gateway_volumes = {item["target"]: item for item in services[f"gateway-{profile}"]["volumes"]}
+        assert gateway_volumes["/data/artifacts"]["read_only"] is True
+        report_volumes = {item["target"]: item for item in services[f"report-{profile}"]["volumes"]}
+        assert report_volumes["/data/captures"]["read_only"] is True
+        assert report_volumes["/data/artifacts"].get("read_only", False) is False
+        assert "volumes" not in services[f"web-{profile}"]
+        secrets = {
+            name: {item["source"] for item in services[name].get("secrets", [])}
+            for name in services
+        }
+        assert secrets[f"gateway-{profile}"] == {f"postgres_password_{profile}", f"report_token_{profile}"}
+        assert secrets[f"report-{profile}"] == {f"report_token_{profile}"}
+        assert secrets[f"postgres-{profile}"] == {f"postgres_password_{profile}"}
+        assert secrets[f"migrate-{profile}"] == {f"postgres_password_{profile}"}
+
+
 def test_metrics_are_private_and_csp_is_restrictive() -> None:
     main = (ROOT / "apps" / "mezo-gateway" / "src" / "main.ts").read_text()
     metrics = (ROOT / "apps" / "mezo-gateway" / "src" / "security" / "observability.ts").read_text()
     caddy = (ROOT / "deploy" / "mezo-evidence" / "Caddyfile").read_text()
+    index = (ROOT / "apps" / "mezo-web" / "index.html").read_text()
+    assert "createServer(telemetryHandler)" in main
     assert "config.metricsPort,config.metricsHost" in main
     assert "liqvera_${name}_total{" not in metrics
     assert "liqvera_payment_ready{" not in metrics
-    assert "Content-Security-Policy" in caddy
-    assert "default-src 'none'" in caddy
-    assert "script-src 'self'" in caddy
-    assert "connect-src 'self'" in caddy
-    assert "style-src 'self'" in caddy
+    expected_csp = (
+        "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
+        "connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'self'; "
+        "frame-ancestors 'none'; object-src 'none'"
+    )
+    match = re.search(r'Content-Security-Policy "([^"]+)"', caddy)
+    assert match and match.group(1) == expected_csp
     assert "unsafe-inline" not in caddy
     assert "/metrics" not in caddy
+    assert re.findall(r"<script[^>]*>", index) == ['<script type="module" src="/src/main.ts">']
+    assert "<style" not in index and " style=" not in index

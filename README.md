@@ -23,7 +23,7 @@ gateway/ledger verification is `ready`: the exact lock, strict cleanup-adapter
 regressions, and five disposable PostgreSQL checks passed pinned verification
 and independent review. F5's focused fake-only Node slice around the real
 gateway and reconciliation orchestration is locally verified and `ready`.
-F6 now has deterministic browser-policy and static operations checks for
+F6 now has deterministic production-orchestration and static operations checks for
 guarded cancel, wrong-network and wallet changes, reload identity and
 no-resettlement, fixture zero-egress topology, internal-only metrics, resource
 and security bounds, and CSP. Focused checks pass; the exact-lock web build,

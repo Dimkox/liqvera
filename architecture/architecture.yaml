@@ -15163,6 +15163,9 @@ repository_inventory:
   - path: apps/mezo-web/src/browser-flow.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/browser-orchestration.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/src/contracts.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
@@ -15183,6 +15186,12 @@ repository_inventory:
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/test/browser-flow.test.mjs
     node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/test/browser-orchestration.test.mjs
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/test/observability.test.mjs
+    node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: tests/operations/test_f6_static.py
     node: test:liqvera-local-mvp

@@ -13,8 +13,9 @@ RPC, or network service:
 npm test
 ```
 
-It exercises the production-used browser policy seam with a deterministic
-EIP-1193 double and exact recovery/payment-guard plans. It covers wrong chain,
+It exercises the production-used browser policy and orchestration seams with a
+deterministic EIP-1193 double, recording API/session/view/payment fakes, and
+exact recovery/payment-guard plans. It covers wrong chain,
 account/chain switch, typed cancel, ambiguous outcome, reload,
 same-idempotency, fixture disable, and no-resettlement decisions. It does not
 prove a real wallet or x402 transfer. The exact-lock typecheck and Vite build

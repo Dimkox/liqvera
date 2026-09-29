@@ -204,6 +204,11 @@ grant UUID plus full grant digest. Reusing the grant with a different output
 directory performs zero second case execution. Browser payment deadlines now
 remain active through complete body streaming; a stalled-body regression is
 covered. P3 remains blocked by `LIVE_GAS_ENFORCEMENT_UNAVAILABLE`.
+Focused repair checks pass: 71 acceptance/contract/graph tests, 18 browser
+tests, and 24 gateway tests with five explicitly disposable-PostgreSQL skips.
+The clean pinned PR verifier then passed 1,219 tests plus 85 subtests, coverage,
+Ruff, Bandit, secret scan, SQL safety, contract structure and configuration
+scan. The verifier itself performed no public read or external write.
 
 ## F6 local UI and operations verification — 2026-09-29
 

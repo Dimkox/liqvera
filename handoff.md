@@ -219,6 +219,8 @@ canonical-block and before/after buyer-balance observations. Migration 003 must
 already be applied through a separately approved database operation.
 Focused repair checks pass: 69 acceptance/contract tests, 18 browser
 tests, and 29 gateway tests with five explicitly disposable-PostgreSQL skips.
+The clean pinned PR verifier passed 1,218 tests plus 85 subtests at fingerprint
+`8dda2e9858734b76a624a8ec309ccc22177845a54526babd15eda4b78ba8b499`.
 The clean pinned PR verifier passed 1,218 tests plus 85 subtests, coverage,
 Ruff, Bandit, secret scan, SQL safety, contract structure and configuration
 scan at fingerprint `2749fdfb20570131d0d15e80171eaa5a885fdf24a8bfd54b13003de4c173acc5`.

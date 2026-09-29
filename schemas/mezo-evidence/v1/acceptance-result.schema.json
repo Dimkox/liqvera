@@ -110,7 +110,7 @@
           "properties": {"command": {"type": "array", "minItems": 1}, "exit_code": {"const": 0}, "evidence": {"minItems": 1}, "omissions": {"maxItems": 0}}
         }},
         {"if": {"properties": {"status": {"enum": ["NOT_RUN", "BLOCKED_EXTERNAL"]}}}, "then": {
-          "properties": {"command": {"type": "null"}, "exit_code": {"type": "null"}, "evidence": {"maxItems": 0}, "omissions": {"minItems": 1}}
+          "properties": {"command": {"type": "null"}, "exit_code": {"type": "null"}, "omissions": {"minItems": 1}}
         }}
       ]
     }

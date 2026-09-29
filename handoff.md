@@ -245,8 +245,10 @@ exactly one of `DATABASE_URL` or `DATABASE_URL_FILE`, an HTTPS facilitator URL,
 and a read-only HTTPS Mezo RPC URL. Before network I/O it checks the current
 clean commit/tree, canonical P3 plan and exact 001–004 migration checksums.
 Durable consumption/`SUBMITTING` precedes the sole settlement; pending or lost
-responses remain spent and confirm-only. Deterministic fake E2E covers confirmed
-and pending paths plus replay. No live payment or network call was performed.
+responses remain spent and confirm-only, with sealed A13/A14 observations using
+the canonical `PAYMENT_CONFIRMATION_PENDING` blocker rather than a false wallet
+omission. Deterministic fake E2E covers confirmed and pending paths plus replay.
+No live payment or network call was performed.
 Final migration identities are `001_ledger.sql`
 `bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b`,
 `002_fix_immutable_ledger_identity.sql`

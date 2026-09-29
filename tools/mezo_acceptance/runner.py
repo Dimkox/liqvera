@@ -41,6 +41,7 @@ DISPATCHER = ROOT / "scripts/run-local-acceptance-assertion.py"
 BLOCKED_REASON = "EXACT_EXTERNAL_GRANT_ABSENT"
 PAYMENT_GRANT_BLOCKED_REASON = "EXACT_PAYMENT_GRANT_ABSENT"
 WALLET_SIGNATURE_BLOCKED_REASON = "HUMAN_WALLET_SIGNATURE_REQUIRED"
+PAYMENT_PENDING_BLOCKED_REASON = "PAYMENT_CONFIRMATION_PENDING"
 A29_BLOCKED_REASON = "A29_NETWORK_BYTE_CAP_UNENFORCEABLE"
 FAIL_REASONS = {
     "ASSERTION_EXIT_NONZERO",
@@ -457,7 +458,7 @@ def validate_result_semantics(result: dict) -> None:
                 raise ValueError(f"{case_id} command capability is not closed")
         elif status == "BLOCKED_EXTERNAL":
             allowed = (
-                [PAYMENT_GRANT_BLOCKED_REASON, WALLET_SIGNATURE_BLOCKED_REASON]
+                [PAYMENT_GRANT_BLOCKED_REASON, WALLET_SIGNATURE_BLOCKED_REASON, PAYMENT_PENDING_BLOCKED_REASON]
                 if case.execution_class == "testnet_write"
                 else [A29_BLOCKED_REASON, BLOCKED_REASON]
                 if case_id == "A29" and result.get("mode") == "live"
@@ -573,6 +574,16 @@ def evidence_reference(
             "payment_attempt_id", "report_sha256", "network", "chain_id", "asset",
             "amount_atomic", "confirmed_at", "finality_policy_version",
         }
+        pending = {"schema", "status", "grant_id", "grant_digest", "tx_hash", "settlement_count", "retry_allowed"}
+        if isinstance(result, dict) and set(result) == pending:
+            if (
+                result["schema"] != "liqvera-p3-payment-observation/v1"
+                or result["status"] != "UNKNOWN" or result["settlement_count"] != 1
+                or result["retry_allowed"] is not False
+                or result["tx_hash"] is not None and not re.fullmatch(r"0x[0-9a-f]{64}", str(result["tx_hash"]))
+            ):
+                raise ValueError(f"{case_id} pending payment observation is invalid")
+            return {"file": relative, "sha256": hashlib.sha256(raw).hexdigest(), "size_bytes": len(raw)}
         if (
             not isinstance(result, dict) or set(result) != required
             or result["schema"] != "liqvera-p3-payment-observation/v1"
@@ -1233,12 +1244,32 @@ def main() -> int:
                         "evidence": [evidence_reference(evidence_root, f"evidence/{case_id}.json", case_id, case.assertion, case.execution_class, identity)],
                     }
                 except (OSError, ValueError, subprocess.SubprocessError, KeyError, TypeError):
-                    row = {
-                        "case_id": case_id, "title": case.title, "status": "BLOCKED_EXTERNAL",
-                        "omissions": [WALLET_SIGNATURE_BLOCKED_REASON], "command": None,
-                        "environment_names": [], "exit_code": None, "evidence": [],
-                        "execution_class": case.execution_class,
-                    }
+                    if isinstance(p3_observation, dict) and p3_observation.get("status") == "UNKNOWN":
+                        document = {
+                            "case_id": case_id, "assertion": case.assertion,
+                            "execution_class": case.execution_class, "claims": list(case.required_claims),
+                            "subject": {"commit": identity["commit"], "tree": identity["tree"]},
+                            "observations": {"result": p3_observation},
+                            "transcript": {"stdout_sha256": canonical_sha256(p3_observation), "stderr_sha256": hashlib.sha256(b"").hexdigest()},
+                        }
+                        evidence_dir = evidence_root / "evidence"
+                        evidence_dir.mkdir(mode=0o700, exist_ok=True)
+                        evidence_file = evidence_dir / f"{case_id}.json"
+                        evidence_file.write_text(json.dumps(document, sort_keys=True, indent=2) + "\n")
+                        row = {
+                            "case_id": case_id, "title": case.title, "status": "BLOCKED_EXTERNAL",
+                            "omissions": [PAYMENT_PENDING_BLOCKED_REASON], "command": None,
+                            "environment_names": [], "exit_code": None,
+                            "evidence": [evidence_reference(evidence_root, f"evidence/{case_id}.json", case_id, case.assertion, case.execution_class, identity)],
+                            "execution_class": case.execution_class,
+                        }
+                    else:
+                        row = {
+                            "case_id": case_id, "title": case.title, "status": "BLOCKED_EXTERNAL",
+                            "omissions": [WALLET_SIGNATURE_BLOCKED_REASON], "command": None,
+                            "environment_names": [], "exit_code": None, "evidence": [],
+                            "execution_class": case.execution_class,
+                        }
             elif case.execution_class != "local":
                 row = {
                     "case_id": case_id,

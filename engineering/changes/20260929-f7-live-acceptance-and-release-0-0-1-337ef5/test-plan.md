@@ -26,9 +26,12 @@
 - Operator P2: actual CLI sealing with deterministic transport injection;
   response target, plan, grant, subject and byte-bound mutations fail closed.
 - P2 semantics: controlled gateway `SOURCE_UNAVAILABLE` through
-  `HttpReportService.build` with no fallback/artifact; shallow anonymous clone
-  in a fresh directory with exact origin/commit/tree and bounded bytes; a
-  second output directory with the same durable journal performs zero work.
+  `HttpReportService.build` with no fallback/artifact. A29 process memory,
+  wall-time, output, single-file and aggregate-disk caps terminate early in
+  tests, but A29 stays blocked because network bytes are not exactly measured.
+- Authority: P2 accepts exactly A07/A29 and the approved journal identity; P3
+  accepts exactly linked A13/A14. Mixed bundles and a different journal fail
+  before case execution.
 - Browser transport: executable timeout, redirect, ambient-credential and both
   declared/streamed response-cap tests. Durable consumption: concurrent and
   restarted adapters share one transactional fake store; real PostgreSQL proof

@@ -7,9 +7,9 @@ import time.
 
 from __future__ import annotations
 
-import ipaddress
 import hashlib
 import http.client
+import ipaddress
 import json
 import os
 import re
@@ -18,7 +18,7 @@ import ssl
 import stat
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from urllib.parse import urlsplit
 
 
@@ -36,10 +36,33 @@ _ALLOWED = {
     ("A29", "GIT_CLONE", "https://github.com/Dimkox/liqvera.git"),
 }
 _FIELDS = {
-    "schema", "grant_id", "subject_commit", "subject_tree", "plan_sha256", "case", "method",
-    "url", "expires_at", "maximum_attempts", "timeout_seconds", "max_response_bytes", "body_sha256",
+    "schema",
+    "grant_id",
+    "journal_id",
+    "journal_sha256",
+    "subject_commit",
+    "subject_tree",
+    "plan_sha256",
+    "case",
+    "method",
+    "url",
+    "expires_at",
+    "maximum_attempts",
+    "timeout_seconds",
+    "max_response_bytes",
+    "body_sha256",
 }
-_AMBIENT_AUTHORITY = {"HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "all_proxy", "no_proxy", "NETRC"}
+_AMBIENT_AUTHORITY = {
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "ALL_PROXY",
+    "NO_PROXY",
+    "http_proxy",
+    "https_proxy",
+    "all_proxy",
+    "no_proxy",
+    "NETRC",
+}
 
 
 @dataclass(frozen=True)
@@ -58,15 +81,25 @@ class PublicReadPlan:
 
     @property
     def digest(self) -> str:
-        value={"case":self.case,"method":self.method,"url":self.url,"body_sha256":self.body_sha256,
-               "timeout_seconds":self.timeout_seconds,"max_response_bytes":self.max_response_bytes,
-               "maximum_attempts":self.maximum_attempts}
-        return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+        value = {
+            "case": self.case,
+            "method": self.method,
+            "url": self.url,
+            "body_sha256": self.body_sha256,
+            "timeout_seconds": self.timeout_seconds,
+            "max_response_bytes": self.max_response_bytes,
+            "maximum_attempts": self.maximum_attempts,
+        }
+        return hashlib.sha256(
+            json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
 
 
 @dataclass(frozen=True)
 class PublicReadGrant:
     grant_id: str
+    journal_id: str
+    journal_sha256: str
     subject_commit: str
     subject_tree: str
     plan_sha256: str
@@ -81,7 +114,11 @@ class PublicReadGrant:
 
     @classmethod
     def parse(cls, raw: object, *, now: datetime) -> "PublicReadGrant":
-        if not isinstance(raw, dict) or set(raw) != _FIELDS or raw.get("schema") != "liqvera-public-read-grant/v1":
+        if (
+            not isinstance(raw, dict)
+            or set(raw) != _FIELDS
+            or raw.get("schema") != "liqvera-public-read-grant/v1"
+        ):
             raise GrantError("PUBLIC_READ_GRANT_INVALID")
         grant_id = raw.get("grant_id")
         try:
@@ -89,8 +126,21 @@ class PublicReadGrant:
                 raise ValueError
         except ValueError:
             raise GrantError("PUBLIC_READ_GRANT_INVALID") from None
+        journal_id, journal_sha256 = raw.get("journal_id"), raw.get("journal_sha256")
+        try:
+            if not isinstance(journal_id, str) or str(uuid.UUID(journal_id)) != journal_id:
+                raise ValueError
+        except ValueError:
+            raise GrantError("PUBLIC_READ_GRANT_INVALID") from None
+        if not isinstance(journal_sha256, str) or not _DIGEST.fullmatch(journal_sha256):
+            raise GrantError("PUBLIC_READ_GRANT_INVALID")
         values = (raw.get("subject_commit"), raw.get("subject_tree"), raw.get("plan_sha256"))
-        if not all(isinstance(value, str) for value in values) or not _OID.fullmatch(values[0]) or not _OID.fullmatch(values[1]) or not _DIGEST.fullmatch(values[2]):
+        if (
+            not all(isinstance(value, str) for value in values)
+            or not _OID.fullmatch(values[0])
+            or not _OID.fullmatch(values[1])
+            or not _DIGEST.fullmatch(values[2])
+        ):
             raise GrantError("PUBLIC_READ_GRANT_INVALID")
         case, method, url = raw.get("case"), raw.get("method"), raw.get("url")
         if not all(isinstance(value, str) for value in (case, method, url)):
@@ -98,7 +148,12 @@ class PublicReadGrant:
         parsed = urlsplit(url)
         if parsed.scheme != "https":
             raise GrantError("PUBLIC_READ_TLS_REQUIRED")
-        if parsed.username or parsed.password or parsed.port not in (None, 443) or (case, method, url) not in _ALLOWED:
+        if (
+            parsed.username
+            or parsed.password
+            or parsed.port not in (None, 443)
+            or (case, method, url) not in _ALLOWED
+        ):
             raise GrantError("PUBLIC_READ_DESTINATION_FORBIDDEN")
         try:
             expires = datetime.fromisoformat(str(raw["expires_at"]).replace("Z", "+00:00"))
@@ -106,34 +161,86 @@ class PublicReadGrant:
             raise GrantError("PUBLIC_READ_GRANT_INVALID") from None
         if expires.tzinfo is None or expires <= now or expires > now + timedelta(minutes=15):
             raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
-        limits = (raw.get("maximum_attempts"), raw.get("timeout_seconds"), raw.get("max_response_bytes"))
+        limits = (
+            raw.get("maximum_attempts"),
+            raw.get("timeout_seconds"),
+            raw.get("max_response_bytes"),
+        )
         maximum_bytes = 52_428_800 if case == "A29" else 2_097_152
-        if any(type(value) is not int for value in limits) or not (limits[0] == 1 and 1 <= limits[1] <= 15 and 1 <= limits[2] <= maximum_bytes):
+        if any(type(value) is not int for value in limits) or not (
+            limits[0] == 1 and 1 <= limits[1] <= 15 and 1 <= limits[2] <= maximum_bytes
+        ):
             raise GrantError("PUBLIC_READ_GRANT_INVALID")
-        body_sha256=raw.get("body_sha256")
-        if not isinstance(body_sha256,str) or not _DIGEST.fullmatch(body_sha256):
+        body_sha256 = raw.get("body_sha256")
+        if not isinstance(body_sha256, str) or not _DIGEST.fullmatch(body_sha256):
             raise GrantError("PUBLIC_READ_GRANT_INVALID")
-        return cls(grant_id, values[0], values[1], values[2], case, method, url, expires, *limits, body_sha256)
+        return cls(
+            grant_id,
+            journal_id,
+            journal_sha256,
+            values[0],
+            values[1],
+            values[2],
+            case,
+            method,
+            url,
+            expires,
+            *limits,
+            body_sha256,
+        )
 
     @property
     def digest(self) -> str:
         value = {
-            "schema": "liqvera-public-read-grant/v1", "grant_id": self.grant_id,
-            "subject_commit": self.subject_commit, "subject_tree": self.subject_tree,
-            "plan_sha256": self.plan_sha256, "case": self.case, "method": self.method,
-            "url": self.url, "expires_at": self.expires_at.isoformat().replace("+00:00", "Z"),
-            "maximum_attempts": self.maximum_attempts, "timeout_seconds": self.timeout_seconds,
-            "max_response_bytes": self.max_response_bytes, "body_sha256": self.body_sha256,
+            "schema": "liqvera-public-read-grant/v1",
+            "grant_id": self.grant_id,
+            "journal_id": self.journal_id,
+            "journal_sha256": self.journal_sha256,
+            "subject_commit": self.subject_commit,
+            "subject_tree": self.subject_tree,
+            "plan_sha256": self.plan_sha256,
+            "case": self.case,
+            "method": self.method,
+            "url": self.url,
+            "expires_at": self.expires_at.isoformat().replace("+00:00", "Z"),
+            "maximum_attempts": self.maximum_attempts,
+            "timeout_seconds": self.timeout_seconds,
+            "max_response_bytes": self.max_response_bytes,
+            "body_sha256": self.body_sha256,
         }
-        return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        return hashlib.sha256(
+            json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
 
-    def authorize(self, plan: PublicReadPlan, *, subject_commit: str, subject_tree: str, now: datetime) -> None:
+    def authorize(
+        self, plan: PublicReadPlan, *, subject_commit: str, subject_tree: str, now: datetime
+    ) -> None:
         if now >= self.expires_at:
             raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
-        actual = (subject_commit, subject_tree, plan.digest, plan.case, plan.method, plan.url,
-                  plan.maximum_attempts, plan.timeout_seconds, plan.max_response_bytes,plan.body_sha256)
-        expected = (self.subject_commit, self.subject_tree, self.plan_sha256, self.case, self.method, self.url,
-                    self.maximum_attempts, self.timeout_seconds, self.max_response_bytes,self.body_sha256)
+        actual = (
+            subject_commit,
+            subject_tree,
+            plan.digest,
+            plan.case,
+            plan.method,
+            plan.url,
+            plan.maximum_attempts,
+            plan.timeout_seconds,
+            plan.max_response_bytes,
+            plan.body_sha256,
+        )
+        expected = (
+            self.subject_commit,
+            self.subject_tree,
+            self.plan_sha256,
+            self.case,
+            self.method,
+            self.url,
+            self.maximum_attempts,
+            self.timeout_seconds,
+            self.max_response_bytes,
+            self.body_sha256,
+        )
         if actual != expected:
             raise GrantError("PUBLIC_READ_GRANT_MISMATCH")
 
@@ -149,93 +256,222 @@ class PublicReadGrant:
                 raise GrantError("PUBLIC_READ_PRIVATE_ADDRESS")
 
 
-def validate_public_read_evidence(grant: PublicReadGrant, raw: object, *, environ: dict[str, str],now:datetime) -> dict[str, object]:
+def validate_public_read_evidence(
+    grant: PublicReadGrant, raw: object, *, environ: dict[str, str], now: datetime
+) -> dict[str, object]:
     """Reduce untrusted transport observations to closed A07/A29 evidence."""
     if any(name in environ for name in _AMBIENT_AUTHORITY):
         raise GrantError("PUBLIC_READ_AMBIENT_AUTHORITY")
-    if now>=grant.expires_at:
+    if now >= grant.expires_at:
         raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
-    fields={"status","final_url","response_bytes","response_sha256","resolved_addresses","connected_address","attempts"}
-    if not isinstance(raw,dict) or set(raw)!=fields or raw.get("status")!=200:
+    fields = {
+        "status",
+        "final_url",
+        "response_bytes",
+        "response_sha256",
+        "resolved_addresses",
+        "connected_address",
+        "attempts",
+    }
+    if not isinstance(raw, dict) or set(raw) != fields or raw.get("status") != 200:
         raise GrantError("PUBLIC_READ_EVIDENCE_INVALID")
-    if raw.get("final_url")!=grant.url:
+    if raw.get("final_url") != grant.url:
         raise GrantError("PUBLIC_READ_REDIRECT_BLOCKED")
-    size=raw.get("response_bytes"); attempts=raw.get("attempts")
-    if type(size) is not int or size<0 or size>grant.max_response_bytes:
+    size = raw.get("response_bytes")
+    attempts = raw.get("attempts")
+    if type(size) is not int or size < 0 or size > grant.max_response_bytes:
         raise GrantError("PUBLIC_READ_RESPONSE_TOO_LARGE")
-    if type(attempts) is not int or attempts<1 or attempts>grant.maximum_attempts or not isinstance(raw.get("response_sha256"),str) or not _DIGEST.fullmatch(raw["response_sha256"]):
+    if (
+        type(attempts) is not int
+        or attempts < 1
+        or attempts > grant.maximum_attempts
+        or not isinstance(raw.get("response_sha256"), str)
+        or not _DIGEST.fullmatch(raw["response_sha256"])
+    ):
         raise GrantError("PUBLIC_READ_EVIDENCE_INVALID")
-    addresses=raw.get("resolved_addresses"); connected=raw.get("connected_address")
-    if not isinstance(addresses,list) or not all(isinstance(value,str) for value in addresses) or not isinstance(connected,str):
+    addresses = raw.get("resolved_addresses")
+    connected = raw.get("connected_address")
+    if (
+        not isinstance(addresses, list)
+        or not all(isinstance(value, str) for value in addresses)
+        or not isinstance(connected, str)
+    ):
         raise GrantError("PUBLIC_READ_EVIDENCE_INVALID")
-    grant.validate_resolution(tuple(addresses),(connected,))
-    return {"case":grant.case,"method":grant.method,"url":grant.url,"status":200,"response_bytes":size,
-            "response_sha256":raw["response_sha256"],"attempts":attempts}
+    grant.validate_resolution(tuple(addresses), (connected,))
+    return {
+        "case": grant.case,
+        "method": grant.method,
+        "url": grant.url,
+        "status": 200,
+        "response_bytes": size,
+        "response_sha256": raw["response_sha256"],
+        "attempts": attempts,
+    }
 
 
 class _PinnedHTTPSConnection(http.client.HTTPSConnection):
-    def __init__(self,host:str,address:str,timeout:int):
-        super().__init__(host,443,timeout=timeout,context=ssl.create_default_context())
-        self._address=address
-    def connect(self)->None:
-        raw=socket.create_connection((self._address,443),self.timeout)
-        self.sock=self._context.wrap_socket(raw,server_hostname=self.host)
+    def __init__(self, host: str, address: str, timeout: int):
+        super().__init__(host, 443, timeout=timeout, context=ssl.create_default_context())
+        self._address = address
+
+    def connect(self) -> None:
+        raw = socket.create_connection((self._address, 443), self.timeout)
+        self.sock = self._context.wrap_socket(raw, server_hostname=self.host)
 
 
-def _resolve(host:str)->tuple[str,...]:
-    return tuple(sorted({item[4][0] for item in socket.getaddrinfo(host,443,type=socket.SOCK_STREAM)}))
+def _resolve(host: str) -> tuple[str, ...]:
+    return tuple(
+        sorted({item[4][0] for item in socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)})
+    )
 
 
-def consume_public_read_grant(state_dir, grant:PublicReadGrant)->str:
+def journal_document(journal_id: str) -> bytes:
+    try:
+        if str(uuid.UUID(journal_id)) != journal_id:
+            raise ValueError
+    except ValueError:
+        raise GrantError("PUBLIC_READ_JOURNAL_INVALID") from None
+    return (
+        json.dumps(
+            {"schema": "liqvera-public-read-journal/v1", "journal_id": journal_id},
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n"
+    ).encode()
+
+
+def initialize_public_read_journal(state_dir, journal_id: str) -> str:
+    info = os.lstat(state_dir)
+    if not stat.S_ISDIR(info.st_mode) or stat.S_IMODE(info.st_mode) != 0o700:
+        raise GrantError("PUBLIC_READ_STATE_DIR_INVALID")
+    raw = journal_document(journal_id)
+    path = os.path.join(os.fspath(state_dir), "journal.json")
+    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o400)
+    try:
+        os.write(descriptor, raw)
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+    directory = os.open(state_dir, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+    return hashlib.sha256(raw).hexdigest()
+
+
+def validate_public_read_journal(state_dir, journal_id: str, journal_sha256: str) -> str:
+    path = os.path.join(os.fspath(state_dir), "journal.json")
+    info = os.lstat(path)
+    if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o400:
+        raise GrantError("PUBLIC_READ_JOURNAL_INVALID")
+    raw = open(path, "rb").read()
+    digest = hashlib.sha256(raw).hexdigest()
+    if raw != journal_document(journal_id) or digest != journal_sha256:
+        raise GrantError("PUBLIC_READ_JOURNAL_MISMATCH")
+    return digest
+
+
+def consume_public_read_grant(state_dir, grant: PublicReadGrant) -> str:
     state_dir = os.fspath(state_dir)
     info = os.lstat(state_dir)
     if not stat.S_ISDIR(info.st_mode) or stat.S_IMODE(info.st_mode) != 0o700:
         raise GrantError("PUBLIC_READ_STATE_DIR_INVALID")
-    identity = hashlib.sha256(f"{info.st_dev}:{info.st_ino}".encode()).hexdigest()
+    identity = validate_public_read_journal(state_dir, grant.journal_id, grant.journal_sha256)
     marker = hashlib.sha256(f"{grant.grant_id}:{grant.digest}".encode()).hexdigest()
     path = os.path.join(state_dir, marker)
     try:
-        descriptor=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o400)
+        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o400)
     except FileExistsError:
         raise GrantError("PUBLIC_READ_GRANT_ALREADY_CONSUMED") from None
     try:
-        os.write(descriptor,(grant.digest+"\n").encode());os.fsync(descriptor)
-    finally: os.close(descriptor)
+        os.write(descriptor, (grant.digest + "\n").encode())
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
     directory = os.open(state_dir, os.O_RDONLY | os.O_DIRECTORY)
-    try: os.fsync(directory)
-    finally: os.close(directory)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
     return identity
 
 
-def execute_public_read(plan:PublicReadPlan,grant:PublicReadGrant,*,subject_commit:str,subject_tree:str,now,
-                        environ:dict[str,str],resolver=_resolve,connection=_PinnedHTTPSConnection,state_dir)->dict[str,object]:
+def execute_public_read(
+    plan: PublicReadPlan,
+    grant: PublicReadGrant,
+    *,
+    subject_commit: str,
+    subject_tree: str,
+    now,
+    environ: dict[str, str],
+    resolver=_resolve,
+    connection=_PinnedHTTPSConnection,
+    state_dir,
+) -> dict[str, object]:
     """Perform one exact HTTPS read through a directly connected validated IP."""
-    grant.authorize(plan,subject_commit=subject_commit,subject_tree=subject_tree,now=now())
-    if any(name in environ for name in _AMBIENT_AUTHORITY): raise GrantError("PUBLIC_READ_AMBIENT_AUTHORITY")
-    parsed=urlsplit(plan.url); before=tuple(resolver(parsed.hostname)); grant.validate_resolution(before,before)
-    connected=tuple(resolver(parsed.hostname)); grant.validate_resolution(before,connected)
-    if now()>=grant.expires_at: raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
-    state_identity = consume_public_read_grant(state_dir,grant)
-    client=connection(parsed.hostname,connected[0],plan.timeout_seconds)
+    grant.authorize(plan, subject_commit=subject_commit, subject_tree=subject_tree, now=now())
+    if any(name in environ for name in _AMBIENT_AUTHORITY):
+        raise GrantError("PUBLIC_READ_AMBIENT_AUTHORITY")
+    parsed = urlsplit(plan.url)
+    before = tuple(resolver(parsed.hostname))
+    grant.validate_resolution(before, before)
+    connected = tuple(resolver(parsed.hostname))
+    grant.validate_resolution(before, connected)
+    if now() >= grant.expires_at:
+        raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
+    state_identity = consume_public_read_grant(state_dir, grant)
+    client = connection(parsed.hostname, connected[0], plan.timeout_seconds)
     try:
-        path=parsed.path+(f"?{parsed.query}" if parsed.query else "")
-        client.request(plan.method,path,body=plan.body,headers={"Host":parsed.hostname,"Accept":"application/json","Content-Type":"application/json","Connection":"close"})
-        response=client.getresponse()
-        if 300<=response.status<400: raise GrantError("PUBLIC_READ_REDIRECT_BLOCKED")
-        if response.status!=200: raise GrantError("PUBLIC_READ_HTTP_STATUS")
-        chunks=[];size=0
+        path = parsed.path + (f"?{parsed.query}" if parsed.query else "")
+        client.request(
+            plan.method,
+            path,
+            body=plan.body,
+            headers={
+                "Host": parsed.hostname,
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Connection": "close",
+            },
+        )
+        response = client.getresponse()
+        if 300 <= response.status < 400:
+            raise GrantError("PUBLIC_READ_REDIRECT_BLOCKED")
+        if response.status != 200:
+            raise GrantError("PUBLIC_READ_HTTP_STATUS")
+        chunks = []
+        size = 0
         while True:
-            chunk=response.read(min(65536,plan.max_response_bytes-size+1))
-            if not chunk: break
-            size+=len(chunk)
-            if size>plan.max_response_bytes: raise GrantError("PUBLIC_READ_RESPONSE_TOO_LARGE")
+            chunk = response.read(min(65536, plan.max_response_bytes - size + 1))
+            if not chunk:
+                break
+            size += len(chunk)
+            if size > plan.max_response_bytes:
+                raise GrantError("PUBLIC_READ_RESPONSE_TOO_LARGE")
             chunks.append(chunk)
-        if now()>=grant.expires_at: raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
-        raw=b"".join(chunks)
-        evidence={"status":200,"final_url":plan.url,"response_bytes":len(raw),"response_sha256":hashlib.sha256(raw).hexdigest(),
-                  "resolved_addresses":list(before),"connected_address":connected[0],"attempts":1}
-        reduced = validate_public_read_evidence(grant,evidence,environ=environ,now=now())
-        return {**reduced, "grant_id": grant.grant_id, "grant_digest": grant.digest,
-                "plan_sha256": plan.digest, "subject_commit": subject_commit,
-                "subject_tree": subject_tree, "state_dir_identity": state_identity}
-    finally: client.close()
+        if now() >= grant.expires_at:
+            raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
+        raw = b"".join(chunks)
+        evidence = {
+            "status": 200,
+            "final_url": plan.url,
+            "response_bytes": len(raw),
+            "response_sha256": hashlib.sha256(raw).hexdigest(),
+            "resolved_addresses": list(before),
+            "connected_address": connected[0],
+            "attempts": 1,
+        }
+        reduced = validate_public_read_evidence(grant, evidence, environ=environ, now=now())
+        return {
+            **reduced,
+            "grant_id": grant.grant_id,
+            "grant_digest": grant.digest,
+            "plan_sha256": plan.digest,
+            "subject_commit": subject_commit,
+            "subject_tree": subject_tree,
+            "state_dir_identity": state_identity,
+        }
+    finally:
+        client.close()

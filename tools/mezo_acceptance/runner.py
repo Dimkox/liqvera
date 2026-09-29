@@ -19,15 +19,9 @@ from urllib.parse import urlsplit
 from jsonschema import Draft202012Validator
 
 from .cases import CASES
-from .live import execute_live_cases, validate_live_bundle
-from .live_cases import execute_a07, execute_a29
-from .public_read import PublicReadPlan
-
-
-def execute_authorized_live_cases(*args, **kwargs):
-    """Runner-owned seam used by production adapters and deterministic fakes."""
-    return execute_live_cases(*args, **kwargs)
-
+from .live import validate_p2_bundle
+from .live_cases import execute_a07
+from .public_read import PublicReadPlan, validate_public_read_journal
 
 ROOT = Path(__file__).resolve().parents[2]
 ENV_NAME = re.compile(r"^[A-Z][A-Z0-9_]*$")
@@ -46,6 +40,7 @@ RESULT_SCHEMA = ROOT / "schemas/mezo-evidence/v1/acceptance-result.schema.json"
 DISPATCHER = ROOT / "scripts/run-local-acceptance-assertion.py"
 BLOCKED_REASON = "EXACT_EXTERNAL_GRANT_ABSENT"
 LIVE_GAS_BLOCKED_REASON = "LIVE_GAS_ENFORCEMENT_UNAVAILABLE"
+A29_BLOCKED_REASON = "A29_NETWORK_BYTE_CAP_UNENFORCEABLE"
 FAIL_REASONS = {
     "ASSERTION_EXIT_NONZERO",
     "ASSERTION_TIMEOUT",
@@ -389,16 +384,21 @@ def validate_result_semantics(result: dict) -> None:
                 }
             ):
                 raise ValueError(f"{case_id} assertion contract digest mismatch")
-            expected_command = (["builtin:public-read", case_id] if case.execution_class == "public_read"
-                                else ["scripts/run-local-acceptance-assertion.py", case_id])
-            if (
-                row.get("command") != expected_command
-                or row.get("environment_names") != []
-            ):
+            expected_command = (
+                ["builtin:public-read", case_id]
+                if case.execution_class == "public_read"
+                else ["scripts/run-local-acceptance-assertion.py", case_id]
+            )
+            if row.get("command") != expected_command or row.get("environment_names") != []:
                 raise ValueError(f"{case_id} command capability is not closed")
         elif status == "BLOCKED_EXTERNAL":
-            allowed = ([LIVE_GAS_BLOCKED_REASON] if case.execution_class == "testnet_write"
-                       else [BLOCKED_REASON])
+            allowed = (
+                [LIVE_GAS_BLOCKED_REASON]
+                if case.execution_class == "testnet_write"
+                else [A29_BLOCKED_REASON]
+                if case_id == "A29" and result.get("mode") == "live"
+                else [BLOCKED_REASON]
+            )
             if case.execution_class == "local" or row.get("omissions") != allowed:
                 raise ValueError(f"{case_id} has invalid external blocker algebra")
         elif status == "NOT_RUN":
@@ -492,32 +492,81 @@ def evidence_reference(
         raise ValueError("evidence observations do not match the case-specific schema")
     if case_id in {"A07", "A29"}:
         result = observations["result"]
-        common = {"grant_id", "grant_digest", "plan_sha256", "subject_commit", "subject_tree", "state_dir_identity"}
-        specific = ({"schema", "adapter", "request_count", "reason", "source_mode", "fixture_fallback_used",
-                     "artifact_emitted", "stdout_sha256", "build_stdout_sha256"} if case_id == "A07" else
-                    {"schema", "commit", "tree", "origin", "clone_size_bytes", "credential_prompt", "redirects_allowed",
-                     "resolved_addresses", "connected_address"})
-        if (not isinstance(result, dict) or set(result) != common | specific
-                or result["subject_commit"] != identity["commit"] or result["subject_tree"] != identity["tree"]
-                or any(not re.fullmatch(r"[0-9a-f]{64}", str(result[name]))
-                       for name in ("grant_digest", "plan_sha256", "state_dir_identity"))
-                or not re.fullmatch(r"[0-9a-f-]{36}", str(result["grant_id"]))):
+        common = {
+            "grant_id",
+            "grant_digest",
+            "plan_sha256",
+            "subject_commit",
+            "subject_tree",
+            "state_dir_identity",
+        }
+        specific = (
+            {
+                "schema",
+                "adapter",
+                "request_count",
+                "reason",
+                "source_mode",
+                "fixture_fallback_used",
+                "artifact_emitted",
+                "stdout_sha256",
+                "build_stdout_sha256",
+            }
+            if case_id == "A07"
+            else {
+                "schema",
+                "commit",
+                "tree",
+                "origin",
+                "clone_size_bytes",
+                "credential_prompt",
+                "redirects_allowed",
+                "resolved_addresses",
+                "connected_address",
+            }
+        )
+        if (
+            not isinstance(result, dict)
+            or set(result) != common | specific
+            or result["subject_commit"] != identity["commit"]
+            or result["subject_tree"] != identity["tree"]
+            or any(
+                not re.fullmatch(r"[0-9a-f]{64}", str(result[name]))
+                for name in ("grant_digest", "plan_sha256", "state_dir_identity")
+            )
+            or not re.fullmatch(r"[0-9a-f-]{36}", str(result["grant_id"]))
+        ):
             raise ValueError(f"{case_id} semantic evidence is not closed")
-        if case_id == "A07" and not (result["schema"] == "liqvera-a07-source-unavailable/v1"
-                and result["adapter"] == "HttpReportService.build" and result["request_count"] == 1
-                and result["reason"] == "SOURCE_UNAVAILABLE" and result["source_mode"] == "live-public"
-                and result["fixture_fallback_used"] is False and result["artifact_emitted"] is False
-                and all(re.fullmatch(r"[0-9a-f]{64}", str(result[name]))
-                        for name in ("stdout_sha256", "build_stdout_sha256"))):
+        if case_id == "A07" and not (
+            result["schema"] == "liqvera-a07-source-unavailable/v1"
+            and result["adapter"] == "HttpReportService.build"
+            and result["request_count"] == 1
+            and result["reason"] == "SOURCE_UNAVAILABLE"
+            and result["source_mode"] == "live-public"
+            and result["fixture_fallback_used"] is False
+            and result["artifact_emitted"] is False
+            and all(
+                re.fullmatch(r"[0-9a-f]{64}", str(result[name]))
+                for name in ("stdout_sha256", "build_stdout_sha256")
+            )
+        ):
             raise ValueError("A07 did not prove source-unavailable fail-closed semantics")
-        if case_id == "A29" and not (result["schema"] == "liqvera-a29-anonymous-clone/v1"
-                and result["commit"] == identity["commit"] and result["tree"] == identity["tree"]
-                and result["origin"] == "https://github.com/Dimkox/liqvera.git"
-                and type(result["clone_size_bytes"]) is int and 0 < result["clone_size_bytes"] <= 52_428_800
-                and result["credential_prompt"] is False and result["redirects_allowed"] is False
-                and isinstance(result["resolved_addresses"], list) and result["connected_address"] in result["resolved_addresses"]
-                and all(isinstance(value, str) and ipaddress.ip_address(value).is_global
-                        for value in result["resolved_addresses"])):
+        if case_id == "A29" and not (
+            result["schema"] == "liqvera-a29-anonymous-clone/v1"
+            and result["commit"] == identity["commit"]
+            and result["tree"] == identity["tree"]
+            and result["origin"] == "https://github.com/Dimkox/liqvera.git"
+            and type(result["clone_size_bytes"]) is int
+            and 0 < result["clone_size_bytes"] <= 52_428_800
+            and result["credential_prompt"] is False
+            and result["redirects_allowed"] is False
+            and isinstance(result["resolved_addresses"], list)
+            and result["connected_address"] in result["resolved_addresses"]
+            and all(
+                isinstance(value, str) and ipaddress.ip_address(value).is_global
+                for value in result["resolved_addresses"]
+            )
+        ):
             raise ValueError("A29 did not prove anonymous clone provenance")
         checks = []
     elif case_id == "A01":
@@ -839,8 +888,9 @@ def main() -> int:
     parser.add_argument(
         "--live-grants", type=Path, help="exact short-lived live grant bundle; never a boolean"
     )
-    parser.add_argument("--operator-state-dir", type=Path,
-                        help="pre-existing mode-0700 durable live-grant journal")
+    parser.add_argument(
+        "--operator-state-dir", type=Path, help="pre-existing mode-0700 durable live-grant journal"
+    )
     args = parser.parse_args()
     try:
         identity = repo_identity()
@@ -857,7 +907,7 @@ def main() -> int:
             if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size > 65536:
                 raise ValueError("live grant bundle must be one bounded regular file")
             grant_doc = json.loads(args.live_grants.read_bytes())
-            live_authority = validate_live_bundle(
+            live_authority = validate_p2_bundle(
                 grant_doc,
                 subject_commit=identity["commit"],
                 subject_tree=identity["tree"],
@@ -872,62 +922,137 @@ def main() -> int:
         if args.mode == "live":
             supplied_state_info = os.lstat(args.operator_state_dir)
             state_info = os.lstat(state_dir)
-            if (stat.S_ISLNK(supplied_state_info.st_mode) or not stat.S_ISDIR(state_info.st_mode)
-                    or stat.S_IMODE(state_info.st_mode) != 0o700
-                    or state_dir.is_relative_to(ROOT)):
-                raise ValueError("operator state directory must be pre-existing, private and outside the repository")
+            if (
+                stat.S_ISLNK(supplied_state_info.st_mode)
+                or not stat.S_ISDIR(state_info.st_mode)
+                or stat.S_IMODE(state_info.st_mode) != 0o700
+                or state_dir.is_relative_to(ROOT)
+            ):
+                raise ValueError(
+                    "operator state directory must be pre-existing, private and outside the repository"
+                )
+            validate_public_read_journal(
+                state_dir, live_authority.journal_id, live_authority.journal_sha256
+            )
         rows = []
         prior_payment = None
         started = utc_now()
         for case_id, case in CASES.items():
-            if case.execution_class == "public_read" and live_authority is not None:
+            if case_id == "A29" and live_authority is not None:
+                row = {
+                    "case_id": case_id,
+                    "title": case.title,
+                    "status": "BLOCKED_EXTERNAL",
+                    "omissions": [A29_BLOCKED_REASON],
+                    "command": None,
+                    "environment_names": [],
+                    "exit_code": None,
+                    "evidence": [],
+                    "execution_class": case.execution_class,
+                }
+            elif case_id == "A07" and live_authority is not None:
                 started_at = utc_now()
                 spec = live_authority.plan.cases[case_id]
-                body = b'{"scenario":"source-unavailable","fallback":"forbidden"}' if case_id == "A07" else b""
-                public_plan = PublicReadPlan(case_id, spec["method"], spec["url"], body,
-                                             spec["timeout_seconds"], spec["max_response_bytes"], 1)
-                grant = live_authority.public_grant(case_id, now=datetime.now(timezone.utc))
+                body = b'{"scenario":"source-unavailable","fallback":"forbidden"}'
+                public_plan = PublicReadPlan(
+                    case_id,
+                    spec["method"],
+                    spec["url"],
+                    body,
+                    spec["timeout_seconds"],
+                    spec["max_response_bytes"],
+                    1,
+                )
+                grant = live_authority.a07_grant(now=datetime.now(timezone.utc))
                 try:
-                    observation = (execute_a07(public_plan, grant, identity=identity, state_dir=state_dir,
-                                               root=ROOT, now=lambda: datetime.now(timezone.utc))
-                                   if case_id == "A07" else
-                                   execute_a29(public_plan, grant, identity=identity, state_dir=state_dir,
-                                               now=lambda: datetime.now(timezone.utc)))
+                    observation = execute_a07(
+                        public_plan,
+                        grant,
+                        identity=identity,
+                        state_dir=state_dir,
+                        root=ROOT,
+                        now=lambda: datetime.now(timezone.utc),
+                    )
                 except (OSError, ValueError, subprocess.SubprocessError):
                     command = ["builtin:public-read", case_id]
-                    row = {"case_id": case_id, "title": case.title, "status": "FAIL",
-                           "omissions": ["ASSERTION_EXECUTION_ERROR"], "command": command,
-                           "environment_names": [], "exit_code": None, "started_at": started_at,
-                           "ended_at": utc_now(), "execution_class": case.execution_class, "evidence": []}
+                    row = {
+                        "case_id": case_id,
+                        "title": case.title,
+                        "status": "FAIL",
+                        "omissions": ["ASSERTION_EXECUTION_ERROR"],
+                        "command": command,
+                        "environment_names": [],
+                        "exit_code": None,
+                        "started_at": started_at,
+                        "ended_at": utc_now(),
+                        "execution_class": case.execution_class,
+                        "evidence": [],
+                    }
                     rows.append(row)
                     continue
                 empty_digest = hashlib.sha256(b"").hexdigest()
-                document = {"case_id": case_id, "assertion": case.assertion,
-                            "execution_class": case.execution_class, "claims": list(case.required_claims),
-                            "subject": {"commit": identity["commit"], "tree": identity["tree"]},
-                            "observations": {"result": observation},
-                            "transcript": {"stdout_sha256": canonical_sha256(observation),
-                                           "stderr_sha256": empty_digest}}
+                document = {
+                    "case_id": case_id,
+                    "assertion": case.assertion,
+                    "execution_class": case.execution_class,
+                    "claims": list(case.required_claims),
+                    "subject": {"commit": identity["commit"], "tree": identity["tree"]},
+                    "observations": {"result": observation},
+                    "transcript": {
+                        "stdout_sha256": canonical_sha256(observation),
+                        "stderr_sha256": empty_digest,
+                    },
+                }
                 evidence_dir = evidence_root / "evidence"
                 evidence_dir.mkdir(mode=0o700, exist_ok=True)
                 evidence_file = evidence_dir / f"{case_id}.json"
-                evidence_file.write_text(json.dumps(document, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+                evidence_file.write_text(
+                    json.dumps(document, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+                )
                 command = ["builtin:public-read", case_id]
-                row = {"case_id": case_id, "title": case.title, "status": "PASS", "omissions": [],
-                       "command": command, "environment_names": [], "exit_code": 0,
-                       "started_at": started_at, "ended_at": utc_now(), "execution_class": case.execution_class,
-                       "stdout_sha256": canonical_sha256(observation), "stderr_sha256": empty_digest,
-                       "command_sha256": canonical_sha256(command),
-                       "assertion_contract_sha256": canonical_sha256({"case_id": case_id, "assertion": case.assertion,
-                           "execution_class": case.execution_class, "required_claims": list(case.required_claims)}),
-                       "evidence": [evidence_reference(evidence_root, f"evidence/{case_id}.json", case_id,
-                                                       case.assertion, case.execution_class, identity)]}
+                row = {
+                    "case_id": case_id,
+                    "title": case.title,
+                    "status": "PASS",
+                    "omissions": [],
+                    "command": command,
+                    "environment_names": [],
+                    "exit_code": 0,
+                    "started_at": started_at,
+                    "ended_at": utc_now(),
+                    "execution_class": case.execution_class,
+                    "stdout_sha256": canonical_sha256(observation),
+                    "stderr_sha256": empty_digest,
+                    "command_sha256": canonical_sha256(command),
+                    "assertion_contract_sha256": canonical_sha256(
+                        {
+                            "case_id": case_id,
+                            "assertion": case.assertion,
+                            "execution_class": case.execution_class,
+                            "required_claims": list(case.required_claims),
+                        }
+                    ),
+                    "evidence": [
+                        evidence_reference(
+                            evidence_root,
+                            f"evidence/{case_id}.json",
+                            case_id,
+                            case.assertion,
+                            case.execution_class,
+                            identity,
+                        )
+                    ],
+                }
             elif case.execution_class != "local":
                 row = {
                     "case_id": case_id,
                     "title": case.title,
                     "status": "BLOCKED_EXTERNAL",
-                    "omissions": [LIVE_GAS_BLOCKED_REASON if case.execution_class == "testnet_write" else BLOCKED_REASON],
+                    "omissions": [
+                        LIVE_GAS_BLOCKED_REASON
+                        if case.execution_class == "testnet_write"
+                        else BLOCKED_REASON
+                    ],
                     "command": None,
                     "environment_names": [],
                     "exit_code": None,

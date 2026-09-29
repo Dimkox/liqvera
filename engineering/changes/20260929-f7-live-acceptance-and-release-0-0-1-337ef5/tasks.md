@@ -10,12 +10,13 @@
   deliberately unconfigured cases remain not run; no case fails.
 - [x] Implement local-only P2 public-read grant/allowlist/DNS boundary; no grant
   was issued and no public read was executed.
-- [x] Wire the operator live CLI to the real bounded P2 executor with closed,
-  sealed A07/A29 observations and internally derived one-shot grant markers.
+- [x] Wire the operator live CLI to the real bounded A07 executor and keep A29
+  explicitly blocked when its network-byte ceiling cannot be proven.
 - [x] Replace the transport-only P2 evidence with canonical semantics: A07 runs
   the real gateway report adapter against a controlled 503 and proves no
-  fixture/artifact; A29 performs a bounded anonymous clone and proves exact
-  origin, commit and tree. The durable journal is independent of output roots.
+  fixture/artifact. A29 has tested hard process/disk/output envelopes but cannot
+  PASS without a reviewer-verifiable preemptive network-byte cap. The durable
+  UUID journal is independent of output roots and bound into every P2 grant.
 - [x] Add executable browser transport timeout, redirect, credential and byte-
   cap tests plus transactional fake restart/concurrency consumption coverage.
 - [x] Implement local P3 identity, twelve-confirmation finality, one-submit live

@@ -244,3 +244,10 @@ matched only a nonce substring in transaction calldata, so restart, replicas or
 a wrong selector could bypass the intended proof. Consume grant identity in the
 ledger transaction before submission and decode the complete reviewed ABI call;
 in-memory counters are never a payment authority boundary.
+
+## 2026-09-29 — A bounded clone was mislabeled as a network-byte-bounded clone
+
+The first A29 implementation measured the completed checkout size, which cannot
+prove that transfer bytes stayed below the authorization ceiling. Disk, output,
+memory and time envelopes are useful but not equivalent; keep A29 blocked until
+the transport exposes a reviewer-verifiable preemptive network-byte limit.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -10,6 +11,8 @@ from tools.mezo_acceptance.public_read import (
     PublicReadPlan,
     consume_public_read_grant,
     execute_public_read,
+    initialize_public_read_journal,
+    journal_document,
     validate_public_read_evidence,
 )
 
@@ -17,6 +20,8 @@ NOW = datetime(2026, 9, 29, 14, 0, tzinfo=timezone.utc)
 COMMIT = "a" * 40
 TREE = "b" * 40
 PLAN = "c" * 64
+JOURNAL = "00000000-0000-4000-8000-000000000099"
+JOURNAL_SHA = hashlib.sha256(journal_document(JOURNAL)).hexdigest()
 
 
 def plan() -> PublicReadPlan:
@@ -35,6 +40,8 @@ def grant(**changes: object) -> dict[str, object]:
     value: dict[str, object] = {
         "schema": "liqvera-public-read-grant/v1",
         "grant_id": "00000000-0000-4000-8000-000000000007",
+        "journal_id": JOURNAL,
+        "journal_sha256": JOURNAL_SHA,
         "subject_commit": COMMIT,
         "subject_tree": TREE,
         "plan_sha256": plan().digest,
@@ -67,12 +74,17 @@ def test_exact_short_lived_grant_binds_subject_plan_and_request() -> None:
         ({"extra": True}, "PUBLIC_READ_GRANT_INVALID"),
     ],
 )
-def test_grant_rejects_broadened_or_expired_authority(changes: dict[str, object], reason: str) -> None:
+def test_grant_rejects_broadened_or_expired_authority(
+    changes: dict[str, object], reason: str
+) -> None:
     with pytest.raises(GrantError, match=f"^{reason}$"):
         PublicReadGrant.parse(grant(**changes), now=NOW)
 
 
-@pytest.mark.parametrize("field,value", [("subject_commit", "d" * 40), ("subject_tree", "d" * 40), ("plan_sha256", "d" * 64)])
+@pytest.mark.parametrize(
+    "field,value",
+    [("subject_commit", "d" * 40), ("subject_tree", "d" * 40), ("plan_sha256", "d" * 64)],
+)
 def test_grant_rejects_changed_subject_or_plan(field: str, value: str) -> None:
     parsed = PublicReadGrant.parse(grant(), now=NOW)
     kwargs = {"subject_commit": COMMIT, "subject_tree": TREE}
@@ -95,61 +107,127 @@ def test_resolution_must_stay_public_and_stable() -> None:
 
 def test_result_evidence_rejects_redirect_oversize_and_ambient_proxy() -> None:
     parsed = PublicReadGrant.parse(grant(), now=NOW)
-    evidence = {"status": 200, "final_url": parsed.url, "response_bytes": 12, "response_sha256": "d" * 64,
-                "resolved_addresses": ["8.8.8.8"], "connected_address": "8.8.8.8", "attempts": 1}
-    assert validate_public_read_evidence(parsed, evidence, environ={}, now=NOW)["response_sha256"] == "d" * 64
+    evidence = {
+        "status": 200,
+        "final_url": parsed.url,
+        "response_bytes": 12,
+        "response_sha256": "d" * 64,
+        "resolved_addresses": ["8.8.8.8"],
+        "connected_address": "8.8.8.8",
+        "attempts": 1,
+    }
+    assert (
+        validate_public_read_evidence(parsed, evidence, environ={}, now=NOW)["response_sha256"]
+        == "d" * 64
+    )
     with pytest.raises(GrantError, match="^PUBLIC_READ_REDIRECT_BLOCKED$"):
-        validate_public_read_evidence(parsed, {**evidence, "final_url": "https://example.com/"}, environ={}, now=NOW)
+        validate_public_read_evidence(
+            parsed, {**evidence, "final_url": "https://example.com/"}, environ={}, now=NOW
+        )
     with pytest.raises(GrantError, match="^PUBLIC_READ_RESPONSE_TOO_LARGE$"):
-        validate_public_read_evidence(parsed, {**evidence, "response_bytes": 3_000_000}, environ={}, now=NOW)
+        validate_public_read_evidence(
+            parsed, {**evidence, "response_bytes": 3_000_000}, environ={}, now=NOW
+        )
     with pytest.raises(GrantError, match="^PUBLIC_READ_AMBIENT_AUTHORITY$"):
-        validate_public_read_evidence(parsed, evidence, environ={"HTTPS_PROXY": "http://proxy.invalid"}, now=NOW)
+        validate_public_read_evidence(
+            parsed, evidence, environ={"HTTPS_PROXY": "http://proxy.invalid"}, now=NOW
+        )
 
 
 def test_executor_sends_exact_body_once_streams_with_cap_and_consumes(tmp_path) -> None:
+    initialize_public_read_journal(tmp_path, JOURNAL)
     parsed = PublicReadGrant.parse(grant(), now=NOW)
     seen: list[tuple[str, str, bytes, dict[str, str]]] = []
+
     class Response:
-        status=200
-        reads=0
-        def getheader(self, name: str): return None
+        status = 200
+        reads = 0
+
+        def getheader(self, name: str):
+            return None
+
         def read(self, amount: int):
-            self.reads+=1
-            return b'{"ok":true}' if self.reads==1 else b""
+            self.reads += 1
+            return b'{"ok":true}' if self.reads == 1 else b""
+
     class Connection:
-        def request(self, method: str, path: str, body: bytes, headers: dict[str,str]):
-            seen.append((method,path,body,{**headers,"read":""}))
-        def getresponse(self): return Response()
-        def close(self): pass
-    evidence=execute_public_read(plan(),parsed,subject_commit=COMMIT,subject_tree=TREE,now=lambda:NOW,
-        environ={},resolver=lambda host:("8.8.8.8",),connection=lambda host,ip,timeout:Connection(),state_dir=tmp_path)
-    assert evidence["attempts"]==1 and seen[0][:3]==("POST","/info",plan().body)
-    with pytest.raises(GrantError,match="^PUBLIC_READ_GRANT_ALREADY_CONSUMED$"):
-        execute_public_read(plan(),parsed,subject_commit=COMMIT,subject_tree=TREE,now=lambda:NOW,
-            environ={},resolver=lambda host:("8.8.8.8",),connection=lambda host,ip,timeout:Connection(),state_dir=tmp_path)
+        def request(self, method: str, path: str, body: bytes, headers: dict[str, str]):
+            seen.append((method, path, body, {**headers, "read": ""}))
+
+        def getresponse(self):
+            return Response()
+
+        def close(self):
+            pass
+
+    evidence = execute_public_read(
+        plan(),
+        parsed,
+        subject_commit=COMMIT,
+        subject_tree=TREE,
+        now=lambda: NOW,
+        environ={},
+        resolver=lambda host: ("8.8.8.8",),
+        connection=lambda host, ip, timeout: Connection(),
+        state_dir=tmp_path,
+    )
+    assert evidence["attempts"] == 1 and seen[0][:3] == ("POST", "/info", plan().body)
+    with pytest.raises(GrantError, match="^PUBLIC_READ_GRANT_ALREADY_CONSUMED$"):
+        execute_public_read(
+            plan(),
+            parsed,
+            subject_commit=COMMIT,
+            subject_tree=TREE,
+            now=lambda: NOW,
+            environ={},
+            resolver=lambda host: ("8.8.8.8",),
+            connection=lambda host, ip, timeout: Connection(),
+            state_dir=tmp_path,
+        )
 
 
 def test_executor_derives_replay_marker_and_rejects_caller_selected_path(tmp_path) -> None:
+    initialize_public_read_journal(tmp_path, JOURNAL)
     parsed = PublicReadGrant.parse(grant(), now=NOW)
     assert parsed.digest == PublicReadGrant.parse(grant(), now=NOW).digest
     with pytest.raises(TypeError, match="consumption_path"):
-        execute_public_read(plan(), parsed, subject_commit=COMMIT, subject_tree=TREE, now=lambda: NOW,
-            environ={}, resolver=lambda host: ("8.8.8.8",), connection=lambda *args: None,
-            state_dir=tmp_path, consumption_path=tmp_path / "alternate")
+        execute_public_read(
+            plan(),
+            parsed,
+            subject_commit=COMMIT,
+            subject_tree=TREE,
+            now=lambda: NOW,
+            environ={},
+            resolver=lambda host: ("8.8.8.8",),
+            connection=lambda *args: None,
+            state_dir=tmp_path,
+            consumption_path=tmp_path / "alternate",
+        )
 
 
 def test_executor_rechecks_expiry_and_dns_before_send(tmp_path) -> None:
-    parsed=PublicReadGrant.parse(grant(),now=NOW)
-    later=NOW+timedelta(minutes=6)
-    with pytest.raises(GrantError,match="^PUBLIC_READ_GRANT_EXPIRED$"):
-        execute_public_read(plan(),parsed,subject_commit=COMMIT,subject_tree=TREE,now=lambda:later,
-            environ={},resolver=lambda host:("8.8.8.8",),connection=lambda *args:None,state_dir=tmp_path)
+    initialize_public_read_journal(tmp_path, JOURNAL)
+    parsed = PublicReadGrant.parse(grant(), now=NOW)
+    later = NOW + timedelta(minutes=6)
+    with pytest.raises(GrantError, match="^PUBLIC_READ_GRANT_EXPIRED$"):
+        execute_public_read(
+            plan(),
+            parsed,
+            subject_commit=COMMIT,
+            subject_tree=TREE,
+            now=lambda: later,
+            environ={},
+            resolver=lambda host: ("8.8.8.8",),
+            connection=lambda *args: None,
+            state_dir=tmp_path,
+        )
 
 
 def test_replay_journal_rejects_symlink_and_non_private_directory(tmp_path) -> None:
     parsed = PublicReadGrant.parse(grant(), now=NOW)
     private = tmp_path / "private"
     private.mkdir(mode=0o700)
+    initialize_public_read_journal(private, JOURNAL)
     link = tmp_path / "link"
     link.symlink_to(private, target_is_directory=True)
     with pytest.raises(GrantError, match="^PUBLIC_READ_STATE_DIR_INVALID$"):

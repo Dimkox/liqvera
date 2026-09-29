@@ -191,24 +191,27 @@ The P2 semantic repair removes the earlier transport-only interpretation.
 A successful Hyperliquid response can no longer pass A07: the runner builds and
 invokes the real gateway `HttpReportService.build` adapter against a controlled
 503, requires canonical `SOURCE_UNAVAILABLE`, and proves no fixture fallback or
-artifact. A29 now uses a fresh shallow anonymous clone with prompts, ambient
-Git configuration, proxies and redirects disabled; DNS is checked twice and
-pinned for Git, and exact origin/commit/tree plus a 50 MiB cap are retained.
+artifact. A29 no longer claims PASS: Git/libcurl does not expose a sufficiently
+reviewer-verifiable preemptive network-byte counter. Hard wall-time, process
+memory, stdout/stderr, single-file and aggregate-disk envelopes are implemented
+and tested, but the runner reports `A29_NETWORK_BYTE_CAP_UNENFORCEABLE`.
 Per-case errors become sealed FAIL rows rather than aborting the whole result.
 
 Live operators must provide three explicit inputs: `--live-grants` pointing to
 the exact current-subject bundle, `--operator-state-dir` pointing to a
 pre-existing external mode-0700 directory, and a new external `--output` path.
-The journal directory identity is recorded and marker names are derived from
-grant UUID plus full grant digest. Reusing the grant with a different output
-directory performs zero second case execution. Browser payment deadlines now
+The create-once mode-0400 journal identity file contains an issuer-approved
+UUID; its exact digest and UUID are bound into the P2-only bundle and both P2
+grants. The CLI validates it before case execution, and marker names derive
+from grant UUID plus full grant digest. A different journal fails pre-I/O.
+Browser payment deadlines now
 remain active through complete body streaming; a stalled-body regression is
 covered. P3 remains blocked by `LIVE_GAS_ENFORCEMENT_UNAVAILABLE`.
-Focused repair checks pass: 71 acceptance/contract/graph tests, 18 browser
+Focused repair checks pass: 69 acceptance/contract tests, 18 browser
 tests, and 24 gateway tests with five explicitly disposable-PostgreSQL skips.
-The clean pinned PR verifier then passed 1,219 tests plus 85 subtests, coverage,
-Ruff, Bandit, secret scan, SQL safety, contract structure and configuration
-scan. The verifier itself performed no public read or external write.
+The full pinned PR verifier remains to be refreshed on the final clean commit.
+No public read, clone, payment, database migration, secret access or other
+external action occurred.
 
 ## F6 local UI and operations verification — 2026-09-29
 

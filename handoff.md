@@ -1,25 +1,27 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (F3-F7 verification scope drafted; implementation awaits the required scope/design gate). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (narrow offline F3 repair approved; implementation begins with failing regressions). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
-## F3-F7 verification and repair — 2026-09-29
+## F3 offline artifact verification repair — 2026-09-29
 
-Route `f6f2495b4648` and change package
-`engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/`
-cover the deferred verification phase. Four route-selected read-only analyses
-recommend approving only Phase 0 characterization plus Phase 1A: the installed
-canonical F3 offline fixture-to-report/bundle/verifier vertical. Application
-code has not changed. The required `scope_and_design_approval` is pending;
-`migration_or_external_write_approval` is also pending and is not requested for
-this no-migration/no-network tranche.
+Active route `08fa9d84745d` and change package
+`engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/`
+are approved with no human gate because the scope is fixture-only and explicitly
+forbids migrations and external writes. The superseded broad route
+`f6f2495b4648` was cancelled before implementation: its task wording introduced
+an inapplicable migration/external-write gate even though its approved scope
+excluded both. Four read-only analyses are retained in the active package.
 
-Confirmed baseline facts: source F3 smoke checks pass, while graph still reports
-six declared conflicts and 26 F3-F7 implementation orphans; the acceptance
-runner emits 40-character Git OIDs against a schema requiring 64 characters;
-gateway/web dependencies and direct runtime suites are absent; all 156 vectors
-remain `NOT_RUN`. Live payment, RPC/facilitator/wallet actions, Compose start,
-deployment and release remain forbidden.
+Implementation is limited to failing-regression-first coverage of the installed
+canonical F3 fixture-to-report/bundle/publish/verifier loop, tamper rejection,
+duplicate report UUIDs, incomplete publication, packaged resources, and the
+confirmed acceptance contract defect: the runner emits real 40-character Git
+OIDs while the schema currently requires 64-character SHA-256 values. No
+application code has changed yet. Gateway/F4 through F7, graph orphan cleanup,
+network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
+start, deployment, release, and push remain outside this route. All 156 broad
+acceptance vectors remain `NOT_RUN`.
 
 **Market reports you can verify.** Built for [MEZO ₿](https://mezo.org/) —
 [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).

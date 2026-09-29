@@ -1,0 +1,19 @@
+{
+  "change_id": "20260929-f3-f7-verification-and-defect-repair-f6f249",
+  "decisions": [
+    {
+      "action": null,
+      "actor": "repository owner via chat",
+      "change_id": "20260929-f3-f7-verification-and-defect-repair-f6f249",
+      "decided_at": "2026-09-29T07:21:47+00:00",
+      "decision": "approved",
+      "gate": "scope_and_design_approval",
+      "reason": "Explicit Да on 2026-09-29 approves only Phase 0 characterization and Phase 1A installed canonical F3 offline verification/repair; migration and external writes remain unapproved.",
+      "resource": null,
+      "route_id": "f6f2495b4648",
+      "scope_digest": "7c9fb126c96d0870e3e3f2d4e1df7a281247946e431bbcac2b7604ddf5904c8a"
+    }
+  ],
+  "route_id": "f6f2495b4648",
+  "schema_version": 1
+}

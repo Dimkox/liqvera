@@ -77,6 +77,12 @@
       "from": "draft",
       "reason": "Four route analyses completed; Phase 0 plus installed canonical F3 offline Phase 1A scope and acceptance criteria are frozen for human review.",
       "to": "scoped"
+    },
+    {
+      "at": "2026-09-29T07:23:15+00:00",
+      "from": "scoped",
+      "reason": "Superseded before implementation: broad F3-F7 task wording caused an inapplicable migration/external-write gate. The approved executable scope contains only offline F3 characterization and repair, with migrations and external writes forbidden.",
+      "to": "cancelled"
     }
   ],
   "human_gates": [
@@ -86,7 +92,7 @@
   "human_gates_digest": "5e51b4abc77a133de94fd46e40f10a2e5a00d7caec160a8e3ef2a28a06ff1251",
   "route_id": "f6f2495b4648",
   "schema_version": 1,
-  "status": "scoped",
+  "status": "cancelled",
   "title": "F3-F7 verification and defect repair",
-  "updated_at": "2026-09-29T05:49:40+00:00"
+  "updated_at": "2026-09-29T07:23:15+00:00"
 }

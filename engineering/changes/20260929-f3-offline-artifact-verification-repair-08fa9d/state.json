@@ -1,0 +1,81 @@
+{
+  "change_id": "20260929-f3-offline-artifact-verification-repair-08fa9d",
+  "checkpoint_mirror_pending": false,
+  "checkpoints": [
+    {
+      "branch": "feat/f3-f7-verification",
+      "change_id": "20260929-f3-offline-artifact-verification-repair-08fa9d",
+      "detached": false,
+      "dirty_product_paths": [],
+      "dirty_product_state": "clean",
+      "git_available": true,
+      "git_findings": [],
+      "head": "bed18457b084f9c9f15dd8bee24c31a74323e639",
+      "kind": "initial",
+      "note": "draft; implementation not started",
+      "observed_at": "2026-09-29T07:23:21+00:00",
+      "route_id": "08fa9d84745d"
+    }
+  ],
+  "created_at": "2026-09-29T07:23:21+00:00",
+  "evidence_accounting": {
+    "obligations": [
+      {
+        "id": "verification",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "verification",
+        "status": "not_run"
+      },
+      {
+        "id": "code_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "code_review",
+        "status": "not_run"
+      },
+      {
+        "id": "test_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "test_review",
+        "status": "not_run"
+      },
+      {
+        "id": "data_review",
+        "kind": "receipt",
+        "reason": "implementation not started",
+        "receipt_kind": "data_review",
+        "status": "not_run"
+      }
+    ],
+    "schema_version": 1
+  },
+  "history": [
+    {
+      "at": "2026-09-29T07:23:21+00:00",
+      "from": null,
+      "reason": "created",
+      "to": "draft"
+    },
+    {
+      "at": "2026-09-29T07:28:24+00:00",
+      "from": "draft",
+      "reason": "Four route analyses synthesized; exact offline F3 scope, acceptance criteria, exclusions, test plan, and rollback are frozen.",
+      "to": "scoped"
+    },
+    {
+      "at": "2026-09-29T07:28:24+00:00",
+      "from": "scoped",
+      "reason": "Route declares no human gates; bounded offline scope approved for implementation.",
+      "to": "approved"
+    }
+  ],
+  "human_gates": [],
+  "human_gates_digest": "06064f840f21ad983c4a103a410f00783082f4ad871eb92ef8e2a4211cf108d8",
+  "route_id": "08fa9d84745d",
+  "schema_version": 1,
+  "status": "approved",
+  "title": "F3 offline artifact verification repair",
+  "updated_at": "2026-09-29T07:28:24+00:00"
+}

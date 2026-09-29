@@ -7,19 +7,20 @@ Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f075
 
 Route `26ffb293d4ff` and change package
 `engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/`
-have completed the four route-selected read-only analyses. The scoped design is
+have completed the four route-selected read-only analyses. The approved design is
 strictly local: a deterministic browser harness with fake EIP-1193, same-origin
 API, storage, crypto, timers and test-only adapter; the smallest injectable UI
 seam; fixture-egress correction with resolved-profile assertions; internal-only
 metrics observability; the canonical restrictive CSP; and exact README,
 runbook, handoff and acceptance truth.
 
-No product/test/configuration implementation has started. The package is
-`scoped` and waits at the mandatory `scope_and_design_approval` gate. The
-proposed phase does not start containers or create a database/schema/volume,
-and performs no external write, so `migration_or_external_write_approval` is
-not applicable and remains unexercised. Any later need for those actions stops
-for a new exact approval.
+No product/test/configuration implementation has started. The repository owner
+approved exact scope digest
+`12231c0f9d521bb91724f731ffd06e17d5deb16cf6a8aff83a456d8832f3ee01`,
+and the package is `approved`. The recorded migration plan is explicitly a
+no-op: this phase does not start containers, create a database/schema/volume,
+or perform an external write. Any later need for those actions stops for a new
+exact approval.
 
 Confirmed gaps are: no executable browser A30 harness; fixture capture,
 gateway and edge inherit non-internal egress networks; gateway metrics are

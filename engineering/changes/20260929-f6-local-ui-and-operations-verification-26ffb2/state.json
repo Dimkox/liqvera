@@ -77,6 +77,12 @@
       "from": "draft",
       "reason": "four selected analyses synthesized; typed fake-browser and static-operations scope frozen; mandatory scope/design approval pending",
       "to": "scoped"
+    },
+    {
+      "at": "2026-09-29T10:56:43+00:00",
+      "from": "scoped",
+      "reason": "Explicit user scope approval recorded; approved migration plan is no migration/no external write",
+      "to": "approved"
     }
   ],
   "human_gates": [
@@ -86,7 +92,7 @@
   "human_gates_digest": "14a58ca69c842145e025ab685eff53825c39f931f78d8db2c937855bff8782f2",
   "route_id": "26ffb293d4ff",
   "schema_version": 1,
-  "status": "scoped",
+  "status": "approved",
   "title": "F6 local UI and operations verification",
-  "updated_at": "2026-09-29T10:08:54+00:00"
+  "updated_at": "2026-09-29T10:56:43+00:00"
 }

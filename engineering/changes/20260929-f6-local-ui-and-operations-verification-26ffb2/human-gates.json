@@ -1,0 +1,43 @@
+{
+  "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+  "decisions": [
+    {
+      "action": null,
+      "actor": "repository owner via chat",
+      "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+      "decided_at": "2026-09-29T10:56:03+00:00",
+      "decision": "approved",
+      "gate": "scope_and_design_approval",
+      "reason": "User explicitly replied далее after receiving the exact F6 scope digest; approval is limited to deterministic fake browser tests and static Compose, metrics, CSP, README, handoff, and runbook repairs, with migrations and external/live actions excluded.",
+      "resource": null,
+      "route_id": "26ffb293d4ff",
+      "scope_digest": "12231c0f9d521bb91724f731ffd06e17d5deb16cf6a8aff83a456d8832f3ee01"
+    },
+    {
+      "action": "migration-plan",
+      "actor": "repository owner via chat",
+      "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+      "decided_at": "2026-09-29T10:56:23+00:00",
+      "decision": "rejected",
+      "gate": "migration_or_external_write_approval",
+      "reason": "The approved F6 scope explicitly excludes migrations, databases, volumes, external writes, and live actions; any future need must stop for a separate exact approval.",
+      "resource": null,
+      "route_id": "26ffb293d4ff",
+      "scope_digest": "12231c0f9d521bb91724f731ffd06e17d5deb16cf6a8aff83a456d8832f3ee01"
+    },
+    {
+      "action": "migration-plan",
+      "actor": "repository owner via chat",
+      "change_id": "20260929-f6-local-ui-and-operations-verification-26ffb2",
+      "decided_at": "2026-09-29T10:56:43+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "User-approved F6 design binds the migration plan to no migration and no external write. This approves only the explicit no-op migration plan; any migration or external target remains unauthorized and requires a separate exact grant.",
+      "resource": null,
+      "route_id": "26ffb293d4ff",
+      "scope_digest": "12231c0f9d521bb91724f731ffd06e17d5deb16cf6a8aff83a456d8832f3ee01"
+    }
+  ],
+  "route_id": "26ffb293d4ff",
+  "schema_version": 1
+}

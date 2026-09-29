@@ -14194,6 +14194,108 @@ repository_inventory:
   - path: engineering/changes/20260928-repository-boundary-cleanup-7f0f98/test-plan.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/change-spec.yaml
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/evidence/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/evidence/analysis-architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/evidence/analysis-data_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/evidence/analysis-docs_researcher.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/evidence/analysis-repo_explorer.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/human-gates.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/route.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-f7-verification-and-defect-repair-f6f249/test-plan.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/change-spec.yaml
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/evidence/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/evidence/analysis-architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/evidence/analysis-data_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/evidence/analysis-docs_researcher.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/evidence/analysis-repo_explorer.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/route.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f3-offline-artifact-verification-repair-08fa9d/test-plan.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: tests/contracts/test_acceptance_result.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/evidence_report/test_canonical_f3.py
+    node: test:liqvera-local-mvp
+    path_class: TEST_SOURCE
+  - path: tests/installed/test_canonical_f3_installed.py
+    node: test:liqvera-local-mvp
+    path_class: TEST_SOURCE
   - path: experiments/lighter/README.md
     node: artifact:stage-a-execution
     path_class: EXECUTION_SOURCE

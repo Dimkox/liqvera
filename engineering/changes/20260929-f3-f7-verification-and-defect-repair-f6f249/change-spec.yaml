@@ -1,17 +1,17 @@
 {
   "acceptance_criteria": [
     {
-      "evidence": [{"test": "tests/evidence_report"}, {"receipt": "test_review"}],
+      "evidence": [{"test": "tests/installed/test_canonical_f3_installed.py"}, {"receipt": "test_review"}],
       "id": "AC-001",
       "statement": "An installed canonical F3 fixture package produces deterministic exact report and bundle artifacts, publishes them atomically, and passes the installed offline verifier."
     },
     {
-      "evidence": [{"test": "tests/evidence_report"}, {"receipt": "security_review"}],
+      "evidence": [{"test": "tests/evidence_report/test_canonical_f3.py"}, {"receipt": "security_review"}],
       "id": "AC-002",
       "statement": "Tampered bytes, manifests, replay inputs, and interrupted publication fail closed without a partial published artifact."
     },
     {
-      "evidence": [{"test": "tests/acceptance"}, {"receipt": "code_review"}],
+      "evidence": [{"test": "tests/contracts/test_acceptance_result.py"}, {"receipt": "code_review"}],
       "id": "AC-003",
       "statement": "The acceptance runner and its JSON Schema use one consistent repository identity representation."
     },
@@ -27,7 +27,7 @@
   "change_id": "20260929-f3-f7-verification-and-defect-repair-f6f249",
   "contracts": {
     "events": [],
-    "json_schema": ["schemas/mezo-evidence/v1/report.schema.json", "schemas/mezo-evidence/v1/evidence-bundle-manifest.schema.json", "schemas/mezo-evidence/v1/acceptance-result.schema.json"],
+    "json_schema": ["schemas/mezo-evidence/v1/report.schema.json", "schemas/mezo-evidence/v1/bundle-manifest.schema.json", "schemas/mezo-evidence/v1/acceptance-result.schema.json"],
     "openapi": []
   },
   "forbidden_outcomes": [
@@ -37,19 +37,19 @@
       "statement": "No live HTTP/RPC/facilitator/wallet/payment/exchange mutation, shared database write, deployment, release, or publication occurs."
     },
     {
-      "evidence": [{"test": "tests/acceptance"}, {"receipt": "test_review"}],
+      "evidence": [{"test": "tests/contracts/test_acceptance_result.py"}, {"receipt": "test_review"}],
       "id": "FORBID-002",
       "statement": "Offline or mocked evidence is never relabeled as live acceptance; A07, A13, A14, A29 and A30 remain blocked or not run."
     }
   ],
   "invariants": [
     {
-      "evidence": [{"test": "tests/contracts"}, {"receipt": "data_review"}],
+      "evidence": [{"test": "tests/contracts/test_acceptance_result.py"}, {"receipt": "data_review"}],
       "id": "INV-001",
       "statement": "F2 public schemas and applied migration 001 remain unchanged; this tranche performs no migration or backfill."
     },
     {
-      "evidence": [{"test": "tests/evidence_report"}, {"receipt": "security_review"}],
+      "evidence": [{"test": "tests/evidence_report/test_canonical_f3.py"}, {"receipt": "security_review"}],
       "id": "INV-002",
       "statement": "Artifact identity is content-derived, canonical, bounded, immutable after publication, and independently verifiable offline."
     }

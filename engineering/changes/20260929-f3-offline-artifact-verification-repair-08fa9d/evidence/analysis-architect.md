@@ -1,7 +1,7 @@
 # Architecture analysis — F3 offline artifact verification repair
 
-Route: `08fa9d84745d`  
-Base: `f07562eee1a33df74768e9fa4a3b074783d8c59e`  
+Route: `08fa9d84745d`
+Base: `f07562eee1a33df74768e9fa4a3b074783d8c59e`
 Role: route-selected, read-only architecture analysis
 
 ## Decision

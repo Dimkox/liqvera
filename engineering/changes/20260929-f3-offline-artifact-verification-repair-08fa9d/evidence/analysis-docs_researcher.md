@@ -1,7 +1,7 @@
 # Documentation and contract analysis — F3 offline acceptance identity
 
-Route: `08fa9d84745d`  
-Role: `docs_researcher` (read-only analysis)  
+Route: `08fa9d84745d`
+Role: `docs_researcher` (read-only analysis)
 Scope: acceptance identity and executable-plan coverage relevant to the local,
 offline F3 tranche.
 

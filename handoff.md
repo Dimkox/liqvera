@@ -13,8 +13,8 @@ forbids migrations and external writes. The superseded broad route
 an inapplicable migration/external-write gate even though its approved scope
 excluded both. Four read-only analyses are retained in the active package.
 
-Implementation remains limited to failing-regression-first coverage of the installed
-canonical F3 fixture-to-report/bundle/publish/verifier loop, tamper rejection,
+Implementation remains limited to failing-regression-first coverage of the
+installed canonical F3 fixture-to-report/bundle/publish/verifier loop, tamper rejection,
 duplicate report UUIDs, incomplete publication, packaged resources, and the
 confirmed acceptance contract defect. A regression first reproduced rejection
 of the runner's real 40-character Git OIDs; the schema now uses a dedicated
@@ -25,11 +25,13 @@ pre-rename verification failure. A no-index wheel test installs all four local
 packages into an isolated environment, proves imports come from that install,
 then exercises both installed F3 commands outside the checkout. The new focused
 slice reports 13 passed; the surrounding capture/analyzer/contracts slice
-reports 738 passed and 85 subtests. The first full PR run completed its checks
-but could not write its receipt because the typed change spec named suite
-directories and one stale manifest filename; those references are now exact
-regular files and the full run must be repeated. Independent route reviews
-remain pending. Gateway/F4 through F7, graph orphan cleanup,
+reports 738 passed and 85 subtests. The full PR verifier exposed and now has
+repairs for whitespace, typed evidence paths, and graph inventory ownership of
+the new package/tests. A focused parallel artifact/installed run is green except
+for the pre-existing root dependency-contract mismatch (`eth-account==0.14.0`
+in the project versus `0.13.7` in its test). A final full run against the
+committed repair is still required; independent reviews remain pending.
+Gateway/F4 through F7, graph orphan cleanup,
 network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
 start, deployment, release, and push remain outside this route. All 156 broad
 acceptance vectors remain `NOT_RUN`.

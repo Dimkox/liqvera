@@ -1,7 +1,7 @@
 # Repository exploration — F3 offline artifact verification repair
 
-Route: `08fa9d84745d`  
-Observed HEAD: `bed18457b084f9c9f15dd8bee24c31a74323e639`  
+Route: `08fa9d84745d`
+Observed HEAD: `bed18457b084f9c9f15dd8bee24c31a74323e639`
 Role: route-selected read-only repository exploration; only this report was added
 
 ## Result

@@ -1,6 +1,6 @@
 # Data architecture analysis — offline F3 artifact loop
 
-Route: `08fa9d84745d`  
+Route: `08fa9d84745d`
 Scope reviewed: installed canonical F3 fixture input, deterministic bundle, immutable local publication, and offline verification.
 
 ## Decision: no migration and no persistent-store work

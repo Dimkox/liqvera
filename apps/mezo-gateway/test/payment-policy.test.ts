@@ -87,10 +87,16 @@ test('settlement_pending transaction is spent confirm-only and other failures ar
 test('facilitator capability must be exact Permit2 with EIP-2612 gas sponsorship',()=>{
   assert.equal(PERMIT2_ADDRESS,permit2);
   assert.equal(x402ExactPermit2ProxyAddress,proxy);
-  assert.equal(permit2Capability({extra:{assetTransferMethod:'permit2'}},['eip2612GasSponsoring']),true);
-  assert.equal(permit2Capability({extra:{assetTransferMethod:'eip3009'}},['eip2612GasSponsoring']),false);
-  assert.equal(permit2Capability({extra:{assetTransferMethod:'permit2'}},[]),false);
-  assert.equal(permit2Capability({extra:{assetTransferMethod:'permit2'}},['erc20ApprovalGasSponsoring']),false);
+  const musd={address:ASSET,symbol:'MUSD',decimals:18,eip712:{name:'Mezo USD',version:'1'},assetTransferMethod:'permit2',supportsEip2612:true};
+  const live={x402Version:2,scheme:'exact',network:NETWORK,extra:{assets:[musd]}};
+  assert.equal(permit2Capability(live,['eip2612GasSponsoring']),true);
+  assert.equal(permit2Capability({...live,extra:{assets:[]}},['eip2612GasSponsoring']),false);
+  assert.equal(permit2Capability({...live,extra:{assets:[musd,{...musd}]}},['eip2612GasSponsoring']),false);
+  for(const changed of [{assetTransferMethod:'eip3009'},{supportsEip2612:false},{decimals:6},{symbol:'USDC'},{address:payer},{eip712:{name:'MUSD',version:'1'}}])
+    assert.equal(permit2Capability({...live,extra:{assets:[{...musd,...changed}]}},['eip2612GasSponsoring']),false);
+  assert.equal(permit2Capability(live,[]),false);
+  assert.equal(permit2Capability(live,['eip2612GasSponsoring','other']),false);
+  assert.equal(permit2Capability(live,['erc20ApprovalGasSponsoring']),false);
 });
 
 test('finality requires twelve canonical confirmations and rejects reorg',async()=>{

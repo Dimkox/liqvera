@@ -29,9 +29,17 @@ export function settlementTransaction(result: Pick<SettleResponse,'success'|'err
 export function permit2Capability(kind:unknown,extensions:unknown):boolean {
   if(!kind||typeof kind!=='object'||Array.isArray(kind)||!Array.isArray(extensions))return false;
   const value=kind as Record<string,unknown>; const extra=value.extra;
-  return !!extra&&typeof extra==='object'&&!Array.isArray(extra)&&
-    (extra as Record<string,unknown>).assetTransferMethod===X402_PERMIT2.assetTransferMethod&&
-    extensions.length===1&&extensions[0]===X402_PERMIT2.requiredExtension;
+  if(Object.keys(value).sort().join()!==['x402Version','scheme','network','extra'].sort().join()||value.x402Version!==2||value.scheme!=='exact'||value.network!==NETWORK||
+    !extra||typeof extra!=='object'||Array.isArray(extra)||Object.keys(extra).join()!=='assets'||extensions.length!==1||extensions[0]!==X402_PERMIT2.requiredExtension)return false;
+  const assets=(extra as Record<string,unknown>).assets;
+  if(!Array.isArray(assets))return false;
+  const matches=assets.filter(item=>item&&typeof item==='object'&&!Array.isArray(item)&&String((item as Record<string,unknown>).address).toLowerCase()===ASSET.toLowerCase());
+  if(matches.length!==1)return false;
+  const asset=matches[0] as Record<string,unknown>; const eip712=asset.eip712;
+  return Object.keys(asset).sort().join()===['address','symbol','decimals','eip712','assetTransferMethod','supportsEip2612'].sort().join()&&
+    asset.symbol==='MUSD'&&asset.decimals===18&&asset.assetTransferMethod===X402_PERMIT2.assetTransferMethod&&asset.supportsEip2612===true&&
+    !!eip712&&typeof eip712==='object'&&!Array.isArray(eip712)&&Object.keys(eip712).sort().join()==='name,version'&&
+    (eip712 as Record<string,unknown>).name===MUSD_PERMIT.domainName&&(eip712 as Record<string,unknown>).version===MUSD_PERMIT.domainVersion;
 }
 // No retries, redirects or custom status endpoint. The SDK controls protocol
 // payload construction; this transport supplies bounded I/O only.

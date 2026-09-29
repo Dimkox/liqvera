@@ -265,3 +265,10 @@ The first Permit2 update changed Python's canonical plan but left a copied Node
 digest, and handcrafted payload tests missed SDK recursive extension merging and
 hex case normalization. Derive the Node digest from its complete canonical plan
 and test Python against compiled Node plus the pinned official browser/gateway flow.
+
+## 2026-09-29 — Facilitator capability parsing assumed the wrong nesting
+
+The first Permit2 readiness check looked for `assetTransferMethod` directly in
+`kind.extra`, but Vativ advertises it in the exact MUSD member of `extra.assets`.
+Characterize the real closed response shape and validate the selected asset's
+address, metadata, EIP-712 domain and capabilities before declaring readiness.

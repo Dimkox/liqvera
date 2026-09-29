@@ -38,6 +38,15 @@ records are local workflow evidence, not credentials or the byte-exact short-liv
 P3 grant/wallet payload; no payment, RPC call, database write or migration was
 performed while recording them.
 
+The first live P3 preflight failed safely with `PAYMENT_NOT_READY`; the quote
+remained `READY` and the ledger contained zero attempts. Vativ advertises its
+method per asset under `/supported` `kind.extra.assets[]`, while the initial
+local parser expected a top-level `kind.extra.assetTransferMethod`. The parser
+now requires exactly one matching MUSD entry with the pinned address, `MUSD`,
+18 decimals, EIP-712 `Mezo USD`/`1`, Permit2, and `supportsEip2612=true`, plus
+the sole `eip2612GasSponsoring` extension. Missing, duplicate, malformed, or
+wrong-capability fixtures fail closed. No settlement was attempted during repair.
+
 Route `337ef5ec16a0` and change package
 `engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/`
 are implementing approved local-only P0/P1. Four route-selected analyses were

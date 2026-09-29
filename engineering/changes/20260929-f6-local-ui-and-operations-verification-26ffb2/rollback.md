@@ -8,11 +8,19 @@
 
 ## Application rollback
 
-Revert the coherent F6 browser/test/config/documentation implementation commit.
-Restore the preceding web sources, Compose/Caddy/gateway operational binding,
-and runbooks together; then rerun the pre-F6 web build/typecheck and static
-Compose render. Production has no enabled payment adapter, so no live payment
-state is created by this route.
+Use a selective forward fix. Never restore the known-unsafe pre-F6 fixture
+egress attachments, process-local/uncollectible metrics binding, a public
+metrics route, or the missing/weakened CSP. Those safety repairs remain the
+minimum baseline even if another part of F6 regresses.
+
+The browser policy seam and its call sites may be selectively reverted only if
+they cause a confirmed regression and the preceding inline behavior is first
+re-characterized as preserving the same payer binding, durable guard,
+same-idempotency recovery, and no-resettlement invariants. Test-only files and
+documentation may be reverted independently when they are the defect source.
+Do not revert Compose, Caddy, and gateway metrics changes as a single bundle
+with unrelated browser behavior. Production has no enabled payment adapter, so
+this route creates no live payment state.
 
 ## Data recovery / forward-fix
 
@@ -24,9 +32,14 @@ the action and request a new exact approval.
 
 ## Verification after rollback
 
-- Exact-lock web typecheck and build pass.
-- Both fixture and live Compose profiles resolve statically to the pre-change
-  topology without starting services.
+- The available web typecheck/tests pass and recovery/payment-guard
+  characterization remains green; exact-lock build evidence is required when
+  its locally unavailable dependency artifact is present.
+- Both fixture and live Compose profiles resolve statically without starting
+  services. Fixture has no external-egress membership; live-only egress stays
+  profile-specific.
+- Metrics remain private to the internal operations network with no host/Caddy
+  route, and the restrictive CSP remains present without `unsafe-inline`.
 - Production x402 remains unregistered; no endpoint, schema, frozen vector, or
   payment-readiness claim changed.
 - Repository status shows no unintended generated, secret, or runtime files.

@@ -23,7 +23,8 @@ gateway/ledger verification is in progress: the exact lock builds and
 typechecks, strict cleanup-adapter regressions pass, and five disposable
 PostgreSQL checks cover fresh/upgrade migrations, 20-way idempotency,
 fail-closed recovery, and lost-response cleanup convergence. Full route
-verification and independent review are still pending. F5–F7 remain
+verification passes with the pinned 22-worker runner; independent review is
+still pending. F5–F7 remain
 **IMPLEMENTED_UNVERIFIED**. The local protocol package pins official Mezo MUSD
 material and recorded `mezo-org` source revisions. Separate Liqvera factory
 targets do not change the existing Stage A three-wheel factory. All 156 frozen

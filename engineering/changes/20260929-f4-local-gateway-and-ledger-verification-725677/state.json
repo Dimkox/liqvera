@@ -105,13 +105,19 @@
       "from": "approved",
       "reason": "TDD regressions reproduced; bounded gateway and migration repairs implemented locally.",
       "to": "implementing"
+    },
+    {
+      "at": "2026-09-29T08:48:02+00:00",
+      "from": "implementing",
+      "reason": "Focused gateway/PostgreSQL checks and pinned full PR verification passed the implementation fingerprint.",
+      "to": "verifying"
     }
   ],
   "human_gates": [],
   "human_gates_digest": "c80c81fef25f98ccee331c8391ed981406316868e0c0e85e3f3deaee6dc63d9a",
   "route_id": "725677143509",
   "schema_version": 1,
-  "status": "implementing",
+  "status": "verifying",
   "title": "F4 local gateway and ledger verification",
-  "updated_at": "2026-09-29T08:45:23+00:00"
+  "updated_at": "2026-09-29T08:48:02+00:00"
 }

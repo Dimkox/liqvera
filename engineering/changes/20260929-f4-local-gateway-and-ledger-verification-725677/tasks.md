@@ -5,6 +5,6 @@
 - [x] Implement the smallest vertical change.
 - [x] Run gateway lock install, protocol prerequisite, typecheck/build, and
   focused local tests.
-- [ ] Run selected quality profiles through the pinned full PR verifier.
+- [x] Run selected quality profiles through the pinned full PR verifier.
 - [ ] Complete independent reviews.
 - [ ] Bind evidence to the final tree fingerprint.

@@ -1,8 +1,8 @@
 # Liqvera gateway
 
-Status: **F4 LOCAL VERIFICATION IN PROGRESS**. The exact lock builds and
+Status: **F4 LOCALLY VERIFIED / REVIEW PENDING**. The exact lock builds and
 typechecks locally, and the private cleanup adapter has executable loopback
-contract tests. Disposable-ledger verification is not yet complete. F2 vectors
+contract tests. Disposable-ledger and pinned full-route verification pass. F2 vectors
 remain `NOT_RUN`; these focused checks do not establish F4/F5 acceptance,
 testnet settlement, deployment, or release acceptance.
 
@@ -86,9 +86,8 @@ an older ledger over newer authorization records.
 
 ## Remaining verification obligations
 
-Validate all F2 response schemas, complete disposable PostgreSQL migration/
-invariant and 20-way idempotency races, compare state
-transitions with `states.json`, and execute the F2 payment/recovery vectors.
+Complete independent review, compare remaining runtime paths with
+`states.json`, and execute the F2 payment/recovery vectors.
 Exercise crash-before-submit, crash-after-broadcast, missing transaction hash,
 settlement timeout, response loss, expiry during settlement, cross-scope reads,
 artifact tampering, reorganization, and log-redaction canaries. Verify official

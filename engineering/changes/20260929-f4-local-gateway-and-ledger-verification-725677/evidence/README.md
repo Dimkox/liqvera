@@ -83,6 +83,21 @@ boundary.
 These results are focused implementation evidence, not a full verifier receipt
 or an assertion that any of the 88 F4-owned vectors changed from `NOT_RUN`.
 
+## Full verification
+
+On clean implementation fingerprint
+`55e3ce270b2cdc118ced8ca3daa9ab0bdab59e43`, pinned Adaptive Grok v2.0.19
+reported `RESULT: PASS | mode=pr profiles=base,contracts,data | changed=70`.
+Git diff, all three typed change specs, secret scan, contract structure, SQL
+safety, nine `MEDIUM,HIGH,CRITICAL` Trivy targets, Ruff, Bandit, and source
+stability passed. The 22-worker pytest invocation exited 0 in 71.457 seconds;
+the fresh coverage invocation exited 0 in 1.255 seconds.
+
+Persisting this report and advancing durable state changes the fingerprint, so
+the verifier is rerun after the documentation-only commit. Independent code,
+test, and data review remains the next coordinator-owned step; this implementer
+does not self-review.
+
 <!-- checkpoint:initial -->
 ## Initial checkpoint
 

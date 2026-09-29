@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (F4 gateway/ledger focused repair green; full route verification pending). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (F4 gateway/ledger repair and full verifier green; independent review pending). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F4 local gateway and ledger verification — 2026-09-29
@@ -32,7 +32,14 @@ fail-closed recovery, and lost-response convergence with artifact/payment
 immutability checks. No dependency upgrade, other migration,
 shared database, facilitator, RPC, wallet, chain, exchange, live capture,
 deployment, release, or payment action is in scope. The next step is the pinned
-full verifier, then independent route-selected review.
+route-selected independent code, test, and data reviews.
+
+The pinned v2.0.19 full verifier passed clean implementation fingerprint
+`55e3ce270b2cdc118ced8ca3daa9ab0bdab59e43`: all diff/spec/secret/contract/SQL,
+nine Trivy, Ruff, Bandit, 22-worker pytest, coverage, and source-stability gates
+passed. The verification-evidence commit changes the fingerprint and therefore
+receives one final verifier refresh before review; no receipt is treated as
+current across a tracked change.
 
 ## F3 offline artifact verification repair — 2026-09-29
 

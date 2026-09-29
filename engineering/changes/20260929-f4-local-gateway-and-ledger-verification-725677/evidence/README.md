@@ -83,6 +83,26 @@ boundary.
 These results are focused implementation evidence, not a full verifier receipt
 or an assertion that any of the 88 F4-owned vectors changed from `NOT_RUN`.
 
+## Test-review P1 timeout repair
+
+The independent test review identified that cleanup's two-second internal
+deadline had no committed executable regression. The test-first run added a
+100 ms delayed valid loopback response and attempted to inject a 20 ms cleanup
+deadline. Before the production constructor accepted that deadline, `npm test
+--prefix apps/mezo-gateway` failed the internal-deadline subtest with `Missing
+expected rejection`; the delayed success arrived after roughly 100 ms and was
+accepted. The separate caller-abort subtest rejected as expected.
+
+The minimal repair gives `HttpReportService` a typed injectable cleanup timeout
+whose production default remains 2000 ms and passes it to the existing
+`boundedJson` signal composition. The focused rerun reported `11 tests`, `6
+pass`, `5 skipped`, and `0 fail`; the skips are the explicit disposable-
+PostgreSQL cases, while the internal-deadline and caller-abort subtests both
+rejected the delayed success. Separate gateway typecheck and production build
+commands exited 0. No dependency, lockfile, migration, vector, external, or
+payment boundary changed. A pinned full verifier is run only against the clean
+committed repair; independent review receipts remain coordinator-owned.
+
 ## Full verification
 
 On clean implementation fingerprint

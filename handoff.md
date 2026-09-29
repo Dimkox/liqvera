@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (F4 gateway/ledger repair and full verifier green; independent review pending). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (F4 cleanup-timeout review repair focused green; verifier refresh and independent re-review pending). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F4 local gateway and ledger verification — 2026-09-29
@@ -18,7 +18,14 @@ success after a lost response, while the gateway currently accepts only
 `deleted:true`. The adapter regression reproduced that mismatch and acceptance
 of an unknown field. The minimum repair now accepts either boolean only in an
 exact matching two-field HTTP 200 body. The two reproduced TypeScript errors
-are repaired; typecheck, build, and three loopback cleanup tests pass.
+are repaired. A test-review P1 then exposed missing executable coverage for
+the adapter's internal deadline: the test-first loopback run accepted a valid
+response delayed beyond an injected 20 ms deadline because the constructor
+still hard-coded 2000 ms. `HttpReportService` now accepts a typed injectable
+cleanup timeout while retaining 2000 ms as the production default. The focused
+suite reports 6 passes and 5 explicit disposable-PostgreSQL skips, including
+fail-closed internal-deadline and caller-abort subtests; typecheck and build
+also pass.
 
 The first disposable PostgreSQL run passed migration/rerun and 20-way
 idempotency, then exposed SQLSTATE `42703`: migration 001's shared immutable
@@ -34,12 +41,14 @@ shared database, facilitator, RPC, wallet, chain, exchange, live capture,
 deployment, release, or payment action is in scope. The next step is the pinned
 route-selected independent code, test, and data reviews.
 
-The pinned v2.0.19 full verifier passed clean implementation fingerprint
+The pinned v2.0.19 full verifier previously passed clean implementation fingerprint
 `55e3ce270b2cdc118ced8ca3daa9ab0bdab59e43`: all diff/spec/secret/contract/SQL,
 nine Trivy, Ruff, Bandit, 22-worker pytest, coverage, and source-stability gates
-passed. The verification-evidence commit changes the fingerprint and therefore
-receives one final verifier refresh before review; no receipt is treated as
-current across a tracked change.
+passed. The timeout repair changes that fingerprint; its pinned full verifier
+is therefore run only after the coherent repair is committed and clean. Runtime
+status is authoritative, and no receipt is treated as current across a tracked
+change. Independent review remains coordinator-owned; this implementer does
+not record PASS receipts or self-review.
 
 ## F3 offline artifact verification repair — 2026-09-29
 

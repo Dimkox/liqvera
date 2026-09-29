@@ -73,3 +73,30 @@ test('cleanup rejects malformed JSON and non-200 responses', async () => {
     await assert.rejects(service.cleanup(REPORT_ID, AbortSignal.timeout(1000)));
   });
 });
+
+test('cleanup rejects when its internal deadline or caller abort expires', async t => {
+  const delayedSuccess = (
+    _request: IncomingMessage,
+    response: ServerResponse,
+  ): void => {
+    setTimeout(() => {
+      if (response.destroyed) return;
+      response.writeHead(200, { 'content-type': 'application/json' });
+      response.end(JSON.stringify({ report_id: REPORT_ID, deleted: true }));
+    }, 100);
+  };
+
+  await t.test('internal cleanup deadline', async () => {
+    await withServer(delayedSuccess, async base => {
+      const service = new HttpReportService(base, 'test_cleanup_token_1234567890', 20);
+      await assert.rejects(service.cleanup(REPORT_ID, AbortSignal.timeout(1000)));
+    });
+  });
+
+  await t.test('caller abort', async () => {
+    await withServer(delayedSuccess, async base => {
+      const service = new HttpReportService(base, 'test_cleanup_token_1234567890');
+      await assert.rejects(service.cleanup(REPORT_ID, AbortSignal.timeout(20)));
+    });
+  });
+});

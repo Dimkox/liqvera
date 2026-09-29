@@ -49,7 +49,9 @@ report service's idempotent `DELETE /internal/v1/reports/{report_id}` and
 accepts an exact matching HTTP 200 body with boolean `deleted`: `true` means
 removed now and `false` means already absent after an earlier attempt. Both
 authoritatively establish the same exact-report absence state; malformed,
-mismatched, non-200, and transport outcomes do not. It requires an internal
+mismatched, non-200, and transport outcomes do not. Cleanup has its own
+two-second deadline and also honors an earlier caller abort; either timeout
+rejects without producing cleanup success. It requires an internal
 service token loaded from `REPORT_SERVICE_TOKEN_FILE`; the token is also sent
 on build and health calls when present. Missing credentials keep retention
 mutation readiness false and cleanup blocked. The gateway never writes or

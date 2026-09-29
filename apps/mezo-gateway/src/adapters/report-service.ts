@@ -2,7 +2,11 @@ import type { ReportService } from '../ports/index.js';
 import { INSTRUMENT, PublicError, isReason, shaPattern, uuidPattern, type Artifact, type QuoteInput } from '../domain/model.js';
 import { boundedJson } from './http.js';
 export class HttpReportService implements ReportService {
-  constructor(private readonly base: URL,private readonly token: string|null=null) {}
+  constructor(
+    private readonly base: URL,
+    private readonly token: string|null=null,
+    private readonly cleanupTimeoutMs:number=2000,
+  ) {}
   private headers():Record<string,string> {return this.token?{Authorization:`Bearer ${this.token}`}:{ };}
   async healthy(): Promise<boolean> {
     try { const result=await boundedJson(new URL('/healthz',this.base),{method:'GET',headers:this.headers()},4096,1500);
@@ -33,7 +37,7 @@ export class HttpReportService implements ReportService {
   cleanupReady():boolean {return !!this.token;}
   async cleanup(reportId:string,signal:AbortSignal):Promise<boolean> {
     if(!this.cleanupReady()||!uuidPattern.test(reportId))return false;
-    const value=await boundedJson(new URL(`/internal/v1/reports/${reportId}`,this.base),{method:'DELETE',signal,headers:this.headers()},4096,2000);
+    const value=await boundedJson(new URL(`/internal/v1/reports/${reportId}`,this.base),{method:'DELETE',signal,headers:this.headers()},4096,this.cleanupTimeoutMs);
     if(!value||typeof value!=='object')return false;
     const body=value as Record<string,unknown>;
     const keys=Object.keys(body);

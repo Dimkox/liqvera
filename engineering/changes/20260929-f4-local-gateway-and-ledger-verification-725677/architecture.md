@@ -94,6 +94,10 @@ Canonical governance JSON under `governance/` remains separately reviewed author
   schema defect would stop this tranche rather than rewrite applied history.
 - Keep remote cleanup inside the existing row-lock transaction. Migration 002
   adds no table/state/index and does not implement two-phase cleanup.
+- Keep the production cleanup deadline at two seconds, compose it with the
+  caller's abort signal, and inject only the deadline duration so a fast
+  loopback regression can prove both failure paths without sleeping two
+  seconds.
 
 ## Risks and mitigations
 
@@ -103,5 +107,6 @@ Canonical governance JSON under `governance/` remains separately reviewed author
   bind loopback only, pass its URL explicitly, and prove removal afterward.
 - A fake could accidentally enable payment: use a fail-closed port and assert
   zero `verify`, `settle`, `confirm`, and `revalidate` calls.
-- Existing retention holds locks during HTTP I/O: retain the two-second timeout
-  and batch-of-ten bounds; record as residual debt rather than refactor schema.
+- Existing retention holds locks during HTTP I/O: retain the default two-second
+  timeout and batch-of-ten bounds; record as residual debt rather than refactor
+  schema.

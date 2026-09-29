@@ -251,3 +251,10 @@ The first A29 implementation measured the completed checkout size, which cannot
 prove that transfer bytes stayed below the authorization ceiling. Disk, output,
 memory and time envelopes are useful but not equivalent; keep A29 blocked until
 the transport exposes a reviewer-verifiable preemptive network-byte limit.
+
+## 2026-09-29 — PostgreSQL behavior suite reused retained migration evidence
+
+The first post-005 behavior invocation targeted the retained migration-evidence
+database even though the suite creates fixed upgrade rows and requires a fresh
+database. Keep retained migration proof untouched and use a separately approved
+fresh disposable database for destructive fixture-based behavioral verification.

@@ -60,6 +60,54 @@
       "resource": "docker://liqvera-f7-postgres/database/liqvera_f4_test_fdae49d",
       "route_id": "337ef5ec16a0",
       "scope_digest": "85f0c4c9ca66141009896ca487454e214bc984045a2ecf03eb59c1aa0262b9ae"
+    },
+    {
+      "action": null,
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T18:10:07+00:00",
+      "decision": "approved",
+      "gate": "scope_and_design_approval",
+      "reason": "Current P3 design approved by explicit user request to implement A13/A14 and apply migration; includes facilitator-sponsored EIP-3009, durable evidence, confirmations and loopback-only PostgreSQL.",
+      "resource": null,
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "59f6f3bba9d957f0791827cd7bb83d3476f3f0ef4b29f64f29092b324ffa2b00"
+    },
+    {
+      "action": "migration-plan",
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T18:10:07+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "Approve additive migration plan 005 on the same isolated disposable Liqvera PostgreSQL, with receipts=0 precondition and full behavioral verification.",
+      "resource": null,
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "59f6f3bba9d957f0791827cd7bb83d3476f3f0ef4b29f64f29092b324ffa2b00"
+    },
+    {
+      "action": "external-write",
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T18:10:07+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "User explicitly ordered PostgreSQL migration; exact target remains isolated disposable Liqvera database.",
+      "resource": "docker://liqvera-f7-postgres/database/liqvera_f4_test_fdae49d",
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "59f6f3bba9d957f0791827cd7bb83d3476f3f0ef4b29f64f29092b324ffa2b00"
+    },
+    {
+      "action": "external-write",
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T18:10:48+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "Authorize separate fresh disposable verification database so PostgreSQL migration/concurrency tests do not reuse or erase retained migration evidence.",
+      "resource": "docker://liqvera-f7-postgres/database/liqvera_f4_test_9c86bf9_verify",
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "59f6f3bba9d957f0791827cd7bb83d3476f3f0ef4b29f64f29092b324ffa2b00"
     }
   ],
   "route_id": "337ef5ec16a0",

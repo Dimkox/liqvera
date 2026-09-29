@@ -269,8 +269,14 @@ to Node, and never reopens the operator-supplied paths. PostgreSQL endpoint URLs
 with any query, `sslmode`, socket override or fragment are rejected before Pool
 construction. Additive migration 005 persists the actually observed canonical
 confirmation count (minimum 12), so fresh and durable replay results have the
-same runner-compatible receipt shape. Migration 005 has not been applied and
-requires a new exact isolated-database approval before live P3 execution.
+same runner-compatible receipt shape. The user then approved and applied
+migration 005 only to retained isolated database
+`liqvera_f4_test_fdae49d`: pre/post `receipts=0`, exact 001–005 ledger,
+idempotent second migrator run, and `confirmations int4 NOT NULL CHECK >= 12`.
+The behavior suite could not reuse that retained database because its fixed
+upgrade fixtures require a fresh target; no cleanup was performed. Separately
+approved `liqvera_f4_test_9c86bf9_verify` passed all 6/6 PostgreSQL tests,
+including twenty-pool one-winner, restart, rollback and append-only behavior.
 The operator accepts only `127.0.0.1`, `::1`, or `localhost` for PostgreSQL;
 every `localhost` resolution must itself be loopback. Remote DNS and
 non-loopback numeric addresses fail before Pool construction. This invariant is
@@ -283,7 +289,7 @@ Final migration identities are `001_ledger.sql`
 `bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0`,
 `004_receipt_confirmation_provenance.sql`
 `96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a`,
-and unapplied `005_receipt_confirmation_count.sql`
+and `005_receipt_confirmation_count.sql`
 `e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11`.
 The clean pinned verifier passed 1,219 tests plus 85 subtests at fingerprint
 `5fde3a92ac8a464b32d0630a531bdb790516c9c96cab922509a310c699cb0ce5`.

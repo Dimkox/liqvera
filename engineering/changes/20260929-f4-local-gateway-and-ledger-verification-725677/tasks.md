@@ -8,5 +8,5 @@
 - [x] Run selected quality profiles through the pinned full PR verifier.
 - [x] Repair the test-review P1 with deterministic internal-deadline and caller-
   abort cleanup regressions while retaining the production two-second default.
-- [ ] Complete independent reviews.
+- [x] Complete independent reviews and persist the reviewer-provided reports.
 - [ ] Bind evidence to the final tree fingerprint.

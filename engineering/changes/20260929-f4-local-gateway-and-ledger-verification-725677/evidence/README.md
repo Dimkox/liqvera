@@ -10,6 +10,16 @@ Code and test review reports perform bounded, change-relevant mutation probes in
 
 Reviewers return the complete report to the coordinator out-of-band and do not write into the candidate worktree. After all reviews finish, the coordinator persists all reports here, then reruns final verification and records fresh fingerprint-bound receipts for the tree containing those reports.
 
+The coordinator has now persisted the independent final PASS reports as
+`code-review.md`, `test-review.md`, and `data-review.md`. All three bind their
+review to clean HEAD `587bf5c0a5edd1712c4cd3cd3e4ade258fff8ffe` and tree
+fingerprint `e88d85fbe2da4789b634f5d2c88bf73beeb9740274c566ba06297f8c1cb4c83b`,
+state `reviewed-tree-modified: no`, and report no findings. They are
+reviewer-provided outputs, not implementer self-review. Persisting and
+registering them changes the tree fingerprint, so runtime receipts are
+refreshed only after this evidence commit and again after durable state
+transitions.
+
 Each report must include:
 
 - source identity: HEAD and candidate tree fingerprint;

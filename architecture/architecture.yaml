@@ -14323,6 +14323,15 @@ repository_inventory:
   - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/evidence/analysis-repo_explorer.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/evidence/code-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/evidence/data-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/evidence/test-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/release.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

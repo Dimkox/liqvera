@@ -86,6 +86,9 @@ class P3Plan:
             "amount_atomic": "10000000000000000",
             "maximum_settlement_submissions": 1,
             "max_buyer_native_gas_wei": "100000000000000",
+            "facilitator_url": "https://facilitator.vativ.io/",
+            "rpc_url": "https://rpc.test.mezo.org/",
+            "database_identity_kind": "sha256-credential-free-postgresql-endpoint/v1",
         }
         cases = {"A13": payment, "A14": payment}
         return cls(cases, _digest(cases))
@@ -255,11 +258,12 @@ def validate_p3_bundle(raw, *, subject_commit, subject_tree, now):
         }
         if (
             not isinstance(value, dict)
-            or set(value) != set(expected) | {"grant_id", "buyer", "pay_to"}
+            or set(value) != set(expected) | {"grant_id", "buyer", "pay_to", "database_identity"}
             or any(value.get(k) != v for k, v in expected.items())
             or not ADDRESS.fullmatch(str(value.get("buyer")))
             or not ADDRESS.fullmatch(str(value.get("pay_to")))
             or value["buyer"].lower() == value["pay_to"].lower()
+            or not DIGEST.fullmatch(str(value.get("database_identity")))
         ):
             raise LiveAuthorityError("LIVE_CASE_GRANT_MISMATCH")
         try:

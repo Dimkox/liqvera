@@ -31,6 +31,7 @@ def grant():
         "expires_at": expires,
         "buyer": BUYER,
         "pay_to": PAYEE,
+        "database_identity": "9" * 64,
         **P3Plan.canonical().cases["A13"],
     }
     return {
@@ -173,6 +174,7 @@ def test_wrong_migrations_fail_before_external_call():
 def test_payment_input_is_closed_and_never_accepts_private_key(tmp_path):
     path = tmp_path / "payment.json"
     path.write_text(json.dumps(payload()))
+    path.chmod(0o600)
     assert load_payment_input(path)["buyer"] == BUYER
     value = payload()
     value["private_key"] = "forbidden"

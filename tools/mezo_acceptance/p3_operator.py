@@ -34,9 +34,22 @@ PAYMENT_FIELDS = {
 
 def _safe_json(path: Path, maximum: int = 65536):
     info = os.lstat(path)
-    if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size > maximum:
+    if (
+        not stat.S_ISREG(info.st_mode)
+        or info.st_nlink != 1
+        or stat.S_IMODE(info.st_mode) & 0o077
+        or not 0 < info.st_size <= maximum
+    ):
         raise P3OperatorError("P3_INPUT_UNSAFE")
-    return json.loads(path.read_bytes())
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        opened = os.fstat(descriptor)
+        raw = os.read(descriptor, maximum + 1)
+    finally:
+        os.close(descriptor)
+    if (opened.st_dev, opened.st_ino, opened.st_size) != (info.st_dev, info.st_ino, info.st_size):
+        raise P3OperatorError("P3_INPUT_UNSAFE")
+    return json.loads(raw)
 
 
 def load_payment_input(path: Path):
@@ -113,6 +126,10 @@ class P3Operator:
             "amount_atomic": grant["amount_atomic"],
             "maximum_settlement_submissions": 1,
             "max_buyer_native_gas_wei": grant["max_buyer_native_gas_wei"],
+            "facilitator_url": grant["facilitator_url"],
+            "rpc_url": grant["rpc_url"],
+            "database_identity_kind": grant["database_identity_kind"],
+            "database_identity": grant["database_identity"],
             "migration_checksums": dict(REQUIRED_MIGRATIONS),
             "external_calls": 0,
             "database_writes": 0,

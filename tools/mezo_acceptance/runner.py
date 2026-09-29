@@ -117,6 +117,30 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
+def read_private_input(path: Path, maximum: int) -> bytes:
+    before = os.lstat(path)
+    if (
+        not stat.S_ISREG(before.st_mode)
+        or before.st_nlink != 1
+        or stat.S_IMODE(before.st_mode) & 0o077
+        or not 0 < before.st_size <= maximum
+    ):
+        raise ValueError("P3 input must be a private single-link regular file")
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        opened = os.fstat(descriptor)
+        raw = os.read(descriptor, maximum + 1)
+    finally:
+        os.close(descriptor)
+    if (
+        (opened.st_dev, opened.st_ino, opened.st_size)
+        != (before.st_dev, before.st_ino, before.st_size)
+        or len(raw) != before.st_size
+    ):
+        raise ValueError("P3 input changed during validation")
+    return raw
+
+
 def execute_p3_operator(
     grant_path: Path,
     payment_path: Path,
@@ -1050,15 +1074,14 @@ def main() -> int:
                     now=datetime.now(timezone.utc),
                 )
             if args.p3_live_grants is not None:
-                info = os.lstat(args.p3_live_grants)
-                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size > 65536:
-                    raise ValueError("P3 grant bundle must be one bounded regular file")
                 p3_authority = validate_p3_bundle(
-                    json.loads(args.p3_live_grants.read_bytes()),
+                    json.loads(read_private_input(args.p3_live_grants, 65536)),
                     subject_commit=identity["commit"],
                     subject_tree=identity["tree"],
                     now=datetime.now(timezone.utc),
                 )
+                if args.p3_payment is not None:
+                    read_private_input(args.p3_payment, 16384)
         output = args.output.resolve()
         if output.exists() or output.is_relative_to(ROOT):
             raise ValueError("output must be a new path outside the repository")

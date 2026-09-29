@@ -4,6 +4,7 @@ import type { PaymentPayload } from '@x402/core/types';
 import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type Quote } from '../src/domain/model.js';
 import { MezoAuthorizationPolicy, MezoFinalityPolicy } from '../src/security/payment-policy.js';
 import { LivePaymentGrant } from '../src/security/live-grant.js';
+import { databaseIdentity } from '../src/p3-operator.js';
 import { composeOfficialX402 } from '../src/security/live-composition.js';
 import { settlementTransaction } from '../src/adapters/x402.js';
 
@@ -56,7 +57,7 @@ test('finality requires twelve canonical confirmations and rejects reorg',async(
   assert.equal(await policy.isFinal(receipt,block,reorg as never),false);
 });
 
-function grantRaw(){return {schema:'liqvera-mezo-payment-grant/v1',grant_id:'00000000-0000-4000-8000-000000000099',subject_commit:'a'.repeat(40),subject_tree:'b'.repeat(40),plan_sha256:'c'.repeat(64),scheme:'exact',settlement_broadcaster:'facilitator',network:NETWORK,chain_id:31611,asset:ASSET,amount_atomic:AMOUNT,buyer:payer,pay_to:payTo,maximum_settlement_submissions:1,max_buyer_native_gas_wei:'100000000000000',expires_at:'2026-09-29T00:05:00Z'};}
+function grantRaw(){return {schema:'liqvera-mezo-payment-grant/v1',grant_id:'00000000-0000-4000-8000-000000000099',subject_commit:'a'.repeat(40),subject_tree:'b'.repeat(40),plan_sha256:'c'.repeat(64),scheme:'exact',settlement_broadcaster:'facilitator',network:NETWORK,chain_id:31611,asset:ASSET,amount_atomic:AMOUNT,buyer:payer,pay_to:payTo,maximum_settlement_submissions:1,max_buyer_native_gas_wei:'100000000000000',facilitator_url:'https://facilitator.vativ.io/',rpc_url:'https://rpc.test.mezo.org/',database_identity_kind:'sha256-credential-free-postgresql-endpoint/v1',database_identity:'d'.repeat(64),expires_at:'2026-09-29T00:05:00Z'};}
 
 test('live grant binds exact facilitator-sponsored settlement and buyer gas authority',()=>{
   const raw=grantRaw();
@@ -65,9 +66,20 @@ test('live grant binds exact facilitator-sponsored settlement and buyer gas auth
   assert.match(grant.digest,/^[0-9a-f]{64}$/);
   assert.throws(()=>LivePaymentGrant.parse({...raw,settlement_broadcaster:'buyer'},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);
   assert.throws(()=>LivePaymentGrant.parse({...raw,scheme:'upto'},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);
+  assert.throws(()=>LivePaymentGrant.parse({...raw,facilitator_url:'https://evil.invalid/'},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);
+  assert.throws(()=>LivePaymentGrant.parse({...raw,rpc_url:'https://evil.invalid/'},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);
+  assert.throws(()=>LivePaymentGrant.parse({...raw,database_identity:'0'.repeat(63)},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);
   assert.throws(()=>grant.authorize({subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,now:new Date('2026-09-29T00:05:00Z')}),/LIVE_GRANT_EXPIRED/);
   const bytes=new TextEncoder().encode(`${JSON.stringify(raw)}\n`);
   assert.notEqual(LivePaymentGrant.parseBytes(bytes,new Date('2026-09-29T00:00:00Z')).digest,grant.digest);
+});
+
+test('operator database identity ignores credentials but binds host port and database',()=>{
+  const approved=databaseIdentity('postgresql://alice:one@db.internal:5433/liqvera_f7');
+  assert.equal(approved,databaseIdentity('postgresql://bob:two@db.internal:5433/liqvera_f7'));
+  assert.notEqual(approved,databaseIdentity('postgresql://alice:one@other.internal:5433/liqvera_f7'));
+  assert.notEqual(approved,databaseIdentity('postgresql://alice:one@db.internal:5432/liqvera_f7'));
+  assert.notEqual(approved,databaseIdentity('postgresql://alice:one@db.internal:5433/other'));
 });
 
 test('production composition is grantless by default and rejects malformed harness authority',()=>{

@@ -78,6 +78,7 @@ def p3_bundle(**change):
         "expires_at": expiry,
         "buyer": "0x" + "1" * 40,
         "pay_to": "0x" + "2" * 40,
+        "database_identity": "9" * 64,
         **plan.cases["A13"],
     }
     value = {
@@ -112,6 +113,36 @@ def test_p3_requires_one_byte_identical_linked_grant():
     value["cases"]["A14"]["grant_id"] = "00000000-0000-4000-8000-000000000014"
     with pytest.raises(LiveAuthorityError, match="LIVE_PAYMENT_LINK_MISMATCH"):
         validate_p3_bundle(value, subject_commit=COMMIT, subject_tree=TREE, now=NOW)
+
+
+@pytest.mark.parametrize("field,bad", [
+    ("facilitator_url", "https://evil.invalid/"),
+    ("rpc_url", "https://evil.invalid/"),
+    ("database_identity", "0" * 63),
+])
+def test_p3_binds_exact_external_identities(field, bad):
+    value = p3_bundle()
+    value["cases"]["A13"][field] = bad
+    value["cases"]["A14"][field] = bad
+    with pytest.raises(LiveAuthorityError, match="LIVE_CASE_GRANT_MISMATCH"):
+        validate_p3_bundle(value, subject_commit=COMMIT, subject_tree=TREE, now=NOW)
+
+
+def test_p3_private_input_rejects_permissions_links_and_replacement(tmp_path, monkeypatch):
+    path = tmp_path / "grant.json"
+    path.write_text("{}")
+    with pytest.raises(ValueError, match="private single-link"):
+        runner.read_private_input(path, 64)
+    path.chmod(0o600)
+    linked = tmp_path / "linked.json"
+    linked.hardlink_to(path)
+    with pytest.raises(ValueError, match="private single-link"):
+        runner.read_private_input(path, 64)
+    linked.unlink()
+    symlink = tmp_path / "symlink.json"
+    symlink.symlink_to(path)
+    with pytest.raises(ValueError, match="private single-link"):
+        runner.read_private_input(symlink, 64)
 
 
 def test_runner_binds_journal_and_keeps_a29_blocked(tmp_path, monkeypatch):
@@ -212,6 +243,7 @@ def test_p3_operator_cli_is_separate_and_requires_human_wallet_before_io(tmp_pat
         case["expires_at"] = expiry
     grants = tmp_path / "p3.json"
     grants.write_text(json.dumps(value))
+    grants.chmod(0o600)
     monkeypatch.setattr(
         runner,
         "repo_identity",
@@ -251,8 +283,10 @@ def test_p3_operator_cli_seals_confirmed_linked_a13_a14_once(tmp_path, monkeypat
         case["expires_at"] = expiry
     grants = tmp_path / "p3.json"
     grants.write_text(json.dumps(value))
+    grants.chmod(0o600)
     payment = tmp_path / "payment.json"
     payment.write_text("{}")
+    payment.chmod(0o600)
     identity = {"repository": "Dimkox/liqvera", "origin": "UNSET", "commit": COMMIT, "tree": TREE, "worktree": "CLEAN"}
     monkeypatch.setattr(runner, "repo_identity", lambda: identity)
     calls = []

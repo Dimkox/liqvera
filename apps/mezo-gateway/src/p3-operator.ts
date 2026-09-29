@@ -1,4 +1,6 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, open, lstat } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -17,12 +19,18 @@ const migrations=new Map([
   ['004_receipt_confirmation_provenance.sql','96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a'],
 ]);
 const fields=['schema','quote_id','scope_hash','report_id','payment_signature','buyer','pay_to'];
-const planDigest='73c48d5c6ce2b29f700e52ab66c2220d6871ff3c5a0bab59f9683a4b90f3fb65';
+const planDigest='c99df87005537ff35a93f02547ba88e2d315b8398b484db4c0d65f138b51acbe';
 function fail(message:string):never{throw new Error(message);}
 function exactObject(value:unknown):Record<string,unknown>{if(!value||typeof value!=='object'||Array.isArray(value))fail('P3_INPUT_INVALID');return value as Record<string,unknown>}
 function arg(name:string):string {const at=process.argv.indexOf(name);if(at<0||!process.argv[at+1])fail(`missing ${name}`);return process.argv[at+1]!}
 function safeUrl(value:string):URL {const url=new URL(value);if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash)fail('P3_URL_INVALID');return url}
-async function bytes(path:string,max=65536):Promise<Uint8Array>{const value=await readFile(path);if(!value.length||value.length>max)fail('P3_INPUT_INVALID');return value}
+async function bytes(path:string,max=65536):Promise<Uint8Array>{
+  const before=await lstat(path);if(!before.isFile()||before.nlink!==1||(before.mode&0o077)!==0||before.size<1||before.size>max)fail('P3_INPUT_UNSAFE');
+  const handle=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);
+  try {const opened=await handle.stat();if(opened.dev!==before.dev||opened.ino!==before.ino||opened.size!==before.size)fail('P3_INPUT_UNSAFE');const value=await handle.readFile();if(!value.length||value.length>max)fail('P3_INPUT_INVALID');return value;}
+  finally {await handle.close();}
+}
+export function databaseIdentity(value:string):string {const url=new URL(value);if(!/^postgres(?:ql)?:$/.test(url.protocol)||!url.hostname||!url.pathname.slice(1))fail('P3_DATABASE_CONFIG_INVALID');const endpoint=`${url.protocol}//${url.hostname.toLowerCase()}:${url.port||'5432'}${url.pathname}`;return createHash('sha256').update(endpoint).digest('hex')}
 async function checkMigrations(pool:Pool):Promise<void>{
   const rows=(await pool.query<{name:string;sha256:string}>('SELECT name,sha256 FROM gateway_migrations ORDER BY name')).rows;
   if(rows.length!==migrations.size||rows.some(row=>migrations.get(row.name)!==row.sha256))fail('P3_MIGRATION_MISMATCH');
@@ -52,9 +60,10 @@ async function main():Promise<void>{
       asset:grant.raw.asset,amount_atomic:grant.raw.amount_atomic,maximum_settlement_submissions:1,max_buyer_native_gas_wei:grant.raw.max_buyer_native_gas_wei,
       required_migrations:Object.fromEntries(migrations),external_calls:0,database_writes:0});return;
   }
-  const databaseUrl=process.env.DATABASE_URL_FILE?(await readFile(process.env.DATABASE_URL_FILE,'utf8')).trim():process.env.DATABASE_URL;
+  const databaseUrl=process.env.DATABASE_URL_FILE?new TextDecoder('utf-8',{fatal:true}).decode(await bytes(process.env.DATABASE_URL_FILE,4096)).trim():process.env.DATABASE_URL;
   if(!databaseUrl||!/^postgres(?:ql)?:\/\//.test(databaseUrl)||Boolean(process.env.DATABASE_URL_FILE)===Boolean(process.env.DATABASE_URL))fail('P3_DATABASE_CONFIG_INVALID');
   const facilitator=safeUrl(arg('--facilitator-url')); const rpcUrl=safeUrl(arg('--rpc-url'));
+  if(facilitator.href!==grant.raw.facilitator_url||rpcUrl.href!==grant.raw.rpc_url||databaseIdentity(databaseUrl)!==grant.raw.database_identity)fail('P3_EXTERNAL_IDENTITY_MISMATCH');
   const pool=new Pool({connectionString:databaseUrl,max:2,connectionTimeoutMillis:5000});
   try {
     await checkMigrations(pool); // No facilitator/RPC call is possible before this point.
@@ -85,4 +94,5 @@ async function main():Promise<void>{
     output({...confirmation.receipt,schema:'liqvera-p3-payment-observation/v1',status:'CONFIRMED',grant_id:grant.raw.grant_id,grant_digest:grant.digest,settlement_count:1,retry_allowed:false});
   } finally {await pool.end();}
 }
-main().catch(error=>{process.stderr.write(`${error instanceof Error?error.message:'P3_OPERATOR_FAILED'}\n`);process.exitCode=1});
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))
+  main().catch(error=>{process.stderr.write(`${error instanceof Error?error.message:'P3_OPERATOR_FAILED'}\n`);process.exitCode=1});

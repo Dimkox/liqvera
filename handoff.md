@@ -249,6 +249,14 @@ responses remain spent and confirm-only, with sealed A13/A14 observations using
 the canonical `PAYMENT_CONFIRMATION_PENDING` blocker rather than a false wallet
 omission. Deterministic fake E2E covers confirmed and pending paths plus replay.
 No live payment or network call was performed.
+
+The P3 grant also binds the exact facilitator URL, read-only RPC URL and a
+stable SHA-256 identity of the credential-free PostgreSQL endpoint
+(`scheme//host:port/database`). Another host, port or database therefore fails
+before external use. Grant, signed-payment and database-URL files must be
+private single-link regular files and are opened with `O_NOFOLLOW` under an
+inode/size check. The canonical P3 plan pins both HTTPS endpoints and names the
+database identity mechanism.
 Final migration identities are `001_ledger.sql`
 `bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b`,
 `002_fix_immutable_ledger_identity.sql`

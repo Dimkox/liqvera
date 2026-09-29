@@ -15,6 +15,8 @@ including twenty-pool single-winner consumption, restart, rollback and
 append-only enforcement. Operator fake E2E proves confirmed and pending paths,
 one settlement across replay, preflight zero-I/O, closed signed inputs, and
 migration mismatch before any external adapter call.
+Negative authority coverage changes the facilitator, RPC and database identity,
+and rejects permissive, symlinked or hard-linked operator input files.
 | P4 | Release artifacts | two builds where reproducibility claimed; archive safety; checksum missing/extra/corrupt; secret canaries |
 | P5 | Publication | old/new main OIDs, tag object/target, draft assets, download re-hash, anonymous source/tree comparison |
 

@@ -51,10 +51,12 @@ with fingerprint `b467a6f9c3312a70f0a7ae946750c1a5405afa29e6bdab7509e8aaac482c2d
 secret, contracts, SQL, nine Trivy targets, Ruff, Bandit, coverage, and source
 stability. Independent code, test, and data reviewers all returned PASS with
 no findings on that exact fingerprint and did not modify the candidate. Their
-reports are stored in this change package. The coordinator must now bind
-receipts to the report-bearing tree and advance the package to `ready`. Do not
-infer testnet payment, persistence, acceptance, deployment, or release
-readiness.
+reports are stored in this change package and were registered after the
+report-bearing tree passed full verification. With no human gate, the durable
+package advanced through `verifying` and `reviewing` to `ready`. The tracked
+state-close commit requires one final verifier and receipt refresh on its exact
+fingerprint. Do not infer testnet payment, persistence, acceptance, deployment,
+or release readiness.
 
 The pre-review pinned verifier execution completed its configured checks but could
 not record a receipt because the new typed acceptance entries used the

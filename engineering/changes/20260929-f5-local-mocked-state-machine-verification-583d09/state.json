@@ -93,13 +93,31 @@
       "from": "approved",
       "reason": "RED regressions reproduced missing immediate manual review in direct and reconciliation receipt-binding paths; minimal two-site repair and six fake-only scenarios are green.",
       "to": "implementing"
+    },
+    {
+      "at": "2026-09-29T09:59:33+00:00",
+      "from": "implementing",
+      "reason": "Implementation and focused verification complete on committed tree",
+      "to": "verifying"
+    },
+    {
+      "at": "2026-09-29T09:59:33+00:00",
+      "from": "verifying",
+      "reason": "Full verifier and independent route-selected reviews passed",
+      "to": "reviewing"
+    },
+    {
+      "at": "2026-09-29T09:59:34+00:00",
+      "from": "reviewing",
+      "reason": "All required fingerprint-bound evidence is present; no human gates",
+      "to": "ready"
     }
   ],
   "human_gates": [],
   "human_gates_digest": "cb040ae659466b1c626d895d8a0bf6015c72880d68642a6e0f570756a021d6dd",
   "route_id": "583d09e0cf44",
   "schema_version": 1,
-  "status": "implementing",
+  "status": "ready",
   "title": "F5 local mocked state-machine verification",
-  "updated_at": "2026-09-29T09:21:28+00:00"
+  "updated_at": "2026-09-29T09:59:34+00:00"
 }

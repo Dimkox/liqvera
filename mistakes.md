@@ -164,3 +164,11 @@ The first green database suite was followed by an immediate `docker inspect`
 after stopping an auto-remove container, producing a false cleanup failure.
 Poll the exact validated container identity until absent before claiming local
 cleanup, while retaining the exit trap.
+
+## 2026-09-29 — F5 acceptance evidence used a prose-only field
+
+The first F5 verifier finished its checks but could not record the receipt
+because acceptance entries used `verification` instead of the schema's typed
+`evidence` array. The root cause was authoring from the Markdown test plan
+without first copying the established v2 acceptance shape from a validated
+change package.

@@ -1,9 +1,9 @@
 {
   "acceptance_criteria": [
-    {"id":"AC-001","statement":"Real gateway and reconciliation orchestration are exercised with deterministic in-process fakes and temporary artifacts only.","verification":"Focused compiled Node tests invoke Gateway.read, reconcileOne, recoverUnsubmitted, and frozen state guards."},
-    {"id":"AC-002","statement":"A post-confirmation receipt-binding rejection immediately enters manual review without entitlement, delivery, or resettlement.","verification":"RED-first direct and reconciliation regression tests assert paired state, exact calls, and absent paid bytes."},
-    {"id":"AC-003","statement":"Duplicate use, pre-submit recovery, unknown outcome, bounded reconciliation, confirmation replay, finality, and reorg boundaries remain fail closed.","verification":"Deterministic scenario matrix asserts final state and exact settlement count."},
-    {"id":"AC-004","statement":"The exact-lock gateway checks and pinned PR verifier pass while migrations and 156 frozen vectors remain unchanged and NOT_RUN.","verification":"npm build/typecheck/test, repository diff checks, and grok_verify PR receipt."}
+    {"id":"AC-001","statement":"Real gateway and reconciliation orchestration are exercised with deterministic in-process fakes and temporary artifacts only.","evidence":[{"test":"apps/mezo-gateway/test/state-machine.test.ts"},{"receipt":"test_review"}]},
+    {"id":"AC-002","statement":"A post-confirmation receipt-binding rejection immediately enters manual review without entitlement, delivery, or resettlement.","evidence":[{"test":"apps/mezo-gateway/test/state-machine.test.ts"},{"receipt":"code_review"}]},
+    {"id":"AC-003","statement":"Duplicate use, pre-submit recovery, unknown outcome, bounded reconciliation, confirmation replay, finality, and reorg boundaries remain fail closed.","evidence":[{"test":"apps/mezo-gateway/test/state-machine.test.ts"},{"receipt":"data_review"}]},
+    {"id":"AC-004","statement":"The exact-lock gateway checks and pinned PR verifier pass while migrations and 156 frozen vectors remain unchanged and NOT_RUN.","evidence":[{"receipt":"verification"},{"receipt":"test_review"}]}
   ],
   "approvals": {
     "required_scopes": []
@@ -15,17 +15,16 @@
     "openapi": []
   },
   "forbidden_outcomes": [
-    "Any network, RPC, facilitator, wallet, transfer, exchange, database, migration, deployment, release, or push action",
-    "Any second settlement call during replay or reconciliation",
-    "Any entitlement or paid delivery from mismatched or non-final evidence",
-    "Any PASS claim for a frozen acceptance vector or production payment readiness"
+    {"id":"FORBID-001","statement":"No network, RPC, facilitator, wallet, transfer, exchange, database, migration, deployment, release, or push action occurs.","evidence":[{"receipt":"verification"},{"receipt":"data_review"}]},
+    {"id":"FORBID-002","statement":"Replay or reconciliation never makes a second settlement call.","evidence":[{"test":"apps/mezo-gateway/test/state-machine.test.ts"},{"receipt":"test_review"}]},
+    {"id":"FORBID-003","statement":"Mismatched or non-final evidence never creates entitlement or paid delivery.","evidence":[{"test":"apps/mezo-gateway/test/state-machine.test.ts"},{"receipt":"code_review"}]},
+    {"id":"FORBID-004","statement":"No frozen acceptance vector or production payment-readiness claim is upgraded by local mocked evidence.","evidence":[{"receipt":"code_review"},{"receipt":"data_review"}]}
   ],
   "invariants": [
-    "SUBMITTING is durable before the sole settlement call",
-    "Recovery and reconciliation never call settle",
-    "Receipt inconsistency retains evidence and immediately enters MANUAL_REVIEW",
-    "Entitlement and paid delivery require an exact final bound confirmation",
-    "Production identity and finality policies remain unresolved"
+    {"id":"INV-001","statement":"SUBMITTING is durable before the sole settlement call, and recovery/reconciliation never call settle.","evidence":[{"test":"apps/mezo-gateway/test/state-machine.test.ts"},{"receipt":"test_review"}]},
+    {"id":"INV-002","statement":"Receipt inconsistency retains evidence and immediately enters MANUAL_REVIEW.","evidence":[{"test":"apps/mezo-gateway/test/state-machine.test.ts"},{"receipt":"code_review"}]},
+    {"id":"INV-003","statement":"Entitlement and paid delivery require an exact final bound confirmation.","evidence":[{"test":"apps/mezo-gateway/test/state-machine.test.ts"},{"receipt":"data_review"}]},
+    {"id":"INV-004","statement":"Production identity and finality policies remain unresolved and shadow-only remains intact.","evidence":[{"receipt":"verification"},{"receipt":"code_review"}]}
   ],
   "objective": {
     "id": "OBJ-001",
@@ -33,7 +32,11 @@
     "success_metric": "Focused fake-only regression matrix and full PR verification pass with zero external actions",
     "target": "Direct and reconciliation mismatch enter manual review with exactly one total settlement and no entitlement or delivery"
   },
-  "observability": ["ordered fake call trace","settle/confirm/manual-review counters","final quote and attempt states","entitlement and delivered-byte presence"],
+  "observability": [
+    {"id":"SIG-001","metric":"ordered_fake_call_trace_and_settlement_count","proves":["OBJ-001"]},
+    {"id":"SIG-002","metric":"final_quote_attempt_and_manual_review_state","proves":["OBJ-001"]},
+    {"id":"SIG-003","metric":"entitlement_and_delivered_byte_presence","proves":["OBJ-001"]}
+  ],
   "risk": {
     "domains": [
       "data"

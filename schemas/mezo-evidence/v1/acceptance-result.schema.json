@@ -5,7 +5,7 @@
   "description": "A result records observed assertions against one clean commit. PASS is permitted only for an executed command with a retained, hashed evidence file; it is not a release approval.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "mode", "repository", "environment", "started_at", "ended_at", "overall_status", "cases"],
+  "required": ["schema", "mode", "repository", "environment", "started_at", "ended_at", "overall_status", "bindings", "cases"],
   "properties": {
     "schema": {"const": "liqvera-acceptance-result/v1"},
     "mode": {"enum": ["offline", "live"]},
@@ -31,6 +31,11 @@
     "started_at": {"$ref": "#/$defs/time"},
     "ended_at": {"$ref": "#/$defs/time"},
     "overall_status": {"enum": ["PASS", "FAIL", "INCOMPLETE"]},
+    "bindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["runner_sha256", "plan_sha256"],
+      "properties": {"runner_sha256": {"$ref": "#/$defs/sha256"}, "plan_sha256": {"$ref": "#/$defs/sha256"}}
+    },
     "cases": {"type": "array", "minItems": 30, "maxItems": 30, "items": {"$ref": "#/$defs/case"}}
   },
   "$defs": {
@@ -74,11 +79,12 @@
     },
     "case": {
       "type": "object", "additionalProperties": false,
-      "required": ["case_id", "title", "status", "command", "environment_names", "exit_code", "evidence", "omissions"],
+      "required": ["case_id", "title", "status", "execution_class", "command", "environment_names", "exit_code", "evidence", "omissions"],
       "properties": {
         "case_id": {"type": "string", "pattern": "^A(0[1-9]|[12][0-9]|30)$"},
         "title": {"type": "string", "minLength": 1},
         "status": {"enum": ["NOT_RUN", "PASS", "FAIL", "BLOCKED_EXTERNAL"]},
+        "execution_class": {"enum": ["local", "public_read", "testnet_write"]},
         "started_at": {"$ref": "#/$defs/time"},
         "ended_at": {"$ref": "#/$defs/time"},
         "command": {"type": ["array", "null"], "items": {"type": "string"}},
@@ -86,13 +92,15 @@
         "exit_code": {"type": ["integer", "null"]},
         "stdout_sha256": {"$ref": "#/$defs/sha256"},
         "stderr_sha256": {"$ref": "#/$defs/sha256"},
+        "command_sha256": {"$ref": "#/$defs/sha256"},
+        "assertion_contract_sha256": {"$ref": "#/$defs/sha256"},
         "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
         "omissions": {"type": "array", "items": {"type": "string", "minLength": 1}},
         "payment_evidence": {"$ref": "#/$defs/payment"}
       },
       "allOf": [
         {"if": {"properties": {"status": {"const": "PASS"}}}, "then": {
-          "required": ["started_at", "ended_at", "stdout_sha256", "stderr_sha256"],
+          "required": ["started_at", "ended_at", "stdout_sha256", "stderr_sha256", "command_sha256", "assertion_contract_sha256"],
           "properties": {"command": {"type": "array", "minItems": 1}, "exit_code": {"const": 0}, "evidence": {"minItems": 1}, "omissions": {"maxItems": 0}}
         }},
         {"if": {"properties": {"status": {"enum": ["NOT_RUN", "BLOCKED_EXTERNAL"]}}}, "then": {

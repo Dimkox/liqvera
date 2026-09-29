@@ -71,10 +71,12 @@ liqvera-images:
 liqvera-compose:
 	docker compose -f deploy/mezo-evidence/compose.yaml config --quiet
 
+ACCEPTANCE_PLAN ?= acceptance/offline-plan.json
+
 liqvera-acceptance:
 	@test -n "$(ACCEPTANCE_OUTPUT)" || \
 		(echo "ACCEPTANCE_OUTPUT is required and must name a new JSON result" >&2; exit 2)
-	$(PYTHON) -B scripts/run-mezo-acceptance.py --mode offline --output "$(ACCEPTANCE_OUTPUT)"
+	$(PYTHON) -B scripts/run-mezo-acceptance.py --mode offline --plan "$(ACCEPTANCE_PLAN)" --output "$(ACCEPTANCE_OUTPUT)"
 
 liqvera-product: liqvera-python liqvera-gateway liqvera-web liqvera-images liqvera-compose
 	@echo "Liqvera product artifacts built; acceptance remains a separate explicit target"

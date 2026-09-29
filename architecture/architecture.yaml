@@ -14353,6 +14353,99 @@ repository_inventory:
   - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/test-plan.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/change-spec.yaml
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/analysis-architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/analysis-data_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/analysis-docs_researcher.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/analysis-repo_explorer.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/human-gates.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/route.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/test-plan.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/change-spec.yaml
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/evidence/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/evidence/analysis-architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/evidence/analysis-data_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/evidence/analysis-docs_researcher.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/evidence/analysis-repo_explorer.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/route.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-local-acceptance-verification-fd7ffd/test-plan.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/architecture.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
@@ -15298,6 +15391,12 @@ repository_inventory:
   - path: scripts/run-mezo-acceptance.py
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE
+  - path: scripts/run-local-acceptance-assertion.py
+    node: runtime:mezo-acceptance
+    path_class: TOOL_SOURCE
+  - path: acceptance/offline-plan.json
+    node: runtime:mezo-acceptance
+    path_class: CONFIGURATION
   - path: scripts/build-liqvera-python-distributions.py
     node: runtime:liqvera-factory
     path_class: TOOL_SOURCE

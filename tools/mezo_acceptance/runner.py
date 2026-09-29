@@ -8,10 +8,11 @@ import platform
 import re
 import subprocess
 import sys
-import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
+
+from jsonschema import Draft202012Validator
 
 from .cases import CASES
 
@@ -21,6 +22,7 @@ SAFE_ARG = re.compile(r"^[^\x00-\x1f\x7f]+$")
 SENSITIVE_ARG = re.compile(r"^--(?:password|secret|private-key|bearer|signature|capability|token)(?:=|$)", re.I)
 SENSITIVE_FIELD = re.compile(r"(password|secret|private|bearer|signature|cookie|authorization|capability|seed|mnemonic|token)", re.I)
 SENSITIVE_VALUE = re.compile(r"Bearer\s+\S+|-----BEGIN [^-]*PRIVATE KEY-----|0x[0-9a-fA-F]{130,}", re.I)
+RESULT_SCHEMA = ROOT / "schemas/mezo-evidence/v1/acceptance-result.schema.json"
 
 
 def utc_now() -> str:
@@ -96,7 +98,42 @@ def read_plan(path: Path | None) -> dict[str, dict]:
     return commands
 
 
-def evidence_reference(root: Path, relative: str, case_id: str, assertion: str) -> dict[str, str | int]:
+def file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def canonical_sha256(value: object) -> str:
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def validate_result_semantics(result: dict) -> None:
+    expected = list(CASES)
+    rows = result.get("cases")
+    if not isinstance(rows, list) or [row.get("case_id") for row in rows if isinstance(row, dict)] != expected:
+        raise ValueError("acceptance cases must use canonical A01-A30 order exactly once")
+    statuses = {row["status"] for row in rows}
+    derived = "FAIL" if "FAIL" in statuses else "PASS" if statuses == {"PASS"} else "INCOMPLETE"
+    if result.get("overall_status") != derived:
+        raise ValueError("overall_status does not match derived case status")
+    for case_id, row in zip(expected, rows, strict=True):
+        case = CASES[case_id]
+        if row["title"] != case.title or row.get("execution_class") != case.execution_class:
+            raise ValueError(f"{case_id} does not match the frozen case contract")
+        if row["status"] == "PASS" and row.get("assertion_contract_sha256") != canonical_sha256({
+            "case_id": case_id,
+            "assertion": case.assertion,
+            "execution_class": case.execution_class,
+            "required_claims": list(case.required_claims),
+        }):
+            raise ValueError(f"{case_id} assertion contract digest mismatch")
+    schema = json.loads(RESULT_SCHEMA.read_text(encoding="utf-8"))
+    errors = list(Draft202012Validator(schema).iter_errors(result))
+    if errors:
+        raise ValueError(f"acceptance result schema invalid at {list(errors[0].path)}")
+
+
+def evidence_reference(root: Path, relative: str, case_id: str, assertion: str,
+                       execution_class: str, identity: dict[str, str]) -> dict[str, str | int]:
     if not isinstance(relative, str) or not relative.endswith(".json") or Path(relative).is_absolute():
         raise ValueError("evidence_file must be a relative JSON path")
     path = (root / relative).resolve()
@@ -108,6 +145,10 @@ def evidence_reference(root: Path, relative: str, case_id: str, assertion: str) 
     document = json.loads(raw)
     if not isinstance(document, dict) or document.get("case_id") != case_id or document.get("assertion") != assertion:
         raise ValueError("evidence document does not bind to this assertion")
+    if document.get("execution_class") != execution_class or document.get("claims") != list(CASES[case_id].required_claims):
+        raise ValueError("evidence claims do not match the closed case contract")
+    if document.get("subject") != {"commit": identity["commit"], "tree": identity["tree"]}:
+        raise ValueError("evidence does not bind to the acceptance subject")
     if not isinstance(document.get("observations"), list) or not document["observations"] or any(
         not isinstance(item, str) or not item.strip() for item in document["observations"]
     ):
@@ -166,14 +207,15 @@ def payment_reference(case_id: str, result: dict, prior: dict | None) -> dict | 
     return None
 
 
-def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict | None) -> dict:
+def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict | None,
+             identity: dict[str, str]) -> dict:
     case = CASES[case_id]
     started = utc_now()
     env = {name: os.environ[name] for name in spec["environment"] if name in os.environ}
     env["LIQVERA_ACCEPTANCE_EVIDENCE_DIR"] = str(evidence_root)
     row = {
         "case_id": case_id, "title": case.title, "status": "FAIL", "started_at": started,
-        "command": spec["argv"], "environment_names": sorted(env),
+        "command": spec["argv"], "environment_names": sorted(env), "execution_class": case.execution_class,
         "exit_code": None, "evidence": [], "omissions": [],
     }
     try:
@@ -196,7 +238,11 @@ def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict 
             allowed.add("payment")
         if set(answer) != allowed or answer["case_id"] != case_id or answer["assertion"] != case.assertion:
             raise ValueError("assertion protocol does not match the case contract")
-        row["evidence"] = [evidence_reference(evidence_root, answer["evidence_file"], case_id, case.assertion)]
+        row["command_sha256"] = canonical_sha256(spec["argv"])
+        row["assertion_contract_sha256"] = canonical_sha256({"case_id": case_id, "assertion": case.assertion,
+            "execution_class": case.execution_class, "required_claims": list(case.required_claims)})
+        row["evidence"] = [evidence_reference(evidence_root, answer["evidence_file"], case_id,
+            case.assertion, case.execution_class, identity)]
         payment = payment_reference(case_id, answer, prior_payment)
         if payment is not None:
             row["payment_evidence"] = payment
@@ -222,38 +268,57 @@ def main() -> int:
         identity = repo_identity()
         commands = read_plan(args.plan)
         output = args.output.resolve()
-        if output.exists():
-            raise ValueError("output already exists; use a new result path")
+        if output.exists() or output.is_relative_to(ROOT):
+            raise ValueError("output must be a new path outside the repository")
         evidence_root = output.parent
-        evidence_root.mkdir(parents=True, exist_ok=True)
+        evidence_root.mkdir(parents=True, mode=0o700, exist_ok=False)
         rows = []
         prior_payment = None
         started = utc_now()
         for case_id, case in CASES.items():
-            if case.live and (args.mode != "live" or not args.authorize_live):
+            if case.execution_class != "local" and (args.mode != "live" or not args.authorize_live):
                 row = {"case_id": case_id, "title": case.title, "status": "BLOCKED_EXTERNAL",
                        "omissions": ["LIVE_AUTHORIZATION_ABSENT"], "command": None,
-                       "environment_names": [], "exit_code": None, "evidence": []}
+                       "environment_names": [], "exit_code": None, "evidence": [],
+                       "execution_class": case.execution_class}
             elif case_id not in commands:
                 row = {"case_id": case_id, "title": case.title, "status": "NOT_RUN",
                        "omissions": ["ASSERTION_COMMAND_NOT_CONFIGURED"], "command": None,
-                       "environment_names": [], "exit_code": None, "evidence": []}
+                       "environment_names": [], "exit_code": None, "evidence": [],
+                       "execution_class": case.execution_class}
             else:
-                row = run_case(case_id, commands[case_id], evidence_root, prior_payment)
+                row = run_case(case_id, commands[case_id], evidence_root, prior_payment, identity)
             rows.append(row)
             if case_id == "A13" and row["status"] == "PASS":
                 prior_payment = row["payment_evidence"]
         statuses = {row["status"] for row in rows}
         overall = "FAIL" if "FAIL" in statuses else "PASS" if statuses == {"PASS"} else "INCOMPLETE"
+        final_identity = repo_identity()
+        if final_identity != identity:
+            raise ValueError("repository identity changed during acceptance")
+        seen_evidence: set[str] = set()
+        for row in rows:
+            for reference in row["evidence"]:
+                if reference["file"] in seen_evidence:
+                    raise ValueError("evidence path is reused by multiple cases")
+                seen_evidence.add(reference["file"])
+                path = evidence_root / reference["file"]
+                if file_sha256(path) != reference["sha256"] or path.stat().st_size != reference["size_bytes"]:
+                    raise ValueError("evidence changed before result sealing")
+        plan_digest = file_sha256(args.plan.resolve()) if args.plan else hashlib.sha256(b"").hexdigest()
         result = {"schema": "liqvera-acceptance-result/v1", "mode": args.mode,
                   "repository": identity, "environment": {"platform": platform.platform(),
                   "python": platform.python_version()}, "started_at": started,
-                  "ended_at": utc_now(), "overall_status": overall, "cases": rows}
+                  "ended_at": utc_now(), "overall_status": overall,
+                  "bindings": {"runner_sha256": file_sha256(Path(__file__)), "plan_sha256": plan_digest},
+                  "cases": rows}
+        validate_result_semantics(result)
         encoded = (json.dumps(result, sort_keys=True, indent=2) + "\n").encode()
-        with tempfile.NamedTemporaryFile(dir=evidence_root, prefix=".acceptance-", delete=False) as tmp:
-            tmp.write(encoded)
-            temp_path = Path(tmp.name)
-        os.replace(temp_path, output)
+        descriptor = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
         print(f"{overall}: {output}")
         return 0 if overall == "PASS" else 1
     except (OSError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:

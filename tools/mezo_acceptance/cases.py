@@ -7,7 +7,11 @@ from dataclasses import dataclass
 class Case:
     title: str
     assertion: str
-    live: bool = False
+    execution_class: str = "local"
+
+    @property
+    def required_claims(self) -> tuple[str, ...]:
+        return (self.assertion,)
 
 
 CASES: dict[str, Case] = {
@@ -17,14 +21,14 @@ CASES: dict[str, Case] = {
     "A04": Case("Invalid quantity and insufficient depth rejection", "invalid_input_rejected"),
     "A05": Case("Time, book, instrument, and metadata rejection", "invalid_snapshot_rejected"),
     "A06": Case("Fictitious mapping and wrong units rejected", "identity_rejected"),
-    "A07": Case("Unavailable live source never falls back to fixture", "source_unavailable", True),
+    "A07": Case("Unavailable live source never falls back to fixture", "source_unavailable", "public_read"),
     "A08": Case("Corrupted and unsafe bundles rejected", "bundle_tamper_rejected"),
     "A09": Case("Clean-machine offline replay has exact digest", "offline_replay_exact"),
     "A10": Case("Unpaid retrieval returns 402 without paid body", "unpaid_402"),
     "A11": Case("Invalid authorizations never entitle", "bad_authorizations_rejected"),
     "A12": Case("MUSD amount is exact in every layer", "atomic_amount_exact"),
-    "A13": Case("Distinct buyer and merchant confirmed testnet transfer", "confirmed_transfer", True),
-    "A14": Case("Paid repeat access without another settlement", "repeat_access_no_charge", True),
+    "A13": Case("Distinct buyer and merchant confirmed testnet transfer", "confirmed_transfer", "testnet_write"),
+    "A14": Case("Paid repeat access without another settlement", "repeat_access_no_charge", "testnet_write"),
     "A15": Case("Concurrent retries create one quote and at most one charge", "concurrent_idempotency"),
     "A16": Case("Idempotency key conflict returns 409", "body_conflict_409"),
     "A17": Case("Crash windows recover uncertain payment safely", "crash_recovery"),
@@ -39,6 +43,6 @@ CASES: dict[str, Case] = {
     "A26": Case("Container and network isolation checked", "network_isolation"),
     "A27": Case("Stage A verdict and fixture suite unchanged", "stage_a_regression"),
     "A28": Case("Clean README install, build, and offline demo", "clean_install_demo"),
-    "A29": Case("Anonymous clone and provenance comparison", "anonymous_clone_provenance", True),
-    "A30": Case("Wallet cancel, switch, reload, wrong chain", "wallet_recovery", True),
+    "A29": Case("Anonymous clone and provenance comparison", "anonymous_clone_provenance", "public_read"),
+    "A30": Case("Wallet cancel, switch, reload, wrong chain", "wallet_recovery", "local"),
 }

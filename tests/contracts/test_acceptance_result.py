@@ -1,5 +1,6 @@
 import json
 import sys
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -18,7 +19,7 @@ TREE = "2caf0e76a1abc52c1952503fecd0ae6436d6e448"
 
 
 def _generated_result(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict:
-    output = tmp_path / "acceptance.json"
+    output = tmp_path / "run" / "acceptance.json"
     monkeypatch.setattr(
         runner,
         "repo_identity",
@@ -50,6 +51,29 @@ def test_runner_result_accepts_exact_git_object_ids(
     assert result["repository"]["tree"] == TREE
 
 
+def test_semantic_validator_rejects_duplicate_inventory_and_dishonest_status(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    result = _generated_result(tmp_path, monkeypatch)
+    duplicate = deepcopy(result)
+    duplicate["cases"][1]["case_id"] = "A01"
+    with pytest.raises(ValueError, match="canonical A01-A30 order"):
+        runner.validate_result_semantics(duplicate)
+
+    result["overall_status"] = "PASS"
+    with pytest.raises(ValueError, match="overall_status"):
+        runner.validate_result_semantics(result)
+
+
+def test_local_a30_is_not_blocked_as_external(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    result = _generated_result(tmp_path, monkeypatch)
+    row = next(item for item in result["cases"] if item["case_id"] == "A30")
+    assert row["status"] == "NOT_RUN"
+    assert row["omissions"] == ["ASSERTION_COMMAND_NOT_CONFIGURED"]
+
+
 def _result_with_passing_case(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> dict:
@@ -62,6 +86,11 @@ def _result_with_passing_case(
         "exit_code": 0,
         "stdout_sha256": "a" * 64,
         "stderr_sha256": "b" * 64,
+        "command_sha256": "d" * 64,
+        "assertion_contract_sha256": runner.canonical_sha256({
+            "case_id": "A01", "assertion": "before_after_checks", "execution_class": "local",
+            "required_claims": ["before_after_checks"],
+        }),
         "evidence": [{"file": "a01.json", "sha256": "c" * 64, "size_bytes": 1}],
         "omissions": [],
     })

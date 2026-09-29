@@ -7,8 +7,8 @@ Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f075
 
 Route `337ef5ec16a0` and change package
 `engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/`
-are scoped only. Four route-selected analyses were synthesized into sequential
-P0–P5 gates; no implementation, network read, database/container action,
+are implementing approved local-only P0/P1. Four route-selected analyses were
+synthesized into sequential P0–P5 gates; no network read, database/container action,
 wallet interaction, payment, push, tag, release, or other external mutation
 occurred. The earlier local-only route `fd7ffd5cc17f` is coherently retained as
 cancelled before implementation. Current decision is **NO-GO**.
@@ -24,6 +24,16 @@ MUSD, exactly 0.01 test MUSD, distinct approved buyer/payee, one submission
 maximum, and a numeric test-BTC gas cap. Any possible broadcast followed by
 timeout is `UNKNOWN`, never retryable; only exact confirmation reconciliation
 may continue.
+
+The P0 implementation defines explicit `local`, `public_read`, and
+`testnet_write` execution classes (A30 local; real wallet observation remains
+separate), exact canonical inventory/status validation, closed per-case claims,
+runner/plan/command/assertion digests, create-only mode-0700 out-of-tree output,
+final clean commit/tree equality, unique evidence paths, and final size/hash
+revalidation before an exclusive fsynced result write. The producer validates
+both JSON Schema and semantic algebra. A checked-in offline dispatcher/plan
+currently binds five full local commands (A01, A08, A09, A27, A30); remaining
+cases are deliberately not promoted from partial historical evidence.
 
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts

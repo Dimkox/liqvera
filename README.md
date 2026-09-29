@@ -23,12 +23,17 @@ gateway/ledger verification is `ready`: the exact lock, strict cleanup-adapter
 regressions, and five disposable PostgreSQL checks passed pinned verification
 and independent review. F5's focused fake-only Node slice around the real
 gateway and reconciliation orchestration is locally verified and `ready`.
-F6 now has deterministic production-orchestration and static operations checks for
+F6 has deterministic production-orchestration and static operations checks for
 guarded cancel, wrong-network and wallet changes, reload identity and
 no-resettlement, fixture zero-egress topology, internal-only metrics, resource
-and security bounds, and CSP. Focused checks pass; the exact-lock web build,
-full route verification, and independent review remain pending. F6–F7 remain
-**IMPLEMENTED_UNVERIFIED**. The local protocol package pins official Mezo MUSD
+and security bounds, and CSP; its route is locally verified and reviewed. F7
+P0 now hardens the acceptance producer with exact A01–A30 semantic reduction,
+closed per-case claims, create-only out-of-tree evidence, final clean Git
+revalidation, final evidence re-hashing, and local A30 classification. The
+checked-in offline plan intentionally executes only five currently bound local
+assertions; every other case remains truthful `NOT_RUN` or `BLOCKED_EXTERNAL`
+until its complete criterion has an approved dispatcher. F7 is therefore
+**INCOMPLETE / NO-GO**. The local protocol package pins official Mezo MUSD
 material and recorded `mezo-org` source revisions. Separate Liqvera factory
 targets do not change the existing Stage A three-wheel factory. All 156 frozen
 vectors remain `NOT_RUN`; focused local tests are not relabelled as vector,
@@ -144,6 +149,13 @@ make liqvera-images
 make liqvera-compose
 make liqvera-acceptance ACCEPTANCE_OUTPUT=/new/path/result.json
 ```
+
+`liqvera-acceptance` uses the checked-in local-only
+`acceptance/offline-plan.json`. `ACCEPTANCE_OUTPUT` must be inside a new
+out-of-repository directory; the runner creates that directory mode 0700 and
+refuses overwrite. A local INCOMPLETE result is expected until every remaining
+criterion has complete executable evidence and the separately gated external
+phases are authorized.
 
 `liqvera-gateway` has now been exercised locally through its exact lock,
 typecheck/build, loopback adapter suite, and disposable PostgreSQL tests. The

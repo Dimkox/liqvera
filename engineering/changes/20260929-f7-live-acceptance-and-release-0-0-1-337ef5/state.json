@@ -15,6 +15,20 @@
       "note": "draft; implementation not started",
       "observed_at": "2026-09-29T12:02:35+00:00",
       "route_id": "337ef5ec16a0"
+    },
+    {
+      "branch": "feat/f3-f7-verification",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "detached": false,
+      "dirty_product_paths": [],
+      "dirty_product_state": "clean",
+      "git_available": true,
+      "git_findings": [],
+      "head": "ce9fc33ec6fa3e92f33249b8a96a7b91692236d4",
+      "kind": "implementation",
+      "note": "implementation started; preserve work before handoff",
+      "observed_at": "2026-09-29T12:16:45+00:00",
+      "route_id": "337ef5ec16a0"
     }
   ],
   "created_at": "2026-09-29T12:02:35+00:00",
@@ -83,6 +97,12 @@
       "from": "scoped",
       "reason": "Explicit user approval of exact F7 scope digest, test payment amount, gas cap, and product version policy",
       "to": "approved"
+    },
+    {
+      "at": "2026-09-29T12:16:45+00:00",
+      "from": "approved",
+      "reason": "Exact F7 scope gate 82c9cb3127d0b55ca43f34ec816c8349a1d770ef52d0e4293ace580a36820f73 is approved; begin local-only P0/P1 with all external phases blocked.",
+      "to": "implementing"
     }
   ],
   "human_gates": [
@@ -92,7 +112,7 @@
   "human_gates_digest": "1ab9adb5cb4d33f265090cb45b1793b25f1857203ce4733f5dc7ccbdef7b03f9",
   "route_id": "337ef5ec16a0",
   "schema_version": 1,
-  "status": "approved",
+  "status": "implementing",
   "title": "F7 live acceptance and release 0.0.1",
-  "updated_at": "2026-09-29T12:15:44+00:00"
+  "updated_at": "2026-09-29T12:16:45+00:00"
 }

@@ -1,0 +1,10 @@
+{
+  "schema": "liqvera-acceptance-plan/v1",
+  "commands": [
+    {"case_id":"A01","argv":["scripts/run-local-acceptance-assertion.py","A01"],"timeout_seconds":120,"environment":[]},
+    {"case_id":"A08","argv":["scripts/run-local-acceptance-assertion.py","A08"],"timeout_seconds":120,"environment":[]},
+    {"case_id":"A09","argv":["scripts/run-local-acceptance-assertion.py","A09"],"timeout_seconds":900,"environment":[]},
+    {"case_id":"A27","argv":["scripts/run-local-acceptance-assertion.py","A27"],"timeout_seconds":300,"environment":[]},
+    {"case_id":"A30","argv":["scripts/run-local-acceptance-assertion.py","A30"],"timeout_seconds":300,"environment":[]}
+  ]
+}

@@ -2,8 +2,9 @@
 
 - [x] Synthesize four analyses and freeze P0–P5 scope, gates, stop conditions,
   rollback, version decision, and exact authority boundaries.
-- [ ] Record `scope_and_design_approval` for the current scope digest.
-- [ ] P0 RED-first runner semantic/evidence/final-binding/A30 repair and reviews.
+- [x] Record `scope_and_design_approval` for the current scope digest.
+- [x] P0 RED-first runner semantic/evidence/final-binding/A30 implementation.
+- [ ] Complete P0 independent reviews after final verifier.
 - [ ] P1 immutable out-of-tree local acceptance and omission review.
 - [ ] Obtain exact short-lived P2 public-read grant; execute allowlisted reads.
 - [ ] P3 implement/review identity, finality, and browser x402 wiring.

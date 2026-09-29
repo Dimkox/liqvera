@@ -130,6 +130,7 @@ class P3Operator:
             "facilitator_url": grant["facilitator_url"],
             "rpc_url": grant["rpc_url"],
             "database_identity_kind": grant["database_identity_kind"],
+            "database_host_policy": grant["database_host_policy"],
             "database_identity": grant["database_identity"],
             "migration_checksums": dict(REQUIRED_MIGRATIONS),
             "external_calls": 0,

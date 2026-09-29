@@ -89,6 +89,7 @@ class P3Plan:
             "facilitator_url": "https://facilitator.vativ.io/",
             "rpc_url": "https://rpc.test.mezo.org/",
             "database_identity_kind": "sha256-credential-free-postgresql-endpoint/v1",
+            "database_host_policy": "loopback-only/v1",
         }
         cases = {"A13": payment, "A14": payment}
         return cls(cases, _digest(cases))

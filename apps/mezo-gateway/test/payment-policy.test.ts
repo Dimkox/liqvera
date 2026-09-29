@@ -57,7 +57,7 @@ test('finality requires twelve canonical confirmations and rejects reorg',async(
   assert.equal(await policy.isFinal(receipt,block,reorg as never),false);
 });
 
-function grantRaw(){return {schema:'liqvera-mezo-payment-grant/v1',grant_id:'00000000-0000-4000-8000-000000000099',subject_commit:'a'.repeat(40),subject_tree:'b'.repeat(40),plan_sha256:'c'.repeat(64),scheme:'exact',settlement_broadcaster:'facilitator',network:NETWORK,chain_id:31611,asset:ASSET,amount_atomic:AMOUNT,buyer:payer,pay_to:payTo,maximum_settlement_submissions:1,max_buyer_native_gas_wei:'100000000000000',facilitator_url:'https://facilitator.vativ.io/',rpc_url:'https://rpc.test.mezo.org/',database_identity_kind:'sha256-credential-free-postgresql-endpoint/v1',database_identity:'d'.repeat(64),expires_at:'2026-09-29T00:05:00Z'};}
+function grantRaw(){return {schema:'liqvera-mezo-payment-grant/v1',grant_id:'00000000-0000-4000-8000-000000000099',subject_commit:'a'.repeat(40),subject_tree:'b'.repeat(40),plan_sha256:'c'.repeat(64),scheme:'exact',settlement_broadcaster:'facilitator',network:NETWORK,chain_id:31611,asset:ASSET,amount_atomic:AMOUNT,buyer:payer,pay_to:payTo,maximum_settlement_submissions:1,max_buyer_native_gas_wei:'100000000000000',facilitator_url:'https://facilitator.vativ.io/',rpc_url:'https://rpc.test.mezo.org/',database_identity_kind:'sha256-credential-free-postgresql-endpoint/v1',database_host_policy:'loopback-only/v1',database_identity:'d'.repeat(64),expires_at:'2026-09-29T00:05:00Z'};}
 
 test('live grant binds exact facilitator-sponsored settlement and buyer gas authority',()=>{
   const raw=grantRaw();
@@ -74,19 +74,24 @@ test('live grant binds exact facilitator-sponsored settlement and buyer gas auth
   assert.notEqual(LivePaymentGrant.parseBytes(bytes,new Date('2026-09-29T00:00:00Z')).digest,grant.digest);
 });
 
-test('operator database identity ignores credentials but binds host port and database',()=>{
-  const approved=databaseIdentity('postgresql://alice:one@db.internal:5433/liqvera_f7');
-  assert.equal(approved,databaseIdentity('postgresql://bob:two@db.internal:5433/liqvera_f7'));
-  assert.notEqual(approved,databaseIdentity('postgresql://alice:one@other.internal:5433/liqvera_f7'));
-  assert.notEqual(approved,databaseIdentity('postgresql://alice:one@db.internal:5432/liqvera_f7'));
-  assert.notEqual(approved,databaseIdentity('postgresql://alice:one@db.internal:5433/other'));
+test('operator database identity accepts only resolved loopback and binds port/database',async()=>{
+  const loopback=async()=>[{address:'127.0.0.1'},{address:'::1'}];
+  const approved=await databaseIdentity('postgresql://alice:one@localhost:5433/liqvera_f7',loopback);
+  assert.equal(approved,await databaseIdentity('postgresql://bob:two@localhost:5433/liqvera_f7',loopback));
+  assert.notEqual(approved,await databaseIdentity('postgresql://alice:one@localhost:5432/liqvera_f7',loopback));
+  assert.notEqual(approved,await databaseIdentity('postgresql://alice:one@localhost:5433/other',loopback));
+  assert.match(await databaseIdentity('postgresql://127.0.0.1/liqvera'),/^[0-9a-f]{64}$/);
+  assert.match(await databaseIdentity('postgresql://[::1]/liqvera'),/^[0-9a-f]{64}$/);
+  await assert.rejects(databaseIdentity('postgresql://localhost/liqvera',async()=>[{address:'192.0.2.1'}]),/P3_DATABASE_HOST_NOT_LOOPBACK/);
+  for(const remote of ['db.internal','192.0.2.1','8.8.8.8','example.com'])
+    await assert.rejects(databaseIdentity(`postgresql://${remote}/liqvera`),/P3_DATABASE_HOST_NOT_LOOPBACK/);
   for(const rejected of [
     'postgresql://db.internal/liqvera?sslmode=require',
     'postgresql://db.internal/liqvera?sslmode=disable',
     'postgresql://db.internal/liqvera?host=/tmp',
     'postgresql://db.internal/liqvera#fragment',
     'postgresql:///liqvera?host=/tmp',
-  ]) assert.throws(()=>databaseIdentity(rejected),/P3_DATABASE_CONFIG_INVALID/);
+  ]) await assert.rejects(databaseIdentity(rejected),/P3_DATABASE_CONFIG_INVALID/);
 });
 
 test('production composition is grantless by default and rejects malformed harness authority',()=>{

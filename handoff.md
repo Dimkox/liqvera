@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (narrow offline F3 repair approved; implementation begins with failing regressions). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (offline F3 regressions and Git OID contract repair implemented; full verification pending). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F3 offline artifact verification repair — 2026-09-29
@@ -13,12 +13,20 @@ forbids migrations and external writes. The superseded broad route
 an inapplicable migration/external-write gate even though its approved scope
 excluded both. Four read-only analyses are retained in the active package.
 
-Implementation is limited to failing-regression-first coverage of the installed
+Implementation remains limited to failing-regression-first coverage of the installed
 canonical F3 fixture-to-report/bundle/publish/verifier loop, tamper rejection,
 duplicate report UUIDs, incomplete publication, packaged resources, and the
-confirmed acceptance contract defect: the runner emits real 40-character Git
-OIDs while the schema currently requires 64-character SHA-256 values. No
-application code has changed yet. Gateway/F4 through F7, graph orphan cleanup,
+confirmed acceptance contract defect. A regression first reproduced rejection
+of the runner's real 40-character Git OIDs; the schema now uses a dedicated
+40-hex `git_oid` definition while true content digests remain 64-hex SHA-256.
+Canonical source tests cover exact build/publish/read/verify, bundle and report
+tamper, matching and differing duplicate UUID publication, partial targets, and
+pre-rename verification failure. A no-index wheel test installs all four local
+packages into an isolated environment, proves imports come from that install,
+then exercises both installed F3 commands outside the checkout. The new focused
+slice reports 13 passed; the surrounding capture/analyzer/contracts slice
+reports 738 passed and 85 subtests. Full PR verification and independent route
+reviews remain pending. Gateway/F4 through F7, graph orphan cleanup,
 network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
 start, deployment, release, and push remain outside this route. All 156 broad
 acceptance vectors remain `NOT_RUN`.

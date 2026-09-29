@@ -15,6 +15,25 @@
       "note": "draft; implementation not started",
       "observed_at": "2026-09-29T07:23:21+00:00",
       "route_id": "08fa9d84745d"
+    },
+    {
+      "branch": "feat/f3-f7-verification",
+      "change_id": "20260929-f3-offline-artifact-verification-repair-08fa9d",
+      "detached": false,
+      "dirty_product_paths": [
+        "schemas/mezo-evidence/v1/acceptance-result.schema.json",
+        "tests/contracts/test_acceptance_result.py",
+        "tests/evidence_report/test_canonical_f3.py",
+        "tests/installed/test_canonical_f3_installed.py"
+      ],
+      "dirty_product_state": "dirty",
+      "git_available": true,
+      "git_findings": [],
+      "head": "7bf0bff7a97d5e276a1fc2eec4f12eb79f917106",
+      "kind": "implementation",
+      "note": "implementation started; preserve work before handoff",
+      "observed_at": "2026-09-29T07:38:49+00:00",
+      "route_id": "08fa9d84745d"
     }
   ],
   "created_at": "2026-09-29T07:23:21+00:00",
@@ -69,13 +88,19 @@
       "from": "scoped",
       "reason": "Route declares no human gates; bounded offline scope approved for implementation.",
       "to": "approved"
+    },
+    {
+      "at": "2026-09-29T07:38:49+00:00",
+      "from": "approved",
+      "reason": "Failing Git OID regression reproduced the schema defect; minimal repair and canonical source/installed F3 regressions are green.",
+      "to": "implementing"
     }
   ],
   "human_gates": [],
   "human_gates_digest": "06064f840f21ad983c4a103a410f00783082f4ad871eb92ef8e2a4211cf108d8",
   "route_id": "08fa9d84745d",
   "schema_version": 1,
-  "status": "approved",
+  "status": "implementing",
   "title": "F3 offline artifact verification repair",
-  "updated_at": "2026-09-29T07:28:24+00:00"
+  "updated_at": "2026-09-29T07:38:49+00:00"
 }

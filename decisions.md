@@ -187,3 +187,9 @@ The complete 22-worker inventory covers all tracked owned Python below
 zero-covered modules. The initial non-regression floor is therefore 36; omit
 only tests, external Grok links, generated paths, and the pinned submodule, then
 raise the floor through the P0 targeted-test debt.
+
+## 2026-09-29 — Keep Git object identity distinct from content digests
+
+Model commit and tree values as the repository's canonical 40-hex Git OIDs;
+do not pad, hash, or relabel them as SHA-256. Keeping the separate schema type
+fixed the producer/consumer mismatch without weakening true 64-hex digests.

@@ -15,8 +15,8 @@
       "properties": {
         "repository": {"const": "Dimkox/liqvera"},
         "origin": {"enum": ["github.com/Dimkox/liqvera", "UNSET"]},
-        "commit": {"$ref": "#/$defs/sha256"},
-        "tree": {"$ref": "#/$defs/sha256"},
+        "commit": {"$ref": "#/$defs/git_oid"},
+        "tree": {"$ref": "#/$defs/git_oid"},
         "worktree": {"const": "CLEAN"}
       }
     },
@@ -34,6 +34,7 @@
     "cases": {"type": "array", "minItems": 30, "maxItems": 30, "items": {"$ref": "#/$defs/case"}}
   },
   "$defs": {
+    "git_oid": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "time": {"type": "string", "format": "date-time"},
     "evidence": {

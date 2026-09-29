@@ -103,6 +103,24 @@
       "from": "approved",
       "reason": "exact approved fake-browser and static-operations implementation started; no migration or external write",
       "to": "implementing"
+    },
+    {
+      "at": "2026-09-29T11:51:32+00:00",
+      "from": "implementing",
+      "reason": "Implementation and focused fake/static verification complete",
+      "to": "verifying"
+    },
+    {
+      "at": "2026-09-29T11:51:32+00:00",
+      "from": "verifying",
+      "reason": "Full verifier and all five independent route reviews passed",
+      "to": "reviewing"
+    },
+    {
+      "at": "2026-09-29T11:51:33+00:00",
+      "from": "reviewing",
+      "reason": "All required fingerprint-bound evidence present; exact Vite build remains explicitly NOT_RUN",
+      "to": "ready"
     }
   ],
   "human_gates": [
@@ -112,7 +130,7 @@
   "human_gates_digest": "14a58ca69c842145e025ab685eff53825c39f931f78d8db2c937855bff8782f2",
   "route_id": "26ffb293d4ff",
   "schema_version": 1,
-  "status": "implementing",
+  "status": "ready",
   "title": "F6 local UI and operations verification",
-  "updated_at": "2026-09-29T10:57:24+00:00"
+  "updated_at": "2026-09-29T11:51:33+00:00"
 }

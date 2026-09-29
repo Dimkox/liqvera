@@ -70,8 +70,9 @@ HEAD `f1667511149c5062443cd2c518ce40d8492b7507` passed the full pinned verifier
 at fingerprint `292558635bb303d8cf302468899eba4ac82d2d742ccff8e4939e8cfe886c970b`.
 Independent code, test, security, data, and release reviewers all returned
 PASS with no findings on that exact fingerprint and did not modify the tree.
-Their reports are stored in the package; receipt registration and the durable
-`ready` transition remain. Production's
+Their reports are stored and registered, and the package advanced through
+`verifying` and `reviewing` to `ready` with `evidence_gaps: []`. The tracked
+state-close commit requires one final verifier and receipt refresh. Production's
 x402 adapter remains deliberately unregistered and fixture payment remains
 fail closed. This route will not use a real wallet, RPC, facilitator, transfer,
 testnet/mainnet payment, live capture/profile, shared environment, deployment,

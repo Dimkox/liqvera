@@ -15226,6 +15226,12 @@ repository_inventory:
   - path: apps/mezo-gateway/src/p3-operator.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/p3-plan.mjs
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/p3-plan.d.mts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/src/ports/index.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
@@ -15331,6 +15337,12 @@ repository_inventory:
   - path: apps/mezo-web/src/x402.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/x402-production.mjs
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/x402-production.d.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/src/x402-transport.mjs
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
@@ -15344,6 +15356,9 @@ repository_inventory:
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/test/x402-transport.test.mjs
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/test/x402-production.test.mjs
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/test/observability.test.mjs

@@ -227,6 +227,16 @@ The opt-in PostgreSQL command is
 `TEST_DATABASE_URL=postgresql://.../liqvera_f4_test_<suffix> TEST_DATABASE_DISPOSABLE=1 npm --prefix apps/mezo-gateway run test:postgres`;
 those are the only two test-specific environment names. It was not run because
 no explicitly disposable database URL was provided or inspected.
+Final migration identities are `001_ledger.sql`
+`bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b`,
+`002_fix_immutable_ledger_identity.sql`
+`981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb`,
+`003_live_grant_consumption.sql`
+`bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0`,
+and `004_receipt_confirmation_provenance.sql`
+`96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a`.
+The clean pinned verifier passed 1,219 tests plus 85 subtests at fingerprint
+`5fde3a92ac8a464b32d0630a531bdb790516c9c96cab922509a310c699cb0ce5`.
 Focused repair checks pass: 69 acceptance/contract tests, 18 browser
 tests, and 29 gateway tests with five explicitly disposable-PostgreSQL skips.
 The clean pinned PR verifier passed 1,218 tests plus 85 subtests at fingerprint

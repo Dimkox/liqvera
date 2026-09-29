@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (F4 independent re-reviews PASS; durable package ready; final runtime receipts refresh after this commit). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (F5 implementation and independent reviews PASS; durable receipt closure in progress). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F5 local mocked state-machine verification — 2026-09-29
@@ -45,9 +45,16 @@ worker cannot lease that state and the adapter lacks an idempotent restore-only
 operation, so this route does not mock a false PASS. Production identity and
 finality remain unresolved, and all 156 frozen vectors remain `NOT_RUN`.
 
-Next: run pinned full verification on the coherent committed tree, then the
-route-selected independent code, test, and data reviews. Do not infer testnet
-payment, persistence, acceptance, deployment, or release readiness.
+Pinned full verification passed clean implementation HEAD `72ba728092e4041ba0b37f23baa5c6373dbd28f9`
+with fingerprint `b467a6f9c3312a70f0a7ae946750c1a5405afa29e6bdab7509e8aaac482c2db1`:
+1155 pytest tests and 85 subtests passed together with change-spec, diff,
+secret, contracts, SQL, nine Trivy targets, Ruff, Bandit, coverage, and source
+stability. Independent code, test, and data reviewers all returned PASS with
+no findings on that exact fingerprint and did not modify the candidate. Their
+reports are stored in this change package. The coordinator must now bind
+receipts to the report-bearing tree and advance the package to `ready`. Do not
+infer testnet payment, persistence, acceptance, deployment, or release
+readiness.
 
 The pre-review pinned verifier execution completed its configured checks but could
 not record a receipt because the new typed acceptance entries used the
@@ -55,8 +62,8 @@ unsupported key `verification`; the v2.0.19 schema requires `evidence`. After
 that correction, the verifier correctly rejected the superseded red-risk
 package's untouched generated `UNKNOWN` placeholders even though its lifecycle
 state was cancelled. Both packages now have schema-valid typed evidence; the
-superseded package remains cancelled and grants no approval. The verifier must
-be rerun on this corrected committed tree.
+superseded package remains cancelled and grants no approval. The corrected
+packages passed exact validation in the final verifier.
 
 ## F4 local gateway and ledger verification — 2026-09-29
 

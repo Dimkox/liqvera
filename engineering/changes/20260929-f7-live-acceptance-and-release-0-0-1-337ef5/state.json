@@ -77,6 +77,12 @@
       "from": "draft",
       "reason": "Four analyses synthesized into sequential P0-P5 scope, red-risk invariants, version/artifact contract, exact short-lived grants, stop conditions, UNKNOWN/no-retry handling, and additive publication recovery; both human gates remain pending.",
       "to": "scoped"
+    },
+    {
+      "at": "2026-09-29T12:15:44+00:00",
+      "from": "scoped",
+      "reason": "Explicit user approval of exact F7 scope digest, test payment amount, gas cap, and product version policy",
+      "to": "approved"
     }
   ],
   "human_gates": [
@@ -86,7 +92,7 @@
   "human_gates_digest": "1ab9adb5cb4d33f265090cb45b1793b25f1857203ce4733f5dc7ccbdef7b03f9",
   "route_id": "337ef5ec16a0",
   "schema_version": 1,
-  "status": "scoped",
+  "status": "approved",
   "title": "F7 live acceptance and release 0.0.1",
-  "updated_at": "2026-09-29T12:09:52+00:00"
+  "updated_at": "2026-09-29T12:15:44+00:00"
 }

@@ -1,0 +1,31 @@
+{
+  "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+  "decisions": [
+    {
+      "action": null,
+      "actor": "repository owner via chat",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T12:15:44+00:00",
+      "decision": "approved",
+      "gate": "scope_and_design_approval",
+      "reason": "User explicitly answered да for F7 scope digest f71f5f53f653a3bdd1dd7de1811682875f1ea34d02fc28d8f8ab950e53ee7dba, including one payment of 0.01 test MUSD, maximum 0.0001 test BTC gas, product release 0.0.1, and preservation of internal package versions 0.1.0.",
+      "resource": null,
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "82c9cb3127d0b55ca43f34ec816c8349a1d770ef52d0e4293ace580a36820f73"
+    },
+    {
+      "action": "migration-plan",
+      "actor": "repository owner via chat",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T12:15:44+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "Approved F7 migration plan is no migration, no database/schema/backfill, and no external write during P0/P1. Testnet and GitHub mutations require separate exact short-lived grants immediately before action.",
+      "resource": null,
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "82c9cb3127d0b55ca43f34ec816c8349a1d770ef52d0e4293ace580a36820f73"
+    }
+  ],
+  "route_id": "337ef5ec16a0",
+  "schema_version": 1
+}

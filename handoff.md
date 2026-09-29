@@ -34,8 +34,11 @@ GitHub Release, allowlisted asset upload/download re-hash, and final owner
 confirmation. Partial publication recovery is additive: never force-push or
 move a published tag.
 
-Both route gates remain pending: `scope_and_design_approval` must approve the
-current scoped digest before P0 implementation, while
+The user approved `scope_and_design_approval` for exact gate scope digest
+`82c9cb3127d0b55ca43f34ec816c8349a1d770ef52d0e4293ace580a36820f73`;
+this is distinct from the canonical spec-content digest. The external-write
+gate remains pending. `migration_or_external_write_approval` is not a blanket
+grant and must be
 `migration_or_external_write_approval` is not a blanket grant and must be
 realized as short-lived exact P2, P3, and P5 action records. Any changed tree,
 plan, target, envelope, amount, gas cap, artifact, limitation, or remote OID

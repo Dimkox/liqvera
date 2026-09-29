@@ -183,6 +183,13 @@ frozen guards and a delivery-call mutation survived. The root cause was
 optimizing the fake for orchestration reachability instead of loading the
 already packaged production contracts and asserting ordered negative effects.
 
+## 2026-09-29 — F7 spec digest was reported as the gate scope digest
+
+The initial F7 handoff labeled canonical spec digest `f71f…` as the approval
+identity, while the gate engine computed scope digest `82c9…` over its broader
+authority payload. Always report `spec_digest` and `scope_digest` with explicit
+names; only the exact gate `scope_digest` identifies a human approval.
+
 ## 2026-09-29 — Coordinator invoked verification outside the project environment
 
 The first report-bearing F5 verification used system `python3`, whose workspace

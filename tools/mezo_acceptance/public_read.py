@@ -8,7 +8,13 @@ import time.
 from __future__ import annotations
 
 import ipaddress
+import hashlib
+import http.client
+import json
+import os
 import re
+import socket
+import ssl
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlsplit
@@ -28,7 +34,7 @@ _ALLOWED = {
 }
 _FIELDS = {
     "schema", "subject_commit", "subject_tree", "plan_sha256", "case", "method",
-    "url", "expires_at", "maximum_attempts", "timeout_seconds", "max_response_bytes",
+    "url", "expires_at", "maximum_attempts", "timeout_seconds", "max_response_bytes", "body_sha256",
 }
 _AMBIENT_AUTHORITY = {"HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "all_proxy", "no_proxy", "NETRC"}
 
@@ -43,6 +49,17 @@ class PublicReadPlan:
     max_response_bytes: int
     maximum_attempts: int
 
+    @property
+    def body_sha256(self) -> str:
+        return hashlib.sha256(self.body).hexdigest()
+
+    @property
+    def digest(self) -> str:
+        value={"case":self.case,"method":self.method,"url":self.url,"body_sha256":self.body_sha256,
+               "timeout_seconds":self.timeout_seconds,"max_response_bytes":self.max_response_bytes,
+               "maximum_attempts":self.maximum_attempts}
+        return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+
 
 @dataclass(frozen=True)
 class PublicReadGrant:
@@ -56,6 +73,7 @@ class PublicReadGrant:
     maximum_attempts: int
     timeout_seconds: int
     max_response_bytes: int
+    body_sha256: str
 
     @classmethod
     def parse(cls, raw: object, *, now: datetime) -> "PublicReadGrant":
@@ -79,15 +97,20 @@ class PublicReadGrant:
         if expires.tzinfo is None or expires <= now or expires > now + timedelta(minutes=15):
             raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
         limits = (raw.get("maximum_attempts"), raw.get("timeout_seconds"), raw.get("max_response_bytes"))
-        if any(type(value) is not int for value in limits) or not (1 <= limits[0] <= 2 and 1 <= limits[1] <= 15 and 1 <= limits[2] <= 2_097_152):
+        if any(type(value) is not int for value in limits) or not (limits[0] == 1 and 1 <= limits[1] <= 15 and 1 <= limits[2] <= 2_097_152):
             raise GrantError("PUBLIC_READ_GRANT_INVALID")
-        return cls(values[0], values[1], values[2], case, method, url, expires, *limits)
+        body_sha256=raw.get("body_sha256")
+        if not isinstance(body_sha256,str) or not _DIGEST.fullmatch(body_sha256):
+            raise GrantError("PUBLIC_READ_GRANT_INVALID")
+        return cls(values[0], values[1], values[2], case, method, url, expires, *limits, body_sha256)
 
-    def authorize(self, plan: PublicReadPlan, *, subject_commit: str, subject_tree: str, plan_sha256: str) -> None:
-        actual = (subject_commit, subject_tree, plan_sha256, plan.case, plan.method, plan.url,
-                  plan.maximum_attempts, plan.timeout_seconds, plan.max_response_bytes)
+    def authorize(self, plan: PublicReadPlan, *, subject_commit: str, subject_tree: str, now: datetime) -> None:
+        if now >= self.expires_at:
+            raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
+        actual = (subject_commit, subject_tree, plan.digest, plan.case, plan.method, plan.url,
+                  plan.maximum_attempts, plan.timeout_seconds, plan.max_response_bytes,plan.body_sha256)
         expected = (self.subject_commit, self.subject_tree, self.plan_sha256, self.case, self.method, self.url,
-                    self.maximum_attempts, self.timeout_seconds, self.max_response_bytes)
+                    self.maximum_attempts, self.timeout_seconds, self.max_response_bytes,self.body_sha256)
         if actual != expected:
             raise GrantError("PUBLIC_READ_GRANT_MISMATCH")
 
@@ -103,10 +126,12 @@ class PublicReadGrant:
                 raise GrantError("PUBLIC_READ_PRIVATE_ADDRESS")
 
 
-def validate_public_read_evidence(grant: PublicReadGrant, raw: object, *, environ: dict[str, str]) -> dict[str, object]:
+def validate_public_read_evidence(grant: PublicReadGrant, raw: object, *, environ: dict[str, str],now:datetime) -> dict[str, object]:
     """Reduce untrusted transport observations to closed A07/A29 evidence."""
     if any(name in environ for name in _AMBIENT_AUTHORITY):
         raise GrantError("PUBLIC_READ_AMBIENT_AUTHORITY")
+    if now>=grant.expires_at:
+        raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
     fields={"status","final_url","response_bytes","response_sha256","resolved_addresses","connected_address","attempts"}
     if not isinstance(raw,dict) or set(raw)!=fields or raw.get("status")!=200:
         raise GrantError("PUBLIC_READ_EVIDENCE_INVALID")
@@ -123,3 +148,57 @@ def validate_public_read_evidence(grant: PublicReadGrant, raw: object, *, enviro
     grant.validate_resolution(tuple(addresses),(connected,))
     return {"case":grant.case,"method":grant.method,"url":grant.url,"status":200,"response_bytes":size,
             "response_sha256":raw["response_sha256"],"attempts":attempts}
+
+
+class _PinnedHTTPSConnection(http.client.HTTPSConnection):
+    def __init__(self,host:str,address:str,timeout:int):
+        super().__init__(host,443,timeout=timeout,context=ssl.create_default_context())
+        self._address=address
+    def connect(self)->None:
+        raw=socket.create_connection((self._address,443),self.timeout)
+        self.sock=self._context.wrap_socket(raw,server_hostname=self.host)
+
+
+def _resolve(host:str)->tuple[str,...]:
+    return tuple(sorted({item[4][0] for item in socket.getaddrinfo(host,443,type=socket.SOCK_STREAM)}))
+
+
+def _consume(path,grant:PublicReadGrant)->None:
+    try:
+        descriptor=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o400)
+    except FileExistsError:
+        raise GrantError("PUBLIC_READ_GRANT_ALREADY_CONSUMED") from None
+    try:
+        os.write(descriptor,(grant.plan_sha256+"\n").encode());os.fsync(descriptor)
+    finally: os.close(descriptor)
+
+
+def execute_public_read(plan:PublicReadPlan,grant:PublicReadGrant,*,subject_commit:str,subject_tree:str,now,
+                        environ:dict[str,str],resolver=_resolve,connection=_PinnedHTTPSConnection,consumption_path)->dict[str,object]:
+    """Perform one exact HTTPS read through a directly connected validated IP."""
+    grant.authorize(plan,subject_commit=subject_commit,subject_tree=subject_tree,now=now())
+    if any(name in environ for name in _AMBIENT_AUTHORITY): raise GrantError("PUBLIC_READ_AMBIENT_AUTHORITY")
+    parsed=urlsplit(plan.url); before=tuple(resolver(parsed.hostname)); grant.validate_resolution(before,before)
+    connected=tuple(resolver(parsed.hostname)); grant.validate_resolution(before,connected)
+    if now()>=grant.expires_at: raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
+    _consume(consumption_path,grant)
+    client=connection(parsed.hostname,connected[0],plan.timeout_seconds)
+    try:
+        path=parsed.path+(f"?{parsed.query}" if parsed.query else "")
+        client.request(plan.method,path,body=plan.body,headers={"Host":parsed.hostname,"Accept":"application/json","Content-Type":"application/json","Connection":"close"})
+        response=client.getresponse()
+        if 300<=response.status<400: raise GrantError("PUBLIC_READ_REDIRECT_BLOCKED")
+        if response.status!=200: raise GrantError("PUBLIC_READ_HTTP_STATUS")
+        chunks=[];size=0
+        while True:
+            chunk=response.read(min(65536,plan.max_response_bytes-size+1))
+            if not chunk: break
+            size+=len(chunk)
+            if size>plan.max_response_bytes: raise GrantError("PUBLIC_READ_RESPONSE_TOO_LARGE")
+            chunks.append(chunk)
+        if now()>=grant.expires_at: raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
+        raw=b"".join(chunks)
+        evidence={"status":200,"final_url":plan.url,"response_bytes":len(raw),"response_sha256":hashlib.sha256(raw).hexdigest(),
+                  "resolved_addresses":list(before),"connected_address":connected[0],"attempts":1}
+        return validate_public_read_evidence(grant,evidence,environ=environ,now=now())
+    finally: client.close()

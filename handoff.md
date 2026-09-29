@@ -166,6 +166,10 @@ reuse its confirmed transaction, while UNKNOWN remains spent and blocks A14 in
 confirm-only state. The CLI accepts only `--live-grants`, never a boolean, and
 still stops before external I/O because the real human-wallet payment seam is
 not injected in ordinary startup. Offline results remain externally blocked.
+Public-read grants now carry a canonical UUID and a digest derived from their
+entire closed grant document. The executor derives the one-shot marker name
+itself inside a mode-0700 state directory and fsyncs both marker and directory;
+operators can no longer select an alternate marker filename to replay a grant.
 
 ## F6 local UI and operations verification — 2026-09-29
 

@@ -28,6 +28,7 @@ def plan() -> PublicReadPlan:
 def grant(**changes: object) -> dict[str, object]:
     value: dict[str, object] = {
         "schema": "liqvera-public-read-grant/v1",
+        "grant_id": "00000000-0000-4000-8000-000000000007",
         "subject_commit": COMMIT,
         "subject_tree": TREE,
         "plan_sha256": plan().digest,
@@ -115,11 +116,20 @@ def test_executor_sends_exact_body_once_streams_with_cap_and_consumes(tmp_path) 
         def getresponse(self): return Response()
         def close(self): pass
     evidence=execute_public_read(plan(),parsed,subject_commit=COMMIT,subject_tree=TREE,now=lambda:NOW,
-        environ={},resolver=lambda host:("8.8.8.8",),connection=lambda host,ip,timeout:Connection(),consumption_path=tmp_path/"used")
+        environ={},resolver=lambda host:("8.8.8.8",),connection=lambda host,ip,timeout:Connection(),state_dir=tmp_path)
     assert evidence["attempts"]==1 and seen[0][:3]==("POST","/info",plan().body)
     with pytest.raises(GrantError,match="^PUBLIC_READ_GRANT_ALREADY_CONSUMED$"):
         execute_public_read(plan(),parsed,subject_commit=COMMIT,subject_tree=TREE,now=lambda:NOW,
-            environ={},resolver=lambda host:("8.8.8.8",),connection=lambda host,ip,timeout:Connection(),consumption_path=tmp_path/"used")
+            environ={},resolver=lambda host:("8.8.8.8",),connection=lambda host,ip,timeout:Connection(),state_dir=tmp_path)
+
+
+def test_executor_derives_replay_marker_and_rejects_caller_selected_path(tmp_path) -> None:
+    parsed = PublicReadGrant.parse(grant(), now=NOW)
+    assert parsed.digest == PublicReadGrant.parse(grant(), now=NOW).digest
+    with pytest.raises(TypeError, match="consumption_path"):
+        execute_public_read(plan(), parsed, subject_commit=COMMIT, subject_tree=TREE, now=lambda: NOW,
+            environ={}, resolver=lambda host: ("8.8.8.8",), connection=lambda *args: None,
+            state_dir=tmp_path, consumption_path=tmp_path / "alternate")
 
 
 def test_executor_rechecks_expiry_and_dns_before_send(tmp_path) -> None:
@@ -127,4 +137,4 @@ def test_executor_rechecks_expiry_and_dns_before_send(tmp_path) -> None:
     later=NOW+timedelta(minutes=6)
     with pytest.raises(GrantError,match="^PUBLIC_READ_GRANT_EXPIRED$"):
         execute_public_read(plan(),parsed,subject_commit=COMMIT,subject_tree=TREE,now=lambda:later,
-            environ={},resolver=lambda host:("8.8.8.8",),connection=lambda *args:None,consumption_path=tmp_path/"expired")
+            environ={},resolver=lambda host:("8.8.8.8",),connection=lambda *args:None,state_dir=tmp_path)

@@ -15,6 +15,8 @@ import os
 import re
 import socket
 import ssl
+import stat
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlsplit
@@ -33,7 +35,7 @@ _ALLOWED = {
     ("A29", "GET", "https://github.com/Dimkox/liqvera.git/info/refs?service=git-upload-pack"),
 }
 _FIELDS = {
-    "schema", "subject_commit", "subject_tree", "plan_sha256", "case", "method",
+    "schema", "grant_id", "subject_commit", "subject_tree", "plan_sha256", "case", "method",
     "url", "expires_at", "maximum_attempts", "timeout_seconds", "max_response_bytes", "body_sha256",
 }
 _AMBIENT_AUTHORITY = {"HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "all_proxy", "no_proxy", "NETRC"}
@@ -63,6 +65,7 @@ class PublicReadPlan:
 
 @dataclass(frozen=True)
 class PublicReadGrant:
+    grant_id: str
     subject_commit: str
     subject_tree: str
     plan_sha256: str
@@ -79,6 +82,12 @@ class PublicReadGrant:
     def parse(cls, raw: object, *, now: datetime) -> "PublicReadGrant":
         if not isinstance(raw, dict) or set(raw) != _FIELDS or raw.get("schema") != "liqvera-public-read-grant/v1":
             raise GrantError("PUBLIC_READ_GRANT_INVALID")
+        grant_id = raw.get("grant_id")
+        try:
+            if not isinstance(grant_id, str) or str(uuid.UUID(grant_id)) != grant_id:
+                raise ValueError
+        except ValueError:
+            raise GrantError("PUBLIC_READ_GRANT_INVALID") from None
         values = (raw.get("subject_commit"), raw.get("subject_tree"), raw.get("plan_sha256"))
         if not all(isinstance(value, str) for value in values) or not _OID.fullmatch(values[0]) or not _OID.fullmatch(values[1]) or not _DIGEST.fullmatch(values[2]):
             raise GrantError("PUBLIC_READ_GRANT_INVALID")
@@ -102,7 +111,19 @@ class PublicReadGrant:
         body_sha256=raw.get("body_sha256")
         if not isinstance(body_sha256,str) or not _DIGEST.fullmatch(body_sha256):
             raise GrantError("PUBLIC_READ_GRANT_INVALID")
-        return cls(values[0], values[1], values[2], case, method, url, expires, *limits, body_sha256)
+        return cls(grant_id, values[0], values[1], values[2], case, method, url, expires, *limits, body_sha256)
+
+    @property
+    def digest(self) -> str:
+        value = {
+            "schema": "liqvera-public-read-grant/v1", "grant_id": self.grant_id,
+            "subject_commit": self.subject_commit, "subject_tree": self.subject_tree,
+            "plan_sha256": self.plan_sha256, "case": self.case, "method": self.method,
+            "url": self.url, "expires_at": self.expires_at.isoformat().replace("+00:00", "Z"),
+            "maximum_attempts": self.maximum_attempts, "timeout_seconds": self.timeout_seconds,
+            "max_response_bytes": self.max_response_bytes, "body_sha256": self.body_sha256,
+        }
+        return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
     def authorize(self, plan: PublicReadPlan, *, subject_commit: str, subject_tree: str, now: datetime) -> None:
         if now >= self.expires_at:
@@ -163,25 +184,34 @@ def _resolve(host:str)->tuple[str,...]:
     return tuple(sorted({item[4][0] for item in socket.getaddrinfo(host,443,type=socket.SOCK_STREAM)}))
 
 
-def _consume(path,grant:PublicReadGrant)->None:
+def _consume(state_dir, grant:PublicReadGrant)->None:
+    state_dir = os.fspath(state_dir)
+    info = os.lstat(state_dir)
+    if not stat.S_ISDIR(info.st_mode) or stat.S_IMODE(info.st_mode) != 0o700:
+        raise GrantError("PUBLIC_READ_STATE_DIR_INVALID")
+    marker = hashlib.sha256(f"{grant.grant_id}:{grant.digest}".encode()).hexdigest()
+    path = os.path.join(state_dir, marker)
     try:
         descriptor=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o400)
     except FileExistsError:
         raise GrantError("PUBLIC_READ_GRANT_ALREADY_CONSUMED") from None
     try:
-        os.write(descriptor,(grant.plan_sha256+"\n").encode());os.fsync(descriptor)
+        os.write(descriptor,(grant.digest+"\n").encode());os.fsync(descriptor)
     finally: os.close(descriptor)
+    directory = os.open(state_dir, os.O_RDONLY | os.O_DIRECTORY)
+    try: os.fsync(directory)
+    finally: os.close(directory)
 
 
 def execute_public_read(plan:PublicReadPlan,grant:PublicReadGrant,*,subject_commit:str,subject_tree:str,now,
-                        environ:dict[str,str],resolver=_resolve,connection=_PinnedHTTPSConnection,consumption_path)->dict[str,object]:
+                        environ:dict[str,str],resolver=_resolve,connection=_PinnedHTTPSConnection,state_dir)->dict[str,object]:
     """Perform one exact HTTPS read through a directly connected validated IP."""
     grant.authorize(plan,subject_commit=subject_commit,subject_tree=subject_tree,now=now())
     if any(name in environ for name in _AMBIENT_AUTHORITY): raise GrantError("PUBLIC_READ_AMBIENT_AUTHORITY")
     parsed=urlsplit(plan.url); before=tuple(resolver(parsed.hostname)); grant.validate_resolution(before,before)
     connected=tuple(resolver(parsed.hostname)); grant.validate_resolution(before,connected)
     if now()>=grant.expires_at: raise GrantError("PUBLIC_READ_GRANT_EXPIRED")
-    _consume(consumption_path,grant)
+    _consume(state_dir,grant)
     client=connection(parsed.hostname,connected[0],plan.timeout_seconds)
     try:
         path=parsed.path+(f"?{parsed.query}" if parsed.query else "")
@@ -200,5 +230,8 @@ def execute_public_read(plan:PublicReadPlan,grant:PublicReadGrant,*,subject_comm
         raw=b"".join(chunks)
         evidence={"status":200,"final_url":plan.url,"response_bytes":len(raw),"response_sha256":hashlib.sha256(raw).hexdigest(),
                   "resolved_addresses":list(before),"connected_address":connected[0],"attempts":1}
-        return validate_public_read_evidence(grant,evidence,environ=environ,now=now())
+        reduced = validate_public_read_evidence(grant,evidence,environ=environ,now=now())
+        return {**reduced, "grant_id": grant.grant_id, "grant_digest": grant.digest,
+                "plan_sha256": plan.digest, "subject_commit": subject_commit,
+                "subject_tree": subject_tree}
     finally: client.close()

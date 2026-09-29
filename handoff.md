@@ -27,6 +27,17 @@ plan and an executable Python-to-compiled-Node regression compares it. Signature
 commitments normalize hex case. Production browser and gateway tests now run the
 pinned official SDK end to end and validate the recursively merged extension.
 
+Human-gate evidence is refreshed at scope digest
+`80efec81ec63901f3b9368643624102d8544422841bbc8fc4c1f2e04691b7df7` from
+the user's explicit continuation and one-time testnet authorization. It approves
+the exact Permit2/EIP-2612 design, preserves the no-new-migration 001–005 plan,
+refreshes both isolated PostgreSQL resources, and identifies the single allowed
+facilitator write at `https://facilitator.vativ.io/` for exactly 0.01 test MUSD,
+one submission, zero buyer native gas and confirm-only UNKNOWN handling. These
+records are local workflow evidence, not credentials or the byte-exact short-lived
+P3 grant/wallet payload; no payment, RPC call, database write or migration was
+performed while recording them.
+
 Route `337ef5ec16a0` and change package
 `engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/`
 are implementing approved local-only P0/P1. Four route-selected analyses were

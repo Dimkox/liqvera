@@ -108,6 +108,66 @@
       "resource": "docker://liqvera-f7-postgres/database/liqvera_f4_test_9c86bf9_verify",
       "route_id": "337ef5ec16a0",
       "scope_digest": "59f6f3bba9d957f0791827cd7bb83d3476f3f0ef4b29f64f29092b324ffa2b00"
+    },
+    {
+      "action": null,
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T19:21:21+00:00",
+      "decision": "approved",
+      "gate": "scope_and_design_approval",
+      "reason": "User explicitly continued F7 and authorized the current exact Permit2 plus EIP-2612 sponsored Mezo Testnet A13/A14 design: chain 31611, canonical Permit2/proxy, 0.01 test MUSD, distinct approved buyer/payee, zero buyer native gas, one submission, UNKNOWN confirm-only, A14 replay, and 12 confirmations.",
+      "resource": null,
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "80efec81ec63901f3b9368643624102d8544422841bbc8fc4c1f2e04691b7df7"
+    },
+    {
+      "action": "migration-plan",
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T19:21:48+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "User explicitly continued the current Permit2 P3 scope. No new migration is introduced; preserve the already applied and checksum-bound additive migrations 001-005 and their retained evidence.",
+      "resource": null,
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "80efec81ec63901f3b9368643624102d8544422841bbc8fc4c1f2e04691b7df7"
+    },
+    {
+      "action": "external-write",
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T19:21:48+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "Refresh the exact retained isolated PostgreSQL target for the approved P3 quote, one-shot grant-consumption, attempt, and receipt ledger writes only; preserve migrations 001-005 and retained evidence.",
+      "resource": "docker://liqvera-f7-postgres/database/liqvera_f4_test_fdae49d",
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "80efec81ec63901f3b9368643624102d8544422841bbc8fc4c1f2e04691b7df7"
+    },
+    {
+      "action": "external-write",
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T19:21:48+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "Refresh the exact fresh disposable PostgreSQL verification target previously approved for migration 001-005 and concurrency/restart/rollback behavior evidence only.",
+      "resource": "docker://liqvera-f7-postgres/database/liqvera_f4_test_9c86bf9_verify",
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "80efec81ec63901f3b9368643624102d8544422841bbc8fc4c1f2e04691b7df7"
+    },
+    {
+      "action": "external-write",
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T19:21:48+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "User explicitly authorized one controlled Mezo Testnet settlement: exact Permit2 plus EIP-2612 sponsorship, chain 31611, exactly 0.01 test MUSD, approved distinct buyer/payee, maximum one facilitator submission, zero buyer native gas; UNKNOWN is spent and confirm-only and A14 must reuse A13.",
+      "resource": "https://facilitator.vativ.io/",
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "80efec81ec63901f3b9368643624102d8544422841bbc8fc4c1f2e04691b7df7"
     }
   ],
   "route_id": "337ef5ec16a0",

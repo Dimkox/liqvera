@@ -40,9 +40,12 @@ payment, persistence, acceptance, deployment, or release readiness.
 
 The first pinned verifier execution completed its configured checks but could
 not record a receipt because the new typed acceptance entries used the
-unsupported key `verification`; the v2.0.19 schema requires `evidence`. The
-package now uses explicit test/review/verification evidence bindings and the
-verifier must be rerun on that corrected committed tree.
+unsupported key `verification`; the v2.0.19 schema requires `evidence`. After
+that correction, the verifier correctly rejected the superseded red-risk
+package's untouched generated `UNKNOWN` placeholders even though its lifecycle
+state was cancelled. Both packages now have schema-valid typed evidence; the
+superseded package remains cancelled and grants no approval. The verifier must
+be rerun on this corrected committed tree.
 
 ## F4 local gateway and ledger verification — 2026-09-29
 

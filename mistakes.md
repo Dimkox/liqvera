@@ -171,4 +171,6 @@ The first F5 verifier finished its checks but could not record the receipt
 because acceptance entries used `verification` instead of the schema's typed
 `evidence` array. The root cause was authoring from the Markdown test plan
 without first copying the established v2 acceptance shape from a validated
-change package.
+change package. The subsequent run also found that a cancelled superseded
+package still participates in gate validation; validate every newly tracked
+spec, not only the active one, before invoking the full suite.

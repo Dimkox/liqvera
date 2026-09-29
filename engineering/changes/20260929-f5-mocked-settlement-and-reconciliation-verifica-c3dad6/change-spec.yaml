@@ -1,7 +1,9 @@
 {
-  "acceptance_criteria": [],
+  "acceptance_criteria": [
+    {"id":"AC-001","statement":"The superseded red-risk route remains cancelled before implementation and performs no product, database, or external action.","evidence":[{"receipt":"security_review"},{"receipt":"release_review"}]}
+  ],
   "approvals": {
-    "required_scopes": []
+    "required_scopes": ["scope_and_design_approval","migration_or_external_write_approval"]
   },
   "change_id": "20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6",
   "contracts": {
@@ -9,13 +11,15 @@
     "json_schema": [],
     "openapi": []
   },
-  "forbidden_outcomes": [],
+  "forbidden_outcomes": [
+    {"id":"FORBID-001","statement":"The cancelled route does not authorize or perform migration, database, wallet, RPC, facilitator, transfer, exchange, deployment, release, or live execution.","evidence":[{"receipt":"security_review"},{"receipt":"release_review"}]}
+  ],
   "invariants": [],
   "objective": {
     "id": "OBJ-001",
     "statement": "Verify and repair the Liqvera F5 local mocked settlement and reconciliation boundary: exercise deterministic authorization reuse, pre-submit failure, unknown outcome, retry prohibition, receipt mismatch, reorganization, finality, entitlement, and recovery state transitions using in-process fakes and disposable local ledger state only. No wallet, chain RPC, facilitator, transfer, shared environment, deployment, release, exchange, or live execution.",
-    "success_metric": "UNKNOWN",
-    "target": "UNKNOWN"
+    "success_metric": "cancelled_before_implementation",
+    "target": "zero product or external changes under the superseded route"
   },
   "observability": [],
   "risk": {

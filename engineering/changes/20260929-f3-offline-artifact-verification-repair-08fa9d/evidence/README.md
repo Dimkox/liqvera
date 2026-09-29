@@ -77,3 +77,30 @@ Initial evidence accounting (current records are in `state.json`):
   ]
 }
 ```
+
+<!-- checkpoint:implementation -->
+## Implementation checkpoint
+
+Local observation only; not verification or publication evidence.
+
+```json
+{
+  "kind": "implementation",
+  "change_id": "20260929-f3-offline-artifact-verification-repair-08fa9d",
+  "route_id": "08fa9d84745d",
+  "observed_at": "2026-09-29T07:38:49+00:00",
+  "branch": "feat/f3-f7-verification",
+  "head": "7bf0bff7a97d5e276a1fc2eec4f12eb79f917106",
+  "detached": false,
+  "git_available": true,
+  "git_findings": [],
+  "dirty_product_state": "dirty",
+  "dirty_product_paths": [
+    "schemas/mezo-evidence/v1/acceptance-result.schema.json",
+    "tests/contracts/test_acceptance_result.py",
+    "tests/evidence_report/test_canonical_f3.py",
+    "tests/installed/test_canonical_f3_installed.py"
+  ],
+  "note": "implementation started; preserve work before handoff"
+}
+```

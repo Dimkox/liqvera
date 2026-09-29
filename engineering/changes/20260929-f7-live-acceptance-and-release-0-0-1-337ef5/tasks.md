@@ -5,7 +5,9 @@
 - [x] Record `scope_and_design_approval` for the current scope digest.
 - [x] P0 RED-first runner semantic/evidence/final-binding/A30 implementation.
 - [ ] Complete P0 independent reviews after final verifier.
-- [ ] P1 immutable out-of-tree local acceptance and omission review.
+- [x] P1 immutable out-of-tree local acceptance and omission review: five
+  configured local assertions pass, four external cases are blocked, and 21
+  deliberately unconfigured cases remain not run; no case fails.
 - [ ] Obtain exact short-lived P2 public-read grant; execute allowlisted reads.
 - [ ] P3 implement/review identity, finality, and browser x402 wiring.
 - [ ] Obtain exact short-lived P3 testnet-write grant including buyer/payee,

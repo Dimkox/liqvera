@@ -61,6 +61,15 @@ non-secret `PATH` as internal plumbing, excludes it from public environment
 claims, and has a regression test; final verification and acceptance must be
 regenerated on the next clean commit.
 
+The repaired P1 run on `c6c7ff9` is semantically INCOMPLETE with no failures:
+5 PASS (A01, A08, A09, A27, A30), 4 BLOCKED_EXTERNAL (A07, A13, A14, A29),
+and 21 NOT_RUN because no complete local assertion command exists. It is bound
+to the clean commit/tree and records runner/plan plus per-command/assertion and
+evidence digests. P0/P1 are implemented; P0 reviews are intentionally not
+self-dispatched, and P2–P5 remain blocked by their explicit gates. Because this
+handoff/task accounting changes the subject tree, the final out-of-tree result
+and verifier receipt must be regenerated once more on the documentation commit.
+
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts
 plus `SHA256SUMS` from one frozen commit. Final acceptance/evidence stays

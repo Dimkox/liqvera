@@ -13828,6 +13828,9 @@ repository_inventory:
   - path: README.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: VERSION
+    node: artifact:liqvera-python-distributions
+    path_class: BUILD_PACKAGING
   - path: PROVENANCE.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
@@ -14365,6 +14368,9 @@ repository_inventory:
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/README.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/acceptance-release-candidate.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/analysis-architect.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
@@ -14384,6 +14390,12 @@ repository_inventory:
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/release-artifact-manifest.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/release-notes-v0.0.1.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/requirements.md

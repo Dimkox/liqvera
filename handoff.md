@@ -16,6 +16,11 @@ The corrected offline result `4799bce9…84d6` at `76c0b63` is INCOMPLETE with
 Root product `VERSION` is now `0.0.1`; component versions remain unchanged.
 Draft notes and a truthful manifest mark release artifacts, checksums, final
 commit binding, A29, reviews, push, tag, and GitHub Release as not run.
+The first verifier on the preparation commit correctly rejected the four new
+tracked paths as absent from repository inventory. VERSION now has an explicit
+build-packaging classifier and all four paths have graph owners; the complete
+graph suite passes 229 tests. A fresh final verifier remains required because
+this inventory repair changes the repository fingerprint.
 
 The local P3 authorization boundary now follows the facilitator capability
 observed by the approved analysis: exact Permit2 with the

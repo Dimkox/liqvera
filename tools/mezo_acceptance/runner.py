@@ -30,10 +30,10 @@ DISPATCHER = ROOT / "scripts/run-local-acceptance-assertion.py"
 BLOCKED_REASON = "EXACT_EXTERNAL_GRANT_ABSENT"
 FAIL_REASONS = {"ASSERTION_EXIT_NONZERO", "ASSERTION_TIMEOUT", "ASSERTION_VALIDATION_ERROR", "ASSERTION_EXECUTION_ERROR"}
 OBSERVATION_FIELDS = {
-    "A01": {"checks", "subject_commit", "subject_tree", "baseline_commit"},
+    "A01": {"baseline", "current", "expected_delta"},
     "A08": {"checks", "subject_commit", "subject_tree"},
     "A09": {"checks", "subject_commit", "subject_tree"},
-    "A27": {"checks", "subject_commit", "subject_tree", "vector_count", "vector_sha256", "go_runtime_paths"},
+    "A27": {"subject_commit", "subject_tree", "vector_checks", "stage_a", "artifact_verifier", "fixture"},
     "A30": {"checks", "subject_commit", "subject_tree"},
 }
 REQUIRED_CHECKS = {
@@ -341,19 +341,63 @@ def evidence_reference(root: Path, relative: str, case_id: str, assertion: str,
     expected_fields = OBSERVATION_FIELDS.get(case_id)
     if expected_fields is None or not isinstance(observations, dict) or set(observations) != expected_fields:
         raise ValueError("evidence observations do not match the case-specific schema")
-    checks = observations.get("checks")
+    if case_id == "A01":
+        baseline, current = observations["baseline"], observations["current"]
+        execution_keys = {"argv", "exit_code", "stdout_sha256", "stderr_sha256", "commit", "tree", "status"}
+        if (not isinstance(baseline, dict) or set(baseline) != execution_keys
+                or baseline["argv"] != [sys.executable, "-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"]
+                or baseline["commit"] != "f07562eee1a33df74768e9fa4a3b074783d8c59e"
+                or baseline["tree"] != "a1df248d000718c28c565d1d5b11bd425f83a055"
+                or baseline["status"] != "EXPECTED_HISTORICAL_FAILURE"
+                or baseline["exit_code"] != 4
+                or not isinstance(current, dict) or set(current) != execution_keys | {"checks"}
+                or current["argv"] != [sys.executable, "-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"]
+                or current["commit"] != identity["commit"] or current["tree"] != identity["tree"]
+                or current["status"] != "PASS" or current["exit_code"] != 0
+                or observations["expected_delta"] != "BASELINE_LACKS_F7_ACCEPTANCE_CONTRACT_CURRENT_PASSES"):
+            raise ValueError("A01 must retain distinct frozen baseline and current checks")
+        checks = current["checks"]
+    elif case_id == "A27":
+        if (observations["subject_commit"], observations["subject_tree"]) != (identity["commit"], identity["tree"]):
+            raise ValueError("A27 observations do not bind to the subject")
+        stage = observations["stage_a"]
+        fixture = observations["fixture"]
+        artifact = observations["artifact_verifier"]
+        expected_stage_checks = {
+            "tests/readonly_analyzer/test_cli_decision.py::test_valid_package_emits_insufficient_evidence",
+            "tests/contracts/test_decision.py::test_stage_a_decision_code_is_the_closed_four",
+        }
+        canonical_fixture = ROOT / "tests/fixtures/shadow-golden-v1.ndjson"
+        if (not isinstance(stage, dict) or stage.get("exit_code") != 0
+                or stage.get("argv") != [sys.executable, "-m", "pytest", "-vv",
+                    "tests/readonly_analyzer/test_cli_decision.py::test_valid_package_emits_insufficient_evidence",
+                    "tests/contracts/test_decision.py::test_stage_a_decision_code_is_the_closed_four"]
+                or stage.get("verdict") != "INSUFFICIENT_EVIDENCE" or stage.get("go_possible") is not False
+                or set(stage.get("checks", [])) != expected_stage_checks
+                or artifact.get("exit_code") != 0 or artifact.get("status") != "PASS"
+                or artifact.get("argv") != [sys.executable, "-B", "scripts/check-stage-a-artifacts.py",
+                    "--forbid-path", "cmd/**", "internal/**", "go.mod", "go.sum",
+                    "--forbid-binary", "engine"]
+                or fixture != {"path": "tests/fixtures/shadow-golden-v1.ndjson",
+                               "sha256": file_sha256(canonical_fixture),
+                               "record_count": len(canonical_fixture.read_bytes().splitlines()),
+                               "terminal_sha256": (ROOT / "tests/fixtures/shadow-golden-v1.terminal.sha256").read_text().strip()}):
+            raise ValueError("A27 must retain the canonical non-GO verdict and stable fixture")
+        checks = observations["vector_checks"]
+    else:
+        if (observations.get("subject_commit"), observations.get("subject_tree")) != (
+            identity["commit"], identity["tree"]
+        ):
+            raise ValueError("semantic observations do not bind to the subject")
+        checks = observations.get("checks")
     if (not isinstance(checks, list) or any(not isinstance(item, str) for item in checks)
             or not REQUIRED_CHECKS[case_id].issubset(checks)):
         raise ValueError("evidence lacks required semantic test identities")
-    if (observations.get("subject_commit"), observations.get("subject_tree")) != (
-        identity["commit"], identity["tree"]
-    ):
-        raise ValueError("semantic observations do not bind to the subject")
-    if case_id == "A01" and observations["baseline_commit"] != "f07562eee1a33df74768e9fa4a3b074783d8c59e":
-        raise ValueError("A01 baseline observation is not the frozen route base")
-    if case_id == "A27" and (observations["vector_count"] != 156 or observations["go_runtime_paths"] != 0
-            or not re.fullmatch(r"[0-9a-f]{64}", observations["vector_sha256"])):
-        raise ValueError("A27 must bind all 156 vectors and a Go-free runtime tree")
+    for execution in ([observations["baseline"], observations["current"]] if case_id == "A01"
+                      else [observations["stage_a"], observations["artifact_verifier"]] if case_id == "A27" else []):
+        if any(not isinstance(execution.get(name), str) or not re.fullmatch(r"[0-9a-f]{64}", execution[name])
+               for name in ("stdout_sha256", "stderr_sha256")):
+            raise ValueError("semantic execution transcript digest is invalid")
     transcript = document.get("transcript")
     if (not isinstance(transcript, dict) or set(transcript) != {"stdout_sha256", "stderr_sha256"}
             or any(not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)

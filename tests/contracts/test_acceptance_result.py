@@ -317,8 +317,44 @@ def test_unrelated_passing_check_cannot_certify_configured_case(
     }
     path = tmp_path / f"{case_id}.json"
     path.write_text(json.dumps(document), encoding="utf-8")
-    with pytest.raises(ValueError, match="required semantic test identities"):
+    with pytest.raises(ValueError):
         runner.evidence_reference(tmp_path, path.name, case_id, case.assertion, "local",
+                                  {"commit": COMMIT, "tree": TREE})
+
+
+@pytest.mark.parametrize("retained", ["baseline", "current"])
+def test_a01_rejects_one_sided_baseline_or_current_evidence(tmp_path: Path, retained: str) -> None:
+    execution = {
+        "argv": ["pytest"], "exit_code": 0, "stdout_sha256": "a" * 64,
+        "stderr_sha256": "b" * 64, "commit": COMMIT, "tree": TREE,
+        "status": "PASS", "checks": list(runner.REQUIRED_CHECKS["A01"]),
+    }
+    observations = {retained: execution, "expected_delta": "BASELINE_LACKS_F7_ACCEPTANCE_CONTRACT_CURRENT_PASSES"}
+    document = {
+        "case_id": "A01", "assertion": "before_after_checks", "execution_class": "local",
+        "claims": ["before_after_checks"], "subject": {"commit": COMMIT, "tree": TREE},
+        "observations": observations,
+        "transcript": {"stdout_sha256": "a" * 64, "stderr_sha256": "b" * 64},
+    }
+    path = tmp_path / "a01.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="case-specific schema"):
+        runner.evidence_reference(tmp_path, path.name, "A01", "before_after_checks", "local",
+                                  {"commit": COMMIT, "tree": TREE})
+
+
+def test_a27_rejects_vectors_only_without_stage_a_verdict_and_fixture(tmp_path: Path) -> None:
+    document = {
+        "case_id": "A27", "assertion": "stage_a_regression", "execution_class": "local",
+        "claims": ["stage_a_regression"], "subject": {"commit": COMMIT, "tree": TREE},
+        "observations": {"subject_commit": COMMIT, "subject_tree": TREE,
+                         "vector_checks": list(runner.REQUIRED_CHECKS["A27"])},
+        "transcript": {"stdout_sha256": "a" * 64, "stderr_sha256": "b" * 64},
+    }
+    path = tmp_path / "a27.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="case-specific schema"):
+        runner.evidence_reference(tmp_path, path.name, "A27", "stage_a_regression", "local",
                                   {"commit": COMMIT, "tree": TREE})
 
 

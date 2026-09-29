@@ -77,6 +77,20 @@ If drift appears in the late window, the canonical result name is atomically
 renamed with `.invalid` rather than left accepted. Regression tests cover that
 late mutation and post-seal unlink prevention.
 
+The third review narrowed two remaining semantic gaps. A01 now exports the
+frozen route baseline to a temporary read-only candidate extraction, runs the
+same bounded acceptance-contract command against baseline and current trees,
+and retains separate commit/tree, argv, exit, status, and transcript hashes.
+The accepted delta is exact: baseline exit 4 because it predates the F7
+contract test, while the current tree passes its named checks. The temporary
+extraction is removed without changing the candidate or Git metadata.
+
+A27 now supplements its vector identities with the canonical Stage A artifact
+verifier and exact CLI decision/closed-enum tests. Evidence requires the frozen
+`INSUFFICIENT_EVIDENCE`/non-GO verdict and binds the retained shadow fixture's
+path, byte digest, terminal digest, and 38-record count. One-sided A01 evidence
+and vectors-only A27 evidence are explicit negative regressions.
+
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts
 plus `SHA256SUMS` from one frozen commit. Final acceptance/evidence stays

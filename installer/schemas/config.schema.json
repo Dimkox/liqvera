@@ -23,9 +23,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "DATABASE_PASSWORD_FILE": {"$ref": "#/$defs/secret_file"},
-        "P3_PAYMENT_PAYLOAD_FILE": {"$ref": "#/$defs/secret_file"},
-        "P3_LIVE_GRANTS_FILE": {"$ref": "#/$defs/secret_file"}
+        "DATABASE_PASSWORD_FILE": {"$ref": "#/$defs/secret_file"}
       }
     }
   },

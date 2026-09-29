@@ -3,14 +3,22 @@
   "$id": "https://liqvera.example/schemas/liqvera-installer-release-v1.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "product_version", "git_commit", "git_tree", "archive_sha256", "compose_sha256", "images", "migrations", "supported_linux"],
+  "required": ["schema_version", "product_version", "git_commit", "git_tree", "compose_sha256", "launchers", "images", "migrations", "supported_linux"],
   "properties": {
     "schema_version": {"const": "liqvera-installer-release/v1"},
     "product_version": {"const": "0.0.2"},
     "git_commit": {"$ref": "#/$defs/git_oid"},
     "git_tree": {"$ref": "#/$defs/git_oid"},
-    "archive_sha256": {"$ref": "#/$defs/sha256"},
     "compose_sha256": {"$ref": "#/$defs/sha256"},
+    "launchers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["install.sh", "liqvera.sh"],
+      "properties": {
+        "install.sh": {"$ref": "#/$defs/sha256"},
+        "liqvera.sh": {"$ref": "#/$defs/sha256"}
+      }
+    },
     "images": {
       "type": "object",
       "additionalProperties": false,
@@ -50,7 +58,7 @@
   "$defs": {
     "git_oid": {"type": "string", "minLength": 40, "maxLength": 40, "pattern": "^[0-9a-f]{40}$"},
     "sha256": {"type": "string", "minLength": 64, "maxLength": 64, "pattern": "^[0-9a-f]{64}$"},
-    "image": {"type": "string", "pattern": "^[^@\\s]+@sha256:[0-9a-f]{64}$"},
+    "image": {"type": "string", "pattern": "^[^@\\s]+@sha256:[0-9a-f]{64}(?![\\s\\S])"},
     "migration_001": {"const": {"name": "001_ledger.sql", "sha256": "bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b"}},
     "migration_002": {"const": {"name": "002_fix_immutable_ledger_identity.sql", "sha256": "981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb"}},
     "migration_003": {"const": {"name": "003_live_grant_consumption.sql", "sha256": "bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0"}},

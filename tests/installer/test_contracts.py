@@ -56,8 +56,11 @@ def release_manifest() -> dict[str, object]:
         "product_version": "0.0.2",
         "git_commit": HEX40,
         "git_tree": "2" * 40,
-        "archive_sha256": HEX64,
         "compose_sha256": "b" * 64,
+        "launchers": {
+            "install.sh": "c" * 64,
+            "liqvera.sh": "d" * 64,
+        },
         "images": {
             "edge": f"ghcr.io/dimkox/liqvera-edge@sha256:{'1' * 64}",
             "web": f"ghcr.io/dimkox/liqvera-web@sha256:{'2' * 64}",
@@ -117,8 +120,17 @@ def test_release_manifest_is_closed_and_binds_exact_release_inputs() -> None:
 
     for mutation in (
         {**value, "product_version": "0.0.1"},
-        {**value, "archive_sha256": f"{HEX64}\n"},
+        {**value, "archive_sha256": HEX64},
+        {key: item for key, item in value.items() if key != "launchers"},
+        {**value, "launchers": {**value["launchers"], "unexpected.sh": HEX64}},
+        {**value, "launchers": {**value["launchers"], "install.sh": "C" * 64}},
+        {**value, "launchers": {**value["launchers"], "liqvera.sh": "d" * 63}},
         {**value, "images": {**value["images"], "web": "liqvera-web:latest"}},
+        {**value, "images": {**value["images"], "postgres": f"postgres@sha256:{'6' * 64}\n"}},
+        {**value, "images": {**value["images"], "postgres": f"post gres@sha256:{'6' * 64}"}},
+        {**value, "images": {**value["images"], "postgres": f"postgres@sha256:{'A' * 64}"}},
+        {**value, "images": {**value["images"], "postgres": f"postgres@sha256:{'6' * 63}"}},
+        {**value, "images": {**value["images"], "postgres": f"postgres@sha256:{'6' * 65}"}},
         {**value, "migrations": value["migrations"][:-1]},
         {**value, "unexpected": True},
     ):
@@ -139,6 +151,8 @@ def test_install_config_enforces_safe_defaults_and_named_secret_files() -> None:
         {**value, "source_mode": "live"},
         {**value, "ports": {**value["ports"], "web": {"host": "0.0.0.0", "port": 3000}}},
         {**value, "secret_files": {"DATABASE_PASSWORD": "plaintext"}},
+        {**value, "secret_files": {"P3_PAYMENT_PAYLOAD_FILE": "/run/secrets/payment"}},
+        {**value, "secret_files": {"P3_LIVE_GRANTS_FILE": "/run/secrets/grants"}},
         {**value, "FREE_FORM_ENV": "unsafe"},
     ):
         assert_rejected(schema, mutation)
@@ -149,12 +163,12 @@ def test_install_state_is_closed_and_uses_only_exact_error_codes() -> None:
     value = install_state()
     Draft202012Validator(schema).validate(value)
 
-    accepted = set()
+    actual_enum = set(schema["properties"]["last_error"]["enum"])
+    assert actual_enum == {None, *ERROR_CODES}
+
     for code in ERROR_CODES:
         candidate = {**value, "last_error": code}
         Draft202012Validator(schema).validate(candidate)
-        accepted.add(code)
-    assert accepted == ERROR_CODES
 
     assert_rejected(schema, {**value, "last_error": "UNKNOWN_ERROR"})
     assert_rejected(schema, {**value, "release_sha256": HEX64.upper()})

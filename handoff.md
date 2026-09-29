@@ -19,7 +19,11 @@ mutation were made. Plan Task 1 now freezes the three closed Draft 2020-12
 release/config/state contracts and Linux-safe non-secret templates: product
 `0.0.2`, chain `31611`, shadow source mode, payment disabled, loopback ports,
 digest-only images, and exact migrations 001–005. No launcher or mutating
-installer behavior exists yet; Task 2 is the next implementation boundary.
+installer behavior exists yet. Independent Task 1 review removed the impossible
+self-referential outer archive digest from the embedded manifest, added exact
+launcher digest bindings, excluded P3 payment/grant inputs from installer
+authority, and closed image references against trailing whitespace. Task 2 is
+the next implementation boundary.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

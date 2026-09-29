@@ -182,3 +182,11 @@ state-machine methods, so their final-state assertions could not prove the
 frozen guards and a delivery-call mutation survived. The root cause was
 optimizing the fake for orchestration reachability instead of loading the
 already packaged production contracts and asserting ordered negative effects.
+
+## 2026-09-29 — Coordinator invoked verification outside the project environment
+
+The first report-bearing F5 verification used system `python3`, whose workspace
+packages were unavailable, and produced unrelated import/install failures. The
+root cause was relying on shell resolution instead of the repository's documented
+`.venv`; run factory verification explicitly with `.venv/bin/python3` after the
+editable dev install is present.

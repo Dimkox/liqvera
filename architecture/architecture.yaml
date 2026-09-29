@@ -14377,6 +14377,15 @@ repository_inventory:
   - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/evidence/analysis-repo_explorer.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/evidence/code-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/evidence/data-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/evidence/test-review.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/release.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

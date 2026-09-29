@@ -60,6 +60,7 @@ export const X402_PERMIT2 = {
   exactProxyAddress: "0x402085c248EeA27D92E8b30b2C58ed07f9E20001",
   approvalMode: "eip2612-gas-sponsoring",
   requiredExtension: "eip2612GasSponsoring",
+  extensionDescription: "The facilitator accepts EIP-2612 gasless Permit to `Permit2` canonical contract.",
   authorizationIdentityVersion: "liqvera-permit2-eip2612-identity/v1",
 } as const;
 

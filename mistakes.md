@@ -258,3 +258,10 @@ The first post-005 behavior invocation targeted the retained migration-evidence
 database even though the suite creates fixed upgrade rows and requires a fresh
 database. Keep retained migration proof untouched and use a separately approved
 fresh disposable database for destructive fixture-based behavioral verification.
+
+## 2026-09-29 — P3 duplicated a cross-runtime canonical digest
+
+The first Permit2 update changed Python's canonical plan but left a copied Node
+digest, and handcrafted payload tests missed SDK recursive extension merging and
+hex case normalization. Derive the Node digest from its complete canonical plan
+and test Python against compiled Node plus the pinned official browser/gateway flow.

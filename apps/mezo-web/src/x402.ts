@@ -1,10 +1,10 @@
 import { MEZO_TESTNET, MUSD_PERMIT, X402_PERMIT2 } from "@liqvera/mezo-protocol";
 import type { Delivery, Quote } from "./contracts";
 import type { Eip1193Provider } from "./wallet";
-import { x402Client, x402HTTPClient } from "@x402/core/client";
-import { ExactEvmScheme, type ClientEvmSigner } from "@x402/evm";
+import type { ClientEvmSigner } from "@x402/evm";
 import { validateDelivery } from "./api";
 import { boundedFetchJson } from "./x402-transport.mjs";
+import { createProductionProtocol, requirePermit2Challenge, requireSponsoredPayment } from "./x402-production.mjs";
 
 export { boundedFetch, boundedFetchJson, boundedResponseJson } from "./x402-transport.mjs";
 
@@ -56,21 +56,17 @@ class ProductionX402BrowserAdapter implements OfficialX402BrowserAdapter {
       if(typeof signature!=="string"||!/^0x[0-9a-fA-F]{130}$/.test(signature))throw new X402CancelledBeforeSubmission();
       return signature as `0x${string}`;
     }};
-    const protocol=new x402HTTPClient(new x402Client().register("eip155:31611",new ExactEvmScheme(signer,{rpcUrl:MEZO_TESTNET.rpcUrl})));
+    const protocol=createProductionProtocol(signer,MEZO_TESTNET.rpcUrl);
     const headers={Authorization:`Bearer ${input.bearerCapability}`,Accept:"application/json"};
     try {
       const challengeRead=await boundedFetchJson(fetch,input.path,{headers},65_536);
       const challenge=challengeRead.response;
       if(challenge.status!==402)throw new Error("Expected an exact payment challenge. No payment was submitted.");
       const required=protocol.getPaymentRequiredResponse(name=>challenge.headers.get(name),challengeRead.body);
-      if(required.accepts.length!==1||required.accepts[0]?.extra?.assetTransferMethod!==X402_PERMIT2.assetTransferMethod||
-        required.accepts[0]?.extra?.name!==MUSD_PERMIT.domainName||required.accepts[0]?.extra?.version!==MUSD_PERMIT.domainVersion||
-        !required.extensions||Object.keys(required.extensions).length!==1||!(X402_PERMIT2.requiredExtension in required.extensions))
-        throw new Error("Permit2 EIP-2612 sponsorship is required. No payment was submitted.");
+      const permit={...X402_PERMIT2,domainName:MUSD_PERMIT.domainName,domainVersion:MUSD_PERMIT.domainVersion};
+      requirePermit2Challenge(required,permit);
       const payment=await protocol.createPaymentPayload(required);
-      if(payment.accepted.extra?.assetTransferMethod!==X402_PERMIT2.assetTransferMethod||!payment.extensions||
-        Object.keys(payment.extensions).length!==1||!(X402_PERMIT2.requiredExtension in payment.extensions))
-        throw new Error("Wallet did not produce the required gas-sponsored payment. No payment was submitted.");
+      requireSponsoredPayment(payment,permit);
       const paidRead=await boundedFetchJson(fetch,input.path,{headers:{...headers,...protocol.encodePaymentSignatureHeader(payment)}},10_000_000);
       const paid=paidRead.response;
       if(paid.status===202)return "recovering";

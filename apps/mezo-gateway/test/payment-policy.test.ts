@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { PaymentPayload } from '@x402/core/types';
+import { x402Client } from '@x402/core/client';
 import { encodeFunctionData } from 'viem';
-import { PERMIT2_ADDRESS, x402ExactPermit2ProxyABI, x402ExactPermit2ProxyAddress } from '@x402/evm';
+import { ExactEvmScheme, PERMIT2_ADDRESS, x402ExactPermit2ProxyABI, x402ExactPermit2ProxyAddress } from '@x402/evm';
 import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type Quote } from '../src/domain/model.js';
 import { MezoAuthorizationPolicy, MezoFinalityPolicy } from '../src/security/payment-policy.js';
 import { LivePaymentGrant } from '../src/security/live-grant.js';
@@ -15,7 +16,7 @@ const payTo='0x2222222222222222222222222222222222222222';
 const quote={id:'00000000-0000-4000-8000-000000000001',report_id:'00000000-0000-4000-8000-000000000002',report_sha256:'a'.repeat(64),terms:{expected_payer:payer,pay_to:payTo}} as Quote;
 const permit2='0x000000000022D473030F116dDEE9F6B43aC78BA3';
 const proxy='0x402085c248EeA27D92E8b30b2C58ed07f9E20001';
-function payload(): PaymentPayload { return {x402Version:2,accepted:{scheme:'exact',network:NETWORK,asset:ASSET,amount:AMOUNT,payTo,extra:{assetTransferMethod:'permit2',name:'Mezo USD',version:'1'}},payload:{signature:`0x${'1'.repeat(130)}`,permit2Authorization:{from:payer,permitted:{token:ASSET,amount:AMOUNT},spender:proxy,nonce:'42',deadline:'1790640300',witness:{to:payTo,validAfter:'0'}}},extensions:{eip2612GasSponsoring:{info:{from:payer,asset:ASSET,spender:permit2,amount:AMOUNT,nonce:'7',deadline:'1790640300',signature:`0x${'2'.repeat(130)}`,version:'1'},schema:{}}}} as unknown as PaymentPayload; }
+function payload(): PaymentPayload { return {x402Version:2,accepted:{scheme:'exact',network:NETWORK,asset:ASSET,amount:AMOUNT,payTo,extra:{assetTransferMethod:'permit2',name:'Mezo USD',version:'1'}},payload:{signature:`0x${'1'.repeat(130)}`,permit2Authorization:{from:payer,permitted:{token:ASSET,amount:AMOUNT},spender:proxy,nonce:'42',deadline:'1790640300',witness:{to:payTo,validAfter:'0'}}},extensions:{eip2612GasSponsoring:{info:{description:'The facilitator accepts EIP-2612 gasless Permit to `Permit2` canonical contract.',from:payer,asset:ASSET,spender:permit2,amount:AMOUNT,nonce:'7',deadline:'1790640300',signature:`0x${'2'.repeat(130)}`,version:'1'},schema:{}}}} as unknown as PaymentPayload; }
 
 test('authorization identity binds exact Permit2 plus EIP-2612 sponsorship without raw signatures',async()=>{
   const policy=new MezoAuthorizationPolicy(()=>new Date('2026-09-29T00:00:00Z'));
@@ -32,6 +33,35 @@ test('authorization identity binds exact Permit2 plus EIP-2612 sponsorship witho
   ]});
   assert.equal(await policy.bindsTransfer(attempt,{hash:attempt.tx_hash,to:proxy,input},{transactionHash:attempt.tx_hash}),true);
   assert.equal(await policy.bindsTransfer(attempt,{hash:attempt.tx_hash,to:ASSET,input:`0xdeadbeef${input.slice(10)}`},{transactionHash:attempt.tx_hash}),false);
+});
+
+test('uppercase wire signatures retain the same decoded settlement identity',async()=>{
+  const wire=payload() as unknown as {payload:{signature:string},extensions:{eip2612GasSponsoring:{info:{signature:string}}}};
+  wire.payload.signature=`0x${'A'.repeat(130)}`;
+  wire.extensions.eip2612GasSponsoring.info.signature=`0x${'B'.repeat(128)}1B`;
+  const policy=new MezoAuthorizationPolicy(()=>new Date('2026-09-29T00:00:00Z'));
+  const identity=policy.identify(wire as unknown as PaymentPayload,quote);
+  const attempt={authorization_identity:identity.identity,identity_version:identity.version,correlation:identity.correlation,tx_hash:`0x${'3'.repeat(64)}`} as Attempt;
+  const input=encodeFunctionData({abi:x402ExactPermit2ProxyABI,functionName:'settleWithPermit',args:[
+    {value:BigInt(AMOUNT),deadline:1790640300n,r:`0x${'b'.repeat(64)}`,s:`0x${'b'.repeat(64)}`,v:27},
+    {permitted:{token:ASSET,amount:BigInt(AMOUNT)},nonce:42n,deadline:1790640300n},payer,{to:payTo,validAfter:0n},`0x${'a'.repeat(130)}`,
+  ]});
+  assert.equal(await policy.bindsTransfer(attempt,{hash:attempt.tx_hash,to:proxy,input},{transactionHash:attempt.tx_hash}),true);
+});
+
+test('official SDK Permit2 and merged EIP-2612 payload passes gateway policy',async()=>{
+  let signatures=0;
+  const signer={address:payer as `0x${string}`,readContract:async({functionName}:{functionName:string})=>functionName==='allowance'?0n:7n,
+    signTypedData:async()=>`0x${(++signatures===1?'A':'B').repeat(130)}` as `0x${string}`};
+  const client=new x402Client().register(NETWORK,new ExactEvmScheme(signer));
+  const required={x402Version:2,resource:{url:'https://liqvera.invalid/report',description:'report',mimeType:'application/json'},accepts:[{
+    scheme:'exact',network:NETWORK,asset:ASSET,amount:AMOUNT,payTo,maxTimeoutSeconds:120,
+    extra:{assetTransferMethod:'permit2',name:'Mezo USD',version:'1'},
+  }],extensions:{eip2612GasSponsoring:{info:{description:'The facilitator accepts EIP-2612 gasless Permit to `Permit2` canonical contract.',version:'1'},schema:{type:'object'}}}};
+  const created=await client.createPaymentPayload(required as never);
+  const identity=new MezoAuthorizationPolicy(()=>new Date()).identify(created as PaymentPayload,quote);
+  assert.equal(identity.version,'liqvera-permit2-eip2612-identity/v1');
+  assert.equal(signatures,2);
 });
 
 test('authorization identity rejects changed amount and expired validity',()=>{

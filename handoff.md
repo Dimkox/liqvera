@@ -18,6 +18,15 @@ no buyer approval transaction is accepted. Local installed-SDK constants were
 verified; no live `eth_getCode`, payment, wallet or network action was run because
 no short-lived public-read/payment grant was provided. A13/A14 remain blocked.
 
+The first Permit2 review found three fail-closed interoperability defects and
+they are repaired locally: the Node operator's former copied plan digest could
+diverge from Python, mixed-case wire signatures hashed differently from decoded
+ABI bytes, and the official SDK preserves the server extension description when
+it enriches EIP-2612 info. Node now derives its digest from the complete canonical
+plan and an executable Python-to-compiled-Node regression compares it. Signature
+commitments normalize hex case. Production browser and gateway tests now run the
+pinned official SDK end to end and validate the recursively merged extension.
+
 Route `337ef5ec16a0` and change package
 `engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/`
 are implementing approved local-only P0/P1. Four route-selected analyses were

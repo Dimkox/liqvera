@@ -1,4 +1,5 @@
 import json
+import subprocess
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -18,6 +19,23 @@ TREE = "b" * 40
 BUYER = "0x" + "1" * 40
 PAYEE = "0x" + "2" * 40
 TX = "0x" + "3" * 64
+
+
+def test_python_plan_digest_matches_compiled_node_operator():
+    subprocess.run(
+        ["npm", "--prefix", "apps/mezo-gateway", "run", "build"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    observed = subprocess.run(
+        ["node", "apps/mezo-gateway/dist/p3-operator.js", "--print-plan-digest"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    observed = json.loads(observed)
+    assert observed == P3Plan.canonical().digest
 
 
 def grant():

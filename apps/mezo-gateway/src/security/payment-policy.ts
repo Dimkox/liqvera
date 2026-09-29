@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import type { PaymentPayload } from '@x402/core/types';
 import { PERMIT2_ADDRESS, x402ExactPermit2ProxyABI, x402ExactPermit2ProxyAddress } from '@x402/evm';
 import { decodeFunctionData, encodeFunctionData } from 'viem';
-import { MUSD_PERMIT } from '@liqvera/mezo-protocol';
+import { MUSD_PERMIT, X402_PERMIT2 } from '@liqvera/mezo-protocol';
 import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type AuthorizationIdentity, type Quote } from '../domain/model.js';
 import type { AuthorizationPolicy, FinalityPolicy, ReadonlyRpc } from '../ports/index.js';
 
@@ -25,7 +25,7 @@ export class MezoAuthorizationPolicy implements AuthorizationPolicy {
     const witness=object(authorization.witness); exactKeys(witness,['to','validAfter']);
     const extensions=object(outer.extensions); exactKeys(extensions,['eip2612GasSponsoring']);
     const extension=object(extensions.eip2612GasSponsoring); exactKeys(extension,['info','schema']);
-    const permit=object(extension.info); exactKeys(permit,['from','asset','spender','amount','nonce','deadline','signature','version']);
+    const permit=object(extension.info); exactKeys(permit,['from','asset','spender','amount','nonce','deadline','signature','version','description']);
     const values={from:String(authorization.from).toLowerCase(),token:String(permitted.token).toLowerCase(),amount:String(permitted.amount),
       spender:String(authorization.spender).toLowerCase(),nonce:String(authorization.nonce),deadline:String(authorization.deadline),
       to:String(witness.to).toLowerCase(),validAfter:String(witness.validAfter)};
@@ -35,13 +35,13 @@ export class MezoAuthorizationPolicy implements AuthorizationPolicy {
       accepted.amount!==AMOUNT||String(accepted.payTo).toLowerCase()!==quote.terms.pay_to||extra.assetTransferMethod!=='permit2'||extra.name!==MUSD_PERMIT.domainName||extra.version!==MUSD_PERMIT.domainVersion||
       values.from!==quote.terms.expected_payer||values.to!==quote.terms.pay_to||values.token!==ASSET.toLowerCase()||values.amount!==AMOUNT||
       values.spender!==x402ExactPermit2ProxyAddress.toLowerCase()||!ADDRESS.test(values.from)||!ADDRESS.test(values.to)||!UINT.test(values.validAfter)||!UINT.test(values.deadline)||!UINT.test(values.nonce)||
-      approval.from!==values.from||approval.asset!==values.token||approval.spender!==PERMIT2_ADDRESS.toLowerCase()||approval.amount!==AMOUNT||approval.version!=='1'||
+      approval.from!==values.from||approval.asset!==values.token||approval.spender!==PERMIT2_ADDRESS.toLowerCase()||approval.amount!==AMOUNT||approval.version!=='1'||permit.description!==X402_PERMIT2.extensionDescription||
       !UINT.test(approval.nonce)||!UINT.test(approval.deadline)||typeof body.signature!=='string'||!/^0x[0-9a-fA-F]{130}$/.test(body.signature)||
       typeof permit.signature!=='string'||!/^0x[0-9a-fA-F]{130}$/.test(permit.signature))throw new PublicError('PAYMENT_REJECTED',409);
     const now=Math.floor(this.now().getTime()/1000); const deadline=Number(values.deadline); const after=Number(values.validAfter); const approvalDeadline=Number(approval.deadline);
     if(!Number.isSafeInteger(deadline)||!Number.isSafeInteger(after)||!Number.isSafeInteger(approvalDeadline)||after>now||deadline<=now||deadline-now>600||approvalDeadline<deadline||approvalDeadline-now>600)throw new PublicError('PAYMENT_REJECTED',409);
-    const signatureCommitment=createHash('sha256').update(body.signature).digest('hex');
-    const approvalSignatureCommitment=createHash('sha256').update(permit.signature).digest('hex');
+    const signatureCommitment=createHash('sha256').update(body.signature.toLowerCase()).digest('hex');
+    const approvalSignatureCommitment=createHash('sha256').update(permit.signature.toLowerCase()).digest('hex');
     const correlation={...values,eip2612_from:approval.from,eip2612_asset:approval.asset,eip2612_spender:approval.spender,eip2612_amount:approval.amount,
       eip2612_nonce:approval.nonce,eip2612_deadline:approval.deadline,eip2612_version:approval.version,signature_commitment:signatureCommitment,
       eip2612_signature_commitment:approvalSignatureCommitment,network:NETWORK,asset:ASSET.toLowerCase(),asset_transfer_method:'permit2',
@@ -64,7 +64,7 @@ export class MezoAuthorizationPolicy implements AuthorizationPolicy {
       return String(owner).toLowerCase()===attempt.correlation.from&&String(permitted.token).toLowerCase()===attempt.correlation.token&&String(permitted.amount)===attempt.correlation.amount&&
         String(permit2.nonce)===attempt.correlation.nonce&&String(permit2.deadline)===attempt.correlation.deadline&&String(witness.to).toLowerCase()===attempt.correlation.to&&
         String(witness.validAfter)===attempt.correlation.validAfter&&String(permit2612.value)===attempt.correlation.eip2612_amount&&String(permit2612.deadline)===attempt.correlation.eip2612_deadline&&
-        createHash('sha256').update(signature).digest('hex')===attempt.correlation.signature_commitment&&createHash('sha256').update(approvalSignature).digest('hex')===attempt.correlation.eip2612_signature_commitment;
+        createHash('sha256').update(signature.toLowerCase()).digest('hex')===attempt.correlation.signature_commitment&&createHash('sha256').update(approvalSignature.toLowerCase()).digest('hex')===attempt.correlation.eip2612_signature_commitment;
     } catch { return false; }
   }
 }

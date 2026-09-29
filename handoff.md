@@ -25,8 +25,11 @@ pre-rename verification failure. A no-index wheel test installs all four local
 packages into an isolated environment, proves imports come from that install,
 then exercises both installed F3 commands outside the checkout. The new focused
 slice reports 13 passed; the surrounding capture/analyzer/contracts slice
-reports 738 passed and 85 subtests. Full PR verification and independent route
-reviews remain pending. Gateway/F4 through F7, graph orphan cleanup,
+reports 738 passed and 85 subtests. The first full PR run completed its checks
+but could not write its receipt because the typed change spec named suite
+directories and one stale manifest filename; those references are now exact
+regular files and the full run must be repeated. Independent route reviews
+remain pending. Gateway/F4 through F7, graph orphan cleanup,
 network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
 start, deployment, release, and push remain outside this route. All 156 broad
 acceptance vectors remain `NOT_RUN`.

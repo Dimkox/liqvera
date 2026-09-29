@@ -1,17 +1,17 @@
 {
   "acceptance_criteria": [
     {
-      "evidence": [{"test": "tests/evidence_report"}, {"receipt": "test_review"}],
+      "evidence": [{"test": "tests/installed/test_canonical_f3_installed.py"}, {"receipt": "test_review"}],
       "id": "AC-001",
       "statement": "An isolated installed canonical F3 package deterministically builds, atomically publishes, reads, and offline-verifies an exact fixture report and bundle."
     },
     {
-      "evidence": [{"test": "tests/evidence_report"}, {"receipt": "code_review"}],
+      "evidence": [{"test": "tests/evidence_report/test_canonical_f3.py"}, {"receipt": "code_review"}],
       "id": "AC-002",
       "statement": "Tampering, duplicate report UUID publication, and incomplete targets fail closed without replacing or exposing a partial artifact."
     },
     {
-      "evidence": [{"test": "tests/acceptance"}, {"receipt": "data_review"}],
+      "evidence": [{"test": "tests/contracts/test_acceptance_result.py"}, {"receipt": "data_review"}],
       "id": "AC-003",
       "statement": "Runner-produced Git commit and tree OIDs validate against the acceptance-result schema while content SHA-256 fields remain exactly 64 lowercase hexadecimal characters."
     },
@@ -27,7 +27,7 @@
   "change_id": "20260929-f3-offline-artifact-verification-repair-08fa9d",
   "contracts": {
     "events": [],
-    "json_schema": ["schemas/mezo-evidence/v1/acceptance-result.schema.json", "schemas/mezo-evidence/v1/report.schema.json", "schemas/mezo-evidence/v1/evidence-bundle-manifest.schema.json"],
+    "json_schema": ["schemas/mezo-evidence/v1/acceptance-result.schema.json", "schemas/mezo-evidence/v1/report.schema.json", "schemas/mezo-evidence/v1/bundle-manifest.schema.json"],
     "openapi": []
   },
   "forbidden_outcomes": [
@@ -37,19 +37,19 @@
       "statement": "No network, database, migration, RPC, wallet, payment, exchange, deployment, release, push, or other external write occurs."
     },
     {
-      "evidence": [{"test": "tests/evidence_report"}, {"receipt": "test_review"}],
+      "evidence": [{"test": "tests/evidence_report/test_canonical_f3.py"}, {"receipt": "test_review"}],
       "id": "FORBID-002",
       "statement": "Fixture integrity evidence is never relabelled as live authenticity, chargeability, execution authority, or broad F3-F7 acceptance."
     }
   ],
   "invariants": [
     {
-      "evidence": [{"test": "tests/evidence_report"}, {"receipt": "data_review"}],
+      "evidence": [{"test": "tests/evidence_report/test_canonical_f3.py"}, {"receipt": "data_review"}],
       "id": "INV-001",
       "statement": "Artifact bytes are canonical, bounded, immutable after UUID publication, and independently reproducible offline."
     },
     {
-      "evidence": [{"test": "tests/contracts"}, {"receipt": "code_review"}],
+      "evidence": [{"test": "tests/contracts/test_acceptance_result.py"}, {"receipt": "code_review"}],
       "id": "INV-002",
       "statement": "All existing F2 contracts and every SQL migration remain unchanged except the demonstrated acceptance Git identity schema repair."
     }

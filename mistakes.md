@@ -135,3 +135,10 @@ set of Liqvera packages/tools, producing an invalid 59.18% denominator that
 still omitted owned scripts, standalone tools, and project-owned tooling. The
 complete tracked inventory measures 36.16%; coverage ownership and its blocking
 floor must be derived together and guarded by an inventory comparison.
+
+## 2026-09-29 — Typed evidence referenced directories instead of contracts
+
+The first F3 full verifier completed its checks but could not record a receipt
+because the change spec named test directories and one nonexistent schema file.
+The root cause was copying human-readable suite labels into typed evidence
+instead of validating every entry as the required regular file path.

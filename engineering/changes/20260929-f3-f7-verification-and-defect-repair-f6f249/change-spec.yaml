@@ -1,0 +1,76 @@
+{
+  "acceptance_criteria": [
+    {
+      "evidence": [{"test": "tests/evidence_report"}, {"receipt": "test_review"}],
+      "id": "AC-001",
+      "statement": "An installed canonical F3 fixture package produces deterministic exact report and bundle artifacts, publishes them atomically, and passes the installed offline verifier."
+    },
+    {
+      "evidence": [{"test": "tests/evidence_report"}, {"receipt": "security_review"}],
+      "id": "AC-002",
+      "statement": "Tampered bytes, manifests, replay inputs, and interrupted publication fail closed without a partial published artifact."
+    },
+    {
+      "evidence": [{"test": "tests/acceptance"}, {"receipt": "code_review"}],
+      "id": "AC-003",
+      "statement": "The acceptance runner and its JSON Schema use one consistent repository identity representation."
+    },
+    {
+      "evidence": [{"receipt": "verification"}, {"receipt": "code_review"}, {"receipt": "test_review"}, {"receipt": "security_review"}, {"receipt": "data_review"}, {"receipt": "release_review"}],
+      "id": "AC-004",
+      "statement": "The final Phase 0 and Phase 1A tree has route-selected verification and independent reviews bound to one fingerprint."
+    }
+  ],
+  "approvals": {
+    "required_scopes": ["scope_and_design_approval", "migration_or_external_write_approval"]
+  },
+  "change_id": "20260929-f3-f7-verification-and-defect-repair-f6f249",
+  "contracts": {
+    "events": [],
+    "json_schema": ["schemas/mezo-evidence/v1/report.schema.json", "schemas/mezo-evidence/v1/evidence-bundle-manifest.schema.json", "schemas/mezo-evidence/v1/acceptance-result.schema.json"],
+    "openapi": []
+  },
+  "forbidden_outcomes": [
+    {
+      "evidence": [{"receipt": "security_review"}, {"receipt": "release_review"}],
+      "id": "FORBID-001",
+      "statement": "No live HTTP/RPC/facilitator/wallet/payment/exchange mutation, shared database write, deployment, release, or publication occurs."
+    },
+    {
+      "evidence": [{"test": "tests/acceptance"}, {"receipt": "test_review"}],
+      "id": "FORBID-002",
+      "statement": "Offline or mocked evidence is never relabeled as live acceptance; A07, A13, A14, A29 and A30 remain blocked or not run."
+    }
+  ],
+  "invariants": [
+    {
+      "evidence": [{"test": "tests/contracts"}, {"receipt": "data_review"}],
+      "id": "INV-001",
+      "statement": "F2 public schemas and applied migration 001 remain unchanged; this tranche performs no migration or backfill."
+    },
+    {
+      "evidence": [{"test": "tests/evidence_report"}, {"receipt": "security_review"}],
+      "id": "INV-002",
+      "statement": "Artifact identity is content-derived, canonical, bounded, immutable after publication, and independently verifiable offline."
+    }
+  ],
+  "objective": {
+    "id": "OBJ-001",
+    "statement": "Verify and repair the already integrated Liqvera F3-F7 product engine in dependency order, beginning with factory/resource builds, typechecks, graph, canonical F3 evidence runtime, F4 gateway/concurrency/artifact-loss paths, mocked F5 settlement faults, F6 browser/Compose/security flows, and F7 offline acceptance; keep live payment, deployment, release, and exchange mutation disabled.",
+    "success_metric": "phase0_and_installed_f3_offline_vertical_pass",
+    "target": "deterministic installed F3 report and bundle with tamper rejection and zero external writes"
+  },
+  "observability": [{"id": "SIG-001", "metric": "offline_f3_verification_and_artifact_hashes", "proves": ["OBJ-001"]}],
+  "risk": {
+    "domains": [
+      "data",
+      "security"
+    ],
+    "tier": "red"
+  },
+  "rollback": {
+    "maximum_steps": 1,
+    "strategy": "forward_fix"
+  },
+  "schema_version": 2
+}

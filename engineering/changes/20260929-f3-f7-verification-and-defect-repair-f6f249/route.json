@@ -1,0 +1,98 @@
+{
+  "allowed_agents": [
+    "repo_explorer",
+    "architect",
+    "docs_researcher",
+    "data_architect",
+    "code_reviewer",
+    "test_reviewer",
+    "security_reviewer",
+    "release_reviewer",
+    "data_reviewer",
+    "general_implementer"
+  ],
+  "analysis_agents": [
+    "repo_explorer",
+    "architect",
+    "docs_researcher",
+    "data_architect"
+  ],
+  "base_commit": "f07562eee1a33df74768e9fa4a3b074783d8c59e",
+  "base_fingerprint": "db3713e403024edd4a8e84527088bfeb92dbe67249e02ac5b125eb0ba181b4a8",
+  "complexity": "high-risk",
+  "created_at": "2026-09-29T05:38:57+00:00",
+  "delivery_expected": true,
+  "domains": [
+    "security",
+    "data"
+  ],
+  "human_gates": [
+    "scope_and_design_approval",
+    "migration_or_external_write_approval"
+  ],
+  "intent": "bugfix",
+  "matched_keywords": {
+    "security": [
+      "security"
+    ]
+  },
+  "primary_skill": "adaptive-delivery",
+  "quality_profiles": [
+    "base",
+    "data"
+  ],
+  "rationale": [
+    "high-risk signal: payment",
+    "intent=bugfix",
+    "domains=security,data",
+    "repository=python",
+    "write-owner=general_implementer",
+    "analysis-wave=4/10"
+  ],
+  "repo": {
+    "bitrix_modules": [],
+    "domains": [
+      "data"
+    ],
+    "kind": "python",
+    "languages": [
+      "python"
+    ],
+    "package_scripts": [],
+    "signals": [
+      "python:project",
+      "data:migrations"
+    ]
+  },
+  "required_evidence": [
+    "verification",
+    "code_review",
+    "test_review",
+    "security_review",
+    "data_review",
+    "release_review"
+  ],
+  "review_agents": [
+    "code_reviewer",
+    "test_reviewer",
+    "security_reviewer",
+    "release_reviewer",
+    "data_reviewer"
+  ],
+  "risk": "high",
+  "route_id": "f6f2495b4648",
+  "schema_version": 1,
+  "session_id": "manual",
+  "status": "routed",
+  "task": "Verify and repair the already integrated Liqvera F3-F7 product engine in dependency order, beginning with factory/resource builds, typechecks, graph, canonical F3 evidence runtime, F4 gateway/concurrency/artifact-loss paths, mocked F5 settlement faults, F6 browser/Compose/security flows, and F7 offline acceptance; keep live payment, deployment, release, and exchange mutation disabled.",
+  "task_domains": [
+    "security"
+  ],
+  "workflow_skills": [
+    "adaptive-delivery",
+    "bugfix-workflow",
+    "data-change",
+    "security-sensitive-change"
+  ],
+  "write_agent": "general_implementer"
+}

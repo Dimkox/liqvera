@@ -156,20 +156,27 @@ estimated and then proven byte-identical at submission. Caller-reported gas is
 therefore rejected as authority: even a structurally valid grant now stops with
 `LIVE_GAS_ENFORCEMENT_UNAVAILABLE`. P3 is technically blocked until a reviewed
 prepare → estimate → identical-submit API exists and durable concurrency is
-behaviorally proven against a disposable local database.
+behaviorally proven against a disposable local database. The transaction
+adapter now also has restart/concurrency coverage against a shared in-memory
+transactional store; no disposable PostgreSQL URL was available or inspected,
+so that test profile remains skipped and cannot activate P3.
 
 The runner now exposes the same closed live-case orchestration used by the fake
 end-to-end suite. Its authority envelope binds the current commit/tree, an
 internally derived canonical plan, expiry, exact A07/A29 request bodies and
 bounds, and one shared A13/A14 payment grant. A13 executes once; A14 can only
 reuse its confirmed transaction, while UNKNOWN remains spent and blocks A14 in
-confirm-only state. The CLI accepts only `--live-grants`, never a boolean, and
-still stops before external I/O because the real human-wallet payment seam is
-not injected in ordinary startup. Offline results remain externally blocked.
+confirm-only state. The CLI accepts only `--live-grants`, never a boolean. With
+a valid exact bundle it can now execute only A07/A29 through the bounded
+production public-read transport and seal closed subject/plan/grant/target/
+response observations; A13/A14 remain `BLOCKED_EXTERNAL` with
+`LIVE_GAS_ENFORCEMENT_UNAVAILABLE`. Offline results remain externally blocked.
 Public-read grants now carry a canonical UUID and a digest derived from their
 entire closed grant document. The executor derives the one-shot marker name
 itself inside a mode-0700 state directory and fsyncs both marker and directory;
 operators can no longer select an alternate marker filename to replay a grant.
+Browser transport bounds are executable tests: timeout, redirect rejection,
+credentials omission, and declared/streamed response caps all fail closed.
 
 ## F6 local UI and operations verification — 2026-09-29
 

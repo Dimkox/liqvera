@@ -8,7 +8,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from .public_read import PublicReadPlan
+from .public_read import PublicReadGrant, PublicReadPlan
 
 
 class LiveAuthorityError(ValueError):
@@ -47,18 +47,16 @@ class LivePlan:
                 "maximum_attempts": 1,
             },
             "A13": {
-                "action": "testnet_payment",
-                "cases": ["A13", "A14"],
                 "network": "eip155:31611",
+                "chain_id": 31611,
                 "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
                 "amount_atomic": "10000000000000000",
                 "maximum_settlement_submissions": 1,
                 "max_gas_wei": "100000000000000",
             },
             "A14": {
-                "action": "testnet_payment",
-                "cases": ["A13", "A14"],
                 "network": "eip155:31611",
+                "chain_id": 31611,
                 "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
                 "amount_atomic": "10000000000000000",
                 "maximum_settlement_submissions": 1,
@@ -92,6 +90,27 @@ class LiveAuthority:
     expires_at: datetime
     cases: dict[str, CaseGrant]
 
+    def public_grant(self, case: str, *, now: datetime) -> PublicReadGrant:
+        value = self.cases[case].value
+        return PublicReadGrant.parse(
+            {
+                "schema": "liqvera-public-read-grant/v1",
+                "grant_id": value["grant_id"],
+                "subject_commit": value["subject_commit"],
+                "subject_tree": value["subject_tree"],
+                "plan_sha256": value["plan_sha256"],
+                "case": case,
+                "method": value["method"],
+                "url": value["url"],
+                "expires_at": value["expires_at"],
+                "maximum_attempts": value["maximum_attempts"],
+                "timeout_seconds": value["timeout_seconds"],
+                "max_response_bytes": value["max_response_bytes"],
+                "body_sha256": value["body_sha256"],
+            },
+            now=now,
+        )
+
 
 def validate_live_bundle(raw, *, subject_commit, subject_tree, now):
     plan = LivePlan.canonical()
@@ -122,10 +141,40 @@ def validate_live_bundle(raw, *, subject_commit, subject_tree, now):
     grants = {}
     for case, expected in plan.cases.items():
         value = raw["cases"][case]
+        binding = {
+            "subject_commit": raw["subject_commit"],
+            "subject_tree": raw["subject_tree"],
+            "plan_sha256": PublicReadPlan(
+                case,
+                expected["method"],
+                expected["url"],
+                b'{"type":"l2Book","coin":"BTC"}' if case == "A07" else b"",
+                expected["timeout_seconds"],
+                expected["max_response_bytes"],
+                expected["maximum_attempts"],
+            ).digest,
+            "expires_at": raw["expires_at"],
+        } if case in {"A07", "A29"} else {
+            "schema": "liqvera-live-payment-grant/v1",
+            "subject_commit": raw["subject_commit"],
+            "subject_tree": raw["subject_tree"],
+            "plan_sha256": raw["plan_sha256"],
+            "expires_at": raw["expires_at"],
+        }
+        permitted = {"grant_id", *binding, *expected}
+        if case in {"A13", "A14"}:
+            permitted |= {"buyer", "pay_to"}
         if (
             not isinstance(value, dict)
-            or {k: v for k, v in value.items() if k != "grant_id"} != expected
+            or set(value) != permitted
+            or {k: v for k, v in value.items() if k in expected} != expected
+            or any(value.get(k) != v for k, v in binding.items())
             or not re.fullmatch(r"[0-9a-f-]{36}", str(value.get("grant_id")))
+            or (case in {"A13", "A14"} and (
+                not re.fullmatch(r"0x[0-9a-fA-F]{40}", str(value.get("buyer")))
+                or not re.fullmatch(r"0x[0-9a-fA-F]{40}", str(value.get("pay_to")))
+                or value["buyer"].lower() == value["pay_to"].lower()
+            ))
         ):
             raise LiveAuthorityError("LIVE_CASE_GRANT_MISMATCH")
         grants[case] = CaseGrant(

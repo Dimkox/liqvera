@@ -5,6 +5,16 @@ import { AMOUNT, ASSET, CHAIN_ID, NETWORK, PublicError, type Artifact, type Atte
 import { digest } from '../security/input.js';
 
 const QUOTE_SELECT = `SELECT q.*,a.report_sha256,a.bundle_sha256,a.metadata AS artifact FROM quotes q JOIN artifacts a USING(report_id)`;
+export async function consumeLiveGrant(
+  db: { query(sql: string, values: unknown[]): Promise<{ rowCount: number | null }> },
+  grantDigest: string,
+  grantId: string,
+  paymentAttemptId: string,
+): Promise<boolean> {
+  const consumed=await db.query(`INSERT INTO live_grant_consumptions(grant_digest,grant_id,payment_attempt_id)
+    VALUES($1,$2,$3) ON CONFLICT DO NOTHING RETURNING grant_digest`,[grantDigest,grantId,paymentAttemptId]);
+  return Boolean(consumed.rowCount);
+}
 function toQuote(row: QueryResultRow): Quote {
   return { id: row.id, report_request_id: row.report_request_id, scope_hash: row.scope_hash, report_id: row.report_id,
     report_sha256: row.report_sha256, bundle_sha256: row.bundle_sha256, state: row.state, expires_at: row.expires_at,
@@ -116,9 +126,7 @@ export class Ledger {
       const grantDigest=current.correlation?.live_grant_digest;
       const grantId=current.correlation?.live_grant_id;
       if(typeof grantDigest!=='string'||!/^[0-9a-f]{64}$/.test(grantDigest)||typeof grantId!=='string')return false;
-      const consumed=await db.query(`INSERT INTO live_grant_consumptions(grant_digest,grant_id,payment_attempt_id)
-        VALUES($1,$2,$3) ON CONFLICT DO NOTHING RETURNING grant_digest`,[grantDigest,grantId,attempt.id]);
-      if(!consumed.rowCount)return false;
+      if(!await consumeLiveGrant(db,grantDigest,grantId,attempt.id))return false;
       await db.query("UPDATE payment_attempts SET state='SUBMITTING',submitted_at=now(),updated_at=now(),next_reconcile_at=now()+interval '30 seconds' WHERE id=$1",[attempt.id]);
       await db.query("INSERT INTO audit_events(quote_id,payment_attempt_id,event) VALUES($1,$2,'SUBMIT_COMMITTED')",[attempt.quote_id,attempt.id]);
       return true;

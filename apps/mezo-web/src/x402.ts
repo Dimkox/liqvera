@@ -4,6 +4,9 @@ import type { Eip1193Provider } from "./wallet";
 import { x402Client, x402HTTPClient } from "@x402/core/client";
 import { ExactEvmScheme, type ClientEvmSigner } from "@x402/evm";
 import { validateDelivery } from "./api";
+import { boundedFetch, boundedResponseJson } from "./x402-transport.mjs";
+
+export { boundedFetch, boundedResponseJson } from "./x402-transport.mjs";
 
 /**
  * Only a reviewed implementation using the installed official x402 browser SDK
@@ -55,13 +58,12 @@ class ProductionX402BrowserAdapter implements OfficialX402BrowserAdapter {
     }};
     const protocol=new x402HTTPClient(new x402Client().register("eip155:31611",new ExactEvmScheme(signer)));
     const headers={Authorization:`Bearer ${input.bearerCapability}`,Accept:"application/json"};
-    const controller=new AbortController();const deadline=setTimeout(()=>controller.abort(),15_000);
     try {
-      const challenge=await fetch(input.path,{headers,cache:"no-store",credentials:"omit",redirect:"error",signal:controller.signal});
+      const challenge=await boundedFetch(fetch,input.path,{headers});
       if(challenge.status!==402)throw new Error("Expected an exact payment challenge. No payment was submitted.");
       const required=protocol.getPaymentRequiredResponse(name=>challenge.headers.get(name),await boundedResponseJson(challenge,65_536));
       const payment=await protocol.createPaymentPayload(required);
-      const paid=await fetch(input.path,{headers:{...headers,...protocol.encodePaymentSignatureHeader(payment)},cache:"no-store",credentials:"omit",redirect:"error",signal:controller.signal});
+      const paid=await boundedFetch(fetch,input.path,{headers:{...headers,...protocol.encodePaymentSignatureHeader(payment)}});
       if(paid.status===202)return "recovering";
       if(!paid.ok)throw new Error("Payment outcome requires reconciliation.");
       await protocol.processPaymentResult(payment,name=>paid.headers.get(name),paid.status);
@@ -69,19 +71,9 @@ class ProductionX402BrowserAdapter implements OfficialX402BrowserAdapter {
     } catch(error) {
       if(error instanceof X402CancelledBeforeSubmission)throw error;
       return "recovering";
-    } finally { clearTimeout(deadline); }
+    }
   }
 }
 
 /** Production uses the exact pinned SDK; gateway readiness still requires an exact live grant. */
 export function installProductionX402Adapter():void { registerReviewedX402Adapter(new ProductionX402BrowserAdapter()); }
-
-export async function boundedResponseJson(response:Response,maximum:number):Promise<unknown>{
-  const declared=response.headers.get("content-length");
-  if(declared!==null&&(!/^[0-9]+$/.test(declared)||Number(declared)>maximum))throw new Error("Response exceeds the payment boundary.");
-  if(!response.body)throw new Error("Payment response body missing.");
-  const reader=response.body.getReader();const chunks:Uint8Array[]=[];let size=0;
-  while(true){const item=await reader.read();if(item.done)break;size+=item.value.byteLength;if(size>maximum){await reader.cancel();throw new Error("Response exceeds the payment boundary.");}chunks.push(item.value);}
-  const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
-  return JSON.parse(new TextDecoder("utf-8",{fatal:true}).decode(bytes));
-}

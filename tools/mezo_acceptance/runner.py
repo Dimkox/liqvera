@@ -19,11 +19,28 @@ from jsonschema import Draft202012Validator
 
 from .cases import CASES
 from .live import execute_live_cases, validate_live_bundle
+from .public_read import PublicReadPlan, execute_public_read
 
 
 def execute_authorized_live_cases(*args, **kwargs):
     """Runner-owned seam used by production adapters and deterministic fakes."""
     return execute_live_cases(*args, **kwargs)
+
+
+def validate_live_public_output(raw, plan, grant, identity):
+    fields = {"case", "method", "url", "status", "response_bytes", "response_sha256", "attempts",
+              "grant_id", "grant_digest", "plan_sha256", "subject_commit", "subject_tree"}
+    expected = {"case": plan.case, "method": plan.method, "url": plan.url, "status": 200, "attempts": 1,
+                "grant_id": grant.grant_id, "grant_digest": grant.digest, "plan_sha256": plan.digest,
+                "subject_commit": identity["commit"], "subject_tree": identity["tree"]}
+    if (not isinstance(raw, dict) or set(raw) != fields
+            or any(raw.get(key) != value for key, value in expected.items())
+            or type(raw.get("response_bytes")) is not int
+            or not 0 <= raw["response_bytes"] <= plan.max_response_bytes
+            or not isinstance(raw.get("response_sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", raw["response_sha256"])):
+        raise ValueError("live public executor returned an unbound observation")
+    return raw
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -42,6 +59,7 @@ SENSITIVE_VALUE = re.compile(
 RESULT_SCHEMA = ROOT / "schemas/mezo-evidence/v1/acceptance-result.schema.json"
 DISPATCHER = ROOT / "scripts/run-local-acceptance-assertion.py"
 BLOCKED_REASON = "EXACT_EXTERNAL_GRANT_ABSENT"
+LIVE_GAS_BLOCKED_REASON = "LIVE_GAS_ENFORCEMENT_UNAVAILABLE"
 FAIL_REASONS = {
     "ASSERTION_EXIT_NONZERO",
     "ASSERTION_TIMEOUT",
@@ -49,6 +67,7 @@ FAIL_REASONS = {
     "ASSERTION_EXECUTION_ERROR",
 }
 OBSERVATION_FIELDS = {
+    "A07": {"transport"},
     "A01": {"baseline", "current", "expected_delta"},
     "A08": {"checks", "subject_commit", "subject_tree"},
     "A09": {"checks", "subject_commit", "subject_tree"},
@@ -60,6 +79,7 @@ OBSERVATION_FIELDS = {
         "artifact_verifier",
         "fixture",
     },
+    "A29": {"transport"},
     "A30": {"checks", "subject_commit", "subject_tree"},
 }
 REQUIRED_CHECKS = {
@@ -383,13 +403,17 @@ def validate_result_semantics(result: dict) -> None:
                 }
             ):
                 raise ValueError(f"{case_id} assertion contract digest mismatch")
+            expected_command = (["builtin:public-read", case_id] if case.execution_class == "public_read"
+                                else ["scripts/run-local-acceptance-assertion.py", case_id])
             if (
-                row.get("command") != ["scripts/run-local-acceptance-assertion.py", case_id]
+                row.get("command") != expected_command
                 or row.get("environment_names") != []
             ):
                 raise ValueError(f"{case_id} command capability is not closed")
         elif status == "BLOCKED_EXTERNAL":
-            if case.execution_class == "local" or row.get("omissions") != [BLOCKED_REASON]:
+            allowed = ([LIVE_GAS_BLOCKED_REASON] if case.execution_class == "testnet_write"
+                       else [BLOCKED_REASON])
+            if case.execution_class == "local" or row.get("omissions") != allowed:
                 raise ValueError(f"{case_id} has invalid external blocker algebra")
         elif status == "NOT_RUN":
             expected_reason = case.local_omission
@@ -480,7 +504,20 @@ def evidence_reference(
         or set(observations) != expected_fields
     ):
         raise ValueError("evidence observations do not match the case-specific schema")
-    if case_id == "A01":
+    if case_id in {"A07", "A29"}:
+        transport = observations["transport"]
+        fields = {"case", "method", "url", "status", "response_bytes", "response_sha256",
+                  "attempts", "grant_id", "grant_digest", "plan_sha256", "subject_commit", "subject_tree"}
+        if (not isinstance(transport, dict) or set(transport) != fields
+                or transport["case"] != case_id or transport["status"] != 200
+                or transport["attempts"] != 1 or transport["subject_commit"] != identity["commit"]
+                or transport["subject_tree"] != identity["tree"]
+                or not re.fullmatch(r"[0-9a-f]{64}", transport["response_sha256"])
+                or not re.fullmatch(r"[0-9a-f]{64}", transport["grant_digest"])
+                or not re.fullmatch(r"[0-9a-f]{64}", transport["plan_sha256"])):
+            raise ValueError(f"{case_id} public-read evidence is not closed")
+        checks = []
+    elif case_id == "A01":
         baseline, current = observations["baseline"], observations["current"]
         execution_keys = {
             "interpreter",
@@ -597,7 +634,7 @@ def evidence_reference(
     if (
         not isinstance(checks, list)
         or any(not isinstance(item, str) for item in checks)
-        or not REQUIRED_CHECKS[case_id].issubset(checks)
+        or not REQUIRED_CHECKS.get(case_id, set()).issubset(checks)
     ):
         raise ValueError("evidence lacks required semantic test identities")
     for execution in (
@@ -805,6 +842,7 @@ def main() -> int:
         commands, plan_snapshot = read_plan(args.plan)
         if args.mode == "offline" and args.live_grants is not None:
             raise ValueError("offline acceptance cannot consume live grants")
+        live_authority = None
         if args.mode == "live":
             if args.live_grants is None:
                 raise ValueError("live acceptance requires an exact grant bundle")
@@ -812,28 +850,62 @@ def main() -> int:
             if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size > 65536:
                 raise ValueError("live grant bundle must be one bounded regular file")
             grant_doc = json.loads(args.live_grants.read_bytes())
-            validate_live_bundle(
+            live_authority = validate_live_bundle(
                 grant_doc,
                 subject_commit=identity["commit"],
                 subject_tree=identity["tree"],
                 now=datetime.now(timezone.utc),
             )
-            raise ValueError("live execution requires the injected production payment seam")
         output = args.output.resolve()
         if output.exists() or output.is_relative_to(ROOT):
             raise ValueError("output must be a new path outside the repository")
         evidence_root = output.parent
         evidence_root.mkdir(parents=True, mode=0o700, exist_ok=False)
+        state_dir = evidence_root / ".live-state"
+        if args.mode == "live":
+            state_dir.mkdir(mode=0o700)
         rows = []
         prior_payment = None
         started = utc_now()
         for case_id, case in CASES.items():
-            if case.execution_class != "local":
+            if case.execution_class == "public_read" and live_authority is not None:
+                started_at = utc_now()
+                spec = live_authority.plan.cases[case_id]
+                body = b'{"type":"l2Book","coin":"BTC"}' if case_id == "A07" else b""
+                public_plan = PublicReadPlan(case_id, spec["method"], spec["url"], body,
+                                             spec["timeout_seconds"], spec["max_response_bytes"], 1)
+                grant = live_authority.public_grant(case_id, now=datetime.now(timezone.utc))
+                observation = validate_live_public_output(execute_public_read(
+                    public_plan, grant, subject_commit=identity["commit"], subject_tree=identity["tree"],
+                    now=lambda: datetime.now(timezone.utc), environ=dict(os.environ), state_dir=state_dir,
+                ), public_plan, grant, identity)
+                empty_digest = hashlib.sha256(b"").hexdigest()
+                document = {"case_id": case_id, "assertion": case.assertion,
+                            "execution_class": case.execution_class, "claims": list(case.required_claims),
+                            "subject": {"commit": identity["commit"], "tree": identity["tree"]},
+                            "observations": {"transport": observation},
+                            "transcript": {"stdout_sha256": canonical_sha256(observation),
+                                           "stderr_sha256": empty_digest}}
+                evidence_dir = evidence_root / "evidence"
+                evidence_dir.mkdir(mode=0o700, exist_ok=True)
+                evidence_file = evidence_dir / f"{case_id}.json"
+                evidence_file.write_text(json.dumps(document, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+                command = ["builtin:public-read", case_id]
+                row = {"case_id": case_id, "title": case.title, "status": "PASS", "omissions": [],
+                       "command": command, "environment_names": [], "exit_code": 0,
+                       "started_at": started_at, "ended_at": utc_now(), "execution_class": case.execution_class,
+                       "stdout_sha256": canonical_sha256(observation), "stderr_sha256": empty_digest,
+                       "command_sha256": canonical_sha256(command),
+                       "assertion_contract_sha256": canonical_sha256({"case_id": case_id, "assertion": case.assertion,
+                           "execution_class": case.execution_class, "required_claims": list(case.required_claims)}),
+                       "evidence": [evidence_reference(evidence_root, f"evidence/{case_id}.json", case_id,
+                                                       case.assertion, case.execution_class, identity)]}
+            elif case.execution_class != "local":
                 row = {
                     "case_id": case_id,
                     "title": case.title,
                     "status": "BLOCKED_EXTERNAL",
-                    "omissions": [BLOCKED_REASON],
+                    "omissions": [LIVE_GAS_BLOCKED_REASON if case.execution_class == "testnet_write" else BLOCKED_REASON],
                     "command": None,
                     "environment_names": [],
                     "exit_code": None,

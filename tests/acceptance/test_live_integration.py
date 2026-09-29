@@ -3,7 +3,8 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from tools.mezo_acceptance.live import LiveAuthorityError, LivePlan, validate_live_bundle
-from tools.mezo_acceptance.runner import execute_authorized_live_cases
+from tools.mezo_acceptance.runner import execute_authorized_live_cases, validate_live_public_output
+from tools.mezo_acceptance import runner
 
 NOW = datetime(2026, 9, 29, 15, 0, tzinfo=timezone.utc)
 COMMIT = "a" * 40
@@ -20,6 +21,27 @@ def bundle(**change):
         "expires_at": (NOW + timedelta(minutes=5)).isoformat().replace("+00:00", "Z"),
         "cases": {case: plan.grant(case) for case in ("A07", "A29", "A13", "A14")},
     }
+    for case in ("A07", "A29"):
+        spec = plan.cases[case]
+        body = b'{"type":"l2Book","coin":"BTC"}' if case == "A07" else b""
+        from tools.mezo_acceptance.public_read import PublicReadPlan
+        value["cases"][case].update({
+            "subject_commit": COMMIT,
+            "subject_tree": TREE,
+            "plan_sha256": PublicReadPlan(case, spec["method"], spec["url"], body,
+                                             spec["timeout_seconds"], spec["max_response_bytes"], 1).digest,
+            "expires_at": value["expires_at"],
+        })
+    for case in ("A13", "A14"):
+        value["cases"][case].update({
+            "schema": "liqvera-live-payment-grant/v1",
+            "subject_commit": COMMIT,
+            "subject_tree": TREE,
+            "plan_sha256": plan.digest,
+            "expires_at": value["expires_at"],
+            "buyer": "0x1111111111111111111111111111111111111111",
+            "pay_to": "0x2222222222222222222222222222222222222222",
+        })
     value.update(change)
     return value
 
@@ -120,3 +142,54 @@ def test_unknown_is_spent_and_never_replayed():
         and rows["A13"]["status"] == "UNKNOWN"
         and rows["A14"]["status"] == "BLOCKED_CONFIRM_ONLY"
     )
+
+
+def test_operator_cli_seals_public_reads_and_blocks_payment_without_gas_seam(tmp_path, monkeypatch):
+    grant_file = tmp_path / "grants.json"
+    live_bundle = bundle()
+    expiry = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat().replace("+00:00", "Z")
+    live_bundle["expires_at"] = expiry
+    for case in ("A07", "A29", "A13", "A14"):
+        live_bundle["cases"][case]["expires_at"] = expiry
+    grant_file.write_text(__import__("json").dumps(live_bundle), encoding="utf-8")
+    output = tmp_path / "sealed" / "result.json"
+    calls = []
+
+    def fake_execute(plan, grant, **kwargs):
+        calls.append((plan.case, grant.grant_id))
+        return {
+            "case": plan.case, "method": plan.method, "url": plan.url, "status": 200,
+            "response_bytes": 12, "response_sha256": "d" * 64, "attempts": 1,
+            "grant_id": grant.grant_id, "grant_digest": grant.digest,
+            "plan_sha256": plan.digest, "subject_commit": COMMIT, "subject_tree": TREE,
+        }
+
+    monkeypatch.setattr(runner, "repo_identity", lambda: {
+        "repository": "Dimkox/liqvera", "origin": "UNSET", "commit": COMMIT,
+        "tree": TREE, "worktree": "CLEAN",
+    })
+    monkeypatch.setattr(runner, "execute_public_read", fake_execute)
+    monkeypatch.setattr(runner.sys, "argv", ["runner", "--mode", "live", "--live-grants",
+                                              str(grant_file), "--output", str(output)])
+    assert runner.main() == 1
+    result = __import__("json").loads(output.read_text())
+    rows = {row["case_id"]: row for row in result["cases"]}
+    assert [case for case, _ in calls] == ["A07", "A29"]
+    assert rows["A07"]["status"] == rows["A29"]["status"] == "PASS"
+    assert rows["A13"]["omissions"] == rows["A14"]["omissions"] == ["LIVE_GAS_ENFORCEMENT_UNAVAILABLE"]
+
+
+def test_live_public_output_cannot_self_certify_changed_target_or_grant():
+    authority = validate_live_bundle(bundle(), subject_commit=COMMIT, subject_tree=TREE, now=NOW)
+    spec = authority.plan.cases["A07"]
+    from tools.mezo_acceptance.public_read import PublicReadPlan
+    read_plan = PublicReadPlan("A07", spec["method"], spec["url"], b'{"type":"l2Book","coin":"BTC"}', 15, 2_097_152, 1)
+    grant = authority.public_grant("A07", now=NOW)
+    good = {"case": "A07", "method": read_plan.method, "url": read_plan.url, "status": 200,
+            "response_bytes": 1, "response_sha256": "d" * 64, "attempts": 1,
+            "grant_id": grant.grant_id, "grant_digest": grant.digest, "plan_sha256": read_plan.digest,
+            "subject_commit": COMMIT, "subject_tree": TREE}
+    assert validate_live_public_output(good, read_plan, grant, {"commit": COMMIT, "tree": TREE}) == good
+    for mutation in ({"url": "https://example.com"}, {"grant_digest": "e" * 64}, {"response_bytes": 3_000_000}):
+        with pytest.raises(ValueError, match="unbound observation"):
+            validate_live_public_output({**good, **mutation}, read_plan, grant, {"commit": COMMIT, "tree": TREE})

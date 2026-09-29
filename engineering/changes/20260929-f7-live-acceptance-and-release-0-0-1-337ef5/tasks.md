@@ -10,11 +10,18 @@
   deliberately unconfigured cases remain not run; no case fails.
 - [x] Implement local-only P2 public-read grant/allowlist/DNS boundary; no grant
   was issued and no public read was executed.
+- [x] Wire the operator live CLI to the real bounded P2 executor with closed,
+  sealed A07/A29 observations and internally derived one-shot grant markers.
+- [x] Add executable browser transport timeout, redirect, credential and byte-
+  cap tests plus transactional fake restart/concurrency consumption coverage.
 - [x] Implement local P3 identity, twelve-confirmation finality, one-submit live
   grant, and pinned browser x402 wiring. Independent review remains pending.
 - [ ] Obtain exact short-lived P2 public-read grant; execute allowlisted reads.
 - [ ] Obtain exact short-lived P3 testnet-write grant including buyer/payee,
   amount, one-submit budget, and numeric BTC gas cap; human confirms wallet.
+  P3 remains fail-closed with `LIVE_GAS_ENFORCEMENT_UNAVAILABLE`; a disposable
+  PostgreSQL behavioral run and prepare/estimate/identical-submit SDK seam are
+  still prerequisites.
 - [ ] P4 set root product `VERSION=0.0.1`, preserve component `0.1.0`, build and
   verify manifest, artifacts, checksums, notes, scans, verifier, and reviews.
 - [ ] Obtain exact P5 publication grant; fast-forward main, tag `v0.0.1`, create

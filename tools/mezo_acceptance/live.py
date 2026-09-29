@@ -18,7 +18,7 @@ class LiveAuthorityError(ValueError):
 
 OID = re.compile(r"[0-9a-f]{40}\Z")
 DIGEST = re.compile(r"[0-9a-f]{64}\Z")
-ADDRESS = re.compile(r"0x[0-9a-fA-F]{40}\Z")
+ADDRESS = re.compile(r"0x[0-9a-f]{40}\Z")
 
 
 def _digest(value):
@@ -78,12 +78,14 @@ class P3Plan:
     @classmethod
     def canonical(cls):
         payment = {
+            "scheme": "exact",
+            "settlement_broadcaster": "facilitator",
             "network": "eip155:31611",
             "chain_id": 31611,
             "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
             "amount_atomic": "10000000000000000",
             "maximum_settlement_submissions": 1,
-            "max_gas_wei": "100000000000000",
+            "max_buyer_native_gas_wei": "100000000000000",
         }
         cases = {"A13": payment, "A14": payment}
         return cls(cases, _digest(cases))
@@ -244,7 +246,7 @@ def validate_p3_bundle(raw, *, subject_commit, subject_tree, now):
     for case in ("A13", "A14"):
         value = raw["cases"][case]
         expected = {
-            "schema": "liqvera-live-payment-grant/v1",
+            "schema": "liqvera-mezo-payment-grant/v1",
             "subject_commit": subject_commit,
             "subject_tree": subject_tree,
             "plan_sha256": plan.digest,

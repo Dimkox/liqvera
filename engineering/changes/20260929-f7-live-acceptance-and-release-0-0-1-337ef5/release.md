@@ -26,7 +26,7 @@ Current: **NO-GO** for public reads, payment, push, tag, or GitHub Release.
 P0 GO requires scope approval plus green repair tests/verifier/reviews. P1 GO
 requires valid immutable local result and reviewed omissions. P2/P3/P5 each
 require their own exact short-lived grant. P3 additionally requires reviewed
-production wiring and numeric gas cap. P4 requires exact clean commit, complete
+production wiring and numeric buyer-native gas-spend cap. P4 requires exact clean commit, complete
 manifest/checksums, artifact extraction/install validation, scans and all five
 reviews. Any FAIL blocks release. An INCOMPLETE release requires explicit owner
 acceptance and cannot claim completed F7/payment readiness.

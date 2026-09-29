@@ -47,7 +47,8 @@
 
 ## Manual checks
 
-- Human verifies exact wallet chain/token/amount/recipient/expiry and numeric
-  gas cap immediately before signature.
+- Human verifies exact wallet scheme/chain/token/amount/recipient/expiry and the
+  buyer native-gas cap immediately before signature. Exact EIP-3009 requires a
+  zero buyer native-balance delta; facilitator gas is not buyer authority.
 - Human verifies rendered release notes, tag target, asset names/hashes, and
   limitations immediately before draft publication.

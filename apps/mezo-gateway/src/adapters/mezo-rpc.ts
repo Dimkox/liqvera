@@ -9,6 +9,7 @@ const TRANSFER=MUSD_TRANSFER_EVENT.topic0;
 export const musdProtocol={abi:MUSD_ABI,permit:MUSD_PERMIT};
 const HASH=/^0x[0-9a-f]{64}$/;
 const HEX=/^0x(?:0|[1-9a-f][0-9a-f]*)$/;
+const UINT=/^(?:0|[1-9][0-9]*)$/;
 function object(value: unknown): Record<string,unknown> {
   if (!value || typeof value!=='object' || Array.isArray(value)) throw new PublicError('PAYMENT_UNCERTAIN',202);
   return value as Record<string,unknown>;
@@ -27,6 +28,11 @@ export class MezoReadonlyRpc implements ReadonlyRpc {
 }
 export class MezoReceiptReader {
   constructor(private readonly rpc: ReadonlyRpc,private readonly identity: AuthorizationPolicy,private readonly finality: FinalityPolicy) {}
+  async nativeBalance(buyer:string,block:string):Promise<string> {
+    const value=await this.rpc.call('eth_getBalance',[buyer,block]);
+    if(typeof value!=='string'||!HEX.test(value))throw new PublicError('PAYMENT_UNCERTAIN',202);
+    return BigInt(value).toString();
+  }
   async confirmation(quote: Quote,attempt: Attempt): Promise<Receipt|null> {
     if (!this.identity.reviewed || !this.finality.reviewed || !attempt.tx_hash || !HASH.test(attempt.tx_hash)) return null;
     try { assertMezoTestnetChainId(safeInteger(await this.rpc.call('eth_chainId',[]))); }
@@ -37,7 +43,14 @@ export class MezoReceiptReader {
     const block=object(await this.rpc.call('eth_getBlockByNumber',[receipt.blockNumber,false]));
     if (block.hash!==receipt.blockHash) throw new PublicError('MANUAL_REVIEW',202);
     if (!await this.finality.isFinal(receipt,block,this.rpc)) return null;
-    const transaction=await this.rpc.call('eth_getTransactionByHash',[attempt.tx_hash]);
+    const transaction=object(await this.rpc.call('eth_getTransactionByHash',[attempt.tx_hash]));
+    const before=attempt.correlation.buyer_native_balance_before;
+    let after:string;
+    try { after=await this.nativeBalance(quote.terms.expected_payer,String(receipt.blockNumber)); }
+    catch { throw new PublicError('MANUAL_REVIEW',202); }
+    if(typeof transaction.from!=='string'||!/^0x[0-9a-fA-F]{40}$/.test(transaction.from)||transaction.from.toLowerCase()===quote.terms.expected_payer||
+      typeof before!=='string'||!UINT.test(before)||after!==before)
+      throw new PublicError('MANUAL_REVIEW',202);
     const matches: Record<string,unknown>[]=[];
     for (const value of receipt.logs) {
       const log=object(value); const topics=log.topics;

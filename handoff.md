@@ -150,16 +150,15 @@ before settlement. Ordinary startup still composes `null` authority and performs
 no external call. The migration was authored and tested structurally but not
 applied to any database in this local-only phase.
 
-The subsequent activation audit found the pinned facilitator SDK exposes only
-opaque `settlePayment()`, not a prepared request/transaction that can be gas-
-estimated and then proven byte-identical at submission. Caller-reported gas is
-therefore rejected as authority: even a structurally valid grant now stops with
-`LIVE_GAS_ENFORCEMENT_UNAVAILABLE`. P3 is technically blocked until a reviewed
-prepare → estimate → identical-submit API exists and durable concurrency is
-behaviorally proven against a disposable local database. The transaction
-adapter now also has restart/concurrency coverage against a shared in-memory
-transactional store; no disposable PostgreSQL URL was available or inspected,
-so that test profile remains skipped and cannot activate P3.
+The exact EIP-3009 activation model now follows the official x402 scheme: the
+buyer signs the exact transfer authorization while the facilitator broadcasts
+and pays gas. The approved numeric test-BTC ceiling is therefore a buyer-native-
+gas spend cap; this exact path requires a zero buyer native-balance delta and
+does not claim control of facilitator gas. Confirmation checks a non-buyer
+`tx.from`, before/after buyer balance equality, the exact token Transfer and
+twelve-block canonical finality. Missing observations enter manual review.
+The transactional adapter retains restart/concurrency coverage; migration 003
+was not applied to any database.
 
 The runner now exposes the same closed live-case orchestration used by the fake
 end-to-end suite. Its authority envelope binds the current commit/tree, an
@@ -170,7 +169,7 @@ confirm-only state. The CLI accepts only `--live-grants`, never a boolean. With
 a valid exact bundle it can now execute only A07/A29 through the bounded
 production public-read transport and seal closed subject/plan/grant/target/
 response observations; A13/A14 remain `BLOCKED_EXTERNAL` with
-`LIVE_GAS_ENFORCEMENT_UNAVAILABLE`. Offline results remain externally blocked.
+`EXACT_PAYMENT_GRANT_ABSENT`. Offline results remain externally blocked.
 Public-read grants now carry a canonical UUID and a digest derived from their
 entire closed grant document. The executor derives the one-shot marker name
 itself inside a mode-0700 state directory and fsyncs both marker and directory;
@@ -206,9 +205,20 @@ grants. The CLI validates it before case execution, and marker names derive
 from grant UUID plus full grant digest. A different journal fails pre-I/O.
 Browser payment deadlines now
 remain active through complete body streaming; a stalled-body regression is
-covered. P3 remains blocked by `LIVE_GAS_ENFORCEMENT_UNAVAILABLE`.
+covered. P3 code is locally activatable for a separately approved exact grant,
+human wallet signature, configured facilitator, approved read-only RPC, and
+applied migration 003; none of those live inputs was consumed here.
+The exact P3 inputs are: one short-lived byte-exact A13/A14 grant bound to the
+clean commit/tree and canonical P3 plan; lowercase buyer and distinct payee;
+scheme `exact`, broadcaster `facilitator`, chain `eip155:31611`, the frozen MUSD
+address and `10000000000000000` atomic amount; one-submit budget; and
+`max_buyer_native_gas_wei=100000000000000`. The human wallet supplies only the
+EIP-3009 signature. The configured facilitator performs the sole submission,
+and the approved read-only Mezo RPC supplies chain, receipt, transaction,
+canonical-block and before/after buyer-balance observations. Migration 003 must
+already be applied through a separately approved database operation.
 Focused repair checks pass: 69 acceptance/contract tests, 18 browser
-tests, and 24 gateway tests with five explicitly disposable-PostgreSQL skips.
+tests, and 29 gateway tests with five explicitly disposable-PostgreSQL skips.
 The clean pinned PR verifier passed 1,218 tests plus 85 subtests, coverage,
 Ruff, Bandit, secret scan, SQL safety, contract structure and configuration
 scan at fingerprint `2749fdfb20570131d0d15e80171eaa5a885fdf24a8bfd54b13003de4c173acc5`.

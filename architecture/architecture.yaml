@@ -15265,6 +15265,9 @@ repository_inventory:
   - path: apps/mezo-gateway/test/payment-policy.test.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/test/facilitator-sponsored.test.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/.gitignore
     node: configuration:mezo-web-package
     path_class: CONFIGURATION

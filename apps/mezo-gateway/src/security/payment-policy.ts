@@ -16,6 +16,10 @@ export class MezoAuthorizationPolicy implements AuthorizationPolicy {
   constructor(private readonly now:()=>Date=()=>new Date()) {}
   identify(payment: PaymentPayload,quote: Quote): AuthorizationIdentity {
     const outer=object(payment); const accepted=object(outer.accepted); const body=object(outer.payload);
+    if(accepted.extra!==undefined) {
+      const extra=object(accepted.extra); exactKeys(extra,['assetTransferMethod']);
+      if(extra.assetTransferMethod!=='eip3009')throw new PublicError('PAYMENT_REJECTED',409);
+    }
     exactKeys(body,['authorization','signature']); const authorization=object(body.authorization);
     exactKeys(authorization,['from','to','value','validAfter','validBefore','nonce']);
     const values={from:String(authorization.from).toLowerCase(),to:String(authorization.to).toLowerCase(),value:String(authorization.value),
@@ -27,7 +31,7 @@ export class MezoAuthorizationPolicy implements AuthorizationPolicy {
     const now=Math.floor(this.now().getTime()/1000); const before=Number(values.validBefore); const after=Number(values.validAfter);
     if(!Number.isSafeInteger(before)||!Number.isSafeInteger(after)||after>now||before<=now||before-now>600)throw new PublicError('PAYMENT_REJECTED',409);
     const signatureCommitment=createHash('sha256').update(body.signature).digest('hex');
-    const correlation={...values,signature_commitment:signatureCommitment,network:NETWORK,asset:ASSET.toLowerCase(),quote_id:quote.id,report_id:quote.report_id,report_sha256:quote.report_sha256};
+    const correlation={...values,signature_commitment:signatureCommitment,network:NETWORK,asset:ASSET.toLowerCase(),asset_transfer_method:'eip3009',quote_id:quote.id,report_id:quote.report_id,report_sha256:quote.report_sha256};
     const identity=createHash('sha256').update(canonical(correlation)).digest('hex');
     return {identity,version:this.version,payer:values.from,valid_until:new Date(before*1000).toISOString(),correlation};
   }

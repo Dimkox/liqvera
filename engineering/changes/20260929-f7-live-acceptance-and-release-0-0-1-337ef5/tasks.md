@@ -21,12 +21,15 @@
   cap tests plus transactional fake restart/concurrency consumption coverage.
 - [x] Implement local P3 identity, twelve-confirmation finality, one-submit live
   grant, and pinned browser x402 wiring. Independent review remains pending.
+- [x] Replace the incorrect facilitator-gas blocker with exact EIP-3009 buyer
+  authority: the facilitator broadcasts, the buyer signs only, buyer native-gas
+  spend must be zero, and transaction/Transfer/balance/finality evidence is
+  checked through the approved read-only RPC seam.
 - [ ] Obtain exact short-lived P2 public-read grant; execute allowlisted reads.
 - [ ] Obtain exact short-lived P3 testnet-write grant including buyer/payee,
-  amount, one-submit budget, and numeric BTC gas cap; human confirms wallet.
-  P3 remains fail-closed with `LIVE_GAS_ENFORCEMENT_UNAVAILABLE`; a disposable
-  PostgreSQL behavioral run and prepare/estimate/identical-submit SDK seam are
-  still prerequisites.
+  amount, one-submit budget, and buyer native-gas cap; human confirms wallet.
+  Migration 003 remains unapplied and the exact grant/wallet/RPC/facilitator
+  inputs remain absent, so no live payment is authorized or executed.
 - [ ] P4 set root product `VERSION=0.0.1`, preserve component `0.1.0`, build and
   verify manifest, artifacts, checksums, notes, scans, verifier, and reviews.
 - [ ] Obtain exact P5 publication grant; fast-forward main, tag `v0.0.1`, create

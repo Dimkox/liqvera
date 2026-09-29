@@ -30,4 +30,4 @@ export interface FinalityPolicy {
   readonly version: string;
   isFinal(receipt: unknown, canonicalBlock: unknown, rpc: ReadonlyRpc): Promise<boolean>;
 }
-export interface ReadonlyRpc { call(method: 'eth_chainId' | 'eth_getTransactionReceipt' | 'eth_getTransactionByHash' | 'eth_getBlockByHash' | 'eth_getBlockByNumber', params: unknown[]): Promise<unknown> }
+export interface ReadonlyRpc { call(method: 'eth_chainId' | 'eth_getTransactionReceipt' | 'eth_getTransactionByHash' | 'eth_getBlockByHash' | 'eth_getBlockByNumber' | 'eth_getBalance', params: unknown[]): Promise<unknown> }

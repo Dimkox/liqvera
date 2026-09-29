@@ -13,9 +13,7 @@ from tools.mezo_acceptance import runner
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = json.loads(
-    (ROOT / "schemas/mezo-evidence/v1/acceptance-result.schema.json").read_text(
-        encoding="utf-8"
-    )
+    (ROOT / "schemas/mezo-evidence/v1/acceptance-result.schema.json").read_text(encoding="utf-8")
 )
 COMMIT = "bed18457b084f9c9f15dd8bee24c31a74323e639"
 TREE = "2caf0e76a1abc52c1952503fecd0ae6436d6e448"
@@ -100,26 +98,30 @@ def test_runner_propagates_internal_python_and_path_without_claiming_them(
     assert row["environment_names"] == []
 
 
-def _result_with_passing_case(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> dict:
+def _result_with_passing_case(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict:
     result = _generated_result(tmp_path, monkeypatch)
-    result["cases"][0].update({
-        "status": "PASS",
-        "started_at": "2026-09-29T00:00:00Z",
-        "ended_at": "2026-09-29T00:00:01Z",
-        "command": ["offline-assertion"],
-        "exit_code": 0,
-        "stdout_sha256": "a" * 64,
-        "stderr_sha256": "b" * 64,
-        "command_sha256": "d" * 64,
-        "assertion_contract_sha256": runner.canonical_sha256({
-            "case_id": "A01", "assertion": "before_after_checks", "execution_class": "local",
-            "required_claims": ["before_after_checks"],
-        }),
-        "evidence": [{"file": "a01.json", "sha256": "c" * 64, "size_bytes": 1}],
-        "omissions": [],
-    })
+    result["cases"][0].update(
+        {
+            "status": "PASS",
+            "started_at": "2026-09-29T00:00:00Z",
+            "ended_at": "2026-09-29T00:00:01Z",
+            "command": ["offline-assertion"],
+            "exit_code": 0,
+            "stdout_sha256": "a" * 64,
+            "stderr_sha256": "b" * 64,
+            "command_sha256": "d" * 64,
+            "assertion_contract_sha256": runner.canonical_sha256(
+                {
+                    "case_id": "A01",
+                    "assertion": "before_after_checks",
+                    "execution_class": "local",
+                    "required_claims": ["before_after_checks"],
+                }
+            ),
+            "evidence": [{"file": "a01.json", "sha256": "c" * 64, "size_bytes": 1}],
+            "omissions": [],
+        }
+    )
     return result
 
 
@@ -149,12 +151,8 @@ def test_acceptance_content_digest_rejects_trailing_newline(
 
 
 @pytest.mark.parametrize("field", ["commit", "tree"])
-@pytest.mark.parametrize(
-    "bad_oid", ["a" * 39, "a" * 41, "A" * 40, "g" * 40, "a" * 40 + "\n"]
-)
-def test_acceptance_result_rejects_noncanonical_git_object_ids(
-    field: str, bad_oid: str
-) -> None:
+@pytest.mark.parametrize("bad_oid", ["a" * 39, "a" * 41, "A" * 40, "g" * 40, "a" * 40 + "\n"])
+def test_acceptance_result_rejects_noncanonical_git_object_ids(field: str, bad_oid: str) -> None:
     validator = Draft202012Validator(SCHEMA)
     repository = {
         "repository": "Dimkox/liqvera",
@@ -165,16 +163,20 @@ def test_acceptance_result_rejects_noncanonical_git_object_ids(
     }
 
     repository[field] = bad_oid
-    errors = list(validator.iter_errors({
-        "schema": "liqvera-acceptance-result/v1",
-        "mode": "offline",
-        "repository": repository,
-        "environment": {"platform": "test", "python": "3.12.0"},
-        "started_at": "2026-09-29T00:00:00Z",
-        "ended_at": "2026-09-29T00:00:01Z",
-        "overall_status": "INCOMPLETE",
-        "cases": [],
-    }))
+    errors = list(
+        validator.iter_errors(
+            {
+                "schema": "liqvera-acceptance-result/v1",
+                "mode": "offline",
+                "repository": repository,
+                "environment": {"platform": "test", "python": "3.12.0"},
+                "started_at": "2026-09-29T00:00:00Z",
+                "ended_at": "2026-09-29T00:00:01Z",
+                "overall_status": "INCOMPLETE",
+                "cases": [],
+            }
+        )
+    )
 
     assert any(list(error.path) == ["repository", field] for error in errors)
 
@@ -187,8 +189,12 @@ def test_acceptance_result_rejects_noncanonical_git_object_ids(
     ],
 )
 def test_status_reason_algebra_rejects_generic_or_unknown_reasons(
-    case_id: str, status: str, omissions: list[str], message: str,
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    case_id: str,
+    status: str,
+    omissions: list[str],
+    message: str,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     result = _generated_result(tmp_path, monkeypatch)
     row = next(item for item in result["cases"] if item["case_id"] == case_id)
@@ -202,11 +208,16 @@ def test_semantic_validation_error_is_a_real_fail_even_after_exit_zero(
 ) -> None:
     result = _generated_result(tmp_path, monkeypatch)
     row = result["cases"][0]
-    row.update({
-        "status": "FAIL", "started_at": "2026-09-29T00:00:00Z",
-        "ended_at": "2026-09-29T00:00:01Z", "command": ["offline"],
-        "exit_code": 0, "omissions": ["ASSERTION_VALIDATION_ERROR"],
-    })
+    row.update(
+        {
+            "status": "FAIL",
+            "started_at": "2026-09-29T00:00:00Z",
+            "ended_at": "2026-09-29T00:00:01Z",
+            "command": ["offline"],
+            "exit_code": 0,
+            "omissions": ["ASSERTION_VALIDATION_ERROR"],
+        }
+    )
     result["overall_status"] = "FAIL"
     runner.validate_result_semantics(result)
     row["omissions"] = ["ASSERTION_TIMEOUT"]
@@ -216,19 +227,28 @@ def test_semantic_validation_error_is_a_real_fail_even_after_exit_zero(
 
 @pytest.mark.parametrize(
     ("reason", "exit_code"),
-    [("BOGUS", 1), ("ASSERTION_EXIT_NONZERO", None),
-     ("ASSERTION_TIMEOUT", 1), ("ASSERTION_VALIDATION_ERROR", 1),
-     ("ASSERTION_EXECUTION_ERROR", 0)],
+    [
+        ("BOGUS", 1),
+        ("ASSERTION_EXIT_NONZERO", None),
+        ("ASSERTION_TIMEOUT", 1),
+        ("ASSERTION_VALIDATION_ERROR", 1),
+        ("ASSERTION_EXECUTION_ERROR", 0),
+    ],
 )
 def test_fail_reason_algebra_rejects_unknown_and_contradictory_forms(
     reason: str, exit_code: int | None, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     result = _generated_result(tmp_path, monkeypatch)
-    result["cases"][0].update({
-        "status": "FAIL", "started_at": "2026-09-29T00:00:00Z",
-        "ended_at": "2026-09-29T00:00:01Z", "command": ["offline"],
-        "exit_code": exit_code, "omissions": [reason],
-    })
+    result["cases"][0].update(
+        {
+            "status": "FAIL",
+            "started_at": "2026-09-29T00:00:00Z",
+            "ended_at": "2026-09-29T00:00:01Z",
+            "command": ["offline"],
+            "exit_code": exit_code,
+            "omissions": [reason],
+        }
+    )
     result["overall_status"] = "FAIL"
     with pytest.raises(ValueError, match="contradictory failure"):
         runner.validate_result_semantics(result)
@@ -237,22 +257,42 @@ def test_fail_reason_algebra_rejects_unknown_and_contradictory_forms(
 def test_payment_replay_must_bind_to_exact_a13_receipt() -> None:
     a13 = {
         "payment": {
-            "tx_hash": "0x" + "1" * 64, "block_hash": "0x" + "2" * 64,
-            "log_index": 0, "buyer": "0x" + "3" * 40, "merchant": "0x" + "4" * 40,
-            "network": "eip155:31611", "asset": "0x118917a40faf1cd7a13db0ef56c86de7973ac503",
+            "tx_hash": "0x" + "1" * 64,
+            "block_hash": "0x" + "2" * 64,
+            "log_index": 0,
+            "buyer": "0x" + "3" * 40,
+            "merchant": "0x" + "4" * 40,
+            "network": "eip155:31611",
+            "asset": "0x118917a40faf1cd7a13db0ef56c86de7973ac503",
             "amount_atomic": "10000000000000000",
+            "scheme": "exact",
+            "settlement_broadcaster": "facilitator",
+            "transaction_from": "0x" + "5" * 40,
+            "buyer_native_balance_before": "1000",
+            "buyer_native_balance_after": "1000",
+            "buyer_native_gas_spend_wei": "0",
         }
     }
     receipt = runner.payment_reference("A13", a13, None)
     with pytest.raises(ValueError, match="bind to passing A13"):
-        runner.payment_reference("A14", {"payment": {"tx_hash": "0x" + "9" * 64, "settlement_count": 1}}, receipt)
+        runner.payment_reference(
+            "A14", {"payment": {"tx_hash": "0x" + "9" * 64, "settlement_count": 1}}, receipt
+        )
+
+    a13["payment"]["transaction_from"] = a13["payment"]["buyer"]
+    a13["payment"]["buyer_native_balance_after"] = "0"
+    a13["payment"]["buyer_native_gas_spend_wei"] = "100000000000001"
+    with pytest.raises(ValueError, match="facilitator-sponsored zero buyer gas"):
+        runner.payment_reference("A13", a13, None)
 
 
 def test_atomic_publish_leaves_no_result_after_interrupted_link(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     output = tmp_path / "result.json"
-    monkeypatch.setattr(runner.os, "link", lambda *args, **kwargs: (_ for _ in ()).throw(OSError("stop")))
+    monkeypatch.setattr(
+        runner.os, "link", lambda *args, **kwargs: (_ for _ in ()).throw(OSError("stop"))
+    )
     with pytest.raises(OSError, match="stop"):
         runner._publish_exclusive(output, b"payload")
     assert not output.exists()
@@ -271,8 +311,12 @@ def test_plan_snapshot_detects_replacement(tmp_path: Path) -> None:
     path.write_bytes(b"one")
     info = path.stat()
     snapshot = runner.PlanSnapshot(
-        path, b"one", hashlib.sha256(b"one").hexdigest(),
-        info.st_dev, info.st_ino, info.st_size,
+        path,
+        b"one",
+        hashlib.sha256(b"one").hexdigest(),
+        info.st_dev,
+        info.st_ino,
+        info.st_size,
     )
     path.write_bytes(b"two")
     with pytest.raises(ValueError, match="changed after validation"):
@@ -290,7 +334,11 @@ def test_evidence_links_are_rejected(tmp_path: Path, link_kind: str) -> None:
         os.link(source, linked)
     with pytest.raises(ValueError, match="regular file"):
         runner.evidence_reference(
-            tmp_path, linked.name, "A01", "before_after_checks", "local",
+            tmp_path,
+            linked.name,
+            "A01",
+            "before_after_checks",
+            "local",
             {"commit": COMMIT, "tree": TREE},
         )
 
@@ -310,52 +358,85 @@ def test_unrelated_passing_check_cannot_certify_configured_case(
     if case_id == "A27":
         observations.update(vector_count=156, vector_sha256="a" * 64, go_runtime_paths=0)
     document = {
-        "case_id": case_id, "assertion": case.assertion, "execution_class": "local",
-        "claims": [case.assertion], "subject": {"commit": COMMIT, "tree": TREE},
+        "case_id": case_id,
+        "assertion": case.assertion,
+        "execution_class": "local",
+        "claims": [case.assertion],
+        "subject": {"commit": COMMIT, "tree": TREE},
         "observations": observations,
         "transcript": {"stdout_sha256": "a" * 64, "stderr_sha256": "b" * 64},
     }
     path = tmp_path / f"{case_id}.json"
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError):
-        runner.evidence_reference(tmp_path, path.name, case_id, case.assertion, "local",
-                                  {"commit": COMMIT, "tree": TREE})
+        runner.evidence_reference(
+            tmp_path, path.name, case_id, case.assertion, "local", {"commit": COMMIT, "tree": TREE}
+        )
 
 
 @pytest.mark.parametrize("retained", ["baseline", "current"])
 def test_a01_rejects_one_sided_baseline_or_current_evidence(tmp_path: Path, retained: str) -> None:
     execution = {
-        "argv": ["pytest"], "exit_code": 0, "stdout_sha256": "a" * 64,
-        "stderr_sha256": "b" * 64, "commit": COMMIT, "tree": TREE,
-        "status": "PASS", "checks": list(runner.REQUIRED_CHECKS["A01"]),
+        "argv": ["pytest"],
+        "exit_code": 0,
+        "stdout_sha256": "a" * 64,
+        "stderr_sha256": "b" * 64,
+        "commit": COMMIT,
+        "tree": TREE,
+        "status": "PASS",
+        "checks": list(runner.REQUIRED_CHECKS["A01"]),
     }
-    observations = {retained: execution, "expected_delta": "BASELINE_LACKS_F7_ACCEPTANCE_CONTRACT_CURRENT_PASSES"}
+    observations = {
+        retained: execution,
+        "expected_delta": "BASELINE_LACKS_F7_ACCEPTANCE_CONTRACT_CURRENT_PASSES",
+    }
     document = {
-        "case_id": "A01", "assertion": "before_after_checks", "execution_class": "local",
-        "claims": ["before_after_checks"], "subject": {"commit": COMMIT, "tree": TREE},
+        "case_id": "A01",
+        "assertion": "before_after_checks",
+        "execution_class": "local",
+        "claims": ["before_after_checks"],
+        "subject": {"commit": COMMIT, "tree": TREE},
         "observations": observations,
         "transcript": {"stdout_sha256": "a" * 64, "stderr_sha256": "b" * 64},
     }
     path = tmp_path / "a01.json"
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="case-specific schema"):
-        runner.evidence_reference(tmp_path, path.name, "A01", "before_after_checks", "local",
-                                  {"commit": COMMIT, "tree": TREE})
+        runner.evidence_reference(
+            tmp_path,
+            path.name,
+            "A01",
+            "before_after_checks",
+            "local",
+            {"commit": COMMIT, "tree": TREE},
+        )
 
 
 def test_a27_rejects_vectors_only_without_stage_a_verdict_and_fixture(tmp_path: Path) -> None:
     document = {
-        "case_id": "A27", "assertion": "stage_a_regression", "execution_class": "local",
-        "claims": ["stage_a_regression"], "subject": {"commit": COMMIT, "tree": TREE},
-        "observations": {"subject_commit": COMMIT, "subject_tree": TREE,
-                         "vector_checks": list(runner.REQUIRED_CHECKS["A27"])},
+        "case_id": "A27",
+        "assertion": "stage_a_regression",
+        "execution_class": "local",
+        "claims": ["stage_a_regression"],
+        "subject": {"commit": COMMIT, "tree": TREE},
+        "observations": {
+            "subject_commit": COMMIT,
+            "subject_tree": TREE,
+            "vector_checks": list(runner.REQUIRED_CHECKS["A27"]),
+        },
         "transcript": {"stdout_sha256": "a" * 64, "stderr_sha256": "b" * 64},
     }
     path = tmp_path / "a27.json"
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="case-specific schema"):
-        runner.evidence_reference(tmp_path, path.name, "A27", "stage_a_regression", "local",
-                                  {"commit": COMMIT, "tree": TREE})
+        runner.evidence_reference(
+            tmp_path,
+            path.name,
+            "A27",
+            "stage_a_regression",
+            "local",
+            {"commit": COMMIT, "tree": TREE},
+        )
 
 
 def test_a27_rejects_fixture_and_terminal_mutated_together() -> None:
@@ -386,9 +467,19 @@ def test_system_python_can_verify_venv_produced_seal(
     output = tmp_path / "run" / "acceptance.json"
     digest = hashlib.sha256(output.read_bytes()).hexdigest()
     completed = subprocess.run(
-        ["/usr/bin/python3", "-B", "scripts/verify-mezo-acceptance.py", str(output),
-         "--sha256", digest, "--allow-detached-subject"],
-        cwd=ROOT, check=False, capture_output=True, text=True,
+        [
+            "/usr/bin/python3",
+            "-B",
+            "scripts/verify-mezo-acceptance.py",
+            str(output),
+            "--sha256",
+            digest,
+            "--allow-detached-subject",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
     )
     assert completed.returncode == 0, completed.stderr
     os.chmod(output.parent, 0o700)
@@ -441,12 +532,19 @@ def test_late_repository_drift_invalidates_published_name(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     output = tmp_path / "late" / "acceptance.json"
-    stable = {"repository": "Dimkox/liqvera", "origin": "UNSET", "commit": COMMIT,
-              "tree": TREE, "worktree": "CLEAN"}
+    stable = {
+        "repository": "Dimkox/liqvera",
+        "origin": "UNSET",
+        "commit": COMMIT,
+        "tree": TREE,
+        "worktree": "CLEAN",
+    }
     drifted = {**stable, "commit": "a" * 40}
     identities = iter((stable, stable, drifted))
     monkeypatch.setattr(runner, "repo_identity", lambda: next(identities))
-    monkeypatch.setattr(sys, "argv", ["mezo-acceptance", "--mode", "offline", "--output", str(output)])
+    monkeypatch.setattr(
+        sys, "argv", ["mezo-acceptance", "--mode", "offline", "--output", str(output)]
+    )
     with pytest.raises(SystemExit) as exc:
         runner.main()
     assert exc.value.code == 2

@@ -19,7 +19,9 @@
   green before a separately approved exact envelope is shown to a human-held
   wallet; at most one submission transfers exactly `10000000000000000` atomic
   test MUSD on chain 31611 to the approved distinct merchant, under a numeric
-  test-BTC gas cap. UNKNOWN is confirm-only and never retried.
+  buyer-native test-BTC spend cap. For exact EIP-3009 the facilitator pays gas,
+  so the required buyer native-gas delta is exactly zero; facilitator gas is
+  observed but is outside buyer authority. UNKNOWN is confirm-only and never retried.
 - [ ] AC-005/P4: Liqvera product version `0.0.1` is machine-readable while all
   component versions stay `0.1.0`; reproducible assets and `SHA256SUMS` bind
   the release commit, acceptance result/manifest, exact names, sizes, and hashes.
@@ -35,8 +37,9 @@
   evidence, secret canary, or failing required case stops progression.
 - P2 stops on DNS/TLS/redirect/proxy/chain/token/code/decimals/scheme mismatch,
   rate limiting, malformed/oversized data, stale market data, or credentials.
-- P3 stops before signing on wrong/expired envelope, unreviewed policy, balance
-  or gas-cap failure, ambiguous identity, or any unexpected approval/tx. After
+- P3 stops before signing on wrong/expired envelope, unreviewed policy, missing
+  buyer balance observation, nonzero buyer native-gas delta, buyer-broadcast
+  transaction, ambiguous identity, or any unexpected approval/tx. After
   possible broadcast, state is UNKNOWN; preserve evidence and reconcile only.
 - P5 stops if remote main moved, tag/release exists, actor/repository differs,
   branch rules differ, or any downloaded asset hash differs.

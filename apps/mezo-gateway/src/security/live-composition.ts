@@ -11,7 +11,5 @@ export function composeOfficialX402(identity:AuthorizationPolicy,finality:Finali
   if(!input)return new OfficialX402(identity,finality,reader,publicBase,null,null);
   const grant=LivePaymentGrant.parseBytes(input.grantBytes,input.observedAt);
   grant.authorize({...input.context,now:input.observedAt});
-  // The pinned facilitator API exposes settlePayment(), not an exact prepared
-  // request plus its gas estimate. Caller-provided gas is not authority.
-  throw new Error('LIVE_GAS_ENFORCEMENT_UNAVAILABLE');
+  return new OfficialX402(identity,finality,reader,publicBase,grant,input.context);
 }

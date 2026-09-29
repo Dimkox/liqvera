@@ -211,3 +211,10 @@ Git OIDs and SHA-256 encodings canonical across validators.
 Keep ledger migration 001 immutable and use one idempotent 002
 `CREATE OR REPLACE FUNCTION` with nested table guards. Real 001-only upgrade
 and fresh-install tests prove the repair without rewriting applied history.
+
+## 2026-09-29 — Interpret the test-BTC cap as buyer gas authority
+
+For x402 exact EIP-3009, the facilitator broadcasts and pays transaction gas,
+so the approved cap governs only buyer native-gas spend and the accepted value
+is exactly zero. Confirm this with non-buyer `tx.from` and before/after buyer
+native-balance equality; do not claim authority over facilitator gas.

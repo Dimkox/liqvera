@@ -8,7 +8,7 @@ import { paymentHeader } from '../security/input.js';
 import { boundedJson } from './http.js';
 import { MezoReceiptReader } from './mezo-rpc.js';
 import type { LivePaymentGrant } from '../security/live-grant.js';
-export interface LivePaymentContext { subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;gasEstimateWei:bigint }
+export interface LivePaymentContext { subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string }
 // Policy implementations require reviewed scheme-specific identity, nonce,
 // replay-domain, chain correlation and finality evidence. Configuration cannot
 // flip these defaults into an approval.
@@ -19,6 +19,11 @@ export const unresolvedIdentity: AuthorizationPolicy = {
 };
 export const unresolvedFinality: FinalityPolicy = { reviewed:false,version:'FINALITY_RULE_UNVERIFIED',async isFinal(){return false;} };
 const facilitator=new URL('https://facilitator.vativ.io');
+export function settlementTransaction(result: Pick<SettleResponse,'success'|'errorReason'|'transaction'>):string|null {
+  const pending=result.success===false&&result.errorReason==='settlement_pending';
+  return (result.success===true||pending)&&typeof result.transaction==='string'&&/^0x[0-9a-fA-F]{64}$/.test(result.transaction)
+    ? result.transaction.toLowerCase():null;
+}
 // No retries, redirects or custom status endpoint. The SDK controls protocol
 // payload construction; this transport supplies bounded I/O only.
 const transport={
@@ -80,6 +85,7 @@ export class OfficialX402 implements PaymentPort {
       !Number.isFinite(Date.parse(identity.valid_until))||Date.parse(identity.valid_until)<=Date.now())throw new PublicError('PAYMENT_REJECTED',409);
     this.authorizeGrant();
     if(this.liveContext!.buyer!==identity.payer||this.liveContext!.payTo!==quote.terms.pay_to)throw new PublicError('PAYMENT_REJECTED',409);
+    identity.correlation.buyer_native_balance_before=await this.reader.nativeBalance(identity.payer,'latest');
     identity.correlation.live_grant_digest=this.grant!.digest;
     identity.correlation.live_grant_id=String(this.grant!.raw.grant_id);
     return {payload,requirements,identity};
@@ -88,8 +94,9 @@ export class OfficialX402 implements PaymentPort {
     this.ready();
     this.authorizeGrant();
     const result=await this.server.settlePayment(payload,requirements);
-    // Even success is only a transaction hint, not finality or entitlement.
-    const tx=typeof result.transaction==='string'&&/^0x[0-9a-fA-F]{64}$/.test(result.transaction)?result.transaction.toLowerCase():null;
+    // A transaction-bearing settlement_pending response is spent and enters
+    // confirm-only reconciliation exactly like a successful submission.
+    const tx=settlementTransaction(result);
     return {tx_hash:tx};
   }
   async confirm(quote: Quote,attempt: Attempt) {

@@ -32,7 +32,8 @@ tag, checksummed assets, and truthful limitations.
 - P3: implement and independently review production authorization identity,
   finality, gateway/browser x402 wiring; then one separately granted Mezo
   Testnet payment envelope with human-held wallet, exact 0.01 test MUSD, one
-  maximum submission, and an explicit numeric test-BTC gas cap.
+  maximum submission, and an explicit numeric buyer-native test-BTC gas-spend
+  cap (zero for facilitator-sponsored exact EIP-3009).
 - P4: root Liqvera `VERSION=0.0.1`, release manifest, deterministic artifacts,
   checksums, extraction/install checks, and truthful release notes; component
   package/API versions remain `0.1.0`.

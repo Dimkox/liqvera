@@ -39,7 +39,7 @@ SENSITIVE_VALUE = re.compile(
 RESULT_SCHEMA = ROOT / "schemas/mezo-evidence/v1/acceptance-result.schema.json"
 DISPATCHER = ROOT / "scripts/run-local-acceptance-assertion.py"
 BLOCKED_REASON = "EXACT_EXTERNAL_GRANT_ABSENT"
-LIVE_GAS_BLOCKED_REASON = "LIVE_GAS_ENFORCEMENT_UNAVAILABLE"
+PAYMENT_GRANT_BLOCKED_REASON = "EXACT_PAYMENT_GRANT_ABSENT"
 A29_BLOCKED_REASON = "A29_NETWORK_BYTE_CAP_UNENFORCEABLE"
 FAIL_REASONS = {
     "ASSERTION_EXIT_NONZERO",
@@ -393,7 +393,7 @@ def validate_result_semantics(result: dict) -> None:
                 raise ValueError(f"{case_id} command capability is not closed")
         elif status == "BLOCKED_EXTERNAL":
             allowed = (
-                [LIVE_GAS_BLOCKED_REASON]
+                [PAYMENT_GRANT_BLOCKED_REASON]
                 if case.execution_class == "testnet_write"
                 else [A29_BLOCKED_REASON]
                 if case_id == "A29" and result.get("mode") == "live"
@@ -742,6 +742,12 @@ def payment_reference(case_id: str, result: dict, prior: dict | None) -> dict | 
             "network",
             "asset",
             "amount_atomic",
+            "scheme",
+            "settlement_broadcaster",
+            "transaction_from",
+            "buyer_native_balance_before",
+            "buyer_native_balance_after",
+            "buyer_native_gas_spend_wei",
         }:
             raise ValueError("A13 requires exact sanitized transaction evidence")
         if not all(
@@ -758,6 +764,20 @@ def payment_reference(case_id: str, result: dict, prior: dict | None) -> dict | 
             raise ValueError("A13 buyer/merchant address is invalid")
         if payment["buyer"].lower() == payment["merchant"].lower():
             raise ValueError("A13 buyer must differ from merchant")
+        if (
+            not isinstance(payment["transaction_from"], str)
+            or not re.fullmatch(r"0x[0-9a-fA-F]{40}", payment["transaction_from"])
+            or payment["transaction_from"].lower() == payment["buyer"].lower()
+            or payment["scheme"] != "exact"
+            or payment["settlement_broadcaster"] != "facilitator"
+            or payment["buyer_native_balance_before"] != payment["buyer_native_balance_after"]
+            or payment["buyer_native_gas_spend_wei"] != "0"
+            or not all(
+                isinstance(payment[name], str) and re.fullmatch(r"(?:0|[1-9][0-9]*)", payment[name])
+                for name in ("buyer_native_balance_before", "buyer_native_balance_after")
+            )
+        ):
+            raise ValueError("A13 did not prove facilitator-sponsored zero buyer gas")
         if not all(isinstance(payment[k], str) for k in ("network", "asset", "amount_atomic")):
             raise ValueError("A13 transfer terms have invalid types")
         if (payment["network"], payment["asset"].lower(), payment["amount_atomic"]) != (
@@ -1049,7 +1069,7 @@ def main() -> int:
                     "title": case.title,
                     "status": "BLOCKED_EXTERNAL",
                     "omissions": [
-                        LIVE_GAS_BLOCKED_REASON
+                        PAYMENT_GRANT_BLOCKED_REASON
                         if case.execution_class == "testnet_write"
                         else BLOCKED_REASON
                     ],

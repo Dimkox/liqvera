@@ -70,7 +70,7 @@ def p3_bundle(**change):
     plan = P3Plan.canonical()
     expiry = (NOW + timedelta(minutes=5)).isoformat().replace("+00:00", "Z")
     grant = {
-        "schema": "liqvera-live-payment-grant/v1",
+        "schema": "liqvera-mezo-payment-grant/v1",
         "grant_id": "00000000-0000-4000-8000-000000000013",
         "subject_commit": COMMIT,
         "subject_tree": TREE,

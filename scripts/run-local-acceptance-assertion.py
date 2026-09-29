@@ -9,11 +9,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+PYTHON = os.environ.get("LIQVERA_ACCEPTANCE_PYTHON", sys.executable)
 COMMANDS = {
-    "A01": [sys.executable, "-m", "pytest", "-q", "tests/contracts/test_acceptance_result.py"],
-    "A08": [sys.executable, "-m", "pytest", "-q", "tests/evidence_report/test_canonical_f3.py"],
-    "A09": [sys.executable, "-m", "pytest", "-q", "tests/installed/test_canonical_f3_installed.py"],
-    "A27": [sys.executable, "-m", "pytest", "-q", "tests/contracts/test_mezo_vectors.py"],
+    "A01": [PYTHON, "-m", "pytest", "-q", "tests/contracts/test_acceptance_result.py"],
+    "A08": [PYTHON, "-m", "pytest", "-q", "tests/evidence_report/test_canonical_f3.py"],
+    "A09": [PYTHON, "-m", "pytest", "-q", "tests/installed/test_canonical_f3_installed.py"],
+    "A27": [PYTHON, "-m", "pytest", "-q", "tests/contracts/test_mezo_vectors.py"],
     "A30": ["npm", "test"],
 }
 ASSERTIONS = {

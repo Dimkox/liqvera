@@ -213,9 +213,11 @@ def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict 
     started = utc_now()
     env = {name: os.environ[name] for name in spec["environment"] if name in os.environ}
     env["LIQVERA_ACCEPTANCE_EVIDENCE_DIR"] = str(evidence_root)
+    env["LIQVERA_ACCEPTANCE_PYTHON"] = sys.executable
     row = {
         "case_id": case_id, "title": case.title, "status": "FAIL", "started_at": started,
-        "command": spec["argv"], "environment_names": sorted(env), "execution_class": case.execution_class,
+        "command": spec["argv"], "environment_names": sorted(name for name in env if name != "LIQVERA_ACCEPTANCE_PYTHON"),
+        "execution_class": case.execution_class,
         "exit_code": None, "evidence": [], "omissions": [],
     }
     try:

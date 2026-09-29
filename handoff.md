@@ -35,6 +35,14 @@ both JSON Schema and semantic algebra. A checked-in offline dispatcher/plan
 currently binds five full local commands (A01, A08, A09, A27, A30); remaining
 cases are deliberately not promoted from partial historical evidence.
 
+The first P1 diagnostic result correctly remained incomplete but exposed an
+interpreter-binding defect: four Python assertions ran under the dispatcher's
+system shebang while A30 passed. The runner now supplies its already pinned
+interpreter to the dispatcher through an internal environment binding that is
+excluded from the public evidence contract. The focused 16-test semantic suite
+and Ruff check pass; final clean-HEAD acceptance and full verification remain
+to be regenerated after this repair is committed.
+
 P4 defines Liqvera product release `0.0.1` while retaining inherited/component
 package and API versions `0.1.0`, and builds scanned manifest-bound artifacts
 plus `SHA256SUMS` from one frozen commit. Final acceptance/evidence stays

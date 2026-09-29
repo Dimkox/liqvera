@@ -197,3 +197,11 @@ packages were unavailable, and produced unrelated import/install failures. The
 root cause was relying on shell resolution instead of the repository's documented
 `.venv`; run factory verification explicitly with `.venv/bin/python3` after the
 editable dev install is present.
+
+## 2026-09-29 — Offline dispatcher inherited its shebang interpreter
+
+The first F7 local acceptance run invoked the checked-in dispatcher directly,
+so its `/usr/bin/env python3` shebang selected the system interpreter even
+though the acceptance runner itself was launched from the pinned `.venv`.
+Runner-owned child dispatch must explicitly propagate its current interpreter
+through an internal, non-evidence environment binding.

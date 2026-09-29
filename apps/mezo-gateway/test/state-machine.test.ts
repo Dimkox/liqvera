@@ -102,6 +102,7 @@ function receipt(q: Quote, attempt: Attempt): Receipt {
     observation_before_block_hash: `0x${'5'.repeat(64)}`,
     observation_after_block_number: 1,
     observation_after_block_hash: `0x${'4'.repeat(64)}`,
+    confirmations: 12,
     authorization_identity: attempt.authorization_identity,
     transfer_identity: '6'.repeat(64),
   };

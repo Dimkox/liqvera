@@ -80,6 +80,13 @@ test('operator database identity ignores credentials but binds host port and dat
   assert.notEqual(approved,databaseIdentity('postgresql://alice:one@other.internal:5433/liqvera_f7'));
   assert.notEqual(approved,databaseIdentity('postgresql://alice:one@db.internal:5432/liqvera_f7'));
   assert.notEqual(approved,databaseIdentity('postgresql://alice:one@db.internal:5433/other'));
+  for(const rejected of [
+    'postgresql://db.internal/liqvera?sslmode=require',
+    'postgresql://db.internal/liqvera?sslmode=disable',
+    'postgresql://db.internal/liqvera?host=/tmp',
+    'postgresql://db.internal/liqvera#fragment',
+    'postgresql:///liqvera?host=/tmp',
+  ]) assert.throws(()=>databaseIdentity(rejected),/P3_DATABASE_CONFIG_INVALID/);
 });
 
 test('production composition is grantless by default and rejects malformed harness authority',()=>{

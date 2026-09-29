@@ -108,6 +108,7 @@ export function validateDelivery(value: unknown, reportId: string): Delivery {
       !/^0x[0-9a-f]{64}$/.test(string(receipt.observation_before_block_hash)) ||
       !/^0x[0-9a-f]{64}$/.test(string(receipt.observation_after_block_hash)) ||
       receipt.observation_after_block_hash!==receipt.block_hash || !string(receipt.authorization_identity) ||
+      !Number.isSafeInteger(receipt.confirmations) || receipt.confirmations<12 ||
       !/^[0-9a-f]{64}$/.test(string(receipt.transfer_identity)) ||
       !Number.isSafeInteger(receipt.block_number) || !Number.isSafeInteger(receipt.log_index) ||
       !Number.isFinite(Date.parse(string(receipt.confirmed_at))) ||

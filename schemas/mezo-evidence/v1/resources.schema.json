@@ -80,7 +80,7 @@
     },
     "receipt": {
       "type": "object", "additionalProperties": false,
-      "required": ["schema", "quote_id", "report_id", "payment_attempt_id", "report_sha256", "network", "chain_id", "asset", "amount_atomic", "payer", "pay_to", "tx_hash", "block_hash", "block_number", "log_index", "confirmed_at", "finality_policy_version", "transaction_from", "buyer_native_balance_before", "buyer_native_balance_after", "buyer_native_gas_spent", "observation_before_block_number", "observation_before_block_hash", "observation_after_block_number", "observation_after_block_hash", "authorization_identity", "transfer_identity"],
+      "required": ["schema", "quote_id", "report_id", "payment_attempt_id", "report_sha256", "network", "chain_id", "asset", "amount_atomic", "payer", "pay_to", "tx_hash", "block_hash", "block_number", "log_index", "confirmed_at", "finality_policy_version", "transaction_from", "buyer_native_balance_before", "buyer_native_balance_after", "buyer_native_gas_spent", "observation_before_block_number", "observation_before_block_hash", "observation_after_block_number", "observation_after_block_hash", "confirmations", "authorization_identity", "transfer_identity"],
       "properties": {
         "schema": {"const": "mee-evidence-receipt/v1"},
         "quote_id": {"$ref": "primitives.schema.json#/$defs/id"},
@@ -107,6 +107,7 @@
         "observation_before_block_hash": {"type": "string", "pattern": "^0x[0-9a-f]{64}(?![\\s\\S])"},
         "observation_after_block_number": {"type": "integer", "minimum": 0},
         "observation_after_block_hash": {"type": "string", "pattern": "^0x[0-9a-f]{64}(?![\\s\\S])"},
+        "confirmations": {"type": "integer", "minimum": 12},
         "authorization_identity": {"type": "string", "minLength": 1, "maxLength": 512},
         "transfer_identity": {"$ref": "primitives.schema.json#/$defs/sha256"}
       }

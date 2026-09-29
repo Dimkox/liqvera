@@ -243,7 +243,7 @@ closed linked A13/A14 result. It consumes a byte-bounded exact P3 grant and a
 human-wallet-produced signed x402 payload—never a private key—and requires
 exactly one of `DATABASE_URL` or `DATABASE_URL_FILE`, an HTTPS facilitator URL,
 and a read-only HTTPS Mezo RPC URL. Before network I/O it checks the current
-clean commit/tree, canonical P3 plan and exact 001–004 migration checksums.
+clean commit/tree, canonical P3 plan and exact 001–005 migration checksums.
 Durable consumption/`SUBMITTING` precedes the sole settlement; pending or lost
 responses remain spent and confirm-only, with sealed A13/A14 observations using
 the canonical `PAYMENT_CONFIRMATION_PENDING` blocker rather than a false wallet
@@ -262,6 +262,15 @@ A14 is produced by a second independent operator invocation, not by reusing an
 in-process A13 observation. It must reload the durable grant consumption and
 attempt, return the same confirmed transaction with `settlement_count=1`, and
 cannot enter the settlement branch again.
+
+Final trust-boundary repair snapshots the already validated grant and signed
+payment bytes into create-exclusive private files, passes their SHA-256 digests
+to Node, and never reopens the operator-supplied paths. PostgreSQL endpoint URLs
+with any query, `sslmode`, socket override or fragment are rejected before Pool
+construction. Additive migration 005 persists the actually observed canonical
+confirmation count (minimum 12), so fresh and durable replay results have the
+same runner-compatible receipt shape. Migration 005 has not been applied and
+requires a new exact isolated-database approval before live P3 execution.
 Final migration identities are `001_ledger.sql`
 `bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b`,
 `002_fix_immutable_ledger_identity.sql`

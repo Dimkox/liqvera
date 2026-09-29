@@ -137,6 +137,7 @@ RECEIPT = {
     "observation_before_block_hash": TX_HASH,
     "observation_after_block_number": 1,
     "observation_after_block_hash": TX_HASH,
+    "confirmations": 12,
     "authorization_identity": HASH,
     "transfer_identity": HASH,
 }

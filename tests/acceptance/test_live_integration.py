@@ -145,6 +145,41 @@ def test_p3_private_input_rejects_permissions_links_and_replacement(tmp_path, mo
         runner.read_private_input(symlink, 64)
 
 
+def test_p3_execution_uses_validated_snapshots_after_original_swap(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://db.internal/liqvera")
+    grant = tmp_path / "grant.json"
+    payment = tmp_path / "payment.json"
+    grant.write_bytes(b"approved-grant")
+    payment.write_bytes(b"approved-payment")
+    grant.chmod(0o600)
+    payment.chmod(0o600)
+    grant_bytes = runner.read_private_input(grant, 64)
+    payment_bytes = runner.read_private_input(payment, 64)
+    grant.write_bytes(b"swapped-grant")
+    payment.write_bytes(b"swapped-payment")
+    observed = {}
+
+    def fake_run(command, **kwargs):
+        grant_snapshot = command[command.index("--grant") + 1]
+        payment_snapshot = command[command.index("--payment") + 1]
+        observed["grant"] = open(grant_snapshot, "rb").read()
+        observed["payment"] = open(payment_snapshot, "rb").read()
+        observed["grant_digest"] = command[command.index("--grant-sha256") + 1]
+        observed["payment_digest"] = command[command.index("--payment-sha256") + 1]
+        return type("Done", (), {"returncode": 0, "stderr": "", "stdout": "{}"})()
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    runner.execute_p3_operator(
+        grant_bytes, payment_bytes,
+        {"commit": COMMIT, "tree": TREE}, "c" * 64,
+        "https://facilitator.vativ.io/", "https://rpc.test.mezo.org/",
+    )
+    assert observed["grant"] == b"approved-grant"
+    assert observed["payment"] == b"approved-payment"
+    assert observed["grant_digest"] == runner.hashlib.sha256(b"approved-grant").hexdigest()
+    assert observed["payment_digest"] == runner.hashlib.sha256(b"approved-payment").hexdigest()
+
+
 def test_runner_binds_journal_and_keeps_a29_blocked(tmp_path, monkeypatch):
     state = tmp_path / "state"
     state.mkdir(mode=0o700)

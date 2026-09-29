@@ -44,7 +44,7 @@ export interface Receipt { schema: 'mee-evidence-receipt/v1'; quote_id: string; 
   finality_policy_version: string; transaction_from:string; buyer_native_balance_before:string;
   buyer_native_balance_after:string; buyer_native_gas_spent:'0'; observation_before_block_number:number;
   observation_before_block_hash:string; observation_after_block_number:number; observation_after_block_hash:string;
-  authorization_identity:string; transfer_identity:string }
+  confirmations:number; authorization_identity:string; transfer_identity:string }
 export interface Confirmation { receipt: Receipt; response_header: string }
 export class PublicError extends Error {
   constructor(public readonly code: Reason, public readonly status: number = 503) { super(code); }

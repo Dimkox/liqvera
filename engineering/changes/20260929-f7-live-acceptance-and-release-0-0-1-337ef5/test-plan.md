@@ -17,6 +17,10 @@ one settlement across replay, preflight zero-I/O, closed signed inputs, and
 migration mismatch before any external adapter call.
 Negative authority coverage changes the facilitator, RPC and database identity,
 and rejects permissive, symlinked or hard-linked operator input files.
+Validated grant/payment bytes are copied create-exclusive into private snapshots
+and digest-bound to Node; deterministic original-path swaps cannot change either
+snapshot. Receipt shape tests require the observed confirmation count, and
+migration 005 persists it for replay without an RPC re-query.
 | P4 | Release artifacts | two builds where reproducibility claimed; archive safety; checksum missing/extra/corrupt; secret canaries |
 | P5 | Publication | old/new main OIDs, tag object/target, draft assets, download re-hash, anonymous source/tree comparison |
 

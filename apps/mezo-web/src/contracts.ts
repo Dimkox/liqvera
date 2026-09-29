@@ -100,6 +100,7 @@ export interface Receipt {
   observation_before_block_hash: string;
   observation_after_block_number: number;
   observation_after_block_hash: string;
+  confirmations: number;
   authorization_identity: string;
   transfer_identity: string;
 }

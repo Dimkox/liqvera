@@ -158,7 +158,7 @@ export class Ledger {
       buyer_native_balance_after:String(row.buyer_native_balance_after),buyer_native_gas_spent:'0',
       observation_before_block_number:Number(row.observation_before_block_number),observation_before_block_hash:row.observation_before_block_hash,
       observation_after_block_number:Number(row.observation_after_block_number),observation_after_block_hash:row.observation_after_block_hash,
-      authorization_identity:row.authorization_identity,transfer_identity:row.transfer_identity } } };
+      confirmations:Number(row.confirmations),authorization_identity:row.authorization_identity,transfer_identity:row.transfer_identity } } };
   }
   async confirm(quote: Quote, attempt: Attempt, confirmation: Confirmation): Promise<void> {
     const r = confirmation.receipt;
@@ -174,11 +174,11 @@ export class Ledger {
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,[CHAIN_ID,r.tx_hash,r.log_index,r.block_hash,r.block_number,attempt.id,ASSET,AMOUNT,r.payer,r.pay_to]);
       await db.query(`INSERT INTO receipts(payment_attempt_id,quote_id,report_id,report_sha256,chain_id,tx_hash,log_index,confirmed_at,finality_policy_version,response_header,
         transaction_from,buyer_native_balance_before,buyer_native_balance_after,buyer_native_gas_spent,observation_before_block_number,
-        observation_before_block_hash,observation_after_block_number,observation_after_block_hash,authorization_identity,transfer_identity)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
+        observation_before_block_hash,observation_after_block_number,observation_after_block_hash,authorization_identity,transfer_identity,confirmations)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
       [attempt.id,quote.id,quote.report_id,quote.report_sha256,CHAIN_ID,r.tx_hash,r.log_index,r.confirmed_at,r.finality_policy_version,confirmation.response_header,
         r.transaction_from,r.buyer_native_balance_before,r.buyer_native_balance_after,r.buyer_native_gas_spent,r.observation_before_block_number,
-        r.observation_before_block_hash,r.observation_after_block_number,r.observation_after_block_hash,r.authorization_identity,r.transfer_identity]);
+        r.observation_before_block_hash,r.observation_after_block_number,r.observation_after_block_hash,r.authorization_identity,r.transfer_identity,r.confirmations]);
       await db.query(`INSERT INTO entitlements(quote_id,report_id,scope_hash,report_sha256,payment_attempt_id,retain_until)
         VALUES($1,$2,$3,$4,$5,$6::timestamptz+interval '7 days')`,[quote.id,quote.report_id,quote.scope_hash,quote.report_sha256,attempt.id,r.confirmed_at]);
       await db.query("UPDATE payment_attempts SET state='CONFIRMED',tx_hash=$2,updated_at=now() WHERE id=$1",[attempt.id,r.tx_hash]);

@@ -50,6 +50,10 @@ export class MezoReceiptReader {
     const block=object(await this.rpc.call('eth_getBlockByNumber',[receipt.blockNumber,false]));
     if (block.hash!==receipt.blockHash) throw new PublicError('MANUAL_REVIEW',202);
     if (!await this.finality.isFinal(receipt,block,this.rpc)) return null;
+    const latest=object(await this.rpc.call('eth_getBlockByNumber',['latest',false]));
+    if(typeof latest.number!=='string'||!HEX.test(latest.number))throw new PublicError('MANUAL_REVIEW',202);
+    const confirmations=BigInt(latest.number)-BigInt(String(receipt.blockNumber))+1n;
+    if(confirmations<12n||confirmations>BigInt(Number.MAX_SAFE_INTEGER))throw new PublicError('MANUAL_REVIEW',202);
     const transaction=object(await this.rpc.call('eth_getTransactionByHash',[attempt.tx_hash]));
     const before=attempt.correlation.buyer_native_balance_before;
     let after:string;
@@ -86,6 +90,6 @@ export class MezoReceiptReader {
       transaction_from:transaction.from.toLowerCase(),buyer_native_balance_before:before,buyer_native_balance_after:after,
       buyer_native_gas_spent:'0',observation_before_block_number:Number(beforeNumber),observation_before_block_hash:beforeHash,
       observation_after_block_number:safeInteger(receipt.blockNumber),observation_after_block_hash:receipt.blockHash,
-      authorization_identity:attempt.authorization_identity,transfer_identity:transferIdentity };
+      confirmations:Number(confirmations),authorization_identity:attempt.authorization_identity,transfer_identity:transferIdentity };
   }
 }

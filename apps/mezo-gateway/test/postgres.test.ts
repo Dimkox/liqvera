@@ -22,6 +22,7 @@ const MIGRATION_001_SHA256 = 'bc127e55c876961112f33ca2abdfac01827769d6156ddba2f4
 const MIGRATION_002_SHA256 = '981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb';
 const MIGRATION_003_SHA256 = 'bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0';
 const MIGRATION_004_SHA256 = '96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a';
+const MIGRATION_005_SHA256 = 'e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11';
 const BODY: QuoteInput = {
   instrument_id: 'hyperliquid:BTC:perpetual',
   side: 'BUY',
@@ -73,7 +74,7 @@ async function verifiedAttempt(ledger: Ledger, suffix: string) {
   return { quote, attempt };
 }
 
-test('fresh migration applies 001 through 004 once, reruns by checksum, and keeps audit rows append-only', { skip: skipReason }, async () => {
+test('fresh migration applies 001 through 005 once, reruns by checksum, and keeps audit rows append-only', { skip: skipReason }, async () => {
   const migrations = await pool.query<{ name: string; sha256: string }>(
     'SELECT name,sha256 FROM gateway_migrations ORDER BY name',
   );
@@ -82,6 +83,7 @@ test('fresh migration applies 001 through 004 once, reruns by checksum, and keep
     { name: '002_fix_immutable_ledger_identity.sql', sha256: MIGRATION_002_SHA256 },
     { name: '003_live_grant_consumption.sql', sha256: MIGRATION_003_SHA256 },
     { name: '004_receipt_confirmation_provenance.sql', sha256: MIGRATION_004_SHA256 },
+    { name: '005_receipt_confirmation_count.sql', sha256: MIGRATION_005_SHA256 },
   ]);
 
   const audit = await pool.query<{ id: string }>("INSERT INTO audit_events(event) VALUES('TEST_ONLY') RETURNING id");
@@ -134,6 +136,7 @@ test('an existing empty-receipt 001 ledger upgrades through 004 without replacin
       { name: '002_fix_immutable_ledger_identity.sql', sha256: MIGRATION_002_SHA256 },
       { name: '003_live_grant_consumption.sql', sha256: MIGRATION_003_SHA256 },
       { name: '004_receipt_confirmation_provenance.sql', sha256: MIGRATION_004_SHA256 },
+      { name: '005_receipt_confirmation_count.sql', sha256: MIGRATION_005_SHA256 },
     ]);
   } finally {
     await upgrade.end();

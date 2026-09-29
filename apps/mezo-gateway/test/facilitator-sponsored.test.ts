@@ -20,7 +20,7 @@ function rpc(change:Record<string,unknown>={}) {
   return {call:async(method:string,params:unknown[])=>{
     if(method==='eth_chainId')return '0x7b7b';
     if(method==='eth_getTransactionReceipt')return receipt;
-    if(method==='eth_getBlockByNumber')return {number:params[0],hash:blockHash};
+    if(method==='eth_getBlockByNumber')return params[0]==='latest'?{number:'0x6f',hash:blockHash}:{number:params[0],hash:blockHash};
     if(method==='eth_getTransactionByHash')return transaction;
     if(method==='eth_getBalance')return Object.hasOwn(change,'balance')?change.balance:'0x3e8';
     throw new Error(method);
@@ -37,6 +37,7 @@ test('facilitator broadcast and zero buyer native gas produce exact receipt',asy
   assert.equal(receipt?.amount_atomic,AMOUNT);
   assert.equal(receipt?.buyer_native_gas_spent,'0');
   assert.equal(receipt?.observation_after_block_hash,blockHash);
+  assert.equal(receipt?.confirmations,12);
   assert.match(receipt?.transfer_identity??'',/^[0-9a-f]{64}$/);
 });
 

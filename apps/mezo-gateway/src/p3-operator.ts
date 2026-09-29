@@ -17,6 +17,7 @@ const migrations=new Map([
   ['002_fix_immutable_ledger_identity.sql','981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb'],
   ['003_live_grant_consumption.sql','bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0'],
   ['004_receipt_confirmation_provenance.sql','96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a'],
+  ['005_receipt_confirmation_count.sql','e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11'],
 ]);
 const fields=['schema','quote_id','scope_hash','report_id','payment_signature','buyer','pay_to'];
 const planDigest='c99df87005537ff35a93f02547ba88e2d315b8398b484db4c0d65f138b51acbe';
@@ -30,7 +31,7 @@ async function bytes(path:string,max=65536):Promise<Uint8Array>{
   try {const opened=await handle.stat();if(opened.dev!==before.dev||opened.ino!==before.ino||opened.size!==before.size)fail('P3_INPUT_UNSAFE');const value=await handle.readFile();if(!value.length||value.length>max)fail('P3_INPUT_INVALID');return value;}
   finally {await handle.close();}
 }
-export function databaseIdentity(value:string):string {const url=new URL(value);if(!/^postgres(?:ql)?:$/.test(url.protocol)||!url.hostname||!url.pathname.slice(1))fail('P3_DATABASE_CONFIG_INVALID');const endpoint=`${url.protocol}//${url.hostname.toLowerCase()}:${url.port||'5432'}${url.pathname}`;return createHash('sha256').update(endpoint).digest('hex')}
+export function databaseIdentity(value:string):string {const url=new URL(value);if(!/^postgres(?:ql)?:$/.test(url.protocol)||!url.hostname||!url.pathname.slice(1)||url.search||url.hash)fail('P3_DATABASE_CONFIG_INVALID');const endpoint=`${url.protocol}//${url.hostname.toLowerCase()}:${url.port||'5432'}${url.pathname}`;return createHash('sha256').update(endpoint).digest('hex')}
 async function checkMigrations(pool:Pool):Promise<void>{
   const rows=(await pool.query<{name:string;sha256:string}>('SELECT name,sha256 FROM gateway_migrations ORDER BY name')).rows;
   if(rows.length!==migrations.size||rows.some(row=>migrations.get(row.name)!==row.sha256))fail('P3_MIGRATION_MISMATCH');
@@ -39,8 +40,11 @@ function output(value:unknown):void{process.stdout.write(`${JSON.stringify(value
 
 async function main():Promise<void>{
   const grantPath=arg('--grant'); const paymentPath=arg('--payment');
+  const expectedGrantDigest=arg('--grant-sha256'); const expectedPaymentDigest=arg('--payment-sha256');
   const subjectCommit=arg('--subject-commit'); const subjectTree=arg('--subject-tree'); const planSha256=arg('--plan-sha256');
-  const rawBundle=exactObject(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(await bytes(grantPath))));
+  const rawGrantBytes=await bytes(grantPath);const rawPaymentBytes=await bytes(paymentPath,16384);
+  if(createHash('sha256').update(rawGrantBytes).digest('hex')!==expectedGrantDigest||createHash('sha256').update(rawPaymentBytes).digest('hex')!==expectedPaymentDigest)fail('P3_SNAPSHOT_DIGEST_MISMATCH');
+  const rawBundle=exactObject(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(rawGrantBytes)));
   if(Object.keys(rawBundle).sort().join()!==['cases','expires_at','plan_sha256','schema','subject_commit','subject_tree'].sort().join()||
     rawBundle.schema!=='liqvera-p3-payment-grants/v1'||rawBundle.subject_commit!==subjectCommit||rawBundle.subject_tree!==subjectTree||rawBundle.plan_sha256!==planSha256||planSha256!==planDigest)fail('LIVE_GRANT_MISMATCH');
   const cases=exactObject(rawBundle.cases); const grantRaw=exactObject(cases.A13);
@@ -48,7 +52,7 @@ async function main():Promise<void>{
   if(JSON.stringify(cases.A13)!==JSON.stringify(cases.A14))fail('LIVE_PAYMENT_LINK_MISMATCH');
   const grantBytes=new TextEncoder().encode(JSON.stringify(grantRaw,Object.keys(grantRaw).sort()));
   const grant=LivePaymentGrant.parseBytes(grantBytes,new Date());
-  const payment=exactObject(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(await bytes(paymentPath,16384))));
+  const payment=exactObject(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(rawPaymentBytes)));
   if(Object.keys(payment).sort().join()!==[...fields].sort().join()||payment.schema!=='liqvera-p3-signed-payment/v1'||payment.buyer!==grant.raw.buyer||payment.pay_to!==grant.raw.pay_to)fail('P3_PAYMENT_INPUT_INVALID');
   grant.authorize({subjectCommit,subjectTree,planSha256,buyer:String(payment.buyer),payTo:String(payment.pay_to),now:new Date()});
   const root=resolve(dirname(fileURLToPath(import.meta.url)),'../../..');

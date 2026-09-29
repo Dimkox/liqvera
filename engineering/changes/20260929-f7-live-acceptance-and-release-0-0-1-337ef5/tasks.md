@@ -33,6 +33,8 @@
 - [x] Record the approved isolated PostgreSQL 001–004 migration/idempotency and
   20-pool evidence without credentials; add the bounded signed-payload-only P3
   operator, zero-I/O preflight and linked A13/A14 acceptance evidence seam.
+- [x] Add forward-only migration 005 for durable observed confirmation count;
+  it remains unapplied pending a new exact migration approval.
 - [ ] Obtain exact short-lived P2 public-read grant; execute allowlisted reads.
 - [ ] Obtain exact short-lived P3 testnet-write grant including buyer/payee,
   amount, one-submit budget, and buyer native-gas cap; human confirms wallet.

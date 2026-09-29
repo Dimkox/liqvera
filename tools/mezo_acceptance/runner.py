@@ -142,8 +142,8 @@ def read_private_input(path: Path, maximum: int) -> bytes:
 
 
 def execute_p3_operator(
-    grant_path: Path,
-    payment_path: Path,
+    grant_bytes: bytes,
+    payment_bytes: bytes,
     identity: dict[str, str],
     plan_sha256: str,
     facilitator_url: str,
@@ -160,13 +160,23 @@ def execute_p3_operator(
     }
     if ("DATABASE_URL" in environment) == ("DATABASE_URL_FILE" in environment):
         raise ValueError("P3 requires exactly one of DATABASE_URL or DATABASE_URL_FILE")
+    snapshot_root = Path(tempfile.mkdtemp(prefix="liqvera-p3-"))
+    os.chmod(snapshot_root, 0o700)
+    snapshots = []
+    for name, raw in (("grant.json", grant_bytes), ("payment.json", payment_bytes)):
+        path = snapshot_root / name
+        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o400)
+        try:
+            os.write(descriptor, raw)
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+        snapshots.append(path)
+    _fsync_directory(snapshot_root)
     command = [
-        "node",
-        str(ROOT / "apps/mezo-gateway/dist/p3-operator.js"),
-        "--grant",
-        str(grant_path),
-        "--payment",
-        str(payment_path),
+        "node", str(ROOT / "apps/mezo-gateway/dist/p3-operator.js"),
+        "--grant", str(snapshots[0]), "--grant-sha256", hashlib.sha256(grant_bytes).hexdigest(),
+        "--payment", str(snapshots[1]), "--payment-sha256", hashlib.sha256(payment_bytes).hexdigest(),
         "--subject-commit",
         identity["commit"],
         "--subject-tree",
@@ -178,15 +188,15 @@ def execute_p3_operator(
         "--rpc-url",
         rpc_url,
     ]
-    completed = subprocess.run(
-        command,
-        cwd=ROOT,
-        env=environment,
-        capture_output=True,
-        text=True,
-        timeout=90,
-        check=False,
-    )
+    try:
+        completed = subprocess.run(
+            command, cwd=ROOT, env=environment, capture_output=True,
+            text=True, timeout=90, check=False,
+        )
+    finally:
+        for path in snapshots:
+            path.unlink(missing_ok=True)
+        snapshot_root.rmdir()
     if completed.returncode != 0 or completed.stderr or len(completed.stdout) > 65536:
         raise ValueError("P3 operator failed closed")
     observation = json.loads(completed.stdout)
@@ -1058,6 +1068,8 @@ def main() -> int:
             raise ValueError("offline acceptance cannot consume live grants")
         live_authority = None
         p3_authority = None
+        p3_grant_bytes = None
+        p3_payment_bytes = None
         if args.mode == "live":
             if args.live_grants is None and args.p3_live_grants is None:
                 raise ValueError("live acceptance requires an exact grant bundle")
@@ -1074,14 +1086,15 @@ def main() -> int:
                     now=datetime.now(timezone.utc),
                 )
             if args.p3_live_grants is not None:
+                p3_grant_bytes = read_private_input(args.p3_live_grants, 65536)
                 p3_authority = validate_p3_bundle(
-                    json.loads(read_private_input(args.p3_live_grants, 65536)),
+                    json.loads(p3_grant_bytes),
                     subject_commit=identity["commit"],
                     subject_tree=identity["tree"],
                     now=datetime.now(timezone.utc),
                 )
                 if args.p3_payment is not None:
-                    read_private_input(args.p3_payment, 16384)
+                    p3_payment_bytes = read_private_input(args.p3_payment, 16384)
         output = args.output.resolve()
         if output.exists() or output.is_relative_to(ROOT):
             raise ValueError("output must be a new path outside the repository")
@@ -1223,8 +1236,8 @@ def main() -> int:
                     # only confirm it; an in-memory A13 result is not evidence
                     # of replay safety.
                     p3_observation = execute_p3_operator(
-                        args.p3_live_grants,
-                        args.p3_payment,
+                        p3_grant_bytes,
+                        p3_payment_bytes,
                         identity,
                         p3_authority.plan.digest,
                         args.facilitator_url,

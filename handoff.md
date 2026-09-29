@@ -19,8 +19,12 @@ commit binding, A29, reviews, push, tag, and GitHub Release as not run.
 The first verifier on the preparation commit correctly rejected the four new
 tracked paths as absent from repository inventory. VERSION now has an explicit
 build-packaging classifier and all four paths have graph owners; the complete
-graph suite passes 229 tests. A fresh final verifier remains required because
-this inventory repair changes the repository fingerprint.
+graph suite passes 229 tests. A fresh final verifier was required because
+this inventory repair changed the repository fingerprint. That final verifier
+and all five independent reviews, including the artifact-bound release review,
+subsequently passed. The F7 package has advanced through `verifying` and
+`reviewing` to `ready`; this metadata-only transition commit changes the final
+Git identity and requires the usual receipt refresh before publication.
 
 The local P3 authorization boundary now follows the facilitator capability
 observed by the approved analysis: exact Permit2 with the
@@ -80,7 +84,7 @@ tests passed without network, wallet, payment, or database activity.
 
 Route `337ef5ec16a0` and change package
 `engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/`
-are implementing approved local-only P0/P1. Four route-selected analyses were
+are now `ready`. Four route-selected analyses were
 synthesized into sequential P0–P5 gates; no network read, database/container action,
 wallet interaction, payment, push, tag, release, or other external mutation
 occurred. The earlier local-only route `fd7ffd5cc17f` is coherently retained as

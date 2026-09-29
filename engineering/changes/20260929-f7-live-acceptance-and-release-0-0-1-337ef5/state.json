@@ -103,6 +103,24 @@
       "from": "approved",
       "reason": "Exact F7 scope gate 82c9cb3127d0b55ca43f34ec816c8349a1d770ef52d0e4293ace580a36820f73 is approved; begin local-only P0/P1 with all external phases blocked.",
       "to": "implementing"
+    },
+    {
+      "at": "2026-09-29T20:14:41+00:00",
+      "from": "implementing",
+      "reason": "Final verifier PASS on the release candidate fingerprint.",
+      "to": "verifying"
+    },
+    {
+      "at": "2026-09-29T20:14:42+00:00",
+      "from": "verifying",
+      "reason": "Five independent reviews PASS, including artifact-bound release review.",
+      "to": "reviewing"
+    },
+    {
+      "at": "2026-09-29T20:14:42+00:00",
+      "from": "reviewing",
+      "reason": "Final verifier PASS; five independent reviews PASS including artifact-bound release review; A13/A14 complete with one settlement and zero buyer gas; truthful limitations retain INCOMPLETE acceptance, A29 and publication pending.",
+      "to": "ready"
     }
   ],
   "human_gates": [
@@ -112,7 +130,7 @@
   "human_gates_digest": "1ab9adb5cb4d33f265090cb45b1793b25f1857203ce4733f5dc7ccbdef7b03f9",
   "route_id": "337ef5ec16a0",
   "schema_version": 1,
-  "status": "implementing",
+  "status": "ready",
   "title": "F7 live acceptance and release 0.0.1",
-  "updated_at": "2026-09-29T12:16:45+00:00"
+  "updated_at": "2026-09-29T20:14:42+00:00"
 }

@@ -14095,6 +14095,9 @@ repository_inventory:
   - path: docs/superpowers/specs/2026-09-24-mezo-evidence-design.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: docs/superpowers/specs/2026-09-29-one-click-installer-design.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: docs/validation.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

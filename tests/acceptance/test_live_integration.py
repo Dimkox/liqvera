@@ -317,4 +317,4 @@ def test_p3_operator_cli_seals_confirmed_linked_a13_a14_once(tmp_path, monkeypat
     assert rows["A13"]["status"] == rows["A14"]["status"] == "PASS"
     assert rows["A13"]["payment_evidence"]["tx_hash"] == rows["A14"]["payment_evidence"]["tx_hash"]
     assert rows["A14"]["payment_evidence"]["settlement_count"] == 1
-    assert calls == [1]
+    assert calls == [1, 1]

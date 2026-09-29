@@ -257,6 +257,11 @@ before external use. Grant, signed-payment and database-URL files must be
 private single-link regular files and are opened with `O_NOFOLLOW` under an
 inode/size check. The canonical P3 plan pins both HTTPS endpoints and names the
 database identity mechanism.
+
+A14 is produced by a second independent operator invocation, not by reusing an
+in-process A13 observation. It must reload the durable grant consumption and
+attempt, return the same confirmed transaction with `settlement_count=1`, and
+cannot enter the settlement branch again.
 Final migration identities are `001_ledger.sql`
 `bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b`,
 `002_fix_immutable_ledger_identity.sql`

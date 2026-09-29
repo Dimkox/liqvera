@@ -1218,15 +1218,18 @@ def main() -> int:
                 try:
                     if not args.facilitator_url or not args.rpc_url:
                         raise ValueError("P3 URLs are required")
-                    if p3_observation is None:
-                        p3_observation = execute_p3_operator(
-                            args.p3_live_grants,
-                            args.p3_payment,
-                            identity,
-                            p3_authority.plan.digest,
-                            args.facilitator_url,
-                            args.rpc_url,
-                        )
+                    # A14 is an independent process invocation. The operator
+                    # must recover the durable A13 consumption/attempt and may
+                    # only confirm it; an in-memory A13 result is not evidence
+                    # of replay safety.
+                    p3_observation = execute_p3_operator(
+                        args.p3_live_grants,
+                        args.p3_payment,
+                        identity,
+                        p3_authority.plan.digest,
+                        args.facilitator_url,
+                        args.rpc_url,
+                    )
                     if p3_observation.get("status") != "CONFIRMED":
                         raise ValueError("P3 remains confirm-only pending")
                     document = {

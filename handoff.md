@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (offline F3 repair implemented; dependency pin and verifier environment diagnosis completed). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (offline F3 repair and compatible dependency pin pass full PR verification; independent review is next). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F3 offline artifact verification repair — 2026-09-29
@@ -36,8 +36,13 @@ installation, and canonical F3 slice passes with 22 workers in the pinned local
 environment. Hyperliquid SDK 0.24.0 declares `eth-account>=0.10.0,<0.14.0`, and
 the provisioned compatible version is 0.13.7, so the stale project pin was
 repaired from 0.14.0 to 0.13.7; its characterization and `pip check` now pass.
-A final full verifier run from the pinned environment is pending. Independent
-reviews remain unstarted until that result is green.
+The final full verifier run from the pinned environment passes: 22 workers ran
+`1147 passed, 85 subtests passed` in 67.24 seconds, coverage passed, and diff,
+both change specs, secret, contract, SQL, all nine Trivy targets, Ruff, Bandit,
+and source stability are green. A final receipt refresh after this handoff
+commit is required; route-selected independent code, test, and data review is
+the next coordinator action and has not been performed by the implementation
+owner.
 Gateway/F4 through F7, graph orphan cleanup,
 network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
 start, deployment, release, and push remain outside this route. All 156 broad

@@ -4,7 +4,7 @@
 - [x] Add failing test or characterization test.
 - [x] Repair acceptance Git identity and only other defects reproduced by tests.
 - [x] Add canonical F3 happy-path, tamper, duplicate, and partial-state coverage.
-- [x] Run selected quality profile (red evidence retained: inherited dependency
-  pin mismatch and parallel factory/import collisions remain).
+- [x] Run selected quality profile (`1147 passed, 85 subtests`; full PR profile
+  and coverage pass in the pinned 22-worker environment).
 - [ ] Complete independent reviews.
 - [ ] Bind evidence to the final tree fingerprint.

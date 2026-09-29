@@ -63,6 +63,8 @@ OBSERVATION_FIELDS = {
     },
     "A29": {"result"},
     "A30": {"checks", "subject_commit", "subject_tree"},
+    "A13": {"result"},
+    "A14": {"result"},
 }
 REQUIRED_CHECKS = {
     "A01": {
@@ -112,6 +114,60 @@ class PlanSnapshot:
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def execute_p3_operator(
+    grant_path: Path,
+    payment_path: Path,
+    identity: dict[str, str],
+    plan_sha256: str,
+    facilitator_url: str,
+    rpc_url: str,
+) -> dict:
+    environment = {
+        "PATH": os.environ.get("PATH", ""),
+        **({"DATABASE_URL": os.environ["DATABASE_URL"]} if "DATABASE_URL" in os.environ else {}),
+        **(
+            {"DATABASE_URL_FILE": os.environ["DATABASE_URL_FILE"]}
+            if "DATABASE_URL_FILE" in os.environ
+            else {}
+        ),
+    }
+    if ("DATABASE_URL" in environment) == ("DATABASE_URL_FILE" in environment):
+        raise ValueError("P3 requires exactly one of DATABASE_URL or DATABASE_URL_FILE")
+    command = [
+        "node",
+        str(ROOT / "apps/mezo-gateway/dist/p3-operator.js"),
+        "--grant",
+        str(grant_path),
+        "--payment",
+        str(payment_path),
+        "--subject-commit",
+        identity["commit"],
+        "--subject-tree",
+        identity["tree"],
+        "--plan-sha256",
+        plan_sha256,
+        "--facilitator-url",
+        facilitator_url,
+        "--rpc-url",
+        rpc_url,
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=ROOT,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=90,
+        check=False,
+    )
+    if completed.returncode != 0 or completed.stderr or len(completed.stdout) > 65536:
+        raise ValueError("P3 operator failed closed")
+    observation = json.loads(completed.stdout)
+    if not isinstance(observation, dict):
+        raise ValueError("P3 operator emitted an invalid observation")
+    return observation
 
 
 def git(*args: str) -> str:
@@ -388,9 +444,16 @@ def validate_result_semantics(result: dict) -> None:
             expected_command = (
                 ["builtin:public-read", case_id]
                 if case.execution_class == "public_read"
+                else ["builtin:testnet-write", case_id]
+                if case.execution_class == "testnet_write"
                 else ["scripts/run-local-acceptance-assertion.py", case_id]
             )
-            if row.get("command") != expected_command or row.get("environment_names") != []:
+            expected_env = (
+                ["DATABASE_URL", "DATABASE_URL_FILE"]
+                if case.execution_class == "testnet_write"
+                else []
+            )
+            if row.get("command") != expected_command or row.get("environment_names") != expected_env:
                 raise ValueError(f"{case_id} command capability is not closed")
         elif status == "BLOCKED_EXTERNAL":
             allowed = (
@@ -497,7 +560,31 @@ def evidence_reference(
         or set(observations) != expected_fields
     ):
         raise ValueError("evidence observations do not match the case-specific schema")
-    if case_id in {"A07", "A29"}:
+    if case_id in {"A13", "A14"}:
+        result = observations["result"]
+        required = {
+            "schema", "status", "grant_id", "grant_digest", "settlement_count",
+            "retry_allowed", "tx_hash", "transaction_from", "buyer_native_balance_before",
+            "buyer_native_balance_after", "buyer_native_gas_spent",
+            "observation_before_block_number", "observation_before_block_hash",
+            "observation_after_block_number", "observation_after_block_hash", "block_number",
+            "block_hash", "log_index", "confirmations", "authorization_identity",
+            "transfer_identity", "payer", "pay_to", "quote_id", "report_id",
+            "payment_attempt_id", "report_sha256", "network", "chain_id", "asset",
+            "amount_atomic", "confirmed_at", "finality_policy_version",
+        }
+        if (
+            not isinstance(result, dict) or set(result) != required
+            or result["schema"] != "liqvera-p3-payment-observation/v1"
+            or result["status"] != "CONFIRMED" or result["settlement_count"] != 1
+            or result["retry_allowed"] is not False or result["confirmations"] < 12
+            or result["buyer_native_gas_spent"] != "0"
+            or result["buyer_native_balance_before"] != result["buyer_native_balance_after"]
+            or result["transaction_from"].lower() == result["payer"].lower()
+        ):
+            raise ValueError(f"{case_id} payment observation is not exact and confirmed")
+        checks = []
+    elif case_id in {"A07", "A29"}:
         result = observations["result"]
         common = {
             "grant_id",
@@ -690,6 +777,8 @@ def evidence_reference(
         ):
             raise ValueError("semantic observations do not bind to the subject")
         checks = observations.get("checks")
+    if case_id in {"A13", "A14"}:
+        return {"file": relative, "sha256": hashlib.sha256(raw).hexdigest(), "size_bytes": len(raw)}
     if (
         not isinstance(checks, list)
         or any(not isinstance(item, str) for item in checks)
@@ -918,6 +1007,9 @@ def main() -> int:
     parser.add_argument(
         "--p3-live-grants", type=Path, help="exact short-lived linked A13/A14 payment grant bundle"
     )
+    parser.add_argument("--p3-payment", type=Path, help="human-wallet-produced signed x402 payload")
+    parser.add_argument("--facilitator-url", help="exact approved HTTPS facilitator origin")
+    parser.add_argument("--rpc-url", help="exact approved read-only Mezo HTTPS RPC")
     parser.add_argument(
         "--operator-state-dir", type=Path, help="pre-existing mode-0700 durable live-grant journal"
     )
@@ -979,6 +1071,7 @@ def main() -> int:
             )
         rows = []
         prior_payment = None
+        p3_observation = None
         started = utc_now()
         for case_id, case in CASES.items():
             if case_id == "A29" and live_authority is not None:
@@ -1086,6 +1179,66 @@ def main() -> int:
                         )
                     ],
                 }
+            elif case_id in {"A13", "A14"} and p3_authority is not None and args.p3_payment is not None:
+                started_at = utc_now()
+                try:
+                    if not args.facilitator_url or not args.rpc_url:
+                        raise ValueError("P3 URLs are required")
+                    if p3_observation is None:
+                        p3_observation = execute_p3_operator(
+                            args.p3_live_grants,
+                            args.p3_payment,
+                            identity,
+                            p3_authority.plan.digest,
+                            args.facilitator_url,
+                            args.rpc_url,
+                        )
+                    if p3_observation.get("status") != "CONFIRMED":
+                        raise ValueError("P3 remains confirm-only pending")
+                    document = {
+                        "case_id": case_id,
+                        "assertion": case.assertion,
+                        "execution_class": case.execution_class,
+                        "claims": list(case.required_claims),
+                        "subject": {"commit": identity["commit"], "tree": identity["tree"]},
+                        "observations": {"result": p3_observation},
+                        "transcript": {"stdout_sha256": canonical_sha256(p3_observation), "stderr_sha256": hashlib.sha256(b"").hexdigest()},
+                    }
+                    evidence_dir = evidence_root / "evidence"
+                    evidence_dir.mkdir(mode=0o700, exist_ok=True)
+                    evidence_file = evidence_dir / f"{case_id}.json"
+                    evidence_file.write_text(json.dumps(document, sort_keys=True, indent=2) + "\n")
+                    command = ["builtin:testnet-write", case_id]
+                    a13_payment = {
+                        "tx_hash": p3_observation["tx_hash"], "block_hash": p3_observation["block_hash"],
+                        "log_index": p3_observation["log_index"], "buyer": p3_observation["payer"],
+                        "merchant": p3_observation["pay_to"], "network": p3_observation["network"],
+                        "asset": p3_observation["asset"], "amount_atomic": p3_observation["amount_atomic"],
+                        "scheme": "exact", "settlement_broadcaster": "facilitator",
+                        "transaction_from": p3_observation["transaction_from"],
+                        "buyer_native_balance_before": p3_observation["buyer_native_balance_before"],
+                        "buyer_native_balance_after": p3_observation["buyer_native_balance_after"],
+                        "buyer_native_gas_spend_wei": p3_observation["buyer_native_gas_spent"],
+                    }
+                    payment = a13_payment if case_id == "A13" else {"tx_hash": p3_observation["tx_hash"], "settlement_count": 1}
+                    row = {
+                        "case_id": case_id, "title": case.title, "status": "PASS", "omissions": [],
+                        "command": command, "environment_names": ["DATABASE_URL", "DATABASE_URL_FILE"],
+                        "exit_code": 0, "started_at": started_at, "ended_at": utc_now(),
+                        "execution_class": case.execution_class,
+                        "stdout_sha256": canonical_sha256(p3_observation), "stderr_sha256": hashlib.sha256(b"").hexdigest(),
+                        "command_sha256": canonical_sha256(command),
+                        "assertion_contract_sha256": canonical_sha256({"case_id": case_id, "assertion": case.assertion, "execution_class": case.execution_class, "required_claims": list(case.required_claims)}),
+                        "payment_evidence": payment,
+                        "evidence": [evidence_reference(evidence_root, f"evidence/{case_id}.json", case_id, case.assertion, case.execution_class, identity)],
+                    }
+                except (OSError, ValueError, subprocess.SubprocessError, KeyError, TypeError):
+                    row = {
+                        "case_id": case_id, "title": case.title, "status": "BLOCKED_EXTERNAL",
+                        "omissions": [WALLET_SIGNATURE_BLOCKED_REASON], "command": None,
+                        "environment_names": [], "exit_code": None, "evidence": [],
+                        "execution_class": case.execution_class,
+                    }
             elif case.execution_class != "local":
                 row = {
                     "case_id": case_id,

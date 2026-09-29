@@ -14377,6 +14377,9 @@ repository_inventory:
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/analysis-repo_explorer.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/p3-postgres-operation.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/human-gates.json
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
@@ -15217,6 +15220,9 @@ repository_inventory:
   - path: apps/mezo-gateway/src/migrate.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/p3-operator.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/src/ports/index.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
@@ -15433,10 +15439,16 @@ repository_inventory:
   - path: tools/mezo_acceptance/live_cases.py
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE
+  - path: tools/mezo_acceptance/p3_operator.py
+    node: runtime:mezo-acceptance
+    path_class: TOOL_SOURCE
   - path: tests/acceptance/test_public_read_grant.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: tests/acceptance/test_live_integration.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/acceptance/test_p3_operator.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: tests/acceptance/test_live_case_semantics.py

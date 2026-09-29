@@ -21,8 +21,11 @@ function safeInteger(value: unknown): number {
   return Number(exact);
 }
 export class MezoReadonlyRpc implements ReadonlyRpc {
+  constructor(private readonly rpcUrl:URL=new URL(RPC_URL)) {
+    if(rpcUrl.protocol!=='https:'||rpcUrl.username||rpcUrl.password||rpcUrl.search||rpcUrl.hash)throw new Error('RPC_URL_INVALID');
+  }
   async call(method: Parameters<ReadonlyRpc['call']>[0], params: unknown[]): Promise<unknown> {
-    const result=object(await boundedJson(new URL(RPC_URL),{method:'POST',body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})},2097152));
+    const result=object(await boundedJson(this.rpcUrl,{method:'POST',body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})},2097152));
     if (result.id!==1 || result.jsonrpc!=='2.0' || result.error || !('result' in result)) throw new PublicError('PAYMENT_UNCERTAIN',202);
     return result.result;
   }

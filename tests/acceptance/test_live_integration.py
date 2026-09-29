@@ -241,3 +241,46 @@ def test_p3_operator_cli_is_separate_and_requires_human_wallet_before_io(tmp_pat
     rows = {row["case_id"]: row for row in json.loads(output.read_text())["cases"]}
     assert rows["A13"]["omissions"] == ["HUMAN_WALLET_SIGNATURE_REQUIRED"]
     assert rows["A14"]["omissions"] == ["HUMAN_WALLET_SIGNATURE_REQUIRED"]
+
+
+def test_p3_operator_cli_seals_confirmed_linked_a13_a14_once(tmp_path, monkeypatch):
+    value = p3_bundle()
+    expiry = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat().replace("+00:00", "Z")
+    value["expires_at"] = expiry
+    for case in value["cases"].values():
+        case["expires_at"] = expiry
+    grants = tmp_path / "p3.json"
+    grants.write_text(json.dumps(value))
+    payment = tmp_path / "payment.json"
+    payment.write_text("{}")
+    identity = {"repository": "Dimkox/liqvera", "origin": "UNSET", "commit": COMMIT, "tree": TREE, "worktree": "CLEAN"}
+    monkeypatch.setattr(runner, "repo_identity", lambda: identity)
+    calls = []
+    observation = {
+        "schema": "liqvera-p3-payment-observation/v1", "status": "CONFIRMED",
+        "grant_id": "00000000-0000-4000-8000-000000000013", "grant_digest": "d" * 64,
+        "settlement_count": 1, "retry_allowed": False, "tx_hash": "0x" + "3" * 64,
+        "transaction_from": "0x" + "4" * 40, "buyer_native_balance_before": "7",
+        "buyer_native_balance_after": "7", "buyer_native_gas_spent": "0",
+        "observation_before_block_number": 10, "observation_before_block_hash": "0x" + "5" * 64,
+        "observation_after_block_number": 22, "observation_after_block_hash": "0x" + "6" * 64,
+        "block_number": 11, "block_hash": "0x" + "7" * 64, "log_index": 0,
+        "confirmations": 12, "authorization_identity": "auth", "transfer_identity": "transfer",
+        "payer": "0x" + "1" * 40, "pay_to": "0x" + "2" * 40,
+        "quote_id": "00000000-0000-4000-8000-000000000001",
+        "report_id": "00000000-0000-4000-8000-000000000002",
+        "payment_attempt_id": "00000000-0000-4000-8000-000000000003",
+        "report_sha256": "a" * 64, "network": "eip155:31611", "chain_id": 31611,
+        "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+        "amount_atomic": "10000000000000000", "confirmed_at": NOW.isoformat(),
+        "finality_policy_version": "mezo-testnet-canonical-12/v1",
+    }
+    monkeypatch.setattr(runner, "execute_p3_operator", lambda *a, **k: calls.append(1) or observation)
+    output = tmp_path / "p3-confirmed" / "result.json"
+    monkeypatch.setattr(runner.sys, "argv", ["runner", "--mode", "live", "--p3-live-grants", str(grants), "--p3-payment", str(payment), "--facilitator-url", "https://facilitator.invalid", "--rpc-url", "https://rpc.invalid", "--output", str(output)])
+    assert runner.main() == 1
+    rows = {row["case_id"]: row for row in json.loads(output.read_text())["cases"]}
+    assert rows["A13"]["status"] == rows["A14"]["status"] == "PASS"
+    assert rows["A13"]["payment_evidence"]["tx_hash"] == rows["A14"]["payment_evidence"]["tx_hash"]
+    assert rows["A14"]["payment_evidence"]["settlement_count"] == 1
+    assert calls == [1]

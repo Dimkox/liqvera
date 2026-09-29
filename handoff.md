@@ -227,6 +227,26 @@ The opt-in PostgreSQL command is
 `TEST_DATABASE_URL=postgresql://.../liqvera_f4_test_<suffix> TEST_DATABASE_DISPOSABLE=1 npm --prefix apps/mezo-gateway run test:postgres`;
 those are the only two test-specific environment names. It was not run because
 no explicitly disposable database URL was provided or inspected.
+
+The user subsequently approved and applied migrations 001–004 only to isolated
+target `docker://liqvera-f7-postgres/database/liqvera_f4_test_fdae49d`.
+The first migrator run applied all four files, the second was idempotent, and
+the real PostgreSQL suite passed 6/6: twenty independent pools had one grant
+winner, restart admitted zero further consumption, injected rollback retained
+`VERIFIED` without consumption, and append-only update/delete were rejected.
+No credential value is retained and this evidence grants no other DB or network
+operation.
+
+P3 now has a separate bounded operator executable (`npm --prefix
+apps/mezo-gateway run p3-operator -- ...`) and the acceptance runner accepts its
+closed linked A13/A14 result. It consumes a byte-bounded exact P3 grant and a
+human-wallet-produced signed x402 payload—never a private key—and requires
+exactly one of `DATABASE_URL` or `DATABASE_URL_FILE`, an HTTPS facilitator URL,
+and a read-only HTTPS Mezo RPC URL. Before network I/O it checks the current
+clean commit/tree, canonical P3 plan and exact 001–004 migration checksums.
+Durable consumption/`SUBMITTING` precedes the sole settlement; pending or lost
+responses remain spent and confirm-only. Deterministic fake E2E covers confirmed
+and pending paths plus replay. No live payment or network call was performed.
 Final migration identities are `001_ledger.sql`
 `bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b`,
 `002_fix_immutable_ledger_identity.sql`

@@ -9,6 +9,12 @@
 | P1 | Local acceptance | fresh out-of-tree run; local A30; explicit honest omissions; A26/A28 only with real prerequisites |
 | P2 | Public-read boundary | exact hosts/methods, no redirect/proxy, chain/token/decimals, malformed/oversize/rate-limit stops |
 | P3 | Production payment boundary | identity/replay/finality/reorg/browser cancel/wrong-chain/unknown/no-retry; one exact testnet envelope |
+
+The approved isolated PostgreSQL operation passed all six real database tests,
+including twenty-pool single-winner consumption, restart, rollback and
+append-only enforcement. Operator fake E2E proves confirmed and pending paths,
+one settlement across replay, preflight zero-I/O, closed signed inputs, and
+migration mismatch before any external adapter call.
 | P4 | Release artifacts | two builds where reproducibility claimed; archive safety; checksum missing/extra/corrupt; secret canaries |
 | P5 | Publication | old/new main OIDs, tag object/target, draft assets, download re-hash, anonymous source/tree comparison |
 

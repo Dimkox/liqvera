@@ -18,7 +18,7 @@ export const unresolvedIdentity: AuthorizationPolicy = {
   async bindsTransfer(){return false;}
 };
 export const unresolvedFinality: FinalityPolicy = { reviewed:false,version:'FINALITY_RULE_UNVERIFIED',async isFinal(){return false;} };
-const facilitator=new URL('https://facilitator.vativ.io');
+const defaultFacilitator=new URL('https://facilitator.vativ.io');
 export function settlementTransaction(result: Pick<SettleResponse,'success'|'errorReason'|'transaction'>):string|null {
   const pending=result.success===false&&result.errorReason==='settlement_pending';
   return (result.success===true||pending)&&typeof result.transaction==='string'&&/^0x[0-9a-fA-F]{64}$/.test(result.transaction)
@@ -26,7 +26,7 @@ export function settlementTransaction(result: Pick<SettleResponse,'success'|'err
 }
 // No retries, redirects or custom status endpoint. The SDK controls protocol
 // payload construction; this transport supplies bounded I/O only.
-const transport={
+function facilitatorTransport(facilitator:URL) { return {
   async verify(paymentPayload: PaymentPayload,paymentRequirements: PaymentRequirements): Promise<VerifyResponse> {
     return await boundedJson(new URL('/verify',facilitator),{method:'POST',body:JSON.stringify({x402Version:2,paymentPayload,paymentRequirements})},65536) as VerifyResponse;
   },
@@ -36,12 +36,15 @@ const transport={
   async getSupported(): Promise<SupportedResponse> {
     return await boundedJson(new URL('/supported',facilitator),{method:'GET'},65536) as SupportedResponse;
   }
-};
+}; }
 export class OfficialX402 implements PaymentPort {
-  private readonly server=new x402ResourceServer(transport).register(NETWORK,new ExactEvmScheme());
+  private readonly server:x402ResourceServer;
   private initialized=false;
   constructor(private readonly identity: AuthorizationPolicy,private readonly finality: FinalityPolicy,private readonly reader: MezoReceiptReader,private readonly publicBase: URL,
-    private readonly grant: LivePaymentGrant|null=null,private readonly liveContext:LivePaymentContext|null=null,private readonly now:()=>Date=()=>new Date()) {}
+    private readonly grant: LivePaymentGrant|null=null,private readonly liveContext:LivePaymentContext|null=null,private readonly now:()=>Date=()=>new Date(),
+    facilitator:URL=defaultFacilitator) {
+    this.server=new x402ResourceServer(facilitatorTransport(facilitator)).register(NETWORK,new ExactEvmScheme());
+  }
   private authorizeGrant():void {
     if(!this.grant||!this.liveContext)throw new PublicError('PAYMENT_NOT_READY');
     this.grant.authorize({...this.liveContext,now:this.now()});

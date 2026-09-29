@@ -24,6 +24,42 @@
       "resource": null,
       "route_id": "337ef5ec16a0",
       "scope_digest": "82c9cb3127d0b55ca43f34ec816c8349a1d770ef52d0e4293ace580a36820f73"
+    },
+    {
+      "action": null,
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T16:50:30+00:00",
+      "decision": "approved",
+      "gate": "scope_and_design_approval",
+      "reason": "User explicitly requested researched A13/A14 implementation and application of migration 003 to isolated PostgreSQL; approved design uses facilitator-sponsored exact EIP-3009 with zero buyer native gas and durable receipt provenance.",
+      "resource": null,
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "85f0c4c9ca66141009896ca487454e214bc984045a2ecf03eb59c1aa0262b9ae"
+    },
+    {
+      "action": "migration-plan",
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T16:50:49+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "User approved migration 003 plan for isolated disposable Liqvera PostgreSQL; additive migrations 001 through 004, idempotency, concurrency, rollback and append-only tests only.",
+      "resource": null,
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "85f0c4c9ca66141009896ca487454e214bc984045a2ecf03eb59c1aa0262b9ae"
+    },
+    {
+      "action": "external-write",
+      "actor": "user",
+      "change_id": "20260929-f7-live-acceptance-and-release-0-0-1-337ef5",
+      "decided_at": "2026-09-29T16:50:50+00:00",
+      "decision": "approved",
+      "gate": "migration_or_external_write_approval",
+      "reason": "User explicitly instructed apply migration 003 PG; authorize only this isolated disposable Liqvera database target.",
+      "resource": "docker://liqvera-f7-postgres/database/liqvera_f4_test_fdae49d",
+      "route_id": "337ef5ec16a0",
+      "scope_digest": "85f0c4c9ca66141009896ca487454e214bc984045a2ecf03eb59c1aa0262b9ae"
     }
   ],
   "route_id": "337ef5ec16a0",

@@ -30,11 +30,15 @@
   seam it seals A13/A14 as blocked before facilitator or RPC I/O.
 - [x] Add opt-in disposable-PostgreSQL coverage for 20-pool atomic grant
   consumption, restart rejection, rollback preservation and append-only rows.
+- [x] Record the approved isolated PostgreSQL 001–004 migration/idempotency and
+  20-pool evidence without credentials; add the bounded signed-payload-only P3
+  operator, zero-I/O preflight and linked A13/A14 acceptance evidence seam.
 - [ ] Obtain exact short-lived P2 public-read grant; execute allowlisted reads.
 - [ ] Obtain exact short-lived P3 testnet-write grant including buyer/payee,
   amount, one-submit budget, and buyer native-gas cap; human confirms wallet.
-  Migration 003 remains unapplied and the exact grant/wallet/RPC/facilitator
-  inputs remain absent, so no live payment is authorized or executed.
+  Migrations 001–004 are proven only on the approved isolated disposable DB;
+  exact grant/wallet/RPC/facilitator inputs remain absent, so no live payment is
+  authorized or executed.
 - [ ] P4 set root product `VERSION=0.0.1`, preserve component `0.1.0`, build and
   verify manifest, artifacts, checksums, notes, scans, verifier, and reviews.
 - [ ] Obtain exact P5 publication grant; fast-forward main, tag `v0.0.1`, create

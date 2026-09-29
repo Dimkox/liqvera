@@ -54,6 +54,15 @@ export const MUSD_PERMIT = {
   ],
 } as const;
 
+export const X402_PERMIT2 = {
+  assetTransferMethod: "permit2",
+  permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+  exactProxyAddress: "0x402085c248EeA27D92E8b30b2C58ed07f9E20001",
+  approvalMode: "eip2612-gas-sponsoring",
+  requiredExtension: "eip2612GasSponsoring",
+  authorizationIdentityVersion: "liqvera-permit2-eip2612-identity/v1",
+} as const;
+
 /**
  * Read-only verification ABI derived verbatim, item by item, from the pinned
  * Matsnet MUSD deployment artifact. The full upstream ABI remains vendored.

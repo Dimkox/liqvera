@@ -18,11 +18,13 @@
     "@x402/core": "2.16.0",
     "@x402/evm": "2.16.0",
     "@x402/express": "2.16.0",
+    "@x402/extensions": "2.16.0",
     "@x402/paywall": "2.16.0",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
     "express": "5.1.0",
-    "pg": "8.16.3"
+    "pg": "8.16.3",
+    "viem": "2.48.11"
   },
   "devDependencies": {
     "@types/express": "5.0.3",

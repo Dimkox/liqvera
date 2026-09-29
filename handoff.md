@@ -5,6 +5,19 @@ Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f075
 
 ## F7 live acceptance and release 0.0.1 — 2026-09-29
 
+The local P3 authorization boundary now follows the facilitator capability
+observed by the approved analysis: exact Permit2 with the
+`eip2612GasSponsoring` extension, not the earlier EIP-3009 assumption. The
+gateway binds the official x402 2.16 canonical Permit2 and exact proxy constants,
+requires MUSD's EIP-2612 domain, hashes both signatures out of durable correlation,
+and verifies a byte-canonical `settleWithPermit` call before accepting the exact
+Transfer/finality evidence. The P3 plan and byte-exact grant bind the method,
+addresses, approval mode, required extension and identity-policy version. The
+browser uses the approved read-only RPC only to construct the off-chain permit;
+no buyer approval transaction is accepted. Local installed-SDK constants were
+verified; no live `eth_getCode`, payment, wallet or network action was run because
+no short-lived public-read/payment grant was provided. A13/A14 remain blocked.
+
 Route `337ef5ec16a0` and change package
 `engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/`
 are implementing approved local-only P0/P1. Four route-selected analyses were
@@ -212,8 +225,14 @@ The exact P3 inputs are: one short-lived byte-exact A13/A14 grant bound to the
 clean commit/tree and canonical P3 plan; lowercase buyer and distinct payee;
 scheme `exact`, broadcaster `facilitator`, chain `eip155:31611`, the frozen MUSD
 address and `10000000000000000` atomic amount; one-submit budget; and
-`max_buyer_native_gas_wei=100000000000000`. The human wallet supplies only the
-EIP-3009 signature. The configured facilitator performs the sole submission,
+`max_buyer_native_gas_wei=100000000000000`. The grant additionally binds
+`asset_transfer_method=permit2`, canonical Permit2
+`0x000000000022D473030F116dDEE9F6B43aC78BA3`, exact proxy
+`0x402085c248EeA27D92E8b30b2C58ed07f9E20001`, approval mode
+`eip2612-gas-sponsoring`, required extension `eip2612GasSponsoring`, and identity
+version `liqvera-permit2-eip2612-identity/v1`. The human wallet supplies only
+the off-chain Permit2 and EIP-2612 signatures; no buyer chain approval is allowed.
+The configured facilitator performs the sole submission,
 and the approved read-only Mezo RPC supplies chain, receipt, transaction,
 canonical-block and before/after buyer-balance observations. Migration 003 must
 already be applied through a separately approved database operation.

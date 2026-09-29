@@ -218,3 +218,9 @@ For x402 exact EIP-3009, the facilitator broadcasts and pays transaction gas,
 so the approved cap governs only buyer native-gas spend and the accepted value
 is exactly zero. Confirm this with non-buyer `tx.from` and before/after buyer
 native-balance equality; do not claim authority over facilitator gas.
+
+## 2026-09-29 — Select Permit2 only with atomic EIP-2612 sponsorship
+
+The current facilitator capability advertises Permit2 rather than EIP-3009 for
+Mezo MUSD. Bind the canonical Permit2 and exact proxy addresses and require the
+EIP-2612 extension so the buyer signs off chain and never sends an approval transaction.

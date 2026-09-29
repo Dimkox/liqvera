@@ -77,11 +77,13 @@ Canonical governance JSON under `governance/` remains separately reviewed author
   and prominent limitations; it cannot be called completed F7.
 - Current decision is NO-GO for P2, P3, and P5.
 
-## Exact EIP-3009 settlement authority
+## Exact Permit2 settlement authority with EIP-2612 gas sponsorship
 
-The official x402 exact-EVM specification defines EIP-3009 as a gasless buyer
-authorization: the buyer signs `transferWithAuthorization` fields and the
-facilitator broadcasts the transaction and pays its gas. A transaction-bearing
+The pinned official x402 2.16 implementation defines the selected flow as a
+Permit2 witness authorization plus the `eip2612GasSponsoring` extension. The
+buyer signs both authorizations off chain; the facilitator atomically calls
+`settleWithPermit` on the exact proxy and pays transaction gas. No buyer chain
+transaction or pre-approval is allowed. A transaction-bearing
 `settlement_pending` response is therefore spent and confirm-only, never a
 retry instruction. Sources:
 
@@ -89,9 +91,11 @@ retry instruction. Sources:
 - <https://github.com/x402-foundation/x402/blob/main/specs/x402-specification-v1.md>
 
 Accordingly, the approved `0.0001` test-BTC ceiling is a buyer-native-gas spend
-ceiling, not authority over facilitator gas. The exact EIP-3009 path requires
+ceiling, not authority over facilitator gas. This exact Permit2 path requires
 buyer gas spend to equal zero and proves this conservatively with before/after
-buyer native-balance observations plus `tx.from != buyer`. Missing observations
+buyer native-balance observations plus `tx.from != buyer`, exact canonical
+Permit2/proxy addresses, exact re-encoded `settleWithPermit` calldata, and the
+MUSD `Transfer` log. Missing observations
 or any buyer delta enter manual review. Migration 003 atomically consumes the
 grant before the one facilitator call; pending or ambiguous outcomes remain
 spent and reconciliation-only through twelve canonical confirmations.

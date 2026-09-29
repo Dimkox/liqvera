@@ -1,48 +1,66 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { PaymentPayload } from '@x402/core/types';
+import { encodeFunctionData } from 'viem';
+import { PERMIT2_ADDRESS, x402ExactPermit2ProxyABI, x402ExactPermit2ProxyAddress } from '@x402/evm';
 import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type Quote } from '../src/domain/model.js';
 import { MezoAuthorizationPolicy, MezoFinalityPolicy } from '../src/security/payment-policy.js';
 import { LivePaymentGrant } from '../src/security/live-grant.js';
 import { databaseIdentity } from '../src/p3-operator.js';
 import { composeOfficialX402 } from '../src/security/live-composition.js';
-import { settlementTransaction } from '../src/adapters/x402.js';
+import { permit2Capability, settlementTransaction } from '../src/adapters/x402.js';
 
 const payer='0x1111111111111111111111111111111111111111';
 const payTo='0x2222222222222222222222222222222222222222';
 const quote={id:'00000000-0000-4000-8000-000000000001',report_id:'00000000-0000-4000-8000-000000000002',report_sha256:'a'.repeat(64),terms:{expected_payer:payer,pay_to:payTo}} as Quote;
-function payload(): PaymentPayload { return {x402Version:2,accepted:{scheme:'exact',network:NETWORK,asset:ASSET,amount:AMOUNT,payTo},payload:{signature:`0x${'1'.repeat(128)}1b`,authorization:{from:payer,to:payTo,value:AMOUNT,validAfter:'0',validBefore:'1790640300',nonce:`0x${'2'.repeat(64)}`}}} as unknown as PaymentPayload; }
+const permit2='0x000000000022D473030F116dDEE9F6B43aC78BA3';
+const proxy='0x402085c248EeA27D92E8b30b2C58ed07f9E20001';
+function payload(): PaymentPayload { return {x402Version:2,accepted:{scheme:'exact',network:NETWORK,asset:ASSET,amount:AMOUNT,payTo,extra:{assetTransferMethod:'permit2',name:'Mezo USD',version:'1'}},payload:{signature:`0x${'1'.repeat(130)}`,permit2Authorization:{from:payer,permitted:{token:ASSET,amount:AMOUNT},spender:proxy,nonce:'42',deadline:'1790640300',witness:{to:payTo,validAfter:'0'}}},extensions:{eip2612GasSponsoring:{info:{from:payer,asset:ASSET,spender:permit2,amount:AMOUNT,nonce:'7',deadline:'1790640300',signature:`0x${'2'.repeat(130)}`,version:'1'},schema:{}}}} as unknown as PaymentPayload; }
 
-test('authorization identity binds exact EIP-3009 terms and nonce',async()=>{
+test('authorization identity binds exact Permit2 plus EIP-2612 sponsorship without raw signatures',async()=>{
   const policy=new MezoAuthorizationPolicy(()=>new Date('2026-09-29T00:00:00Z'));
   const identity=policy.identify(payload(),quote);
   assert.equal(identity.payer,payer); assert.equal(identity.version,policy.version);
   assert.match(identity.identity,/^[0-9a-f]{64}$/);
   const attempt={authorization_identity:identity.identity,identity_version:identity.version,correlation:identity.correlation,tx_hash:`0x${'3'.repeat(64)}`} as Attempt;
-  const word=(value:string)=>value.replace(/^0x/,'').padStart(64,'0');
-  const signature=`${'1'.repeat(128)}1b`;
-  const input=`0xe3ee160e${word(payer)}${word(payTo)}${word(BigInt(AMOUNT).toString(16))}${word('0')}${word(BigInt('1790640300').toString(16))}${'2'.repeat(64)}${word('1b')}${'1'.repeat(64)}${'1'.repeat(64)}`;
-  assert.equal(await policy.bindsTransfer(attempt,{hash:attempt.tx_hash,to:ASSET,input},{transactionHash:attempt.tx_hash}),true);
+  assert.equal(identity.version,'liqvera-permit2-eip2612-identity/v1');
+  assert.equal(JSON.stringify(identity.correlation).includes(`0x${'1'.repeat(130)}`),false);
+  assert.equal(JSON.stringify(identity.correlation).includes(`0x${'2'.repeat(130)}`),false);
+  const input=encodeFunctionData({abi:x402ExactPermit2ProxyABI,functionName:'settleWithPermit',args:[
+    {value:BigInt(AMOUNT),deadline:1790640300n,r:`0x${'2'.repeat(64)}`,s:`0x${'2'.repeat(64)}`,v:34},
+    {permitted:{token:ASSET,amount:BigInt(AMOUNT)},nonce:42n,deadline:1790640300n},payer,{to:payTo,validAfter:0n},`0x${'1'.repeat(130)}`,
+  ]});
+  assert.equal(await policy.bindsTransfer(attempt,{hash:attempt.tx_hash,to:proxy,input},{transactionHash:attempt.tx_hash}),true);
   assert.equal(await policy.bindsTransfer(attempt,{hash:attempt.tx_hash,to:ASSET,input:`0xdeadbeef${input.slice(10)}`},{transactionHash:attempt.tx_hash}),false);
-  assert.equal(signature.length,130);
 });
 
 test('authorization identity rejects changed amount and expired validity',()=>{
   const policy=new MezoAuthorizationPolicy(()=>new Date('2026-09-29T00:00:00Z'));
-  const changed=payload() as unknown as {payload:{authorization:{value:string}}}; changed.payload.authorization.value='1';
+  const changed=payload() as unknown as {payload:{permit2Authorization:{permitted:{amount:string}}}}; changed.payload.permit2Authorization.permitted.amount='1';
   assert.throws(()=>policy.identify(changed as unknown as PaymentPayload,quote),(e:unknown)=>e instanceof PublicError&&e.code==='PAYMENT_REJECTED');
-  const expired=payload() as unknown as {payload:{authorization:{validBefore:string}}}; expired.payload.authorization.validBefore='1';
+  const expired=payload() as unknown as {payload:{permit2Authorization:{deadline:string}}}; expired.payload.permit2Authorization.deadline='1';
   assert.throws(()=>policy.identify(expired as unknown as PaymentPayload,quote),(e:unknown)=>e instanceof PublicError&&e.code==='PAYMENT_REJECTED');
   const wrongScheme=payload() as unknown as {accepted:{scheme:string}}; wrongScheme.accepted.scheme='upto';
   assert.throws(()=>policy.identify(wrongScheme as unknown as PaymentPayload,quote),(e:unknown)=>e instanceof PublicError&&e.code==='PAYMENT_REJECTED');
-  const permit2=payload() as unknown as {accepted:{extra:Record<string,string>}}; permit2.accepted.extra={assetTransferMethod:'permit2'};
-  assert.throws(()=>policy.identify(permit2 as unknown as PaymentPayload,quote),(e:unknown)=>e instanceof PublicError&&e.code==='PAYMENT_REJECTED');
+  const eip3009=payload() as unknown as {accepted:{extra:Record<string,string>}}; eip3009.accepted.extra={assetTransferMethod:'eip3009',name:'Mezo USD',version:'1'};
+  assert.throws(()=>policy.identify(eip3009 as unknown as PaymentPayload,quote),(e:unknown)=>e instanceof PublicError&&e.code==='PAYMENT_REJECTED');
+  const missingExtension=payload() as unknown as {extensions?:unknown}; delete missingExtension.extensions;
+  assert.throws(()=>policy.identify(missingExtension as unknown as PaymentPayload,quote),(e:unknown)=>e instanceof PublicError&&e.code==='PAYMENT_REJECTED');
 });
 
 test('settlement_pending transaction is spent confirm-only and other failures are not transaction hints',()=>{
   const transaction=`0x${'3'.repeat(64)}`;
   assert.equal(settlementTransaction({success:false,errorReason:'settlement_pending',transaction}),transaction);
   assert.equal(settlementTransaction({success:false,errorReason:'invalid_payload',transaction}),null);
+});
+
+test('facilitator capability must be exact Permit2 with EIP-2612 gas sponsorship',()=>{
+  assert.equal(PERMIT2_ADDRESS,permit2);
+  assert.equal(x402ExactPermit2ProxyAddress,proxy);
+  assert.equal(permit2Capability({extra:{assetTransferMethod:'permit2'}},['eip2612GasSponsoring']),true);
+  assert.equal(permit2Capability({extra:{assetTransferMethod:'eip3009'}},['eip2612GasSponsoring']),false);
+  assert.equal(permit2Capability({extra:{assetTransferMethod:'permit2'}},[]),false);
+  assert.equal(permit2Capability({extra:{assetTransferMethod:'permit2'}},['erc20ApprovalGasSponsoring']),false);
 });
 
 test('finality requires twelve canonical confirmations and rejects reorg',async()=>{
@@ -57,7 +75,7 @@ test('finality requires twelve canonical confirmations and rejects reorg',async(
   assert.equal(await policy.isFinal(receipt,block,reorg as never),false);
 });
 
-function grantRaw(){return {schema:'liqvera-mezo-payment-grant/v1',grant_id:'00000000-0000-4000-8000-000000000099',subject_commit:'a'.repeat(40),subject_tree:'b'.repeat(40),plan_sha256:'c'.repeat(64),scheme:'exact',settlement_broadcaster:'facilitator',network:NETWORK,chain_id:31611,asset:ASSET,amount_atomic:AMOUNT,buyer:payer,pay_to:payTo,maximum_settlement_submissions:1,max_buyer_native_gas_wei:'100000000000000',facilitator_url:'https://facilitator.vativ.io/',rpc_url:'https://rpc.test.mezo.org/',database_identity_kind:'sha256-credential-free-postgresql-endpoint/v1',database_host_policy:'loopback-only/v1',database_identity:'d'.repeat(64),expires_at:'2026-09-29T00:05:00Z'};}
+function grantRaw(){return {schema:'liqvera-mezo-payment-grant/v1',grant_id:'00000000-0000-4000-8000-000000000099',subject_commit:'a'.repeat(40),subject_tree:'b'.repeat(40),plan_sha256:'c'.repeat(64),scheme:'exact',settlement_broadcaster:'facilitator',network:NETWORK,chain_id:31611,asset:ASSET,amount_atomic:AMOUNT,buyer:payer,pay_to:payTo,maximum_settlement_submissions:1,max_buyer_native_gas_wei:'100000000000000',asset_transfer_method:'permit2',permit2_address:permit2,permit2_proxy:proxy,approval_mode:'eip2612-gas-sponsoring',required_extension:'eip2612GasSponsoring',authorization_identity_version:'liqvera-permit2-eip2612-identity/v1',facilitator_url:'https://facilitator.vativ.io/',rpc_url:'https://rpc.test.mezo.org/',database_identity_kind:'sha256-credential-free-postgresql-endpoint/v1',database_host_policy:'loopback-only/v1',database_identity:'d'.repeat(64),expires_at:'2026-09-29T00:05:00Z'};}
 
 test('live grant binds exact facilitator-sponsored settlement and buyer gas authority',()=>{
   const raw=grantRaw();
@@ -66,6 +84,8 @@ test('live grant binds exact facilitator-sponsored settlement and buyer gas auth
   assert.match(grant.digest,/^[0-9a-f]{64}$/);
   assert.throws(()=>LivePaymentGrant.parse({...raw,settlement_broadcaster:'buyer'},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);
   assert.throws(()=>LivePaymentGrant.parse({...raw,scheme:'upto'},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);
+  for(const changed of [{asset_transfer_method:'eip3009'},{permit2_address:payer},{permit2_proxy:payer},{approval_mode:'preapproved'},{required_extension:'other'}])
+    assert.throws(()=>LivePaymentGrant.parse({...raw,...changed},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);
   assert.throws(()=>LivePaymentGrant.parse({...raw,facilitator_url:'https://evil.invalid/'},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);
   assert.throws(()=>LivePaymentGrant.parse({...raw,rpc_url:'https://evil.invalid/'},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);
   assert.throws(()=>LivePaymentGrant.parse({...raw,database_identity:'0'.repeat(63)},new Date('2026-09-29T00:00:00Z')),/LIVE_GRANT_INVALID/);

@@ -21,10 +21,11 @@
   cap tests plus transactional fake restart/concurrency consumption coverage.
 - [x] Implement local P3 identity, twelve-confirmation finality, one-submit live
   grant, and pinned browser x402 wiring. Independent review remains pending.
-- [x] Replace the incorrect facilitator-gas blocker with exact EIP-3009 buyer
-  authority: the facilitator broadcasts, the buyer signs only, buyer native-gas
-  spend must be zero, and transaction/Transfer/balance/finality evidence is
-  checked through the approved read-only RPC seam.
+- [x] Replace the obsolete EIP-3009 assumption with the facilitator's exact
+  Permit2 capability and required EIP-2612 sponsorship: the facilitator
+  broadcasts, the buyer signs only off chain, buyer native-gas spend must be
+  zero, and exact proxy calldata/Transfer/balance/finality evidence is checked
+  through the approved read-only RPC seam.
 - [x] Add migration 004 for immutable confirmation provenance and a separate
   `--p3-live-grants` operator path. Without the human wallet signature/output
   seam it seals A13/A14 as blocked before facilitator or RPC I/O.

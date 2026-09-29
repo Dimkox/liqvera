@@ -30,7 +30,7 @@ Go packageable in Stage A.
 Do not infer that a live adapter, trading endpoint or production execution path exists from either architecture document.
 
 The separately invoked P3 acceptance operator is not part of ordinary gateway
-startup. It accepts a human-wallet-produced EIP-3009/x402 signature payload but
+startup. It accepts human-wallet-produced Permit2 and EIP-2612/x402 signatures but
 never wallet keys, validates the clean Git subject and exact 001–005 migration
 ledger before external I/O, and relies on PostgreSQL's atomic grant consumption
 plus `SUBMITTING` transition before its sole settlement. An ambiguous result is

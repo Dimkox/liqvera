@@ -19,7 +19,8 @@
   green before a separately approved exact envelope is shown to a human-held
   wallet; at most one submission transfers exactly `10000000000000000` atomic
   test MUSD on chain 31611 to the approved distinct merchant, under a numeric
-  buyer-native test-BTC spend cap. For exact EIP-3009 the facilitator pays gas,
+  buyer-native test-BTC spend cap. For exact Permit2 with required EIP-2612 gas
+  sponsorship the facilitator pays gas and no buyer approval transaction is allowed,
   so the required buyer native-gas delta is exactly zero; facilitator gas is
   observed but is outside buyer authority. UNKNOWN is confirm-only and never retried.
 - [ ] AC-005/P4: Liqvera product version `0.0.1` is machine-readable while all

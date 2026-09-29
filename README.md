@@ -50,9 +50,9 @@ healthcheck was added. See
 [verification evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-verification.md).
 
 The historical live public probe returned `COMPATIBILITY_PASS_PAYMENT_BLOCKED`.
-F7 now implements an explicit EIP-3009 authorization identity, twelve-block
-canonical finality policy, exact one-submit testnet grant, and pinned official
-x402 browser composition. Ordinary startup intentionally has no live grant, so
+F7 now implements an explicit Permit2 authorization identity with required
+EIP-2612 gas sponsorship, twelve-block canonical finality, an exact one-submit
+testnet grant, and pinned official x402 browser composition. Ordinary startup intentionally has no live grant, so
 payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`; no new public
 probe, testnet payment, wallet operation, or deployment has been performed.
 

@@ -29,8 +29,8 @@ migration 005 persists it for replay without an RPC re-query.
 - Unit: semantic validators, assertion dispatcher, evidence writer, identity and
   finality policies, release manifest/checksum tooling.
 - Local security: exact commit/tree/plan/case/request grant binding, 15-minute
-  expiry, HTTPS-only allowlist, public stable DNS resolution, exact EIP-3009
-  identity, twelve canonical confirmations, one submission and 0.0001 test-BTC
+  expiry, HTTPS-only allowlist, public stable DNS resolution, exact Permit2 plus
+  EIP-2612 sponsorship identity, twelve canonical confirmations, one submission and 0.0001 test-BTC
   gas ceiling. These tests use fakes and perform no network or wallet action.
 - Live runner authority: current commit/tree/canonical plan, four exact case
   grants, stale/body/target/linkage mutants, one shared A13/A14 submission, and
@@ -69,7 +69,8 @@ fragments fail before Pool construction. Migration 005 is bound by checksum
 ## Manual checks
 
 - Human verifies exact wallet scheme/chain/token/amount/recipient/expiry and the
-  buyer native-gas cap immediately before signature. Exact EIP-3009 requires a
-  zero buyer native-balance delta; facilitator gas is not buyer authority.
+  buyer native-gas cap immediately before signature. Exact Permit2 with atomic
+  EIP-2612 sponsorship requires a zero buyer native-balance delta and no buyer
+  chain approval; facilitator gas is not buyer authority.
 - Human verifies rendered release notes, tag target, asset names/hashes, and
   limitations immediately before draft publication.

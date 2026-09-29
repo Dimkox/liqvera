@@ -119,6 +119,11 @@ def test_p3_requires_one_byte_identical_linked_grant():
     ("facilitator_url", "https://evil.invalid/"),
     ("rpc_url", "https://evil.invalid/"),
     ("database_identity", "0" * 63),
+    ("asset_transfer_method", "eip3009"),
+    ("permit2_address", "0x1111111111111111111111111111111111111111"),
+    ("permit2_proxy", "0x1111111111111111111111111111111111111111"),
+    ("approval_mode", "preapproved"),
+    ("required_extension", "erc20ApprovalGasSponsoring"),
 ])
 def test_p3_binds_exact_external_identities(field, bad):
     value = p3_bundle()

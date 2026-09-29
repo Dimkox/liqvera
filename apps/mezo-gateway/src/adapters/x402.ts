@@ -1,6 +1,8 @@
 import { x402ResourceServer } from '@x402/core/server';
 import { decodePaymentSignatureHeader, encodePaymentRequiredHeader, encodePaymentResponseHeader } from '@x402/core/http';
 import { ExactEvmScheme } from '@x402/evm/exact/server';
+import { declareEip2612GasSponsoringExtension } from '@x402/extensions';
+import { MUSD_PERMIT, X402_PERMIT2 } from '@liqvera/mezo-protocol';
 import type { PaymentPayload, PaymentRequirements, VerifyResponse, SettleResponse, SupportedResponse } from '@x402/core/types';
 import type { AuthorizationPolicy, FinalityPolicy, PaymentPort } from '../ports/index.js';
 import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type Quote, type Receipt, type Reason } from '../domain/model.js';
@@ -23,6 +25,13 @@ export function settlementTransaction(result: Pick<SettleResponse,'success'|'err
   const pending=result.success===false&&result.errorReason==='settlement_pending';
   return (result.success===true||pending)&&typeof result.transaction==='string'&&/^0x[0-9a-fA-F]{64}$/.test(result.transaction)
     ? result.transaction.toLowerCase():null;
+}
+export function permit2Capability(kind:unknown,extensions:unknown):boolean {
+  if(!kind||typeof kind!=='object'||Array.isArray(kind)||!Array.isArray(extensions))return false;
+  const value=kind as Record<string,unknown>; const extra=value.extra;
+  return !!extra&&typeof extra==='object'&&!Array.isArray(extra)&&
+    (extra as Record<string,unknown>).assetTransferMethod===X402_PERMIT2.assetTransferMethod&&
+    extensions.length===1&&extensions[0]===X402_PERMIT2.requiredExtension;
 }
 // No retries, redirects or custom status endpoint. The SDK controls protocol
 // payload construction; this transport supplies bounded I/O only.
@@ -53,7 +62,7 @@ export class OfficialX402 implements PaymentPort {
     if(!this.identity.reviewed||!this.finality.reviewed||!this.grant||!this.liveContext)return;
     this.authorizeGrant();
     await this.server.initialize();
-    this.initialized=!!this.server.getSupportedKind(2,NETWORK,'exact');
+    this.initialized=permit2Capability(this.server.getSupportedKind(2,NETWORK,'exact'),this.server.getFacilitatorExtensions(2,NETWORK,'exact'));
   }
   blockers(): Reason[] {
     const reasons: Reason[]=[];
@@ -67,11 +76,11 @@ export class OfficialX402 implements PaymentPort {
   async requirements(quote: Quote) {
     this.ready();
     const values=await this.server.buildPaymentRequirements({scheme:'exact',network:NETWORK,payTo:quote.terms.pay_to,
-      price:{asset:ASSET,amount:AMOUNT},maxTimeoutSeconds:120});
+      price:{asset:ASSET,amount:AMOUNT},maxTimeoutSeconds:120,extra:{assetTransferMethod:X402_PERMIT2.assetTransferMethod,name:MUSD_PERMIT.domainName,version:MUSD_PERMIT.domainVersion}});
     if(values.length!==1)throw new PublicError('PAYMENT_NOT_READY');
     const value=values[0]!;
-    if(value.scheme!=='exact'||value.network!==NETWORK||value.asset.toLowerCase()!==ASSET.toLowerCase()||value.amount!==AMOUNT||value.payTo.toLowerCase()!==quote.terms.pay_to)throw new PublicError('PAYMENT_NOT_READY');
-    const required=await this.server.createPaymentRequiredResponse(values,{url:new URL(`/v1/reports/${quote.report_id}`,this.publicBase).href,description:'Liqvera immutable BTC perpetual snapshot report',mimeType:'application/json'});
+    if(value.scheme!=='exact'||value.network!==NETWORK||value.asset.toLowerCase()!==ASSET.toLowerCase()||value.amount!==AMOUNT||value.payTo.toLowerCase()!==quote.terms.pay_to||value.extra?.assetTransferMethod!==X402_PERMIT2.assetTransferMethod||value.extra?.name!==MUSD_PERMIT.domainName||value.extra?.version!==MUSD_PERMIT.domainVersion)throw new PublicError('PAYMENT_NOT_READY');
+    const required=await this.server.createPaymentRequiredResponse(values,{url:new URL(`/v1/reports/${quote.report_id}`,this.publicBase).href,description:'Liqvera immutable BTC perpetual snapshot report',mimeType:'application/json'},undefined,declareEip2612GasSponsoringExtension());
     return {value,header:encodePaymentRequiredHeader(required)};
   }
   async verify(header: string,quote: Quote) {
@@ -79,7 +88,7 @@ export class OfficialX402 implements PaymentPort {
     const payload=decodePaymentSignatureHeader(paymentHeader(header));
     const {value:requirements}=await this.requirements(quote);
     if(payload.x402Version!==2 || payload.accepted?.scheme!=='exact'||payload.accepted.network!==NETWORK||
-      payload.accepted.asset?.toLowerCase()!==ASSET.toLowerCase()||payload.accepted.amount!==AMOUNT||payload.accepted.payTo?.toLowerCase()!==quote.terms.pay_to)
+      payload.accepted.asset?.toLowerCase()!==ASSET.toLowerCase()||payload.accepted.amount!==AMOUNT||payload.accepted.payTo?.toLowerCase()!==quote.terms.pay_to||payload.accepted.extra?.assetTransferMethod!==X402_PERMIT2.assetTransferMethod)
       throw new PublicError('PAYMENT_REJECTED',409);
     const result=await this.server.verifyPayment(payload,requirements);
     if(result.isValid!==true||result.payer?.toLowerCase()!==quote.terms.expected_payer)throw new PublicError('PAYMENT_REJECTED',409);

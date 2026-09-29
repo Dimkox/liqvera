@@ -1,10 +1,12 @@
 import { createHash } from 'node:crypto';
 import type { PaymentPayload } from '@x402/core/types';
+import { PERMIT2_ADDRESS, x402ExactPermit2ProxyABI, x402ExactPermit2ProxyAddress } from '@x402/evm';
+import { decodeFunctionData, encodeFunctionData } from 'viem';
+import { MUSD_PERMIT } from '@liqvera/mezo-protocol';
 import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type AuthorizationIdentity, type Quote } from '../domain/model.js';
 import type { AuthorizationPolicy, FinalityPolicy, ReadonlyRpc } from '../ports/index.js';
 
 const ADDRESS=/^0x[0-9a-f]{40}$/;
-const HASH=/^0x[0-9a-f]{64}$/;
 const UINT=/^(0|[1-9][0-9]*)$/;
 function object(value: unknown): Record<string,unknown> { if(!value||typeof value!=='object'||Array.isArray(value))throw new PublicError('PAYMENT_REJECTED',409); return value as Record<string,unknown>; }
 function exactKeys(value: Record<string,unknown>,keys: string[]): void { if(Object.keys(value).sort().join()!==[...keys].sort().join())throw new PublicError('PAYMENT_REJECTED',409); }
@@ -12,42 +14,58 @@ function canonical(value: Record<string,string>): string { return Object.keys(va
 
 export class MezoAuthorizationPolicy implements AuthorizationPolicy {
   readonly reviewed=true;
-  readonly version='liqvera-eip3009-identity/v1';
+  readonly version='liqvera-permit2-eip2612-identity/v1';
   constructor(private readonly now:()=>Date=()=>new Date()) {}
   identify(payment: PaymentPayload,quote: Quote): AuthorizationIdentity {
     const outer=object(payment); const accepted=object(outer.accepted); const body=object(outer.payload);
-    if(accepted.extra!==undefined) {
-      const extra=object(accepted.extra); exactKeys(extra,['assetTransferMethod']);
-      if(extra.assetTransferMethod!=='eip3009')throw new PublicError('PAYMENT_REJECTED',409);
-    }
-    exactKeys(body,['authorization','signature']); const authorization=object(body.authorization);
-    exactKeys(authorization,['from','to','value','validAfter','validBefore','nonce']);
-    const values={from:String(authorization.from).toLowerCase(),to:String(authorization.to).toLowerCase(),value:String(authorization.value),
-      validAfter:String(authorization.validAfter),validBefore:String(authorization.validBefore),nonce:String(authorization.nonce).toLowerCase()};
+    const extra=object(accepted.extra); exactKeys(extra,['assetTransferMethod','name','version']);
+    exactKeys(body,['permit2Authorization','signature']); const authorization=object(body.permit2Authorization);
+    exactKeys(authorization,['from','permitted','spender','nonce','deadline','witness']);
+    const permitted=object(authorization.permitted); exactKeys(permitted,['token','amount']);
+    const witness=object(authorization.witness); exactKeys(witness,['to','validAfter']);
+    const extensions=object(outer.extensions); exactKeys(extensions,['eip2612GasSponsoring']);
+    const extension=object(extensions.eip2612GasSponsoring); exactKeys(extension,['info','schema']);
+    const permit=object(extension.info); exactKeys(permit,['from','asset','spender','amount','nonce','deadline','signature','version']);
+    const values={from:String(authorization.from).toLowerCase(),token:String(permitted.token).toLowerCase(),amount:String(permitted.amount),
+      spender:String(authorization.spender).toLowerCase(),nonce:String(authorization.nonce),deadline:String(authorization.deadline),
+      to:String(witness.to).toLowerCase(),validAfter:String(witness.validAfter)};
+    const approval={from:String(permit.from).toLowerCase(),asset:String(permit.asset).toLowerCase(),spender:String(permit.spender).toLowerCase(),
+      amount:String(permit.amount),nonce:String(permit.nonce),deadline:String(permit.deadline),version:String(permit.version)};
     if(outer.x402Version!==2||accepted.scheme!=='exact'||accepted.network!==NETWORK||String(accepted.asset).toLowerCase()!==ASSET.toLowerCase()||
-      accepted.amount!==AMOUNT||String(accepted.payTo).toLowerCase()!==quote.terms.pay_to||values.from!==quote.terms.expected_payer||values.to!==quote.terms.pay_to||
-      values.value!==AMOUNT||!ADDRESS.test(values.from)||!ADDRESS.test(values.to)||!UINT.test(values.validAfter)||!UINT.test(values.validBefore)||!HASH.test(values.nonce)||
-      typeof body.signature!=='string'||!/^0x[0-9a-f]{130}$/.test(body.signature))throw new PublicError('PAYMENT_REJECTED',409);
-    const now=Math.floor(this.now().getTime()/1000); const before=Number(values.validBefore); const after=Number(values.validAfter);
-    if(!Number.isSafeInteger(before)||!Number.isSafeInteger(after)||after>now||before<=now||before-now>600)throw new PublicError('PAYMENT_REJECTED',409);
+      accepted.amount!==AMOUNT||String(accepted.payTo).toLowerCase()!==quote.terms.pay_to||extra.assetTransferMethod!=='permit2'||extra.name!==MUSD_PERMIT.domainName||extra.version!==MUSD_PERMIT.domainVersion||
+      values.from!==quote.terms.expected_payer||values.to!==quote.terms.pay_to||values.token!==ASSET.toLowerCase()||values.amount!==AMOUNT||
+      values.spender!==x402ExactPermit2ProxyAddress.toLowerCase()||!ADDRESS.test(values.from)||!ADDRESS.test(values.to)||!UINT.test(values.validAfter)||!UINT.test(values.deadline)||!UINT.test(values.nonce)||
+      approval.from!==values.from||approval.asset!==values.token||approval.spender!==PERMIT2_ADDRESS.toLowerCase()||approval.amount!==AMOUNT||approval.version!=='1'||
+      !UINT.test(approval.nonce)||!UINT.test(approval.deadline)||typeof body.signature!=='string'||!/^0x[0-9a-fA-F]{130}$/.test(body.signature)||
+      typeof permit.signature!=='string'||!/^0x[0-9a-fA-F]{130}$/.test(permit.signature))throw new PublicError('PAYMENT_REJECTED',409);
+    const now=Math.floor(this.now().getTime()/1000); const deadline=Number(values.deadline); const after=Number(values.validAfter); const approvalDeadline=Number(approval.deadline);
+    if(!Number.isSafeInteger(deadline)||!Number.isSafeInteger(after)||!Number.isSafeInteger(approvalDeadline)||after>now||deadline<=now||deadline-now>600||approvalDeadline<deadline||approvalDeadline-now>600)throw new PublicError('PAYMENT_REJECTED',409);
     const signatureCommitment=createHash('sha256').update(body.signature).digest('hex');
-    const correlation={...values,signature_commitment:signatureCommitment,network:NETWORK,asset:ASSET.toLowerCase(),asset_transfer_method:'eip3009',quote_id:quote.id,report_id:quote.report_id,report_sha256:quote.report_sha256};
+    const approvalSignatureCommitment=createHash('sha256').update(permit.signature).digest('hex');
+    const correlation={...values,eip2612_from:approval.from,eip2612_asset:approval.asset,eip2612_spender:approval.spender,eip2612_amount:approval.amount,
+      eip2612_nonce:approval.nonce,eip2612_deadline:approval.deadline,eip2612_version:approval.version,signature_commitment:signatureCommitment,
+      eip2612_signature_commitment:approvalSignatureCommitment,network:NETWORK,asset:ASSET.toLowerCase(),asset_transfer_method:'permit2',
+      approval_mode:'eip2612-gas-sponsoring',required_extension:'eip2612GasSponsoring',permit2_address:PERMIT2_ADDRESS.toLowerCase(),
+      permit2_proxy:x402ExactPermit2ProxyAddress.toLowerCase(),quote_id:quote.id,report_id:quote.report_id,report_sha256:quote.report_sha256};
     const identity=createHash('sha256').update(canonical(correlation)).digest('hex');
-    return {identity,version:this.version,payer:values.from,valid_until:new Date(before*1000).toISOString(),correlation};
+    return {identity,version:this.version,payer:values.from,valid_until:new Date(Math.min(deadline,approvalDeadline)*1000).toISOString(),correlation};
   }
   async bindsTransfer(attempt: Attempt,transactionValue: unknown,logValue: unknown): Promise<boolean> {
-    if(attempt.identity_version!==this.version||attempt.correlation.network!==NETWORK||attempt.correlation.asset!==ASSET.toLowerCase()||attempt.correlation.value!==AMOUNT)return false;
-    const transaction=object(transactionValue); const log=object(logValue); const input=transaction.input;
-    if(transaction.hash!==attempt.tx_hash||log.transactionHash!==attempt.tx_hash||String(transaction.to).toLowerCase()!==ASSET.toLowerCase()||
-      typeof input!=='string'||!/^0xe3ee160e[0-9a-f]{576}$/.test(input))return false;
-    const words=Array.from({length:9},(_,index)=>input.slice(10+index*64,10+(index+1)*64));
-    const addressWord=(value:string)=>value.slice(2).padStart(64,'0');
-    const uintWord=(value:string)=>BigInt(value).toString(16).padStart(64,'0');
-    const signature=`0x${words[7]!}${words[8]!}${words[6]!.slice(62)}`;
-    return words[0]===addressWord(attempt.correlation.from!)&&words[1]===addressWord(attempt.correlation.to!)&&
-      words[2]===uintWord(attempt.correlation.value!)&&words[3]===uintWord(attempt.correlation.validAfter!)&&
-      words[4]===uintWord(attempt.correlation.validBefore!)&&words[5]===attempt.correlation.nonce!.slice(2)&&
-      createHash('sha256').update(signature).digest('hex')===attempt.correlation.signature_commitment;
+    try {
+      if(attempt.identity_version!==this.version||attempt.correlation.network!==NETWORK||attempt.correlation.asset!==ASSET.toLowerCase()||attempt.correlation.amount!==AMOUNT)return false;
+      const transaction=object(transactionValue); const log=object(logValue); const input=transaction.input;
+      if(transaction.hash!==attempt.tx_hash||log.transactionHash!==attempt.tx_hash||String(transaction.to).toLowerCase()!==x402ExactPermit2ProxyAddress.toLowerCase()||typeof input!=='string')return false;
+      const decoded=decodeFunctionData({abi:x402ExactPermit2ProxyABI,data:input as `0x${string}`});
+      if(decoded.functionName!=='settleWithPermit'||!decoded.args)return false;
+      if(encodeFunctionData({abi:x402ExactPermit2ProxyABI,functionName:'settleWithPermit',args:decoded.args})!==input)return false;
+      const [permit2612,permit2,owner,witness,signature]=decoded.args as unknown as [Record<string,unknown>,Record<string,unknown>,string,Record<string,unknown>,string];
+      const permitted=object(permit2.permitted);
+      const approvalSignature=`0x${String(permit2612.r).slice(2)}${String(permit2612.s).slice(2)}${Number(permit2612.v).toString(16).padStart(2,'0')}`;
+      return String(owner).toLowerCase()===attempt.correlation.from&&String(permitted.token).toLowerCase()===attempt.correlation.token&&String(permitted.amount)===attempt.correlation.amount&&
+        String(permit2.nonce)===attempt.correlation.nonce&&String(permit2.deadline)===attempt.correlation.deadline&&String(witness.to).toLowerCase()===attempt.correlation.to&&
+        String(witness.validAfter)===attempt.correlation.validAfter&&String(permit2612.value)===attempt.correlation.eip2612_amount&&String(permit2612.deadline)===attempt.correlation.eip2612_deadline&&
+        createHash('sha256').update(signature).digest('hex')===attempt.correlation.signature_commitment&&createHash('sha256').update(approvalSignature).digest('hex')===attempt.correlation.eip2612_signature_commitment;
+    } catch { return false; }
   }
 }
 

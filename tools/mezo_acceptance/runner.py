@@ -18,22 +18,48 @@ from urllib.parse import urlsplit
 from jsonschema import Draft202012Validator
 
 from .cases import CASES
+from .live import execute_live_cases, validate_live_bundle
+
+
+def execute_authorized_live_cases(*args, **kwargs):
+    """Runner-owned seam used by production adapters and deterministic fakes."""
+    return execute_live_cases(*args, **kwargs)
+
 
 ROOT = Path(__file__).resolve().parents[2]
 ENV_NAME = re.compile(r"^[A-Z][A-Z0-9_]*$")
 SAFE_ARG = re.compile(r"^[^\x00-\x1f\x7f]+$")
-SENSITIVE_ARG = re.compile(r"^--(?:password|secret|private-key|bearer|signature|capability|token)(?:=|$)", re.I)
-SENSITIVE_FIELD = re.compile(r"(password|secret|private|bearer|signature|cookie|authorization|capability|seed|mnemonic|token)", re.I)
-SENSITIVE_VALUE = re.compile(r"Bearer\s+\S+|-----BEGIN [^-]*PRIVATE KEY-----|0x[0-9a-fA-F]{130,}", re.I)
+SENSITIVE_ARG = re.compile(
+    r"^--(?:password|secret|private-key|bearer|signature|capability|token)(?:=|$)", re.I
+)
+SENSITIVE_FIELD = re.compile(
+    r"(password|secret|private|bearer|signature|cookie|authorization|capability|seed|mnemonic|token)",
+    re.I,
+)
+SENSITIVE_VALUE = re.compile(
+    r"Bearer\s+\S+|-----BEGIN [^-]*PRIVATE KEY-----|0x[0-9a-fA-F]{130,}", re.I
+)
 RESULT_SCHEMA = ROOT / "schemas/mezo-evidence/v1/acceptance-result.schema.json"
 DISPATCHER = ROOT / "scripts/run-local-acceptance-assertion.py"
 BLOCKED_REASON = "EXACT_EXTERNAL_GRANT_ABSENT"
-FAIL_REASONS = {"ASSERTION_EXIT_NONZERO", "ASSERTION_TIMEOUT", "ASSERTION_VALIDATION_ERROR", "ASSERTION_EXECUTION_ERROR"}
+FAIL_REASONS = {
+    "ASSERTION_EXIT_NONZERO",
+    "ASSERTION_TIMEOUT",
+    "ASSERTION_VALIDATION_ERROR",
+    "ASSERTION_EXECUTION_ERROR",
+}
 OBSERVATION_FIELDS = {
     "A01": {"baseline", "current", "expected_delta"},
     "A08": {"checks", "subject_commit", "subject_tree"},
     "A09": {"checks", "subject_commit", "subject_tree"},
-    "A27": {"subject_commit", "subject_tree", "vector_checks", "stage_a", "artifact_verifier", "fixture"},
+    "A27": {
+        "subject_commit",
+        "subject_tree",
+        "vector_checks",
+        "stage_a",
+        "artifact_verifier",
+        "fixture",
+    },
     "A30": {"checks", "subject_commit", "subject_tree"},
 }
 REQUIRED_CHECKS = {
@@ -73,9 +99,12 @@ class PlanSnapshot:
 
     def verify_unchanged(self) -> None:
         info = os.lstat(self.path)
-        if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1
-                or (info.st_dev, info.st_ino, info.st_size) != (self.device, self.inode, self.size)
-                or hashlib.sha256(self.path.read_bytes()).hexdigest() != self.digest):
+        if (
+            not stat.S_ISREG(info.st_mode)
+            or info.st_nlink != 1
+            or (info.st_dev, info.st_ino, info.st_size) != (self.device, self.inode, self.size)
+            or hashlib.sha256(self.path.read_bytes()).hexdigest() != self.digest
+        ):
             raise ValueError("acceptance plan changed after validation")
 
 
@@ -101,7 +130,14 @@ def repo_identity() -> dict[str, str]:
             remote_path = remote.removeprefix("git@github.com:")
         else:
             parsed = urlsplit(remote)
-            if parsed.scheme != "https" or parsed.hostname != "github.com" or parsed.username or parsed.password or parsed.query or parsed.fragment:
+            if (
+                parsed.scheme != "https"
+                or parsed.hostname != "github.com"
+                or parsed.username
+                or parsed.password
+                or parsed.query
+                or parsed.fragment
+            ):
                 raise ValueError("origin is not a credential-free canonical GitHub URL")
             remote_path = parsed.path.lstrip("/")
         if remote_path.removesuffix(".git") != "Dimkox/liqvera":
@@ -157,7 +193,9 @@ def read_plan(path: Path | None) -> tuple[dict[str, dict], PlanSnapshot | None]:
         if names != []:
             raise ValueError(f"environment inputs are not approved for {case_id}")
         commands[case_id] = item
-    snapshot = PlanSnapshot(resolved, raw, hashlib.sha256(raw).hexdigest(), info.st_dev, info.st_ino, info.st_size)
+    snapshot = PlanSnapshot(
+        resolved, raw, hashlib.sha256(raw).hexdigest(), info.st_dev, info.st_ino, info.st_size
+    )
     return commands, snapshot
 
 
@@ -166,7 +204,9 @@ def file_sha256(path: Path) -> str:
 
 
 def canonical_sha256(value: object) -> str:
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
 
 
 def _portable_interpreter_valid(value: object) -> bool:
@@ -175,7 +215,8 @@ def _portable_interpreter_valid(value: object) -> bool:
         and set(value) == {"implementation", "version", "executable_sha256"}
         and value["implementation"] == platform.python_implementation()
         and value["version"] == platform.python_version()
-        and value["executable_sha256"] == hashlib.sha256(Path(sys.executable).read_bytes()).hexdigest()
+        and value["executable_sha256"]
+        == hashlib.sha256(Path(sys.executable).read_bytes()).hexdigest()
     )
 
 
@@ -187,8 +228,13 @@ def _fixture_identity(raw: bytes, terminal: str) -> dict[str, object]:
     }
 
 
-def validate_fixture_stability(fixture: dict, current_raw: bytes, current_terminal: str,
-                               baseline_raw: bytes, baseline_terminal: str) -> None:
+def validate_fixture_stability(
+    fixture: dict,
+    current_raw: bytes,
+    current_terminal: str,
+    baseline_raw: bytes,
+    baseline_terminal: str,
+) -> None:
     baseline = _fixture_identity(baseline_raw, baseline_terminal)
     current = _fixture_identity(current_raw, current_terminal)
     expected = {
@@ -259,8 +305,12 @@ def _invalidate_published(output: Path) -> None:
     _fsync_directory(root)
 
 
-def verify_sealed_result(output: Path, expected_result_sha256: str | None = None,
-                         *, require_current_repository: bool = False) -> dict:
+def verify_sealed_result(
+    output: Path,
+    expected_result_sha256: str | None = None,
+    *,
+    require_current_repository: bool = False,
+) -> dict:
     info = os.lstat(output)
     if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_mode & 0o222:
         raise ValueError("sealed result must be one read-only regular file")
@@ -282,14 +332,24 @@ def verify_sealed_result(output: Path, expected_result_sha256: str | None = None
         for reference in row["evidence"]:
             path = root / reference["file"]
             item = os.lstat(path)
-            if (not stat.S_ISREG(item.st_mode) or item.st_nlink != 1 or item.st_mode & 0o222
-                    or item.st_size != reference["size_bytes"] or file_sha256(path) != reference["sha256"]):
+            if (
+                not stat.S_ISREG(item.st_mode)
+                or item.st_nlink != 1
+                or item.st_mode & 0o222
+                or item.st_size != reference["size_bytes"]
+                or file_sha256(path) != reference["sha256"]
+            ):
                 raise ValueError("sealed evidence integrity mismatch")
             if os.lstat(path.parent).st_mode & 0o222:
                 raise ValueError("sealed evidence directory must be non-writable")
-            evidence_reference(root, reference["file"], row["case_id"],
-                               CASES[row["case_id"]].assertion, row["execution_class"],
-                               result["repository"])
+            evidence_reference(
+                root,
+                reference["file"],
+                row["case_id"],
+                CASES[row["case_id"]].assertion,
+                row["execution_class"],
+                result["repository"],
+            )
     if require_current_repository and repo_identity() != result["repository"]:
         raise ValueError("sealed subject no longer matches the current clean repository")
     return result
@@ -298,7 +358,10 @@ def verify_sealed_result(output: Path, expected_result_sha256: str | None = None
 def validate_result_semantics(result: dict) -> None:
     expected = list(CASES)
     rows = result.get("cases")
-    if not isinstance(rows, list) or [row.get("case_id") for row in rows if isinstance(row, dict)] != expected:
+    if (
+        not isinstance(rows, list)
+        or [row.get("case_id") for row in rows if isinstance(row, dict)] != expected
+    ):
         raise ValueError("acceptance cases must use canonical A01-A30 order exactly once")
     statuses = {row["status"] for row in rows}
     derived = "FAIL" if "FAIL" in statuses else "PASS" if statuses == {"PASS"} else "INCOMPLETE"
@@ -311,30 +374,48 @@ def validate_result_semantics(result: dict) -> None:
             raise ValueError(f"{case_id} does not match the frozen case contract")
         status = row["status"]
         if status == "PASS":
-            if row.get("assertion_contract_sha256") != canonical_sha256({
-                "case_id": case_id, "assertion": case.assertion,
-                "execution_class": case.execution_class,
-                "required_claims": list(case.required_claims),
-            }):
+            if row.get("assertion_contract_sha256") != canonical_sha256(
+                {
+                    "case_id": case_id,
+                    "assertion": case.assertion,
+                    "execution_class": case.execution_class,
+                    "required_claims": list(case.required_claims),
+                }
+            ):
                 raise ValueError(f"{case_id} assertion contract digest mismatch")
-            if row.get("command") != ["scripts/run-local-acceptance-assertion.py", case_id] or row.get("environment_names") != []:
+            if (
+                row.get("command") != ["scripts/run-local-acceptance-assertion.py", case_id]
+                or row.get("environment_names") != []
+            ):
                 raise ValueError(f"{case_id} command capability is not closed")
         elif status == "BLOCKED_EXTERNAL":
             if case.execution_class == "local" or row.get("omissions") != [BLOCKED_REASON]:
                 raise ValueError(f"{case_id} has invalid external blocker algebra")
         elif status == "NOT_RUN":
             expected_reason = case.local_omission
-            if case.execution_class != "local" or expected_reason is None or row.get("omissions") != [expected_reason]:
+            if (
+                case.execution_class != "local"
+                or expected_reason is None
+                or row.get("omissions") != [expected_reason]
+            ):
                 raise ValueError(f"{case_id} has invalid local omission algebra")
         elif status == "FAIL":
             reasons = row.get("omissions", [])
             exit_code = row.get("exit_code")
-            if (not row.get("started_at") or not row.get("ended_at") or row.get("command") is None
-                    or len(reasons) != 1 or reasons[0] not in FAIL_REASONS
-                    or (reasons[0] == "ASSERTION_EXIT_NONZERO" and (type(exit_code) is not int or exit_code == 0))
-                    or (reasons[0] == "ASSERTION_TIMEOUT" and exit_code is not None)
-                    or (reasons[0] == "ASSERTION_VALIDATION_ERROR" and exit_code != 0)
-                    or (reasons[0] == "ASSERTION_EXECUTION_ERROR" and exit_code is not None)):
+            if (
+                not row.get("started_at")
+                or not row.get("ended_at")
+                or row.get("command") is None
+                or len(reasons) != 1
+                or reasons[0] not in FAIL_REASONS
+                or (
+                    reasons[0] == "ASSERTION_EXIT_NONZERO"
+                    and (type(exit_code) is not int or exit_code == 0)
+                )
+                or (reasons[0] == "ASSERTION_TIMEOUT" and exit_code is not None)
+                or (reasons[0] == "ASSERTION_VALIDATION_ERROR" and exit_code != 0)
+                or (reasons[0] == "ASSERTION_EXECUTION_ERROR" and exit_code is not None)
+            ):
                 raise ValueError(f"{case_id} has contradictory failure algebra")
         if status == "PASS" or "payment_evidence" in row:
             payment = payment_reference(
@@ -350,51 +431,96 @@ def validate_result_semantics(result: dict) -> None:
         raise ValueError(f"acceptance result schema invalid at {list(errors[0].path)}")
 
 
-def evidence_reference(root: Path, relative: str, case_id: str, assertion: str,
-                       execution_class: str, identity: dict[str, str]) -> dict[str, str | int]:
-    if not isinstance(relative, str) or not relative.endswith(".json") or Path(relative).is_absolute():
+def evidence_reference(
+    root: Path,
+    relative: str,
+    case_id: str,
+    assertion: str,
+    execution_class: str,
+    identity: dict[str, str],
+) -> dict[str, str | int]:
+    if (
+        not isinstance(relative, str)
+        or not relative.endswith(".json")
+        or Path(relative).is_absolute()
+    ):
         raise ValueError("evidence_file must be a relative JSON path")
     candidate = root / relative
     link_info = os.lstat(candidate)
     path = candidate.resolve()
     info = path.stat()
-    if (not path.is_relative_to(root.resolve()) or not stat.S_ISREG(link_info.st_mode)
-            or not path.is_file() or info.st_nlink != 1):
+    if (
+        not path.is_relative_to(root.resolve())
+        or not stat.S_ISREG(link_info.st_mode)
+        or not path.is_file()
+        or info.st_nlink != 1
+    ):
         raise ValueError("evidence_file must be a regular file under the evidence directory")
     if path.stat().st_size > 10_000_000:
         raise ValueError("evidence_file exceeds 10 MB")
     raw = path.read_bytes()
     document = json.loads(raw)
-    if not isinstance(document, dict) or document.get("case_id") != case_id or document.get("assertion") != assertion:
+    if (
+        not isinstance(document, dict)
+        or document.get("case_id") != case_id
+        or document.get("assertion") != assertion
+    ):
         raise ValueError("evidence document does not bind to this assertion")
-    if document.get("execution_class") != execution_class or document.get("claims") != list(CASES[case_id].required_claims):
+    if document.get("execution_class") != execution_class or document.get("claims") != list(
+        CASES[case_id].required_claims
+    ):
         raise ValueError("evidence claims do not match the closed case contract")
     if document.get("subject") != {"commit": identity["commit"], "tree": identity["tree"]}:
         raise ValueError("evidence does not bind to the acceptance subject")
     observations = document.get("observations")
     expected_fields = OBSERVATION_FIELDS.get(case_id)
-    if expected_fields is None or not isinstance(observations, dict) or set(observations) != expected_fields:
+    if (
+        expected_fields is None
+        or not isinstance(observations, dict)
+        or set(observations) != expected_fields
+    ):
         raise ValueError("evidence observations do not match the case-specific schema")
     if case_id == "A01":
         baseline, current = observations["baseline"], observations["current"]
-        execution_keys = {"interpreter", "argv_tail", "exit_code", "stdout_sha256", "stderr_sha256", "commit", "tree", "status"}
-        if (not isinstance(baseline, dict) or set(baseline) != execution_keys
-                or not _portable_interpreter_valid(baseline["interpreter"])
-                or baseline["argv_tail"] != ["-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"]
-                or baseline["commit"] != "f07562eee1a33df74768e9fa4a3b074783d8c59e"
-                or baseline["tree"] != "a1df248d000718c28c565d1d5b11bd425f83a055"
-                or baseline["status"] != "EXPECTED_HISTORICAL_FAILURE"
-                or baseline["exit_code"] != 4
-                or not isinstance(current, dict) or set(current) != execution_keys | {"checks"}
-                or not _portable_interpreter_valid(current["interpreter"])
-                or current["argv_tail"] != ["-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"]
-                or current["commit"] != identity["commit"] or current["tree"] != identity["tree"]
-                or current["status"] != "PASS" or current["exit_code"] != 0
-                or observations["expected_delta"] != "BASELINE_LACKS_F7_ACCEPTANCE_CONTRACT_CURRENT_PASSES"):
+        execution_keys = {
+            "interpreter",
+            "argv_tail",
+            "exit_code",
+            "stdout_sha256",
+            "stderr_sha256",
+            "commit",
+            "tree",
+            "status",
+        }
+        if (
+            not isinstance(baseline, dict)
+            or set(baseline) != execution_keys
+            or not _portable_interpreter_valid(baseline["interpreter"])
+            or baseline["argv_tail"]
+            != ["-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"]
+            or baseline["commit"] != "f07562eee1a33df74768e9fa4a3b074783d8c59e"
+            or baseline["tree"] != "a1df248d000718c28c565d1d5b11bd425f83a055"
+            or baseline["status"] != "EXPECTED_HISTORICAL_FAILURE"
+            or baseline["exit_code"] != 4
+            or not isinstance(current, dict)
+            or set(current) != execution_keys | {"checks"}
+            or not _portable_interpreter_valid(current["interpreter"])
+            or current["argv_tail"]
+            != ["-m", "pytest", "-vv", "tests/contracts/test_acceptance_result.py"]
+            or current["commit"] != identity["commit"]
+            or current["tree"] != identity["tree"]
+            or current["status"] != "PASS"
+            or current["exit_code"] != 0
+            or observations["expected_delta"]
+            != "BASELINE_LACKS_F7_ACCEPTANCE_CONTRACT_CURRENT_PASSES"
+        ):
             raise ValueError("A01 must retain distinct frozen baseline and current checks")
         checks = current["checks"]
     elif case_id == "A27":
-        if (observations["subject_commit"], observations["subject_tree"]) != (identity["commit"], identity["tree"]):
+        if (observations["subject_commit"], observations["subject_tree"]) != (
+            identity["commit"],
+            identity["tree"],
+        ):
             raise ValueError("A27 observations do not bind to the subject")
         stage = observations["stage_a"]
         fixture = observations["fixture"]
@@ -403,23 +529,56 @@ def evidence_reference(root: Path, relative: str, case_id: str, assertion: str,
             "tests/readonly_analyzer/test_cli_decision.py::test_valid_package_emits_insufficient_evidence",
             "tests/contracts/test_decision.py::test_stage_a_decision_code_is_the_closed_four",
         }
-        if (not isinstance(stage, dict) or stage.get("exit_code") != 0
-                or not _portable_interpreter_valid(stage.get("interpreter"))
-                or stage.get("argv_tail") != ["-m", "pytest", "-vv",
-                    "tests/readonly_analyzer/test_cli_decision.py::test_valid_package_emits_insufficient_evidence",
-                    "tests/contracts/test_decision.py::test_stage_a_decision_code_is_the_closed_four"]
-                or stage.get("verdict") != "INSUFFICIENT_EVIDENCE" or stage.get("go_possible") is not False
-                or set(stage.get("checks", [])) != expected_stage_checks
-                or artifact.get("exit_code") != 0 or artifact.get("status") != "PASS"
-                or not _portable_interpreter_valid(artifact.get("interpreter"))
-                or artifact.get("argv_tail") != ["-B", "scripts/check-stage-a-artifacts.py",
-                    "--forbid-path", "cmd/**", "internal/**", "go.mod", "go.sum",
-                    "--forbid-binary", "engine"]):
+        if (
+            not isinstance(stage, dict)
+            or stage.get("exit_code") != 0
+            or not _portable_interpreter_valid(stage.get("interpreter"))
+            or stage.get("argv_tail")
+            != [
+                "-m",
+                "pytest",
+                "-vv",
+                "tests/readonly_analyzer/test_cli_decision.py::test_valid_package_emits_insufficient_evidence",
+                "tests/contracts/test_decision.py::test_stage_a_decision_code_is_the_closed_four",
+            ]
+            or stage.get("verdict") != "INSUFFICIENT_EVIDENCE"
+            or stage.get("go_possible") is not False
+            or set(stage.get("checks", [])) != expected_stage_checks
+            or artifact.get("exit_code") != 0
+            or artifact.get("status") != "PASS"
+            or not _portable_interpreter_valid(artifact.get("interpreter"))
+            or artifact.get("argv_tail")
+            != [
+                "-B",
+                "scripts/check-stage-a-artifacts.py",
+                "--forbid-path",
+                "cmd/**",
+                "internal/**",
+                "go.mod",
+                "go.sum",
+                "--forbid-binary",
+                "engine",
+            ]
+        ):
             raise ValueError("A27 must retain the canonical non-GO verdict and stable fixture")
-        baseline_raw = subprocess.check_output(["git", "-C", ROOT, "show",
-            "f07562eee1a33df74768e9fa4a3b074783d8c59e:tests/fixtures/shadow-golden-v1.ndjson"])
-        baseline_terminal = subprocess.check_output(["git", "-C", ROOT, "show",
-            "f07562eee1a33df74768e9fa4a3b074783d8c59e:tests/fixtures/shadow-golden-v1.terminal.sha256"]).decode()
+        baseline_raw = subprocess.check_output(
+            [
+                "git",
+                "-C",
+                ROOT,
+                "show",
+                "f07562eee1a33df74768e9fa4a3b074783d8c59e:tests/fixtures/shadow-golden-v1.ndjson",
+            ]
+        )
+        baseline_terminal = subprocess.check_output(
+            [
+                "git",
+                "-C",
+                ROOT,
+                "show",
+                "f07562eee1a33df74768e9fa4a3b074783d8c59e:tests/fixtures/shadow-golden-v1.terminal.sha256",
+            ]
+        ).decode()
         validate_fixture_stability(
             fixture,
             (ROOT / "tests/fixtures/shadow-golden-v1.ndjson").read_bytes(),
@@ -430,22 +589,39 @@ def evidence_reference(root: Path, relative: str, case_id: str, assertion: str,
         checks = observations["vector_checks"]
     else:
         if (observations.get("subject_commit"), observations.get("subject_tree")) != (
-            identity["commit"], identity["tree"]
+            identity["commit"],
+            identity["tree"],
         ):
             raise ValueError("semantic observations do not bind to the subject")
         checks = observations.get("checks")
-    if (not isinstance(checks, list) or any(not isinstance(item, str) for item in checks)
-            or not REQUIRED_CHECKS[case_id].issubset(checks)):
+    if (
+        not isinstance(checks, list)
+        or any(not isinstance(item, str) for item in checks)
+        or not REQUIRED_CHECKS[case_id].issubset(checks)
+    ):
         raise ValueError("evidence lacks required semantic test identities")
-    for execution in ([observations["baseline"], observations["current"]] if case_id == "A01"
-                      else [observations["stage_a"], observations["artifact_verifier"]] if case_id == "A27" else []):
-        if any(not isinstance(execution.get(name), str) or not re.fullmatch(r"[0-9a-f]{64}", execution[name])
-               for name in ("stdout_sha256", "stderr_sha256")):
+    for execution in (
+        [observations["baseline"], observations["current"]]
+        if case_id == "A01"
+        else [observations["stage_a"], observations["artifact_verifier"]]
+        if case_id == "A27"
+        else []
+    ):
+        if any(
+            not isinstance(execution.get(name), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", execution[name])
+            for name in ("stdout_sha256", "stderr_sha256")
+        ):
             raise ValueError("semantic execution transcript digest is invalid")
     transcript = document.get("transcript")
-    if (not isinstance(transcript, dict) or set(transcript) != {"stdout_sha256", "stderr_sha256"}
-            or any(not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)
-                   for value in transcript.values())):
+    if (
+        not isinstance(transcript, dict)
+        or set(transcript) != {"stdout_sha256", "stderr_sha256"}
+        or any(
+            not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)
+            for value in transcript.values()
+        )
+    ):
         raise ValueError("evidence transcript binding is invalid")
 
     def inspect(value: object) -> None:
@@ -469,21 +645,36 @@ def payment_reference(case_id: str, result: dict, prior: dict | None) -> dict | 
     if case_id == "A13":
         payment = result.get("payment")
         if not isinstance(payment, dict) or set(payment) != {
-            "tx_hash", "block_hash", "log_index", "buyer", "merchant", "network", "asset", "amount_atomic"
+            "tx_hash",
+            "block_hash",
+            "log_index",
+            "buyer",
+            "merchant",
+            "network",
+            "asset",
+            "amount_atomic",
         }:
             raise ValueError("A13 requires exact sanitized transaction evidence")
-        if not all(isinstance(payment[k], str) and re.fullmatch(r"0x[0-9a-fA-F]{64}", payment[k]) for k in ("tx_hash", "block_hash")):
+        if not all(
+            isinstance(payment[k], str) and re.fullmatch(r"0x[0-9a-fA-F]{64}", payment[k])
+            for k in ("tx_hash", "block_hash")
+        ):
             raise ValueError("A13 transaction/block hash is invalid")
         if type(payment["log_index"]) is not int or payment["log_index"] < 0:
             raise ValueError("A13 log index is invalid")
-        if not all(isinstance(payment[k], str) and re.fullmatch(r"0x[0-9a-fA-F]{40}", payment[k]) for k in ("buyer", "merchant")):
+        if not all(
+            isinstance(payment[k], str) and re.fullmatch(r"0x[0-9a-fA-F]{40}", payment[k])
+            for k in ("buyer", "merchant")
+        ):
             raise ValueError("A13 buyer/merchant address is invalid")
         if payment["buyer"].lower() == payment["merchant"].lower():
             raise ValueError("A13 buyer must differ from merchant")
         if not all(isinstance(payment[k], str) for k in ("network", "asset", "amount_atomic")):
             raise ValueError("A13 transfer terms have invalid types")
         if (payment["network"], payment["asset"].lower(), payment["amount_atomic"]) != (
-            "eip155:31611", "0x118917a40faf1cd7a13db0ef56c86de7973ac503", "10000000000000000"
+            "eip155:31611",
+            "0x118917a40faf1cd7a13db0ef56c86de7973ac503",
+            "10000000000000000",
         ):
             raise ValueError("A13 transfer terms do not match the Mezo Testnet lock")
         return payment
@@ -491,9 +682,13 @@ def payment_reference(case_id: str, result: dict, prior: dict | None) -> dict | 
         payment = result.get("payment")
         if not isinstance(payment, dict) or set(payment) != {"tx_hash", "settlement_count"}:
             raise ValueError("A14 requires repeat-access settlement evidence")
-        if (prior is None or not isinstance(payment["tx_hash"], str)
-                or payment["tx_hash"] != prior["tx_hash"]
-                or type(payment["settlement_count"]) is not int or payment["settlement_count"] != 1):
+        if (
+            prior is None
+            or not isinstance(payment["tx_hash"], str)
+            or payment["tx_hash"] != prior["tx_hash"]
+            or type(payment["settlement_count"]) is not int
+            or payment["settlement_count"] != 1
+        ):
             raise ValueError("A14 must bind to passing A13 and exactly one settlement")
         return payment
     if "payment" in result:
@@ -501,8 +696,13 @@ def payment_reference(case_id: str, result: dict, prior: dict | None) -> dict | 
     return None
 
 
-def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict | None,
-             identity: dict[str, str]) -> dict:
+def run_case(
+    case_id: str,
+    spec: dict,
+    evidence_root: Path,
+    prior_payment: dict | None,
+    identity: dict[str, str],
+) -> dict:
     case = CASES[case_id]
     started = utc_now()
     env = {
@@ -514,16 +714,26 @@ def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict 
     }
     actual_argv = [sys.executable, "-B", str(DISPATCHER), case_id]
     row = {
-        "case_id": case_id, "title": case.title, "status": "FAIL", "started_at": started,
-        "command": spec["argv"], "environment_names": [],
+        "case_id": case_id,
+        "title": case.title,
+        "status": "FAIL",
+        "started_at": started,
+        "command": spec["argv"],
+        "environment_names": [],
         "execution_class": case.execution_class,
-        "exit_code": None, "evidence": [], "omissions": [],
+        "exit_code": None,
+        "evidence": [],
+        "omissions": [],
     }
     completed = None
     try:
         completed = subprocess.run(
-            actual_argv, cwd=ROOT, env=env, capture_output=True,
-            timeout=spec["timeout_seconds"], check=False,
+            actual_argv,
+            cwd=ROOT,
+            env=env,
+            capture_output=True,
+            timeout=spec["timeout_seconds"],
+            check=False,
         )
         row["exit_code"] = completed.returncode
         row["stdout_sha256"] = hashlib.sha256(completed.stdout).hexdigest()
@@ -540,13 +750,31 @@ def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict 
         allowed = {"case_id", "assertion", "evidence_file"}
         if case_id in {"A13", "A14"}:
             allowed.add("payment")
-        if set(answer) != allowed or answer["case_id"] != case_id or answer["assertion"] != case.assertion:
+        if (
+            set(answer) != allowed
+            or answer["case_id"] != case_id
+            or answer["assertion"] != case.assertion
+        ):
             raise ValueError("assertion protocol does not match the case contract")
         row["command_sha256"] = canonical_sha256(spec["argv"])
-        row["assertion_contract_sha256"] = canonical_sha256({"case_id": case_id, "assertion": case.assertion,
-            "execution_class": case.execution_class, "required_claims": list(case.required_claims)})
-        row["evidence"] = [evidence_reference(evidence_root, answer["evidence_file"], case_id,
-            case.assertion, case.execution_class, identity)]
+        row["assertion_contract_sha256"] = canonical_sha256(
+            {
+                "case_id": case_id,
+                "assertion": case.assertion,
+                "execution_class": case.execution_class,
+                "required_claims": list(case.required_claims),
+            }
+        )
+        row["evidence"] = [
+            evidence_reference(
+                evidence_root,
+                answer["evidence_file"],
+                case_id,
+                case.assertion,
+                case.execution_class,
+                identity,
+            )
+        ]
         payment = payment_reference(case_id, answer, prior_payment)
         if payment is not None:
             row["payment_evidence"] = payment
@@ -554,7 +782,9 @@ def run_case(case_id: str, spec: dict, evidence_root: Path, prior_payment: dict 
     except subprocess.TimeoutExpired:
         row["omissions"] = ["ASSERTION_TIMEOUT"]
     except OSError:
-        row["omissions"] = ["ASSERTION_EXECUTION_ERROR" if completed is None else "ASSERTION_VALIDATION_ERROR"]
+        row["omissions"] = [
+            "ASSERTION_EXECUTION_ERROR" if completed is None else "ASSERTION_VALIDATION_ERROR"
+        ]
     except (ValueError, KeyError, TypeError, json.JSONDecodeError):
         row["omissions"] = ["ASSERTION_VALIDATION_ERROR"]
     row["ended_at"] = utc_now()
@@ -566,13 +796,29 @@ def main() -> int:
     parser.add_argument("--mode", choices=("offline", "live"), required=True)
     parser.add_argument("--plan", type=Path, help="explicit JSON command plan")
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--authorize-live", action="store_true", help="explicitly permit planned live commands")
+    parser.add_argument(
+        "--live-grants", type=Path, help="exact short-lived live grant bundle; never a boolean"
+    )
     args = parser.parse_args()
-    if args.mode == "live" or args.authorize_live:
-        parser.error("live execution requires an exact grant contract that is not implemented")
     try:
         identity = repo_identity()
         commands, plan_snapshot = read_plan(args.plan)
+        if args.mode == "offline" and args.live_grants is not None:
+            raise ValueError("offline acceptance cannot consume live grants")
+        if args.mode == "live":
+            if args.live_grants is None:
+                raise ValueError("live acceptance requires an exact grant bundle")
+            info = os.lstat(args.live_grants)
+            if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size > 65536:
+                raise ValueError("live grant bundle must be one bounded regular file")
+            grant_doc = json.loads(args.live_grants.read_bytes())
+            validate_live_bundle(
+                grant_doc,
+                subject_commit=identity["commit"],
+                subject_tree=identity["tree"],
+                now=datetime.now(timezone.utc),
+            )
+            raise ValueError("live execution requires the injected production payment seam")
         output = args.output.resolve()
         if output.exists() or output.is_relative_to(ROOT):
             raise ValueError("output must be a new path outside the repository")
@@ -583,15 +829,29 @@ def main() -> int:
         started = utc_now()
         for case_id, case in CASES.items():
             if case.execution_class != "local":
-                row = {"case_id": case_id, "title": case.title, "status": "BLOCKED_EXTERNAL",
-                       "omissions": [BLOCKED_REASON], "command": None,
-                       "environment_names": [], "exit_code": None, "evidence": [],
-                       "execution_class": case.execution_class}
+                row = {
+                    "case_id": case_id,
+                    "title": case.title,
+                    "status": "BLOCKED_EXTERNAL",
+                    "omissions": [BLOCKED_REASON],
+                    "command": None,
+                    "environment_names": [],
+                    "exit_code": None,
+                    "evidence": [],
+                    "execution_class": case.execution_class,
+                }
             elif case_id not in commands:
-                row = {"case_id": case_id, "title": case.title, "status": "NOT_RUN",
-                       "omissions": [case.local_omission], "command": None,
-                       "environment_names": [], "exit_code": None, "evidence": [],
-                       "execution_class": case.execution_class}
+                row = {
+                    "case_id": case_id,
+                    "title": case.title,
+                    "status": "NOT_RUN",
+                    "omissions": [case.local_omission],
+                    "command": None,
+                    "environment_names": [],
+                    "exit_code": None,
+                    "evidence": [],
+                    "execution_class": case.execution_class,
+                }
             else:
                 row = run_case(case_id, commands[case_id], evidence_root, prior_payment, identity)
             rows.append(row)
@@ -606,7 +866,10 @@ def main() -> int:
                     raise ValueError("evidence path is reused by multiple cases")
                 seen_evidence.add(reference["file"])
                 path = evidence_root / reference["file"]
-                if file_sha256(path) != reference["sha256"] or path.stat().st_size != reference["size_bytes"]:
+                if (
+                    file_sha256(path) != reference["sha256"]
+                    or path.stat().st_size != reference["size_bytes"]
+                ):
                     raise ValueError("evidence changed before result sealing")
                 os.chmod(path, 0o400)
         if plan_snapshot is not None:
@@ -617,20 +880,26 @@ def main() -> int:
         if final_identity != identity:
             raise ValueError("repository identity changed during acceptance")
         plan_digest = plan_snapshot.digest if plan_snapshot else hashlib.sha256(b"").hexdigest()
-        result = {"schema": "liqvera-acceptance-result/v1", "mode": args.mode,
-                  "repository": identity, "environment": {"platform": platform.platform(),
-                  "python": platform.python_version()}, "started_at": started,
-                  "ended_at": utc_now(), "overall_status": overall,
-                  "bindings": {"runner_sha256": file_sha256(Path(__file__)), "plan_sha256": plan_digest},
-                  "cases": rows}
+        result = {
+            "schema": "liqvera-acceptance-result/v1",
+            "mode": args.mode,
+            "repository": identity,
+            "environment": {"platform": platform.platform(), "python": platform.python_version()},
+            "started_at": started,
+            "ended_at": utc_now(),
+            "overall_status": overall,
+            "bindings": {"runner_sha256": file_sha256(Path(__file__)), "plan_sha256": plan_digest},
+            "cases": rows,
+        }
         validate_result_semantics(result)
         encoded = (json.dumps(result, sort_keys=True, indent=2) + "\n").encode()
         _publish_exclusive(output, encoded)
         os.chmod(evidence_root, 0o500)
         _fsync_directory(evidence_root)
         try:
-            verify_sealed_result(output, hashlib.sha256(encoded).hexdigest(),
-                                 require_current_repository=True)
+            verify_sealed_result(
+                output, hashlib.sha256(encoded).hexdigest(), require_current_repository=True
+            )
         except Exception:
             _invalidate_published(output)
             raise

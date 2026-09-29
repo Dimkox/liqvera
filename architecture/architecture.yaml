@@ -15406,7 +15406,13 @@ repository_inventory:
   - path: tools/mezo_acceptance/public_read.py
     node: runtime:mezo-acceptance
     path_class: TOOL_SOURCE
+  - path: tools/mezo_acceptance/live.py
+    node: runtime:mezo-acceptance
+    path_class: TOOL_SOURCE
   - path: tests/acceptance/test_public_read_grant.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/acceptance/test_live_integration.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: tests/contracts/test_live_grant_consumption.py

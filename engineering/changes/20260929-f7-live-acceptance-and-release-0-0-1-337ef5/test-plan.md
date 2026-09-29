@@ -20,6 +20,9 @@
   expiry, HTTPS-only allowlist, public stable DNS resolution, exact EIP-3009
   identity, twelve canonical confirmations, one submission and 0.0001 test-BTC
   gas ceiling. These tests use fakes and perform no network or wallet action.
+- Live runner authority: current commit/tree/canonical plan, four exact case
+  grants, stale/body/target/linkage mutants, one shared A13/A14 submission, and
+  UNKNOWN confirm-only behavior through injected deterministic executors.
 - Integration: local PostgreSQL/container/browser only after P0; no ambient or
   shared service. Exact public/testnet integration only under P2/P3 grants.
 - Contract: schemas, frozen A01–A30 inventory, official pinned x402 types,

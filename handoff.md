@@ -150,6 +150,15 @@ before settlement. Ordinary startup still composes `null` authority and performs
 no external call. The migration was authored and tested structurally but not
 applied to any database in this local-only phase.
 
+The runner now exposes the same closed live-case orchestration used by the fake
+end-to-end suite. Its authority envelope binds the current commit/tree, an
+internally derived canonical plan, expiry, exact A07/A29 request bodies and
+bounds, and one shared A13/A14 payment grant. A13 executes once; A14 can only
+reuse its confirmed transaction, while UNKNOWN remains spent and blocks A14 in
+confirm-only state. The CLI accepts only `--live-grants`, never a boolean, and
+still stops before external I/O because the real human-wallet payment seam is
+not injected in ordinary startup. Offline results remain externally blocked.
+
 ## F6 local UI and operations verification — 2026-09-29
 
 Route `26ffb293d4ff` and change package

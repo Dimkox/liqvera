@@ -94,6 +94,16 @@ function receipt(q: Quote, attempt: Attempt): Receipt {
     log_index: 0,
     confirmed_at: '2026-09-29T00:00:01Z',
     finality_policy_version: 'TEST_ONLY/v1',
+    transaction_from: '0x5555555555555555555555555555555555555555',
+    buyer_native_balance_before: '1000',
+    buyer_native_balance_after: '1000',
+    buyer_native_gas_spent: '0',
+    observation_before_block_number: 0,
+    observation_before_block_hash: `0x${'5'.repeat(64)}`,
+    observation_after_block_number: 1,
+    observation_after_block_hash: `0x${'4'.repeat(64)}`,
+    authorization_identity: attempt.authorization_identity,
+    transfer_identity: '6'.repeat(64),
   };
 }
 

@@ -15163,6 +15163,9 @@ repository_inventory:
   - path: apps/mezo-gateway/migrations/003_live_grant_consumption.sql
     node: contract:liqvera-gateway-ledger
     path_class: MIGRATION
+  - path: apps/mezo-gateway/migrations/004_receipt_confirmation_provenance.sql
+    node: contract:liqvera-gateway-ledger
+    path_class: MIGRATION
   - path: apps/mezo-gateway/scripts/copy-resources.mjs
     node: artifact:liqvera-gateway
     path_class: BUILD_PACKAGING

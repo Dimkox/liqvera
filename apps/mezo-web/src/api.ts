@@ -99,6 +99,16 @@ export function validateDelivery(value: unknown, reportId: string): Delivery {
       receipt.amount_atomic !== AMOUNT_ATOMIC ||
       !isAddress(string(receipt.payer)) || !isAddress(string(receipt.pay_to)) ||
       !/^0x[0-9a-f]{64}$/.test(string(receipt.tx_hash)) ||
+      !/^0x[0-9a-f]{64}$/.test(string(receipt.block_hash)) ||
+      !isAddress(string(receipt.transaction_from)) || receipt.transaction_from.toLowerCase()===receipt.payer.toLowerCase() ||
+      !/^(0|[1-9][0-9]*)$/.test(string(receipt.buyer_native_balance_before)) ||
+      receipt.buyer_native_balance_after!==receipt.buyer_native_balance_before || receipt.buyer_native_gas_spent!=="0" ||
+      !Number.isSafeInteger(receipt.observation_before_block_number) || !Number.isSafeInteger(receipt.observation_after_block_number) ||
+      receipt.observation_before_block_number>receipt.observation_after_block_number ||
+      !/^0x[0-9a-f]{64}$/.test(string(receipt.observation_before_block_hash)) ||
+      !/^0x[0-9a-f]{64}$/.test(string(receipt.observation_after_block_hash)) ||
+      receipt.observation_after_block_hash!==receipt.block_hash || !string(receipt.authorization_identity) ||
+      !/^[0-9a-f]{64}$/.test(string(receipt.transfer_identity)) ||
       !Number.isSafeInteger(receipt.block_number) || !Number.isSafeInteger(receipt.log_index) ||
       !Number.isFinite(Date.parse(string(receipt.confirmed_at))) ||
       !string(receipt.finality_policy_version) ||

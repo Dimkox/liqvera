@@ -217,6 +217,16 @@ EIP-3009 signature. The configured facilitator performs the sole submission,
 and the approved read-only Mezo RPC supplies chain, receipt, transaction,
 canonical-block and before/after buyer-balance observations. Migration 003 must
 already be applied through a separately approved database operation.
+Migration 004 persists the confirmation observations in the append-only receipt
+row so later A13 evidence does not depend on a mutable RPC re-query. It has an
+explicit zero-legacy-receipts stop condition. The P3 CLI is separate from P2:
+`--p3-live-grants` validates the linked bundle and, without an injected human
+wallet signature/output seam, seals A13/A14 as
+`HUMAN_WALLET_SIGNATURE_REQUIRED` before any external I/O.
+The opt-in PostgreSQL command is
+`TEST_DATABASE_URL=postgresql://.../liqvera_f4_test_<suffix> TEST_DATABASE_DISPOSABLE=1 npm --prefix apps/mezo-gateway run test:postgres`;
+those are the only two test-specific environment names. It was not run because
+no explicitly disposable database URL was provided or inspected.
 Focused repair checks pass: 69 acceptance/contract tests, 18 browser
 tests, and 29 gateway tests with five explicitly disposable-PostgreSQL skips.
 The clean pinned PR verifier passed 1,218 tests plus 85 subtests at fingerprint

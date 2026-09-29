@@ -41,7 +41,10 @@ export interface Receipt { schema: 'mee-evidence-receipt/v1'; quote_id: string; 
   payment_attempt_id: string; report_sha256: string; network: typeof NETWORK; chain_id: typeof CHAIN_ID;
   asset: typeof ASSET; amount_atomic: typeof AMOUNT; payer: string; pay_to: string;
   tx_hash: string; block_hash: string; block_number: number; log_index: number; confirmed_at: string;
-  finality_policy_version: string }
+  finality_policy_version: string; transaction_from:string; buyer_native_balance_before:string;
+  buyer_native_balance_after:string; buyer_native_gas_spent:'0'; observation_before_block_number:number;
+  observation_before_block_hash:string; observation_after_block_number:number; observation_after_block_hash:string;
+  authorization_identity:string; transfer_identity:string }
 export interface Confirmation { receipt: Receipt; response_header: string }
 export class PublicError extends Error {
   constructor(public readonly code: Reason, public readonly status: number = 503) { super(code); }

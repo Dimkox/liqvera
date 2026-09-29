@@ -25,6 +25,11 @@
   authority: the facilitator broadcasts, the buyer signs only, buyer native-gas
   spend must be zero, and transaction/Transfer/balance/finality evidence is
   checked through the approved read-only RPC seam.
+- [x] Add migration 004 for immutable confirmation provenance and a separate
+  `--p3-live-grants` operator path. Without the human wallet signature/output
+  seam it seals A13/A14 as blocked before facilitator or RPC I/O.
+- [x] Add opt-in disposable-PostgreSQL coverage for 20-pool atomic grant
+  consumption, restart rejection, rollback preservation and append-only rows.
 - [ ] Obtain exact short-lived P2 public-read grant; execute allowlisted reads.
 - [ ] Obtain exact short-lived P3 testnet-write grant including buyer/payee,
   amount, one-submit budget, and buyer native-gas cap; human confirms wallet.

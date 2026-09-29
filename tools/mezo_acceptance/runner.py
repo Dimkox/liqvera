@@ -19,7 +19,7 @@ from urllib.parse import urlsplit
 from jsonschema import Draft202012Validator
 
 from .cases import CASES
-from .live import validate_p2_bundle
+from .live import validate_p2_bundle, validate_p3_bundle
 from .live_cases import execute_a07
 from .public_read import PublicReadPlan, validate_public_read_journal
 
@@ -40,6 +40,7 @@ RESULT_SCHEMA = ROOT / "schemas/mezo-evidence/v1/acceptance-result.schema.json"
 DISPATCHER = ROOT / "scripts/run-local-acceptance-assertion.py"
 BLOCKED_REASON = "EXACT_EXTERNAL_GRANT_ABSENT"
 PAYMENT_GRANT_BLOCKED_REASON = "EXACT_PAYMENT_GRANT_ABSENT"
+WALLET_SIGNATURE_BLOCKED_REASON = "HUMAN_WALLET_SIGNATURE_REQUIRED"
 A29_BLOCKED_REASON = "A29_NETWORK_BYTE_CAP_UNENFORCEABLE"
 FAIL_REASONS = {
     "ASSERTION_EXIT_NONZERO",
@@ -393,13 +394,19 @@ def validate_result_semantics(result: dict) -> None:
                 raise ValueError(f"{case_id} command capability is not closed")
         elif status == "BLOCKED_EXTERNAL":
             allowed = (
-                [PAYMENT_GRANT_BLOCKED_REASON]
+                [PAYMENT_GRANT_BLOCKED_REASON, WALLET_SIGNATURE_BLOCKED_REASON]
                 if case.execution_class == "testnet_write"
-                else [A29_BLOCKED_REASON]
+                else [A29_BLOCKED_REASON, BLOCKED_REASON]
                 if case_id == "A29" and result.get("mode") == "live"
                 else [BLOCKED_REASON]
             )
-            if case.execution_class == "local" or row.get("omissions") != allowed:
+            omissions = row.get("omissions")
+            if (
+                case.execution_class == "local"
+                or not isinstance(omissions, list)
+                or len(omissions) != 1
+                or omissions[0] not in allowed
+            ):
                 raise ValueError(f"{case_id} has invalid external blocker algebra")
         elif status == "NOT_RUN":
             expected_reason = case.local_omission
@@ -909,37 +916,53 @@ def main() -> int:
         "--live-grants", type=Path, help="exact short-lived live grant bundle; never a boolean"
     )
     parser.add_argument(
+        "--p3-live-grants", type=Path, help="exact short-lived linked A13/A14 payment grant bundle"
+    )
+    parser.add_argument(
         "--operator-state-dir", type=Path, help="pre-existing mode-0700 durable live-grant journal"
     )
     args = parser.parse_args()
     try:
         identity = repo_identity()
         commands, plan_snapshot = read_plan(args.plan)
-        if args.mode == "offline" and args.live_grants is not None:
+        if args.mode == "offline" and (
+            args.live_grants is not None or args.p3_live_grants is not None
+        ):
             raise ValueError("offline acceptance cannot consume live grants")
         live_authority = None
+        p3_authority = None
         if args.mode == "live":
-            if args.live_grants is None:
+            if args.live_grants is None and args.p3_live_grants is None:
                 raise ValueError("live acceptance requires an exact grant bundle")
-            if args.operator_state_dir is None:
+            if args.live_grants is not None and args.operator_state_dir is None:
                 raise ValueError("live acceptance requires an operator state directory")
-            info = os.lstat(args.live_grants)
-            if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size > 65536:
-                raise ValueError("live grant bundle must be one bounded regular file")
-            grant_doc = json.loads(args.live_grants.read_bytes())
-            live_authority = validate_p2_bundle(
-                grant_doc,
-                subject_commit=identity["commit"],
-                subject_tree=identity["tree"],
-                now=datetime.now(timezone.utc),
-            )
+            if args.live_grants is not None:
+                info = os.lstat(args.live_grants)
+                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size > 65536:
+                    raise ValueError("live grant bundle must be one bounded regular file")
+                live_authority = validate_p2_bundle(
+                    json.loads(args.live_grants.read_bytes()),
+                    subject_commit=identity["commit"],
+                    subject_tree=identity["tree"],
+                    now=datetime.now(timezone.utc),
+                )
+            if args.p3_live_grants is not None:
+                info = os.lstat(args.p3_live_grants)
+                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size > 65536:
+                    raise ValueError("P3 grant bundle must be one bounded regular file")
+                p3_authority = validate_p3_bundle(
+                    json.loads(args.p3_live_grants.read_bytes()),
+                    subject_commit=identity["commit"],
+                    subject_tree=identity["tree"],
+                    now=datetime.now(timezone.utc),
+                )
         output = args.output.resolve()
         if output.exists() or output.is_relative_to(ROOT):
             raise ValueError("output must be a new path outside the repository")
         evidence_root = output.parent
         evidence_root.mkdir(parents=True, mode=0o700, exist_ok=False)
         state_dir = args.operator_state_dir.resolve() if args.operator_state_dir else None
-        if args.mode == "live":
+        if live_authority is not None:
             supplied_state_info = os.lstat(args.operator_state_dir)
             state_info = os.lstat(state_dir)
             if (
@@ -1069,7 +1092,11 @@ def main() -> int:
                     "title": case.title,
                     "status": "BLOCKED_EXTERNAL",
                     "omissions": [
-                        PAYMENT_GRANT_BLOCKED_REASON
+                        (
+                            WALLET_SIGNATURE_BLOCKED_REASON
+                            if p3_authority is not None
+                            else PAYMENT_GRANT_BLOCKED_REASON
+                        )
                         if case.execution_class == "testnet_write"
                         else BLOCKED_REASON
                     ],

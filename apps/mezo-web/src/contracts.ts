@@ -87,10 +87,21 @@ export interface Receipt {
   payer: string;
   pay_to: string;
   tx_hash: string;
+  block_hash: string;
   block_number: number;
   log_index: number;
   confirmed_at: string;
   finality_policy_version: string;
+  transaction_from: string;
+  buyer_native_balance_before: string;
+  buyer_native_balance_after: string;
+  buyer_native_gas_spent: "0";
+  observation_before_block_number: number;
+  observation_before_block_hash: string;
+  observation_after_block_number: number;
+  observation_after_block_hash: string;
+  authorization_identity: string;
+  transfer_identity: string;
 }
 
 export interface Report {

@@ -44,6 +44,11 @@ one-shot grant-consumption relation: the grant digest, grant UUID and payment
 attempt are each unique. Its row is committed in the same ledger transaction
 as `VERIFIED -> SUBMITTING`, before facilitator I/O, so restart and replica races
 cannot create a second submission. It contains no secret or wallet material.
+Migration 004 extends immutable receipts with the exact before/after native-
+balance observations, their block identities, broadcaster, authorization and
+transfer identities, and zero buyer-gas result. It refuses to migrate a ledger
+containing legacy receipts because those facts cannot be reconstructed without
+fabrication; operators must preserve evidence and stop instead.
 
 ## Governance context
 

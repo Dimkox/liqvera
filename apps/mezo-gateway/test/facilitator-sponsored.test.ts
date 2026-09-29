@@ -11,7 +11,7 @@ const txHash=`0x${'4'.repeat(64)}`;
 const blockHash=`0x${'5'.repeat(64)}`;
 const topic=(address:string)=>`0x${'0'.repeat(24)}${address.slice(2)}`;
 const quote={id:'00000000-0000-4000-8000-000000000001',report_id:'00000000-0000-4000-8000-000000000002',report_sha256:'a'.repeat(64),terms:{expected_payer:buyer,pay_to:payTo}} as Quote;
-const attempt={id:'00000000-0000-4000-8000-000000000003',quote_id:quote.id,state:'UNKNOWN',authorization_identity:'b'.repeat(64),identity_version:'test',authorization_valid_until:new Date('2026-09-29T00:05:00Z'),correlation:{buyer_native_balance_before:'1000'},tx_hash:txHash,submitted_at:new Date('2026-09-29T00:00:00Z'),reconciliation_count:1} as Attempt;
+const attempt={id:'00000000-0000-4000-8000-000000000003',quote_id:quote.id,state:'UNKNOWN',authorization_identity:'b'.repeat(64),identity_version:'test',authorization_valid_until:new Date('2026-09-29T00:05:00Z'),correlation:{buyer_native_balance_before:'1000',buyer_native_balance_before_block_number:'99',buyer_native_balance_before_block_hash:`0x${'6'.repeat(64)}`},tx_hash:txHash,submitted_at:new Date('2026-09-29T00:00:00Z'),reconciliation_count:1} as Attempt;
 
 function rpc(change:Record<string,unknown>={}) {
   const transaction={hash:txHash,from:facilitator,to:ASSET,input:'0x',...(change.transaction as object ?? {})};
@@ -35,6 +35,19 @@ test('facilitator broadcast and zero buyer native gas produce exact receipt',asy
   assert.equal(receipt?.tx_hash,txHash);
   assert.equal(receipt?.payer,buyer);
   assert.equal(receipt?.amount_atomic,AMOUNT);
+  assert.equal(receipt?.buyer_native_gas_spent,'0');
+  assert.equal(receipt?.observation_after_block_hash,blockHash);
+  assert.match(receipt?.transfer_identity??'',/^[0-9a-f]{64}$/);
+});
+
+test('missing snapshot identity or snapshot after receipt block fails closed',async()=>{
+  for(const correlation of [
+    {buyer_native_balance_before:'1000'},
+    {...attempt.correlation,buyer_native_balance_before_block_number:'101'},
+  ] as Record<string,string>[]) {
+    const reader=new MezoReceiptReader(rpc() as never,identity as never,finality as never);
+    await assert.rejects(reader.confirmation(quote,{...attempt,correlation}),(error:unknown)=>error instanceof PublicError&&error.code==='MANUAL_REVIEW');
+  }
 });
 
 test('buyer broadcast, buyer balance delta, or missing balance proof fails closed',async()=>{

@@ -23,6 +23,11 @@ and must never be deleted during rollback. Disable new sales or revert the
 application while retaining the table; a failed or UNKNOWN submission remains
 spent and may only enter confirmation reconciliation.
 
+Migration 004 is also forward-only. Before applying it, require zero legacy
+receipt rows; otherwise stop and preserve the database for an explicitly
+designed provenance recovery. Once applied, retain its append-only observation
+columns on application rollback because they are the durable A13 audit source.
+
 Partial publication is additive: if main pushed but tag/release failed, verify
 the pushed SHA and resume only the missing approved step. Never force-push or
 move a published tag. An incorrect published release is superseded by a new

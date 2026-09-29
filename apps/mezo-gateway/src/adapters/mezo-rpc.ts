@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { AMOUNT, ASSET, CHAIN_ID, NETWORK, PublicError, type Attempt, type Quote, type Receipt } from '../domain/model.js';
 import type { AuthorizationPolicy, FinalityPolicy, ReadonlyRpc } from '../ports/index.js';
 import { boundedJson } from './http.js';
@@ -28,10 +29,13 @@ export class MezoReadonlyRpc implements ReadonlyRpc {
 }
 export class MezoReceiptReader {
   constructor(private readonly rpc: ReadonlyRpc,private readonly identity: AuthorizationPolicy,private readonly finality: FinalityPolicy) {}
-  async nativeBalance(buyer:string,block:string):Promise<string> {
-    const value=await this.rpc.call('eth_getBalance',[buyer,block]);
+  async nativeBalanceSnapshot(buyer:string):Promise<{balance:string;block_number:string;block_hash:string}> {
+    const block=object(await this.rpc.call('eth_getBlockByNumber',['latest',false]));
+    if(typeof block.number!=='string'||!HEX.test(block.number)||typeof block.hash!=='string'||!HASH.test(block.hash))
+      throw new PublicError('PAYMENT_UNCERTAIN',202);
+    const value=await this.rpc.call('eth_getBalance',[buyer,block.number]);
     if(typeof value!=='string'||!HEX.test(value))throw new PublicError('PAYMENT_UNCERTAIN',202);
-    return BigInt(value).toString();
+    return {balance:BigInt(value).toString(),block_number:BigInt(block.number).toString(),block_hash:block.hash};
   }
   async confirmation(quote: Quote,attempt: Attempt): Promise<Receipt|null> {
     if (!this.identity.reviewed || !this.finality.reviewed || !attempt.tx_hash || !HASH.test(attempt.tx_hash)) return null;
@@ -46,7 +50,11 @@ export class MezoReceiptReader {
     const transaction=object(await this.rpc.call('eth_getTransactionByHash',[attempt.tx_hash]));
     const before=attempt.correlation.buyer_native_balance_before;
     let after:string;
-    try { after=await this.nativeBalance(quote.terms.expected_payer,String(receipt.blockNumber)); }
+    try {
+      const value=await this.rpc.call('eth_getBalance',[quote.terms.expected_payer,String(receipt.blockNumber)]);
+      if(typeof value!=='string'||!HEX.test(value))throw new Error('invalid balance');
+      after=BigInt(value).toString();
+    }
     catch { throw new PublicError('MANUAL_REVIEW',202); }
     if(typeof transaction.from!=='string'||!/^0x[0-9a-fA-F]{40}$/.test(transaction.from)||transaction.from.toLowerCase()===quote.terms.expected_payer||
       typeof before!=='string'||!UINT.test(before)||after!==before)
@@ -62,10 +70,19 @@ export class MezoReceiptReader {
       if(await this.identity.bindsTransfer(attempt,transaction,log))matches.push(log);
     }
     if(matches.length!==1) return null;
+    const beforeNumber=attempt.correlation.buyer_native_balance_before_block_number;
+    const beforeHash=attempt.correlation.buyer_native_balance_before_block_hash;
+    if(typeof beforeNumber!=='string'||!UINT.test(beforeNumber)||typeof beforeHash!=='string'||!HASH.test(beforeHash)||BigInt(beforeNumber)>BigInt(String(receipt.blockNumber)))
+      throw new PublicError('MANUAL_REVIEW',202);
+    const transferIdentity=createHash('sha256').update(`${attempt.authorization_identity}\n${attempt.tx_hash}\n${matches[0]!.logIndex}`).digest('hex');
     return { schema:'mee-evidence-receipt/v1',quote_id:quote.id,report_id:quote.report_id,payment_attempt_id:attempt.id,
       report_sha256:quote.report_sha256,network:NETWORK,chain_id:CHAIN_ID,asset:ASSET,amount_atomic:AMOUNT,
       payer:quote.terms.expected_payer,pay_to:quote.terms.pay_to,tx_hash:attempt.tx_hash,block_hash:receipt.blockHash,
       block_number:safeInteger(receipt.blockNumber),log_index:safeInteger(matches[0]!.logIndex),
-      confirmed_at:new Date().toISOString(),finality_policy_version:this.finality.version };
+      confirmed_at:new Date().toISOString(),finality_policy_version:this.finality.version,
+      transaction_from:transaction.from.toLowerCase(),buyer_native_balance_before:before,buyer_native_balance_after:after,
+      buyer_native_gas_spent:'0',observation_before_block_number:Number(beforeNumber),observation_before_block_hash:beforeHash,
+      observation_after_block_number:safeInteger(receipt.blockNumber),observation_after_block_hash:receipt.blockHash,
+      authorization_identity:attempt.authorization_identity,transfer_identity:transferIdentity };
   }
 }

@@ -38,6 +38,10 @@
   remains gated on an explicitly disposable local database URL.
 - Integration: local PostgreSQL/container/browser only after P0; no ambient or
   shared service. Exact public/testnet integration only under P2/P3 grants.
+- Disposable PostgreSQL: with only `TEST_DATABASE_URL` and
+  `TEST_DATABASE_DISPOSABLE=1`, migrate fresh 001→004 twice, verify checksums,
+  race 20 separate pools through `markSubmitting`, retry after restart, inject
+  an in-transaction failure, and reject update/delete of consumption rows.
 - Contract: schemas, frozen A01–A30 inventory, official pinned x402 types,
   release manifest and product/component version split.
 - E2E: local first; one controlled testnet payment maximum; publication only

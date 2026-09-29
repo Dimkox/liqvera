@@ -202,3 +202,42 @@ def test_runner_binds_journal_and_keeps_a29_blocked(tmp_path, monkeypatch):
     with pytest.raises(SystemExit):
         runner.main()
     assert calls == ["A07"]
+
+
+def test_p3_operator_cli_is_separate_and_requires_human_wallet_before_io(tmp_path, monkeypatch):
+    value = p3_bundle()
+    expiry = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat().replace("+00:00", "Z")
+    value["expires_at"] = expiry
+    for case in value["cases"].values():
+        case["expires_at"] = expiry
+    grants = tmp_path / "p3.json"
+    grants.write_text(json.dumps(value))
+    monkeypatch.setattr(
+        runner,
+        "repo_identity",
+        lambda: {
+            "repository": "Dimkox/liqvera",
+            "origin": "UNSET",
+            "commit": COMMIT,
+            "tree": TREE,
+            "worktree": "CLEAN",
+        },
+    )
+    output = tmp_path / "p3-out" / "result.json"
+    monkeypatch.setattr(
+        runner.sys,
+        "argv",
+        [
+            "runner",
+            "--mode",
+            "live",
+            "--p3-live-grants",
+            str(grants),
+            "--output",
+            str(output),
+        ],
+    )
+    assert runner.main() == 1
+    rows = {row["case_id"]: row for row in json.loads(output.read_text())["cases"]}
+    assert rows["A13"]["omissions"] == ["HUMAN_WALLET_SIGNATURE_REQUIRED"]
+    assert rows["A14"]["omissions"] == ["HUMAN_WALLET_SIGNATURE_REQUIRED"]

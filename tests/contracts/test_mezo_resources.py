@@ -129,6 +129,16 @@ RECEIPT = {
     "log_index": 0,
     "confirmed_at": TIME,
     "finality_policy_version": "verified/v1",
+    "transaction_from": "0x3333333333333333333333333333333333333333",
+    "buyer_native_balance_before": "1000",
+    "buyer_native_balance_after": "1000",
+    "buyer_native_gas_spent": "0",
+    "observation_before_block_number": 0,
+    "observation_before_block_hash": TX_HASH,
+    "observation_after_block_number": 1,
+    "observation_after_block_hash": TX_HASH,
+    "authorization_identity": HASH,
+    "transfer_identity": HASH,
 }
 EXAMPLES = {
     "preview": PREVIEW,

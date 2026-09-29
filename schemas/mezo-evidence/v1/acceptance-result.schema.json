@@ -34,8 +34,8 @@
     "cases": {"type": "array", "minItems": 30, "maxItems": 30, "items": {"$ref": "#/$defs/case"}}
   },
   "$defs": {
-    "git_oid": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "git_oid": {"type": "string", "minLength": 40, "maxLength": 40, "pattern": "^[0-9a-f]{40}$"},
+    "sha256": {"type": "string", "minLength": 64, "maxLength": 64, "pattern": "^[0-9a-f]{64}$"},
     "time": {"type": "string", "format": "date-time"},
     "evidence": {
       "type": "object", "additionalProperties": false,

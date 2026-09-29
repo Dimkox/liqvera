@@ -6,5 +6,7 @@
 - [x] Add canonical F3 happy-path, tamper, duplicate, and partial-state coverage.
 - [x] Run selected quality profile (`1147 passed, 85 subtests`; full PR profile
   and coverage pass in the pinned 22-worker environment).
+- [x] Repair first-review Git OID/tree and SHA-256 terminal-newline findings
+  with exact-path regression coverage.
 - [ ] Complete independent reviews.
 - [ ] Bind evidence to the final tree fingerprint.

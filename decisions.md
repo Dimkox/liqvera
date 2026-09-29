@@ -199,3 +199,9 @@ fixed the producer/consumer mismatch without weakening true 64-hex digests.
 Keep `eth-account==0.13.7` with `hyperliquid-python-sdk==0.24.0`, whose metadata
 requires `eth-account<0.14.0`. The existing characterization was correct; the
 project's 0.14.0 pin was the incompatible stale value.
+
+## 2026-09-29 — Pair hex patterns with exact JSON string lengths
+
+JSON Schema regex `$` follows host regex semantics that may match before a
+terminal newline. Exact `minLength`/`maxLength` plus lowercase-hex patterns keep
+Git OIDs and SHA-256 encodings canonical across validators.

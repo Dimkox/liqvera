@@ -1,6 +1,6 @@
 # Liqvera — handoff
 
-Updated: 2026-09-29 (offline F3 repair and compatible dependency pin pass full PR verification; independent review is next). Repository: `Dimkox/liqvera`.
+Updated: 2026-09-29 (first-review identifier-boundary findings repaired; full verification and re-review pending). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
 ## F3 offline artifact verification repair — 2026-09-29
@@ -43,6 +43,16 @@ and source stability are green. A final receipt refresh after this handoff
 commit is required; route-selected independent code, test, and data review is
 the next coordinator action and has not been performed by the implementation
 owner.
+
+The first independent code and test reviews then found that JSON Schema's `$`
+accepted a terminal newline and that malformed `repository.tree` values lacked
+negative coverage. Both `git_oid` and `sha256` now combine their lowercase-hex
+patterns with exact `minLength`/`maxLength`; commit and tree share the complete
+short, long, uppercase, non-hex, and terminal-newline matrix, while stdout,
+stderr, and evidence digests each reject terminal newlines at their exact error
+paths. The repaired focused slice reports `21 passed`. The original FAIL review
+reports are preserved as evidence; full verification and independent re-review
+must bind the new tree before closure.
 Gateway/F4 through F7, graph orphan cleanup,
 network, database, RPC/facilitator/wallet/payment/exchange actions, Compose
 start, deployment, release, and push remain outside this route. All 156 broad

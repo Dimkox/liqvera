@@ -93,17 +93,20 @@ export class Gateway {
       // No recovery or HTTP replay path ever calls settle for this attempt.
       if(!await this.ledger.markSubmitting(attempt))throw new PublicError('QUOTE_EXPIRED',410);
       let txHash:string|null=null;
+      let confirmationObserved=false;
       try {
         const result=await this.payment.settle(verified.payload,verified.requirements);txHash=result.tx_hash;
         await this.ledger.unknown(attempt,txHash);
         const confirmation=await this.payment.confirm(quote,{...attempt,state:'UNKNOWN',tx_hash:txHash});
         if(!confirmation)throw new PublicError('PAYMENT_UNCERTAIN',202);
+        confirmationObserved=true;
         this.contracts.assert('receipt',confirmation.receipt);
         await this.ledger.confirm(quote,attempt,confirmation);
         metrics.increment('payment_settled');
       } catch(error) {
         await this.ledger.unknown(attempt,txHash);
-        if(error instanceof PublicError&&error.code==='MANUAL_REVIEW')await this.ledger.manualReview(quote,attempt);
+        if(error instanceof PublicError&&(error.code==='MANUAL_REVIEW'||
+          (confirmationObserved&&error.code==='PAYMENT_REJECTED')))await this.ledger.manualReview(quote,attempt);
         throw new PublicError('PAYMENT_UNCERTAIN',202);
       }
       quote=await this.ledger.quote(scope,reportId,true);

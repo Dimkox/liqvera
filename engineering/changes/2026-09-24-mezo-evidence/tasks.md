@@ -114,7 +114,9 @@ and an explicitly simulated `NO TRANSFER` unlock outside the chargeable
 
 - [x] Add pinned SDK adapter and runtime readiness checks.
 - [x] Add durable verify/settle/reconciliation/entitlement state transitions.
-- [ ] Pass mocked replay, timeout, crash, and duplicate-attempt tests.
+- [x] Pass the bounded fake-only replay, timeout/lost-response,
+  crash-before-submit, and canonical duplicate-attempt slice (local application
+  evidence only; persistent durability and frozen vectors remain unverified).
 - [ ] Run separately approved controlled testnet payment.
 
 ## F6 — UI and operations

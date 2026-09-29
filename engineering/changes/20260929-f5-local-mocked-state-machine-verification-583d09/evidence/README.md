@@ -77,3 +77,29 @@ Initial evidence accounting (current records are in `state.json`):
   ]
 }
 ```
+
+<!-- checkpoint:implementation -->
+## Implementation checkpoint
+
+Local observation only; not verification or publication evidence.
+
+```json
+{
+  "kind": "implementation",
+  "change_id": "20260929-f5-local-mocked-state-machine-verification-583d09",
+  "route_id": "583d09e0cf44",
+  "observed_at": "2026-09-29T09:21:28+00:00",
+  "branch": "feat/f3-f7-verification",
+  "head": "4282302df0e10ffa3fe3ff96fa798615ebb51048",
+  "detached": false,
+  "git_available": true,
+  "git_findings": [],
+  "dirty_product_state": "dirty",
+  "dirty_product_paths": [
+    "apps/mezo-gateway/src/application/gateway.ts",
+    "apps/mezo-gateway/src/workers/reconciliation.ts",
+    "apps/mezo-gateway/test/state-machine.test.ts"
+  ],
+  "note": "implementation started; preserve work before handoff"
+}
+```

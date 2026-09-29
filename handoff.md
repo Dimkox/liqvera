@@ -3,6 +3,41 @@
 Updated: 2026-09-29 (F4 independent re-reviews PASS; durable package ready; final runtime receipts refresh after this commit). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
+## F5 local mocked state-machine verification — 2026-09-29
+
+Route `583d09e0cf44` and change package
+`engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/`
+are implementing a strictly fake-only Node vertical with no database, migration,
+RPC, facilitator, wallet, transfer, exchange, deployment, release, or push.
+Four read-only analyses froze the scope; route `c3dad647a9f8` was cancelled
+before implementation because keyword routing attached inapplicable external
+write gates to the same local-only intent.
+
+RED tests reproduced that an authoritative confirmation rejected by
+`Ledger.confirm` as `PAYMENT_REJECTED` remained ordinary uncertainty in both
+`Gateway.read` and `reconcileOne`: neither entered manual review immediately.
+The minimal repair distinguishes a confirmation already observed from earlier
+payment failures and treats only its binding rejection (plus the existing
+manual-review error) as frozen `inconsistent_receipt` evidence. Both paths
+retain the fail-closed 202 response, enter paired `MANUAL_REVIEW`, create no
+entitlement or delivery, and never settle again.
+
+Six deterministic scenarios execute real gateway/reconciliation/recovery
+orchestration with a structural in-memory ledger, scripted payment port, and
+per-test temporary artifacts: direct and reconciled mismatch, post-submit lost
+response and HTTP replay, canonical duplicate use, stale verified pre-submit
+recovery, entitlement reuse, and reorganization withholding. The focused file
+passes 6 tests; the complete gateway suite passes 12 and skips the five
+explicitly disposable-PostgreSQL F4 cases when no database URL is supplied.
+`MANUAL_REVIEW -> PAID/CONFIRMED` recovery remains an explicit residual: the
+worker cannot lease that state and the adapter lacks an idempotent restore-only
+operation, so this route does not mock a false PASS. Production identity and
+finality remain unresolved, and all 156 frozen vectors remain `NOT_RUN`.
+
+Next: run pinned full verification on the coherent committed tree, then the
+route-selected independent code, test, and data reviews. Do not infer testnet
+payment, persistence, acceptance, deployment, or release readiness.
+
 ## F4 local gateway and ledger verification — 2026-09-29
 
 Route `725677143509` and change package

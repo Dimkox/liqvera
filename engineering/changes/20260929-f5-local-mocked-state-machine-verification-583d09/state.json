@@ -15,6 +15,24 @@
       "note": "draft; implementation not started",
       "observed_at": "2026-09-29T09:13:06+00:00",
       "route_id": "583d09e0cf44"
+    },
+    {
+      "branch": "feat/f3-f7-verification",
+      "change_id": "20260929-f5-local-mocked-state-machine-verification-583d09",
+      "detached": false,
+      "dirty_product_paths": [
+        "apps/mezo-gateway/src/application/gateway.ts",
+        "apps/mezo-gateway/src/workers/reconciliation.ts",
+        "apps/mezo-gateway/test/state-machine.test.ts"
+      ],
+      "dirty_product_state": "dirty",
+      "git_available": true,
+      "git_findings": [],
+      "head": "4282302df0e10ffa3fe3ff96fa798615ebb51048",
+      "kind": "implementation",
+      "note": "implementation started; preserve work before handoff",
+      "observed_at": "2026-09-29T09:21:28+00:00",
+      "route_id": "583d09e0cf44"
     }
   ],
   "created_at": "2026-09-29T09:13:06+00:00",
@@ -69,13 +87,19 @@
       "from": "scoped",
       "reason": "Route declares no human gates; bounded in-process test scope is approved without database, migration, or external actions.",
       "to": "approved"
+    },
+    {
+      "at": "2026-09-29T09:21:28+00:00",
+      "from": "approved",
+      "reason": "RED regressions reproduced missing immediate manual review in direct and reconciliation receipt-binding paths; minimal two-site repair and six fake-only scenarios are green.",
+      "to": "implementing"
     }
   ],
   "human_gates": [],
   "human_gates_digest": "cb040ae659466b1c626d895d8a0bf6015c72880d68642a6e0f570756a021d6dd",
   "route_id": "583d09e0cf44",
   "schema_version": 1,
-  "status": "approved",
+  "status": "implementing",
   "title": "F5 local mocked state-machine verification",
-  "updated_at": "2026-09-29T09:18:23+00:00"
+  "updated_at": "2026-09-29T09:21:28+00:00"
 }

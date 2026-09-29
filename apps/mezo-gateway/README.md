@@ -1,10 +1,12 @@
 # Liqvera gateway
 
-Status: **F4 LOCALLY VERIFIED / REVIEW PENDING**. The exact lock builds and
-typechecks locally, and the private cleanup adapter has executable loopback
-contract tests. Disposable-ledger and pinned full-route verification pass. F2 vectors
-remain `NOT_RUN`; these focused checks do not establish F4/F5 acceptance,
-testnet settlement, deployment, or release acceptance.
+Status: **F4 READY / F5 LOCAL MOCK VERIFICATION IN PROGRESS**. The exact lock,
+cleanup adapter, disposable-ledger checks, pinned full-route verification, and
+F4 independent reviews pass. A deterministic F5 Node slice now exercises the
+real gateway/reconciliation orchestration for duplicate use, pre-submit
+recovery, unknown outcomes, receipt mismatch, entitlement replay, and reorg
+withholding. All 156 vectors remain `NOT_RUN`; these focused checks do not
+establish F5 acceptance, testnet settlement, deployment, or release readiness.
 
 The Express process owns the frozen `/v1/*` HTTP surface, PostgreSQL ledger,
 and official x402 2.16.0 boundary. Python remains responsible for all analytics
@@ -88,11 +90,14 @@ an older ledger over newer authorization records.
 
 ## Remaining verification obligations
 
-Complete independent review, compare remaining runtime paths with
-`states.json`, and execute the F2 payment/recovery vectors.
-Exercise crash-before-submit, crash-after-broadcast, missing transaction hash,
-settlement timeout, response loss, expiry during settlement, cross-scope reads,
-artifact tampering, reorganization, and log-redaction canaries. Verify official
+Complete F5 pinned verification and independent review, compare remaining
+runtime paths with `states.json`, and eventually execute the frozen
+payment/recovery vectors under separate authorization. The local suite covers
+crash-before-submit, lost settlement response, canonical duplicate use,
+receipt-binding rejection, entitlement replay, and reorganization withholding;
+it does not prove PostgreSQL crash durability or real identity/finality.
+Still exercise expiry during settlement, cross-scope reads, artifact tampering,
+and log-redaction canaries. Verify official
 SDK requirements/extra fields and MUSD permit domain from pinned dependencies.
 The current finality/identity policy placeholders are deliberate release
 blockers, not successful mock settlement. Live network/payment tests require

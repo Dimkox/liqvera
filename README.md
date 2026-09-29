@@ -19,12 +19,13 @@ approved at `3729bdc131ca4ac971ab04e735da2e113d68ad71`: 446 contract tests
 and 1087 full-suite tests plus 85 subtests pass. See the
 [bound F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md).
 F3's canonical offline artifact path is locally verified and `ready`. F4 local
-gateway/ledger verification is in progress: the exact lock builds and
-typechecks, strict cleanup-adapter regressions pass, and five disposable
-PostgreSQL checks cover fresh/upgrade migrations, 20-way idempotency,
-fail-closed recovery, and lost-response cleanup convergence. Full route
-verification passes with the pinned 22-worker runner; independent review is
-still pending. F5–F7 remain
+gateway/ledger verification is `ready`: the exact lock, strict cleanup-adapter
+regressions, and five disposable PostgreSQL checks passed pinned verification
+and independent review. F5 now has a focused fake-only Node slice around the
+real gateway and reconciliation orchestration. It proves duplicate-use,
+pre-submit recovery, post-submit uncertainty/no-resettle, receipt-mismatch,
+entitlement replay, and reorganization withholding locally; its full route
+verification and independent review remain pending. F6–F7 remain
 **IMPLEMENTED_UNVERIFIED**. The local protocol package pins official Mezo MUSD
 material and recorded `mezo-org` source revisions. Separate Liqvera factory
 targets do not change the existing Stage A three-wheel factory. All 156 frozen
@@ -144,6 +145,11 @@ make liqvera-acceptance ACCEPTANCE_OUTPUT=/new/path/result.json
 
 `liqvera-gateway` has now been exercised locally through its exact lock,
 typecheck/build, loopback adapter suite, and disposable PostgreSQL tests. The
+gateway-owned fake-only F5 suite additionally executes `Gateway.read`,
+`reconcileOne`, and `recoverUnsubmitted` without a database or network. These
+tests do not establish production payment readiness: authorization identity
+and finality policies remain unresolved and all 156 vectors remain `NOT_RUN`.
+The
 other listed targets remain separately evidenced. The gateway and web
 lockfiles were generated with lifecycle scripts disabled; dependency audit
 findings remain release-risk input, not acceptance. The current gateway audit

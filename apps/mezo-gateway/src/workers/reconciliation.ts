@@ -12,12 +12,14 @@ export async function reconcileOne(gateway:Gateway):Promise<boolean> {
   const quote=await gateway.ledger.quoteForAttempt(attempt);
   await gateway.ledger.unknown(attempt,attempt.tx_hash);
   let code='PAYMENT_UNCERTAIN';
+  let confirmationObserved=false;
   try {
     const confirmation=await gateway.payment.confirm(quote,{...attempt,state:'UNKNOWN'});
-    if(confirmation) {gateway.contracts.assert('receipt',confirmation.receipt);await gateway.ledger.confirm(quote,attempt,confirmation);code='CONFIRMED';}
+    if(confirmation) {confirmationObserved=true;gateway.contracts.assert('receipt',confirmation.receipt);await gateway.ledger.confirm(quote,attempt,confirmation);code='CONFIRMED';}
     else if(attempt.reconciliation_count>=10) {await gateway.ledger.manualReview(quote,attempt);code='MANUAL_REVIEW';}
   } catch(error) {
-    if(attempt.reconciliation_count>=10||(error instanceof PublicError&&error.code==='MANUAL_REVIEW')) {await gateway.ledger.manualReview(quote,attempt);code='MANUAL_REVIEW';}
+    if(attempt.reconciliation_count>=10||(error instanceof PublicError&&(error.code==='MANUAL_REVIEW'||
+      (confirmationObserved&&error.code==='PAYMENT_REJECTED')))) {await gateway.ledger.manualReview(quote,attempt);code='MANUAL_REVIEW';}
   }
   await gateway.ledger.pool.query('INSERT INTO reconciliation_events(payment_attempt_id,code) VALUES($1,$2)',[attempt.id,code]);
   metrics.increment('reconciliation_complete');

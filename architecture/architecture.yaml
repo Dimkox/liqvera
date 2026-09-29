@@ -14353,6 +14353,84 @@ repository_inventory:
   - path: engineering/changes/20260929-f4-local-gateway-and-ledger-verification-725677/test-plan.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/change-spec.yaml
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/evidence/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/evidence/analysis-architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/evidence/analysis-data_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/evidence/analysis-docs_researcher.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/evidence/analysis-repo_explorer.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/route.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/test-plan.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/change-spec.yaml
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/evidence/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/route.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/test-plan.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: tests/contracts/test_acceptance_result.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
@@ -14996,6 +15074,9 @@ repository_inventory:
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/test/report-service.test.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/test/state-machine.test.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/.gitignore

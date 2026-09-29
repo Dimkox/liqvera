@@ -14407,6 +14407,54 @@ repository_inventory:
   - path: engineering/changes/20260929-f5-local-mocked-state-machine-verification-583d09/test-plan.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/architecture.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/brief.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/change-spec.yaml
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/README.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/analysis-architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/analysis-data_architect.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/analysis-docs_researcher.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/evidence/analysis-repo_explorer.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/human-gates.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/release.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/requirements.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/rollback.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/route.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/state.json
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/tasks.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f6-local-ui-and-operations-verification-26ffb2/test-plan.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f5-mocked-settlement-and-reconciliation-verifica-c3dad6/architecture.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
@@ -15112,6 +15160,9 @@ repository_inventory:
   - path: apps/mezo-web/src/api.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/browser-flow.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/src/contracts.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
@@ -15130,6 +15181,12 @@ repository_inventory:
   - path: apps/mezo-web/src/x402.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/test/browser-flow.test.mjs
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: tests/operations/test_f6_static.py
+    node: test:liqvera-local-mvp
+    path_class: TEST_SOURCE
   - path: deploy/mezo-evidence/.gitignore
     node: configuration:liqvera-deployment
     path_class: CONFIGURATION

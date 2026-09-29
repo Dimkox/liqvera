@@ -41,7 +41,12 @@ a registry request. The first full pinned verifier completed its checks but
 could not record a receipt because the typed spec used symbolic test labels;
 v2.0.19 requires existing repository paths. Those evidence references now
 point to the real browser and operations test files. A clean rerun and
-independent route reviews remain next. Production's
+independent route reviews remain next. The subsequent full run reached the
+Python suite and exposed only missing architecture-inventory ownership for the
+new F6 package and tests: 1153 tests and 85 subtests passed, while five graph
+policy tests failed on the undeclared paths. The inventory now binds every F6
+package file and both new test/source artifacts; the exact five-test graph
+regression slice passes. Production's
 x402 adapter remains deliberately unregistered and fixture payment remains
 fail closed. This route will not use a real wallet, RPC, facilitator, transfer,
 testnet/mainnet payment, live capture/profile, shared environment, deployment,

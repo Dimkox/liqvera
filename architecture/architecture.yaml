@@ -14439,6 +14439,12 @@ repository_inventory:
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/release-review-paywall-live-r2.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/security-review-paywall-live-r3.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/release-review-paywall-live-r3.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/p3-postgres-operation.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

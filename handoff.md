@@ -1,5 +1,22 @@
 # Liqvera — handoff
 
+## 2026-09-30 R3 review close and live snapshot evidence
+
+Commit `ea3098732b369f92d4a8ec7503cfda6153a582ee` closes the two R2 blockers.
+The final no-record verifier passed with eight xdist workers, including fresh
+coverage. Independent R3 review records **security PASS** for the isolated
+database topology and **release GO** for the checked-in grantless rollback.
+
+The coordinator supplied live Hyperliquid snapshot evidence for report
+`820df2f8-5bd6-41ad-a94d-98b5078f4d64`, captured at
+`2026-09-30T21:32:46.790Z`. The sealed report SHA-256 is
+`770ba84eeaaec8d1092c9179c2079cebbe891b128b448e722e4367dee87eed9b`; the
+bundle SHA-256 is
+`92fa784431cf92848dbdb8033b111367fb8d624c70906c1cd0c5cc94a1a5d527`.
+Its temporary generation path is not durable and is therefore not recorded as
+an artifact location. This documentation close made no external call, payment,
+deployment, or product-code change.
+
 ## 2026-09-30 R2 paywall topology and rollback repair
 
 The live PostgreSQL service is again confined to `gateway_db`. A dedicated,

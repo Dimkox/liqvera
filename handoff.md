@@ -178,6 +178,10 @@ SBOM/provenance attestations. Capture/report/gateway bind source `9505cd8`; the
 web typing repair required source `a435954`, which also binds web/edge. The exact
 index digests plus official multiarch `postgres:16-alpine` digest are frozen in
 `installer/manifests/image-lock-v0.0.2.json`; source manifest is now runnable.
+Clean production builds from `5a1e8dc` were byte-identical: archive SHA-256
+`3754f5128f42b3d1565a72511e1c369d45309d0d44ae7798f7a1337ea9ffd79a`,
+inner inventory `db30f81def0faf3a3ad72680bb4b9d0dddf5d56a844091ae9e6e063cbcf7071a`,
+25 files. Both archives passed independent materialization verification.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

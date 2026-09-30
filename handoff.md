@@ -1,5 +1,24 @@
 # Liqvera — handoff
 
+## 2026-09-30 automated Mezo Testnet demo payments
+
+The retained faucet-funded buyer encrypted keystore was used through a local
+EIP-712 signer subprocess; no private key, password, or signature was placed in
+the repository or logs. Three fresh 0.01 test MUSD payments were confirmed on
+Mezo Testnet because the first facilitator request timed out client-side but
+still settled on-chain: transactions
+`0x1ca6255bfd83de27feaafd805e27a4dae535e6c5d832be0c875e997dba2b181e`,
+`0x19304292f6a08d1061c4cf3e83d506f67ca0f7b88d67220c45d376c362b335a8`,
+and `0xdab835ad81cd66b56911d6dd4b389ecf2c383e067ba9c52bbf293427eb113c23`.
+Each transferred exactly 0.01 test MUSD from the retained buyer to the retained
+merchant through the reviewed Permit2/x402 path, reached at least 12 canonical
+confirmations, and recorded zero buyer native-gas spend. The timeout case was
+recovered from its canonical MUSD Transfer log and reconciled confirm-only;
+there was no second settlement submission for any grant. Current observed
+balances are 1799.96 test MUSD buyer and 0.04 test MUSD merchant, including the
+historical retained 0.01 test MUSD evidence payment. No exchange mutation,
+mainnet action, real-fund transfer, deployment, push, or release occurred.
+
 ## 2026-09-30 R3 review close and live snapshot evidence
 
 Commit `ea3098732b369f92d4a8ec7503cfda6153a582ee` closes the two R2 blockers.

@@ -232,3 +232,8 @@ native-balance equality; do not claim authority over facilitator gas.
 The current facilitator capability advertises Permit2 rather than EIP-3009 for
 Mezo MUSD. Bind the canonical Permit2 and exact proxy addresses and require the
 EIP-2612 extension so the buyer signs off chain and never sends an approval transaction.
+# 2026-09-30 — Sign demo payments without exporting wallet authority
+
+Use the retained encrypted faucet keystore only inside a short-lived local
+EIP-712 signer subprocess, passing typed data in and returning only signatures.
+This enabled repeatable x402 testnet demos without exposing or copying the raw private key.

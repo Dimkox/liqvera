@@ -3,6 +3,15 @@
 Updated: 2026-09-29 (F5 closed; F6 fake/static verification and independent reviews PASS). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 
+Post-release update: v0.0.2 is published at
+`https://github.com/Dimkox/liqvera/releases/tag/v0.0.2`; tag and pushed main
+target `b761074d7291d9b95a2785f3c3e01a1103cb3b3e`. The six published installer
+assets retain the exact sizes and SHA-256 values in
+`release-artifact-manifest-v0.0.2.json`; the ZIP itself remains bound internally
+to build subject `70141b662ff949c7d06e7801143e29ae14d253be` / tree
+`1ede66694689d38e68b61560d67cd7a1dd614838`. Clean-host Docker acceptance is
+still `NOT_RUN`, and the aggregate acceptance projection remains INCOMPLETE.
+
 ## F7 live acceptance and release 0.0.1 — 2026-09-29
 
 The approved one-click installer concept is now captured as a design-only spec
@@ -285,7 +294,8 @@ evidence hash is
 Together with local A01/A08/A09/A27/A30, the multi-result projection is 9
 PASS, 21 NOT_RUN, zero BLOCKED_EXTERNAL, and zero FAIL. It remains INCOMPLETE:
 the 21 cases were genuinely not executed, and no single runner has an overall
-PASS. No v0.0.2 build, push, tag, or release has occurred.
+PASS. This preparation statement was superseded by the v0.0.2 publication
+record at the top of this handoff.
 
 Liqvera v0.0.1 is published at
 `https://github.com/Dimkox/liqvera/releases/tag/v0.0.1`; the immutable tag

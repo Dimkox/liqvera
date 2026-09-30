@@ -69,11 +69,13 @@ authorized Mezo Testnet settlement is retained as sealed A13/A14 evidence; no
 mainnet payment, exchange mutation, custody action, deployment, tag, push, or
 release publication was performed.
 
-Current product candidate identity: root `VERSION` is `0.0.2`; published
-release v0.0.1 remains immutable. The root Python
+Current product identity: root `VERSION` is `0.0.2`; releases v0.0.1 and
+[v0.0.2](https://github.com/Dimkox/liqvera/releases/tag/v0.0.2) are published
+and immutable. The v0.0.2 tag targets
+`b761074d7291d9b95a2785f3c3e01a1103cb3b3e`. The root Python
 workspace remains `0.1.0.dev0`, and Stage A, evidence-report, protocol,
-gateway, and web component packages remain `0.1.0`. No v0.0.2 tag or GitHub
-Release exists yet. Inherited `mee-*` identifiers are preserved.
+gateway, and web component packages remain `0.1.0`. Inherited `mee-*`
+identifiers are preserved.
 
 ## Start here
 

@@ -12,6 +12,7 @@ import { startWorkers } from './workers/scheduler.js';
 import { logEvent, telemetryHandler } from './security/observability.js';
 import { MezoAuthorizationPolicy, MezoFinalityPolicy } from './security/payment-policy.js';
 import { composeOfficialX402, readPrivateGrantFile } from './security/live-composition.js';
+import { databaseIdentity } from './p3-operator.js';
 async function main():Promise<void> {
   const config=await loadConfig();
   const pool=new Pool({connectionString:config.databaseUrl,max:12,connectionTimeoutMillis:3000,idleTimeoutMillis:30000,
@@ -22,7 +23,8 @@ async function main():Promise<void> {
   const finality=new MezoFinalityPolicy(12);
   const reader=new MezoReceiptReader(new MezoReadonlyRpc(),identity,finality);
   const liveInput=config.liveGrantFile&&config.liveContext?{
-    grantBytes:await readPrivateGrantFile(config.liveGrantFile),context:config.liveContext,observedAt:new Date(),
+    grantBytes:await readPrivateGrantFile(config.liveGrantFile),
+    context:{...config.liveContext,databaseIdentity:await databaseIdentity(config.databaseUrl)},observedAt:new Date(),
   }:null;
   const payments=composeOfficialX402(identity,finality,reader,config.publicBase,liveInput);
   await payments.initialize();

@@ -149,12 +149,14 @@ def build_inspected_report(evidence: InspectedInput, request: ReportRequest) -> 
             "checks": [{"name": name, "result": "PASS"} for name in (
                 "sealed bytes and source bindings", "exact snapshot sweep")]
                 + [{"name": "live identity approval", "result": "PASS" if mode == "live-public" else "UNCERTAIN"}],
-            "limitations": [
+            "limitations": ([
                 "SIMULATED fixture input and timestamps; never eligible for a chargeable quote.",
+            ] if mode == "fixture" else [
+                "Public snapshot identity is policy-validated; exchange authenticity is not independently attested.",
+            ]) + [
                 "Calculation over the available snapshot depth, at most 20 levels per side.",
                 "Hypothetical snapshot sweep; no fees, funding, net PnL, or execution guarantee.",
                 "Hashes establish integrity relative to the bundle, not exchange authenticity.",
-                "Live identity approval is absent; live reports remain blocked.",
             ],
             "stage_a": evidence.stage_a,
         },

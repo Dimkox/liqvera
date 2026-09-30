@@ -109,6 +109,8 @@ function receipt(q: Quote, attempt: Attempt): Receipt {
 }
 
 class ScriptedPayment implements PaymentPort {
+  requirementsCalls = 0;
+  verifyCalls = 0;
   settleCalls = 0;
   confirmCalls = 0;
   revalidateCalls = 0;
@@ -119,8 +121,9 @@ class ScriptedPayment implements PaymentPort {
     public current = true,
   ) {}
   blockers() { return []; }
-  async requirements() { return { header: 'required', value: {} as PaymentRequirements }; }
+  async requirements() { this.requirementsCalls += 1; return { header: 'required', value: {} as PaymentRequirements }; }
   async verify(_header: string, _quote: Quote): Promise<{ payload: PaymentPayload; requirements: PaymentRequirements; identity: AuthorizationIdentity }> {
+    this.verifyCalls += 1;
     return {
       payload: {} as PaymentPayload,
       requirements: {} as PaymentRequirements,
@@ -140,6 +143,7 @@ class ScriptedPayment implements PaymentPort {
 }
 
 class MemoryLedger {
+  grantConsumed = false;
   readonly quotes = new Map<string, Quote>();
   readonly attempts = new Map<string, Attempt>();
   readonly usedIdentities = new Set<string>();
@@ -152,6 +156,7 @@ class MemoryLedger {
   readonly pool = {
     query: async (sql: string, params?: unknown[]): Promise<{ rows: unknown[]; rowCount: number }> => {
       this.trace.push(sql.startsWith('INSERT INTO reconciliation_events') ? `reconciliation:${String(params?.[1])}` : 'pool:query');
+      if(sql.includes('live_grant_consumptions'))return {rows:[],rowCount:this.grantConsumed?1:0};
       return { rows: [], rowCount: 0 };
     },
   };
@@ -186,7 +191,7 @@ class MemoryLedger {
     this.trace.push('attempt:submitting');
     attempt.state = 'SUBMITTING';
     attempt.submitted_at = new Date('2026-09-29T00:00:00Z');
-    return true;
+    return 'SUBMITTING' as const;
   }
   async unknown(attempt: Attempt, txHash: string | null) {
     this.trace.push('attempt:unknown');
@@ -280,6 +285,27 @@ test('direct receipt-binding rejection immediately enters manual review without 
   assert.equal(attempt.state, 'MANUAL_REVIEW');
   assert.equal(f.ledger.entitlements.size, 0);
   assert.ok(!f.ledger.trace.includes('delivery'));
+});
+
+test('consumed grant blocks readiness, 402 requirements, and external verify',async t=>{
+  const f=await fixture();t.after(f.cleanup);
+  Object.defineProperties(f.payment,{liveGrantDigest:{value:'f'.repeat(64)},expectedPayer:{value:payer}});
+  f.ledger.grantConsumed=true;
+  const ready=await f.gateway.readiness('request-ready');
+  assert.equal(ready.status,503);assert.ok((ready.body as {blockers:string[]}).blockers.includes('EXTERNAL_GRANT_REQUIRED'));
+  await expectPublicError('PAYMENT_NOT_READY',()=>f.gateway.read('scope',f.q.id,'report',undefined,'request-402'));
+  await expectPublicError('PAYMENT_NOT_READY',()=>f.gateway.read('scope',f.q.id,'report','signature','request-verify'));
+  assert.equal(f.payment.requirementsCalls,0);assert.equal(f.payment.verifyCalls,0);
+});
+
+test('grant payer mismatch is rejected before request persistence',async t=>{
+  const f=await fixture();t.after(f.cleanup);
+  Object.defineProperty(f.payment,'expectedPayer',{value:payer});
+  let persisted=0;(f.ledger as unknown as {createRequest:()=>never}).createRequest=()=>{persisted+=1;throw new Error('unexpected');};
+  await expectPublicError('PAYMENT_NOT_READY',()=>f.gateway.create('scope','key',{
+    instrument_id:'hyperliquid:BTC:perpetual',side:'BUY',quantity_base:'0.1',expected_payer:'0x3333333333333333333333333333333333333333'
+  },'request-create'));
+  assert.equal(persisted,0);
 });
 
 test('reconciliation receipt-binding rejection immediately enters manual review and never settles', async t => {

@@ -67,7 +67,8 @@ def test_fixture_profile_has_no_external_egress_and_live_keeps_required_egress()
     assert service_networks(fixture, "gateway-fixture") == {"edge", "gateway_db", "gateway_report", "operations"}
     assert service_networks(fixture, "edge-fixture") == {"edge"}
     assert service_networks(live, "evidence-capture-live") == {"capture_report", "capture_egress"}
-    assert service_networks(live, "gateway-live") == {"edge", "gateway_db", "gateway_report", "operations", "payment_egress"}
+    assert live["services"]["gateway-live"]["network_mode"] == "service:postgres-live"
+    assert service_networks(live, "postgres-live") == {"edge", "gateway_db", "gateway_report", "operations", "payment_egress"}
     assert service_networks(live, "edge-live") == {"edge", "tls_egress"}
     for config in (fixture, live):
         networks = config["networks"]
@@ -133,7 +134,10 @@ def test_exact_users_tmpfs_mount_modes_resources_and_profile_secrets() -> None:
             name: {item["source"] for item in services[name].get("secrets", [])}
             for name in services
         }
-        assert secrets[f"gateway-{profile}"] == {f"postgres_password_{profile}", f"report_token_{profile}"}
+        expected_gateway = {f"postgres_password_{profile}", f"report_token_{profile}"}
+        if profile == "live":
+            expected_gateway.add("payment_grant_live")
+        assert secrets[f"gateway-{profile}"] == expected_gateway
         assert secrets[f"report-{profile}"] == {f"report_token_{profile}"}
         assert secrets[f"postgres-{profile}"] == {f"postgres_password_{profile}"}
         assert secrets[f"migrate-{profile}"] == {f"postgres_password_{profile}"}

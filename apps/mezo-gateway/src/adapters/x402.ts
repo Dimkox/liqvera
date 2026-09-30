@@ -10,7 +10,7 @@ import { paymentHeader } from '../security/input.js';
 import { boundedJson } from './http.js';
 import { MezoReceiptReader } from './mezo-rpc.js';
 import type { LivePaymentGrant } from '../security/live-grant.js';
-export interface LivePaymentContext { subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string }
+export interface LivePaymentContext { subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string }
 // Policy implementations require reviewed scheme-specific identity, nonce,
 // replay-domain, chain correlation and finality evidence. Configuration cannot
 // flip these defaults into an approval.

@@ -114,22 +114,27 @@ export class Ledger {
       return { ...inserted.rows[0], state:'VERIFIED' };
     });
   }
-  async markSubmitting(attempt: Attempt): Promise<boolean> {
+  async markSubmitting(attempt: Attempt): Promise<'SUBMITTING'|'EXPIRED'|'GRANT_CONSUMED'|'INVALID_STATE'> {
     return this.transaction(async db => {
       const q = (await db.query('SELECT * FROM quotes WHERE id=$1 FOR UPDATE',[attempt.quote_id])).rows[0]!;
       const current = (await db.query<Attempt>('SELECT * FROM payment_attempts WHERE id=$1 FOR UPDATE',[attempt.id])).rows[0]!;
-      if (current.state !== 'VERIFIED') return false;
+      if (current.state !== 'VERIFIED') return 'INVALID_STATE';
       if (q.expires_at <= new Date()) {
         await db.query("UPDATE payment_attempts SET state='REJECTED',updated_at=now() WHERE id=$1",[attempt.id]);
-        await db.query("UPDATE quotes SET state='EXPIRED' WHERE id=$1",[attempt.quote_id]); return false;
+        await db.query("UPDATE quotes SET state='EXPIRED' WHERE id=$1",[attempt.quote_id]); return 'EXPIRED';
       }
       const grantDigest=current.correlation?.live_grant_digest;
       const grantId=current.correlation?.live_grant_id;
-      if(typeof grantDigest!=='string'||!/^[0-9a-f]{64}$/.test(grantDigest)||typeof grantId!=='string')return false;
-      if(!await consumeLiveGrant(db,grantDigest,grantId,attempt.id))return false;
+      if(typeof grantDigest!=='string'||!/^[0-9a-f]{64}$/.test(grantDigest)||typeof grantId!=='string')return 'INVALID_STATE';
+      if(!await consumeLiveGrant(db,grantDigest,grantId,attempt.id)) {
+        await db.query("UPDATE payment_attempts SET state='REJECTED',updated_at=now() WHERE id=$1",[attempt.id]);
+        await db.query("UPDATE quotes SET state='READY' WHERE id=$1 AND state='PAYMENT_PENDING'",[attempt.quote_id]);
+        await db.query("INSERT INTO audit_events(quote_id,payment_attempt_id,event) VALUES($1,$2,'GRANT_ALREADY_CONSUMED')",[attempt.quote_id,attempt.id]);
+        return 'GRANT_CONSUMED';
+      }
       await db.query("UPDATE payment_attempts SET state='SUBMITTING',submitted_at=now(),updated_at=now(),next_reconcile_at=now()+interval '30 seconds' WHERE id=$1",[attempt.id]);
       await db.query("INSERT INTO audit_events(quote_id,payment_attempt_id,event) VALUES($1,$2,'SUBMIT_COMMITTED')",[attempt.quote_id,attempt.id]);
-      return true;
+      return 'SUBMITTING';
     });
   }
   async unknown(attempt: Attempt, txHash: string | null): Promise<void> {

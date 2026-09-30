@@ -84,13 +84,14 @@ export class Gateway {
     if(['PAYMENT_PENDING','PAYMENT_UNCERTAIN','MANUAL_REVIEW'].includes(quote.state))
       throw new PublicError(quote.state==='MANUAL_REVIEW'?'MANUAL_REVIEW':'PAYMENT_UNCERTAIN',202);
     if(quote.state==='READY') {
-      if(this.blockers().length || !await this.salesHealthy())throw new PublicError('PAYMENT_NOT_READY');
+      if((await this.currentBlockers()).length || !await this.salesHealthy())throw new PublicError('PAYMENT_NOT_READY');
       await Promise.all([this.artifacts.read(quote.artifact,'report'),this.artifacts.read(quote.artifact,'bundle')]);
       if(!signature||kind==='bundle') {
         const required=await this.payment.requirements(quote);
         metrics.increment('payment_required');
         return {status:402,shape:'error',headers:{'PAYMENT-REQUIRED':required.header},body:errorResource('PAYMENT_REQUIRED',requestId)};
       }
+      if((await this.currentBlockers()).length)throw new PublicError('PAYMENT_NOT_READY');
       const verified=await this.payment.verify(signature,quote);
       metrics.increment('payment_verified');
       this.contracts.states.next('quote',quote.state,'authorization_accepted',{
@@ -100,7 +101,8 @@ export class Gateway {
       await Promise.all([this.artifacts.read(quote.artifact,'report'),this.artifacts.read(quote.artifact,'bundle')]);
       // The durable SUBMITTING boundary precedes the sole external settle call.
       // No recovery or HTTP replay path ever calls settle for this attempt.
-      if(!await this.ledger.markSubmitting(attempt))throw new PublicError('QUOTE_EXPIRED',410);
+      const submission=await this.ledger.markSubmitting(attempt);
+      if(submission!=='SUBMITTING')throw new PublicError(submission==='EXPIRED'?'QUOTE_EXPIRED':'PAYMENT_NOT_READY',submission==='EXPIRED'?410:503);
       let txHash:string|null=null;
       let confirmationObserved=false;
       try {

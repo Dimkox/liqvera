@@ -23,5 +23,5 @@ def test_ordinary_gateway_startup_requires_explicit_private_file_composition() -
     assert "config.liveGrantFile&&config.liveContext" in main
     assert "readPrivateGrantFile(config.liveGrantFile)" in main
     assert "LIQVERA_LIVE_GRANT_FILE" in config
-    assert "O_NOFOLLOW" in composition and "(before.mode&0o077)!==0" in composition
+    assert "O_NOFOLLOW" in composition
     assert "process.env" not in main

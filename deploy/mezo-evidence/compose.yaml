@@ -260,6 +260,12 @@ services:
     secrets:
       - source: postgres_password_live
         target: postgres_password
+    networks:
+      gateway_db: { aliases: [postgres] }
+      edge: { aliases: [gateway] }
+      gateway_report: {}
+      operations: { aliases: [gateway-metrics] }
+      payment_egress: {}
 
   migrate-fixture:
     <<: *migrate
@@ -303,13 +309,39 @@ services:
       report-fixture: { condition: service_healthy }
 
   gateway-live:
-    <<: *gateway
+    build:
+      context: ../..
+      dockerfile: deploy/mezo-evidence/Dockerfile.gateway
+    image: liqvera/mezo-gateway:local
+    init: true
+    restart: unless-stopped
+    user: "10003:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+    mem_limit: 512m
+    cpus: 1.0
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+    volumes:
+      - artifacts:/data/artifacts:ro
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:8080/healthz', {signal: AbortSignal.timeout(2000)}).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
     profiles: [live]
     secrets:
       - source: postgres_password_live
         target: postgres_password
       - source: report_token_live
         target: report_service_token
+      - source: payment_grant_live
+        target: payment_grant
+        uid: "10003"
+        gid: "10001"
+        mode: 0400
     environment:
       SOURCE_MODE: live-public
       REPORT_SERVICE_URL: http://report:8082
@@ -318,15 +350,16 @@ services:
       PUBLIC_BASE_URL: ${LIQVERA_PUBLIC_ORIGIN:-}
       CORS_ORIGINS: ${LIQVERA_PUBLIC_ORIGIN:-}
       PAY_TO: ${LIQVERA_PAY_TO:-}
+      LIQVERA_LIVE_GRANT_FILE: /run/secrets/payment_grant
+      LIQVERA_SUBJECT_COMMIT: ${LIQVERA_SUBJECT_COMMIT:-}
+      LIQVERA_SUBJECT_TREE: ${LIQVERA_SUBJECT_TREE:-}
+      LIQVERA_PLAN_SHA256: ${LIQVERA_PLAN_SHA256:-}
+      LIQVERA_LIVE_BUYER: ${LIQVERA_LIVE_BUYER:-}
+      LIQVERA_DATABASE_HOST: 127.0.0.1
       PORT: "8080"
       METRICS_HOST: gateway-metrics
       METRICS_PORT: "9090"
-    networks:
-      edge: { aliases: [gateway] }
-      gateway_db: {}
-      gateway_report: {}
-      operations: { aliases: [gateway-metrics] }
-      payment_egress: {}
+    network_mode: service:postgres-live
     depends_on:
       migrate-live: { condition: service_completed_successfully }
       report-live: { condition: service_healthy }
@@ -374,6 +407,8 @@ secrets:
     file: ./secrets/fixture_report_service_token
   report_token_live:
     file: ./secrets/live_report_service_token
+  payment_grant_live:
+    file: ./secrets/live_payment_grant
 
 volumes:
   captures: {}

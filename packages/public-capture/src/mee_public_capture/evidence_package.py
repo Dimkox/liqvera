@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import json
 import shutil
 import tempfile
 from pathlib import Path
@@ -75,7 +76,16 @@ def capture_members(capture_id: UUID, source_mode: str,
         identity_evidence = FIXTURE_IDENTITY
         mapping = [fixture_mapping()]
     else:
-        metadata_doc = __import__("json").loads(metadata.payload)
+        def pairs(items: list[tuple[str, object]]) -> dict[str, object]:
+            result: dict[str, object] = {}
+            for key, value in items:
+                if key in result:
+                    raise ValueError("IDENTITY_UNVERIFIED")
+                result[key] = value
+            return result
+        metadata_doc = json.loads(metadata.payload, object_pairs_hook=pairs)
+        if type(metadata_doc) is not dict:
+            raise ValueError("IDENTITY_UNVERIFIED")
         candidates = [item for item in metadata_doc.get("universe", [])
                       if type(item) is dict and item.get("name") == "BTC"]
         if len(candidates) != 1 or type(candidates[0].get("szDecimals")) is not int:

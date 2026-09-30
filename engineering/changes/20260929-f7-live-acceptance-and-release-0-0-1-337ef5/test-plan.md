@@ -4,6 +4,10 @@
 
 RED was observed at `IDENTITY_UNVERIFIED`; gateway compilation rejected the new expiry seam. GREEN requires evidence-report and gateway suites; external calls remain separately gated.
 
+Review RED covered live ZIP verification/tamper, executable grant-file races,
+gateway spent-grant readiness/402/verify blocking, payer mismatch before
+persistence, and resolved Compose secret isolation.
+
 ## Installer Task 5
 
 - Exercise idempotent start/stop/status, the nonblocking lifecycle lock, bounded

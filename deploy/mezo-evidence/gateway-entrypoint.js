@@ -5,7 +5,9 @@ const { spawn } = require('node:child_process');
 const secretPath = process.env.LIQVERA_POSTGRES_PASSWORD_FILE || '/run/secrets/postgres_password';
 const password = readFileSync(secretPath, 'utf8').trimEnd();
 if (!password) throw new Error('PostgreSQL password file is empty');
-const url = new URL('postgresql://liqvera@postgres:5432/liqvera');
+const databaseHost = process.env.LIQVERA_DATABASE_HOST || 'postgres';
+if (!['postgres', '127.0.0.1'].includes(databaseHost)) throw new Error('PostgreSQL host is not allowed');
+const url = new URL(`postgresql://liqvera@${databaseHost}:5432/liqvera`);
 url.password = password;
 
 const command = process.argv[2] || 'npm';

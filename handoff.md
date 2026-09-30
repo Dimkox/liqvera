@@ -6,6 +6,8 @@ The user explicitly approved the bounded design in chat. Live BTC identity is ve
 
 Verification repair: the first exact-commit run exposed four newly tracked analysis reports missing from `architecture/architecture.yaml` and Markdown whitespace in those reports. The exact documented `python3 scripts/grok_verify.py` command also ran tests with system Python, which lacked pinned runtime/build dependencies; the wrapper now re-executes the repository venv when present. After repair, graph regressions pass, xdist passes with 1368 tests plus 85 subtests, and the full no-record verifier passes; it must be rerun after this commit for final fingerprint binding.
 
+Independent review repair binds payment authority to the credential-free loopback database identity, performs stable bounded descriptor reads for grant files, blocks spent grants before 402/verify, and atomically rejects a losing grant consumer without stranding payment state. Live ZIPs are offline verified and tamper-tested; Compose mounts the grant only into gateway-live with exact context variables. No external call or payment was made.
+
 Updated: 2026-09-29 (F5 closed; F6 fake/static verification and independent reviews PASS). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 

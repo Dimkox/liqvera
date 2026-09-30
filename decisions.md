@@ -4,6 +4,10 @@
 
 Deriving the reviewed BTC mapping from sealed metadata/book bytes made the report independently reproducible without granting the collector identity authority. Optional private-file payment composition preserved default fail-closed startup and the existing exactly-once ledger.
 
+## 2026-09-30 — Keep one-shot loss terminal before external I/O
+
+Database-backed rechecks stop known-spent grants before 402/verify, while the unique insert remains final race authority. A losing contender is atomically rejected and its quote reopened behind the spent-grant blocker, avoiding resettlement and stranded recovery state.
+
 Patterns that paid for themselves. Each entry is at most three sentences.
 
 ## 2026-08-21 — Fixture dual-write official Lighter omit-symbol plus indexed mapping

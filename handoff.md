@@ -173,6 +173,11 @@ During authorized multiarch publication the production web Docker build exposed
 strict TypeScript narrowing gaps in receipt verification and the reviewed JS
 x402 bridge import. The minimal source typing repair preserves all runtime
 guards; web production build and all 20 browser tests pass before image rebuild.
+Authorized GHCR publication completed all five amd64/arm64 OCI indexes with
+SBOM/provenance attestations. Capture/report/gateway bind source `9505cd8`; the
+web typing repair required source `a435954`, which also binds web/edge. The exact
+index digests plus official multiarch `postgres:16-alpine` digest are frozen in
+`installer/manifests/image-lock-v0.0.2.json`; source manifest is now runnable.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

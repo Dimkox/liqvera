@@ -35,6 +35,7 @@ SOURCE_MAP = {
     "schemas/install-state.schema.json": "installer/schemas/install-state.schema.json",
     "schemas/release-manifest.schema.json": "installer/schemas/release-manifest.schema.json",
     "manifests/v0.0.2.json": "installer/manifests/v0.0.2.json",
+    "manifests/image-lock-v0.0.2.json": "installer/manifests/image-lock-v0.0.2.json",
     "systemd/liqvera.service.in": "installer/systemd/liqvera.service.in",
     **{f"migrations/{name}": f"apps/mezo-gateway/migrations/{name}" for name in MIGRATIONS},
 }

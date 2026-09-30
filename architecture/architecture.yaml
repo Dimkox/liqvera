@@ -15556,6 +15556,9 @@ repository_inventory:
   - path: installer/manifests/v0.0.2.json
     node: manifest:runtime
     path_class: CONFIGURATION
+  - path: installer/manifests/image-lock-v0.0.2.json
+    node: manifest:runtime
+    path_class: CONFIGURATION
   - path: installer/schemas/config.schema.json
     node: contract:liqvera-evidence-runtime
     path_class: SCHEMA_MANIFEST

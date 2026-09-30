@@ -85,6 +85,7 @@ def valid_files() -> dict[str, bytes]:
             separators=(",", ":"),
         ).encode(),
         "manifests/v0.0.2.json": (ROOT / "installer/manifests/v0.0.2.json").read_bytes(),
+        "manifests/image-lock-v0.0.2.json": (ROOT / "installer/manifests/image-lock-v0.0.2.json").read_bytes(),
         "systemd/liqvera.service.in": (ROOT / "installer/systemd/liqvera.service.in").read_bytes(),
         "LICENSE-NOTICE.md": b"Liqvera test fixture\n",
     }

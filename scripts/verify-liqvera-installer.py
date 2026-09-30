@@ -56,6 +56,7 @@ APPROVED_PATHS = frozenset(
         "manifests/release-manifest.json",
         "manifests/migration-checksums.json",
         "manifests/v0.0.2.json",
+        "manifests/image-lock-v0.0.2.json",
         "systemd/liqvera.service.in",
         "LICENSE-NOTICE.md",
         "SHA256SUMS",

@@ -1,5 +1,17 @@
 # Liqvera — handoff
 
+## 2026-09-30 historical live public preview
+
+The browser packages exact bytes from validated live report
+`d84fb495-8b22-49c1-99a3-a2b763afc977` (source time
+`2026-09-30T23:32:40.858Z`) as a wallet-free historical preview. Report SHA-256
+is `8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd`;
+bundle SHA-256 is
+`a6cc771d3fb8428325d32855fef53417f7da25c893db3a99b49802f482adc4fc`.
+There is no payment transaction for this preview. The UI labels it historical,
+preserves the paid fresh flow, and links the public repository and v0.0.2
+release. No regeneration or fixture substitution occurred.
+
 ## 2026-09-30 live deployment deterministic repairs
 
 The source service still rejects snapshots older than five seconds when

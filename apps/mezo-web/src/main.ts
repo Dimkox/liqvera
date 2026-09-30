@@ -8,6 +8,7 @@ import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./ses
 import { injectedWallet, switchToMezo, walletAccount, walletError, walletOnMezo, type Eip1193Provider } from "./wallet";
 import { bindWalletStateListeners, refreshWalletState, type WalletState } from "./wallet-events";
 import { installProductionX402Adapter, requestPaidReport, x402Available, X402CancelledBeforeSubmission } from "./x402";
+import { HISTORICAL_DEMO, validateHistoricalReport } from "./historical-demo";
 
 installProductionX402Adapter();
 
@@ -43,13 +44,13 @@ app.innerHTML = `
           <div class="panel-heading"><span class="step">02</span><div><p class="eyebrow">STATUS & DELIVERY</p><h2 id="result-title">Your report</h2></div></div>
           <div id="announcement" class="announcement" role="status" aria-live="polite">Checking capabilities and saved session…</div>
           <div id="capability-status" class="capability-status"></div>
-          <div id="result-content" class="result-content"><div class="empty-state"><div class="empty-graphic" aria-hidden="true"><span></span><span></span><span></span><span></span></div><h3>Waiting for a question</h3><p>Connect your wallet and ask for a snapshot report. A quote appears only after the source and evidence are prepared.</p></div></div>
+          <div id="result-content" class="result-content"><div class="empty-state"><div class="empty-graphic" aria-hidden="true"><span></span><span></span><span></span><span></span></div><h3>Waiting for a question</h3><p>Connect your wallet and ask for a fresh paid report, or inspect the sealed historical live example.</p><button id="historical-button" class="secondary-button" type="button">Show latest live report</button></div></div>
           <div class="result-actions"><button id="refresh-button" class="secondary-button hidden" type="button">Check status</button><button id="new-button" class="text-button hidden" type="button">Start another report</button></div>
         </section>
       </div>
       <section class="boundary-strip" aria-label="Important context"><div><span>01</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>02</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>03</span><p><strong>No execution authority.</strong> No orders, custody, live trading, or guaranteed fills.</p></div></section>
     </main>
-    <footer><span>Liqvera · Market reports you can verify.</span><span>Built for MEZO ₿ · Testnet experience</span></footer>
+    <footer><span>Liqvera · Market reports you can verify.</span><span>Built for MEZO ₿ · Testnet experience · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases/tag/v0.0.2" target="_blank" rel="noopener noreferrer">v0.0.2 release ↗</a></span></footer>
   </div>`;
 
 function el<T extends HTMLElement>(selector: string): T {
@@ -97,6 +98,29 @@ function snapshotAge(value: string): string {
   if (elapsed < 0) return "Clock difference detected";
   const minutes = Math.floor(elapsed / 60000);
   return minutes < 1 ? "Less than a minute old" : `${minutes} minute${minutes === 1 ? "" : "s"} old now`;
+}
+
+async function showHistoricalReport():Promise<void> {
+  const target=el<HTMLDivElement>("#result-content");
+  target.replaceChildren(node("p","status-card","Loading sealed historical report…"));
+  announcement("Loading sealed historical report. No wallet or payment is required.");
+  try {
+    const response=await fetch(HISTORICAL_DEMO.reportUrl,{credentials:"omit",redirect:"error"});
+    if(!response.ok)throw new Error("Historical preview could not be loaded.");
+    const report=validateHistoricalReport(await response.json());
+    const card=node("div","status-card");
+    card.append(node("p","eyebrow","HISTORICAL LIVE PUBLIC PREVIEW"),node("h3","","Sealed Hyperliquid BTC perpetual report"));
+    const grid=node("div","data-grid report-grid");
+    appendField(grid,"Captured at",dateTime(HISTORICAL_DEMO.sourceAt));
+    appendField(grid,"Report ID",HISTORICAL_DEMO.reportId,"breakable span-all");
+    appendField(grid,"Report SHA-256",HISTORICAL_DEMO.reportSha256,"breakable span-all");
+    appendField(grid,"Bundle SHA-256",HISTORICAL_DEMO.bundleSha256,"breakable span-all");
+    appendField(grid,"Snapshot calculation",`${report.request.side} ${report.request.quantity_base} BTC · VWAP ${report.calculation.display.vwap}`);
+    card.append(grid,node("p","safety-note","Historical capture from 30 Sep 2026. It is not fresh market data, an execution promise, or a new run. No payment transaction exists for this public preview."));
+    const download=document.createElement("a");download.className="secondary-button";download.href=HISTORICAL_DEMO.bundleUrl;
+    download.download="liqvera-historical-live-evidence.zip";download.textContent="Download evidence ZIP";
+    card.append(download);target.replaceChildren(card);announcement("Historical sealed report loaded. Payment is not required.");
+  } catch { target.replaceChildren(node("p","safety-note","Historical preview could not be loaded. The paid fresh-report flow is unchanged."));announcement("Historical preview could not be loaded.","error"); }
 }
 
 let cap: Capabilities | null = null;
@@ -520,6 +544,7 @@ el<HTMLButtonElement>("#switch-button").addEventListener("click", async () => {
   catch (error) { announcement(walletError(error), "warning"); }
 });
 el<HTMLButtonElement>("#refresh-button").addEventListener("click", () => { void resumeFlow(); });
+el<HTMLButtonElement>("#historical-button").addEventListener("click", () => { void showHistoricalReport(); });
 el<HTMLButtonElement>("#new-button").addEventListener("click", () => {
   if (!flow || flow.paymentGuard !== "clear" || busy || polling ||
       (quote && ["PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "MANUAL_REVIEW"].includes(quote.state))) return;

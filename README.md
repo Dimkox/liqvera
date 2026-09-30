@@ -6,6 +6,11 @@
 > startup remains buyer-bound and grant-required; UNKNOWN is confirm-only. On
 > mobile, open the URL in the wallet's in-app browser.
 
+The landing page also offers a wallet-free historical live preview captured
+from public Hyperliquid at `2026-09-30T23:32:40.858Z`. It serves the exact
+sealed report and evidence ZIP; it is not a fresh quote, new run, payment
+receipt, or execution promise.
+
 **Market reports you can verify.**
 
 Built for [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).

@@ -37,11 +37,11 @@ export class LivePaymentGrant {
     parsed._digest=createHash('sha256').update(bytes).digest('hex');
     return parsed;
   }
-  assertContext(input:{subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string}):void {
-    if(input.subjectCommit!==this.raw.subject_commit||input.subjectTree!==this.raw.subject_tree||input.planSha256!==this.raw.plan_sha256||input.buyer!==this.raw.buyer||input.payTo!==this.raw.pay_to||
+  assertContext(input:{subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string;demoAnyPayer?:boolean}):void {
+    if(input.subjectCommit!==this.raw.subject_commit||input.subjectTree!==this.raw.subject_tree||input.planSha256!==this.raw.plan_sha256||(!input.demoAnyPayer&&input.buyer!==this.raw.buyer)||input.payTo!==this.raw.pay_to||
       (input.databaseIdentity!==undefined&&input.databaseIdentity!==this.raw.database_identity))throw new Error('LIVE_GRANT_MISMATCH');
   }
-  authorize(input:{subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string;now:Date}):void {
+  authorize(input:{subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string;demoAnyPayer?:boolean;now:Date}):void {
     this.assertContext(input);
     const expiry=Date.parse(String(this.raw.expires_at));
     if(expiry<=input.now.getTime()||expiry>input.now.getTime()+15*60_000)throw new Error('LIVE_GRANT_EXPIRED');

@@ -1,5 +1,15 @@
 # Liqvera — handoff
 
+## 2026-09-30 public judge testnet payer mode
+
+Explicit `LIQVERA_TESTNET_DEMO_ANY_PAYER=1` lets a connected EVM account on
+Mezo Testnet 31611 own and pay its quote at `https://liqvera.site` for exactly
+0.01 test MUSD. It still requires the reviewed live grant and healthy
+live-public Hyperliquid source; default configuration remains buyer-bound.
+Quote uniqueness preserves one settlement per quote and UNKNOWN remains
+confirm-only. The browser can add Mezo Matsnet. No deployment, secret read,
+push, payment, or publication occurred.
+
 ## 2026-09-30 v0.0.3 release candidate
 
 Root product VERSION advances to `0.0.3` for the live-public snapshot and

@@ -1,5 +1,10 @@
 # Liqvera canonical browser
 
+Public judge URL: `https://liqvera.site`. Use an injected EVM wallet or its
+in-app browser on mobile. The UI can add/switch to Mezo Matsnet chain 31611,
+shows the report SHA-256, verifies the ZIP digest locally, and links confirmed
+receipts to the testnet explorer. After UNKNOWN/pending, use Check status.
+
 This Vite application is the `/v1/*` Mezo Testnet browser. The existing `/demo/*` fixture UI is a separate application. Serve this build and the gateway behind one origin; Vite's local development proxy expects the gateway at `127.0.0.1:8080`.
 
 Install the exact package versions in `package.json`, then run `npm run build`. No wallet key, merchant secret, payment signature, or bearer capability belongs in build variables or logs. The app generates a 256-bit bearer capability and keeps its recovery record only in `sessionStorage`; closing the browser session may lose access to an existing report. The server remains the authority for entitlement, quote state, and finality.

@@ -214,6 +214,25 @@ test('valid exact grant activates facilitator-sponsored composition without netw
   }),/LIVE_GRANT_MISMATCH/);
 });
 
+test('opt-in testnet demo accepts quote payer while default remains grant buyer bound',async()=>{
+  const base={grantBytes:new TextEncoder().encode(JSON.stringify(grantRaw())),observedAt:new Date('2026-09-29T00:00:00Z'),
+    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64)}};
+  const bound=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://liqvera.site'),base);
+  assert.equal(bound.expectedPayer,payer);
+  const demo=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://liqvera.site'),
+    {...base,context:{...base.context,demoAnyPayer:true}});
+  assert.equal(demo.expectedPayer,undefined);
+  assert.equal(demo.liveGrantDigest,undefined);
+  assert.match(bound.liveGrantDigest!,/^[0-9a-f]{64}$/);
+  assert.doesNotThrow(()=>LivePaymentGrant.parse(grantRaw(),new Date('2026-09-29T00:00:00Z')).authorize({...base.context,
+    demoAnyPayer:true,buyer:'0x3333333333333333333333333333333333333333',now:new Date('2026-09-29T00:01:00Z')}));
+  const config=await loadConfig({DATABASE_URL:'postgresql://127.0.0.1/liqvera',SOURCE_MODE:'live-public',PAY_TO:payTo,
+    LIQVERA_LIVE_GRANT_FILE:'/run/secrets/payment_grant',LIQVERA_SUBJECT_COMMIT:'a'.repeat(40),LIQVERA_SUBJECT_TREE:'b'.repeat(40),
+    LIQVERA_PLAN_SHA256:'c'.repeat(64),LIQVERA_LIVE_BUYER:payer,LIQVERA_TESTNET_DEMO_ANY_PAYER:'1'});
+  assert.equal(config.testnetDemoAnyPayer,true);
+  await assert.rejects(loadConfig({DATABASE_URL:'postgresql://127.0.0.1/liqvera',SOURCE_MODE:'live-public',LIQVERA_TESTNET_DEMO_ANY_PAYER:'1'}),/INVALID_INPUT/);
+});
+
 test('live grant expiry becomes a readiness blocker after startup',()=>{
   let now=new Date('2026-09-29T00:00:00Z');
   const payment=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://reports.invalid'),{

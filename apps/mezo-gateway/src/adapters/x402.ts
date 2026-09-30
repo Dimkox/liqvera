@@ -10,7 +10,7 @@ import { paymentHeader } from '../security/input.js';
 import { boundedJson } from './http.js';
 import { MezoReceiptReader } from './mezo-rpc.js';
 import type { LivePaymentGrant } from '../security/live-grant.js';
-export interface LivePaymentContext { subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string }
+export interface LivePaymentContext { subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string;demoAnyPayer?:boolean }
 // Policy implementations require reviewed scheme-specific identity, nonce,
 // replay-domain, chain correlation and finality evidence. Configuration cannot
 // flip these defaults into an approval.
@@ -57,8 +57,10 @@ function facilitatorTransport(facilitator:URL) { return {
 export class OfficialX402 implements PaymentPort {
   private readonly server:x402ResourceServer;
   private initialized=false;
-  get expectedPayer():string|undefined { return this.liveContext?.buyer; }
-  get liveGrantDigest():string|undefined { return this.grant?.digest; }
+  get expectedPayer():string|undefined { return this.liveContext?.demoAnyPayer?undefined:this.liveContext?.buyer; }
+  // Public testnet demo authority is reusable across independently guarded quotes;
+  // quote/authorization uniqueness remains the exactly-once settlement boundary.
+  get liveGrantDigest():string|undefined { return this.liveContext?.demoAnyPayer?undefined:this.grant?.digest; }
   constructor(private readonly identity: AuthorizationPolicy,private readonly finality: FinalityPolicy,private readonly reader: MezoReceiptReader,private readonly publicBase: URL,
     private readonly grant: LivePaymentGrant|null=null,private readonly liveContext:LivePaymentContext|null=null,private readonly now:()=>Date=()=>new Date(),
     facilitator:URL=defaultFacilitator) {

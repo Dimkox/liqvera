@@ -1,5 +1,11 @@
 # Liqvera
 
+> Public hackathon judge: **https://liqvera.site**. With the reviewed live
+> grant, `LIQVERA_TESTNET_DEMO_ANY_PAYER=1` lets any connected EVM account on
+> Mezo Testnet 31611 own its quote and pay exactly `0.01` test MUSD. Default
+> startup remains buyer-bound and grant-required; UNKNOWN is confirm-only. On
+> mobile, open the URL in the wallet's in-app browser.
+
 **Market reports you can verify.**
 
 Built for [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).

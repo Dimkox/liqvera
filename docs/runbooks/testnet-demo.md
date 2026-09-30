@@ -10,6 +10,13 @@ recording accordingly.
 
 ## Live-public + Mezo Testnet gate
 
+For `https://liqvera.site`, set `LIQVERA_TESTNET_DEMO_ANY_PAYER=1` only with
+the reviewed grant. Any connected EVM account on Mezo Testnet 31611 can then
+own its quote and pay exactly `0.01` test MUSD. Omit it (or set `0`) for the
+default buyer-bound mode. Source availability, exact payment terms,
+authorization uniqueness, one settlement per quote, and UNKNOWN confirm-only
+recovery remain fail-closed. Mobile judges may need the wallet in-app browser.
+
 Create `deploy/mezo-evidence/secrets/live_payment_grant` outside Git with owner
 UID 10003, mode `0400`, and the reviewed one-shot grant JSON. Set the non-secret
 `LIQVERA_SUBJECT_COMMIT`, `LIQVERA_SUBJECT_TREE`, `LIQVERA_PLAN_SHA256`,

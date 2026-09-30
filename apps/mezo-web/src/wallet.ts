@@ -1,4 +1,5 @@
 import { assertMezoTestnetChainId } from "@liqvera/mezo-protocol";
+import { MEZO_TESTNET } from "@liqvera/mezo-protocol";
 import { CHAIN_HEX, isAddress } from "./contracts";
 
 export interface Eip1193Provider {
@@ -32,7 +33,12 @@ export async function walletOnMezo(provider: Eip1193Provider): Promise<boolean> 
 }
 
 export async function switchToMezo(provider: Eip1193Provider): Promise<void> {
-  await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_HEX }] });
+  try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_HEX }] }); }
+  catch (error) {
+    if(typeof error!=="object"||error===null||!("code" in error)||error.code!==4902)throw error;
+    await provider.request({method:"wallet_addEthereumChain",params:[{chainId:CHAIN_HEX,chainName:MEZO_TESTNET.name,
+      nativeCurrency:{name:"Bitcoin",symbol:"BTC",decimals:18},rpcUrls:[MEZO_TESTNET.rpcUrl],blockExplorerUrls:[MEZO_TESTNET.explorerUrl]}]});
+  }
   if (!(await walletOnMezo(provider))) throw new Error("Wallet is still on a different network.");
 }
 

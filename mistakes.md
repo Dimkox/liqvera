@@ -296,3 +296,7 @@ but `main` trusted a directory name, validated secrets after mkdir, discarded
 root identity, and never reconciled prior state. Exercise the real CLI pipeline
 with a Task 2 receipt, failure injection, retries and path replacement: trust,
 validation and descriptor ownership must remain continuous through publication.
+The receipt must bind an inventory digest produced from outer-digest-verified
+archive bytes; rehashing a directory against its own mutable checksum file proves
+only self-consistency. Lock ownership must likewise begin before reconciliation,
+not merely before the final writes.

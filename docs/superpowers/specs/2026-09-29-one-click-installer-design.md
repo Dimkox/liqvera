@@ -187,7 +187,10 @@ Interactive confirmation requires typing the printed exact command digest;
 non-interactive use requires that digest as an argument. The receipt is the
 closed output of the independently verified Task 2 materialization and is
 reconciled with the supplied outer digest and a fresh inner-file rehash before
-any host mutation.
+any host mutation. Its verifier-produced `inventory_sha256` binds the exact
+full `SHA256SUMS` bytes captured from the independently outer-digest-verified
+archive; the consumer requires that immutable inventory digest before trusting
+the materialized directory.
 Privilege elevation is initiated visibly by the operator; the installer never
 embeds credentials, bypasses policy, or silently invokes `sudo`. Unsupported
 Linux distributions/architectures fail before dependency installation.

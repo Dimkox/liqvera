@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import stat
 import subprocess
 import sys
+import threading
+from dataclasses import asdict
 from pathlib import Path
 
 import pytest
@@ -40,7 +43,7 @@ def safe_config(secret_file: Path | None = None) -> dict[str, object]:
     }
 
 
-def verified_release(tmp_path: Path, digest: str = "a" * 64) -> tuple[Path, Path]:
+def verified_release(tmp_path: Path) -> tuple[Path, Path]:
     archive_spec = importlib.util.spec_from_file_location(
         "installer_archive_fixture", ROOT / "tests/installer/test_archive_verifier.py"
     )
@@ -48,28 +51,19 @@ def verified_release(tmp_path: Path, digest: str = "a" * 64) -> tuple[Path, Path
     archive_module = importlib.util.module_from_spec(archive_spec)
     sys.modules[archive_spec.name] = archive_module
     archive_spec.loader.exec_module(archive_module)
-    release = tmp_path / "verified"
-    for name, data in archive_module.valid_files().items():
-        target = release / name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(data)
-    checksums = {
-        str(path.relative_to(release)): hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in release.rglob("*")
-        if path.is_file()
-    }
-    (release / "SHA256SUMS").write_text(
-        "".join(f"{value}  {name}\n" for name, value in sorted(checksums.items())),
-        encoding="utf-8",
+    archive = tmp_path / "installer.zip"
+    actual_digest = archive_module.write_archive(archive)
+    verifier_spec = importlib.util.spec_from_file_location(
+        "installer_archive_verifier", ROOT / "scripts/verify-liqvera-installer.py"
     )
-    manifest = json.loads((release / "manifests/release-manifest.json").read_text())
+    assert verifier_spec is not None and verifier_spec.loader is not None
+    verifier = importlib.util.module_from_spec(verifier_spec)
+    sys.modules[verifier_spec.name] = verifier
+    verifier_spec.loader.exec_module(verifier)
+    release = tmp_path / "verified"
+    result = verifier.verify_installer(archive, actual_digest, release)
     receipt = tmp_path / "verified-receipt.json"
-    receipt.write_text(json.dumps({
-        "schema_version": "verified-release-v1", "archive_sha256": digest,
-        "destination": str(release.resolve()), "file_count": len(checksums) + 1,
-        "product_version": manifest["product_version"],
-        "git_commit": manifest["git_commit"], "git_tree": manifest["git_tree"],
-    }), encoding="utf-8")
+    receipt.write_text(json.dumps(asdict(result)), encoding="utf-8")
     receipt.chmod(0o600)
     return release, receipt
 
@@ -340,7 +334,7 @@ def test_json_inputs_reject_duplicate_keys() -> None:
         RUNTIME.load_json_bytes(b'{"payment_enabled":true,"payment_enabled":false}', "CONFIG_INVALID")
 
 
-@pytest.mark.parametrize("name", ["line\nfeed", "${INTERPOLATION}", "control\x7f"])
+@pytest.mark.parametrize("name", ["line\nfeed", "${INTERPOLATION}", "$NAME", "$(command)", "`command`", "control\x7f"])
 def test_secret_reference_rejects_control_or_interpolation(tmp_path: Path, name: str) -> None:
     secret = tmp_path / name
     secret.write_text("x")
@@ -351,11 +345,27 @@ def test_secret_reference_rejects_control_or_interpolation(tmp_path: Path, name:
 
 def test_verified_release_rejects_wrong_digest_and_mutated_member(tmp_path: Path) -> None:
     release, receipt = verified_release(tmp_path)
+    expected = json.loads(receipt.read_text())["archive_sha256"]
     with pytest.raises(RUNTIME.InstallerError, match="RELEASE_DIGEST_MISMATCH"):
         RUNTIME.validate_verified_release(release, receipt, "b" * 64)
     (release / "install.sh").write_text("changed")
     with pytest.raises(RUNTIME.InstallerError, match="ARCHIVE_INVALID"):
-        RUNTIME.validate_verified_release(release, receipt, "a" * 64)
+        RUNTIME.validate_verified_release(release, receipt, expected)
+
+
+def test_verified_receipt_rejects_member_plus_checksum_rewrite(tmp_path: Path) -> None:
+    release, receipt = verified_release(tmp_path)
+    expected = json.loads(receipt.read_text())["archive_sha256"]
+    member = release / "LICENSE-NOTICE.md"
+    member.write_bytes(b"coordinated replacement\n")
+    lines = (release / "SHA256SUMS").read_text().splitlines()
+    replacement = hashlib.sha256(member.read_bytes()).hexdigest()
+    (release / "SHA256SUMS").write_text("\n".join(
+        f"{replacement}  LICENSE-NOTICE.md" if line.endswith("  LICENSE-NOTICE.md") else line
+        for line in lines
+    ) + "\n")
+    with pytest.raises(RUNTIME.InstallerError, match="ARCHIVE_INVALID"):
+        RUNTIME.validate_verified_release(release, receipt, expected)
 
 
 def test_descriptor_bound_root_rejects_path_replacement(tmp_path: Path) -> None:
@@ -373,6 +383,31 @@ def test_descriptor_bound_root_rejects_path_replacement(tmp_path: Path) -> None:
         assert not (outside / "config/runtime.env").exists()
     finally:
         handle.close()
+
+
+def test_descriptor_traversal_rejects_ancestor_exchange_before_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    selected = tmp_path / "selected"
+    (selected / "private").mkdir(parents=True)
+    outside = tmp_path / "outside"
+    (outside / "private").mkdir(parents=True)
+    moved = tmp_path / "moved"
+    original_open = RUNTIME.os.open
+    exchanged = False
+
+    def raced_open(path: object, *args: object, **kwargs: object) -> int:
+        nonlocal exchanged
+        if path == "selected" and not exchanged:
+            exchanged = True
+            selected.rename(moved)
+            selected.symlink_to(outside, target_is_directory=True)
+        return original_open(path, *args, **kwargs)
+
+    monkeypatch.setattr(RUNTIME.os, "open", raced_open)
+    with pytest.raises((RUNTIME.InstallerError, OSError)):
+        RUNTIME.InstallRoot.create(selected / "private/install")
+    assert not (outside / "private/install").exists()
 
 
 def test_existing_install_is_idempotent_and_conflicts_fail_without_overwrite(tmp_path: Path) -> None:
@@ -401,9 +436,10 @@ def test_existing_install_is_idempotent_and_conflicts_fail_without_overwrite(tmp
 
 
 def cli_args(release: Path, receipt: Path, config: Path, root: Path, *extra: str) -> list[str]:
+    digest = json.loads(receipt.read_text())["archive_sha256"]
     return [
         "--verified-release", str(release), "--verified-receipt", str(receipt),
-        "--sha256", "a" * 64, "--install-dir", str(root), "--config", str(config),
+        "--sha256", digest, "--install-dir", str(root), "--config", str(config),
         "--bash-version", "5.2.21", *extra,
     ]
 
@@ -485,11 +521,13 @@ def test_main_interactive_dependency_requires_exact_typed_digest(
     monkeypatch.setattr(RUNTIME, "_system_runner", lambda argv: calls.append(argv) or 0)
     command = RUNTIME.dependency_command("ubuntu")
     approval = hashlib.sha256("\0".join(command).encode()).hexdigest()
-    monkeypatch.setattr("builtins.input", lambda _prompt: approval)
+    monkeypatch.setattr(sys, "stdin", io.StringIO(approval + "\n"))
 
     assert RUNTIME.main(cli_args(release, receipt, config_path, tmp_path / "install", "--install-deps")) == 0
     assert calls == [command]
-    diagnostic = capsys.readouterr().err
+    captured = capsys.readouterr()
+    assert json.loads(captured.out)["status"] == "CONFIGURED"
+    diagnostic = captured.err
     assert "DEPENDENCY_PREVIEW: /usr/bin/sudo -- /usr/bin/apt-get install" in diagnostic
     assert approval in diagnostic
 
@@ -505,6 +543,40 @@ def test_main_resource_failure_never_runs_dependency_command(
     calls: list[tuple[str, ...]] = []
     monkeypatch.setattr(RUNTIME, "_system_runner", lambda argv: calls.append(argv) or 0)
     assert RUNTIME.main(cli_args(release, receipt, config_path, tmp_path / "install", "--install-deps")) == 2
+    assert calls == []
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        {"distribution_version": "20.04"},
+        {"architecture": "i686"},
+        {"bash_version": "5.1.99"},
+        {"disk_bytes": 1},
+        {"memory_bytes": 1},
+    ],
+)
+def test_missing_docker_never_crosses_an_independent_preflight_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mutation: dict[str, object]
+) -> None:
+    clear_authority(monkeypatch)
+    release, receipt = verified_release(tmp_path)
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps(safe_config()))
+    combined = facts(
+        docker_version="0.0.0", compose_version="0.0.0", daemon_reachable=False,
+        installable_dependency_missing=True, **mutation,
+    )
+    monkeypatch.setattr(RUNTIME, "_collect_system_facts", lambda *_: combined)
+    calls: list[tuple[str, ...]] = []
+    monkeypatch.setattr(RUNTIME, "_system_runner", lambda argv: calls.append(argv) or 0)
+    command = RUNTIME.dependency_command("ubuntu")
+    approval = hashlib.sha256("\0".join(command).encode()).hexdigest()
+    result = RUNTIME.main(cli_args(
+        release, receipt, config_path, tmp_path / "install", "--install-deps",
+        "--non-interactive", "--approve-dependency-command", approval,
+    ))
+    assert result == 2
     assert calls == []
 
 
@@ -530,6 +602,38 @@ def test_main_publication_failure_removes_invocation_owned_partial_root(
     monkeypatch.setattr(RUNTIME.InstallRoot, "write", fail_second_write)
     assert RUNTIME.main(cli_args(release, receipt, config_path, root)) == 2
     assert not root.exists()
+
+
+def test_full_reconciliation_and_publication_are_serialized(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    clear_authority(monkeypatch)
+    release, receipt = verified_release(tmp_path)
+    secret = tmp_path / "database-password"
+    secret.write_text("CANARY")
+    secret.chmod(0o600)
+    configs = [tmp_path / "config-a.json", tmp_path / "config-b.json"]
+    configs[0].write_text(json.dumps(safe_config()))
+    configs[1].write_text(json.dumps(safe_config(secret)))
+    root = tmp_path / "install"
+    monkeypatch.setattr(RUNTIME, "_collect_system_facts", lambda *_: facts())
+    barrier = threading.Barrier(2)
+    results: list[int] = []
+
+    def invoke(config_path: Path) -> None:
+        barrier.wait()
+        results.append(RUNTIME.main(cli_args(release, receipt, config_path, root)))
+
+    threads = [threading.Thread(target=invoke, args=(path,)) for path in configs]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=10)
+        assert not thread.is_alive()
+    assert sorted(results) == [0, 2]
+    rendered = (root / "config/runtime.env").read_bytes()
+    assert rendered in {RUNTIME.render_config_bytes(safe_config()), RUNTIME.render_config_bytes(safe_config(secret))}
+    assert json.loads((root / "state/install-state.json").read_text())["last_completed_phase"] == "CONFIGURED"
 
 
 def test_process_adapters_suppress_children_and_close_timeout(

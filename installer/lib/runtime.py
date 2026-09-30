@@ -193,7 +193,7 @@ def preflight(request: dict[str, object], facts: dict[str, object]) -> dict[str,
 
 def _validate_secret_reference(path_value: object) -> Path:
     path = Path(str(path_value))
-    if any(character in str(path) for character in ("\n", "\r", "\x00", "\x7f")) or "${" in str(path):
+    if any(character in str(path) for character in ("\n", "\r", "\x00", "\x7f", "$", "`", "\\")):
         raise InstallerError("SECRET_REFERENCE_INVALID", "secret reference contains unsafe characters")
     current = Path("/")
     for part in path.parts[1:]:
@@ -225,32 +225,56 @@ def _validate_secret_reference(path_value: object) -> Path:
 class InstallRoot:
     """Descriptor-bound private installation root."""
 
-    def __init__(self, path: Path, root_fd: int, identity: tuple[int, int], created: bool) -> None:
+    def __init__(
+        self, path: Path, root_fd: int, parent_fd: int,
+        identity: tuple[int, int], ancestry: tuple[tuple[int, int], ...], created: bool,
+    ) -> None:
         self.path = path
         self.fd = root_fd
         self.identity = identity
+        self.parent_fd = parent_fd
+        self.ancestry = ancestry
         self.created = created
 
     @classmethod
     def create(cls, path: Path) -> "InstallRoot":
-        path = _validate_install_root(path, "unknown")
-        existed = path.exists()
-        missing: list[str] = []
-        existing = path
-        while not existing.exists():
-            missing.append(existing.name)
-            existing = existing.parent
-        fd = os.open(existing, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        path = Path(path)
+        if not path.is_absolute() or path == Path("/"):
+            raise InstallerError("UNSAFE_INSTALL_ROOT", "install root must be a narrow absolute path")
+        fd = os.open("/", os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        ancestry: list[tuple[int, int]] = []
+        parent_fd = -1
+        root_created = False
         try:
-            for name in reversed(missing):
-                os.mkdir(name, 0o700, dir_fd=fd)
-                child = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=fd)
+            root_item = os.fstat(fd)
+            ancestry.append((root_item.st_dev, root_item.st_ino))
+            for index, name in enumerate(path.parts[1:]):
+                try:
+                    child = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=fd)
+                except FileNotFoundError:
+                    os.mkdir(name, 0o700, dir_fd=fd)
+                    child = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=fd)
+                    if index == len(path.parts[1:]) - 1:
+                        root_created = True
+                item = os.fstat(child)
+                writable = stat.S_IMODE(item.st_mode) & 0o022
+                trusted_sticky_root = item.st_uid == 0 and bool(item.st_mode & stat.S_ISVTX)
+                if writable and not trusted_sticky_root:
+                    os.close(child)
+                    raise InstallerError("UNSAFE_INSTALL_ROOT", "writable path ancestry")
+                ancestry.append((item.st_dev, item.st_ino))
+                if index == len(path.parts[1:]) - 1:
+                    parent_fd = fd
+                    fd = child
+                    break
                 os.close(fd)
                 fd = child
             item = os.fstat(fd)
-            return cls(path, fd, (item.st_dev, item.st_ino), not existed)
+            return cls(path, fd, parent_fd, (item.st_dev, item.st_ino), tuple(ancestry), root_created)
         except Exception:
             os.close(fd)
+            if parent_fd >= 0:
+                os.close(parent_fd)
             raise
 
     def ensure_directory(self, name: str) -> int:
@@ -273,16 +297,47 @@ class InstallRoot:
         finally:
             os.close(parent_fd)
 
-    def assert_selected_path(self) -> None:
+    def read(self, relative: str, maximum: int = 1024 * 1024) -> bytes:
+        directory, name = relative.split("/", 1)
         try:
-            item = self.path.stat(follow_symlinks=False)
+            parent_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=self.fd)
+        except OSError as exc:
+            raise InstallerError("CONFIG_INVALID", "installed directory is unavailable") from exc
+        try:
+            file_fd = os.open(name, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=parent_fd)
+            try:
+                item = os.fstat(file_fd)
+                if not stat.S_ISREG(item.st_mode) or item.st_nlink != 1 or item.st_size > maximum:
+                    raise InstallerError("CONFIG_INVALID", "installed file is unsafe")
+                data = os.read(file_fd, maximum + 1)
+            finally:
+                os.close(file_fd)
+        finally:
+            os.close(parent_fd)
+        if len(data) > maximum:
+            raise InstallerError("CONFIG_INVALID", "installed file exceeds bound")
+        return data
+
+    def assert_selected_path(self) -> None:
+        fd = os.open("/", os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        try:
+            observed = [(os.fstat(fd).st_dev, os.fstat(fd).st_ino)]
+            for name in self.path.parts[1:]:
+                child = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=fd)
+                os.close(fd)
+                fd = child
+                item = os.fstat(fd)
+                observed.append((item.st_dev, item.st_ino))
         except OSError as exc:
             raise InstallerError("UNSAFE_INSTALL_ROOT", "selected root disappeared") from exc
-        if stat.S_ISLNK(item.st_mode) or (item.st_dev, item.st_ino) != self.identity:
+        finally:
+            os.close(fd)
+        if tuple(observed) != self.ancestry:
             raise InstallerError("UNSAFE_INSTALL_ROOT", "selected root identity changed")
 
     def close(self) -> None:
         os.close(self.fd)
+        os.close(self.parent_fd)
 
     def cleanup_created(self) -> None:
         if not self.created:
@@ -307,8 +362,48 @@ class InstallRoot:
             os.unlink(".install.lock", dir_fd=self.fd)
         except FileNotFoundError:
             pass
-        self.assert_selected_path()
-        self.path.rmdir()
+        os.rmdir(self.path.name, dir_fd=self.parent_fd)
+
+
+class LifecycleLock:
+    """Serializes one canonical install path from a descriptor-bound anchor."""
+
+    def __init__(self, directory_fd: int, lock_fd: int) -> None:
+        self.directory_fd = directory_fd
+        self.lock_fd = lock_fd
+
+    @classmethod
+    def acquire(cls, path: Path) -> "LifecycleLock":
+        fd = os.open("/", os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        try:
+            for name in path.parts[1:-1]:
+                try:
+                    child = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=fd)
+                except FileNotFoundError:
+                    break
+                item = os.fstat(child)
+                os.close(fd)
+                fd = child
+                if item.st_uid == os.getuid():
+                    break
+            if os.fstat(fd).st_uid != os.getuid():
+                raise InstallerError("UNSAFE_INSTALL_ROOT", "no owned lifecycle-lock anchor")
+            lock_name = f".liqvera-install-{hashlib.sha256(str(path).encode()).hexdigest()[:24]}.lock"
+            lock_fd = os.open(lock_name, os.O_WRONLY | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600, dir_fd=fd)
+            lock_item = os.fstat(lock_fd)
+            if (not stat.S_ISREG(lock_item.st_mode) or lock_item.st_uid != os.getuid()
+                    or lock_item.st_nlink != 1 or stat.S_IMODE(lock_item.st_mode) & 0o077):
+                os.close(lock_fd)
+                raise InstallerError("UNSAFE_INSTALL_ROOT", "lifecycle lock is unsafe")
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+            return cls(fd, lock_fd)
+        except Exception:
+            os.close(fd)
+            raise
+
+    def close(self) -> None:
+        os.close(self.lock_fd)
+        os.close(self.directory_fd)
 
 
 def _atomic_write_fd(parent_fd: int, name: str, data: bytes) -> None:
@@ -346,7 +441,7 @@ def render_config_bytes(config: dict[str, object]) -> bytes:
     if isinstance(preliminary_secrets, dict):
         for value in preliminary_secrets.values():
             raw = str(value)
-            if any(character in raw for character in ("\n", "\r", "\x00", "\x7f")) or "${" in raw:
+            if any(character in raw for character in ("\n", "\r", "\x00", "\x7f", "$", "`", "\\")):
                 raise InstallerError("SECRET_REFERENCE_INVALID", "secret reference contains unsafe characters")
     _validate(CONFIG_SCHEMA, config, "CONFIG_INVALID")
     secret_files = config["secret_files"]
@@ -417,6 +512,21 @@ def reconcile_existing(root: Path, expected: dict[str, object], config_bytes: by
     return observed
 
 
+def reconcile_handle(handle: InstallRoot, expected: dict[str, object], config_bytes: bytes) -> dict[str, object]:
+    state_value = load_json_bytes(handle.read("state/install-state.json"), "CONFIG_INVALID")
+    if not isinstance(state_value, dict):
+        raise InstallerError("CONFIG_INVALID", "existing state is invalid")
+    _validate(STATE_SCHEMA, state_value, "CONFIG_INVALID")
+    for key in ("product_version", "release_sha256", "git_commit", "git_tree", "install_root", "compose_project", "ports"):
+        if state_value.get(key) != expected.get(key):
+            code = "RELEASE_DIGEST_MISMATCH" if key in {"release_sha256", "git_commit", "git_tree", "product_version"} else "CONFIG_INVALID"
+            raise InstallerError(code, "existing installation identity conflicts")
+    if handle.read("config/runtime.env") != config_bytes:
+        raise InstallerError("CONFIG_INVALID", "existing configuration conflicts")
+    handle.assert_selected_path()
+    return state_value
+
+
 def _safe_regular_bytes(path: Path, code: str, maximum: int = 1024 * 1024) -> bytes:
     try:
         item = path.lstat()
@@ -437,7 +547,7 @@ def _safe_regular_bytes(path: Path, code: str, maximum: int = 1024 * 1024) -> by
 
 def validate_verified_release(release: Path, receipt_path: Path, expected_sha256: str) -> dict[str, object]:
     receipt = load_json_bytes(_safe_regular_bytes(receipt_path, "ARCHIVE_INVALID"), "ARCHIVE_INVALID")
-    required = {"schema_version", "archive_sha256", "destination", "file_count", "product_version", "git_commit", "git_tree"}
+    required = {"schema_version", "archive_sha256", "inventory_sha256", "destination", "file_count", "product_version", "git_commit", "git_tree"}
     if not isinstance(receipt, dict) or set(receipt) != required or receipt.get("schema_version") != "verified-release-v1":
         raise InstallerError("ARCHIVE_INVALID", "verified release receipt is not closed")
     if receipt.get("archive_sha256") != expected_sha256:
@@ -448,7 +558,10 @@ def validate_verified_release(release: Path, receipt_path: Path, expected_sha256
     if not isinstance(manifest, dict):
         raise InstallerError("ARCHIVE_INVALID", "release manifest is not an object")
     _validate(INSTALLER_ROOT / "schemas/release-manifest.schema.json", manifest, "ARCHIVE_INVALID")
-    sums_data = _safe_regular_bytes(release / "SHA256SUMS", "ARCHIVE_INVALID").decode("utf-8")
+    sums_bytes = _safe_regular_bytes(release / "SHA256SUMS", "ARCHIVE_INVALID")
+    if hashlib.sha256(sums_bytes).hexdigest() != receipt.get("inventory_sha256"):
+        raise InstallerError("ARCHIVE_INVALID", "verified inventory digest mismatch")
+    sums_data = sums_bytes.decode("utf-8")
     expected: dict[str, str] = {}
     for line in sums_data.splitlines():
         match = re.fullmatch(r"([0-9a-f]{64})  ([^\x00-\x1f\x7f]+)", line)
@@ -528,6 +641,7 @@ def main(argv: list[str] | None = None) -> int:
     if not HEX64.fullmatch(args.sha256):
         print("RELEASE_DIGEST_MISMATCH: malformed outer digest", file=sys.stderr)
         return 2
+    lifecycle: LifecycleLock | None = None
     try:
         reject_ambient_authority(os.environ)
         config = load_json_bytes(_safe_regular_bytes(args.config, "CONFIG_INVALID"), "CONFIG_INVALID")
@@ -543,12 +657,23 @@ def main(argv: list[str] | None = None) -> int:
             "install_root": str(root), "compose_project": f"liqvera-{args.sha256[:12]}",
             "ports": {name: config["ports"][name]["port"] for name in ("web", "gateway", "metrics")},
         }
-        existing = reconcile_existing(root, identity, config_bytes)
-        if existing is not None:
+        lifecycle = LifecycleLock.acquire(root)
+        if root.exists():
+            existing_handle = InstallRoot.create(root)
+            try:
+                existing = reconcile_handle(existing_handle, identity, config_bytes)
+            finally:
+                existing_handle.close()
             print(json.dumps({"schema_version": "liqvera-preflight-result/v1", "status": existing["last_completed_phase"], "install_root": str(root)}, sort_keys=True, separators=(",", ":")))
             return 0
         # Host collection remains read-only; Task 4 owns Docker/Compose mutation.
         facts = _collect_system_facts(args.install_dir, config, args.bash_version)
+        independent_facts = {
+            **facts, "docker_version": ".".join(map(str, MIN_DOCKER)),
+            "compose_version": ".".join(map(str, MIN_COMPOSE)),
+            "daemon_reachable": True, "installable_dependency_missing": False,
+        }
+        preflight({"schema_version": "liqvera-preflight-request/v1", "install_root": str(args.install_dir), "config": config}, independent_facts)
         try:
             outcome = preflight(request={
                 "schema_version": "liqvera-preflight-request/v1",
@@ -565,7 +690,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"DEPENDENCY_APPROVAL_SHA256: {command_digest}", file=sys.stderr)
             if approval is None and not args.non_interactive:
                 try:
-                    approval = input("Enter the exact dependency approval SHA-256: ").strip()
+                    print("Enter the exact dependency approval SHA-256: ", end="", file=sys.stderr, flush=True)
+                    approval = input().strip()
                 except EOFError as input_error:
                     raise InstallerError("DEPENDENCY_MISSING", "dependency approval was not provided") from input_error
             install_dependencies(str(facts["distribution"]), approval, _system_runner)
@@ -594,14 +720,13 @@ def main(argv: list[str] | None = None) -> int:
         _validate(STATE_SCHEMA, state, "CONFIG_INVALID")
         root_handle = InstallRoot.create(args.install_dir)
         try:
-            lock_fd = os.open(".install.lock", os.O_WRONLY | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600, dir_fd=root_handle.fd)
-            try:
-                fcntl.flock(lock_fd, fcntl.LOCK_EX)
-                root_handle.write("config/runtime.env", config_bytes)
-                root_handle.write("state/install-state.json", (json.dumps(state, sort_keys=True, separators=(",", ":")) + "\n").encode())
-                root_handle.assert_selected_path()
-            finally:
-                os.close(lock_fd)
+            if not root_handle.created:
+                existing = reconcile_handle(root_handle, identity, config_bytes)
+                print(json.dumps({"schema_version": "liqvera-preflight-result/v1", "status": existing["last_completed_phase"], "install_root": str(root)}, sort_keys=True, separators=(",", ":")))
+                return 0
+            root_handle.write("config/runtime.env", config_bytes)
+            root_handle.write("state/install-state.json", (json.dumps(state, sort_keys=True, separators=(",", ":")) + "\n").encode())
+            root_handle.assert_selected_path()
         except Exception:
             root_handle.cleanup_created()
             raise
@@ -613,6 +738,9 @@ def main(argv: list[str] | None = None) -> int:
         message = str(exc) if isinstance(exc, InstallerError) else "CONFIG_INVALID: bounded input failure"
         print(message, file=sys.stderr)
         return 2
+    finally:
+        if lifecycle is not None:
+            lifecycle.close()
 
 
 def _read_os_release() -> tuple[str, str]:

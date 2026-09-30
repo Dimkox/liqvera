@@ -22,7 +22,6 @@ from pathlib import Path, PurePosixPath
 
 from jsonschema import Draft202012Validator, ValidationError
 
-
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_SCHEMA = ROOT / "installer" / "schemas" / "release-manifest.schema.json"
 ARCHIVE_PREFIX = "liqvera-installer-0.0.2/"
@@ -72,6 +71,7 @@ class VerificationError(ValueError):
 class VerifiedRelease:
     schema_version: str
     archive_sha256: str
+    inventory_sha256: str
     destination: str
     file_count: int
     product_version: str
@@ -503,6 +503,7 @@ def verify_installer(
     return VerifiedRelease(
         schema_version="verified-release-v1",
         archive_sha256=actual_sha256,
+        inventory_sha256=hashlib.sha256(payloads["SHA256SUMS"]).hexdigest(),
         destination=str(destination.resolve()),
         file_count=len(payloads),
         product_version=str(manifest["product_version"]),

@@ -13,7 +13,6 @@ from pathlib import Path
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "verify-liqvera-installer.py"
 SPEC = importlib.util.spec_from_file_location("verify_liqvera_installer", SCRIPT)
@@ -132,6 +131,7 @@ def test_valid_archive_materializes_only_after_complete_verification(tmp_path: P
 
     assert result.schema_version == "verified-release-v1"
     assert result.archive_sha256 == expected
+    assert result.inventory_sha256 == sha((destination / "SHA256SUMS").read_bytes())
     assert result.product_version == "0.0.2"
     assert result.git_commit == "1" * 40
     assert result.git_tree == "2" * 40
@@ -154,6 +154,7 @@ def test_valid_archive_materializes_only_after_complete_verification(tmp_path: P
         "file_count": len(valid_files()) + 1,
         "git_commit": "1" * 40,
         "git_tree": "2" * 40,
+        "inventory_sha256": sha((destination / "SHA256SUMS").read_bytes()),
         "product_version": "0.0.2",
         "schema_version": "verified-release-v1",
     }

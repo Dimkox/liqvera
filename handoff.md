@@ -72,6 +72,15 @@ before entering Bash and passes numeric `BASH_VERSINFO`. Docker probes bind the
 local socket in exact argv, suppress child output, close timeouts/errors, and
 only missing installable Docker prerequisites can enter the exact preview plus
 typed-digest dependency flow. Compose and all Task 4 mutations remain absent.
+The second review repair binds the receipt to the verifier-produced digest of
+the archive's full `SHA256SUMS` bytes, so coordinated member/inventory rewrites
+cannot reuse the receipt. Install ancestry is now opened component-by-component
+from `/` with `openat`/no-follow identity checks, while one descriptor-bound
+lifecycle lock covers reconciliation, creation and publication. Mixed platform,
+architecture, Bash or resource failures cannot enter dependency installation;
+dotenv secret references reject all dollar/backtick/control expansion syntax;
+and the interactive digest prompt is stderr-only so stdout remains one JSON
+object.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

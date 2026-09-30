@@ -15526,6 +15526,12 @@ repository_inventory:
   - path: installer/config/liqvera.env.template
     node: manifest:runtime
     path_class: CONFIGURATION
+  - path: installer/Caddyfile
+    node: manifest:runtime
+    path_class: CONFIGURATION
+  - path: installer/compose.yaml
+    node: artifact:liqvera-compose
+    path_class: COMPOSE
   - path: installer/config/ports.env.template
     node: manifest:runtime
     path_class: CONFIGURATION
@@ -15538,6 +15544,12 @@ repository_inventory:
   - path: installer/lib/runtime.py
     node: runtime:liqvera-factory
     path_class: RUNTIME_SOURCE
+  - path: installer/lib/orchestration.py
+    node: runtime:liqvera-factory
+    path_class: RUNTIME_SOURCE
+  - path: installer/manifests/v0.0.2.json
+    node: manifest:runtime
+    path_class: CONFIGURATION
   - path: installer/schemas/config.schema.json
     node: contract:liqvera-evidence-runtime
     path_class: SCHEMA_MANIFEST
@@ -15547,6 +15559,9 @@ repository_inventory:
   - path: installer/schemas/release-manifest.schema.json
     node: contract:liqvera-evidence-runtime
     path_class: SCHEMA_MANIFEST
+  - path: installer/systemd/liqvera.service.in
+    node: manifest:runtime
+    path_class: CONFIGURATION
   - path: scripts/verify-liqvera-installer.py
     node: runtime:liqvera-factory
     path_class: TOOL_SOURCE
@@ -15562,6 +15577,18 @@ repository_inventory:
   - path: tests/installer/test_linux_installer.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
+  - path: tests/installer/test_compose_install.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/installer/test_systemd_integration.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: apps/mezo-gateway/src/migration-policy.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/test/migration-policy.test.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
   - path: docs/competition/README.md
     node: document:liqvera-f3-f7-implementation
     path_class: DOCUMENTATION

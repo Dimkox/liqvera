@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator, ValidationError
 
-
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMAS = ROOT / "installer" / "schemas"
 CONFIG = ROOT / "installer" / "config"
@@ -89,7 +88,8 @@ def install_config() -> dict[str, object]:
             "metrics": {"host": "127.0.0.1", "port": 9090},
         },
         "secret_files": {
-            "DATABASE_PASSWORD_FILE": "/run/secrets/liqvera_database_password",
+                "DATABASE_PASSWORD_FILE": "/run/secrets/liqvera_database_password",
+                "REPORT_SERVICE_TOKEN_FILE": "/run/secrets/liqvera_report_service_token",
         },
     }
 
@@ -182,6 +182,7 @@ def test_env_templates_contain_only_closed_non_secret_defaults_and_file_referenc
             "LIQVERA_PAYMENT_ENABLED": "false",
             "LIQVERA_SOURCE_MODE": "shadow",
             "DATABASE_PASSWORD_FILE": "/run/secrets/liqvera_database_password",
+            "REPORT_SERVICE_TOKEN_FILE": "/run/secrets/liqvera_report_service_token",
         },
         "ports.env.template": {
             "LIQVERA_WEB_HOST": "127.0.0.1",

@@ -1,0 +1,13 @@
+[Unit]
+Description=Liqvera shadow stack
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=@INSTALL_ROOT@/liqvera.sh start
+ExecStop=@INSTALL_ROOT@/liqvera.sh stop
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target

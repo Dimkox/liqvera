@@ -65,9 +65,11 @@ def manifest(files: dict[str, bytes]) -> bytes:
 
 def valid_files() -> dict[str, bytes]:
     files = {
+        "Caddyfile": (ROOT / "installer/Caddyfile").read_bytes(),
         "install.sh": b"#!/usr/bin/env bash\nexit 0\n",
         "lib/common.sh": (ROOT / "installer/lib/common.sh").read_bytes(),
         "lib/runtime.py": (ROOT / "installer/lib/runtime.py").read_bytes(),
+        "lib/orchestration.py": (ROOT / "installer/lib/orchestration.py").read_bytes(),
         "liqvera.sh": b"#!/usr/bin/env bash\nexit 0\n",
         "compose.yaml": b"services: {}\n",
         "config/liqvera.env.template": b"LIQVERA_PAYMENT_ENABLED=false\n",
@@ -80,6 +82,8 @@ def valid_files() -> dict[str, bytes]:
             sort_keys=True,
             separators=(",", ":"),
         ).encode(),
+        "manifests/v0.0.2.json": (ROOT / "installer/manifests/v0.0.2.json").read_bytes(),
+        "systemd/liqvera.service.in": (ROOT / "installer/systemd/liqvera.service.in").read_bytes(),
         "LICENSE-NOTICE.md": b"Liqvera test fixture\n",
     }
     files.update({f"migrations/{name}": data for name, data in MIGRATIONS.items()})

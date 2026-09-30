@@ -89,6 +89,19 @@ it internally. A direct installer call without it fails before filesystem or
 process activity, while the normal bootstrap contract still asks the end user
 only for the published outer archive SHA-256.
 
+Task 4 now provides a fail-closed shadow Compose projection and bounded
+orchestration policies. Seven digest-only roles map installer `shadow` to
+runtime `fixture`; only edge publishes `127.0.0.1:3000`, while metrics and all
+service networks remain internal. Database password and report token are
+separate private file references. The existing gateway migrator remains the
+sole SQL applier and now requires an exact 001–005 ledger prefix plus bounded
+nonblocking advisory locking; it refuses unknown/gap/duplicate/checksum or
+post-005 state and resumes only the missing committed suffix. Health accepts
+only frozen safe-shadow blockers, and a lost port or health failure stops only
+the candidate. Optional systemd is explicit and user-only, with Compose fallback.
+The source manifest remains `runnable=false` with null images until Task 6 binds
+real reviewed digests. No Docker, database, or systemd mutation was performed.
+
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result
 `b31bc68310c471d35de079d1e0a13232aa39dff4e99b42a9d21b9ce2dbe770de`

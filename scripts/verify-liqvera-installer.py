@@ -41,8 +41,10 @@ MIGRATION_NAMES = (
 APPROVED_PATHS = frozenset(
     {
         "install.sh",
+        "Caddyfile",
         "lib/common.sh",
         "lib/runtime.py",
+        "lib/orchestration.py",
         "liqvera.sh",
         "compose.yaml",
         "config/liqvera.env.template",
@@ -52,6 +54,8 @@ APPROVED_PATHS = frozenset(
         "schemas/release-manifest.schema.json",
         "manifests/release-manifest.json",
         "manifests/migration-checksums.json",
+        "manifests/v0.0.2.json",
+        "systemd/liqvera.service.in",
         "LICENSE-NOTICE.md",
         "SHA256SUMS",
         *(f"migrations/{name}" for name in MIGRATION_NAMES),

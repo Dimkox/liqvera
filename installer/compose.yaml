@@ -1,0 +1,106 @@
+name: liqvera-shadow
+
+x-runtime: &runtime
+  init: true
+  restart: unless-stopped
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 128
+  tmpfs: [/tmp:rw,noexec,nosuid,size=32m]
+
+services:
+  postgres:
+    <<: *runtime
+    image: "${LIQVERA_IMAGE_POSTGRES:?verified digest required}"
+    environment:
+      POSTGRES_USER: liqvera
+      POSTGRES_DB: liqvera
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets: [postgres_password]
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    networks: [gateway_db]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U liqvera -d liqvera]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  migrate:
+    image: "${LIQVERA_IMAGE_GATEWAY:?verified digest required}"
+    restart: "no"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    command: [node, /app/gateway-entrypoint.js, npm, run, migrate]
+    secrets: [postgres_password]
+    networks: [gateway_db]
+    depends_on:
+      postgres: {condition: service_healthy}
+  capture:
+    <<: *runtime
+    image: "${LIQVERA_IMAGE_CAPTURE:?verified digest required}"
+    environment:
+      LIQVERA_SOURCE_MODE: fixture
+      LIQVERA_CAPTURE_ROOT: /data/captures
+      LIQVERA_CAPTURE_PORT: "8081"
+    volumes: [captures:/data/captures]
+    networks: [capture_report]
+  report:
+    <<: *runtime
+    image: "${LIQVERA_IMAGE_REPORT:?verified digest required}"
+    environment:
+      LIQVERA_SOURCE_MODE: fixture
+      LIQVERA_CAPTURE_URL: http://capture:8081
+      LIQVERA_CAPTURE_ROOT: /data/captures
+      LIQVERA_ARTIFACT_ROOT: /data/artifacts
+      LIQVERA_INTERNAL_TOKEN_FILE: /run/secrets/report_service_token
+    secrets: [report_service_token]
+    volumes: [captures:/data/captures:ro, artifacts:/data/artifacts]
+    networks: [capture_report, gateway_report]
+    depends_on:
+      capture: {condition: service_healthy}
+  gateway:
+    <<: *runtime
+    image: "${LIQVERA_IMAGE_GATEWAY:?verified digest required}"
+    environment:
+      SOURCE_MODE: fixture
+      REPORT_SERVICE_URL: http://report:8082
+      REPORT_SERVICE_TOKEN_FILE: /run/secrets/report_service_token
+      ARTIFACT_ROOT: /data/artifacts
+      PAY_TO: ""
+      PORT: "8080"
+      METRICS_HOST: gateway-metrics
+      METRICS_PORT: "9090"
+    secrets: [postgres_password, report_service_token]
+    volumes: [artifacts:/data/artifacts:ro]
+    networks: [edge, gateway_db, gateway_report, operations]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      report: {condition: service_healthy}
+  web:
+    <<: *runtime
+    image: "${LIQVERA_IMAGE_WEB:?verified digest required}"
+    networks: [edge]
+  edge:
+    <<: *runtime
+    image: "${LIQVERA_IMAGE_EDGE:?verified digest required}"
+    ports: ["127.0.0.1:3000:8080"]
+    volumes: [./Caddyfile:/etc/caddy/Caddyfile:ro]
+    networks: [edge]
+    depends_on:
+      gateway: {condition: service_healthy}
+      web: {condition: service_healthy}
+
+secrets:
+  postgres_password: {file: "${DATABASE_PASSWORD_FILE:?private file required}"}
+  report_service_token: {file: "${REPORT_SERVICE_TOKEN_FILE:?private file required}"}
+volumes:
+  postgres_data: {}
+  captures: {}
+  artifacts: {}
+networks:
+  edge: {internal: true}
+  gateway_db: {internal: true}
+  gateway_report: {internal: true}
+  capture_report: {internal: true}
+  operations: {internal: true}

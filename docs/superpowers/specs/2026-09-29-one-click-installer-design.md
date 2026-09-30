@@ -80,12 +80,16 @@ liqvera-installer-0.0.2/
 ├── liqvera.sh
 ├── lib/
 │   ├── common.sh
-│   └── runtime.py
+│   ├── runtime.py
+│   └── orchestration.py
 ├── schemas/
 │   ├── config.schema.json
 │   ├── install-state.schema.json
 │   └── release-manifest.schema.json
 ├── compose.yaml
+├── Caddyfile
+├── systemd/
+│   └── liqvera.service.in
 ├── config/
 │   ├── liqvera.env.template
 │   └── ports.env.template
@@ -97,7 +101,8 @@ liqvera-installer-0.0.2/
 │   └── 005_*.sql
 ├── manifests/
 │   ├── release-manifest.json
-│   └── migration-checksums.json
+│   ├── migration-checksums.json
+│   └── v0.0.2.json
 ├── LICENSE-NOTICE.md
 └── SHA256SUMS
 ```

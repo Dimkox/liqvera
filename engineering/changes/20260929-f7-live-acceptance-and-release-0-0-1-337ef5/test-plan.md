@@ -1,5 +1,16 @@
 # Test plan — F7 live acceptance and release 0.0.1
 
+## Installer Task 4
+
+- Assert the seven-role Compose topology, digest-only inputs, fixture mapping,
+  exact private-file secrets, internal networks, and loopback edge-only publish.
+- Cover migration empty/prefix/complete retry and reject unknown, duplicate, gap,
+  reorder and checksum drift; exercise bounded nonblocking lock acquisition.
+- Exercise honest shadow health, unsafe timeout, port-race candidate shutdown,
+  and systemd-user opt-in/fallback through injected effects.
+- Run gateway build/typecheck and focused migration policy tests. Real PostgreSQL
+  remains NOT_RUN unless the explicit disposable test URL gate is provisioned.
+
 ## Risk-based scenarios
 
 | Priority | Scenario | Evidence |

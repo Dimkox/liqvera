@@ -2,6 +2,32 @@
 
 > Typed authority: [`change-spec.yaml`](change-spec.yaml). This Markdown explains context and cannot override typed IDs, risk, acceptance criteria, forbidden outcomes, or approval scopes.
 
+## Installer Task 4 rulings (2026-09-30)
+
+- The Compose projection is shadow-only: `shadow` maps explicitly to runtime
+  `fixture`. It has no egress, payment/wallet/grant inputs, or live profile.
+  Only edge publishes `127.0.0.1:3000`; gateway and metrics remain internal.
+- Database and report credentials are distinct private file references. The
+  source manifest is `runnable=false` until Task 6 supplies reviewed image digests.
+- The existing gateway migrator remains the sole SQL applier. Schema before is
+  any exact applied prefix of immutable migrations 001–005; after is exactly all
+  five rows with source checksums. There is no new SQL, backfill, down migration,
+  index impact, or business-data scan.
+- The migrator validates the whole ledger before applying its missing suffix and
+  uses bounded `pg_try_advisory_lock`. Unknown, duplicate, holey, reordered,
+  drifted, or post-005 rows stop. Each migration retains its own transaction and
+  5-second SQL lock timeout; failure preserves the committed prefix for retry.
+- Health accepts healthy containers/storage/integration with payment disabled
+  only for the frozen safe-shadow reasons including `SIMULATED_SOURCE`. A port
+  race or health failure stops only the candidate. systemd is opt-in/user-only;
+  otherwise Compose is the fallback.
+
+Migration-ledger volume is zero to five rows. The ordered validation query has
+no meaningful query-plan or index cost. Advisory wait is bounded at 15 seconds;
+stop conditions are ledger divergence, lock deadline, SQL error, unsafe health,
+lost edge port, or unresolved image digest. Recovery is forward-only from the
+last exact committed prefix; rollback after committed schema change is not claimed.
+
 ## Installer Task 3 rulings (2026-09-30)
 
 - The packaged Bash launcher delegates JSON/schema/state work to a packaged,

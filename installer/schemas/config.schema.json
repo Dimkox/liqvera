@@ -23,7 +23,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "DATABASE_PASSWORD_FILE": {"$ref": "#/$defs/secret_file"}
+        "DATABASE_PASSWORD_FILE": {"$ref": "#/$defs/secret_file"},
+        "REPORT_SERVICE_TOKEN_FILE": {"$ref": "#/$defs/secret_file"}
       }
     }
   },

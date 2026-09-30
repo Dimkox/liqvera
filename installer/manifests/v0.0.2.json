@@ -1,0 +1,22 @@
+{
+  "schema_version": "liqvera-installer-source-manifest/v1",
+  "product_version": "0.0.2",
+  "runnable": false,
+  "reason": "TASK6_VERIFIED_IMAGE_DIGESTS_REQUIRED",
+  "compose_sha256": "2d1d9f6137dd9f522faac152f05e0582d7d9145c03b751c318190015ae840534",
+  "images": {
+    "edge": null,
+    "web": null,
+    "gateway": null,
+    "capture": null,
+    "report": null,
+    "postgres": null
+  },
+  "migrations": [
+    {"name": "001_ledger.sql", "sha256": "bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b"},
+    {"name": "002_fix_immutable_ledger_identity.sql", "sha256": "981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb"},
+    {"name": "003_live_grant_consumption.sql", "sha256": "bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0"},
+    {"name": "004_receipt_confirmation_provenance.sql", "sha256": "96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a"},
+    {"name": "005_receipt_confirmation_count.sql", "sha256": "e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11"}
+  ]
+}

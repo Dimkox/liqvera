@@ -93,12 +93,13 @@ references only; never put a password, token, wallet key, payment grant, or
 signature in the config or command line.
 
 Download these four release assets without executing them:
-`install-liqvera-0.0.2.sh`, its independently published checksum,
-`verify-liqvera-installer.py`, and `liqvera-installer-0.0.2.zip` plus its
-detached checksum. Never use `curl | bash`. From that download directory:
+`install-liqvera-0.0.2.sh`, `verify-liqvera-installer.py`, and
+`liqvera-installer-0.0.2.zip`, plus a detached checksum for every executable
+or payload asset. Never use `curl | bash`. From that download directory:
 
 ```bash
 sha256sum --check install-liqvera-0.0.2.sh.sha256
+sha256sum --check verify-liqvera-installer.py.sha256
 sha256sum --check liqvera-installer-0.0.2.zip.sha256
 bash ./install-liqvera-0.0.2.sh \
   ./liqvera-installer-0.0.2.zip <published-archive-sha256> \

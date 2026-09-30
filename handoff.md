@@ -209,6 +209,17 @@ runs report 25 files and inventory `ad66569f…ca68bd2`. The retained out-of-tre
 asset set includes the 970-byte bootstrap, its detached checksum, the 41,157-byte
 archive, its detached checksum, and the 22,093-byte verifier. Nothing is
 published; clean-host Docker acceptance remains `NOT_RUN`.
+Final lifecycle review reproduced the narrower crash window after atomic
+`current` rename but before install-authority persistence. Recovery now relaxes
+authority only when the durable operation journal's exact verified candidate
+matches the on-disk pointer; it immediately republishes install authority and
+closes the operation. Ordinary status and non-journaled tampering remain strict.
+The same final review closed a root-swap window after the initial health
+callback: the held root identity is now asserted before either the healthy
+no-op return or any adapter start effect. Operator docs now require detached
+verification of the verifier itself, provide the closed two-secret-file config,
+and state truthfully that production update/rollback remain fail-closed until a
+coherent backup and migration-ledger adapter exists.
 During authorized multiarch publication the production web Docker build exposed
 strict TypeScript narrowing gaps in receipt verification and the reviewed JS
 x402 bridge import. The minimal source typing repair preserves all runtime

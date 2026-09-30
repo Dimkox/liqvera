@@ -350,6 +350,35 @@ def test_pointer_switch_crash_is_reconciled_from_disk(tmp_path: Path) -> None:
     assert (root / "current").resolve() == candidate.resolve()
 
 
+def test_crash_between_pointer_switch_and_install_authority_write_recovers_from_journal(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, _, _ = installed(tmp_path)
+    candidate = release(root, "b" * 64)
+    adapter = FakeAdapter()
+    original = LIFECYCLE._write_install_authority
+    calls = 0
+
+    def crash_once(path: Path, authority: dict[str, object], root_fd: int) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise LIFECYCLE.InjectedCrash("AFTER_POINTER_BEFORE_AUTHORITY")
+        original(path, authority, root_fd)
+
+    monkeypatch.setattr(LIFECYCLE, "_write_install_authority", crash_once)
+    with pytest.raises(LIFECYCLE.InjectedCrash, match="AFTER_POINTER_BEFORE_AUTHORITY"):
+        LIFECYCLE.run_lifecycle(
+            root, "update", {"version": "0.0.2", "sha256": "b" * 64}, adapter,
+        )
+
+    assert (root / "current").resolve() == candidate.resolve()
+    assert json.loads((root / "state/install-state.json").read_text())["release_sha256"] == "a" * 64
+    result = LIFECYCLE.run_lifecycle(root, "status", {}, adapter)
+    assert result["release_sha256"] == "b" * 64
+    assert json.loads((root / "state/install-state.json").read_text())["release_sha256"] == "b" * 64
+
+
 def test_runtime_files_are_rehashed_before_compose_use(tmp_path: Path) -> None:
     root, _, current = installed(tmp_path)
     (root / "config").mkdir()
@@ -452,6 +481,27 @@ def test_locked_root_replacement_cannot_receive_state_write(tmp_path: Path) -> N
     adapter.stop = replace_root
     with pytest.raises(LIFECYCLE.LifecycleError, match="UNSAFE_INSTALL_ROOT"):
         LIFECYCLE.run_lifecycle(root, "stop", {}, adapter)
+    assert not (root / "state/lifecycle.json").exists()
+
+
+@pytest.mark.parametrize("reported_healthy", [False, True])
+def test_root_replacement_during_initial_health_never_reaches_start_or_noop(
+    tmp_path: Path, reported_healthy: bool,
+) -> None:
+    root, _, _ = installed(tmp_path)
+    displaced = tmp_path / "displaced"
+    adapter = FakeAdapter()
+
+    def replace_root(_: str) -> bool:
+        adapter.trace.append(("health", "liqvera-test"))
+        root.rename(displaced)
+        root.mkdir(mode=0o700)
+        return reported_healthy
+
+    adapter.health = replace_root
+    with pytest.raises(LIFECYCLE.LifecycleError, match="UNSAFE_INSTALL_ROOT"):
+        LIFECYCLE.run_lifecycle(root, "start", {}, adapter)
+    assert not any(item[0] == "start" for item in adapter.trace)
     assert not (root / "state/lifecycle.json").exists()
 
 

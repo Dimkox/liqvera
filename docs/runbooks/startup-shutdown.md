@@ -9,6 +9,7 @@ Never use `curl | bash` and never execute archive contents before verification.
 
 ```bash
 sha256sum --check install-liqvera-0.0.2.sh.sha256
+sha256sum --check verify-liqvera-installer.py.sha256
 sha256sum --check liqvera-installer-0.0.2.zip.sha256
 root="${XDG_DATA_HOME:-$HOME/.local/share}/liqvera"
 bash ./install-liqvera-0.0.2.sh \
@@ -18,8 +19,30 @@ bash ./install-liqvera-0.0.2.sh \
 ```
 
 The config is closed: chain 31611, shadow source, payment disabled, loopback
-`127.0.0.1` ports, and optional references to private database-password and
-report-token files. It accepts no secret values, wallets, signatures, payment
+`127.0.0.1` ports, and required references to private database-password and
+report-token files. Create both files as single-link regular files owned by the
+installing user, non-empty, at most 64 KiB, and mode 0600. A usable config is:
+
+```json
+{
+  "schema_version": "liqvera-install-config/v1",
+  "chain_id": 31611,
+  "payment_enabled": false,
+  "source_mode": "shadow",
+  "ports": {
+    "web": {"host": "127.0.0.1", "port": 3000},
+    "gateway": {"host": "127.0.0.1", "port": 8080},
+    "metrics": {"host": "127.0.0.1", "port": 9090}
+  },
+  "secret_files": {
+    "DATABASE_PASSWORD_FILE": "/home/USER/.config/liqvera/database-password",
+    "REPORT_SERVICE_TOKEN_FILE": "/home/USER/.config/liqvera/report-service-token"
+  }
+}
+```
+
+Replace `USER` with the installing account and run `chmod 0600` on both secret
+files before installation. The config accepts no secret values, wallets, signatures, payment
 grants, mainnet, or exchange authority. `--install-deps` is optional and never
 silent: the installer prints the exact package-manager command and requires
 its typed digest before invoking `sudo`. User systemd is separately opt-in;
@@ -32,10 +55,14 @@ bounded logs:
 "$root/liqvera.sh" --install-root "$root" start
 "$root/liqvera.sh" --install-root "$root" stop
 "$root/liqvera.sh" --install-root "$root" logs gateway --tail 200 --since 15m
-"$root/liqvera.sh" --install-root "$root" update --version 0.0.2 --sha256 <verified-digest>
-"$root/liqvera.sh" --install-root "$root" rollback
 "$root/liqvera.sh" --install-root "$root" uninstall
 ```
+
+The CLI exposes `update` and `rollback` syntax, but the production Compose
+adapter deliberately has no coherent-backup or migration-ledger implementation;
+both remain fail-closed with `ROLLBACK_RESTORE_REQUIRED` and are not operational
+v0.0.2 procedures. Stage a later verified release only after that adapter and
+its recovery proof are independently reviewed.
 
 Default uninstall removes runtime containers but preserves configuration,
 logs, backups, artifacts, and all five named volumes. Destructive removal is a

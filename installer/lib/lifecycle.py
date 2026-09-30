@@ -657,7 +657,15 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
         state = load_lifecycle_state(root)
         operation = state.get("operation")
         if isinstance(operation, dict):
-            disk_release = _current_release(root)[1]
+            try:
+                disk_release = _current_release(root)[1]
+            except LifecycleError as exc:
+                candidate_authority = operation.get("candidate")
+                if str(exc) != "ARCHIVE_INVALID" or not isinstance(candidate_authority, dict):
+                    raise
+                # The only relaxed window is a journaled candidate whose exact
+                # verified identity already owns the atomic current pointer.
+                disk_release = _current_release(root, candidate_authority)[1]
             if disk_release == operation.get("candidate") and state.get("current") != disk_release:
                 state["previous"] = operation["prior"]
                 state["current"] = disk_release
@@ -691,8 +699,10 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
                 observed_healthy = adapter.health(project)
             except Exception:
                 observed_healthy = False
+            lock.assert_root(root)
             if state["status"] != "HEALTHY" or not observed_healthy:
                 try:
+                    lock.assert_root(root)
                     adapter.start(project, current_path)
                     if not adapter.health(project):
                         raise LifecycleError("HEALTH_TIMEOUT")

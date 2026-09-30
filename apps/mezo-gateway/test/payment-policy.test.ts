@@ -198,3 +198,15 @@ test('valid exact grant activates facilitator-sponsored composition without netw
   });
   assert.ok(payment.blockers().includes('PAYMENT_SERVICE_UNAVAILABLE'));
 });
+
+test('live grant expiry becomes a readiness blocker after startup',()=>{
+  let now=new Date('2026-09-29T00:00:00Z');
+  const payment=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://reports.invalid'),{
+    grantBytes:new TextEncoder().encode(JSON.stringify(grantRaw())),observedAt:now,
+    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo},
+    now:()=>now,
+  });
+  assert.ok(!payment.blockers().includes('EXTERNAL_GRANT_REQUIRED'));
+  now=new Date('2026-09-29T00:10:01Z');
+  assert.ok(payment.blockers().includes('EXTERNAL_GRANT_REQUIRED'));
+});

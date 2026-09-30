@@ -19,6 +19,33 @@ FIXTURE_IDENTITY = {
     "displayed_size_unit": "coin", "contract_multiplier": "1",
     "limitation": "Synthetic mapping for simulation only; no live identity approval.",
 }
+LIVE_REFERENCE = "https://schemas.liqvera.invalid/hyperliquid/btc-linear-perpetual/v1"
+
+
+def live_identity(metadata: bytes, book: bytes, sz_decimals: int) -> dict[str, object]:
+    return {
+        "schema": "liqvera-hyperliquid-btc-identity/v1", "source_mode": "live-public",
+        "policy_version": "hyperliquid-btc-linear-perpetual/v1", "reference": LIVE_REFERENCE,
+        "metadata_sha256": sha256_bytes(metadata), "book_sha256": sha256_bytes(book),
+        "base_asset": "BTC", "quote_asset": "USD", "settlement_asset": "USDC",
+        "product_kind": "perp", "payoff_kind": "linear", "displayed_size_unit": "coin",
+        "contract_multiplier": "1", "quantity_step": "0." + "0" * (sz_decimals - 1) + "1" if sz_decimals else "1",
+        "maximum_price_significant_digits": 5, "minimum_notional_usd": "10",
+        "limitation": "Snapshot identity only; no funding, fee, execution, or trading authority claim.",
+    }
+
+
+def live_mapping(evidence: dict[str, object]) -> dict[str, object]:
+    return {
+        "mapping_id": "hyperliquid-btc-perpetual", "mapping_version": evidence["policy_version"],
+        "decision": "APPROVED", "venue": "hyperliquid", "symbol": "BTC",
+        "identity": {key: evidence[key] for key in ("base_asset", "quote_asset", "product_kind", "settlement_asset", "payoff_kind")},
+        "evidence_sha256": sha256_bytes(canonical_json_bytes(evidence)), "evidence_reference": LIVE_REFERENCE,
+        "valid_from_ms": 0, "valid_until_ms": None, "reviewed_contract_multiplier": "1",
+        "displayed_size_unit": "coin", "quantity_step": evidence["quantity_step"], "price_tick": None,
+        "price_decimals": None, "max_price_significant_digits": evidence["maximum_price_significant_digits"],
+        "min_quantity": None, "min_notional": evidence["minimum_notional_usd"],
+    }
 
 
 def fixture_mapping() -> dict[str, object]:
@@ -44,8 +71,17 @@ def capture_members(capture_id: UUID, source_mode: str,
     if (metadata.kind, book.kind) != ("metadata", "book"):
         raise ValueError("INVALID_DATASET")
     observed = book.received_at_ms
-    # Live metadata is retained without inventing a human-approved mapping.
-    mapping = [fixture_mapping()] if source_mode == "fixture" else []
+    if source_mode == "fixture":
+        identity_evidence = FIXTURE_IDENTITY
+        mapping = [fixture_mapping()]
+    else:
+        metadata_doc = __import__("json").loads(metadata.payload)
+        candidates = [item for item in metadata_doc.get("universe", [])
+                      if type(item) is dict and item.get("name") == "BTC"]
+        if len(candidates) != 1 or type(candidates[0].get("szDecimals")) is not int:
+            raise ValueError("IDENTITY_UNVERIFIED")
+        identity_evidence = live_identity(metadata.payload, book.payload, candidates[0]["szDecimals"])
+        mapping = [live_mapping(identity_evidence)]
     members = {
         "control_evidence/records.ndjson": canonical_json_bytes({
             "recorded_at_ms": observed, "kind": "epoch",
@@ -63,11 +99,10 @@ def capture_members(capture_id: UUID, source_mode: str,
         "source/book.bin": book.payload,
         "source/capture.json": canonical_json_bytes({
             "schema": "mee-evidence-capture/v1", "capture_id": str(capture_id),
-            "source_mode": source_mode, "identity_status": "SIMULATED" if mapping else "UNVERIFIED",
+            "source_mode": source_mode, "identity_status": "SIMULATED" if source_mode == "fixture" else "UNVERIFIED",
             "responses": [item.evidence(source_mode) for item in responses]}),
     }
-    if mapping:
-        members["source/mapping-evidence.json"] = canonical_json_bytes(FIXTURE_IDENTITY)
+    members["source/mapping-evidence.json"] = canonical_json_bytes(identity_evidence)
     manifest = {
         "schema": PACKAGE_SCHEMA, "capture_run_id": str(capture_id),
         "started_at_ms": metadata.started_at_ms, "venue_set": ["hyperliquid"],

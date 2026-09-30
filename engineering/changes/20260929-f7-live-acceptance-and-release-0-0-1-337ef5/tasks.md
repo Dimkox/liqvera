@@ -1,5 +1,11 @@
 # Tasks — F7 live acceptance and release 0.0.1
 
+- [x] Record explicit design approval from chat.
+- [x] Add digest-bound BTC live identity and offline report verification.
+- [x] Compose ordinary gateway from a private one-shot grant file.
+- [x] Fail closed on expiry, payer mismatch, and durable consumption.
+- [ ] Execute external snapshot/payment only under a separate exact operation gate.
+
 - [x] Synthesize four analyses and freeze P0–P5 scope, gates, stop conditions,
   rollback, version decision, and exact authority boundaries.
 - [x] Record `scope_and_design_approval` for the current scope digest.

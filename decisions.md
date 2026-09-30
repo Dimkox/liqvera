@@ -1,5 +1,9 @@
 # Decisions
 
+## 2026-09-30 — Bind live identity to retained bytes
+
+Deriving the reviewed BTC mapping from sealed metadata/book bytes made the report independently reproducible without granting the collector identity authority. Optional private-file payment composition preserved default fail-closed startup and the existing exactly-once ledger.
+
 Patterns that paid for themselves. Each entry is at most three sentences.
 
 ## 2026-08-21 — Fixture dual-write official Lighter omit-symbol plus indexed mapping

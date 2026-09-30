@@ -57,7 +57,7 @@
       "const": 86400000
     },
     "live_identity_approved": {
-      "const": false
+      "type": "boolean"
     },
     "display_precision": {
       "const": 28
@@ -70,4 +70,3 @@
     }
   }
 }
-

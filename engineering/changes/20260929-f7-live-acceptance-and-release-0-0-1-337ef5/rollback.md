@@ -1,5 +1,7 @@
 # Rollback plan — F7 live acceptance and release 0.0.1
 
+Remove the grant mount/reference and restart to restore `EXTERNAL_GRANT_REQUIRED`; disable new live capture requests. Preserve sealed artifacts, ledger rows, consumed grants, and UNKNOWN attempts.
+
 ## Trigger conditions
 
 Any failed test/case, stale identity/grant, secret exposure, wrong external

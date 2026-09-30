@@ -1,5 +1,9 @@
 # Liqvera — handoff
 
+## 2026-09-30 live Hyperliquid + Mezo Testnet paywall implementation
+
+The user explicitly approved the bounded design in chat. Live BTC identity is versioned and raw-digest-bound; ordinary gateway startup can consume an opt-in private grant file while rechecking expiry, payer, and durable consumption. Migrations 001--005 and UNKNOWN/reconcile-only behavior are unchanged; no secret value or external payment was used.
+
 Updated: 2026-09-29 (F5 closed; F6 fake/static verification and independent reviews PASS). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 

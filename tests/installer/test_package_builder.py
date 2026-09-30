@@ -88,3 +88,5 @@ def test_bootstrap_passes_verifier_inventory_authority_without_user_input() -> N
     assert "inventory_sha256" in text
     assert "--inventory-sha256" in text
     assert "eval" not in text and "curl" not in text
+    assert 'receipt_path="$verified_dir/verification-receipt.json"' not in text
+    assert "mktemp" in text

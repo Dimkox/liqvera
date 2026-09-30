@@ -34,6 +34,7 @@ def test_user_unit_uses_only_systemctl_user_and_private_user_path(tmp_path: Path
     assert "/etc/systemd" not in unit.read_text()
     assert "\\x20" in unit.read_text()
     assert "%%" in unit.read_text()
+    assert f"ExecStart={str(tmp_path / 'install % root').replace('%', '%%').replace(' ', r'\x20')}/liqvera.sh" in unit.read_text()
 
 
 def test_user_unit_requires_explicit_option(tmp_path: Path) -> None:

@@ -184,6 +184,13 @@ Focused archive/contracts/runtime/lifecycle verification passes 137 tests.
 The five application refs now use anonymously pullable Docker Hub names with
 the unchanged externally verified multiarch index digests; PostgreSQL remains
 the pinned official digest. No release/tag/push occurred in this repair step.
+The bounded security follow-up moves the transient verifier receipt outside
+the exact package inventory, publishes the stable root lifecycle wrapper used
+by the user-systemd unit, makes non-secret release directories UID-10003
+traversable, admits only the two reviewed secret-file env keys, and rechecks
+current release identity against the independently pinned install state on
+every lifecycle read. Focused package/archive/runtime/lifecycle/systemd checks
+pass 155 tests.
 During authorized multiarch publication the production web Docker build exposed
 strict TypeScript narrowing gaps in receipt verification and the reviewed JS
 x402 bridge import. The minimal source typing repair preserves all runtime

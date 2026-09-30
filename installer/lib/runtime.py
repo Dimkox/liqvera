@@ -296,14 +296,16 @@ class InstallRoot:
         if not parts or any(part in {"", ".", ".."} for part in parts):
             raise InstallerError("CONFIG_INVALID", "invalid installation path")
         parent_fd = os.dup(self.fd)
+        directory_mode = 0o755 if parts[0] == "releases" else 0o700
         try:
             for directory in parts[:-1]:
                 try:
-                    os.mkdir(directory, 0o700, dir_fd=parent_fd)
+                    os.mkdir(directory, directory_mode, dir_fd=parent_fd)
                 except FileExistsError:
                     pass
                 child_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
                                    dir_fd=parent_fd)
+                os.fchmod(child_fd, directory_mode)
                 os.close(parent_fd)
                 parent_fd = child_fd
             _atomic_write_fd(parent_fd, parts[-1], data, mode)
@@ -825,6 +827,13 @@ def main(argv: list[str] | None = None, lifecycle_adapter: object | None = None)
                 f"releases/{release_name}/release.json",
                 (json.dumps(lifecycle_release, sort_keys=True, separators=(",", ":")) + "\n").encode(),
                 0o644,
+            )
+            root_handle.write(
+                "liqvera.sh",
+                b'#!/usr/bin/env bash\nset -euo pipefail\n'
+                b'script_dir="$(cd -P -- "${BASH_SOURCE[0]%/*}" && pwd -P)"\n'
+                b'exec "${script_dir}/current/liqvera.sh" "$@"\n',
+                0o755,
             )
             root_handle.switch_current(f"releases/{release_name}")
             root_handle.write("state/install-state.json", (json.dumps(state, sort_keys=True, separators=(",", ":")) + "\n").encode())

@@ -571,6 +571,10 @@ def test_install_stages_verified_release_and_starts_healthy_lifecycle(
     assert output["status"] == "HEALTHY"
     assert (root / "current").resolve() == staged.resolve()
     assert (staged / "compose.yaml").read_bytes() == (release / "compose.yaml").read_bytes()
+    assert stat.S_IMODE((staged / "migrations").stat().st_mode) == 0o755
+    assert stat.S_IMODE((staged / "migrations/001_ledger.sql").stat().st_mode) == 0o644
+    assert stat.S_IMODE((root / "liqvera.sh").stat().st_mode) == 0o755
+    assert "current/liqvera.sh" in (root / "liqvera.sh").read_text()
     release_value = json.loads((staged / "release.json").read_text())
     assert release_value["inventory_sha256"] == receipt_value["inventory_sha256"]
     assert release_value["images"] == manifest["images"]

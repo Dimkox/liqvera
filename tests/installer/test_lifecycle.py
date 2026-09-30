@@ -375,6 +375,21 @@ def test_runtime_image_values_are_exactly_manifest_bound(tmp_path: Path) -> None
         adapter.start("liqvera-test", current)
 
 
+def test_runtime_env_accepts_only_exact_closed_secret_reference_keys(tmp_path: Path) -> None:
+    root, _, current = installed(tmp_path)
+    runtime_files(root, current)
+    env = root / "config/runtime.env"
+    env.write_text(
+        env.read_text()
+        + "DATABASE_PASSWORD_FILE=/run/secrets/liqvera_database_password\n"
+        + "REPORT_SERVICE_TOKEN_FILE=/run/secrets/liqvera_report_service_token\n"
+    )
+    LIFECYCLE._validate_runtime_env(env, IMAGES)
+    env.write_text(env.read_text() + "ATTACKER_PASSWORD_FILE=/tmp/secret\n")
+    with pytest.raises(LIFECYCLE.LifecycleError, match="CONFIG_INVALID"):
+        LIFECYCLE._validate_runtime_env(env, IMAGES)
+
+
 def test_coordinated_release_metadata_and_env_image_rewrite_cannot_reuse_inventory_authority(
     tmp_path: Path,
 ) -> None:
@@ -393,6 +408,36 @@ def test_coordinated_release_metadata_and_env_image_rewrite_cannot_reuse_invento
     )
     with pytest.raises(LIFECYCLE.LifecycleError, match="ARCHIVE_INVALID"):
         adapter.start("liqvera-test", current)
+
+
+def test_coordinated_package_inventory_and_metadata_rewrite_cannot_replace_install_authority(
+    tmp_path: Path,
+) -> None:
+    root, _, current = installed(tmp_path)
+    runtime_files(root, current)
+    changed = dict(IMAGES)
+    changed["web"] = "registry.invalid/attacker/web@sha256:" + "e" * 64
+    package = json.loads((current / "manifests/release-manifest.json").read_text())
+    package["images"] = changed
+    package_bytes = json.dumps(package, sort_keys=True).encode()
+    (current / "manifests/release-manifest.json").write_bytes(package_bytes)
+    sums = (current / "SHA256SUMS").read_text().splitlines()
+    sums = [
+        f"{hashlib.sha256(package_bytes).hexdigest()}  manifests/release-manifest.json"
+        if line.endswith("  manifests/release-manifest.json") else line
+        for line in sums
+    ]
+    sums_bytes = ("\n".join(sums) + "\n").encode()
+    (current / "SHA256SUMS").write_bytes(sums_bytes)
+    metadata = json.loads((current / "release.json").read_text())
+    metadata["images"] = changed
+    metadata["inventory_sha256"] = hashlib.sha256(sums_bytes).hexdigest()
+    (current / "release.json").write_text(json.dumps(metadata))
+    env = root / "config/runtime.env"
+    env.write_text(env.read_text().replace(IMAGES["web"], changed["web"]))
+
+    with pytest.raises(LIFECYCLE.LifecycleError, match="ARCHIVE_INVALID"):
+        LIFECYCLE.run_lifecycle(root, "status", {}, FakeAdapter())
 
 
 def test_locked_root_replacement_cannot_receive_state_write(tmp_path: Path) -> None:

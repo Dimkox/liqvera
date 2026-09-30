@@ -289,7 +289,7 @@ def _validate_runtime_env(path: Path, images: object) -> None:
         raise LifecycleError("CONFIG_INVALID")
     values: dict[str, str] = {}
     for line in text.splitlines():
-        if not re.fullmatch(r"LIQVERA_[A-Z0-9_]+=[^\x00-\x1f\x7f$`\\]*", line):
+        if not re.fullmatch(r"[A-Z][A-Z0-9_]*=[^\x00-\x1f\x7f$`\\]*", line):
             raise LifecycleError("CONFIG_INVALID")
         name, value = line.split("=", 1)
         if name in values:
@@ -500,7 +500,9 @@ def _release(root: Path, digest: str) -> tuple[Path, dict[str, object]]:
     return target, value
 
 
-def _current_release(root: Path) -> tuple[Path, dict[str, object]]:
+def _current_release(
+    root: Path, expected_authority: dict[str, object] | None = None,
+) -> tuple[Path, dict[str, object]]:
     link = root / "current"
     if not link.is_symlink():
         raise LifecycleError("CONFIG_INVALID")
@@ -513,7 +515,21 @@ def _current_release(root: Path) -> tuple[Path, dict[str, object]]:
     checked_target, checked = _release(root, digest)
     if checked_target.resolve() != target:
         raise LifecycleError("ARCHIVE_INVALID")
+    installed = expected_authority or _read_json(root / "state/install-state.json", "CONFIG_INVALID")
+    for key in ("release_sha256", "inventory_sha256", "git_commit", "git_tree"):
+        if installed.get(key) != checked.get(key):
+            raise LifecycleError("ARCHIVE_INVALID")
     return target, checked
+
+
+def _write_install_authority(root: Path, release: dict[str, object], root_fd: int) -> None:
+    installed = _read_json(root / "state/install-state.json", "CONFIG_INVALID")
+    for key in ("release_sha256", "inventory_sha256", "git_commit", "git_tree"):
+        installed[key] = release[key]
+    _atomic_write(
+        root, "state/install-state.json",
+        (json.dumps(installed, sort_keys=True, separators=(",", ":")) + "\n").encode(), root_fd,
+    )
 
 
 def _validate_state(value: dict[str, object]) -> dict[str, object]:
@@ -648,6 +664,7 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
                 state["migration_ledger"] = disk_release["database_compatibility"]
                 state["status"] = "HEALTHY"
                 state["operation"] = None
+                _write_install_authority(root, disk_release, lock.directory_fd)
                 lock.assert_root(root)
                 persist()
                 operation = None
@@ -659,7 +676,7 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
                 and state.get("migration_committed") is True):
             raise LifecycleError("ROLLBACK_RESTORE_REQUIRED: migration outcome requires explicit recovery")
         project = str(state["compose_project"])
-        current_path, _ = _current_release(root)
+        current_path, _ = _current_release(root, state.get("current") if isinstance(state.get("current"), dict) else None)
         if command == "status":
             return _status(state)
         if command == "stop":
@@ -760,6 +777,7 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
             state["migration_ledger"] = ledger
             state["status"] = "HEALTHY"
             _switch_current(root, candidate_path, lock.directory_fd)
+            _write_install_authority(root, candidate, lock.directory_fd)
             lock.assert_root(root)
             operation["phase"] = "POINTER_SWITCHED"
             persist()
@@ -798,6 +816,7 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
             state["operation"] = None
             state["status"] = "HEALTHY"
             _switch_current(root, prior_path, lock.directory_fd)
+            _write_install_authority(root, checked, lock.directory_fd)
             persist()
             return _status(state)
         if command == "uninstall":

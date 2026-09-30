@@ -345,12 +345,14 @@ def test_secret_reference_rejects_control_or_interpolation(tmp_path: Path, name:
 
 def test_verified_release_rejects_wrong_digest_and_mutated_member(tmp_path: Path) -> None:
     release, receipt = verified_release(tmp_path)
-    expected = json.loads(receipt.read_text())["archive_sha256"]
+    receipt_value = json.loads(receipt.read_text())
+    expected = receipt_value["archive_sha256"]
+    inventory = receipt_value["inventory_sha256"]
     with pytest.raises(RUNTIME.InstallerError, match="RELEASE_DIGEST_MISMATCH"):
-        RUNTIME.validate_verified_release(release, receipt, "b" * 64)
+        RUNTIME.validate_verified_release(release, receipt, "b" * 64, inventory)
     (release / "install.sh").write_text("changed")
     with pytest.raises(RUNTIME.InstallerError, match="ARCHIVE_INVALID"):
-        RUNTIME.validate_verified_release(release, receipt, expected)
+        RUNTIME.validate_verified_release(release, receipt, expected, inventory)
 
 
 def test_verified_receipt_rejects_member_plus_checksum_rewrite(tmp_path: Path) -> None:
@@ -365,7 +367,27 @@ def test_verified_receipt_rejects_member_plus_checksum_rewrite(tmp_path: Path) -
         for line in lines
     ) + "\n")
     with pytest.raises(RUNTIME.InstallerError, match="ARCHIVE_INVALID"):
-        RUNTIME.validate_verified_release(release, receipt, expected)
+        RUNTIME.validate_verified_release(release, receipt, expected, json.loads(receipt.read_text())["inventory_sha256"])
+
+
+def test_independent_inventory_authority_rejects_receipt_and_content_rewrite(tmp_path: Path) -> None:
+    release, receipt = verified_release(tmp_path)
+    original_receipt = json.loads(receipt.read_text())
+    member = release / "LICENSE-NOTICE.md"
+    member.write_bytes(b"coordinated replacement\n")
+    lines = (release / "SHA256SUMS").read_text().splitlines()
+    replacement = hashlib.sha256(member.read_bytes()).hexdigest()
+    sums = "\n".join(
+        f"{replacement}  LICENSE-NOTICE.md" if line.endswith("  LICENSE-NOTICE.md") else line
+        for line in lines
+    ) + "\n"
+    (release / "SHA256SUMS").write_text(sums)
+    changed_receipt = {**original_receipt, "inventory_sha256": hashlib.sha256(sums.encode()).hexdigest()}
+    receipt.write_text(json.dumps(changed_receipt))
+    with pytest.raises(RUNTIME.InstallerError, match="ARCHIVE_INVALID"):
+        RUNTIME.validate_verified_release(
+            release, receipt, original_receipt["archive_sha256"], original_receipt["inventory_sha256"]
+        )
 
 
 def test_descriptor_bound_root_rejects_path_replacement(tmp_path: Path) -> None:
@@ -436,12 +458,30 @@ def test_existing_install_is_idempotent_and_conflicts_fail_without_overwrite(tmp
 
 
 def cli_args(release: Path, receipt: Path, config: Path, root: Path, *extra: str) -> list[str]:
-    digest = json.loads(receipt.read_text())["archive_sha256"]
+    receipt_value = json.loads(receipt.read_text())
+    digest = receipt_value["archive_sha256"]
     return [
         "--verified-release", str(release), "--verified-receipt", str(receipt),
-        "--sha256", digest, "--install-dir", str(root), "--config", str(config),
+        "--sha256", digest, "--inventory-sha256", receipt_value["inventory_sha256"],
+        "--install-dir", str(root), "--config", str(config),
         "--bash-version", "5.2.21", *extra,
     ]
+
+
+def test_direct_runtime_requires_independent_inventory_authority(tmp_path: Path) -> None:
+    release, receipt = verified_release(tmp_path)
+    config = tmp_path / "config.json"
+    config.write_text(json.dumps(safe_config()))
+    arguments = cli_args(release, receipt, config, tmp_path / "install")
+    index = arguments.index("--inventory-sha256")
+    del arguments[index:index + 2]
+    completed = subprocess.run(
+        [sys.executable, str(RUNTIME_PATH), *arguments], check=False,
+        capture_output=True, text=True, env={"PATH": "/usr/bin:/bin"},
+    )
+    assert completed.returncode == 2
+    assert "--inventory-sha256" in completed.stderr
+    assert not (tmp_path / "install").exists()
 
 
 def clear_authority(monkeypatch: pytest.MonkeyPatch) -> None:

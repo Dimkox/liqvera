@@ -90,7 +90,7 @@ Stable shell/JSON interfaces:
 - Create: `tests/installer/test_archive_verifier.py`
 - Modify: `pyproject.toml`, `architecture/architecture.yaml`, `handoff.md`
 
-**Interfaces:** Produces Python `verify_installer(archive: Path, expected_sha256: str, destination: Path) -> VerifiedRelease`; CLI emits canonical `verified-release-v1` only after safe materialization.
+**Interfaces:** Produces Python `verify_installer(archive: Path, expected_sha256: str, destination: Path) -> VerifiedRelease`; CLI emits canonical `verified-release-v1`, including `inventory_sha256` derived from the outer-digest-verified archive's full `SHA256SUMS` bytes, only after safe materialization.
 
 - [ ] **Step 1: Add RED hostile-archive tests.** Cover valid archive; wrong outer digest; missing/extra file; duplicate normalized/casefold name; `../`, absolute and backslash traversal; Unicode collision; symlink/hardlink/FIFO/device; oversized member/aggregate; changed inner checksum; existing destination. Assert no executable appears on failure.
 - [ ] **Step 2: Run** `.venv/bin/python -m pytest -q tests/installer/test_archive_verifier.py`. **Expected:** FAIL importing verifier.
@@ -107,7 +107,7 @@ Stable shell/JSON interfaces:
 - Create: `tests/installer/test_linux_installer.py`
 - Modify: `architecture/architecture.yaml`, `handoff.md`
 
-**Interfaces:** Produces Bash functions `preflight`, `load_state`, `write_state_atomic`, `render_config`, `run_compose`, `reconcile_install`; CLI `install.sh --sha256 DIGEST [--version 0.0.2] [--install-dir PATH] [--config PATH] [--non-interactive] [--install-deps]`.
+**Interfaces:** Produces Bash/Python functions `preflight`, `load_state`, `write_state_atomic`, `render_config`, and `reconcile_install`; internal CLI `install.sh --verified-release DIR --verified-receipt FILE --sha256 DIGEST --inventory-sha256 DIGEST --install-dir PATH --config PATH [--non-interactive] [--install-deps]`. Task 6 captures the independent inventory digest from the immediately preceding verifier result rather than asking the normal end user for a second published value.
 
 - [ ] **Step 1: Add RED tests with fake executables.** Cover Ubuntu/Debian and documented RPM-family fixtures, unsupported OS/arch, Bash/Docker/Compose floors, daemon unavailable, disk/memory, unsafe root/symlink/world-writable parent, paths with spaces, occupied port, restricted `0600` config, invalid secret reference, secret-canary redaction, and exact process allowlist.
 - [ ] **Step 2: Add RED privilege tests.** Without `--install-deps`, missing Docker performs zero package calls. With it, print the exact allowlisted package command and require interactive confirmation; `--non-interactive --install-deps` fails without a separate exact approval input. Assert no implicit `sudo`.

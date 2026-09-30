@@ -15,12 +15,13 @@ source "${INSTALLER_DIR}/lib/common.sh"
 
 usage() {
     cat <<'EOF'
-Usage: install.sh --verified-release DIR --verified-receipt FILE --sha256 DIGEST --install-dir DIR --config FILE [OPTIONS]
+Usage: install.sh --verified-release DIR --verified-receipt FILE --sha256 DIGEST --inventory-sha256 DIGEST --install-dir DIR --config FILE [OPTIONS]
 
 Options:
   --verified-release DIR              Task 2 materialized release directory
   --verified-receipt FILE             Exact Task 2 verification receipt
   --sha256 DIGEST                     Independently supplied archive SHA-256
+  --inventory-sha256 DIGEST           Bootstrap-captured verified inventory SHA-256
   --install-dir DIR                   Narrow local installation root
   --config FILE                       Closed JSON installer configuration
   --install-deps                      Permit the separately approved dependency command
@@ -42,7 +43,7 @@ while (($#)); do
             printf '0.0.2\n'
             exit 0
             ;;
-        --verified-release|--verified-receipt|--sha256|--install-dir|--config|--approve-dependency-command)
+        --verified-release|--verified-receipt|--sha256|--inventory-sha256|--install-dir|--config|--approve-dependency-command)
             if (($# < 2)); then
                 printf 'CONFIG_INVALID: missing value for %s\n' "$1" >&2
                 exit 2

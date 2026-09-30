@@ -298,5 +298,7 @@ with a Task 2 receipt, failure injection, retries and path replacement: trust,
 validation and descriptor ownership must remain continuous through publication.
 The receipt must bind an inventory digest produced from outer-digest-verified
 archive bytes; rehashing a directory against its own mutable checksum file proves
-only self-consistency. Lock ownership must likewise begin before reconciliation,
+only self-consistency. That digest must also cross the consumer boundary as an
+independent bootstrap-held input; placing it only inside another caller-mutable
+receipt recreates the same circular trust. Lock ownership must likewise begin before reconciliation,
 not merely before the final writes.

@@ -159,6 +159,7 @@ Initial installation:
 
 ```text
 install.sh  --verified-release DIR --verified-receipt FILE --sha256 DIGEST
+            --inventory-sha256 DIGEST
             --install-dir PATH --config PATH [--non-interactive]
             [--install-deps --approve-dependency-command SHA256]
 ```
@@ -190,7 +191,11 @@ reconciled with the supplied outer digest and a fresh inner-file rehash before
 any host mutation. Its verifier-produced `inventory_sha256` binds the exact
 full `SHA256SUMS` bytes captured from the independently outer-digest-verified
 archive; the consumer requires that immutable inventory digest before trusting
-the materialized directory.
+the materialized directory. Direct internal invocation requires the independently
+carried `--inventory-sha256`; matching only the mutable receipt is insufficient.
+The Task 6 one-click bootstrap captures that value directly from the just-finished
+verifier result and passes it internally, so the normal end user still supplies
+only the independently published outer archive SHA-256.
 Privilege elevation is initiated visibly by the operator; the installer never
 embeds credentials, bypasses policy, or silently invokes `sudo`. Unsupported
 Linux distributions/architectures fail before dependency installation.

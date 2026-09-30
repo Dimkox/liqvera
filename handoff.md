@@ -81,6 +81,13 @@ architecture, Bash or resource failures cannot enter dependency installation;
 dotenv secret references reject all dollar/backtick/control expansion syntax;
 and the interactive digest prompt is stderr-only so stdout remains one JSON
 object.
+The final R1 repair separates authority from the mutable receipt: Task 3 now
+requires an independent `--inventory-sha256` and compares it to both the receipt
+and the freshly rehashed full inventory. The Task 2 verifier emits this digest;
+Task 6 must capture it directly from that completed verifier invocation and pass
+it internally. A direct installer call without it fails before filesystem or
+process activity, while the normal bootstrap contract still asks the end user
+only for the published outer archive SHA-256.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

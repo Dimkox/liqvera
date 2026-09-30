@@ -545,13 +545,17 @@ def _safe_regular_bytes(path: Path, code: str, maximum: int = 1024 * 1024) -> by
     return data
 
 
-def validate_verified_release(release: Path, receipt_path: Path, expected_sha256: str) -> dict[str, object]:
+def validate_verified_release(
+    release: Path, receipt_path: Path, expected_sha256: str, expected_inventory_sha256: str
+) -> dict[str, object]:
     receipt = load_json_bytes(_safe_regular_bytes(receipt_path, "ARCHIVE_INVALID"), "ARCHIVE_INVALID")
     required = {"schema_version", "archive_sha256", "inventory_sha256", "destination", "file_count", "product_version", "git_commit", "git_tree"}
     if not isinstance(receipt, dict) or set(receipt) != required or receipt.get("schema_version") != "verified-release-v1":
         raise InstallerError("ARCHIVE_INVALID", "verified release receipt is not closed")
     if receipt.get("archive_sha256") != expected_sha256:
         raise InstallerError("RELEASE_DIGEST_MISMATCH", "receipt does not bind the supplied archive digest")
+    if not HEX64.fullmatch(expected_inventory_sha256) or receipt.get("inventory_sha256") != expected_inventory_sha256:
+        raise InstallerError("ARCHIVE_INVALID", "receipt does not bind independent inventory authority")
     if receipt.get("destination") != str(release.resolve(strict=True)):
         raise InstallerError("ARCHIVE_INVALID", "receipt destination mismatch")
     manifest = load_json_bytes(_safe_regular_bytes(release / "manifests/release-manifest.json", "ARCHIVE_INVALID"), "ARCHIVE_INVALID")
@@ -559,7 +563,7 @@ def validate_verified_release(release: Path, receipt_path: Path, expected_sha256
         raise InstallerError("ARCHIVE_INVALID", "release manifest is not an object")
     _validate(INSTALLER_ROOT / "schemas/release-manifest.schema.json", manifest, "ARCHIVE_INVALID")
     sums_bytes = _safe_regular_bytes(release / "SHA256SUMS", "ARCHIVE_INVALID")
-    if hashlib.sha256(sums_bytes).hexdigest() != receipt.get("inventory_sha256"):
+    if hashlib.sha256(sums_bytes).hexdigest() != expected_inventory_sha256:
         raise InstallerError("ARCHIVE_INVALID", "verified inventory digest mismatch")
     sums_data = sums_bytes.decode("utf-8")
     expected: dict[str, str] = {}
@@ -627,6 +631,7 @@ def _cli_parser() -> argparse.ArgumentParser:
     parser.add_argument("--verified-release", type=Path, required=True)
     parser.add_argument("--verified-receipt", type=Path, required=True)
     parser.add_argument("--sha256", required=True)
+    parser.add_argument("--inventory-sha256", required=True)
     parser.add_argument("--install-dir", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--bash-version", required=True, help=argparse.SUPPRESS)
@@ -645,7 +650,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         reject_ambient_authority(os.environ)
         config = load_json_bytes(_safe_regular_bytes(args.config, "CONFIG_INVALID"), "CONFIG_INVALID")
-        manifest = validate_verified_release(args.verified_release, args.verified_receipt, args.sha256)
+        manifest = validate_verified_release(
+            args.verified_release, args.verified_receipt, args.sha256, args.inventory_sha256
+        )
         if not isinstance(config, dict) or not isinstance(manifest, dict):
             raise InstallerError("CONFIG_INVALID", "config or manifest is not an object")
         _validate(CONFIG_SCHEMA, config, "CONFIG_INVALID")

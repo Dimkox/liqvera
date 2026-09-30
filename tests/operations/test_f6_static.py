@@ -131,7 +131,7 @@ def test_exact_users_tmpfs_mount_modes_resources_and_profile_secrets() -> None:
     expected = {
         "evidence-capture": ("10001:10001", ["/tmp:rw,noexec,nosuid,size=32m"], 402653184, 0.5, 128),
         "report": ("10002:10001", ["/tmp:rw,noexec,nosuid,size=64m"], 536870912, 1.0, 128),
-        "postgres": ("70:70", ["/tmp:rw,noexec,nosuid,size=64m", "/var/run/postgresql:rw,nosuid,size=8m"], 805306368, 1.0, 128),
+        "postgres": ("70:70", ["/tmp:rw,noexec,nosuid,size=64m", "/var/run/postgresql:rw,nosuid,size=8m,uid=70,gid=70,mode=0775"], 805306368, 1.0, 128),
         "migrate": ("10003:10001", ["/tmp:rw,noexec,nosuid,size=32m"], 268435456, 0.5, 128),
         "gateway": ("10003:10001", ["/tmp:rw,noexec,nosuid,size=64m"], 536870912, 1.0, 256),
         "web": ("101:101", ["/tmp:rw,noexec,nosuid,size=8m", "/var/cache/nginx:rw,nosuid,size=8m", "/var/run:rw,nosuid,size=8m"], 134217728, 0.25, 64),
@@ -184,3 +184,6 @@ def test_metrics_are_private_and_csp_is_restrictive() -> None:
     assert "/metrics" not in caddy
     assert re.findall(r"<script[^>]*>", index) == ['<script type="module" src="/src/main.ts">']
     assert "<style" not in index and " style=" not in index
+    edge = (ROOT / "deploy" / "mezo-evidence" / "Dockerfile.edge").read_text()
+    assert "setcap -r /usr/bin/caddy" in edge
+    assert "EXPOSE 8080 8443" in edge

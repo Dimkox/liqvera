@@ -25,3 +25,9 @@ use host group GID `10001` and mode `0640` so the distinct non-root report and
 gateway UIDs can read their mounts. Never copy a token into an env file or log,
 and rotate the token with a coordinated restart of both services. Do not use
 the token as a public API bearer capability.
+
+Use only `[A-Za-z0-9_-]`, 32–256 characters, for report tokens. Local Compose
+file-backed secrets retain host ownership/mode rather than applying target
+`uid`/`gid`/`mode`. Consequently `live_payment_grant` must actually be UID 10003
+mode `0400`; database passwords and report tokens must be readable by host GID
+10001 at mode `0640`. Check the real files with `stat`; never commit them.

@@ -102,6 +102,8 @@ file. Create random `secrets/fixture_postgres_password`,
 `secrets/live_report_service_token` with owner-only write and group-only read
 permissions (host group GID `10001`, mode `0640`). Keep
 database passwords and internal report tokens distinct for each profile.
+For compatibility with both services, report tokens must be 32–256 characters
+from `[A-Za-z0-9_-]` only, with no whitespace.
 Compose may resolve all secret declarations while parsing either profile, so
 keep all four files present. The report token must be mounted only into report
 and gateway; never pass it to capture.
@@ -126,6 +128,12 @@ Before parsing Compose, provision `secrets/live_payment_grant` as UID 10003 mode
 edge services never receive it. `gateway-live` shares the live PostgreSQL
 network namespace so its credential-free endpoint is the reviewed loopback
 identity `postgresql://127.0.0.1:5432/liqvera`.
+
+With local bind-backed Compose secrets, Docker does not apply the service
+secret's declared `uid`, `gid`, or `mode`: those are documentation for a real
+secret backend. The host `live_payment_grant` must therefore actually be owned
+by UID 10003 with mode `0400`. PostgreSQL passwords and report tokens must be
+host-readable by shared GID 10001 (mode `0640`). Verify with `stat` before start.
 
 ```bash
 cd deploy/mezo-evidence

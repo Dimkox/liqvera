@@ -15,12 +15,22 @@ import { authorizeNewSettlement, databaseIdentity } from '../src/p3-operator.js'
 import { composeOfficialX402, readPrivateGrantFile } from '../src/security/live-composition.js';
 import { permit2Capability, settlementTransaction } from '../src/adapters/x402.js';
 import { loadConfig } from '../src/config.js';
+import { assertSaleFresh, MAX_SALE_AGE_MS } from '../src/workers/builds.js';
 
 const payer='0x1111111111111111111111111111111111111111';
 const payTo='0x2222222222222222222222222222222222222222';
 const quote={id:'00000000-0000-4000-8000-000000000001',report_id:'00000000-0000-4000-8000-000000000002',report_sha256:'a'.repeat(64),terms:{expected_payer:payer,pay_to:payTo}} as Quote;
 const permit2='0x000000000022D473030F116dDEE9F6B43aC78BA3';
 const proxy='0x402085c248EeA27D92E8b30b2C58ed07f9E20001';
+
+test('sale publication permits bounded packaging latency without weakening capture freshness',()=>{
+  const now=Date.parse('2026-09-30T12:00:30.000Z');
+  assert.equal(MAX_SALE_AGE_MS,30_000);
+  assert.doesNotThrow(()=>assertSaleFresh('2026-09-30T12:00:00.000Z',now));
+  assert.throws(()=>assertSaleFresh('2026-09-30T11:59:59.999Z',now),/STALE_SOURCE/);
+  assert.doesNotThrow(()=>assertSaleFresh('2026-09-30T12:00:31.000Z',now));
+  assert.throws(()=>assertSaleFresh('2026-09-30T12:00:31.001Z',now),/CLOCK_SKEW/);
+});
 
 test('grantless live runtime starts payment-not-ready',async()=>{
   const config=await loadConfig({DATABASE_URL:'postgresql://liqvera:test@127.0.0.1:5432/liqvera',SOURCE_MODE:'live-public',PUBLIC_BASE_URL:'https://reports.invalid',CORS_ORIGINS:'https://reports.invalid',PAY_TO:payTo});

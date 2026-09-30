@@ -73,7 +73,7 @@ x-postgres: &postgres
   shm_size: 128m
   tmpfs:
     - /tmp:rw,noexec,nosuid,size=64m
-    - /var/run/postgresql:rw,nosuid,size=8m
+    - /var/run/postgresql:rw,nosuid,size=8m,uid=70,gid=70,mode=0775
   environment:
     POSTGRES_USER: liqvera
     POSTGRES_DB: liqvera

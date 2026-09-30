@@ -3,6 +3,12 @@ import { Gateway } from '../application/gateway.js';
 import { metrics } from '../security/observability.js';
 const rejectedReasons:Reason[]=['INVALID_INPUT','INVALID_DATASET','STALE_SOURCE','CLOCK_SKEW','IDENTITY_UNVERIFIED',
   'IDENTITY_MISMATCH','CROSSED_BOOK','DEPTH_INSUFFICIENT','UNSUPPORTED_INSTRUMENT','SIMULATED_SOURCE'];
+export const MAX_SALE_AGE_MS=30_000;
+export function assertSaleFresh(snapshotAt:string,now=Date.now()):void {
+  const age=now-Date.parse(snapshotAt);
+  if(age>MAX_SALE_AGE_MS)throw new PublicError('STALE_SOURCE',422);
+  if(age < -1000)throw new PublicError('CLOCK_SKEW',422);
+}
 export async function buildOne(gateway:Gateway):Promise<boolean> {
   const request=await gateway.ledger.claimBuild();if(!request)return false;
   const started=performance.now();
@@ -23,8 +29,7 @@ export async function buildOne(gateway:Gateway):Promise<boolean> {
       artifact.snapshot_at!==report.source.source_at)throw new PublicError('INVALID_DATASET',422);
     // Current freshness is checked once for sale. Paid historical delivery uses
     // the immutable original snapshot and never recalculates market data.
-    const age=Date.now()-Date.parse(artifact.snapshot_at);
-    if(age>5000)throw new PublicError('STALE_SOURCE',422);if(age < -1000)throw new PublicError('CLOCK_SKEW',422);
+    assertSaleFresh(artifact.snapshot_at);
     if(signal.aborted)throw new PublicError('SOURCE_UNAVAILABLE');
     if(gateway.blockers().length||!gateway.config.payTo)throw new PublicError('SOURCE_UNAVAILABLE');
     gateway.contracts.states.next('report_request','PREPARING','artifact_verified',{semantic_report_valid:true,live_source:true,

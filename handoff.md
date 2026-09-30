@@ -1,5 +1,15 @@
 # Liqvera — handoff
 
+## 2026-09-30 live deployment deterministic repairs
+
+The source service still rejects snapshots older than five seconds when
+received. Gateway publication now permits at most 30 seconds total age so
+capture, sealing, persistence, and readback cannot invalidate an otherwise
+fresh source; no fixture fallback exists. PostgreSQL runtime tmpfs is owned by
+UID/GID 70, and the edge image removes Caddy's low-port file capability while
+continuing to listen on 8080/8443 under `cap_drop: ALL`. Operator docs record
+the exact report-token alphabet and bind-backed secret ownership behavior.
+
 ## 2026-09-30 public judge testnet payer mode
 
 Follow-up hardening removes the remaining fixed grant-buyer comparison from

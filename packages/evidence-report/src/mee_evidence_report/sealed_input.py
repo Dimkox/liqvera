@@ -33,6 +33,7 @@ MAPPING_KEYS = {
 IDENTITY = {"base_asset": "BTC", "quote_asset": "USD", "settlement_asset": "USDC",
             "product_kind": "perp", "payoff_kind": "linear"}
 FIXTURE_REFERENCE = "https://schemas.liqvera.invalid/fixture/btc-perpetual/v1"
+LIVE_REFERENCE = "https://schemas.liqvera.invalid/hyperliquid/btc-linear-perpetual/v1"
 
 
 @dataclass(frozen=True)
@@ -61,7 +62,7 @@ def _inspect(members: dict[str, bytes]) -> InspectedInput:
     capture = strict_json(members["source/capture.json"])
     validate("capture-evidence.schema.json", capture)
     mode = capture["source_mode"]
-    expected = BASE_MEMBERS | ({"source/mapping-evidence.json"} if mode == "fixture" else set())
+    expected = BASE_MEMBERS | {"source/mapping-evidence.json"}
     if set(members) != expected:
         raise EvidenceRejected("INVALID_DATASET")
     manifest = object_keys(strict_json(members["manifest.json"]), {
@@ -183,31 +184,48 @@ def _inspect(members: dict[str, bytes]) -> InspectedInput:
         if canonical_json_bytes(strict_json(members[name])) != canonical_json_bytes(expected_record):
             raise EvidenceRejected("INVALID_DATASET")
     mapping_doc = object_keys(strict_json(members["mapping_snapshot.json"]), {"mappings"})
-    if mode == "live-public":
-        if mapping_doc["mappings"] != []:
-            raise EvidenceRejected("IDENTITY_UNVERIFIED")
-        # No runtime string, environment setting, or bundled claim can approve
-        # absent reviewed evidence. A later reviewed implementation owns this gate.
-        raise EvidenceRejected("IDENTITY_UNVERIFIED")
-    if capture["identity_status"] != "SIMULATED" or type(mapping_doc["mappings"]) is not list or len(mapping_doc["mappings"]) != 1:
+    if type(mapping_doc["mappings"]) is not list or len(mapping_doc["mappings"]) != 1:
         raise EvidenceRejected("IDENTITY_UNVERIFIED")
     mapping = object_keys(mapping_doc["mappings"][0], MAPPING_KEYS)
     source = strict_json(members["source/mapping-evidence.json"])
-    expected_source = {
-        "schema": "mee-fixture-identity/v1", "source_mode": "fixture", "reference": FIXTURE_REFERENCE,
-        **IDENTITY, "displayed_size_unit": "coin", "contract_multiplier": "1",
-        "limitation": "Synthetic mapping for simulation only; no live identity approval.",
-    }
+    if mode == "live-public":
+        quantity_step = "1" if candidates[0]["szDecimals"] == 0 else "0." + "0" * (candidates[0]["szDecimals"] - 1) + "1"
+        expected_source = {
+            "schema": "liqvera-hyperliquid-btc-identity/v1", "source_mode": "live-public",
+            "policy_version": "hyperliquid-btc-linear-perpetual/v1", "reference": LIVE_REFERENCE,
+            "metadata_sha256": digest(members["source/metadata.bin"]), "book_sha256": digest(raw),
+            **IDENTITY, "displayed_size_unit": "coin", "contract_multiplier": "1", "quantity_step": quantity_step,
+            "maximum_price_significant_digits": 5, "minimum_notional_usd": "10",
+            "limitation": "Snapshot identity only; no funding, fee, execution, or trading authority claim.",
+        }
+        expected_mapping = {
+            "mapping_id": "hyperliquid-btc-perpetual", "mapping_version": "hyperliquid-btc-linear-perpetual/v1",
+            "decision": "APPROVED", "venue": "hyperliquid", "symbol": "BTC", "identity": IDENTITY,
+            "evidence_sha256": digest(members["source/mapping-evidence.json"]), "evidence_reference": LIVE_REFERENCE,
+            "valid_from_ms": 0, "valid_until_ms": None, "reviewed_contract_multiplier": "1",
+            "displayed_size_unit": "coin", "quantity_step": quantity_step, "price_tick": None,
+            "price_decimals": None, "max_price_significant_digits": 5, "min_quantity": None, "min_notional": "10",
+        }
+        if source != expected_source or canonical_json_bytes(source) != members["source/mapping-evidence.json"] or canonical_json_bytes(mapping) != canonical_json_bytes(expected_mapping):
+            raise EvidenceRejected("IDENTITY_UNVERIFIED")
+    else:
+        if capture["identity_status"] != "SIMULATED":
+            raise EvidenceRejected("IDENTITY_UNVERIFIED")
+        expected_source = {
+            "schema": "mee-fixture-identity/v1", "source_mode": "fixture", "reference": FIXTURE_REFERENCE,
+            **IDENTITY, "displayed_size_unit": "coin", "contract_multiplier": "1",
+            "limitation": "Synthetic mapping for simulation only; no live identity approval.",
+        }
+        expected_mapping = {
+            "mapping_id": "fixture-btc-perpetual", "mapping_version": "fixture/v1",
+            "decision": "APPROVED", "venue": "hyperliquid", "symbol": "BTC", "identity": IDENTITY,
+            "evidence_sha256": digest(members["source/mapping-evidence.json"]), "evidence_reference": FIXTURE_REFERENCE,
+            "valid_from_ms": 0, "valid_until_ms": None, "reviewed_contract_multiplier": "1",
+            "displayed_size_unit": "coin", "quantity_step": "0.00001", "price_tick": "0.1",
+            "price_decimals": None, "max_price_significant_digits": None, "min_quantity": None, "min_notional": "10",
+        }
     if source != expected_source or canonical_json_bytes(source) != members["source/mapping-evidence.json"]:
         raise EvidenceRejected("IDENTITY_UNVERIFIED")
-    expected_mapping = {
-        "mapping_id": "fixture-btc-perpetual", "mapping_version": "fixture/v1",
-        "decision": "APPROVED", "venue": "hyperliquid", "symbol": "BTC", "identity": IDENTITY,
-        "evidence_sha256": digest(members["source/mapping-evidence.json"]), "evidence_reference": FIXTURE_REFERENCE,
-        "valid_from_ms": 0, "valid_until_ms": None, "reviewed_contract_multiplier": "1",
-        "displayed_size_unit": "coin", "quantity_step": "0.00001", "price_tick": "0.1",
-        "price_decimals": None, "max_price_significant_digits": None, "min_quantity": None, "min_notional": "10",
-    }
     if canonical_json_bytes(mapping) != canonical_json_bytes(expected_mapping):
         raise EvidenceRejected("IDENTITY_UNVERIFIED")
     # Reuse the inherited reader over a private snapshot of already bounded bytes.

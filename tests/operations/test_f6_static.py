@@ -9,9 +9,10 @@ import re
 
 ROOT = Path(__file__).resolve().parents[2]
 COMPOSE = ROOT / "deploy" / "mezo-evidence" / "compose.yaml"
+DISABLED = ROOT / "deploy" / "mezo-evidence" / "compose.live-disabled.yaml"
 
 
-def rendered(profile: str) -> dict[str, object]:
+def rendered(profile: str, *overrides: Path) -> dict[str, object]:
     env = os.environ.copy()
     env.update(
         {
@@ -29,6 +30,7 @@ def rendered(profile: str) -> dict[str, object]:
             profile,
             "-f",
             str(COMPOSE),
+            *[item for override in overrides for item in ("-f", str(override))],
             "config",
             "--format",
             "json",
@@ -61,13 +63,20 @@ def test_fixture_profile_has_no_external_egress_and_live_keeps_required_egress()
     }
     assert set(live["services"]) == {
         "evidence-capture-live", "report-live", "postgres-live",
-        "migrate-live", "gateway-live", "web-live", "edge-live",
+        "migrate-live", "gateway-net-live", "gateway-live", "web-live", "edge-live",
     }
     assert service_networks(fixture, "evidence-capture-fixture") == {"capture_report"}
     assert service_networks(fixture, "gateway-fixture") == {"edge", "gateway_db", "gateway_report", "operations"}
     assert service_networks(fixture, "edge-fixture") == {"edge"}
     assert service_networks(live, "evidence-capture-live") == {"capture_report", "capture_egress"}
-    assert service_networks(live, "gateway-live") == {"edge", "gateway_db", "gateway_report", "operations", "payment_egress"}
+    assert live["services"]["gateway-live"]["network_mode"] == "service:gateway-net-live"
+    assert service_networks(live, "postgres-live") == {"gateway_db"}
+    assert service_networks(live, "gateway-net-live") == {"edge", "gateway_db", "gateway_report", "operations", "payment_egress"}
+    bridge = live["services"]["gateway-net-live"]
+    assert bridge["command"] == ["node", "/app/db-loopback-proxy.js"]
+    assert "secrets" not in bridge and "volumes" not in bridge
+    proxy = (ROOT / "deploy" / "mezo-evidence" / "db-loopback-proxy.js").read_text()
+    assert "server.listen(5432, '127.0.0.1')" in proxy
     assert service_networks(live, "edge-live") == {"edge", "tls_egress"}
     for config in (fixture, live):
         networks = config["networks"]
@@ -75,6 +84,19 @@ def test_fixture_profile_has_no_external_egress_and_live_keeps_required_egress()
         operations = networks["operations"]
         assert isinstance(operations, dict)
         assert operations["internal"] is True
+
+
+def test_live_disabled_override_removes_grant_and_context_as_one_unit() -> None:
+    live = rendered("live", DISABLED)
+    gateway = live["services"]["gateway-live"]
+    assert isinstance(gateway, dict)
+    assert "payment_grant_live" not in {item["source"] for item in gateway["secrets"]}
+    for name in (
+        "LIQVERA_LIVE_GRANT_FILE", "LIQVERA_SUBJECT_COMMIT", "LIQVERA_SUBJECT_TREE",
+        "LIQVERA_PLAN_SHA256", "LIQVERA_LIVE_BUYER",
+    ):
+        assert name not in gateway["environment"]
+    assert "payment_grant_live" not in live.get("secrets", {})
 
 
 def test_fixture_publication_resource_security_health_and_secret_boundaries() -> None:
@@ -133,7 +155,10 @@ def test_exact_users_tmpfs_mount_modes_resources_and_profile_secrets() -> None:
             name: {item["source"] for item in services[name].get("secrets", [])}
             for name in services
         }
-        assert secrets[f"gateway-{profile}"] == {f"postgres_password_{profile}", f"report_token_{profile}"}
+        expected_gateway = {f"postgres_password_{profile}", f"report_token_{profile}"}
+        if profile == "live":
+            expected_gateway.add("payment_grant_live")
+        assert secrets[f"gateway-{profile}"] == expected_gateway
         assert secrets[f"report-{profile}"] == {f"report_token_{profile}"}
         assert secrets[f"postgres-{profile}"] == {f"postgres_password_{profile}"}
         assert secrets[f"migrate-{profile}"] == {f"postgres_password_{profile}"}

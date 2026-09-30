@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { chmod, link, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import type { PaymentPayload } from '@x402/core/types';
 import { x402Client } from '@x402/core/client';
 import { encodeFunctionData } from 'viem';
@@ -8,14 +11,22 @@ import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type Quote } from '.
 import { MezoAuthorizationPolicy, MezoFinalityPolicy } from '../src/security/payment-policy.js';
 import { LivePaymentGrant } from '../src/security/live-grant.js';
 import { authorizeNewSettlement, databaseIdentity } from '../src/p3-operator.js';
-import { composeOfficialX402 } from '../src/security/live-composition.js';
+import { composeOfficialX402, readPrivateGrantFile } from '../src/security/live-composition.js';
 import { permit2Capability, settlementTransaction } from '../src/adapters/x402.js';
+import { loadConfig } from '../src/config.js';
 
 const payer='0x1111111111111111111111111111111111111111';
 const payTo='0x2222222222222222222222222222222222222222';
 const quote={id:'00000000-0000-4000-8000-000000000001',report_id:'00000000-0000-4000-8000-000000000002',report_sha256:'a'.repeat(64),terms:{expected_payer:payer,pay_to:payTo}} as Quote;
 const permit2='0x000000000022D473030F116dDEE9F6B43aC78BA3';
 const proxy='0x402085c248EeA27D92E8b30b2C58ed07f9E20001';
+
+test('grantless live runtime starts payment-not-ready',async()=>{
+  const config=await loadConfig({DATABASE_URL:'postgresql://liqvera:test@127.0.0.1:5432/liqvera',SOURCE_MODE:'live-public',PUBLIC_BASE_URL:'https://reports.invalid',CORS_ORIGINS:'https://reports.invalid',PAY_TO:payTo});
+  assert.equal(config.liveGrantFile,null); assert.equal(config.liveContext,null);
+  const payment=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://reports.invalid'),null);
+  assert.ok(payment.blockers().includes('EXTERNAL_GRANT_REQUIRED'));
+});
 function payload(): PaymentPayload { return {x402Version:2,accepted:{scheme:'exact',network:NETWORK,asset:ASSET,amount:AMOUNT,payTo,extra:{assetTransferMethod:'permit2',name:'Mezo USD',version:'1'}},payload:{signature:`0x${'1'.repeat(130)}`,permit2Authorization:{from:payer,permitted:{token:ASSET,amount:AMOUNT},spender:proxy,nonce:'42',deadline:'1790640300',witness:{to:payTo,validAfter:'0'}}},extensions:{eip2612GasSponsoring:{info:{description:'The facilitator accepts EIP-2612 gasless Permit to `Permit2` canonical contract.',from:payer,asset:ASSET,spender:permit2,amount:AMOUNT,nonce:'7',deadline:'1790640300',signature:`0x${'2'.repeat(130)}`,version:'1'},schema:{}}}} as unknown as PaymentPayload; }
 
 test('authorization identity binds exact Permit2 plus EIP-2612 sponsorship without raw signatures',async()=>{
@@ -187,14 +198,52 @@ test('production composition is grantless by default and rejects malformed harne
   assert.ok(ordinary.blockers().includes('EXTERNAL_GRANT_REQUIRED'));
   assert.throws(()=>composeOfficialX402(identity,finality,reader,new URL('https://reports.invalid'),{
     grantBytes:new TextEncoder().encode('{}'),observedAt:new Date('2026-09-29T00:00:00Z'),
-    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo},
+    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64)},
   }),/LIVE_GRANT_INVALID/);
 });
 
 test('valid exact grant activates facilitator-sponsored composition without network I/O',()=>{
   const payment=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://reports.invalid'),{
     grantBytes:new TextEncoder().encode(JSON.stringify(grantRaw())),observedAt:new Date('2026-09-29T00:00:00Z'),
-    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo},
+    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64)},
   });
   assert.ok(payment.blockers().includes('PAYMENT_SERVICE_UNAVAILABLE'));
+  assert.throws(()=>composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://reports.invalid'),{
+    grantBytes:new TextEncoder().encode(JSON.stringify(grantRaw())),observedAt:new Date('2026-09-29T00:00:00Z'),
+    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'e'.repeat(64)},
+  }),/LIVE_GRANT_MISMATCH/);
+});
+
+test('live grant expiry becomes a readiness blocker after startup',()=>{
+  let now=new Date('2026-09-29T00:00:00Z');
+  const payment=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://reports.invalid'),{
+    grantBytes:new TextEncoder().encode(JSON.stringify(grantRaw())),observedAt:now,
+    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64)},
+    now:()=>now,
+  });
+  assert.ok(!payment.blockers().includes('EXTERNAL_GRANT_REQUIRED'));
+  now=new Date('2026-09-29T00:10:01Z');
+  assert.ok(payment.blockers().includes('EXTERNAL_GRANT_REQUIRED'));
+});
+
+test('private grant reader accepts only one stable bounded private regular file',async()=>{
+  const root=await mkdtemp(join(tmpdir(),'liqvera-grant-'));
+  try {
+    const path=join(root,'grant.json');const bytes=new TextEncoder().encode('{"grant":true}');
+    await writeFile(path,bytes,{mode:0o600});
+    assert.deepEqual(await readPrivateGrantFile(path),Buffer.from(bytes));
+    await chmod(path,0o644);await assert.rejects(readPrivateGrantFile(path),/LIVE_GRANT_FILE_UNSAFE/);
+    await chmod(path,0o600);const hard=join(root,'hard');await link(path,hard);
+    await assert.rejects(readPrivateGrantFile(path),/LIVE_GRANT_FILE_UNSAFE/);await rm(hard);
+    const symbolic=join(root,'symbolic');await symlink(path,symbolic);
+    await assert.rejects(readPrivateGrantFile(symbolic),/LIVE_GRANT_FILE_UNSAFE/);
+    const empty=join(root,'empty');await writeFile(empty,new Uint8Array(),{mode:0o600});
+    await assert.rejects(readPrivateGrantFile(empty),/LIVE_GRANT_FILE_UNSAFE/);
+    const large=join(root,'large');await writeFile(large,new Uint8Array(16_385),{mode:0o600});
+    await assert.rejects(readPrivateGrantFile(large),/LIVE_GRANT_FILE_UNSAFE/);
+    await chmod(path,0o600);
+    await assert.rejects(readPrivateGrantFile(path,{afterOpen:async()=>{await chmod(path,0o644);}}),/LIVE_GRANT_FILE_CHANGED/);
+    await chmod(path,0o600);
+    await assert.rejects(readPrivateGrantFile(path,{afterRead:async()=>{await writeFile(path,new TextEncoder().encode('{"other":true}'));}}),/LIVE_GRANT_FILE_CHANGED/);
+  } finally { await rm(root,{recursive:true,force:true}); }
 });

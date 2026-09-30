@@ -1,5 +1,13 @@
 # Decisions
 
+## 2026-09-30 — Bind live identity to retained bytes
+
+Deriving the reviewed BTC mapping from sealed metadata/book bytes made the report independently reproducible without granting the collector identity authority. Optional private-file payment composition preserved default fail-closed startup and the existing exactly-once ledger.
+
+## 2026-09-30 — Keep one-shot loss terminal before external I/O
+
+Database-backed rechecks stop known-spent grants before 402/verify, while the unique insert remains final race authority. A losing contender is atomically rejected and its quote reopened behind the spent-grant blocker, avoiding resettlement and stranded recovery state.
+
 Patterns that paid for themselves. Each entry is at most three sentences.
 
 ## 2026-08-21 — Fixture dual-write official Lighter omit-symbol plus indexed mapping
@@ -224,3 +232,8 @@ native-balance equality; do not claim authority over facilitator gas.
 The current facilitator capability advertises Permit2 rather than EIP-3009 for
 Mezo MUSD. Bind the canonical Permit2 and exact proxy addresses and require the
 EIP-2612 extension so the buyer signs off chain and never sends an approval transaction.
+# 2026-09-30 — Sign demo payments without exporting wallet authority
+
+Use the retained encrypted faucet keystore only inside a short-lived local
+EIP-712 signer subprocess, passing typed data in and returning only signatures.
+This enabled repeatable x402 testnet demos without exposing or copying the raw private key.

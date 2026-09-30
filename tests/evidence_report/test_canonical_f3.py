@@ -11,7 +11,8 @@ from mee_evidence_report.evidence_bundle import (
 )
 from mee_evidence_report.evidence_io import EvidenceRejected
 from mee_evidence_report.report import ReportRequest, build_report
-from mee_public_capture.evidence_package import capture_package
+from mee_public_capture.evidence_capture import CapturedResponse, FIXTURE_BOOK, FIXTURE_METADATA
+from mee_public_capture.evidence_package import capture_members, capture_package
 from mee_readonly_analyzer.vwap import Side
 
 CAPTURE_ID = UUID("123e4567-e89b-42d3-a456-426614174010")
@@ -57,6 +58,43 @@ def test_canonical_fixture_publishes_and_reproduces_exact_artifact(tmp_path: Pat
         output / str(REPORT_ID) / "evidence.zip",
         expected_report_sha256=published.report_sha256,
     ) == built
+
+
+def test_live_btc_identity_is_digest_bound_and_offline_reproducible(tmp_path: Path) -> None:
+    observed = 1_790_208_000_000
+    members = capture_members(CAPTURE_ID, "live-public", (
+        CapturedResponse("metadata", FIXTURE_METADATA, observed - 10, observed - 5, 5_000_000),
+        CapturedResponse("book", FIXTURE_BOOK, observed - 5, observed, 5_000_000),
+    ))
+    package = tmp_path / "live"
+    for name, raw in members.items():
+        path = package / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+    built = build_report(package, ReportRequest(
+        report_id=REPORT_ID, side=Side.BUY,
+        quantity_base=ExactDecimal.parse("0.15"), engine_commit=ENGINE_COMMIT,
+    ))
+    assert built.document["source"]["source_mode"] == "live-public"
+    assert built.document["quality"]["snapshot_status"] == "VALID_FOR_SNAPSHOT_CALCULATION"
+    assert built.document["identity"]["mapping_version"] == "hyperliquid-btc-linear-perpetual/v1"
+    assert built.document["boundaries"]["execution_authority"] == "NONE"
+    assert built.algorithm_bytes
+    assert built.input_members["source/mapping-evidence.json"]
+    assert "Live identity approval is absent; live reports remain blocked." not in built.document["quality"]["limitations"]
+    output = tmp_path / "live-artifacts"
+    output.mkdir()
+    published = publish_artifact(output, built)
+    assert verify_bundle(output / str(REPORT_ID) / "evidence.zip",
+                         expected_report_sha256=published.report_sha256) == built
+
+    evidence = package / "source/mapping-evidence.json"
+    evidence.write_bytes(evidence.read_bytes().replace(b'"book_sha256":"', b'"book_sha256":"0'))
+    with pytest.raises(EvidenceRejected, match="INVALID_DATASET"):
+        build_report(package, ReportRequest(
+            report_id=REPORT_ID, side=Side.BUY,
+            quantity_base=ExactDecimal.parse("0.15"), engine_commit=ENGINE_COMMIT,
+        ))
 
 
 def test_tampered_bundle_and_trusted_digest_are_rejected(tmp_path: Path) -> None:

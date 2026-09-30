@@ -104,7 +104,7 @@ async function main():Promise<void>{
       authorizeNewSettlement(grant,{subjectCommit,subjectTree,planSha256,buyer:String(payment.buyer),payTo:String(payment.pay_to),now:new Date()},false);
       await port.initialize(); const verified=await port.verify(String(payment.payment_signature),quote);
       attempt=await ledger.beginAttempt(quote,verified.identity);
-      if(!await ledger.markSubmitting(attempt))fail('P3_GRANT_ALREADY_CONSUMED');
+    if(await ledger.markSubmitting(attempt)!=='SUBMITTING')fail('P3_GRANT_ALREADY_CONSUMED');
       let tx:string|null=null;
       try {tx=(await port.settle(verified.payload,verified.requirements)).tx_hash;} finally {await ledger.unknown(attempt,tx);}
       attempt={...attempt,state:'UNKNOWN',tx_hash:tx};

@@ -1,5 +1,61 @@
 # Liqvera — handoff
 
+## 2026-09-30 automated Mezo Testnet demo payments
+
+The retained faucet-funded buyer encrypted keystore was used through a local
+EIP-712 signer subprocess; no private key, password, or signature was placed in
+the repository or logs. Three fresh 0.01 test MUSD payments were confirmed on
+Mezo Testnet because the first facilitator request timed out client-side but
+still settled on-chain: transactions
+`0x1ca6255bfd83de27feaafd805e27a4dae535e6c5d832be0c875e997dba2b181e`,
+`0x19304292f6a08d1061c4cf3e83d506f67ca0f7b88d67220c45d376c362b335a8`,
+and `0xdab835ad81cd66b56911d6dd4b389ecf2c383e067ba9c52bbf293427eb113c23`.
+Each transferred exactly 0.01 test MUSD from the retained buyer to the retained
+merchant through the reviewed Permit2/x402 path, reached at least 12 canonical
+confirmations, and recorded zero buyer native-gas spend. The timeout case was
+recovered from its canonical MUSD Transfer log and reconciled confirm-only;
+there was no second settlement submission for any grant. Current observed
+balances are 1799.96 test MUSD buyer and 0.04 test MUSD merchant, including the
+historical retained 0.01 test MUSD evidence payment. No exchange mutation,
+mainnet action, real-fund transfer, deployment, push, or release occurred.
+
+## 2026-09-30 R3 review close and live snapshot evidence
+
+Commit `ea3098732b369f92d4a8ec7503cfda6153a582ee` closes the two R2 blockers.
+The final no-record verifier passed with eight xdist workers, including fresh
+coverage. Independent R3 review records **security PASS** for the isolated
+database topology and **release GO** for the checked-in grantless rollback.
+
+The coordinator supplied live Hyperliquid snapshot evidence for report
+`820df2f8-5bd6-41ad-a94d-98b5078f4d64`, captured at
+`2026-09-30T21:32:46.790Z`. The sealed report SHA-256 is
+`770ba84eeaaec8d1092c9179c2079cebbe891b128b448e722e4367dee87eed9b`; the
+bundle SHA-256 is
+`92fa784431cf92848dbdb8033b111367fb8d624c70906c1cd0c5cc94a1a5d527`.
+Its temporary generation path is not durable and is therefore not recorded as
+an artifact location. This documentation close made no external call, payment,
+deployment, or product-code change.
+
+## 2026-09-30 R2 paywall topology and rollback repair
+
+The live PostgreSQL service is again confined to `gateway_db`. A dedicated,
+unprivileged `gateway-net-live` endpoint exposes only a bounded loopback TCP
+bridge to the gateway namespace, so the grant remains bound to
+`127.0.0.1:5432/liqvera` without putting PostgreSQL on edge, report,
+operations, or payment-egress networks. The checked-in
+`compose.live-disabled.yaml` removes the grant mount and its context together;
+the grantless runtime remains available and reports `EXTERNAL_GRANT_REQUIRED`.
+Missing/expired grants remain fail-closed in enabled mode. No secret value was
+read and no external call, payment, deployment, receipt, or release occurred.
+
+## 2026-09-30 live Hyperliquid + Mezo Testnet paywall implementation
+
+The user explicitly approved the bounded design in chat. Live BTC identity is versioned and raw-digest-bound; ordinary gateway startup can consume an opt-in private grant file while rechecking expiry, payer, and durable consumption. Migrations 001--005 and UNKNOWN/reconcile-only behavior are unchanged; no secret value or external payment was used.
+
+Verification repair: the first exact-commit run exposed four newly tracked analysis reports missing from `architecture/architecture.yaml` and Markdown whitespace in those reports. The exact documented `python3 scripts/grok_verify.py` command also ran tests with system Python, which lacked pinned runtime/build dependencies; the wrapper now re-executes the repository venv when present. After repair, graph regressions pass, xdist passes with 1368 tests plus 85 subtests, and the full no-record verifier passes; it must be rerun after this commit for final fingerprint binding.
+
+Independent review repair binds payment authority to the credential-free loopback database identity, performs stable bounded descriptor reads for grant files, blocks spent grants before 402/verify, and atomically rejects a losing grant consumer without stranding payment state. Live ZIPs are offline verified and tamper-tested; Compose mounts the grant only into gateway-live with exact context variables. No external call or payment was made.
+
 Updated: 2026-09-29 (F5 closed; F6 fake/static verification and independent reviews PASS). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 

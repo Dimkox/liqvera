@@ -10,6 +10,18 @@ recording accordingly.
 
 ## Live-public + Mezo Testnet gate
 
+Create `deploy/mezo-evidence/secrets/live_payment_grant` outside Git with owner
+UID 10003, mode `0400`, and the reviewed one-shot grant JSON. Set the non-secret
+`LIQVERA_SUBJECT_COMMIT`, `LIQVERA_SUBJECT_TREE`, `LIQVERA_PLAN_SHA256`,
+`LIQVERA_LIVE_BUYER`, and `LIQVERA_PAY_TO` values to the exact identities bound
+inside that grant. Ordinary startup derives the credential-free database
+identity from `DATABASE_URL`; a non-loopback or mismatched endpoint fails before
+facilitator initialization. Never put grant JSON or wallet signatures in env.
+
+Before payment, `/readyz` must report `payment_ready=true`. After the one-shot
+grant is durably consumed it must return `EXTERNAL_GRANT_REQUIRED`; existing
+PAID delivery and UNKNOWN confirm-only reconciliation remain available.
+
 The `live` profile permits public Hyperliquid capture and only Mezo Testnet
 payment. Before presenting a paid flow, the owner must review all of these
 against real evidence:
@@ -43,3 +55,17 @@ receipt evidence without signatures or wallet secrets.
 
 If any preflight is unavailable, report `BLOCKED_EXTERNAL` or the concrete
 failing gate. Do not fabricate a PASS, a transaction, or a hosted URL.
+
+To disable new payments, use the checked-in override; do not edit Compose or
+move/delete the grant file:
+
+```bash
+docker compose --env-file env/live.env -p liqvera-live --profile live \
+  -f compose.yaml -f compose.live-disabled.yaml up -d --build --force-recreate gateway-live
+```
+
+The override atomically removes the grant secret mount and every grant-context
+variable. Confirm `/readyz` reports `EXTERNAL_GRANT_REQUIRED`. A missing or
+expired grant in the enabled profile intentionally fails startup; apply this
+override to obtain the supported payment-disabled live service. Preserve
+PostgreSQL/artifact volumes and never resubmit UNKNOWN attempts.

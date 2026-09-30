@@ -1,0 +1,22 @@
+services:
+  gateway-live:
+    secrets: !override
+      - source: postgres_password_live
+        target: postgres_password
+      - source: report_token_live
+        target: report_service_token
+    environment: !override
+      SOURCE_MODE: live-public
+      REPORT_SERVICE_URL: http://report:8082
+      REPORT_SERVICE_TOKEN_FILE: /run/secrets/report_service_token
+      ARTIFACT_ROOT: /data/artifacts
+      PUBLIC_BASE_URL: ${LIQVERA_PUBLIC_ORIGIN:-}
+      CORS_ORIGINS: ${LIQVERA_PUBLIC_ORIGIN:-}
+      PAY_TO: ${LIQVERA_PAY_TO:-}
+      LIQVERA_DATABASE_HOST: 127.0.0.1
+      PORT: "8080"
+      METRICS_HOST: gateway-metrics
+      METRICS_PORT: "9090"
+
+secrets:
+  payment_grant_live: !reset null

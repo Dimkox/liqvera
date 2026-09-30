@@ -13,6 +13,8 @@ export interface RuntimeConfig extends GatewayConfig {
   reportUrl: URL;
   metricsHost: string;
   metricsPort: number;
+  liveGrantFile: string|null;
+  liveContext: {subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string}|null;
 }
 export async function databaseUrl(env:NodeJS.ProcessEnv):Promise<string> {
   if(env.DATABASE_URL&&env.DATABASE_URL_FILE)throw new PublicError('INVALID_INPUT');
@@ -35,7 +37,15 @@ export async function loadConfig(env:NodeJS.ProcessEnv=process.env):Promise<Runt
   if(!Number.isInteger(metricsPort)||metricsPort<1||metricsPort>65535||metricsPort===port)throw new PublicError('INVALID_INPUT');
   const reportToken=env.REPORT_SERVICE_TOKEN_FILE?(await readFile(env.REPORT_SERVICE_TOKEN_FILE,'utf8')).trim():null;
   if(reportToken!==null&&(!/^[A-Za-z0-9_-]{32,256}$/.test(reportToken)))throw new PublicError('INVALID_INPUT');
-  return {databaseUrl:await databaseUrl(env),sourceMode,payTo:env.PAY_TO?address(env.PAY_TO):null,publicBase,origins,port,
+  const payTo=env.PAY_TO?address(env.PAY_TO):null;
+  const liveGrantFile=env.LIQVERA_LIVE_GRANT_FILE??null;
+  let liveContext:RuntimeConfig['liveContext']=null;
+  if(liveGrantFile) {
+    if(sourceMode!=='live-public'||!payTo||!env.LIQVERA_SUBJECT_COMMIT||!env.LIQVERA_SUBJECT_TREE||!env.LIQVERA_PLAN_SHA256||!env.LIQVERA_LIVE_BUYER)throw new PublicError('INVALID_INPUT');
+    if(!/^[0-9a-f]{40}$/.test(env.LIQVERA_SUBJECT_COMMIT)||!/^[0-9a-f]{40}$/.test(env.LIQVERA_SUBJECT_TREE)||!/^[0-9a-f]{64}$/.test(env.LIQVERA_PLAN_SHA256))throw new PublicError('INVALID_INPUT');
+    liveContext={subjectCommit:env.LIQVERA_SUBJECT_COMMIT,subjectTree:env.LIQVERA_SUBJECT_TREE,planSha256:env.LIQVERA_PLAN_SHA256,buyer:address(env.LIQVERA_LIVE_BUYER),payTo};
+  }
+  return {databaseUrl:await databaseUrl(env),sourceMode,payTo,publicBase,origins,port,liveGrantFile,liveContext,
     host:env.HOST??'0.0.0.0',artifactRoot:env.ARTIFACT_ROOT??'/data/artifacts',reportToken,metricsHost,metricsPort,
     reportUrl:fixedInternalUrl(env.REPORT_SERVICE_URL??'http://report:8082')};
 }

@@ -1,5 +1,18 @@
 # Rollback plan — F7 live acceptance and release 0.0.1
 
+Apply the checked-in grantless override from `deploy/mezo-evidence`:
+
+```bash
+docker compose --env-file env/live.env -p liqvera-live --profile live \
+  -f compose.yaml -f compose.live-disabled.yaml up -d --build --force-recreate gateway-live
+```
+
+It removes the grant mount and all grant-context variables as one reviewed
+unit, while preserving live public capture and restoring
+`EXTERNAL_GRANT_REQUIRED`. Missing or expired grants fail closed in the enabled
+profile; use this override rather than deleting/moving the secret. Preserve
+sealed artifacts, ledger rows, consumed grants, and UNKNOWN attempts.
+
 ## Trigger conditions
 
 Any failed test/case, stale identity/grant, secret exposure, wrong external

@@ -39,15 +39,25 @@ def _root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
+def _verification_python(root: Path, current: Path) -> Path:
+    candidate = root / ".venv/bin/python"
+    return candidate if candidate.is_file() else current
+
+
 def main() -> int:
     root = _root()
+    invoked = os.environ.pop("_LIQVERA_GROK_INVOKED", Path(sys.argv[0]).name)
+    if invoked == "grok_verify.py":
+        interpreter = _verification_python(root, Path(sys.executable))
+        if interpreter.absolute() != Path(sys.executable).absolute():
+            os.environ["_LIQVERA_GROK_INVOKED"] = invoked
+            os.execv(str(interpreter), [str(interpreter), str(Path(sys.argv[0]).resolve()), *sys.argv[1:]])
     try:
         source = validate(root)
     except ToolingPinError as exc:
         print(f"Adaptive Grok pin validation failed: {exc}", file=sys.stderr)
         return 2
 
-    invoked = Path(sys.argv[0]).name
     arguments = sys.argv[1:]
     if invoked == "grok_verify.py":
         target = root / "tooling/grok-verify.py"

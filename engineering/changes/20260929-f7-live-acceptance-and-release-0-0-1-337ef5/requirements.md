@@ -1,5 +1,11 @@
 # Requirements — F7 live acceptance and release 0.0.1
 
+## 2026-09-30 approved live MVP slice
+
+- [x] Live BTC packages carry versioned identity evidence bound to exact raw response digests and rebuild offline.
+- [x] Ordinary startup may consume one private-file grant; absence, expiry, payer mismatch, or durable consumption fails closed.
+- [x] Migrations 001--005 and confirm-only UNKNOWN semantics remain unchanged.
+
 > Typed authority: [`change-spec.yaml`](change-spec.yaml). This Markdown explains context and cannot override typed IDs, risk, acceptance criteria, forbidden outcomes, or approval scopes.
 
 ## Acceptance criteria

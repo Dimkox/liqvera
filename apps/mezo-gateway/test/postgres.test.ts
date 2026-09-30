@@ -175,12 +175,12 @@ test('twenty pools consume one grant once; restart loses and rollback preserves 
   const pools = Array.from({ length: 20 }, () => new Pool({ connectionString: databaseUrl, max: 1 }));
   try {
     const outcomes = await Promise.all(pools.map(value => new Ledger(value).markSubmitting(first.attempt)));
-    assert.equal(outcomes.filter(Boolean).length, 1);
+    assert.equal(outcomes.filter(value=>value==='SUBMITTING').length, 1);
   } finally {
     await Promise.all(pools.map(value => value.end()));
   }
   const restartedPool = new Pool({ connectionString: databaseUrl, max: 1 });
-  try { assert.equal(await new Ledger(restartedPool).markSubmitting(first.attempt), false); }
+  try { assert.equal(await new Ledger(restartedPool).markSubmitting(first.attempt), 'INVALID_STATE'); }
   finally { await restartedPool.end(); }
 
   const second = await verifiedAttempt(setup, '32');

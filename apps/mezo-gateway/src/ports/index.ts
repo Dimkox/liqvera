@@ -13,6 +13,8 @@ export interface ArtifactStore {
 }
 export interface PaymentPort {
   blockers(): Reason[];
+  readonly expectedPayer?: string;
+  readonly liveGrantDigest?: string;
   requirements(quote: Quote): Promise<{ header: string; value: PaymentRequirements }>;
   verify(header: string, quote: Quote): Promise<{ payload: PaymentPayload; requirements: PaymentRequirements; identity: AuthorizationIdentity }>;
   settle(payload: PaymentPayload, requirements: PaymentRequirements): Promise<{ tx_hash: string | null }>;

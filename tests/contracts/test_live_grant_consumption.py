@@ -16,7 +16,12 @@ def test_live_grant_consumption_is_one_shot_append_only_and_precedes_submission(
     assert "ON CONFLICT DO NOTHING RETURNING grant_digest" in ledger[consume:submitting]
 
 
-def test_ordinary_gateway_startup_has_no_grant_composition() -> None:
+def test_ordinary_gateway_startup_requires_explicit_private_file_composition() -> None:
     main = (ROOT / "apps/mezo-gateway/src/main.ts").read_text()
-    assert "composeOfficialX402(identity,finality,reader,config.publicBase,null)" in main
+    config = (ROOT / "apps/mezo-gateway/src/config.ts").read_text()
+    composition = (ROOT / "apps/mezo-gateway/src/security/live-composition.ts").read_text()
+    assert "config.liveGrantFile&&config.liveContext" in main
+    assert "readPrivateGrantFile(config.liveGrantFile)" in main
+    assert "LIQVERA_LIVE_GRANT_FILE" in config
+    assert "O_NOFOLLOW" in composition
     assert "process.env" not in main

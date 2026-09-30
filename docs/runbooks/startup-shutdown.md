@@ -118,6 +118,15 @@ docker compose --env-file env/fixture.env -p liqvera-fixture --profile fixture -
 
 For a reviewed live-public/testnet deployment, use a separate project:
 
+Before parsing Compose, provision `secrets/live_payment_grant` as UID 10003 mode
+`0400` and export the exact non-secret `LIQVERA_SUBJECT_COMMIT`,
+`LIQVERA_SUBJECT_TREE`, `LIQVERA_PLAN_SHA256`, `LIQVERA_LIVE_BUYER`, and
+`LIQVERA_PAY_TO` bindings. The grant is mounted read-only only at
+`gateway-live:/run/secrets/payment_grant`; fixture, capture, report, web, and
+edge services never receive it. `gateway-live` shares the live PostgreSQL
+network namespace so its credential-free endpoint is the reviewed loopback
+identity `postgresql://127.0.0.1:5432/liqvera`.
+
 ```bash
 cd deploy/mezo-evidence
 docker compose --env-file env/live.env -p liqvera-live --profile live -f compose.yaml up -d --build

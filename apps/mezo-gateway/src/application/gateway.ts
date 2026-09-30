@@ -13,10 +13,18 @@ export class Gateway {
     return [...new Set<Reason>([...this.payment.blockers(),...(!this.config.payTo?['PAY_TO_MISSING' as const]:[]),
       ...(this.config.sourceMode==='fixture'?['SIMULATED_SOURCE' as const]:[])])];
   }
+  private async currentBlockers():Promise<Reason[]> {
+    const blockers=this.blockers();const digest=this.payment.liveGrantDigest;
+    if(digest) {
+      const spent=await this.ledger.pool.query('SELECT 1 FROM live_grant_consumptions WHERE grant_digest=$1 LIMIT 1',[digest]);
+      if(spent.rowCount)blockers.push('EXTERNAL_GRANT_REQUIRED');
+    }
+    return [...new Set(blockers)];
+  }
   async readiness(requestId:string):Promise<ApiResult> {
     const [database,artifacts,reportHealthy]=await Promise.all([this.ledger.healthy(),this.artifacts.healthy(),this.reports.healthy()]);
     const integration=reportHealthy&&this.reports.cleanupReady();
-    const blockers=this.blockers();const storage=database&&artifacts;
+    const blockers=await this.currentBlockers();const storage=database&&artifacts;
     if(!storage)blockers.push('STORAGE_UNAVAILABLE');
     if(!integration)blockers.push('SOURCE_UNAVAILABLE');
     if(database&&!await this.salesHealthy())blockers.push('ARTIFACT_INTEGRITY_FAILURE');
@@ -27,7 +35,7 @@ export class Gateway {
       payment_ready:payment,blockers:unique}};
   }
   async capabilities(requestId:string):Promise<ApiResult> {
-    const blockers=this.blockers();
+    const blockers=await this.currentBlockers();
     if(!await this.ledger.healthy())blockers.push('STORAGE_UNAVAILABLE');
     else if(!await this.salesHealthy())blockers.push('ARTIFACT_INTEGRITY_FAILURE');
     return {status:200,shape:'capabilities',body:capabilitiesResource(requestId,this.config.sourceMode,[...new Set(blockers)])};
@@ -40,7 +48,8 @@ export class Gateway {
     const existing=(await this.ledger.pool.query<ReportRequest>('SELECT * FROM report_requests WHERE scope_hash=$1 AND idempotency_key=$2',[scope,key])).rows[0];
     if(!existing) {
       if(this.config.sourceMode==='fixture')throw new PublicError('SIMULATED_SOURCE',422);
-      if(this.blockers().length||!await this.salesHealthy())throw new PublicError('PAYMENT_NOT_READY');
+      if((await this.currentBlockers()).length||!await this.salesHealthy())throw new PublicError('PAYMENT_NOT_READY');
+      if(this.payment.expectedPayer&&body.expected_payer!==this.payment.expectedPayer)throw new PublicError('PAYMENT_NOT_READY');
       if(body.expected_payer===this.config.payTo)throw new PublicError('INVALID_INPUT',422);
     }
     const request=await this.ledger.createRequest(scope,key,body);
@@ -75,13 +84,14 @@ export class Gateway {
     if(['PAYMENT_PENDING','PAYMENT_UNCERTAIN','MANUAL_REVIEW'].includes(quote.state))
       throw new PublicError(quote.state==='MANUAL_REVIEW'?'MANUAL_REVIEW':'PAYMENT_UNCERTAIN',202);
     if(quote.state==='READY') {
-      if(this.blockers().length || !await this.salesHealthy())throw new PublicError('PAYMENT_NOT_READY');
+      if((await this.currentBlockers()).length || !await this.salesHealthy())throw new PublicError('PAYMENT_NOT_READY');
       await Promise.all([this.artifacts.read(quote.artifact,'report'),this.artifacts.read(quote.artifact,'bundle')]);
       if(!signature||kind==='bundle') {
         const required=await this.payment.requirements(quote);
         metrics.increment('payment_required');
         return {status:402,shape:'error',headers:{'PAYMENT-REQUIRED':required.header},body:errorResource('PAYMENT_REQUIRED',requestId)};
       }
+      if((await this.currentBlockers()).length)throw new PublicError('PAYMENT_NOT_READY');
       const verified=await this.payment.verify(signature,quote);
       metrics.increment('payment_verified');
       this.contracts.states.next('quote',quote.state,'authorization_accepted',{
@@ -91,7 +101,8 @@ export class Gateway {
       await Promise.all([this.artifacts.read(quote.artifact,'report'),this.artifacts.read(quote.artifact,'bundle')]);
       // The durable SUBMITTING boundary precedes the sole external settle call.
       // No recovery or HTTP replay path ever calls settle for this attempt.
-      if(!await this.ledger.markSubmitting(attempt))throw new PublicError('QUOTE_EXPIRED',410);
+      const submission=await this.ledger.markSubmitting(attempt);
+      if(submission!=='SUBMITTING')throw new PublicError(submission==='EXPIRED'?'QUOTE_EXPIRED':'PAYMENT_NOT_READY',submission==='EXPIRED'?410:503);
       let txHash:string|null=null;
       let confirmationObserved=false;
       try {

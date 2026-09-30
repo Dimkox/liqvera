@@ -71,14 +71,14 @@ def parse_request(body: object, *, engine_commit: str) -> ReportRequest:
         raise EvidenceRejected("INVALID_INPUT") from error
 
 
-def algorithm_document(engine_commit: str, dependencies: bytes) -> dict:
+def algorithm_document(engine_commit: str, dependencies: bytes, live_identity_approved: bool = False) -> dict:
     return {
         "schema": "mee-evidence-algorithm/v1", "calculation_version": "snapshot-sweep/v1",
         "policy_version": "snapshot-policy/v1", "serialization_version": "canonical-json/v1",
         "engine_commit": engine_commit, "package_versions": VERSIONS,
         "dependency_lock_sha256": digest(dependencies), "maximum_source_age_ms": 5000,
         "maximum_future_skew_ms": 1000, "maximum_metadata_age_ms": 86_400_000,
-        "live_identity_approved": False, "display_precision": 28, "display_rounding": "ROUND_HALF_EVEN",
+        "live_identity_approved": live_identity_approved, "display_precision": 28, "display_rounding": "ROUND_HALF_EVEN",
         "boundary": "Integrity and recalculation do not authenticate the exchange or promise execution.",
     }
 
@@ -92,8 +92,6 @@ def build_inspected_report(evidence: InspectedInput, request: ReportRequest) -> 
         raise EvidenceRejected("INVALID_INPUT")
     book = evidence.book
     mode = evidence.capture["source_mode"]
-    if mode != "fixture":
-        raise EvidenceRejected("IDENTITY_UNVERIFIED")
     source_at = book.snapshot.exchange_timestamp_ms
     received = book.snapshot.received_timestamp_ms
     created = received if request.created_at_ms is None else request.created_at_ms
@@ -111,7 +109,7 @@ def build_inspected_report(evidence: InspectedInput, request: ReportRequest) -> 
     if mapping is None:
         raise EvidenceRejected("IDENTITY_UNVERIFIED")
     dependencies = files("mee_evidence_report").joinpath("resources", "runtime-dependencies.txt").read_bytes()
-    algorithm = algorithm_document(request.engine_commit, dependencies)
+    algorithm = algorithm_document(request.engine_commit, dependencies, mode == "live-public")
     validate("algorithm.schema.json", algorithm)
     algorithm_bytes = canonical_json_bytes(algorithm)
     inputs = {f"sealed-input/{name}": payload for name, payload in evidence.members.items()}
@@ -146,16 +144,19 @@ def build_inspected_report(evidence: InspectedInput, request: ReportRequest) -> 
             "display_precision": 28, "display_rounding": "ROUND_HALF_EVEN",
         },
         "quality": {
-            "snapshot_status": "SIMULATED", "reason_codes": ["SIMULATED_SOURCE"],
+            "snapshot_status": "SIMULATED" if mode == "fixture" else "VALID_FOR_SNAPSHOT_CALCULATION",
+            "reason_codes": ["SIMULATED_SOURCE"] if mode == "fixture" else [],
             "checks": [{"name": name, "result": "PASS"} for name in (
-                "sealed bytes and source bindings", "explicit simulated identity", "exact snapshot sweep")]
-                + [{"name": "live identity approval", "result": "UNCERTAIN"}],
-            "limitations": [
+                "sealed bytes and source bindings", "exact snapshot sweep")]
+                + [{"name": "live identity approval", "result": "PASS" if mode == "live-public" else "UNCERTAIN"}],
+            "limitations": ([
                 "SIMULATED fixture input and timestamps; never eligible for a chargeable quote.",
+            ] if mode == "fixture" else [
+                "Public snapshot identity is policy-validated; exchange authenticity is not independently attested.",
+            ]) + [
                 "Calculation over the available snapshot depth, at most 20 levels per side.",
                 "Hypothetical snapshot sweep; no fees, funding, net PnL, or execution guarantee.",
                 "Hashes establish integrity relative to the bundle, not exchange authenticity.",
-                "Live identity approval is absent; live reports remain blocked.",
             ],
             "stage_a": evidence.stage_a,
         },

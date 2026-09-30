@@ -1,5 +1,9 @@
 # Architecture — F7 live acceptance and release 0.0.1
 
+## 2026-09-30 bounded extension
+
+The sealed mapping binds raw Hyperliquid response digests and is rechecked offline. The gateway optionally reads `LIQVERA_LIVE_GRANT_FILE` through a no-follow, private-mode, single-link, size-bounded snapshot and retains the existing atomic grant-consumption boundary.
+
 > Typed authority: [`change-spec.yaml`](change-spec.yaml). This Markdown explains context and cannot override typed IDs, risk, acceptance criteria, forbidden outcomes, or approval scopes.
 
 ## Installer Task 5 rulings (2026-09-30)

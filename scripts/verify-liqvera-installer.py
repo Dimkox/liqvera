@@ -366,11 +366,13 @@ def _open_child_directory(parent_fd: int, name: str) -> int:
     except FileExistsError:
         pass
     try:
-        return os.open(
+        descriptor = os.open(
             name,
             os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
             dir_fd=parent_fd,
         )
+        os.fchmod(descriptor, 0o755)  # nosec B103 - verified non-secret runtime projection
+        return descriptor
     except OSError as exc:
         raise VerificationError("ARCHIVE_INVALID: unsafe materialization directory") from exc
 
@@ -388,7 +390,7 @@ def _write_payloads(temporary_fd: int, payloads: dict[str, bytes]) -> None:
                 file_fd = os.open(
                     parts[-1],
                     os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW,
-                    0o600,
+                0o755 if relative in {"install.sh", "liqvera.sh"} else 0o644,
                     dir_fd=directory_fd,
                 )
             except OSError as exc:
@@ -400,6 +402,7 @@ def _write_payloads(temporary_fd: int, payloads: dict[str, bytes]) -> None:
         finally:
             os.close(directory_fd)
     os.fsync(temporary_fd)
+    os.fchmod(temporary_fd, 0o755)  # nosec B103 - verified non-secret runtime projection
 
 
 def _remove_tree_contents(directory_fd: int) -> None:

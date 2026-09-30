@@ -15571,6 +15571,12 @@ repository_inventory:
   - path: scripts/verify-liqvera-installer.py
     node: runtime:liqvera-factory
     path_class: TOOL_SOURCE
+  - path: scripts/build-liqvera-installer.py
+    node: runtime:liqvera-factory
+    path_class: TOOL_SOURCE
+  - path: scripts/install-liqvera-0.0.2.sh
+    node: runtime:liqvera-factory
+    path_class: SHELL_SCRIPT
   - path: tests/installer/test_archive_verifier.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
@@ -15590,6 +15596,9 @@ repository_inventory:
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: tests/installer/test_lifecycle.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/installer/test_package_builder.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: apps/mezo-gateway/src/migration-policy.ts

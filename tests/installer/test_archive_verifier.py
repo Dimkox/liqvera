@@ -144,8 +144,9 @@ def test_valid_archive_materializes_only_after_complete_verification(tmp_path: P
     assert result.destination == str(destination.resolve())
     assert result.file_count == len(valid_files()) + 1
     assert (destination / "install.sh").read_bytes().startswith(b"#!/usr/bin/env bash")
-    assert stat.S_IMODE(destination.stat().st_mode) == 0o700
-    assert stat.S_IMODE((destination / "install.sh").stat().st_mode) == 0o600
+    assert stat.S_IMODE(destination.stat().st_mode) == 0o755
+    assert stat.S_IMODE((destination / "install.sh").stat().st_mode) == 0o755
+    assert stat.S_IMODE((destination / "migrations/001_ledger.sql").stat().st_mode) == 0o644
 
     completed = subprocess.run(
         [sys.executable, str(SCRIPT), str(archive), expected, str(tmp_path / "cli-release")],

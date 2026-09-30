@@ -86,6 +86,20 @@ liqvera-acceptance-verify:
 liqvera-product: liqvera-python liqvera-gateway liqvera-web liqvera-images liqvera-compose
 	@echo "Liqvera product artifacts built; acceptance remains a separate explicit target"
 
+INSTALLER_OUT ?= build/installer
+INSTALLER_IMAGE_LOCK ?=
+
+liqvera-installer:
+	@test -n "$(INSTALLER_IMAGE_LOCK)" || (echo "INSTALLER_IMAGE_LOCK is required" >&2; exit 2)
+	$(PYTHON) -B scripts/build-liqvera-installer.py --source-commit "$$(git rev-parse HEAD)" \
+		--output "$(INSTALLER_OUT)" --image-lock "$(INSTALLER_IMAGE_LOCK)"
+
+liqvera-installer-verify:
+	@digest="$$(sha256sum "$(INSTALLER_OUT)/liqvera-installer-0.0.2.zip" | cut -d' ' -f1)"; \
+	destination="$$(mktemp -d)/verified"; \
+	$(PYTHON) -B scripts/verify-liqvera-installer.py \
+		"$(INSTALLER_OUT)/liqvera-installer-0.0.2.zip" "$$digest" "$$destination"
+
 prod: product
 	docker compose -f compose.stage-a.yml run --rm --no-deps prepare-data
 	docker compose -f compose.stage-a.yml run --rm --no-deps capture

@@ -27,7 +27,17 @@
   },
   "artifacts": [
     {"name": "liqvera-0.0.2.zip", "status": "NOT_BUILT", "size": null, "sha256": null},
+    {"name": "liqvera-installer-0.0.2.zip", "status": "NOT_BUILT_IMAGE_DIGESTS_REQUIRED", "size": null, "sha256": null},
+    {"name": "liqvera-installer-0.0.2.zip.sha256", "status": "NOT_BUILT_IMAGE_DIGESTS_REQUIRED", "size": null, "sha256": null},
+    {"name": "install-liqvera-0.0.2.sh", "status": "SOURCE_READY_NOT_PUBLISHED", "size": null, "sha256": null},
     {"name": "SHA256SUMS", "status": "NOT_BUILT", "size": null, "sha256": null}
   ],
+  "installer": {
+    "builder": "scripts/build-liqvera-installer.py",
+    "verifier": "scripts/verify-liqvera-installer.py",
+    "reproducibility": "PASS_FIXTURE_ONLY",
+    "production_image_lock": "NOT_AVAILABLE",
+    "clean_host_acceptance": "NOT_RUN"
+  },
   "publication": {"status": "NOT_RUN", "main_push": "NOT_RUN", "tag": "NOT_RUN", "github_release": "NOT_RUN"}
 }

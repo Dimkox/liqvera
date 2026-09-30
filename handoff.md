@@ -156,6 +156,20 @@ The final bounded correction targets the actually published edge endpoint at
 unknown, storage, source and artifact-integrity blockers fail health. Focused
 lifecycle checks pass 28.
 
+Task 6 now provides an offline deterministic ZIP builder, detached outer
+checksum, standalone bootstrap source, exact inner inventory and independently
+verified materialization with explicit executable/data modes. The builder reads
+only a closed tracked allowlist from the exact clean HEAD, binds commit/tree,
+Compose, launchers, migrations and six immutable image references, and refuses
+mutable tags, missing image authority, dirty/wrong subjects or existing output.
+The bootstrap passes the verifier-produced inventory digest internally to the
+installer; ordinary users do not invent that authority. Fixture builds are
+byte-identical and verifier-accepted, including a UID-10003-readable 0644
+migration projection. The production archive remains truthfully `NOT_BUILT`:
+the tracked source manifest is `runnable=false` with six null image digests and
+no reviewed registry image lock exists. No placeholder or mutable image was
+promoted, and no network/publication occurred.
+
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result
 `b31bc68310c471d35de079d1e0a13232aa39dff4e99b42a9d21b9ce2dbe770de`

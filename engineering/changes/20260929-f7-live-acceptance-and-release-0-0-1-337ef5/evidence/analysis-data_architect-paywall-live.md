@@ -1,8 +1,8 @@
 # Data architecture: Mezo testnet paywall and live Hyperliquid report
 
-Route: `337ef5ec16a0`  
-Role: `data_architect` (read-only analysis; no application-code changes)  
-Observed subject: `e3df683`  
+Route: `337ef5ec16a0`
+Role: `data_architect` (read-only analysis; no application-code changes)
+Observed subject: `e3df683`
 Scope: payment ledger/migrations, live capture/report persistence, minimum safe
 state transitions, idempotency and receipt checks.
 

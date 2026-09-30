@@ -4,6 +4,8 @@
 
 The user explicitly approved the bounded design in chat. Live BTC identity is versioned and raw-digest-bound; ordinary gateway startup can consume an opt-in private grant file while rechecking expiry, payer, and durable consumption. Migrations 001--005 and UNKNOWN/reconcile-only behavior are unchanged; no secret value or external payment was used.
 
+Verification repair: the first exact-commit run exposed four newly tracked analysis reports missing from `architecture/architecture.yaml` and Markdown whitespace in those reports. After declaring all four artifacts and normalizing them, the three graph regressions pass and the xdist suite passes with 1368 tests plus 85 subtests; full route verification still must be rerun on the repair commit before recording a receipt.
+
 Updated: 2026-09-29 (F5 closed; F6 fake/static verification and independent reviews PASS). Repository: `Dimkox/liqvera`.
 Branch: `feat/f3-f7-verification` (based on merged repository-cleanup main `f07562e`).
 

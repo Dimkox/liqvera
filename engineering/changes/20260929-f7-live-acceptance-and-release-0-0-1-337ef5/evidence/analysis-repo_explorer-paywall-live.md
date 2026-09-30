@@ -1,7 +1,7 @@
 # Repository analysis: live Hyperliquid report and testnet paywall
 
-Route: `337ef5ec16a0`  
-Role: `repo_explorer` (read-only application analysis)  
+Route: `337ef5ec16a0`
+Role: `repo_explorer` (read-only application analysis)
 Tree inspected: `/home/pall/projects/liqvera/.worktrees/repo-cleanup`
 
 ## Finding
@@ -201,4 +201,3 @@ Focused test minimum:
   deployment still needs an actual hostname/TLS endpoint and durable Postgres/artifact
   storage; that is deployment evidence, not a code gap in the HL/report path.
 - No application code or credentials were read or modified during this analysis.
-

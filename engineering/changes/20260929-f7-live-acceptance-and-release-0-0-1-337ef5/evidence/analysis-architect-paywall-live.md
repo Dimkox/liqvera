@@ -1,7 +1,7 @@
 # Architecture analysis: live Hyperliquid report + enabled Mezo Testnet paywall
 
-Route: `337ef5ec16a0`  
-Role: `architect` (read-only application-code analysis)  
+Route: `337ef5ec16a0`
+Role: `architect` (read-only application-code analysis)
 Scope: a bounded live-public BTC snapshot and a genuinely enabled, single-use
 Mezo Testnet x402 demo. Mainnet, exchange mutation, custody, private venues and
 merchant/buyer private keys remain out of scope.
@@ -231,4 +231,3 @@ Testnet transfer require the explicit external-write approval bound to the
 exact commit/tree, buyer, payee, amount, grant expiry, database identity and
 testnet endpoints. Reading credential *locations* is sufficient for design;
 agents must not inspect `.env`, private keys or credential values.
-

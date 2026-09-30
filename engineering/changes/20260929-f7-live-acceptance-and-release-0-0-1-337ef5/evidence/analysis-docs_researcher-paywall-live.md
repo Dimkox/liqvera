@@ -1,6 +1,6 @@
 # Pinned live-source and Mezo payment inputs
 
-Route: `337ef5ec16a0`  
+Route: `337ef5ec16a0`
 Scope: read-only inspection of repository-local code, contracts, runbooks, and package locks. No web request was needed and no secret file or secret value was read.
 
 ## Hyperliquid public snapshot

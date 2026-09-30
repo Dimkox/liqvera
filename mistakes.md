@@ -1,5 +1,9 @@
 # Mistakes
 
+## 2026-09-30 — New evidence files bypassed repository inventory
+
+Root cause: the implementation commit staged read-only agent reports without running the repository's exact-base diff check or declaring the new tracked paths in the architecture inventory. The repair adds all four declarations, removes inherited Markdown whitespace, and requires the xdist/graph path before future commits containing new evidence files.
+
 Root causes, not symptoms. Record only mistakes that caused a real problem.
 
 ## 2026-08-18 — Treated research completion as Git publication

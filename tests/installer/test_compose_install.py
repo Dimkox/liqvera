@@ -47,6 +47,11 @@ def test_compose_is_shadow_only_digest_bound_and_publishes_only_edge() -> None:
         assert service["mem_limit"]
         assert service["cpus"]
         assert service["tmpfs"]
+    assert compose["services"]["migrate"]["tmpfs"] == ["/tmp:rw,noexec,nosuid,size=32m"]
+    assert compose["services"]["capture"]["tmpfs"] == ["/tmp:rw,noexec,nosuid,size=32m"]
+    assert compose["services"]["report"]["tmpfs"] == ["/tmp:rw,noexec,nosuid,size=64m"]
+    assert compose["services"]["gateway"]["tmpfs"] == ["/tmp:rw,noexec,nosuid,size=64m"]
+    assert compose["services"]["edge"]["tmpfs"] == ["/tmp:rw,noexec,nosuid,size=16m"]
     assert compose["services"]["migrate"]["volumes"] == [
         "./manifests/release-manifest.json:/run/liqvera/release-manifest.json:ro",
         "./migrations:/run/liqvera/migrations:ro",

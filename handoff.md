@@ -101,7 +101,8 @@ advisory lock, refuses missing/extra/changed SQL and unknown/gap/duplicate/
 checksum/post-005 state, and resumes only the missing committed suffix. The
 projection restores application healthchecks, non-root users, resource bounds,
 required mounts/aliases, the loopback public origin, and the report engine
-commit input. Health requires both `SIMULATED_SOURCE` and
+commit input. Compose tmpfs mount options are quoted as single parsed entries.
+Health requires both `SIMULATED_SOURCE` and
 `EXTERNAL_GRANT_REQUIRED` within its monotonic total budget. Partial startup,
 lost port, or health failure stops only the candidate. Optional systemd is
 restricted to the exact private user-unit root; unsafe rendering is rejected

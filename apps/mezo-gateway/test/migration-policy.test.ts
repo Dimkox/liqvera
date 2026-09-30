@@ -28,6 +28,14 @@ test('migration lock destroys a stalled query at the total deadline',async()=>{
   assert.equal(destroyed,1);
 });
 
+test('migration lock rejects an acquired result returned after its deadline',async()=>{
+  let time=0;let destroyed=0;
+  await assert.rejects(()=>acquireMigrationLock(
+    {query:async()=>{time=11;return {rows:[{acquired:true}]};}},10,()=>time,async()=>{},()=>{destroyed++;}
+  ),/MIGRATION_LOCK_TIMEOUT/);
+  assert.equal(destroyed,1);
+});
+
 test('verified manifest is sole authority for exact embedded migration inventory',()=>{
   const sql=new Map(expected.map(row=>[row.name,Buffer.from(row.name)]));
   const manifest=expected.map(row=>({...row,sha256:createHash('sha256').update(sql.get(row.name)!).digest('hex')}));

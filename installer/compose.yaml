@@ -7,7 +7,7 @@ x-runtime: &runtime
   cap_drop: [ALL]
   security_opt: [no-new-privileges:true]
   pids_limit: 128
-  tmpfs: [/tmp:rw,noexec,nosuid,size=32m]
+  tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]
 
 services:
   postgres:
@@ -46,7 +46,7 @@ services:
     pids_limit: 128
     mem_limit: 256m
     cpus: 0.5
-    tmpfs: [/tmp:rw,noexec,nosuid,size=32m]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]
     command: [node, /app/gateway-entrypoint.js, npm, run, migrate]
     environment:
       MIGRATION_MANIFEST_FILE: /run/liqvera/release-manifest.json
@@ -83,7 +83,7 @@ services:
     user: "10002:10001"
     mem_limit: 512m
     cpus: 1.0
-    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
     environment:
       LIQVERA_SOURCE_MODE: fixture
       LIQVERA_CAPTURE_URL: http://evidence-capture:8081
@@ -112,7 +112,7 @@ services:
     pids_limit: 256
     mem_limit: 512m
     cpus: 1.0
-    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
     environment:
       SOURCE_MODE: fixture
       REPORT_SERVICE_URL: http://report:8082
@@ -164,7 +164,7 @@ services:
     user: "10001:10001"
     mem_limit: 192m
     cpus: 0.5
-    tmpfs: [/tmp:rw,noexec,nosuid,size=16m]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=16m"]
     ports: ["127.0.0.1:3000:8080"]
     volumes: [./Caddyfile:/etc/caddy/Caddyfile:ro, caddy_data:/data, caddy_config:/config]
     networks: [edge]

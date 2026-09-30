@@ -109,3 +109,22 @@ def test_user_manager_exception_removes_invocation_owned_unit(tmp_path: Path) ->
         tmp_path, fail,
     ) is None
     assert not (tmp_path / ".config/systemd/user/liqvera.service").exists()
+
+
+def test_user_manager_rollback_never_follows_preexisting_temp_symlink(tmp_path: Path) -> None:
+    unit_dir = tmp_path / ".config/systemd/user"
+    unit_dir.mkdir(parents=True)
+    (tmp_path / ".config").chmod(0o700)
+    (tmp_path / ".config/systemd").chmod(0o700)
+    unit_dir.chmod(0o700)
+    unit = unit_dir / "liqvera.service"
+    unit.write_text("prior")
+    outside = tmp_path / "outside"
+    outside.write_text("sentinel")
+    (unit_dir / ".liqvera.service.rollback").symlink_to(outside)
+
+    assert ORCHESTRATION.install_user_unit(
+        True, "@INSTALL_ROOT@", tmp_path / "root", unit_dir, tmp_path, lambda _: 1,
+    ) is None
+    assert outside.read_text() == "sentinel"
+    assert unit.read_text() == "prior"

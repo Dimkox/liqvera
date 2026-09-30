@@ -3,7 +3,7 @@
   "product_version": "0.0.2",
   "runnable": false,
   "reason": "TASK6_VERIFIED_IMAGE_DIGESTS_REQUIRED",
-  "compose_sha256": "a799a5d5b4f0368e5d4cf03618bf1d5fd0ddcf878a651c8982d20f0da2a73a60",
+  "compose_sha256": "e138eb47d6ade1b6dfc68458717a4034ebec6eb7ece571d1aabf2d02c6a1a85b",
   "images": {
     "edge": null,
     "web": null,

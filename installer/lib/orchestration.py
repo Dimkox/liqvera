@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import secrets
 import stat
 from contextlib import suppress
 from pathlib import Path
@@ -148,13 +149,37 @@ def install_user_unit(
         except Exception:
             succeeded = False
         if not succeeded:
-            rollback = unit_directory / ".liqvera.service.rollback"
-            if prior is None:
-                unit.unlink(missing_ok=True)
-            else:
-                rollback.write_bytes(prior)
-                os.chmod(rollback, 0o600)
-                os.replace(rollback, unit)
+            directory_fd = os.open(
+                unit_directory, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
+            )
+            rollback_name: str | None = None
+            try:
+                if prior is None:
+                    with suppress(FileNotFoundError):
+                        os.unlink("liqvera.service", dir_fd=directory_fd)
+                else:
+                    rollback_name = f".liqvera.service.rollback.{secrets.token_hex(8)}"
+                    rollback_fd = os.open(
+                        rollback_name,
+                        os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW,
+                        0o600,
+                        dir_fd=directory_fd,
+                    )
+                    with os.fdopen(rollback_fd, "wb") as rollback_handle:
+                        rollback_handle.write(prior)
+                        rollback_handle.flush()
+                        os.fsync(rollback_handle.fileno())
+                    os.replace(
+                        rollback_name, "liqvera.service",
+                        src_dir_fd=directory_fd, dst_dir_fd=directory_fd,
+                    )
+                    rollback_name = None
+                os.fsync(directory_fd)
+            finally:
+                if rollback_name is not None:
+                    with suppress(FileNotFoundError):
+                        os.unlink(rollback_name, dir_fd=directory_fd)
+                os.close(directory_fd)
             try:
                 runner(("/usr/bin/systemctl", "--user", "daemon-reload"))
             except Exception:

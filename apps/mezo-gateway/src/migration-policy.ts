@@ -51,6 +51,7 @@ export async function acquireMigrationLock(
     let result:{rows:Array<Record<string,unknown>>};
     try{result=await Promise.race([client.query('SELECT pg_try_advisory_lock(31611,1) AS acquired'),timeout]);}
     finally{if(timer!==undefined)clearTimeout(timer);}
+    if(now()>=deadline){destroy();throw new Error('MIGRATION_LOCK_TIMEOUT');}
     if(result.rows[0]?.acquired===true)return;
     await pause(Math.min(250,Math.max(0,deadline-now())));
   }

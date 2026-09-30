@@ -169,6 +169,21 @@ migration projection. The production archive remains truthfully `NOT_BUILT`:
 the tracked source manifest is `runnable=false` with six null image digests and
 no reviewed registry image lock exists. No placeholder or mutable image was
 promoted, and no network/publication occurred.
+
+Final release review found that the verified archive stopped at configuration
+instead of becoming an installed runnable release. The repaired vertical now
+copies only verifier-rehashed payload bytes into
+`releases/0.0.2-<archive-prefix>`, writes an inventory-bound lifecycle record,
+switches `current`, renders the exact six digest-only image references, and
+invokes the existing start/health lifecycle. Lifecycle use revalidates the
+full `SHA256SUMS` inventory and compares mutable `release.json` identities to
+the embedded verified release manifest, so coordinated metadata and env image
+rewrites cannot replace image authority. Materialization explicitly applies
+0755 launcher/directory and 0644 non-secret data modes even under umask 077.
+Focused archive/contracts/runtime/lifecycle verification passes 137 tests.
+The five application refs now use anonymously pullable Docker Hub names with
+the unchanged externally verified multiarch index digests; PostgreSQL remains
+the pinned official digest. No release/tag/push occurred in this repair step.
 During authorized multiarch publication the production web Docker build exposed
 strict TypeScript narrowing gaps in receipt verification and the reviewed JS
 x402 bridge import. The minimal source typing repair preserves all runtime

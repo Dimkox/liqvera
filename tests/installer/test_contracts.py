@@ -103,6 +103,7 @@ def install_state() -> dict[str, object]:
         "schema_version": "liqvera-install-state/v1",
         "product_version": "0.0.2",
         "release_sha256": HEX64,
+        "inventory_sha256": "b" * 64,
         "git_commit": HEX40,
         "git_tree": "2" * 40,
         "install_root": "/srv/liqvera",

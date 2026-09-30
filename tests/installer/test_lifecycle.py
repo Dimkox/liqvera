@@ -66,10 +66,27 @@ class FakeAdapter:
 def release(root: Path, digest: str, *, compatible: bool = True) -> Path:
     target = root / "releases" / f"0.0.2-{digest[:12]}"
     target.mkdir(parents=True)
+    payload = b"fixture\n"
+    compose = (ROOT / "installer/compose.yaml").read_bytes()
+    (target / "payload.txt").write_bytes(payload)
+    (target / "compose.yaml").write_bytes(compose)
+    package_manifest = {
+        "schema_version": "liqvera-installer-release/v1", "product_version": "0.0.2",
+        "git_commit": digest[:40], "git_tree": digest[-40:], "images": IMAGES,
+        "database_compatibility": {"accepted_migrations": LEDGER, "down_migrations": False},
+    }
+    (target / "manifests").mkdir()
+    manifest_bytes = json.dumps(package_manifest, sort_keys=True).encode()
+    (target / "manifests/release-manifest.json").write_bytes(manifest_bytes)
+    sums = (f"{hashlib.sha256(compose).hexdigest()}  compose.yaml\n"
+            f"{hashlib.sha256(manifest_bytes).hexdigest()}  manifests/release-manifest.json\n"
+            f"{hashlib.sha256(payload).hexdigest()}  payload.txt\n").encode()
+    (target / "SHA256SUMS").write_bytes(sums)
     metadata = {
         "schema_version": "liqvera-lifecycle-release/v1",
         "product_version": "0.0.2",
         "release_sha256": digest,
+        "inventory_sha256": hashlib.sha256(sums).hexdigest(),
         "git_commit": digest[:40],
         "git_tree": digest[-40:],
         "database_compatibility": LEDGER if compatible else LEDGER[:-1],
@@ -89,6 +106,7 @@ def installed(tmp_path: Path) -> tuple[Path, str, Path]:
     install_state = {
         "product_version": "0.0.2", "release_sha256": digest,
         "git_commit": "a" * 40, "git_tree": "a" * 40,
+        "inventory_sha256": json.loads((current / "release.json").read_text())["inventory_sha256"],
         "compose_project": "liqvera-test", "last_completed_phase": "HEALTHY",
     }
     (root / "state/install-state.json").write_text(json.dumps(install_state))
@@ -98,10 +116,13 @@ def installed(tmp_path: Path) -> tuple[Path, str, Path]:
 def runtime_files(root: Path, current: Path) -> None:
     (root / "config").mkdir(exist_ok=True)
     (root / "config/runtime.env").write_text(
-        "LIQVERA_PAYMENT_ENABLED=false\nLIQVERA_SOURCE_MODE=shadow\n"
+        "LIQVERA_CHAIN_ID=31611\nLIQVERA_PAYMENT_ENABLED=false\nLIQVERA_SOURCE_MODE=shadow\n"
+        "LIQVERA_ENGINE_COMMIT=" + "a" * 40 + "\n"
+        "LIQVERA_WEB_HOST=127.0.0.1\nLIQVERA_WEB_PORT=3000\n"
+        "LIQVERA_GATEWAY_HOST=127.0.0.1\nLIQVERA_GATEWAY_PORT=8080\n"
+        "LIQVERA_METRICS_HOST=127.0.0.1\nLIQVERA_METRICS_PORT=9090\n"
         + "".join(f"LIQVERA_IMAGE_{name.upper()}={value}\n" for name, value in sorted(IMAGES.items()))
     )
-    (current / "compose.yaml").write_bytes((ROOT / "installer/compose.yaml").read_bytes())
 
 
 def test_start_stop_are_idempotent_and_status_is_closed(tmp_path: Path) -> None:
@@ -340,7 +361,7 @@ def test_runtime_files_are_rehashed_before_compose_use(tmp_path: Path) -> None:
     adapter = LIFECYCLE.ComposeAdapter(root, lambda argv, **kwargs: subprocess.CompletedProcess(argv, 0, b"", b""))
     adapter.bind_runtime(current, compose, env)
     compose.write_text("services: {evil: {}}\n")
-    with pytest.raises(LIFECYCLE.LifecycleError, match="CONFIG_INVALID"):
+    with pytest.raises(LIFECYCLE.LifecycleError, match="ARCHIVE_INVALID"):
         adapter.start("liqvera-test", current)
 
 
@@ -351,6 +372,26 @@ def test_runtime_image_values_are_exactly_manifest_bound(tmp_path: Path) -> None
     env.write_text(env.read_text().replace(IMAGES["web"], "registry.invalid/liqvera/web:latest"))
     adapter = LIFECYCLE.ComposeAdapter(root, lambda argv, **kwargs: subprocess.CompletedProcess(argv, 0, b"", b""))
     with pytest.raises(LIFECYCLE.LifecycleError, match="CONFIG_INVALID"):
+        adapter.start("liqvera-test", current)
+
+
+def test_coordinated_release_metadata_and_env_image_rewrite_cannot_reuse_inventory_authority(
+    tmp_path: Path,
+) -> None:
+    root, _, current = installed(tmp_path)
+    runtime_files(root, current)
+    changed = dict(IMAGES)
+    changed["web"] = "registry.invalid/attacker/web@sha256:" + "f" * 64
+    metadata = json.loads((current / "release.json").read_text())
+    metadata["images"] = changed
+    (current / "release.json").write_text(json.dumps(metadata))
+    env = root / "config/runtime.env"
+    env.write_text(env.read_text().replace(IMAGES["web"], changed["web"]))
+
+    adapter = LIFECYCLE.ComposeAdapter(
+        root, lambda argv, **kwargs: subprocess.CompletedProcess(argv, 0, b"", b"")
+    )
+    with pytest.raises(LIFECYCLE.LifecycleError, match="ARCHIVE_INVALID"):
         adapter.start("liqvera-test", current)
 
 

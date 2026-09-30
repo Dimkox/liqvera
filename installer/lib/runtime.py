@@ -11,6 +11,7 @@ import os
 import platform
 import re
 import secrets
+import importlib.util
 import socket
 import stat
 import subprocess  # nosec B404: every executable and argv is closed below.
@@ -290,13 +291,36 @@ class InstallRoot:
             raise InstallerError("UNSAFE_INSTALL_ROOT", "installation child is not private")
         return child
 
-    def write(self, relative: str, data: bytes) -> None:
-        directory, name = relative.split("/", 1)
-        parent_fd = self.ensure_directory(directory)
+    def write(self, relative: str, data: bytes, mode: int = 0o600) -> None:
+        parts = Path(relative).parts
+        if not parts or any(part in {"", ".", ".."} for part in parts):
+            raise InstallerError("CONFIG_INVALID", "invalid installation path")
+        parent_fd = os.dup(self.fd)
         try:
-            _atomic_write_fd(parent_fd, name, data)
+            for directory in parts[:-1]:
+                try:
+                    os.mkdir(directory, 0o700, dir_fd=parent_fd)
+                except FileExistsError:
+                    pass
+                child_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
+                                   dir_fd=parent_fd)
+                os.close(parent_fd)
+                parent_fd = child_fd
+            _atomic_write_fd(parent_fd, parts[-1], data, mode)
         finally:
             os.close(parent_fd)
+
+    def switch_current(self, target: str) -> None:
+        temporary = f".current.{secrets.token_hex(12)}"
+        try:
+            os.symlink(target, temporary, dir_fd=self.fd)
+            os.replace(temporary, "current", src_dir_fd=self.fd, dst_dir_fd=self.fd)
+            os.fsync(self.fd)
+        finally:
+            try:
+                os.unlink(temporary, dir_fd=self.fd)
+            except FileNotFoundError:
+                pass
 
     def read(self, relative: str, maximum: int = 1024 * 1024) -> bytes:
         directory, name = relative.split("/", 1)
@@ -407,11 +431,12 @@ class LifecycleLock:
         os.close(self.directory_fd)
 
 
-def _atomic_write_fd(parent_fd: int, name: str, data: bytes) -> None:
+def _atomic_write_fd(parent_fd: int, name: str, data: bytes, mode: int = 0o600) -> None:
     temporary = f".{name}.{secrets.token_hex(12)}"
     file_fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600, dir_fd=parent_fd)
     try:
         with os.fdopen(file_fd, "wb") as handle:
+            os.fchmod(handle.fileno(), mode)
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
@@ -437,7 +462,10 @@ def _atomic_write(path: Path, data: bytes) -> None:
         os.close(parent_fd)
 
 
-def render_config_bytes(config: dict[str, object], engine_commit: str | None = None) -> bytes:
+def render_config_bytes(
+    config: dict[str, object], engine_commit: str | None = None,
+    images: dict[str, object] | None = None,
+) -> bytes:
     preliminary_secrets = config.get("secret_files")
     if isinstance(preliminary_secrets, dict):
         for value in preliminary_secrets.values():
@@ -461,6 +489,15 @@ def render_config_bytes(config: dict[str, object], engine_commit: str | None = N
         if not HEX40.fullmatch(engine_commit):
             raise InstallerError("CONFIG_INVALID", "engine commit is not a lowercase Git OID")
         lines.append(f"LIQVERA_ENGINE_COMMIT={engine_commit}")
+    if images is not None:
+        expected_names = {"edge", "web", "gateway", "capture", "report", "postgres"}
+        if set(images) != expected_names or any(
+            not isinstance(value, str) or not re.fullmatch(r"[^@\s]+@sha256:[0-9a-f]{64}", value)
+            for value in images.values()
+        ):
+            raise InstallerError("CONFIG_INVALID", "image authority is invalid")
+        for name, value in sorted(images.items()):
+            lines.append(f"LIQVERA_IMAGE_{name.upper()}={value}")
     for name in ("web", "gateway", "metrics"):
         endpoint = ports[name]
         if not isinstance(endpoint, dict):
@@ -504,7 +541,7 @@ def reconcile_existing(root: Path, expected: dict[str, object], config_bytes: by
     observed = load_state(state_path)
     if observed is None:
         raise InstallerError("CONFIG_INVALID", "existing state is missing")
-    for key in ("product_version", "release_sha256", "git_commit", "git_tree", "install_root", "compose_project", "ports"):
+    for key in ("product_version", "release_sha256", "inventory_sha256", "git_commit", "git_tree", "install_root", "compose_project", "ports"):
         if observed.get(key) != expected.get(key):
             code = "RELEASE_DIGEST_MISMATCH" if key in {"release_sha256", "git_commit", "git_tree", "product_version"} else "CONFIG_INVALID"
             raise InstallerError(code, "existing installation identity conflicts")
@@ -522,7 +559,7 @@ def reconcile_handle(handle: InstallRoot, expected: dict[str, object], config_by
     if not isinstance(state_value, dict):
         raise InstallerError("CONFIG_INVALID", "existing state is invalid")
     _validate(STATE_SCHEMA, state_value, "CONFIG_INVALID")
-    for key in ("product_version", "release_sha256", "git_commit", "git_tree", "install_root", "compose_project", "ports"):
+    for key in ("product_version", "release_sha256", "inventory_sha256", "git_commit", "git_tree", "install_root", "compose_project", "ports"):
         if state_value.get(key) != expected.get(key):
             code = "RELEASE_DIGEST_MISMATCH" if key in {"release_sha256", "git_commit", "git_tree", "product_version"} else "CONFIG_INVALID"
             raise InstallerError(code, "existing installation identity conflicts")
@@ -550,9 +587,9 @@ def _safe_regular_bytes(path: Path, code: str, maximum: int = 1024 * 1024) -> by
     return data
 
 
-def validate_verified_release(
+def snapshot_verified_release(
     release: Path, receipt_path: Path, expected_sha256: str, expected_inventory_sha256: str
-) -> dict[str, object]:
+) -> tuple[dict[str, object], dict[str, bytes]]:
     receipt = load_json_bytes(_safe_regular_bytes(receipt_path, "ARCHIVE_INVALID"), "ARCHIVE_INVALID")
     required = {"schema_version", "archive_sha256", "inventory_sha256", "destination", "file_count", "product_version", "git_commit", "git_tree"}
     if not isinstance(receipt, dict) or set(receipt) != required or receipt.get("schema_version") != "verified-release-v1":
@@ -580,13 +617,34 @@ def validate_verified_release(
     observed = {str(path.relative_to(release)): path for path in release.rglob("*") if path.is_file() and path.name != "SHA256SUMS"}
     if set(observed) != set(expected) or receipt.get("file_count") != len(expected) + 1:
         raise InstallerError("ARCHIVE_INVALID", "release inventory mismatch")
+    payloads = {"SHA256SUMS": sums_bytes}
     for name, path in observed.items():
-        if hashlib.sha256(_safe_regular_bytes(path, "ARCHIVE_INVALID", 16 * 1024 * 1024)).hexdigest() != expected[name]:
+        data = _safe_regular_bytes(path, "ARCHIVE_INVALID", 16 * 1024 * 1024)
+        if hashlib.sha256(data).hexdigest() != expected[name]:
             raise InstallerError("ARCHIVE_INVALID", "release member digest mismatch")
+        payloads[name] = data
     for key in ("product_version", "git_commit", "git_tree"):
         if receipt.get(key) != manifest.get(key):
             raise InstallerError("ARCHIVE_INVALID", "receipt and manifest identity mismatch")
-    return manifest
+    return manifest, payloads
+
+
+def validate_verified_release(
+    release: Path, receipt_path: Path, expected_sha256: str, expected_inventory_sha256: str
+) -> dict[str, object]:
+    return snapshot_verified_release(
+        release, receipt_path, expected_sha256, expected_inventory_sha256
+    )[0]
+
+
+def _lifecycle_module() -> object:
+    path = INSTALLER_ROOT / "lib" / "lifecycle.py"
+    spec = importlib.util.spec_from_file_location("liqvera_installer_lifecycle_runtime", path)
+    if spec is None or spec.loader is None:
+        raise InstallerError("CONFIG_INVALID", "lifecycle runtime is unavailable")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def dependency_command(distribution: str) -> tuple[str, ...]:
@@ -646,7 +704,7 @@ def _cli_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None, lifecycle_adapter: object | None = None) -> int:
     args = _cli_parser().parse_args(argv)
     if not HEX64.fullmatch(args.sha256):
         print("RELEASE_DIGEST_MISMATCH: malformed outer digest", file=sys.stderr)
@@ -655,16 +713,20 @@ def main(argv: list[str] | None = None) -> int:
     try:
         reject_ambient_authority(os.environ)
         config = load_json_bytes(_safe_regular_bytes(args.config, "CONFIG_INVALID"), "CONFIG_INVALID")
-        manifest = validate_verified_release(
+        manifest, release_payloads = snapshot_verified_release(
             args.verified_release, args.verified_receipt, args.sha256, args.inventory_sha256
         )
         if not isinstance(config, dict) or not isinstance(manifest, dict):
             raise InstallerError("CONFIG_INVALID", "config or manifest is not an object")
         _validate(CONFIG_SCHEMA, config, "CONFIG_INVALID")
-        config_bytes = render_config_bytes(config, str(manifest["git_commit"]))
+        images = manifest.get("images")
+        if not isinstance(images, dict):
+            raise InstallerError("ARCHIVE_INVALID", "release images are unavailable")
+        config_bytes = render_config_bytes(config, str(manifest["git_commit"]), images)
         root = _validate_install_root(args.install_dir, "unknown")
         identity = {
             "product_version": manifest["product_version"], "release_sha256": args.sha256,
+            "inventory_sha256": args.inventory_sha256,
             "git_commit": manifest["git_commit"], "git_tree": manifest["git_tree"],
             "install_root": str(root), "compose_project": f"liqvera-{args.sha256[:12]}",
             "ports": {name: config["ports"][name]["port"] for name in ("web", "gateway", "metrics")},
@@ -676,7 +738,14 @@ def main(argv: list[str] | None = None) -> int:
                 existing = reconcile_handle(existing_handle, identity, config_bytes)
             finally:
                 existing_handle.close()
-            print(json.dumps({"schema_version": "liqvera-preflight-result/v1", "status": existing["last_completed_phase"], "install_root": str(root)}, sort_keys=True, separators=(",", ":")))
+            lifecycle_runtime = _lifecycle_module()
+            adapter = lifecycle_adapter if lifecycle_adapter is not None else lifecycle_runtime.ComposeAdapter(args.install_dir)
+            lifecycle_result = lifecycle_runtime.run_lifecycle(args.install_dir, "start", {}, adapter)
+            if existing["last_completed_phase"] != "HEALTHY":
+                existing["last_completed_phase"] = "HEALTHY"
+                existing["updated_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+                write_state_atomic(args.install_dir / "state/install-state.json", existing)
+            print(json.dumps(lifecycle_result, sort_keys=True, separators=(",", ":")))
             return 0
         # Host collection remains read-only; Task 4 owns Docker/Compose mutation.
         facts = _collect_system_facts(args.install_dir, config, args.bash_version)
@@ -714,6 +783,7 @@ def main(argv: list[str] | None = None) -> int:
             "schema_version": "liqvera-install-state/v1",
             "product_version": manifest["product_version"],
             "release_sha256": args.sha256,
+            "inventory_sha256": args.inventory_sha256,
             "git_commit": manifest["git_commit"],
             "git_tree": manifest["git_tree"],
             "install_root": outcome["install_root"],
@@ -737,6 +807,26 @@ def main(argv: list[str] | None = None) -> int:
                 print(json.dumps({"schema_version": "liqvera-preflight-result/v1", "status": existing["last_completed_phase"], "install_root": str(root)}, sort_keys=True, separators=(",", ":")))
                 return 0
             root_handle.write("config/runtime.env", config_bytes)
+            release_name = f"0.0.2-{args.sha256[:12]}"
+            for relative, data in sorted(release_payloads.items()):
+                mode = 0o755 if relative in {"install.sh", "liqvera.sh"} else 0o644
+                root_handle.write(f"releases/{release_name}/{relative}", data, mode)
+            lifecycle_release = {
+                "schema_version": "liqvera-lifecycle-release/v1",
+                "product_version": manifest["product_version"],
+                "release_sha256": args.sha256,
+                "inventory_sha256": args.inventory_sha256,
+                "git_commit": manifest["git_commit"],
+                "git_tree": manifest["git_tree"],
+                "database_compatibility": manifest["database_compatibility"]["accepted_migrations"],
+                "images": images,
+            }
+            root_handle.write(
+                f"releases/{release_name}/release.json",
+                (json.dumps(lifecycle_release, sort_keys=True, separators=(",", ":")) + "\n").encode(),
+                0o644,
+            )
+            root_handle.switch_current(f"releases/{release_name}")
             root_handle.write("state/install-state.json", (json.dumps(state, sort_keys=True, separators=(",", ":")) + "\n").encode())
             root_handle.assert_selected_path()
         except Exception:
@@ -744,7 +834,13 @@ def main(argv: list[str] | None = None) -> int:
             raise
         finally:
             root_handle.close()
-        print(json.dumps({**outcome, "status": "CONFIGURED"}, sort_keys=True, separators=(",", ":")))
+        lifecycle_runtime = _lifecycle_module()
+        adapter = lifecycle_adapter if lifecycle_adapter is not None else lifecycle_runtime.ComposeAdapter(args.install_dir)
+        lifecycle_result = lifecycle_runtime.run_lifecycle(args.install_dir, "start", {}, adapter)
+        state["last_completed_phase"] = "HEALTHY"
+        state["updated_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        write_state_atomic(args.install_dir / "state/install-state.json", state)
+        print(json.dumps({**outcome, **lifecycle_result}, sort_keys=True, separators=(",", ":")))
         return 0
     except (InstallerError, OSError, json.JSONDecodeError, KeyError, TypeError, ValueError, subprocess.SubprocessError) as exc:
         message = str(exc) if isinstance(exc, InstallerError) else "CONFIG_INVALID: bounded input failure"

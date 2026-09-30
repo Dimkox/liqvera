@@ -397,6 +397,7 @@ def _write_payloads(temporary_fd: int, payloads: dict[str, bytes]) -> None:
             except OSError as exc:
                 raise VerificationError("ARCHIVE_INVALID: unsafe materialization target") from exc
             with os.fdopen(file_fd, "wb") as handle:
+                os.fchmod(handle.fileno(), 0o755 if relative in {"install.sh", "liqvera.sh"} else 0o644)
                 handle.write(data)
                 handle.flush()
                 os.fsync(handle.fileno())

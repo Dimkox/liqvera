@@ -182,6 +182,23 @@ def test_rejects_wrong_outer_digest_and_existing_destination(tmp_path: Path) -> 
     assert marker.read_text(encoding="utf-8") == "preserve"
 
 
+def test_materialized_modes_are_independent_of_restrictive_umask(tmp_path: Path) -> None:
+    archive = tmp_path / "release.zip"
+    expected = write_archive(archive)
+    destination = tmp_path / "release"
+    previous = os.umask(0o077)
+    try:
+        VERIFIER.verify_installer(archive, expected, destination)
+    finally:
+        os.umask(previous)
+
+    assert stat.S_IMODE(destination.stat().st_mode) == 0o755
+    assert stat.S_IMODE((destination / "migrations").stat().st_mode) == 0o755
+    assert stat.S_IMODE((destination / "migrations/001_ledger.sql").stat().st_mode) == 0o644
+    assert stat.S_IMODE((destination / "manifests/release-manifest.json").stat().st_mode) == 0o644
+    assert stat.S_IMODE((destination / "install.sh").stat().st_mode) == 0o755
+
+
 def test_outer_digest_and_zip_validation_use_the_same_open_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -244,6 +244,7 @@ def test_state_write_is_atomic_closed_and_contains_no_secret(tmp_path: Path) -> 
         "schema_version": "liqvera-install-state/v1",
         "product_version": "0.0.2",
         "release_sha256": "a" * 64,
+        "inventory_sha256": "b" * 64,
         "git_commit": "1" * 40,
         "git_tree": "2" * 40,
         "install_root": str((tmp_path / "install").resolve()),
@@ -271,6 +272,17 @@ class FakeRunner:
     def __call__(self, argv: tuple[str, ...]) -> int:
         self.calls.append(argv)
         return 0
+
+
+class HealthyLifecycleAdapter:
+    def start(self, project: str, candidate: Path) -> None:
+        pass
+
+    def stop(self, project: str) -> None:
+        pass
+
+    def health(self, project: str) -> bool:
+        return True
 
 
 def test_process_contract_matches_reviewed_fixture() -> None:
@@ -442,6 +454,7 @@ def test_existing_install_is_idempotent_and_conflicts_fail_without_overwrite(tmp
     state = {
         "schema_version": "liqvera-install-state/v1", "product_version": "0.0.2",
         "release_sha256": "a" * 64, "git_commit": "1" * 40, "git_tree": "2" * 40,
+        "inventory_sha256": "b" * 64,
         "install_root": str(root.resolve()), "compose_project": "liqvera-aaaaaaaaaaaa",
         "linux": {"distribution": "ubuntu", "architecture": "amd64"},
         "docker": {"engine_version": "27.5.1", "compose_version": "2.32.4"},
@@ -499,13 +512,13 @@ def test_main_validates_everything_before_write_and_preserves_matching_install(
     root = tmp_path / "install"
     monkeypatch.setattr(RUNTIME, "_collect_system_facts", lambda *_: facts())
 
-    assert RUNTIME.main(cli_args(release, receipt, config_path, root)) == 0
+    assert RUNTIME.main(cli_args(release, receipt, config_path, root), lifecycle_adapter=HealthyLifecycleAdapter()) == 0
     first_state = (root / "state/install-state.json").read_bytes()
     first_config_stat = (root / "config/runtime.env").stat()
     assert "LIQVERA_ENGINE_COMMIT=" + "1" * 40 in (root / "config/runtime.env").read_text()
-    assert json.loads(capsys.readouterr().out)["status"] == "CONFIGURED"
+    assert json.loads(capsys.readouterr().out)["status"] == "HEALTHY"
 
-    assert RUNTIME.main(cli_args(release, receipt, config_path, root)) == 0
+    assert RUNTIME.main(cli_args(release, receipt, config_path, root), lifecycle_adapter=HealthyLifecycleAdapter()) == 0
     assert (root / "state/install-state.json").read_bytes() == first_state
     assert (root / "config/runtime.env").stat().st_ino == first_config_stat.st_ino
 
@@ -528,6 +541,44 @@ def test_main_invalid_secret_or_manifest_leaves_no_install_root(
     assert not root.exists()
 
 
+def test_install_stages_verified_release_and_starts_healthy_lifecycle(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    clear_authority(monkeypatch)
+    release, receipt = verified_release(tmp_path)
+    receipt_value = json.loads(receipt.read_text())
+    manifest = json.loads((release / "manifests/release-manifest.json").read_text())
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps(safe_config()))
+    root = tmp_path / "install"
+    monkeypatch.setattr(RUNTIME, "_collect_system_facts", lambda *_: facts())
+    trace: list[tuple[str, str]] = []
+
+    class Adapter:
+        def start(self, project: str, candidate: Path) -> None:
+            trace.append(("start", candidate.name))
+
+        def stop(self, project: str) -> None:
+            trace.append(("stop", project))
+
+        def health(self, project: str) -> bool:
+            trace.append(("health", project))
+            return True
+
+    assert RUNTIME.main(cli_args(release, receipt, config_path, root), lifecycle_adapter=Adapter()) == 0
+    output = json.loads(capsys.readouterr().out)
+    staged = root / "releases" / f"0.0.2-{receipt_value['archive_sha256'][:12]}"
+    assert output["status"] == "HEALTHY"
+    assert (root / "current").resolve() == staged.resolve()
+    assert (staged / "compose.yaml").read_bytes() == (release / "compose.yaml").read_bytes()
+    release_value = json.loads((staged / "release.json").read_text())
+    assert release_value["inventory_sha256"] == receipt_value["inventory_sha256"]
+    assert release_value["images"] == manifest["images"]
+    runtime = (root / "config/runtime.env").read_text()
+    assert all(f"LIQVERA_IMAGE_{name.upper()}={value}\n" in runtime for name, value in manifest["images"].items())
+    assert json.loads((root / "state/install-state.json").read_text())["last_completed_phase"] == "HEALTHY"
+    assert [item[0] for item in trace] == ["health", "start", "health"]
+
 def test_main_missing_docker_only_runs_exact_explicit_approved_dependency(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -544,7 +595,7 @@ def test_main_missing_docker_only_runs_exact_explicit_approved_dependency(
     command = RUNTIME.dependency_command("ubuntu")
     approval = hashlib.sha256("\0".join(command).encode()).hexdigest()
     assert RUNTIME.main(cli_args(release, receipt, config_path, root, "--install-deps", "--non-interactive",
-                                 "--approve-dependency-command", approval)) == 0
+                                 "--approve-dependency-command", approval), lifecycle_adapter=HealthyLifecycleAdapter()) == 0
     assert calls == [command]
 
 
@@ -564,10 +615,11 @@ def test_main_interactive_dependency_requires_exact_typed_digest(
     approval = hashlib.sha256("\0".join(command).encode()).hexdigest()
     monkeypatch.setattr(sys, "stdin", io.StringIO(approval + "\n"))
 
-    assert RUNTIME.main(cli_args(release, receipt, config_path, tmp_path / "install", "--install-deps")) == 0
+    assert RUNTIME.main(cli_args(release, receipt, config_path, tmp_path / "install", "--install-deps"),
+                        lifecycle_adapter=HealthyLifecycleAdapter()) == 0
     assert calls == [command]
     captured = capsys.readouterr()
-    assert json.loads(captured.out)["status"] == "CONFIGURED"
+    assert json.loads(captured.out)["status"] == "HEALTHY"
     diagnostic = captured.err
     assert "DEPENDENCY_PREVIEW: /usr/bin/sudo -- /usr/bin/apt-get install" in diagnostic
     assert approval in diagnostic
@@ -663,7 +715,8 @@ def test_full_reconciliation_and_publication_are_serialized(
 
     def invoke(config_path: Path) -> None:
         barrier.wait()
-        results.append(RUNTIME.main(cli_args(release, receipt, config_path, root)))
+        results.append(RUNTIME.main(cli_args(release, receipt, config_path, root),
+                                    lifecycle_adapter=HealthyLifecycleAdapter()))
 
     threads = [threading.Thread(target=invoke, args=(path,)) for path in configs]
     for thread in threads:
@@ -673,11 +726,12 @@ def test_full_reconciliation_and_publication_are_serialized(
         assert not thread.is_alive()
     assert sorted(results) == [0, 2]
     rendered = (root / "config/runtime.env").read_bytes()
+    images = json.loads((release / "manifests/release-manifest.json").read_text())["images"]
     assert rendered in {
-        RUNTIME.render_config_bytes(safe_config(), "1" * 40),
-        RUNTIME.render_config_bytes(safe_config(secret), "1" * 40),
+        RUNTIME.render_config_bytes(safe_config(), "1" * 40, images),
+        RUNTIME.render_config_bytes(safe_config(secret), "1" * 40, images),
     }
-    assert json.loads((root / "state/install-state.json").read_text())["last_completed_phase"] == "CONFIGURED"
+    assert json.loads((root / "state/install-state.json").read_text())["last_completed_phase"] == "HEALTHY"
 
 
 def test_process_adapters_suppress_children_and_close_timeout(

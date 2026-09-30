@@ -36,7 +36,7 @@ OPERATION_PHASES = frozenset({
 })
 RELEASE_KEYS = frozenset({
     "schema_version", "product_version", "release_sha256", "git_commit", "git_tree",
-    "database_compatibility", "images",
+    "inventory_sha256", "database_compatibility", "images",
 })
 STATE_KEYS = frozenset({
     "schema_version", "generation", "status", "service_manager", "compose_project",
@@ -79,13 +79,16 @@ class ComposeAdapter:
         self.runtime_binding = (release.resolve(), _file_sha256(compose), _file_sha256(env_file))
 
     def _base(self, project: str, release: Path) -> tuple[str, ...]:
+        raw_metadata = _read_json(release / "release.json", "CONFIG_INVALID")
+        checked_path, metadata = _release(self.root, str(raw_metadata.get("release_sha256", "")))
+        if checked_path.resolve() != release.resolve():
+            raise LifecycleError("ARCHIVE_INVALID")
         compose = release / "compose.yaml"
         env_file = self.root / "config/runtime.env"
         if compose.is_symlink() or env_file.is_symlink() or not compose.is_file() or not env_file.is_file():
             raise LifecycleError("CONFIG_INVALID")
         if _file_sha256(compose) != COMPOSE_SHA256:
             raise LifecycleError("CONFIG_INVALID")
-        metadata = _validate_release_value(_read_json(release / "release.json", "CONFIG_INVALID"))
         _validate_runtime_env(env_file, metadata["images"])
         if self.runtime_binding is not None:
             bound_release, compose_sha, env_sha = self.runtime_binding
@@ -297,7 +300,24 @@ def _validate_runtime_env(path: Path, images: object) -> None:
     if not isinstance(images, dict):
         raise LifecycleError("CONFIG_INVALID")
     expected = {f"LIQVERA_IMAGE_{name.upper()}": value for name, value in images.items()}
-    if any(values.get(name) != value for name, value in expected.items()):
+    required = {
+        "LIQVERA_CHAIN_ID", "LIQVERA_PAYMENT_ENABLED", "LIQVERA_SOURCE_MODE",
+        "LIQVERA_ENGINE_COMMIT", "LIQVERA_WEB_HOST", "LIQVERA_WEB_PORT",
+        "LIQVERA_GATEWAY_HOST", "LIQVERA_GATEWAY_PORT", "LIQVERA_METRICS_HOST",
+        "LIQVERA_METRICS_PORT", *expected,
+    }
+    optional = {"DATABASE_PASSWORD_FILE", "REPORT_SERVICE_TOKEN_FILE"}
+    if not required.issubset(values) or not set(values).issubset(required | optional):
+        raise LifecycleError("CONFIG_INVALID")
+    if (values.get("LIQVERA_CHAIN_ID") != "31611"
+            or not HEX40.fullmatch(values.get("LIQVERA_ENGINE_COMMIT", ""))
+            or values.get("LIQVERA_WEB_HOST") != "127.0.0.1"
+            or values.get("LIQVERA_WEB_PORT") != "3000"
+            or values.get("LIQVERA_GATEWAY_HOST") != "127.0.0.1"
+            or values.get("LIQVERA_GATEWAY_PORT") != "8080"
+            or values.get("LIQVERA_METRICS_HOST") != "127.0.0.1"
+            or values.get("LIQVERA_METRICS_PORT") != "9090"
+            or any(values.get(name) != value for name, value in expected.items())):
         raise LifecycleError("CONFIG_INVALID")
 
 
@@ -412,6 +432,7 @@ def _validate_release_value(value: object) -> dict[str, object]:
             or value.get("schema_version") != "liqvera-lifecycle-release/v1"
             or value.get("product_version") != "0.0.2"
             or not HEX64.fullmatch(str(value.get("release_sha256")))
+            or not HEX64.fullmatch(str(value.get("inventory_sha256")))
             or not HEX40.fullmatch(str(value.get("git_commit")))
             or not HEX40.fullmatch(str(value.get("git_tree")))):
         raise LifecycleError("CONFIG_INVALID")
@@ -423,6 +444,32 @@ def _validate_release_value(value: object) -> dict[str, object]:
                    for item in images.values())):
         raise LifecycleError("CONFIG_INVALID")
     return value
+
+
+def _verify_release_inventory(target: Path, inventory_sha256: str) -> dict[str, object]:
+    sums_path = target / "SHA256SUMS"
+    try:
+        sums = sums_path.read_bytes()
+    except OSError as exc:
+        raise LifecycleError("ARCHIVE_INVALID") from exc
+    if hashlib.sha256(sums).hexdigest() != inventory_sha256:
+        raise LifecycleError("ARCHIVE_INVALID")
+    expected: dict[str, str] = {}
+    for line in sums.decode("utf-8").splitlines():
+        match = re.fullmatch(r"([0-9a-f]{64})  ([^\x00-\x1f\x7f]+)", line)
+        if match is None or match.group(2) in expected or match.group(2) == "release.json":
+            raise LifecycleError("ARCHIVE_INVALID")
+        expected[match.group(2)] = match.group(1)
+    observed = {
+        str(path.relative_to(target)): path for path in target.rglob("*")
+        if path.is_file() and path.name not in {"SHA256SUMS", "release.json"}
+    }
+    if set(observed) != set(expected):
+        raise LifecycleError("ARCHIVE_INVALID")
+    if any(_file_sha256(path) != expected[name] for name, path in observed.items()):
+        raise LifecycleError("ARCHIVE_INVALID")
+    manifest = _read_json(target / "manifests/release-manifest.json", "ARCHIVE_INVALID")
+    return manifest
 
 
 def _release(root: Path, digest: str) -> tuple[Path, dict[str, object]]:
@@ -439,6 +486,17 @@ def _release(root: Path, digest: str) -> tuple[Path, dict[str, object]]:
         raise LifecycleError("ARCHIVE_INVALID")
     value["database_compatibility"] = _validate_ledger(value.get("database_compatibility"))
     _validate_release_value(value)
+    package = _verify_release_inventory(target, str(value["inventory_sha256"]))
+    compatibility = package.get("database_compatibility")
+    if (package.get("schema_version") != "liqvera-installer-release/v1"
+            or package.get("product_version") != value["product_version"]
+            or package.get("git_commit") != value["git_commit"]
+            or package.get("git_tree") != value["git_tree"]
+            or package.get("images") != value["images"]
+            or not isinstance(compatibility, dict)
+            or compatibility.get("accepted_migrations") != value["database_compatibility"]
+            or compatibility.get("down_migrations") is not False):
+        raise LifecycleError("ARCHIVE_INVALID")
     return target, value
 
 
@@ -494,6 +552,8 @@ def bootstrap_state(root: Path) -> dict[str, object]:
     _, current = _current_release(root)
     installed = _read_json(root / "state/install-state.json", "CONFIG_INVALID")
     if installed.get("release_sha256") != current["release_sha256"]:
+        raise LifecycleError("CONFIG_INVALID")
+    if installed.get("inventory_sha256") != current["inventory_sha256"]:
         raise LifecycleError("CONFIG_INVALID")
     return {
         "schema_version": "liqvera-lifecycle/v1", "generation": 0,

@@ -4,6 +4,7 @@ import type { Eip1193Provider } from "./wallet";
 import type { ClientEvmSigner } from "@x402/evm";
 import { validateDelivery } from "./api";
 import { boundedFetchJson } from "./x402-transport.mjs";
+// @ts-expect-error The pinned JS SDK bridge is exercised directly by x402-production.test.mjs.
 import { createProductionProtocol, requirePermit2Challenge, requireSponsoredPayment } from "./x402-production.mjs";
 
 export { boundedFetch, boundedFetchJson, boundedResponseJson } from "./x402-transport.mjs";
@@ -62,7 +63,7 @@ class ProductionX402BrowserAdapter implements OfficialX402BrowserAdapter {
       const challengeRead=await boundedFetchJson(fetch,input.path,{headers},65_536);
       const challenge=challengeRead.response;
       if(challenge.status!==402)throw new Error("Expected an exact payment challenge. No payment was submitted.");
-      const required=protocol.getPaymentRequiredResponse(name=>challenge.headers.get(name),challengeRead.body);
+      const required=protocol.getPaymentRequiredResponse((name:string)=>challenge.headers.get(name),challengeRead.body);
       const permit={...X402_PERMIT2,domainName:MUSD_PERMIT.domainName,domainVersion:MUSD_PERMIT.domainVersion};
       requirePermit2Challenge(required,permit);
       const payment=await protocol.createPaymentPayload(required);
@@ -71,7 +72,7 @@ class ProductionX402BrowserAdapter implements OfficialX402BrowserAdapter {
       const paid=paidRead.response;
       if(paid.status===202)return "recovering";
       if(!paid.ok)throw new Error("Payment outcome requires reconciliation.");
-      await protocol.processPaymentResult(payment,name=>paid.headers.get(name),paid.status);
+      await protocol.processPaymentResult(payment,(name:string)=>paid.headers.get(name),paid.status);
       return validateDelivery(paidRead.body,input.quote.report_id);
     } catch(error) {
       if(error instanceof X402CancelledBeforeSubmission)throw error;

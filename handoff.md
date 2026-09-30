@@ -169,6 +169,10 @@ migration projection. The production archive remains truthfully `NOT_BUILT`:
 the tracked source manifest is `runnable=false` with six null image digests and
 no reviewed registry image lock exists. No placeholder or mutable image was
 promoted, and no network/publication occurred.
+During authorized multiarch publication the production web Docker build exposed
+strict TypeScript narrowing gaps in receipt verification and the reviewed JS
+x402 bridge import. The minimal source typing repair preserves all runtime
+guards; web production build and all 20 browser tests pass before image rebuild.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

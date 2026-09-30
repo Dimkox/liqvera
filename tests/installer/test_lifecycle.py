@@ -26,7 +26,8 @@ class FakeAdapter:
         self.trace: list[tuple[object, ...]] = []
         self.healthy = True
         self.migration_committed = False
-        self.log_text = "ok\nAuthorization: Bearer CANARY\npostgres://user:secret@db/x\n"
+        self.log_text = ("ok\nAuthorization: Bearer CANARY\npostgres://user:secret@db/x\n"
+                         "REPORT_SERVICE_TOKEN=REPORT_CANARY\nPAYMENT_SIGNATURE=SIGNATURE_CANARY\n")
 
     def start(self, project: str, release: Path) -> None:
         self.trace.append(("start", project, release.name))
@@ -91,6 +92,14 @@ def installed(tmp_path: Path) -> tuple[Path, str, Path]:
     return root, digest, current
 
 
+def runtime_files(root: Path, current: Path) -> None:
+    (root / "config").mkdir(exist_ok=True)
+    (root / "config/runtime.env").write_text(
+        "LIQVERA_PAYMENT_ENABLED=false\nLIQVERA_SOURCE_MODE=shadow\n"
+    )
+    (current / "compose.yaml").write_bytes((ROOT / "installer/compose.yaml").read_bytes())
+
+
 def test_start_stop_are_idempotent_and_status_is_closed(tmp_path: Path) -> None:
     root, digest, _ = installed(tmp_path)
     adapter = FakeAdapter()
@@ -116,7 +125,7 @@ def test_update_stages_and_health_checks_before_atomic_current_switch(tmp_path: 
     assert result["status"] == "HEALTHY"
     assert (root / "current").resolve() == candidate.resolve()
     assert json.loads((root / "state/lifecycle.json").read_text())["previous"]["release_sha256"] == old_digest
-    assert adapter.trace.index(("health", "liqvera-test-candidate")) < len(adapter.trace)
+    assert ("health", "liqvera-test") in adapter.trace
     assert old.exists()
 
 
@@ -128,7 +137,7 @@ def test_failed_candidate_health_preserves_prior_pointer_and_data(tmp_path: Path
     with pytest.raises(LIFECYCLE.LifecycleError, match="HEALTH_TIMEOUT"):
         LIFECYCLE.run_lifecycle(root, "update", {"version": "0.0.2", "sha256": "b" * 64}, adapter)
     assert (root / "current").resolve() == old.resolve()
-    assert ("stop", "liqvera-test-candidate") in adapter.trace
+    assert ("stop", "liqvera-test") in adapter.trace
     assert not any(item[0] == "purge" for item in adapter.trace)
 
 
@@ -232,15 +241,14 @@ def test_concurrent_lock_fails_closed_without_effect(tmp_path: Path) -> None:
 
 def test_compose_adapter_uses_fixed_argv_and_never_removes_volumes(tmp_path: Path) -> None:
     root, _, current = installed(tmp_path)
-    (root / "config").mkdir()
-    (root / "config/runtime.env").write_text("LIQVERA_PAYMENT_ENABLED=false\n")
-    (current / "compose.yaml").write_text("services: {}\n")
+    runtime_files(root, current)
     calls: list[tuple[tuple[str, ...], dict[str, object]]] = []
 
     def runner(argv: tuple[str, ...], **kwargs: object) -> subprocess.CompletedProcess[bytes]:
         calls.append((argv, kwargs))
         output = json.dumps([
-            {"State": "running", "Health": "healthy"} for _ in range(6)
+            {"Service": service, "State": "running", "Health": "healthy"}
+            for service in ("postgres", "capture", "report", "gateway", "web", "edge")
         ]).encode() if argv[-3:] == ("ps", "--format", "json") else b""
         return subprocess.CompletedProcess(argv, 0, output, b"")
 
@@ -251,3 +259,96 @@ def test_compose_adapter_uses_fixed_argv_and_never_removes_volumes(tmp_path: Pat
     assert all(call[0][0] == "/usr/bin/docker" for call in calls)
     assert all("--volumes" not in call[0] and "-v" not in call[0] for call in calls)
     assert all(call[1]["env"] == {"PATH": "/usr/bin:/bin"} for call in calls)
+
+
+def test_compose_health_requires_exact_unique_service_states(tmp_path: Path) -> None:
+    root, _, current = installed(tmp_path)
+    runtime_files(root, current)
+    rows = [{"Service": name, "State": "running", "Health": "healthy"}
+            for name in ("postgres", "capture", "report", "gateway", "web", "edge")]
+    rows.append({"Service": "gateway", "State": "exited", "Health": ""})
+    def runner(argv: tuple[str, ...], **_: object) -> subprocess.CompletedProcess[bytes]:
+        return subprocess.CompletedProcess(argv, 0, json.dumps(rows).encode(), b"")
+    assert LIFECYCLE.ComposeAdapter(root, runner).health("liqvera-test") is False
+
+
+def test_migrate_exception_records_uncertain_outcome(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    release(root, "b" * 64)
+    adapter = FakeAdapter()
+    adapter.migrate = lambda project, path: (_ for _ in ()).throw(RuntimeError("lost response"))
+    with pytest.raises(LIFECYCLE.LifecycleError, match="ROLLBACK_RESTORE_REQUIRED"):
+        LIFECYCLE.run_lifecycle(root, "update", {"version": "0.0.2", "sha256": "b" * 64}, adapter)
+    state = LIFECYCLE.load_lifecycle_state(root)
+    assert state["migration_committed"] is True
+    assert state["operation"]["phase"] == "MIGRATION_COMMITTED"
+
+
+def test_partial_candidate_start_is_always_stopped(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    release(root, "b" * 64)
+    adapter = FakeAdapter()
+    def partial(project: str, path: Path) -> None:
+        adapter.trace.append(("start-partial", project))
+        raise RuntimeError("partial")
+    adapter.start = partial
+    with pytest.raises(LIFECYCLE.LifecycleError, match="LIFECYCLE_COMMAND_FAILED"):
+        LIFECYCLE.run_lifecycle(root, "update", {"version": "0.0.2", "sha256": "b" * 64}, adapter)
+    assert ("stop", "liqvera-test") in adapter.trace
+
+
+def test_pointer_switch_crash_is_reconciled_from_disk(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    candidate = release(root, "b" * 64)
+    adapter = FakeAdapter()
+    with pytest.raises(LIFECYCLE.InjectedCrash):
+        LIFECYCLE.run_lifecycle(root, "update", {"version": "0.0.2", "sha256": "b" * 64,
+                                                 "crash_after": "POINTER_SWITCHED"}, adapter)
+    # Simulate the smaller crash window: pointer persisted, phase marker remained HEALTHY.
+    state_path = root / "state/lifecycle.json"
+    state = json.loads(state_path.read_text())
+    state["operation"]["phase"] = "HEALTHY"
+    state["current"] = state["operation"]["prior"]
+    state_path.write_text(json.dumps(state))
+    result = LIFECYCLE.run_lifecycle(root, "status", {}, adapter)
+    assert result["release_sha256"] == "b" * 64
+    assert (root / "current").resolve() == candidate.resolve()
+
+
+def test_runtime_files_are_rehashed_before_compose_use(tmp_path: Path) -> None:
+    root, _, current = installed(tmp_path)
+    (root / "config").mkdir()
+    env = root / "config/runtime.env"
+    compose = current / "compose.yaml"
+    env.write_text("LIQVERA_PAYMENT_ENABLED=false\nLIQVERA_SOURCE_MODE=shadow\n")
+    compose.write_bytes((ROOT / "installer/compose.yaml").read_bytes())
+    adapter = LIFECYCLE.ComposeAdapter(root, lambda argv, **kwargs: subprocess.CompletedProcess(argv, 0, b"", b""))
+    adapter.bind_runtime(current, compose, env)
+    compose.write_text("services: {evil: {}}\n")
+    with pytest.raises(LIFECYCLE.LifecycleError, match="CONFIG_INVALID"):
+        adapter.start("liqvera-test", current)
+
+
+def test_locked_root_replacement_cannot_receive_state_write(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    displaced = tmp_path / "displaced"
+    adapter = FakeAdapter()
+    original_stop = adapter.stop
+    def replace_root(project: str) -> None:
+        original_stop(project)
+        root.rename(displaced)
+        root.mkdir(mode=0o700)
+    adapter.stop = replace_root
+    with pytest.raises(LIFECYCLE.LifecycleError, match="UNSAFE_INSTALL_ROOT"):
+        LIFECYCLE.run_lifecycle(root, "stop", {}, adapter)
+    assert not (root / "state/lifecycle.json").exists()
+
+
+def test_purge_removes_runtime_before_owned_volumes(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    adapter = FakeAdapter()
+    preview = LIFECYCLE.purge_preview(root)
+    LIFECYCLE.run_lifecycle(root, "uninstall", {"purge_data": True,
+                                                "confirm_purge": preview["token"]}, adapter)
+    kinds = [item[0] for item in adapter.trace]
+    assert kinds.index("remove_runtime") < kinds.index("purge")

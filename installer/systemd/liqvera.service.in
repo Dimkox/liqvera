@@ -5,8 +5,8 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=@INSTALL_ROOT@/liqvera.sh start
-ExecStop=@INSTALL_ROOT@/liqvera.sh stop
+ExecStart=@INSTALL_ROOT@/liqvera.sh --install-root @INSTALL_ROOT@ start
+ExecStop=@INSTALL_ROOT@/liqvera.sh --install-root @INSTALL_ROOT@ stop
 NoNewPrivileges=yes
 
 [Install]

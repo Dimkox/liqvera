@@ -125,6 +125,20 @@ or broad targets. Production Compose update remains deliberately fail-closed
 until a reviewed database-ledger/coherent-backup adapter exists; ordinary
 start/stop/logs/down use fixed absolute Docker argv without `--volumes`.
 
+Task 5 independent review repair now records migration uncertainty before the
+external call, reconciles an atomic `current` switch from the on-disk pointer,
+and keeps one stable Compose project/data identity through update. Partial
+start and health exceptions clean up and preserve the original failure. Health
+requires the exact six unique running/healthy services; the canonical Compose
+bytes and closed shadow-only runtime environment are revalidated before every
+Docker call. Root replacement is detected against the held lock descriptor
+before state publication. Purge removes containers first and the production
+adapter verifies exact Compose ownership labels before deleting volumes. Token,
+password and signature log forms are redacted, and the generated user unit now
+passes the mandatory `--install-root`. Focused lifecycle/systemd/Compose checks
+passed 59 tests; full installer+graph passed 394 tests. Real Docker/database/
+systemd and destructive purge remain NOT_RUN.
+
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result
 `b31bc68310c471d35de079d1e0a13232aa39dff4e99b42a9d21b9ce2dbe770de`

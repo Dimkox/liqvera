@@ -20,6 +20,8 @@ HEX40 = re.compile(r"[0-9a-f]{40}\Z")
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 SINCE = re.compile(r"[1-9][0-9]{0,5}[smhd]\Z")
 SERVICES = frozenset({"postgres", "migrate", "capture", "report", "gateway", "web", "edge"})
+RUNNING_SERVICES = frozenset({"postgres", "capture", "report", "gateway", "web", "edge"})
+COMPOSE_SHA256 = "e138eb47d6ade1b6dfc68458717a4034ebec6eb7ece571d1aabf2d02c6a1a85b"
 PHASES = frozenset({"HEALTHY", "STOPPED", "UNINSTALLED"})
 OPERATION_PHASES = frozenset({
     "INTENT", "BACKUP_COMPLETE", "MIGRATION_COMMITTED", "CANDIDATE_STARTED",
@@ -62,12 +64,24 @@ class ComposeAdapter:
         self.root = _safe_root(root)
         self.runner = runner
         self.releases: dict[str, Path] = {}
+        self.runtime_binding: tuple[Path, str, str] | None = None
+
+    def bind_runtime(self, release: Path, compose: Path, env_file: Path) -> None:
+        self.runtime_binding = (release.resolve(), _file_sha256(compose), _file_sha256(env_file))
 
     def _base(self, project: str, release: Path) -> tuple[str, ...]:
         compose = release / "compose.yaml"
         env_file = self.root / "config/runtime.env"
         if compose.is_symlink() or env_file.is_symlink() or not compose.is_file() or not env_file.is_file():
             raise LifecycleError("CONFIG_INVALID")
+        if _file_sha256(compose) != COMPOSE_SHA256:
+            raise LifecycleError("CONFIG_INVALID")
+        _validate_runtime_env(env_file)
+        if self.runtime_binding is not None:
+            bound_release, compose_sha, env_sha = self.runtime_binding
+            if (release.resolve() != bound_release or _file_sha256(compose) != compose_sha
+                    or _file_sha256(env_file) != env_sha):
+                raise LifecycleError("CONFIG_INVALID")
         return (
             "/usr/bin/docker", "compose", "--project-name", project,
             "--file", str(compose), "--env-file", str(env_file),
@@ -102,10 +116,12 @@ class ComposeAdapter:
             rows = json.loads(result.stdout)
         except (json.JSONDecodeError, UnicodeDecodeError):
             return False
-        if not isinstance(rows, list) or len(rows) < 6:
+        if not isinstance(rows, list) or len(rows) != len(RUNNING_SERVICES):
             return False
-        return all(isinstance(row, dict) and row.get("State") in {"running", "exited"}
-                   and row.get("Health") in {"healthy", ""} for row in rows)
+        by_service = {row.get("Service"): row for row in rows if isinstance(row, dict)}
+        return (set(by_service) == RUNNING_SERVICES
+                and all(row.get("State") == "running" and row.get("Health") == "healthy"
+                        for row in by_service.values()))
 
     def migration_ledger(self) -> list[dict[str, str]]:
         raise LifecycleError("ROLLBACK_RESTORE_REQUIRED: database ledger adapter unavailable")
@@ -121,6 +137,16 @@ class ComposeAdapter:
         self._run((*self._base(project, release), "down", "--remove-orphans", "--timeout", "30"), timeout=40)
 
     def purge(self, targets: tuple[str, ...]) -> None:
+        project = targets[0].rsplit("_", 1)[0]
+        for target in targets:
+            result = self._run(("/usr/bin/docker", "volume", "inspect", target), capture=True, timeout=10)
+            try:
+                values = json.loads(result.stdout)
+                labels = values[0]["Labels"]
+            except (json.JSONDecodeError, UnicodeDecodeError, IndexError, KeyError, TypeError) as exc:
+                raise LifecycleError("PURGE_CONFIRMATION_REQUIRED") from exc
+            if labels.get("com.docker.compose.project") != project:
+                raise LifecycleError("PURGE_CONFIRMATION_REQUIRED")
         self._run(("/usr/bin/docker", "volume", "rm", *targets), timeout=30)
 
     def logs(self, project: str, service: str, tail: int, since: str) -> str:
@@ -140,6 +166,41 @@ def _safe_root(root: Path) -> Path:
     if not stat.S_ISDIR(item.st_mode) or item.st_uid != os.getuid() or item.st_mode & 0o077:
         raise LifecycleError("UNSAFE_INSTALL_ROOT")
     return root
+
+
+def _file_sha256(path: Path) -> str:
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        with os.fdopen(fd, "rb") as handle:
+            item = os.fstat(handle.fileno())
+            if not stat.S_ISREG(item.st_mode) or item.st_nlink != 1:
+                raise LifecycleError("CONFIG_INVALID")
+            digest = hashlib.sha256()
+            while chunk := handle.read(65536):
+                digest.update(chunk)
+            return digest.hexdigest()
+    except OSError as exc:
+        raise LifecycleError("CONFIG_INVALID") from exc
+
+
+def _validate_runtime_env(path: Path) -> None:
+    try:
+        raw = path.read_bytes()
+        text = raw.decode("utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise LifecycleError("CONFIG_INVALID") from exc
+    if len(raw) > 65536 or not text.endswith("\n"):
+        raise LifecycleError("CONFIG_INVALID")
+    values: dict[str, str] = {}
+    for line in text.splitlines():
+        if not re.fullmatch(r"LIQVERA_[A-Z0-9_]+=[^\x00-\x1f\x7f$`\\]*", line):
+            raise LifecycleError("CONFIG_INVALID")
+        name, value = line.split("=", 1)
+        if name in values:
+            raise LifecycleError("CONFIG_INVALID")
+        values[name] = value
+    if values.get("LIQVERA_PAYMENT_ENABLED") != "false" or values.get("LIQVERA_SOURCE_MODE") != "shadow":
+        raise LifecycleError("CONFIG_INVALID")
 
 
 class LifecycleLock:
@@ -171,6 +232,15 @@ class LifecycleLock:
     def close(self) -> None:
         os.close(self.lock_fd)
         os.close(self.directory_fd)
+
+    def assert_root(self, root: Path) -> None:
+        try:
+            path_item = os.stat(root, follow_symlinks=False)
+            held_item = os.fstat(self.directory_fd)
+        except OSError as exc:
+            raise LifecycleError("UNSAFE_INSTALL_ROOT") from exc
+        if (path_item.st_dev, path_item.st_ino) != (held_item.st_dev, held_item.st_ino):
+            raise LifecycleError("UNSAFE_INSTALL_ROOT")
 
 
 def _atomic_write(root: Path, relative: str, payload: bytes) -> None:
@@ -371,6 +441,8 @@ def _status(state: dict[str, object]) -> dict[str, object]:
 def _redact(value: str) -> str:
     value = re.sub(r"(?i)(authorization\s*:\s*)([^\r\n]+)", r"\1[REDACTED]", value)
     value = re.sub(r"([a-z][a-z0-9+.-]*://)[^/@\s]+@", r"\1[REDACTED]@", value)
+    value = re.sub(r"(?im)^([A-Z0-9_-]*(?:PASSWORD|TOKEN|SIGNATURE)[A-Z0-9_-]*\s*[=:]\s*)[^\r\n]*$",
+                   r"\1[REDACTED]", value)
     return value[:65536]
 
 
@@ -394,8 +466,20 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
     root = _safe_root(root)
     lock = LifecycleLock.acquire(root)
     try:
+        lock.assert_root(root)
         state = load_lifecycle_state(root)
         operation = state.get("operation")
+        if isinstance(operation, dict):
+            disk_release = _current_release(root)[1]
+            if disk_release == operation.get("candidate") and state.get("current") != disk_release:
+                state["previous"] = operation["prior"]
+                state["current"] = disk_release
+                state["migration_ledger"] = disk_release["database_compatibility"]
+                state["status"] = "HEALTHY"
+                state["operation"] = None
+                lock.assert_root(root)
+                write_lifecycle_state(root, state)
+                operation = None
         if isinstance(operation, dict) and operation.get("phase") == "POINTER_SWITCHED":
             state["operation"] = None
             state["status"] = "HEALTHY"
@@ -410,12 +494,25 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
         if command == "stop":
             if state["status"] != "STOPPED":
                 adapter.stop(project)
+                lock.assert_root(root)
                 state["status"] = "STOPPED"
                 write_lifecycle_state(root, state)
             return _status(state)
         if command == "start":
-            if state["status"] != "HEALTHY":
-                adapter.start(project, current_path)
+            if state["status"] != "HEALTHY" or not adapter.health(project):
+                try:
+                    adapter.start(project, current_path)
+                    if not adapter.health(project):
+                        raise LifecycleError("HEALTH_TIMEOUT")
+                except Exception as exc:
+                    try:
+                        adapter.stop(project)
+                    except Exception:  # nosec B110 - cleanup must preserve the original failure
+                        pass
+                    if isinstance(exc, LifecycleError):
+                        raise
+                    raise LifecycleError("LIFECYCLE_COMMAND_FAILED") from exc
+                lock.assert_root(root)
                 if not adapter.health(project):
                     adapter.stop(project)
                     raise LifecycleError("HEALTH_TIMEOUT")
@@ -450,20 +547,39 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
             operation["phase"] = "BACKUP_COMPLETE"
             write_lifecycle_state(root, state)
             _crash_if(options, "BACKUP_COMPLETE")
-            candidate_project = f"{project}-candidate"
-            committed = adapter.migrate(candidate_project, candidate_path)
+            candidate_project = project
+            operation["phase"] = "MIGRATION_COMMITTED"
+            state["migration_committed"] = True
+            write_lifecycle_state(root, state)
+            try:
+                committed = adapter.migrate(candidate_project, candidate_path)
+            except Exception as exc:
+                raise LifecycleError("ROLLBACK_RESTORE_REQUIRED: migration outcome uncertain") from exc
             if committed:
-                state["migration_committed"] = True
-                operation["phase"] = "MIGRATION_COMMITTED"
-                write_lifecycle_state(root, state)
                 _crash_if(options, "MIGRATION_COMMITTED")
-            adapter.start(candidate_project, candidate_path)
+            else:
+                state["migration_committed"] = False
+            # One stable Compose project owns the data volumes and subsequent lifecycle.
+            adapter.stop(project)
+            try:
+                adapter.start(candidate_project, candidate_path)
+                if not adapter.health(candidate_project):
+                    raise LifecycleError("HEALTH_TIMEOUT")
+            except Exception as exc:
+                try:
+                    adapter.stop(candidate_project)
+                except Exception:  # nosec B110 - cleanup must preserve the original failure
+                    pass
+                try:
+                    adapter.start(project, current_path)
+                except Exception:  # nosec B110 - recovery is best effort; original failure wins
+                    pass
+                if isinstance(exc, LifecycleError):
+                    raise
+                raise LifecycleError("LIFECYCLE_COMMAND_FAILED") from exc
             operation["phase"] = "CANDIDATE_STARTED"
             write_lifecycle_state(root, state)
             _crash_if(options, "CANDIDATE_STARTED")
-            if not adapter.health(candidate_project):
-                adapter.stop(candidate_project)
-                raise LifecycleError("HEALTH_TIMEOUT")
             operation["phase"] = "HEALTHY"
             write_lifecycle_state(root, state)
             _crash_if(options, "HEALTHY")
@@ -472,6 +588,7 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
             state["migration_ledger"] = ledger
             state["status"] = "HEALTHY"
             _switch_current(root, candidate_path)
+            lock.assert_root(root)
             operation["phase"] = "POINTER_SWITCHED"
             write_lifecycle_state(root, state)
             _crash_if(options, "POINTER_SWITCHED")
@@ -492,10 +609,18 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
             if checked != previous:
                 raise LifecycleError("ROLLBACK_RESTORE_REQUIRED: prior identity mismatch")
             adapter.stop(project)
-            adapter.start(project, prior_path)
-            if not adapter.health(project):
-                adapter.stop(project)
-                raise LifecycleError("HEALTH_TIMEOUT")
+            try:
+                adapter.start(project, prior_path)
+                if not adapter.health(project):
+                    raise LifecycleError("HEALTH_TIMEOUT")
+            except Exception as exc:
+                try:
+                    adapter.stop(project)
+                except Exception:  # nosec B110 - cleanup must preserve the original failure
+                    pass
+                if isinstance(exc, LifecycleError):
+                    raise
+                raise LifecycleError("LIFECYCLE_COMMAND_FAILED") from exc
             state["current"], state["previous"] = previous, state["current"]
             state["migration_committed"] = False
             state["operation"] = None
@@ -504,12 +629,15 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
             write_lifecycle_state(root, state)
             return _status(state)
         if command == "uninstall":
+            preview = None
             if options.get("purge_data") is True:
                 preview = purge_preview(root)
                 if options.get("confirm_purge") != preview["token"]:
                     raise LifecycleError("PURGE_CONFIRMATION_REQUIRED")
-                adapter.purge(tuple(preview["targets"]))
             adapter.remove_runtime(project)
+            if preview is not None:
+                adapter.purge(tuple(preview["targets"]))
+            lock.assert_root(root)
             state["status"] = "UNINSTALLED"
             write_lifecycle_state(root, state)
             return _status(state)

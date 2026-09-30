@@ -25,6 +25,17 @@ def _load(path: Path, name: str):
     return module
 
 
+def test_grok_verify_prefers_repository_venv_interpreter(tmp_path: Path) -> None:
+    wrapper = _load(ROOT / "tooling/run-adaptive-grok.py", "venv_selection")
+    root = tmp_path / "repo"
+    interpreter = root / ".venv/bin/python"
+    interpreter.parent.mkdir(parents=True)
+    interpreter.write_bytes(b"")
+    assert wrapper._verification_python(root, Path("/usr/bin/python3")) == interpreter
+    interpreter.unlink()
+    assert wrapper._verification_python(root, Path("/usr/bin/python3")) == Path("/usr/bin/python3")
+
+
 def _copy_owned_tooling(destination: Path) -> None:
     tooling = destination / "tooling"
     tooling.mkdir(parents=True)

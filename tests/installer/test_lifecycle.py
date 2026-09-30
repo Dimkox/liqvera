@@ -19,6 +19,8 @@ LEDGER = [
     {"name": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
     for path in sorted((ROOT / "apps/mezo-gateway/migrations").glob("*.sql"))
 ]
+IMAGES = {name: f"registry.invalid/liqvera/{name}@sha256:{hashlib.sha256(name.encode()).hexdigest()}"
+          for name in ("edge", "web", "gateway", "capture", "report", "postgres")}
 
 
 class FakeAdapter:
@@ -71,6 +73,7 @@ def release(root: Path, digest: str, *, compatible: bool = True) -> Path:
         "git_commit": digest[:40],
         "git_tree": digest[-40:],
         "database_compatibility": LEDGER if compatible else LEDGER[:-1],
+        "images": IMAGES,
     }
     (target / "release.json").write_text(json.dumps(metadata))
     return target
@@ -96,6 +99,7 @@ def runtime_files(root: Path, current: Path) -> None:
     (root / "config").mkdir(exist_ok=True)
     (root / "config/runtime.env").write_text(
         "LIQVERA_PAYMENT_ENABLED=false\nLIQVERA_SOURCE_MODE=shadow\n"
+        + "".join(f"LIQVERA_IMAGE_{name.upper()}={value}\n" for name, value in sorted(IMAGES.items()))
     )
     (current / "compose.yaml").write_bytes((ROOT / "installer/compose.yaml").read_bytes())
 
@@ -246,10 +250,16 @@ def test_compose_adapter_uses_fixed_argv_and_never_removes_volumes(tmp_path: Pat
 
     def runner(argv: tuple[str, ...], **kwargs: object) -> subprocess.CompletedProcess[bytes]:
         calls.append((argv, kwargs))
-        output = json.dumps([
+        rows = [
             {"Service": service, "State": "running", "Health": "healthy"}
             for service in ("postgres", "capture", "report", "gateway", "web", "edge")
-        ]).encode() if argv[-3:] == ("ps", "--format", "json") else b""
+        ] + [{"Service": "migrate", "State": "exited", "Health": "", "ExitCode": 0}]
+        if argv[-4:] == ("ps", "--all", "--format", "json"):
+            output = json.dumps(rows).encode()
+        elif argv[-2:] == ("readiness", "--json"):
+            output = json.dumps({"status": "BLOCKED", "blockers": ["SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED"]}).encode()
+        else:
+            output = b""
         return subprocess.CompletedProcess(argv, 0, output, b"")
 
     adapter = LIFECYCLE.ComposeAdapter(root, runner)
@@ -320,11 +330,22 @@ def test_runtime_files_are_rehashed_before_compose_use(tmp_path: Path) -> None:
     (root / "config").mkdir()
     env = root / "config/runtime.env"
     compose = current / "compose.yaml"
-    env.write_text("LIQVERA_PAYMENT_ENABLED=false\nLIQVERA_SOURCE_MODE=shadow\n")
+    env.write_text("LIQVERA_PAYMENT_ENABLED=false\nLIQVERA_SOURCE_MODE=shadow\n" +
+                   "".join(f"LIQVERA_IMAGE_{name.upper()}={value}\n" for name, value in sorted(IMAGES.items())))
     compose.write_bytes((ROOT / "installer/compose.yaml").read_bytes())
     adapter = LIFECYCLE.ComposeAdapter(root, lambda argv, **kwargs: subprocess.CompletedProcess(argv, 0, b"", b""))
     adapter.bind_runtime(current, compose, env)
     compose.write_text("services: {evil: {}}\n")
+    with pytest.raises(LIFECYCLE.LifecycleError, match="CONFIG_INVALID"):
+        adapter.start("liqvera-test", current)
+
+
+def test_runtime_image_values_are_exactly_manifest_bound(tmp_path: Path) -> None:
+    root, _, current = installed(tmp_path)
+    runtime_files(root, current)
+    env = root / "config/runtime.env"
+    env.write_text(env.read_text().replace(IMAGES["web"], "registry.invalid/liqvera/web:latest"))
+    adapter = LIFECYCLE.ComposeAdapter(root, lambda argv, **kwargs: subprocess.CompletedProcess(argv, 0, b"", b""))
     with pytest.raises(LIFECYCLE.LifecycleError, match="CONFIG_INVALID"):
         adapter.start("liqvera-test", current)
 
@@ -352,3 +373,42 @@ def test_purge_removes_runtime_before_owned_volumes(tmp_path: Path) -> None:
                                                 "confirm_purge": preview["token"]}, adapter)
     kinds = [item[0] for item in adapter.trace]
     assert kinds.index("remove_runtime") < kinds.index("purge")
+
+
+def test_backup_callback_root_swap_cannot_redirect_update_journal(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    release(root, "b" * 64)
+    displaced = tmp_path / "displaced"
+    adapter = FakeAdapter()
+    def swapped(_: str) -> dict[str, object]:
+        root.rename(displaced)
+        root.mkdir(mode=0o700)
+        return {"complete": True, "sha256": "b" * 64}
+    adapter.backup = swapped
+    with pytest.raises(LIFECYCLE.LifecycleError, match="UNSAFE_INSTALL_ROOT"):
+        LIFECYCLE.run_lifecycle(root, "update", {"version": "0.0.2", "sha256": "b" * 64}, adapter)
+    assert not (root / "state/lifecycle.json").exists()
+
+
+def test_compose_purge_requires_exact_full_project_label(tmp_path: Path) -> None:
+    root, _, current = installed(tmp_path)
+    runtime_files(root, current)
+    calls: list[tuple[str, ...]] = []
+    def runner(argv: tuple[str, ...], **_: object) -> subprocess.CompletedProcess[bytes]:
+        calls.append(argv)
+        body = json.dumps([{"Labels": {"com.docker.compose.project": "liqvera-test"}}]).encode()
+        return subprocess.CompletedProcess(argv, 0, body, b"")
+    adapter = LIFECYCLE.ComposeAdapter(root, runner)
+    targets = tuple(f"liqvera-test_{name}" for name in
+                    ("postgres_data", "captures", "artifacts", "caddy_data", "caddy_config"))
+    adapter.purge(targets)
+    assert calls[-1][-5:] == targets
+
+
+def test_injected_log_adapter_rejects_oversized_capture(tmp_path: Path) -> None:
+    root, _, current = installed(tmp_path)
+    runtime_files(root, current)
+    def runner(argv: tuple[str, ...], **_: object) -> subprocess.CompletedProcess[bytes]:
+        return subprocess.CompletedProcess(argv, 0, b"x" * 65537, b"")
+    with pytest.raises(LIFECYCLE.LifecycleError, match="LIFECYCLE_COMMAND_FAILED"):
+        LIFECYCLE.ComposeAdapter(root, runner).logs("liqvera-test", "gateway", 100, "10m")

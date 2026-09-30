@@ -138,6 +138,15 @@ password and signature log forms are redacted, and the generated user unit now
 passes the mandatory `--install-root`. Focused lifecycle/systemd/Compose checks
 passed 59 tests; full installer+graph passed 394 tests. Real Docker/database/
 systemd and destructive purge remain NOT_RUN.
+The bounded re-review repair additionally binds all six runtime image values to
+the immutable release metadata, performs lifecycle state and pointer writes
+through the held root descriptor, and rejects root replacement around external
+callbacks. Status uses the same pointer reconciliation path as mutations.
+Readiness now requires exact unique running services, migrate exit zero and the
+closed shadow blockers; log collection is streaming, byte-bounded and timed.
+Volume ownership parsing preserves the full Compose project before the fixed
+volume suffix. Second-cycle focused checks passed 63 tests and full
+installer+graph passed 398 tests.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

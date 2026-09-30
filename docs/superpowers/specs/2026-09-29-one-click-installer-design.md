@@ -158,8 +158,9 @@ and last completed phase. It contains no secret values.
 Initial installation:
 
 ```text
-install.sh  --sha256 DIGEST [--version 0.0.2] [--install-dir PATH] [--config PATH]
-            [--non-interactive] [--install-deps]
+install.sh  --verified-release DIR --verified-receipt FILE --sha256 DIGEST
+            --install-dir PATH --config PATH [--non-interactive]
+            [--install-deps --approve-dependency-command SHA256]
 ```
 
 Lifecycle wrapper:
@@ -182,6 +183,11 @@ default that broadens authority.
 `--install-deps` is optional and explicit. Without it, missing Docker/Compose
 returns a distribution-specific instruction and makes no host changes. With it, the
 launcher prints the exact package-manager command and asks for confirmation.
+Interactive confirmation requires typing the printed exact command digest;
+non-interactive use requires that digest as an argument. The receipt is the
+closed output of the independently verified Task 2 materialization and is
+reconciled with the supplied outer digest and a fresh inner-file rehash before
+any host mutation.
 Privilege elevation is initiated visibly by the operator; the installer never
 embeds credentials, bypasses policy, or silently invokes `sudo`. Unsupported
 Linux distributions/architectures fail before dependency installation.

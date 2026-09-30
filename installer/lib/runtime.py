@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
 import hashlib
 import json
 import os
@@ -19,7 +20,6 @@ from pathlib import Path
 from typing import Callable
 
 from jsonschema import Draft202012Validator, ValidationError
-
 
 INSTALLER_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_SCHEMA = INSTALLER_ROOT / "schemas" / "config.schema.json"
@@ -45,9 +45,9 @@ FORBIDDEN_AMBIENT_ENV = {
     "BASH_ENV", "ENV",
 }
 READ_ONLY_COMMANDS = {
-    ("/usr/bin/docker", "version", "--format", "{{.Server.Version}}"),
-    ("/usr/bin/docker", "compose", "version", "--short"),
-    ("/usr/bin/docker", "info", "--format", "{{json .}}"),
+    ("/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "version", "--format", "{{.Server.Version}}"),
+    ("/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "compose", "version", "--short"),
+    ("/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "info", "--format", "{{.ServerVersion}}"),
 }
 DEPENDENCY_COMMANDS = {
     "ubuntu": ("/usr/bin/sudo", "--", "/usr/bin/apt-get", "install", "docker-ce", "docker-compose-plugin"),
@@ -68,6 +68,26 @@ def _load_schema(path: Path) -> dict[str, object]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _reject_duplicate_key(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise InstallerError("CONFIG_INVALID", "duplicate JSON key")
+        result[key] = value
+    return result
+
+
+def load_json_bytes(data: bytes, code: str, *, maximum: int = 1024 * 1024) -> object:
+    if len(data) > maximum:
+        raise InstallerError(code, "input exceeds bounded size")
+    try:
+        return json.loads(data.decode("utf-8"), object_pairs_hook=_reject_duplicate_key)
+    except InstallerError:
+        raise
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstallerError(code, "JSON is malformed") from exc
+
+
 def _validate(schema_path: Path, value: dict[str, object], code: str) -> None:
     try:
         Draft202012Validator(_load_schema(schema_path)).validate(value)
@@ -76,7 +96,10 @@ def _validate(schema_path: Path, value: dict[str, object], code: str) -> None:
 
 
 def _version(value: object) -> tuple[int, int, int]:
-    match = re.fullmatch(r"([0-9]+)\.([0-9]+)(?:\.([0-9]+))?(?:[-+][A-Za-z0-9_.-]+)?", str(value))
+    match = re.fullmatch(
+        r"([0-9]+)\.([0-9]+)(?:\.([0-9]+))?(?:\([0-9]+\))?(?:[-+][A-Za-z0-9_.-]+)?",
+        str(value),
+    )
     if match is None:
         raise InstallerError("DEPENDENCY_MISSING", "dependency version is malformed")
     return tuple(int(part or "0") for part in match.groups())  # type: ignore[return-value]
@@ -97,6 +120,10 @@ def _validate_install_root(path_value: object, filesystem_type: object) -> Path:
             break
         if stat.S_ISLNK(item.st_mode):
             raise InstallerError("UNSAFE_INSTALL_ROOT", "link path component")
+        writable = stat.S_IMODE(item.st_mode) & 0o022
+        trusted_sticky_root = item.st_uid == 0 and bool(item.st_mode & stat.S_ISVTX)
+        if writable and not trusted_sticky_root:
+            raise InstallerError("UNSAFE_INSTALL_ROOT", "writable path ancestry")
     existing = path
     while not existing.exists():
         existing = existing.parent
@@ -104,8 +131,17 @@ def _validate_install_root(path_value: object, filesystem_type: object) -> Path:
     parent_stat = parent.stat()
     if parent_stat.st_uid != os.getuid() or parent_stat.st_mode & stat.S_IWOTH:
         raise InstallerError("UNSAFE_INSTALL_ROOT", "unsafe existing ancestor")
-    if path.exists() and any(path.iterdir()) and not (path / "state" / "install-state.json").is_file():
-        raise InstallerError("UNSAFE_INSTALL_ROOT", "existing directory is not a Liqvera install")
+    if path.exists() and any(path.iterdir()):
+        state_path = path / "state" / "install-state.json"
+        config_path = path / "config" / "runtime.env"
+        if not state_path.is_file() or not config_path.is_file():
+            raise InstallerError("UNSAFE_INSTALL_ROOT", "existing directory is not a complete Liqvera install")
+        state_value = load_json_bytes(_safe_regular_bytes(state_path, "CONFIG_INVALID"), "CONFIG_INVALID")
+        if not isinstance(state_value, dict):
+            raise InstallerError("CONFIG_INVALID", "existing state is invalid")
+        _validate(STATE_SCHEMA, state_value, "CONFIG_INVALID")
+        if state_value.get("install_root") != str(path.resolve(strict=False)):
+            raise InstallerError("UNSAFE_INSTALL_ROOT", "existing state belongs to another root")
     return path.resolve(strict=False)
 
 
@@ -157,6 +193,17 @@ def preflight(request: dict[str, object], facts: dict[str, object]) -> dict[str,
 
 def _validate_secret_reference(path_value: object) -> Path:
     path = Path(str(path_value))
+    if any(character in str(path) for character in ("\n", "\r", "\x00", "\x7f")) or "${" in str(path):
+        raise InstallerError("SECRET_REFERENCE_INVALID", "secret reference contains unsafe characters")
+    current = Path("/")
+    for part in path.parts[1:]:
+        current /= part
+        try:
+            component = current.lstat()
+        except OSError as exc:
+            raise InstallerError("SECRET_REFERENCE_INVALID", "secret reference is unavailable") from exc
+        if stat.S_ISLNK(component.st_mode):
+            raise InstallerError("SECRET_REFERENCE_INVALID", "secret reference ancestry contains a link")
     try:
         item = path.lstat()
     except OSError as exc:
@@ -175,38 +222,132 @@ def _validate_secret_reference(path_value: object) -> Path:
     return path
 
 
+class InstallRoot:
+    """Descriptor-bound private installation root."""
+
+    def __init__(self, path: Path, root_fd: int, identity: tuple[int, int], created: bool) -> None:
+        self.path = path
+        self.fd = root_fd
+        self.identity = identity
+        self.created = created
+
+    @classmethod
+    def create(cls, path: Path) -> "InstallRoot":
+        path = _validate_install_root(path, "unknown")
+        existed = path.exists()
+        missing: list[str] = []
+        existing = path
+        while not existing.exists():
+            missing.append(existing.name)
+            existing = existing.parent
+        fd = os.open(existing, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        try:
+            for name in reversed(missing):
+                os.mkdir(name, 0o700, dir_fd=fd)
+                child = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=fd)
+                os.close(fd)
+                fd = child
+            item = os.fstat(fd)
+            return cls(path, fd, (item.st_dev, item.st_ino), not existed)
+        except Exception:
+            os.close(fd)
+            raise
+
+    def ensure_directory(self, name: str) -> int:
+        try:
+            os.mkdir(name, 0o700, dir_fd=self.fd)
+        except FileExistsError:
+            pass
+        child = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=self.fd)
+        item = os.fstat(child)
+        if item.st_uid != os.getuid() or stat.S_IMODE(item.st_mode) & 0o077:
+            os.close(child)
+            raise InstallerError("UNSAFE_INSTALL_ROOT", "installation child is not private")
+        return child
+
+    def write(self, relative: str, data: bytes) -> None:
+        directory, name = relative.split("/", 1)
+        parent_fd = self.ensure_directory(directory)
+        try:
+            _atomic_write_fd(parent_fd, name, data)
+        finally:
+            os.close(parent_fd)
+
+    def assert_selected_path(self) -> None:
+        try:
+            item = self.path.stat(follow_symlinks=False)
+        except OSError as exc:
+            raise InstallerError("UNSAFE_INSTALL_ROOT", "selected root disappeared") from exc
+        if stat.S_ISLNK(item.st_mode) or (item.st_dev, item.st_ino) != self.identity:
+            raise InstallerError("UNSAFE_INSTALL_ROOT", "selected root identity changed")
+
+    def close(self) -> None:
+        os.close(self.fd)
+
+    def cleanup_created(self) -> None:
+        if not self.created:
+            return
+        for directory, filename in (("config", "runtime.env"), ("state", "install-state.json")):
+            try:
+                child = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW, dir_fd=self.fd)
+            except FileNotFoundError:
+                continue
+            try:
+                try:
+                    os.unlink(filename, dir_fd=child)
+                except FileNotFoundError:
+                    pass
+            finally:
+                os.close(child)
+            try:
+                os.rmdir(directory, dir_fd=self.fd)
+            except FileNotFoundError:
+                pass
+        try:
+            os.unlink(".install.lock", dir_fd=self.fd)
+        except FileNotFoundError:
+            pass
+        self.assert_selected_path()
+        self.path.rmdir()
+
+
+def _atomic_write_fd(parent_fd: int, name: str, data: bytes) -> None:
+    temporary = f".{name}.{secrets.token_hex(12)}"
+    file_fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600, dir_fd=parent_fd)
+    try:
+        with os.fdopen(file_fd, "wb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
+        os.fsync(parent_fd)
+    except Exception:
+        try:
+            os.unlink(temporary, dir_fd=parent_fd)
+        except FileNotFoundError:
+            pass
+        raise
+
+
 def _atomic_write(path: Path, data: bytes) -> None:
     parent = path.parent
     try:
         parent_fd = os.open(parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW)
     except OSError as exc:
         raise InstallerError("CONFIG_INVALID", "output parent is unavailable") from exc
-    temporary = f".{path.name}.{secrets.token_hex(12)}"
     try:
-        file_fd = os.open(
-            temporary,
-            os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW,
-            0o600,
-            dir_fd=parent_fd,
-        )
-        try:
-            with os.fdopen(file_fd, "wb") as handle:
-                handle.write(data)
-                handle.flush()
-                os.fsync(handle.fileno())
-            os.replace(temporary, path.name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
-            os.fsync(parent_fd)
-        except Exception:
-            try:
-                os.unlink(temporary, dir_fd=parent_fd)
-            except FileNotFoundError:
-                pass
-            raise
+        _atomic_write_fd(parent_fd, path.name, data)
     finally:
         os.close(parent_fd)
 
 
-def render_config(config: dict[str, object], destination: Path) -> None:
+def render_config_bytes(config: dict[str, object]) -> bytes:
+    preliminary_secrets = config.get("secret_files")
+    if isinstance(preliminary_secrets, dict):
+        for value in preliminary_secrets.values():
+            raw = str(value)
+            if any(character in raw for character in ("\n", "\r", "\x00", "\x7f")) or "${" in raw:
+                raise InstallerError("SECRET_REFERENCE_INVALID", "secret reference contains unsafe characters")
     _validate(CONFIG_SCHEMA, config, "CONFIG_INVALID")
     secret_files = config["secret_files"]
     if not isinstance(secret_files, dict):
@@ -228,7 +369,11 @@ def render_config(config: dict[str, object], destination: Path) -> None:
         lines.extend((f"{prefix}_HOST={endpoint['host']}", f"{prefix}_PORT={endpoint['port']}"))
     for name, path in sorted(validated_secrets.items()):
         lines.append(f"{name}={path}")
-    _atomic_write(destination, ("\n".join(lines) + "\n").encode())
+    return ("\n".join(lines) + "\n").encode()
+
+
+def render_config(config: dict[str, object], destination: Path) -> None:
+    _atomic_write(destination, render_config_bytes(config))
 
 
 def write_state_atomic(path: Path, state: dict[str, object]) -> None:
@@ -247,6 +392,79 @@ def load_state(path: Path) -> dict[str, object] | None:
         raise InstallerError("CONFIG_INVALID", "install state must be an object")
     _validate(STATE_SCHEMA, state, "CONFIG_INVALID")
     return state
+
+
+def reconcile_existing(root: Path, expected: dict[str, object], config_bytes: bytes) -> dict[str, object] | None:
+    if not root.exists():
+        return None
+    state_path = root / "state/install-state.json"
+    config_path = root / "config/runtime.env"
+    if not state_path.is_file() or not config_path.is_file():
+        raise InstallerError("UNSAFE_INSTALL_ROOT", "existing root is not a complete Liqvera install")
+    observed = load_state(state_path)
+    if observed is None:
+        raise InstallerError("CONFIG_INVALID", "existing state is missing")
+    for key in ("product_version", "release_sha256", "git_commit", "git_tree", "install_root", "compose_project", "ports"):
+        if observed.get(key) != expected.get(key):
+            code = "RELEASE_DIGEST_MISMATCH" if key in {"release_sha256", "git_commit", "git_tree", "product_version"} else "CONFIG_INVALID"
+            raise InstallerError(code, "existing installation identity conflicts")
+    try:
+        existing_config = config_path.read_bytes()
+    except OSError as exc:
+        raise InstallerError("CONFIG_INVALID", "existing config is unavailable") from exc
+    if existing_config != config_bytes:
+        raise InstallerError("CONFIG_INVALID", "existing configuration conflicts")
+    return observed
+
+
+def _safe_regular_bytes(path: Path, code: str, maximum: int = 1024 * 1024) -> bytes:
+    try:
+        item = path.lstat()
+        if not stat.S_ISREG(item.st_mode) or item.st_nlink != 1 or item.st_size > maximum:
+            raise InstallerError(code, "input is not a bounded single-link regular file")
+        fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        try:
+            data = os.read(fd, maximum + 1)
+            after = os.fstat(fd)
+        finally:
+            os.close(fd)
+    except OSError as exc:
+        raise InstallerError(code, "input is unavailable") from exc
+    if len(data) > maximum or (after.st_dev, after.st_ino, after.st_size) != (item.st_dev, item.st_ino, item.st_size):
+        raise InstallerError(code, "input identity changed")
+    return data
+
+
+def validate_verified_release(release: Path, receipt_path: Path, expected_sha256: str) -> dict[str, object]:
+    receipt = load_json_bytes(_safe_regular_bytes(receipt_path, "ARCHIVE_INVALID"), "ARCHIVE_INVALID")
+    required = {"schema_version", "archive_sha256", "destination", "file_count", "product_version", "git_commit", "git_tree"}
+    if not isinstance(receipt, dict) or set(receipt) != required or receipt.get("schema_version") != "verified-release-v1":
+        raise InstallerError("ARCHIVE_INVALID", "verified release receipt is not closed")
+    if receipt.get("archive_sha256") != expected_sha256:
+        raise InstallerError("RELEASE_DIGEST_MISMATCH", "receipt does not bind the supplied archive digest")
+    if receipt.get("destination") != str(release.resolve(strict=True)):
+        raise InstallerError("ARCHIVE_INVALID", "receipt destination mismatch")
+    manifest = load_json_bytes(_safe_regular_bytes(release / "manifests/release-manifest.json", "ARCHIVE_INVALID"), "ARCHIVE_INVALID")
+    if not isinstance(manifest, dict):
+        raise InstallerError("ARCHIVE_INVALID", "release manifest is not an object")
+    _validate(INSTALLER_ROOT / "schemas/release-manifest.schema.json", manifest, "ARCHIVE_INVALID")
+    sums_data = _safe_regular_bytes(release / "SHA256SUMS", "ARCHIVE_INVALID").decode("utf-8")
+    expected: dict[str, str] = {}
+    for line in sums_data.splitlines():
+        match = re.fullmatch(r"([0-9a-f]{64})  ([^\x00-\x1f\x7f]+)", line)
+        if match is None or match.group(2) in expected:
+            raise InstallerError("ARCHIVE_INVALID", "checksum inventory is malformed")
+        expected[match.group(2)] = match.group(1)
+    observed = {str(path.relative_to(release)): path for path in release.rglob("*") if path.is_file() and path.name != "SHA256SUMS"}
+    if set(observed) != set(expected) or receipt.get("file_count") != len(expected) + 1:
+        raise InstallerError("ARCHIVE_INVALID", "release inventory mismatch")
+    for name, path in observed.items():
+        if hashlib.sha256(_safe_regular_bytes(path, "ARCHIVE_INVALID", 16 * 1024 * 1024)).hexdigest() != expected[name]:
+            raise InstallerError("ARCHIVE_INVALID", "release member digest mismatch")
+    for key in ("product_version", "git_commit", "git_tree"):
+        if receipt.get(key) != manifest.get(key):
+            raise InstallerError("ARCHIVE_INVALID", "receipt and manifest identity mismatch")
+    return manifest
 
 
 def dependency_command(distribution: str) -> tuple[str, ...]:
@@ -282,12 +500,19 @@ def reject_ambient_authority(environment: dict[str, str] | os._Environ[str]) -> 
 
 def _system_runner(argv: tuple[str, ...]) -> int:
     # argv is either a fixed read-only command or an exact reviewed dependency tuple.
-    return subprocess.run(argv, env=SAFE_ENV, check=False, timeout=30).returncode  # nosec B603
+    try:
+        return subprocess.run(  # nosec B603
+            argv, env=SAFE_ENV, check=False, timeout=30,
+            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        ).returncode
+    except (OSError, subprocess.SubprocessError):
+        return 127
 
 
 def _cli_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Configure a verified Liqvera Linux release")
     parser.add_argument("--verified-release", type=Path, required=True)
+    parser.add_argument("--verified-receipt", type=Path, required=True)
     parser.add_argument("--sha256", required=True)
     parser.add_argument("--install-dir", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
@@ -305,11 +530,24 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         reject_ambient_authority(os.environ)
-        config = json.loads(args.config.read_text(encoding="utf-8"))
-        manifest = json.loads((args.verified_release / "manifests/release-manifest.json").read_text(encoding="utf-8"))
+        config = load_json_bytes(_safe_regular_bytes(args.config, "CONFIG_INVALID"), "CONFIG_INVALID")
+        manifest = validate_verified_release(args.verified_release, args.verified_receipt, args.sha256)
         if not isinstance(config, dict) or not isinstance(manifest, dict):
             raise InstallerError("CONFIG_INVALID", "config or manifest is not an object")
-        # Host collection remains read-only; Task 4 owns all Docker/Compose mutation.
+        _validate(CONFIG_SCHEMA, config, "CONFIG_INVALID")
+        config_bytes = render_config_bytes(config)
+        root = _validate_install_root(args.install_dir, "unknown")
+        identity = {
+            "product_version": manifest["product_version"], "release_sha256": args.sha256,
+            "git_commit": manifest["git_commit"], "git_tree": manifest["git_tree"],
+            "install_root": str(root), "compose_project": f"liqvera-{args.sha256[:12]}",
+            "ports": {name: config["ports"][name]["port"] for name in ("web", "gateway", "metrics")},
+        }
+        existing = reconcile_existing(root, identity, config_bytes)
+        if existing is not None:
+            print(json.dumps({"schema_version": "liqvera-preflight-result/v1", "status": existing["last_completed_phase"], "install_root": str(root)}, sort_keys=True, separators=(",", ":")))
+            return 0
+        # Host collection remains read-only; Task 4 owns Docker/Compose mutation.
         facts = _collect_system_facts(args.install_dir, config, args.bash_version)
         try:
             outcome = preflight(request={
@@ -317,16 +555,22 @@ def main(argv: list[str] | None = None) -> int:
                 "install_root": str(args.install_dir),
                 "config": config,
             }, facts=facts)
-        except InstallerError as exc:
-            if exc.code != "DEPENDENCY_MISSING" or not args.install_deps:
+        except InstallerError:
+            if facts.get("installable_dependency_missing") is not True or not args.install_deps:
                 raise
-            install_dependencies(str(facts["distribution"]), args.approve_dependency_command, _system_runner)
+            approval = args.approve_dependency_command
+            command = dependency_command(str(facts["distribution"]))
+            command_digest = hashlib.sha256("\0".join(command).encode()).hexdigest()
+            print(f"DEPENDENCY_PREVIEW: {' '.join(command)}", file=sys.stderr)
+            print(f"DEPENDENCY_APPROVAL_SHA256: {command_digest}", file=sys.stderr)
+            if approval is None and not args.non_interactive:
+                try:
+                    approval = input("Enter the exact dependency approval SHA-256: ").strip()
+                except EOFError as input_error:
+                    raise InstallerError("DEPENDENCY_MISSING", "dependency approval was not provided") from input_error
+            install_dependencies(str(facts["distribution"]), approval, _system_runner)
             facts = _collect_system_facts(args.install_dir, config, args.bash_version)
             outcome = preflight({"schema_version": "liqvera-preflight-request/v1", "install_root": str(args.install_dir), "config": config}, facts)
-        args.install_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
-        (args.install_dir / "config").mkdir(mode=0o700, exist_ok=True)
-        (args.install_dir / "state").mkdir(mode=0o700, exist_ok=True)
-        render_config(config, args.install_dir / "config" / "runtime.env")
         now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
         state = {
             "schema_version": "liqvera-install-state/v1",
@@ -337,17 +581,35 @@ def main(argv: list[str] | None = None) -> int:
             "install_root": outcome["install_root"],
             "compose_project": f"liqvera-{args.sha256[:12]}",
             "linux": {"distribution": outcome["distribution"], "architecture": outcome["architecture"]},
-            "docker": {"engine_version": str(facts["docker_version"]), "compose_version": str(facts["compose_version"])},
+            "docker": {
+                "engine_version": ".".join(str(part) for part in _version(facts["docker_version"])),
+                "compose_version": ".".join(str(part) for part in _version(facts["compose_version"])),
+            },
             "ports": {name: config["ports"][name]["port"] for name in ("web", "gateway", "metrics")},
             "last_completed_phase": "CONFIGURED",
             "last_error": None,
             "created_at": now,
             "updated_at": now,
         }
-        write_state_atomic(args.install_dir / "state" / "install-state.json", state)
+        _validate(STATE_SCHEMA, state, "CONFIG_INVALID")
+        root_handle = InstallRoot.create(args.install_dir)
+        try:
+            lock_fd = os.open(".install.lock", os.O_WRONLY | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600, dir_fd=root_handle.fd)
+            try:
+                fcntl.flock(lock_fd, fcntl.LOCK_EX)
+                root_handle.write("config/runtime.env", config_bytes)
+                root_handle.write("state/install-state.json", (json.dumps(state, sort_keys=True, separators=(",", ":")) + "\n").encode())
+                root_handle.assert_selected_path()
+            finally:
+                os.close(lock_fd)
+        except Exception:
+            root_handle.cleanup_created()
+            raise
+        finally:
+            root_handle.close()
         print(json.dumps({**outcome, "status": "CONFIGURED"}, sort_keys=True, separators=(",", ":")))
         return 0
-    except (InstallerError, OSError, json.JSONDecodeError, KeyError) as exc:
+    except (InstallerError, OSError, json.JSONDecodeError, KeyError, TypeError, ValueError, subprocess.SubprocessError) as exc:
         message = str(exc) if isinstance(exc, InstallerError) else "CONFIG_INVALID: bounded input failure"
         print(message, file=sys.stderr)
         return 2
@@ -362,14 +624,23 @@ def _read_os_release() -> tuple[str, str]:
     return values.get("ID", ""), values.get("VERSION_ID", "")
 
 
-def _command_output(argv: tuple[str, ...]) -> str:
+def _command_output(argv: tuple[str, ...]) -> str | None:
     # Callers supply only literal entries from READ_ONLY_COMMANDS.
-    completed = subprocess.run(  # nosec B603
-        argv, env=SAFE_ENV, check=False, capture_output=True, text=True, timeout=10
-    )
+    try:
+        completed = subprocess.run(  # nosec B603
+            argv, env=SAFE_ENV, check=False, capture_output=True, timeout=10,
+            stdin=subprocess.DEVNULL,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
     if completed.returncode != 0:
-        return "0.0.0"
-    return completed.stdout.strip().removeprefix("Docker version ").split(",", 1)[0].removeprefix("v")
+        return None
+    if len(completed.stdout) > 256 or len(completed.stderr) > 256:
+        return None
+    try:
+        return completed.stdout.decode("ascii").strip().removeprefix("Docker version ").split(",", 1)[0].removeprefix("v")
+    except UnicodeDecodeError:
+        return None
 
 
 def _filesystem_type(path: Path) -> str:
@@ -408,16 +679,20 @@ def _collect_system_facts(install_root: Path, config: dict[str, object], bash_ve
     ports = config["ports"]
     if not isinstance(ports, dict):
         raise InstallerError("CONFIG_INVALID", "ports must be an object")
+    docker_version = _command_output(("/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "version", "--format", "{{.Server.Version}}"))
+    compose_version = _command_output(("/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "compose", "version", "--short"))
+    missing = docker_version is None or compose_version is None
     return {
         "kernel": platform.system(),
         "distribution": distribution,
         "distribution_version": distribution_version,
         "architecture": platform.machine(),
         "bash_version": bash_version,
-        "docker_version": _command_output(("/usr/bin/docker", "version", "--format", "{{.Server.Version}}")),
-        "compose_version": _command_output(("/usr/bin/docker", "compose", "version", "--short")),
-        "docker_endpoint": "unix:///var/run/docker.sock" if not os.environ.get("DOCKER_HOST") else "ambient-override",
-        "daemon_reachable": _system_runner(("/usr/bin/docker", "info", "--format", "{{json .}}")) == 0,
+        "docker_version": docker_version or "0.0.0",
+        "compose_version": compose_version or "0.0.0",
+        "installable_dependency_missing": missing,
+        "docker_endpoint": "unix:///var/run/docker.sock",
+        "daemon_reachable": not missing and _system_runner(("/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "info", "--format", "{{.ServerVersion}}")) == 0,
         "disk_bytes": usage.f_bavail * usage.f_frsize,
         "memory_bytes": os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_AVPHYS_PAGES"),
         "filesystem_type": _filesystem_type(install_root),

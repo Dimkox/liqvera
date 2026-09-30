@@ -1,4 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/sh
+if [ "${LIQVERA_TRUSTED_BASH:-}" != "1" ]; then
+    unset BASH_ENV ENV CDPATH GLOBIGNORE SHELLOPTS
+    LIQVERA_TRUSTED_BASH=1
+    export LIQVERA_TRUSTED_BASH
+    exec /usr/bin/bash --noprofile --norc "$0" "$@"
+fi
 set -euo pipefail
 readonly PATH='/usr/bin:/bin'
 export PATH
@@ -9,10 +15,11 @@ source "${INSTALLER_DIR}/lib/common.sh"
 
 usage() {
     cat <<'EOF'
-Usage: install.sh --verified-release DIR --sha256 DIGEST --install-dir DIR --config FILE [OPTIONS]
+Usage: install.sh --verified-release DIR --verified-receipt FILE --sha256 DIGEST --install-dir DIR --config FILE [OPTIONS]
 
 Options:
   --verified-release DIR              Task 2 materialized release directory
+  --verified-receipt FILE             Exact Task 2 verification receipt
   --sha256 DIGEST                     Independently supplied archive SHA-256
   --install-dir DIR                   Narrow local installation root
   --config FILE                       Closed JSON installer configuration
@@ -35,7 +42,7 @@ while (($#)); do
             printf '0.0.2\n'
             exit 0
             ;;
-        --verified-release|--sha256|--install-dir|--config|--approve-dependency-command)
+        --verified-release|--verified-receipt|--sha256|--install-dir|--config|--approve-dependency-command)
             if (($# < 2)); then
                 printf 'CONFIG_INVALID: missing value for %s\n' "$1" >&2
                 exit 2
@@ -54,5 +61,5 @@ while (($#)); do
     esac
 done
 
-args+=(--bash-version "${BASH_VERSION}")
+args+=(--bash-version "${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}.${BASH_VERSINFO[2]}")
 liqvera_run_runtime "${args[@]}"

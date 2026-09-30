@@ -288,3 +288,11 @@ The first full live runner allowed A08/A09 to resolve `/usr/bin/python`, even
 though the verified dependencies lived in the repository environment, producing
 two unrelated failures beside valid payment evidence. Acceptance wrappers must
 select the repository `.venv` explicitly and fail closed when it is unavailable.
+
+## 2026-09-30 — Installer unit seams did not prove the orchestration boundary
+
+The first Task 3 implementation tested validators and atomic files separately,
+but `main` trusted a directory name, validated secrets after mkdir, discarded
+root identity, and never reconciled prior state. Exercise the real CLI pipeline
+with a Task 2 receipt, failure injection, retries and path replacement: trust,
+validation and descriptor ownership must remain continuous through publication.

@@ -11,7 +11,6 @@ from pathlib import Path
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[2]
 RUNTIME_PATH = ROOT / "installer" / "lib" / "runtime.py"
 INSTALLER = ROOT / "installer" / "install.sh"
@@ -39,6 +38,40 @@ def safe_config(secret_file: Path | None = None) -> dict[str, object]:
         },
         "secret_files": secret_files,
     }
+
+
+def verified_release(tmp_path: Path, digest: str = "a" * 64) -> tuple[Path, Path]:
+    archive_spec = importlib.util.spec_from_file_location(
+        "installer_archive_fixture", ROOT / "tests/installer/test_archive_verifier.py"
+    )
+    assert archive_spec is not None and archive_spec.loader is not None
+    archive_module = importlib.util.module_from_spec(archive_spec)
+    sys.modules[archive_spec.name] = archive_module
+    archive_spec.loader.exec_module(archive_module)
+    release = tmp_path / "verified"
+    for name, data in archive_module.valid_files().items():
+        target = release / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+    checksums = {
+        str(path.relative_to(release)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in release.rglob("*")
+        if path.is_file()
+    }
+    (release / "SHA256SUMS").write_text(
+        "".join(f"{value}  {name}\n" for name, value in sorted(checksums.items())),
+        encoding="utf-8",
+    )
+    manifest = json.loads((release / "manifests/release-manifest.json").read_text())
+    receipt = tmp_path / "verified-receipt.json"
+    receipt.write_text(json.dumps({
+        "schema_version": "verified-release-v1", "archive_sha256": digest,
+        "destination": str(release.resolve()), "file_count": len(checksums) + 1,
+        "product_version": manifest["product_version"],
+        "git_commit": manifest["git_commit"], "git_tree": manifest["git_tree"],
+    }), encoding="utf-8")
+    receipt.chmod(0o600)
+    return release, receipt
 
 
 def facts(**overrides: object) -> dict[str, object]:
@@ -298,9 +331,233 @@ def test_ambient_runtime_authority_is_rejected_before_process_execution(name: st
         RUNTIME.reject_ambient_authority({name: "CANARY"})
 
 
+def test_bash_numeric_version_accepts_real_spelling() -> None:
+    assert RUNTIME._version("5.2.21(1)-release") == (5, 2, 21)
+
+
+def test_json_inputs_reject_duplicate_keys() -> None:
+    with pytest.raises(RUNTIME.InstallerError, match="CONFIG_INVALID"):
+        RUNTIME.load_json_bytes(b'{"payment_enabled":true,"payment_enabled":false}', "CONFIG_INVALID")
+
+
+@pytest.mark.parametrize("name", ["line\nfeed", "${INTERPOLATION}", "control\x7f"])
+def test_secret_reference_rejects_control_or_interpolation(tmp_path: Path, name: str) -> None:
+    secret = tmp_path / name
+    secret.write_text("x")
+    secret.chmod(0o600)
+    with pytest.raises(RUNTIME.InstallerError, match="SECRET_REFERENCE_INVALID"):
+        RUNTIME.render_config(safe_config(secret), tmp_path / "runtime.env")
+
+
+def test_verified_release_rejects_wrong_digest_and_mutated_member(tmp_path: Path) -> None:
+    release, receipt = verified_release(tmp_path)
+    with pytest.raises(RUNTIME.InstallerError, match="RELEASE_DIGEST_MISMATCH"):
+        RUNTIME.validate_verified_release(release, receipt, "b" * 64)
+    (release / "install.sh").write_text("changed")
+    with pytest.raises(RUNTIME.InstallerError, match="ARCHIVE_INVALID"):
+        RUNTIME.validate_verified_release(release, receipt, "a" * 64)
+
+
+def test_descriptor_bound_root_rejects_path_replacement(tmp_path: Path) -> None:
+    root = tmp_path / "install"
+    handle = RUNTIME.InstallRoot.create(root)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    moved = tmp_path / "moved"
+    root.rename(moved)
+    root.symlink_to(outside, target_is_directory=True)
+    try:
+        with pytest.raises(RUNTIME.InstallerError, match="UNSAFE_INSTALL_ROOT"):
+            handle.assert_selected_path()
+        handle.write("config/runtime.env", b"safe\n")
+        assert not (outside / "config/runtime.env").exists()
+    finally:
+        handle.close()
+
+
+def test_existing_install_is_idempotent_and_conflicts_fail_without_overwrite(tmp_path: Path) -> None:
+    root = tmp_path / "install"
+    root.mkdir(mode=0o700)
+    (root / "config").mkdir()
+    (root / "state").mkdir()
+    config_bytes = b"stable\n"
+    (root / "config/runtime.env").write_bytes(config_bytes)
+    state = {
+        "schema_version": "liqvera-install-state/v1", "product_version": "0.0.2",
+        "release_sha256": "a" * 64, "git_commit": "1" * 40, "git_tree": "2" * 40,
+        "install_root": str(root.resolve()), "compose_project": "liqvera-aaaaaaaaaaaa",
+        "linux": {"distribution": "ubuntu", "architecture": "amd64"},
+        "docker": {"engine_version": "27.5.1", "compose_version": "2.32.4"},
+        "ports": {"web": 3000, "gateway": 8080, "metrics": 9090},
+        "last_completed_phase": "HEALTHY", "last_error": None,
+        "created_at": "2026-09-29T00:00:00Z", "updated_at": "2026-09-29T00:00:00Z",
+    }
+    (root / "state/install-state.json").write_text(json.dumps(state))
+    assert RUNTIME.reconcile_existing(root, state, config_bytes) == state
+    assert (root / "config/runtime.env").read_bytes() == config_bytes
+    with pytest.raises(RUNTIME.InstallerError, match="RELEASE_DIGEST_MISMATCH"):
+        RUNTIME.reconcile_existing(root, {**state, "release_sha256": "b" * 64}, config_bytes)
+    assert json.loads((root / "state/install-state.json").read_text())["release_sha256"] == "a" * 64
+
+
+def cli_args(release: Path, receipt: Path, config: Path, root: Path, *extra: str) -> list[str]:
+    return [
+        "--verified-release", str(release), "--verified-receipt", str(receipt),
+        "--sha256", "a" * 64, "--install-dir", str(root), "--config", str(config),
+        "--bash-version", "5.2.21", *extra,
+    ]
+
+
+def clear_authority(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name in RUNTIME.FORBIDDEN_AMBIENT_ENV:
+        monkeypatch.delenv(name, raising=False)
+
+
+def test_main_validates_everything_before_write_and_preserves_matching_install(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    clear_authority(monkeypatch)
+    release, receipt = verified_release(tmp_path)
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps(safe_config()))
+    root = tmp_path / "install"
+    monkeypatch.setattr(RUNTIME, "_collect_system_facts", lambda *_: facts())
+
+    assert RUNTIME.main(cli_args(release, receipt, config_path, root)) == 0
+    first_state = (root / "state/install-state.json").read_bytes()
+    first_config_stat = (root / "config/runtime.env").stat()
+    assert json.loads(capsys.readouterr().out)["status"] == "CONFIGURED"
+
+    assert RUNTIME.main(cli_args(release, receipt, config_path, root)) == 0
+    assert (root / "state/install-state.json").read_bytes() == first_state
+    assert (root / "config/runtime.env").stat().st_ino == first_config_stat.st_ino
+
+
+def test_main_invalid_secret_or_manifest_leaves_no_install_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    clear_authority(monkeypatch)
+    release, receipt = verified_release(tmp_path)
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps(safe_config(tmp_path / "missing-secret")))
+    root = tmp_path / "install"
+    monkeypatch.setattr(RUNTIME, "_collect_system_facts", lambda *_: facts())
+    assert RUNTIME.main(cli_args(release, receipt, config_path, root)) == 2
+    assert not root.exists()
+
+    config_path.write_text(json.dumps(safe_config()))
+    (release / "manifests/release-manifest.json").write_text("{}")
+    assert RUNTIME.main(cli_args(release, receipt, config_path, root)) == 2
+    assert not root.exists()
+
+
+def test_main_missing_docker_only_runs_exact_explicit_approved_dependency(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    clear_authority(monkeypatch)
+    release, receipt = verified_release(tmp_path)
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps(safe_config()))
+    root = tmp_path / "install"
+    observations = [facts(docker_version="0.0.0", compose_version="0.0.0", daemon_reachable=False,
+                          installable_dependency_missing=True), facts()]
+    monkeypatch.setattr(RUNTIME, "_collect_system_facts", lambda *_: observations.pop(0))
+    calls: list[tuple[str, ...]] = []
+    monkeypatch.setattr(RUNTIME, "_system_runner", lambda argv: calls.append(argv) or 0)
+    command = RUNTIME.dependency_command("ubuntu")
+    approval = hashlib.sha256("\0".join(command).encode()).hexdigest()
+    assert RUNTIME.main(cli_args(release, receipt, config_path, root, "--install-deps", "--non-interactive",
+                                 "--approve-dependency-command", approval)) == 0
+    assert calls == [command]
+
+
+def test_main_interactive_dependency_requires_exact_typed_digest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    clear_authority(monkeypatch)
+    release, receipt = verified_release(tmp_path)
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps(safe_config()))
+    observations = [facts(docker_version="0.0.0", compose_version="0.0.0", daemon_reachable=False,
+                          installable_dependency_missing=True), facts()]
+    monkeypatch.setattr(RUNTIME, "_collect_system_facts", lambda *_: observations.pop(0))
+    calls: list[tuple[str, ...]] = []
+    monkeypatch.setattr(RUNTIME, "_system_runner", lambda argv: calls.append(argv) or 0)
+    command = RUNTIME.dependency_command("ubuntu")
+    approval = hashlib.sha256("\0".join(command).encode()).hexdigest()
+    monkeypatch.setattr("builtins.input", lambda _prompt: approval)
+
+    assert RUNTIME.main(cli_args(release, receipt, config_path, tmp_path / "install", "--install-deps")) == 0
+    assert calls == [command]
+    diagnostic = capsys.readouterr().err
+    assert "DEPENDENCY_PREVIEW: /usr/bin/sudo -- /usr/bin/apt-get install" in diagnostic
+    assert approval in diagnostic
+
+
+def test_main_resource_failure_never_runs_dependency_command(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    clear_authority(monkeypatch)
+    release, receipt = verified_release(tmp_path)
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps(safe_config()))
+    monkeypatch.setattr(RUNTIME, "_collect_system_facts", lambda *_: facts(disk_bytes=1))
+    calls: list[tuple[str, ...]] = []
+    monkeypatch.setattr(RUNTIME, "_system_runner", lambda argv: calls.append(argv) or 0)
+    assert RUNTIME.main(cli_args(release, receipt, config_path, tmp_path / "install", "--install-deps")) == 2
+    assert calls == []
+
+
+def test_main_publication_failure_removes_invocation_owned_partial_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    clear_authority(monkeypatch)
+    release, receipt = verified_release(tmp_path)
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps(safe_config()))
+    root = tmp_path / "install"
+    monkeypatch.setattr(RUNTIME, "_collect_system_facts", lambda *_: facts())
+    original_write = RUNTIME.InstallRoot.write
+    calls = 0
+
+    def fail_second_write(handle: object, relative: str, data: bytes) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("CANARY-WRITE-FAILURE")
+        original_write(handle, relative, data)
+
+    monkeypatch.setattr(RUNTIME.InstallRoot, "write", fail_second_write)
+    assert RUNTIME.main(cli_args(release, receipt, config_path, root)) == 2
+    assert not root.exists()
+
+
+def test_process_adapters_suppress_children_and_close_timeout(
+    monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[dict[str, object]] = []
+
+    def quiet(*_args: object, **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+        calls.append(kwargs)
+        return subprocess.CompletedProcess([], 1, b"CANARY", b"CANARY")
+
+    monkeypatch.setattr(RUNTIME.subprocess, "run", quiet)
+    assert RUNTIME._system_runner(next(iter(RUNTIME.READ_ONLY_COMMANDS))) == 1
+    assert calls[0]["stdout"] is subprocess.DEVNULL
+    assert calls[0]["stderr"] is subprocess.DEVNULL
+
+    def timeout(*_args: object, **_kwargs: object) -> subprocess.CompletedProcess[bytes]:
+        raise subprocess.TimeoutExpired("docker", 10, output=b"CANARY", stderr=b"CANARY")
+
+    monkeypatch.setattr(RUNTIME.subprocess, "run", timeout)
+    assert RUNTIME._command_output(next(iter(RUNTIME.READ_ONLY_COMMANDS))) is None
+    assert RUNTIME._system_runner(next(iter(RUNTIME.READ_ONLY_COMMANDS))) == 127
+
+
 def test_process_adapter_rejects_shell_live_and_daemon_authority() -> None:
     runner = FakeRunner()
-    assert RUNTIME.run_process(("/usr/bin/docker", "version", "--format", "{{.Server.Version}}"), runner) == 0
+    allowed = ("/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "version", "--format", "{{.Server.Version}}")
+    assert RUNTIME.run_process(allowed, runner) == 0
     for argv in (
         ("/bin/sh", "-c", "true"),
         ("/usr/bin/docker", "compose", "-f", "/tmp/evil", "up"),
@@ -310,7 +567,7 @@ def test_process_adapter_rejects_shell_live_and_daemon_authority() -> None:
         with pytest.raises(RUNTIME.InstallerError, match="DEPENDENCY_MISSING"):
             RUNTIME.run_process(argv, runner)
     assert runner.calls == [
-        ("/usr/bin/docker", "version", "--format", "{{.Server.Version}}")
+        allowed
     ]
 
 
@@ -335,3 +592,13 @@ def test_bash_entrypoint_has_closed_help_and_rejects_unknown_flags(tmp_path: Pat
     )
     assert unknown.returncode == 2
     assert not (tmp_path / "pwned").exists()
+
+    startup = tmp_path / "startup.sh"
+    startup.write_text("printf 'CANARY-STARTUP\\n'\n")
+    version = subprocess.run(
+        [str(INSTALLER), "--version"], cwd=tmp_path, check=False,
+        capture_output=True, text=True, env={**os.environ, "BASH_ENV": str(startup)},
+    )
+    assert version.returncode == 0
+    assert version.stdout == "0.0.2\n"
+    assert "CANARY" not in version.stderr

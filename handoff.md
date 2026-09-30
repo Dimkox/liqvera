@@ -58,6 +58,21 @@ topology, and readiness semantics before it can mutate Docker state. The
 current development environment does not provision `shellcheck`; no download
 was attempted.
 
+Task 3 independent review then found that the first vertical stopped its trust
+checks too early. The repaired boundary now requires the exact Task 2 receipt,
+matches its independently supplied outer digest/destination/manifest identity,
+rehashes the complete materialized inventory, and rejects duplicate JSON keys.
+All config, secret metadata, release/state identities, canonical versions and
+host facts are validated before root creation. New installs retain a private
+root descriptor and lock through descriptor-relative config/state publication,
+revalidate the selected pathname, and remove invocation-owned partial output on
+failure; retries validate and preserve matching state/config and reject corrupt
+or conflicting installations. The launcher clears shell-startup authority
+before entering Bash and passes numeric `BASH_VERSINFO`. Docker probes bind the
+local socket in exact argv, suppress child output, close timeouts/errors, and
+only missing installable Docker prerequisites can enter the exact preview plus
+typed-digest dependency flow. Compose and all Task 4 mutations remain absent.
+
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result
 `b31bc68310c471d35de079d1e0a13232aa39dff4e99b42a9d21b9ce2dbe770de`

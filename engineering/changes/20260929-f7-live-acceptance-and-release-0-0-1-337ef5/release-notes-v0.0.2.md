@@ -41,5 +41,14 @@ workspace metadata `0.1.0.dev0`); only the Liqvera product VERSION advances to
 `0.0.2`.
 
 No v0.0.2 tag, push, or GitHub Release has been created. Final artifact evidence
-must bind the reviewed release commit/tree, archive/inventory hashes, detached
-checksum, bootstrap/verifier assets, and all immutable image references.
+binds release commit `55f08c586d009c1b6fd7cd60de12025777d2bea3`, tree
+`ad8a205d3ddb7faae69e914fbb2ebdb471f05848`, archive SHA-256
+`a6f3c08382e7727640d9707da7ee4804f071ed0580fd56c1a2dcbf4351aad17d`
+(41,157 bytes), and inner inventory
+`ad66569f354144e61c0f0d32c6679c5661288db402ec4e75103ccbb99ca68bd2`.
+Two builds were byte-identical and both independently materialized 25 files.
+The detached checksum, bootstrap, bootstrap checksum, and verifier hashes are
+recorded in the release artifact manifest. All five Liqvera images use
+anonymous Docker Hub refs with unchanged multiarch index digests; PostgreSQL is
+the pinned official multiarch digest. Assets remain `NOT_PUBLISHED` pending
+exact-fingerprint independent reviews.

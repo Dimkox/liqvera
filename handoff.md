@@ -202,6 +202,13 @@ installer archive hashes are explicitly stale after integration repairs and
 will be replaced only by two byte-identical builds from the final Task 7 docs
 commit, each accepted by the independent verifier. Publication remains held
 for exact-fingerprint independent reviews.
+The frozen Task 7 release subject is `55f08c586d009c1b6fd7cd60de12025777d2bea3`
+/ tree `ad8a205d3ddb7faae69e914fbb2ebdb471f05848`. Two clean builds are
+byte-identical at archive SHA-256 `a6f3c083…1aad17d`; both independent verifier
+runs report 25 files and inventory `ad66569f…ca68bd2`. The retained out-of-tree
+asset set includes the 970-byte bootstrap, its detached checksum, the 41,157-byte
+archive, its detached checksum, and the 22,093-byte verifier. Nothing is
+published; clean-host Docker acceptance remains `NOT_RUN`.
 During authorized multiarch publication the production web Docker build exposed
 strict TypeScript narrowing gaps in receipt verification and the reviewed JS
 x402 bridge import. The minimal source typing repair preserves all runtime

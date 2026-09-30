@@ -64,10 +64,14 @@ The historical live public probe returned `COMPATIBILITY_PASS_PAYMENT_BLOCKED`.
 F7 now implements an explicit Permit2 authorization identity with required
 EIP-2612 gas sponsorship, twelve-block canonical finality, an exact one-submit
 testnet grant, and pinned official x402 browser composition. Ordinary startup intentionally has no live grant, so
-payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`. One explicitly
-authorized Mezo Testnet settlement is retained as sealed A13/A14 evidence; no
-mainnet payment, exchange mutation, custody action, deployment, tag, push, or
-release publication was performed.
+payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`. Four
+explicitly authorized 0.01 test MUSD settlements are retained: the original
+sealed A13/A14 evidence payment and three automated hackathon-demo payments.
+All four reached canonical finality with zero buyer native-gas spend. The first
+new demo request timed out client-side but settled on-chain and was recovered
+confirm-only from its canonical Transfer log; no grant submitted settlement
+twice. No mainnet payment, exchange mutation, custody action, or deployment
+was performed.
 
 Current product identity: root `VERSION` is `0.0.2`; releases v0.0.1 and
 [v0.0.2](https://github.com/Dimkox/liqvera/releases/tag/v0.0.2) are published

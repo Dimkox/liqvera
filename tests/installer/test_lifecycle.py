@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -392,6 +393,44 @@ def test_crash_between_pointer_switch_and_install_authority_write_recovers_from_
     result = LIFECYCLE.run_lifecycle(root, "status", {}, adapter)
     assert result["release_sha256"] == "b" * 64
     assert json.loads((root / "state/install-state.json").read_text())["release_sha256"] == "b" * 64
+
+
+def test_rollback_pointer_switch_crash_recovers_install_authority(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, _, original_release = installed(tmp_path)
+    candidate = release(root, "b" * 64)
+    state = LIFECYCLE.bootstrap_state(root)
+    state["previous"] = state["current"]
+    state["current"] = json.loads((candidate / "release.json").read_text())
+    LIFECYCLE.write_lifecycle_state(root, state)
+    (root / "current").unlink()
+    (root / "current").symlink_to(candidate.relative_to(root))
+    root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        LIFECYCLE._write_install_authority(root, state["current"], root_fd)
+    finally:
+        os.close(root_fd)
+    adapter = FakeAdapter()
+    original_write = LIFECYCLE._write_install_authority
+    calls = 0
+
+    def crash_once(path: Path, authority: dict[str, object], root_fd: int) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise LIFECYCLE.InjectedCrash("ROLLBACK_AFTER_POINTER_BEFORE_AUTHORITY")
+        original_write(path, authority, root_fd)
+
+    monkeypatch.setattr(LIFECYCLE, "_write_install_authority", crash_once)
+    with pytest.raises(LIFECYCLE.InjectedCrash, match="ROLLBACK_AFTER_POINTER_BEFORE_AUTHORITY"):
+        LIFECYCLE.run_lifecycle(root, "rollback", {}, adapter)
+
+    assert (root / "current").resolve() == original_release.resolve()
+    assert json.loads((root / "state/install-state.json").read_text())["release_sha256"] == "b" * 64
+    result = LIFECYCLE.run_lifecycle(root, "status", {}, adapter)
+    assert result["release_sha256"] == "a" * 64
+    assert json.loads((root / "state/install-state.json").read_text())["release_sha256"] == "a" * 64
 
 
 def test_runtime_files_are_rehashed_before_compose_use(tmp_path: Path) -> None:

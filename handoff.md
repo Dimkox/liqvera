@@ -245,6 +245,12 @@ Python 3.9-compatible UTC API, and a download-layout test runs the real
 bootstrap then checks all packaged Python modules against the 3.9 grammar and
 standard-library-only boundary. The `a75ba04`/`99ab4e1f…55e3d` artifact is
 therefore retained only as superseded evidence pending a fresh double build.
+The final lifecycle regression also covers the symmetric rollback crash after
+the `current` pointer switches but before install authority is rewritten.
+Rollback now persists an exact candidate/prior operation before the switch, so
+the next status repairs authority from that journal without retrying effects;
+non-journaled pointer drift remains rejected. The installer suite passes 197
+tests after this repair.
 During authorized multiarch publication the production web Docker build exposed
 strict TypeScript narrowing gaps in receipt verification and the reviewed JS
 x402 bridge import. The minimal source typing repair preserves all runtime

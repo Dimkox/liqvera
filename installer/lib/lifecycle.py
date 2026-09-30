@@ -549,7 +549,8 @@ def _validate_state(value: dict[str, object]) -> dict[str, object]:
         if (not isinstance(operation, dict)
                 or set(operation) != {"id", "type", "phase", "candidate", "prior", "backup_sha256"}
                 or not re.fullmatch(r"[0-9a-f]{32}", str(operation.get("id")))
-                or operation.get("type") != "UPDATE" or operation.get("phase") not in OPERATION_PHASES
+                or operation.get("type") not in {"UPDATE", "ROLLBACK"}
+                or operation.get("phase") not in OPERATION_PHASES
                 or operation.get("backup_sha256") is not None
                 and not HEX64.fullmatch(str(operation.get("backup_sha256")))):
             raise LifecycleError("CONFIG_INVALID")
@@ -808,6 +809,12 @@ def run_lifecycle(root: Path, command: str, options: dict[str, object], adapter:
             prior_path, checked = _release(root, str(previous.get("release_sha256", "")))
             if checked != previous:
                 raise LifecycleError("ROLLBACK_RESTORE_REQUIRED: prior identity mismatch")
+            operation = {
+                "id": secrets.token_hex(16), "type": "ROLLBACK", "phase": "HEALTHY",
+                "candidate": previous, "prior": state["current"], "backup_sha256": None,
+            }
+            state["operation"] = operation
+            persist()
             adapter.stop(project)
             try:
                 adapter.start(project, prior_path)

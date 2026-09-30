@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -61,8 +62,12 @@ def test_compose_is_shadow_only_digest_bound_and_publishes_only_edge() -> None:
         "MIGRATION_SQL_ROOT": "/run/liqvera/migrations",
     }
     source_manifest = json.loads((ROOT / "installer/manifests/v0.0.2.json").read_text())
-    assert source_manifest["runnable"] is False
-    assert set(source_manifest["images"].values()) == {None}
+    image_lock = json.loads((ROOT / "installer/manifests/image-lock-v0.0.2.json").read_text())
+    assert source_manifest["runnable"] is True
+    assert "reason" not in source_manifest
+    assert source_manifest["images"] == image_lock
+    assert set(image_lock) == {"capture", "report", "gateway", "web", "edge", "postgres"}
+    assert all(re.fullmatch(r"[^@\s]+@sha256:[0-9a-f]{64}", value) for value in image_lock.values())
     assert source_manifest["compose_sha256"] == hashlib.sha256(
         (ROOT / "installer/compose.yaml").read_bytes()
     ).hexdigest()

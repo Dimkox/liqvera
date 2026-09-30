@@ -2,7 +2,6 @@
   "schema_version": "liqvera-installer-source-manifest/v1",
   "product_version": "0.0.2",
   "runnable": true,
-  "reason": null,
   "compose_sha256": "e138eb47d6ade1b6dfc68458717a4034ebec6eb7ece571d1aabf2d02c6a1a85b",
   "images": {
     "edge": "ghcr.io/dimkox/liqvera-edge@sha256:b88c09c0c2a363a9a61dd443e9f874d2a44c29447cf75d3523a60cc2f816b06a",

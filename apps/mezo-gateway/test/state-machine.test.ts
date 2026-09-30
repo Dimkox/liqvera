@@ -463,3 +463,15 @@ test('confirmed entitlement is reused, then reorg withholds delivery without res
   assert.equal(f.q.state, 'MANUAL_REVIEW');
   assert.equal([...f.ledger.attempts.values()][0]!.state, 'MANUAL_REVIEW');
 });
+
+test('transient paid revalidation preserves entitlement and never resettles', async t => {
+  const f = await fixture();
+  t.after(f.cleanup);
+  assert.equal((await f.gateway.read('scope', f.q.id, 'report', 'signature', 'request-1')).status,200);
+  f.payment.revalidate=async()=>{throw new PublicError('PAYMENT_UNCERTAIN',202);};
+  await expectPublicError('PAYMENT_UNCERTAIN',()=>f.gateway.read('scope',f.q.id,'bundle',undefined,'request-2'));
+  assert.equal(f.q.state,'PAID');
+  assert.equal([...f.ledger.attempts.values()][0]!.state,'CONFIRMED');
+  assert.equal(f.ledger.entitlements.size,1);
+  assert.equal(f.payment.settleCalls,1);
+});

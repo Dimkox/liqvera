@@ -133,7 +133,10 @@ export class OfficialX402 implements PaymentPort {
   }
   async revalidate(quote: Quote,attempt: Attempt,receipt: Receipt): Promise<boolean> {
     const current=await this.reader.confirmation(quote,attempt);
-    return !!current && current.tx_hash===receipt.tx_hash && current.block_hash===receipt.block_hash &&
+    // A temporarily incomplete RPC observation is not evidence of a reorg.
+    // Keep the durable PAID entitlement and ask the caller to retry read-only.
+    if(!current)throw new PublicError('PAYMENT_UNCERTAIN',202);
+    return current.tx_hash===receipt.tx_hash && current.block_hash===receipt.block_hash &&
       current.block_number===receipt.block_number && current.log_index===receipt.log_index && current.finality_policy_version===receipt.finality_policy_version;
   }
 }

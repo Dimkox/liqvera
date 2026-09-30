@@ -1,5 +1,16 @@
 # Liqvera — handoff
 
+## 2026-09-30 paid JSON then ZIP revalidation repair
+
+Live evidence showed quote `cc47e135-95d3-44a8-9a6d-7398d1b95aef`
+(report `3420b123-b6b8-4c47-87ae-555201267c2d`, transaction
+`0x8a94d59fd0614c7b863f4a2c17caf1a0af98bb552c2872c7af2379b560286e0a`)
+deliver JSON at 25 confirmations, then incorrectly enter MANUAL_REVIEW on the
+immediate ZIP read. Root cause was conflating an RPC `null` re-observation with
+a proven conflicting receipt. Transient absence now returns PAYMENT_UNCERTAIN
+without changing PAID/CONFIRMED state or resubmitting; an observed receipt
+mismatch still enters MANUAL_REVIEW.
+
 ## 2026-09-30 historical live public preview
 
 The browser packages exact bytes from validated live report

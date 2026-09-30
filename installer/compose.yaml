@@ -13,10 +13,20 @@ services:
   postgres:
     <<: *runtime
     image: "${LIQVERA_IMAGE_POSTGRES:?verified digest required}"
+    user: "70:70"
+    group_add: ["10001"]
+    mem_limit: 768m
+    cpus: 1.0
+    shm_size: 128m
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+      - /var/run/postgresql:rw,nosuid,size=8m
     environment:
       POSTGRES_USER: liqvera
       POSTGRES_DB: liqvera
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+      PGDATA: /var/lib/postgresql/data/pgdata
     secrets: [postgres_password]
     volumes: [postgres_data:/var/lib/postgresql/data]
     networks: [gateway_db]
@@ -25,71 +35,148 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+      start_period: 30s
   migrate:
     image: "${LIQVERA_IMAGE_GATEWAY:?verified digest required}"
     restart: "no"
+    user: "10003:10001"
     read_only: true
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 256m
+    cpus: 0.5
+    tmpfs: [/tmp:rw,noexec,nosuid,size=32m]
     command: [node, /app/gateway-entrypoint.js, npm, run, migrate]
+    environment:
+      MIGRATION_MANIFEST_FILE: /run/liqvera/release-manifest.json
+      MIGRATION_SQL_ROOT: /run/liqvera/migrations
     secrets: [postgres_password]
+    volumes:
+      - ./manifests/release-manifest.json:/run/liqvera/release-manifest.json:ro
+      - ./migrations:/run/liqvera/migrations:ro
     networks: [gateway_db]
     depends_on:
       postgres: {condition: service_healthy}
   capture:
     <<: *runtime
     image: "${LIQVERA_IMAGE_CAPTURE:?verified digest required}"
+    user: "10001:10001"
+    mem_limit: 384m
+    cpus: 0.5
     environment:
       LIQVERA_SOURCE_MODE: fixture
       LIQVERA_CAPTURE_ROOT: /data/captures
       LIQVERA_CAPTURE_PORT: "8081"
     volumes: [captures:/data/captures]
-    networks: [capture_report]
+    networks:
+      capture_report: {aliases: [evidence-capture]}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/healthz', timeout=2).read()"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
   report:
     <<: *runtime
     image: "${LIQVERA_IMAGE_REPORT:?verified digest required}"
+    user: "10002:10001"
+    mem_limit: 512m
+    cpus: 1.0
+    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
     environment:
       LIQVERA_SOURCE_MODE: fixture
-      LIQVERA_CAPTURE_URL: http://capture:8081
+      LIQVERA_CAPTURE_URL: http://evidence-capture:8081
       LIQVERA_CAPTURE_ROOT: /data/captures
       LIQVERA_ARTIFACT_ROOT: /data/artifacts
+      LIQVERA_REPORT_PORT: "8082"
+      LIQVERA_ENGINE_COMMIT: "${LIQVERA_ENGINE_COMMIT:?verified release commit required}"
       LIQVERA_INTERNAL_TOKEN_FILE: /run/secrets/report_service_token
     secrets: [report_service_token]
     volumes: [captures:/data/captures:ro, artifacts:/data/artifacts]
-    networks: [capture_report, gateway_report]
+    networks:
+      capture_report: {}
+      gateway_report: {aliases: [report]}
     depends_on:
       capture: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8082/healthz', timeout=2).read()"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
   gateway:
     <<: *runtime
     image: "${LIQVERA_IMAGE_GATEWAY:?verified digest required}"
+    user: "10003:10001"
+    pids_limit: 256
+    mem_limit: 512m
+    cpus: 1.0
+    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
     environment:
       SOURCE_MODE: fixture
       REPORT_SERVICE_URL: http://report:8082
       REPORT_SERVICE_TOKEN_FILE: /run/secrets/report_service_token
       ARTIFACT_ROOT: /data/artifacts
+      PUBLIC_BASE_URL: http://127.0.0.1:3000
+      CORS_ORIGINS: http://127.0.0.1:3000
       PAY_TO: ""
       PORT: "8080"
       METRICS_HOST: gateway-metrics
       METRICS_PORT: "9090"
     secrets: [postgres_password, report_service_token]
     volumes: [artifacts:/data/artifacts:ro]
-    networks: [edge, gateway_db, gateway_report, operations]
+    networks:
+      edge: {aliases: [gateway]}
+      gateway_db: {}
+      gateway_report: {}
+      operations: {aliases: [gateway-metrics]}
     depends_on:
       migrate: {condition: service_completed_successfully}
       report: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:8080/healthz', {signal: AbortSignal.timeout(2000)}).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
   web:
     <<: *runtime
     image: "${LIQVERA_IMAGE_WEB:?verified digest required}"
+    user: "101:101"
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.25
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=8m
+      - /var/cache/nginx:rw,nosuid,size=8m
+      - /var/run:rw,nosuid,size=8m
     networks: [edge]
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8083/healthz]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
   edge:
     <<: *runtime
     image: "${LIQVERA_IMAGE_EDGE:?verified digest required}"
+    user: "10001:10001"
+    mem_limit: 192m
+    cpus: 0.5
+    tmpfs: [/tmp:rw,noexec,nosuid,size=16m]
     ports: ["127.0.0.1:3000:8080"]
-    volumes: [./Caddyfile:/etc/caddy/Caddyfile:ro]
+    volumes: [./Caddyfile:/etc/caddy/Caddyfile:ro, caddy_data:/data, caddy_config:/config]
     networks: [edge]
     depends_on:
       gateway: {condition: service_healthy}
       web: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:2019/config/]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
 
 secrets:
   postgres_password: {file: "${DATABASE_PASSWORD_FILE:?private file required}"}
@@ -98,6 +185,8 @@ volumes:
   postgres_data: {}
   captures: {}
   artifacts: {}
+  caddy_data: {}
+  caddy_config: {}
 networks:
   edge: {internal: true}
   gateway_db: {internal: true}

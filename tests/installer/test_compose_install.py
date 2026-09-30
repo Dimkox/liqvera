@@ -35,6 +35,26 @@ def test_compose_is_shadow_only_digest_bound_and_publishes_only_edge() -> None:
     assert compose["services"]["gateway"]["environment"]["SOURCE_MODE"] == "fixture"
     assert compose["networks"]["operations"]["internal"] is True
     assert compose["services"]["migrate"]["restart"] == "no"
+    assert compose["services"]["report"]["environment"]["LIQVERA_ENGINE_COMMIT"] == "${LIQVERA_ENGINE_COMMIT:?verified release commit required}"
+    assert compose["services"]["gateway"]["environment"]["PUBLIC_BASE_URL"] == "http://127.0.0.1:3000"
+    assert compose["services"]["gateway"]["networks"]["operations"]["aliases"] == ["gateway-metrics"]
+    assert compose["services"]["capture"]["networks"]["capture_report"]["aliases"] == ["evidence-capture"]
+    assert compose["services"]["report"]["environment"]["LIQVERA_CAPTURE_URL"] == "http://evidence-capture:8081"
+    for name in ("capture", "report", "gateway", "web", "edge"):
+        service = compose["services"][name]
+        assert service["healthcheck"]["start_period"]
+        assert service["user"]
+        assert service["mem_limit"]
+        assert service["cpus"]
+        assert service["tmpfs"]
+    assert compose["services"]["migrate"]["volumes"] == [
+        "./manifests/release-manifest.json:/run/liqvera/release-manifest.json:ro",
+        "./migrations:/run/liqvera/migrations:ro",
+    ]
+    assert compose["services"]["migrate"]["environment"] == {
+        "MIGRATION_MANIFEST_FILE": "/run/liqvera/release-manifest.json",
+        "MIGRATION_SQL_ROOT": "/run/liqvera/migrations",
+    }
     source_manifest = json.loads((ROOT / "installer/manifests/v0.0.2.json").read_text())
     assert source_manifest["runnable"] is False
     assert set(source_manifest["images"].values()) == {None}
@@ -70,14 +90,53 @@ def test_bounded_health_accepts_only_safe_shadow_blockers() -> None:
         {"containers": "healthy", "storage": True, "integration": True, "payment": False,
          "reasons": ["SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED", "PAYMENT_SERVICE_UNAVAILABLE", "PAY_TO_MISSING"]},
     ])
-    clock_values = iter([0.0, 1.0, 2.0, 3.0])
-    result = ORCHESTRATION.wait_healthy(lambda: next(observations), lambda: next(clock_values), lambda _: None, 10.0)
+    clock_values = iter([0.0, 1.0, 2.0, 3.0, 4.0])
+    remaining: list[float] = []
+    result = ORCHESTRATION.wait_healthy(lambda budget: remaining.append(budget) or next(observations),
+                                        lambda: next(clock_values), lambda _: None, 10.0)
     assert result["containers"] == "healthy"
+    assert remaining == [9.0, 7.0]
     with pytest.raises(ORCHESTRATION.OrchestrationError, match="HEALTH_TIMEOUT"):
         ORCHESTRATION.wait_healthy(
-            lambda: {"containers": "healthy", "storage": False, "integration": True, "payment": False,
+            lambda _: {"containers": "healthy", "storage": False, "integration": True, "payment": False,
                      "reasons": ["STORAGE_UNAVAILABLE"]},
             iter([0.0, 11.0]).__next__, lambda _: None, 10.0,
+        )
+
+
+@pytest.mark.parametrize(
+    "reasons",
+    [
+        ["SIMULATED_SOURCE"],
+        ["EXTERNAL_GRANT_REQUIRED"],
+        ["SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED", 1],
+        ["SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED", "UNKNOWN"],
+        ["SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED", "EXTERNAL_GRANT_REQUIRED"],
+    ],
+)
+def test_health_requires_both_closed_honest_blockers(reasons: list[object]) -> None:
+    clocks = iter([10.0, 10.0, 10.5, 12.0])
+    with pytest.raises(ORCHESTRATION.OrchestrationError, match="HEALTH_TIMEOUT"):
+        ORCHESTRATION.wait_healthy(
+            lambda _: {"containers": "healthy", "storage": True, "integration": True,
+                     "payment": False, "reasons": reasons},
+            clocks.__next__, lambda _: None, 1.0,
+        )
+
+
+def test_health_deadline_rejects_a_clock_that_moves_backwards() -> None:
+    clocks = iter([10.0, 10.0, 9.0])
+    with pytest.raises(ORCHESTRATION.OrchestrationError, match="HEALTH_CLOCK_INVALID"):
+        ORCHESTRATION.wait_healthy(lambda _: {"containers": "starting"}, clocks.__next__, lambda _: None, 10.0)
+
+
+def test_health_rejects_success_returned_after_total_deadline() -> None:
+    clocks = iter([0.0, 1.0, 11.0])
+    with pytest.raises(ORCHESTRATION.OrchestrationError, match="HEALTH_TIMEOUT"):
+        ORCHESTRATION.wait_healthy(
+            lambda _: {"containers": "healthy", "storage": True, "integration": True,
+                     "payment": False, "reasons": ["SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED"]},
+            clocks.__next__, lambda _: None, 10.0,
         )
 
 
@@ -93,3 +152,27 @@ def test_port_race_or_health_failure_stops_only_candidate() -> None:
                                       lambda: (_ for _ in ()).throw(ORCHESTRATION.OrchestrationError("HEALTH_TIMEOUT")),
                                       lambda p: trace.append(("down", p)))
     assert trace == [("up", "candidate"), ("down", "candidate")]
+
+
+def test_partial_compose_up_failure_stops_only_candidate() -> None:
+    trace: list[tuple[str, str]] = []
+
+    def partial_up(project: str) -> None:
+        trace.append(("up", project))
+        raise RuntimeError("partial startup")
+
+    with pytest.raises(RuntimeError, match="partial startup"):
+        ORCHESTRATION.start_candidate("candidate", partial_up, lambda: True, lambda: {},
+                                      lambda project: trace.append(("down", project)))
+    assert trace == [("up", "candidate"), ("down", "candidate")]
+
+
+def test_candidate_cleanup_failure_does_not_mask_startup_failure() -> None:
+    def fail_up(_: str) -> None:
+        raise RuntimeError("original startup failure")
+
+    def fail_down(_: str) -> None:
+        raise RuntimeError("cleanup failure")
+
+    with pytest.raises(RuntimeError, match="original startup failure"):
+        ORCHESTRATION.start_candidate("candidate", fail_up, lambda: True, lambda: {}, fail_down)

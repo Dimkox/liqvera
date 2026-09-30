@@ -56,6 +56,7 @@ DEPENDENCY_COMMANDS = {
     "rhel": ("/usr/bin/sudo", "--", "/usr/bin/dnf", "install", "docker-ce", "docker-compose-plugin"),
 }
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
+HEX40 = re.compile(r"[0-9a-f]{40}\Z")
 
 
 class InstallerError(RuntimeError):
@@ -436,7 +437,7 @@ def _atomic_write(path: Path, data: bytes) -> None:
         os.close(parent_fd)
 
 
-def render_config_bytes(config: dict[str, object]) -> bytes:
+def render_config_bytes(config: dict[str, object], engine_commit: str | None = None) -> bytes:
     preliminary_secrets = config.get("secret_files")
     if isinstance(preliminary_secrets, dict):
         for value in preliminary_secrets.values():
@@ -456,6 +457,10 @@ def render_config_bytes(config: dict[str, object]) -> bytes:
         "LIQVERA_PAYMENT_ENABLED=false",
         "LIQVERA_SOURCE_MODE=shadow",
     ]
+    if engine_commit is not None:
+        if not HEX40.fullmatch(engine_commit):
+            raise InstallerError("CONFIG_INVALID", "engine commit is not a lowercase Git OID")
+        lines.append(f"LIQVERA_ENGINE_COMMIT={engine_commit}")
     for name in ("web", "gateway", "metrics"):
         endpoint = ports[name]
         if not isinstance(endpoint, dict):
@@ -656,7 +661,7 @@ def main(argv: list[str] | None = None) -> int:
         if not isinstance(config, dict) or not isinstance(manifest, dict):
             raise InstallerError("CONFIG_INVALID", "config or manifest is not an object")
         _validate(CONFIG_SCHEMA, config, "CONFIG_INVALID")
-        config_bytes = render_config_bytes(config)
+        config_bytes = render_config_bytes(config, str(manifest["git_commit"]))
         root = _validate_install_root(args.install_dir, "unknown")
         identity = {
             "product_version": manifest["product_version"], "release_sha256": args.sha256,

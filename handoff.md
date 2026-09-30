@@ -94,11 +94,18 @@ orchestration policies. Seven digest-only roles map installer `shadow` to
 runtime `fixture`; only edge publishes `127.0.0.1:3000`, while metrics and all
 service networks remain internal. Database password and report token are
 separate private file references. The existing gateway migrator remains the
-sole SQL applier and now requires an exact 001–005 ledger prefix plus bounded
-nonblocking advisory locking; it refuses unknown/gap/duplicate/checksum or
-post-005 state and resumes only the missing committed suffix. Health accepts
-only frozen safe-shadow blockers, and a lost port or health failure stops only
-the candidate. Optional systemd is explicit and user-only, with Compose fallback.
+sole SQL applier and now binds the complete SQL byte inventory to both reviewed
+001–005 constants and the verified release manifest before any database
+mutation. It requires an exact ledger prefix plus a total-deadline nonblocking
+advisory lock, refuses missing/extra/changed SQL and unknown/gap/duplicate/
+checksum/post-005 state, and resumes only the missing committed suffix. The
+projection restores application healthchecks, non-root users, resource bounds,
+required mounts/aliases, the loopback public origin, and the report engine
+commit input. Health requires both `SIMULATED_SOURCE` and
+`EXTERNAL_GRANT_REQUIRED` within its monotonic total budget. Partial startup,
+lost port, or health failure stops only the candidate. Optional systemd is
+restricted to the exact private user-unit root; unsafe rendering is rejected
+and reload/enable failure restores the prior unit or returns Compose fallback.
 The source manifest remains `runnable=false` with null images until Task 6 binds
 real reviewed digests. No Docker, database, or systemd mutation was performed.
 

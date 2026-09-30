@@ -502,6 +502,7 @@ def test_main_validates_everything_before_write_and_preserves_matching_install(
     assert RUNTIME.main(cli_args(release, receipt, config_path, root)) == 0
     first_state = (root / "state/install-state.json").read_bytes()
     first_config_stat = (root / "config/runtime.env").stat()
+    assert "LIQVERA_ENGINE_COMMIT=" + "1" * 40 in (root / "config/runtime.env").read_text()
     assert json.loads(capsys.readouterr().out)["status"] == "CONFIGURED"
 
     assert RUNTIME.main(cli_args(release, receipt, config_path, root)) == 0
@@ -672,7 +673,10 @@ def test_full_reconciliation_and_publication_are_serialized(
         assert not thread.is_alive()
     assert sorted(results) == [0, 2]
     rendered = (root / "config/runtime.env").read_bytes()
-    assert rendered in {RUNTIME.render_config_bytes(safe_config()), RUNTIME.render_config_bytes(safe_config(secret))}
+    assert rendered in {
+        RUNTIME.render_config_bytes(safe_config(), "1" * 40),
+        RUNTIME.render_config_bytes(safe_config(secret), "1" * 40),
+    }
     assert json.loads((root / "state/install-state.json").read_text())["last_completed_phase"] == "CONFIGURED"
 
 

@@ -34,7 +34,7 @@ export async function readPrivateGrantFile(path:string,hooks:GrantReadHooks={}):
 export function composeOfficialX402(identity:AuthorizationPolicy,finality:FinalityPolicy,reader:MezoReceiptReader,
   publicBase:URL,input:LiveCompositionInput|null):OfficialX402 {
   if(!input)return new OfficialX402(identity,finality,reader,publicBase,null,null);
-  const grant=LivePaymentGrant.parseBytes(input.grantBytes,input.observedAt);
+  const grant=LivePaymentGrant.parseBytes(input.grantBytes,input.observedAt,input.context.demoAnyPayer===true);
   grant.authorize({...input.context,now:input.observedAt});
   return new OfficialX402(identity,finality,reader,publicBase,grant,input.context,input.now);
 }

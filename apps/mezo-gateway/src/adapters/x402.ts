@@ -109,7 +109,7 @@ export class OfficialX402 implements PaymentPort {
     if(identity.payer!==quote.terms.expected_payer||!identity.identity||identity.identity.length>512||identity.version!==this.identity.version||
       !Number.isFinite(Date.parse(identity.valid_until))||Date.parse(identity.valid_until)<=Date.now())throw new PublicError('PAYMENT_REJECTED',409);
     this.authorizeGrant();
-    if(this.liveContext!.buyer!==identity.payer||this.liveContext!.payTo!==quote.terms.pay_to)throw new PublicError('PAYMENT_REJECTED',409);
+    if((!this.liveContext!.demoAnyPayer&&this.liveContext!.buyer!==identity.payer)||this.liveContext!.payTo!==quote.terms.pay_to)throw new PublicError('PAYMENT_REJECTED',409);
     const balance=await this.reader.nativeBalanceSnapshot(identity.payer);
     identity.correlation.buyer_native_balance_before=balance.balance;
     identity.correlation.buyer_native_balance_before_block_number=balance.block_number;

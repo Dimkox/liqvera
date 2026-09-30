@@ -2,6 +2,12 @@
 
 ## 2026-09-30 public judge testnet payer mode
 
+Follow-up hardening removes the remaining fixed grant-buyer comparison from
+the complete x402 verify path in demo mode: facilitator and decoded identity
+must instead equal the quote payer, while payee and all exact terms remain
+fixed. Demo grants may last at most seven days and expiry is rechecked on every
+authorization; ordinary grants retain the fifteen-minute maximum.
+
 Explicit `LIQVERA_TESTNET_DEMO_ANY_PAYER=1` lets a connected EVM account on
 Mezo Testnet 31611 own and pay its quote at `https://liqvera.site` for exactly
 0.01 test MUSD. It still requires the reviewed live grant and healthy

@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { PaymentPayload } from '@x402/core/types';
 import { x402Client } from '@x402/core/client';
+import { encodePaymentSignatureHeader } from '@x402/core/http';
 import { encodeFunctionData } from 'viem';
 import { ExactEvmScheme, PERMIT2_ADDRESS, x402ExactPermit2ProxyABI, x402ExactPermit2ProxyAddress } from '@x402/evm';
 import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type Quote } from '../src/domain/model.js';
@@ -231,6 +232,38 @@ test('opt-in testnet demo accepts quote payer while default remains grant buyer 
     LIQVERA_PLAN_SHA256:'c'.repeat(64),LIQVERA_LIVE_BUYER:payer,LIQVERA_TESTNET_DEMO_ANY_PAYER:'1'});
   assert.equal(config.testnetDemoAnyPayer,true);
   await assert.rejects(loadConfig({DATABASE_URL:'postgresql://127.0.0.1/liqvera',SOURCE_MODE:'live-public',LIQVERA_TESTNET_DEMO_ANY_PAYER:'1'}),/INVALID_INPUT/);
+});
+
+test('demo grant lifetime is at most seven days while default remains fifteen minutes',()=>{
+  const now=new Date('2026-09-29T00:00:00Z');
+  const sixDays={...grantRaw(),expires_at:'2026-10-05T00:00:00Z'};
+  assert.throws(()=>LivePaymentGrant.parse(sixDays,now),/LIVE_GRANT_EXPIRED/);
+  const demo=LivePaymentGrant.parse(sixDays,now,true);
+  const context={subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,demoAnyPayer:true};
+  assert.doesNotThrow(()=>demo.authorize({...context,now:new Date('2026-10-04T23:59:59Z')}));
+  assert.throws(()=>demo.authorize({...context,now:new Date('2026-10-05T00:00:00Z')}),/LIVE_GRANT_EXPIRED/);
+  assert.doesNotThrow(()=>LivePaymentGrant.parse({...grantRaw(),expires_at:'2026-10-06T00:00:00Z'},now,true));
+  assert.throws(()=>LivePaymentGrant.parse({...grantRaw(),expires_at:'2026-10-06T00:00:00.001Z'},now,true),/LIVE_GRANT_EXPIRED/);
+});
+
+test('full demo verification binds the quote payer rather than the grant buyer',async()=>{
+  const quotePayer='0x3333333333333333333333333333333333333333';
+  const demoQuote={...quote,terms:{...quote.terms,expected_payer:quotePayer}} as Quote;
+  const wire=payload() as unknown as Record<string,unknown>;
+  ((wire.payload as {permit2Authorization:{from:string}}).permit2Authorization.from)=quotePayer;
+  ((wire.extensions as {eip2612GasSponsoring:{info:{from:string}}}).eip2612GasSponsoring.info.from)=quotePayer;
+  const policy={reviewed:true,version:'test/v1',identify:()=>({payer:quotePayer,identity:'a'.repeat(64),version:'test/v1',valid_until:'2099-01-01T00:00:00Z',correlation:{}}),async bindsTransfer(){return true;}};
+  const reader={nativeBalanceSnapshot:async()=>({balance:'0',block_number:'0x1',block_hash:`0x${'1'.repeat(64)}`})};
+  const payment=composeOfficialX402(policy as never,new MezoFinalityPolicy(12),reader as never,new URL('https://liqvera.site'),{
+    grantBytes:new TextEncoder().encode(JSON.stringify(grantRaw())),observedAt:new Date('2026-09-29T00:00:00Z'),
+    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64),demoAnyPayer:true},
+    now:()=>new Date('2026-09-29T00:01:00Z'),
+  });
+  const requirements={scheme:'exact',network:NETWORK,asset:ASSET,amount:AMOUNT,payTo,extra:{assetTransferMethod:'permit2',name:'Mezo USD',version:'1'}};
+  const target=payment as unknown as {initialized:boolean;server:{buildPaymentRequirements():Promise<unknown[]>;createPaymentRequiredResponse():Promise<unknown>;verifyPayment():Promise<unknown>}};
+  target.initialized=true;target.server={async buildPaymentRequirements(){return [requirements];},async createPaymentRequiredResponse(){return {x402Version:2,accepts:[requirements],resource:{url:'https://liqvera.site'}};},async verifyPayment(){return {isValid:true,payer:quotePayer};}};
+  const verified=await payment.verify(encodePaymentSignatureHeader(wire as never),demoQuote);
+  assert.equal(verified.identity.payer,quotePayer);
 });
 
 test('live grant expiry becomes a readiness blocker after startup',()=>{

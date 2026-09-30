@@ -73,10 +73,11 @@ confirm-only from its canonical Transfer log; no grant submitted settlement
 twice. No mainnet payment, exchange mutation, custody action, or deployment
 was performed.
 
-Current product identity: root `VERSION` is `0.0.2`; releases v0.0.1 and
-[v0.0.2](https://github.com/Dimkox/liqvera/releases/tag/v0.0.2) are published
-and immutable. The v0.0.2 tag targets
-`b761074d7291d9b95a2785f3c3e01a1103cb3b3e`. The root Python
+Current product identity: root `VERSION` is `0.0.3`; releases v0.0.1,
+[v0.0.2](https://github.com/Dimkox/liqvera/releases/tag/v0.0.2), and v0.0.3
+are published milestones. v0.0.3 records the live-public snapshot and three
+new automated Mezo Testnet demo payments; the installable operator package
+remains v0.0.2. The root Python
 workspace remains `0.1.0.dev0`, and Stage A, evidence-report, protocol,
 gateway, and web component packages remain `0.1.0`. Inherited `mee-*`
 identifiers are preserved.

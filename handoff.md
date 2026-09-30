@@ -1,5 +1,15 @@
 # Liqvera — handoff
 
+## 2026-09-30 v0.0.3 release candidate
+
+Root product VERSION advances to `0.0.3` for the live-public snapshot and
+automated Mezo Testnet demo evidence already recorded below. This release does
+not rename or republish the installer: the installable operator package remains
+the independently verified v0.0.2 asset set. v0.0.3 publishes a clean-tree
+source ZIP, detached checksum, and a public JSON summary containing report and
+transaction identities only; it contains no wallet, password, private key,
+signature, grant, or database credential.
+
 ## 2026-09-30 automated Mezo Testnet demo payments
 
 The retained faucet-funded buyer encrypted keystore was used through a local

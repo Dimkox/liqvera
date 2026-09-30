@@ -202,13 +202,20 @@ installer archive hashes are explicitly stale after integration repairs and
 will be replaced only by two byte-identical builds from the final Task 7 docs
 commit, each accepted by the independent verifier. Publication remains held
 for exact-fingerprint independent reviews.
-The frozen Task 7 release subject is `55f08c586d009c1b6fd7cd60de12025777d2bea3`
-/ tree `ad8a205d3ddb7faae69e914fbb2ebdb471f05848`. Two clean builds are
-byte-identical at archive SHA-256 `a6f3c083…1aad17d`; both independent verifier
-runs report 25 files and inventory `ad66569f…ca68bd2`. The retained out-of-tree
-asset set includes the 970-byte bootstrap, its detached checksum, the 41,157-byte
-archive, its detached checksum, and the 22,093-byte verifier. Nothing is
-published; clean-host Docker acceptance remains `NOT_RUN`.
+The earlier Task 7 artifact subject `55f08c5` is superseded by the final
+standalone-verifier repair. The current frozen candidate subject is
+`a75ba04b868473c057beb0e7f448eba8edaac6a7` / tree
+`d80652ebbc53c379a5ef833f82cbf3fdc135b493`. Two fresh clean builds are
+byte-identical at archive SHA-256
+`99ab4e1f0b0a39290f8b036eaf54e8d6ec14116c15bb048061c094fd5d355e3d`;
+system Python and the pinned venv independently report 25 files and inventory
+`0ce551ba64e09bc343361c285b1a93ecb90fb9d4efe886020af878ad2a028d06`.
+The retained out-of-tree asset set at
+`/home/pall/grok-projects/liqvera-release-0.0.2-a75ba04` includes the 970-byte
+bootstrap, its 91-byte detached checksum, the 41,347-byte archive, its 94-byte
+detached checksum, the 24,826-byte standalone verifier, and its 94-byte
+detached checksum. Nothing is published; clean-host Docker acceptance remains
+`NOT_RUN`.
 Final lifecycle review reproduced the narrower crash window after atomic
 `current` rename but before install-authority persistence. Recovery now relaxes
 authority only when the durable operation journal's exact verified candidate

@@ -1,5 +1,15 @@
 # Liqvera — handoff
 
+## 2026-09-30 wallet discovery and public asset permissions
+
+Connect Wallet now discovers lifetime EIP-6963 announcements through pinned
+`mipd`, offers deterministic selection when several providers exist, and uses
+`window.ethereum` only when no announced provider exists. Connect switches to
+Mezo 31611 immediately, adding the pinned Matsnet definition on error 4902,
+then verifies account and chain. No MetaMask-specific path exists. The web
+image explicitly ships historical report/ZIP assets mode 0644, repairing the
+observed public 403 without widening any secret permissions.
+
 ## 2026-09-30 paid JSON then ZIP revalidation repair
 
 Live evidence showed quote `cc47e135-95d3-44a8-9a6d-7398d1b95aef`
@@ -20,8 +30,8 @@ is `8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd`;
 bundle SHA-256 is
 `a6cc771d3fb8428325d32855fef53417f7da25c893db3a99b49802f482adc4fc`.
 There is no payment transaction for this preview. The UI labels it historical,
-preserves the paid fresh flow, and links the public repository and v0.0.2
-release. No regeneration or fixture substitution occurred.
+preserves the paid fresh flow, and links the public repository and the
+version-neutral releases index. No regeneration or fixture substitution occurred.
 
 ## 2026-09-30 live deployment deterministic repairs
 

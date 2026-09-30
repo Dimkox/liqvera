@@ -7,6 +7,7 @@ import { quoteIsPayable, receiptMatchesQuote, type Capabilities, type Delivery, 
 import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./session";
 import { injectedWallet, switchToMezo, walletAccount, walletError, walletOnMezo, type Eip1193Provider } from "./wallet";
 import { bindWalletStateListeners, refreshWalletState, type WalletState } from "./wallet-events";
+import { walletChoices, walletStore, type WalletChoice } from "./wallet-discovery";
 import { installProductionX402Adapter, requestPaidReport, x402Available, X402CancelledBeforeSubmission } from "./x402";
 import { HISTORICAL_DEMO, validateHistoricalReport } from "./historical-demo";
 
@@ -35,7 +36,7 @@ app.innerHTML = `
           <form id="report-form" novalidate>
             <fieldset><legend>Hypothetical side</legend><div class="segment"><label><input type="radio" name="side" value="BUY" checked /><span>BUY</span></label><label><input type="radio" name="side" value="SELL" /><span>SELL</span></label></div></fieldset>
             <label class="field-label" for="quantity">Quantity <span>BTC</span></label><input id="quantity" name="quantity" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0.15" aria-describedby="quantity-hint" /><p id="quantity-hint" class="field-hint">A positive decimal string, up to 8 places. The report shows a hypothetical sweep.</p>
-            <div class="wallet-box"><div><span class="eyebrow">EXPECTED PAYER</span><strong id="wallet-label">No wallet connected</strong><span id="chain-label">Connect an EVM wallet on Mezo Testnet.</span></div><div class="wallet-actions"><button id="connect-button" type="button" class="text-button">Connect wallet</button><button id="switch-button" type="button" class="text-button hidden">Switch network</button></div></div>
+            <div class="wallet-box"><div><span class="eyebrow">EXPECTED PAYER</span><strong id="wallet-label">No wallet connected</strong><span id="chain-label">Connect an EVM wallet on Mezo Testnet.</span></div><div class="wallet-actions"><label for="wallet-provider" class="field-hint">Wallet provider</label><select id="wallet-provider" class="hidden" aria-label="Choose wallet provider"></select><button id="connect-button" type="button" class="text-button">Connect wallet</button><button id="switch-button" type="button" class="text-button hidden">Switch network</button></div></div>
             <button id="create-button" class="primary-button" type="submit" disabled>Request a report <span aria-hidden="true">↗</span></button>
             <p id="create-note" class="form-note">Checking service capabilities…</p>
           </form>
@@ -50,7 +51,7 @@ app.innerHTML = `
       </div>
       <section class="boundary-strip" aria-label="Important context"><div><span>01</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>02</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>03</span><p><strong>No execution authority.</strong> No orders, custody, live trading, or guaranteed fills.</p></div></section>
     </main>
-    <footer><span>Liqvera · Market reports you can verify.</span><span>Built for MEZO ₿ · Testnet experience · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases/tag/v0.0.2" target="_blank" rel="noopener noreferrer">v0.0.2 release ↗</a></span></footer>
+    <footer><span>Liqvera · Market reports you can verify.</span><span>Built for MEZO ₿ · Testnet experience · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a></span></footer>
   </div>`;
 
 function el<T extends HTMLElement>(selector: string): T {
@@ -126,6 +127,7 @@ async function showHistoricalReport():Promise<void> {
 let cap: Capabilities | null = null;
 let bearer: string | null = null;
 let provider: Eip1193Provider | null = injectedWallet();
+let choices:WalletChoice[]=[];
 let account: string | null = null;
 let onChain = false;
 let flow: SavedFlow | null = null;
@@ -510,17 +512,28 @@ async function submitPayment(): Promise<void> {
 }
 
 async function connectWallet(): Promise<void> {
-  provider = injectedWallet();
+  refreshProviderChoices();
+  const selected=el<HTMLSelectElement>("#wallet-provider").value;
+  provider=(choices.find(item=>item.id===selected)??choices[0])?.provider??null;
   if (!provider) { announcement("Install or enable an injected EVM wallet to continue.", "warning"); return; }
   try {
+    await switchToMezo(provider);
     account = await walletAccount(provider, true);
     onChain = await walletOnMezo(provider);
     if (!account) announcement("The wallet did not provide an account.", "warning");
-    else if (!onChain) announcement("Wallet connected. Switch to Mezo Testnet (chain 31611).", "warning");
+    else if (!onChain) announcement("Wallet could not switch to Mezo Testnet (chain 31611).", "warning");
     else announcement("Wallet connected on Mezo Testnet. No payment has been requested.");
   } catch (error) { announcement(walletError(error), "warning"); }
   updateControls();
   if (quote) renderQuote();
+}
+
+function refreshProviderChoices():void {
+  choices=walletChoices(walletStore,injectedWallet());
+  const select=el<HTMLSelectElement>("#wallet-provider");const previous=select.value;select.replaceChildren();
+  for(const choice of choices){const option=document.createElement("option");option.value=choice.id;option.textContent=choice.name;select.append(option);}
+  if(choices.some(item=>item.id===previous))select.value=previous;
+  select.classList.toggle("hidden",choices.length<=1);
 }
 
 async function refreshWallet(): Promise<void> {
@@ -580,6 +593,8 @@ async function boot(): Promise<void> {
     el<HTMLInputElement>("#quantity").value = flow.quantity;
     el<HTMLInputElement>(`input[name="side"][value="${flow.side}"]`).checked = true;
   }
+  refreshProviderChoices();provider=choices[0]?.provider??null;
+  walletStore.subscribe(()=>refreshProviderChoices());
   bindWalletStateListeners(provider, { applyWalletState });
   await refreshWallet();
   try {

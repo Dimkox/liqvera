@@ -17,5 +17,7 @@ test("historical preview UI exposes loading error and accessible mobile-safe con
   assert.match(source,/No payment transaction exists for this public preview/);
   assert.match(source,/download="liqvera-historical-live-evidence\.zip"/);
   assert.match(source,/https:\/\/github\.com\/Dimkox\/liqvera/);
+  assert.match(source,/href="https:\/\/github\.com\/Dimkox\/liqvera\/releases"/);
+  assert.doesNotMatch(source,/releases\/tag\//);
   assert.match(source,/rel="noopener noreferrer"/);
 });

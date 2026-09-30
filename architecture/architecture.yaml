@@ -15405,6 +15405,9 @@ repository_inventory:
   - path: apps/mezo-web/src/main.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/src/wallet-discovery.ts
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/src/historical-demo.ts
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
@@ -15445,6 +15448,9 @@ repository_inventory:
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/test/historical-demo.test.mjs
+    node: runtime:mezo-web
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-web/test/wallet-discovery.test.mjs
     node: runtime:mezo-web
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-web/test/browser-orchestration.test.mjs

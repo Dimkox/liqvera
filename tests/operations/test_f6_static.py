@@ -187,3 +187,5 @@ def test_metrics_are_private_and_csp_is_restrictive() -> None:
     edge = (ROOT / "deploy" / "mezo-evidence" / "Dockerfile.edge").read_text()
     assert "setcap -r /usr/bin/caddy" in edge
     assert "EXPOSE 8080 8443" in edge
+    web_dockerfile = (ROOT / "deploy" / "mezo-evidence" / "Dockerfile.web").read_text()
+    assert "find /usr/share/nginx/html/demo/latest-live -type f -exec chmod 0644 {} +" in web_dockerfile

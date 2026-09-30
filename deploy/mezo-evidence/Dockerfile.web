@@ -12,5 +12,6 @@ RUN npm run build
 FROM nginxinc/nginx-unprivileged:1.27-alpine
 COPY deploy/mezo-evidence/nginx-web.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /workspace/apps/mezo-web/dist /usr/share/nginx/html
+RUN find /usr/share/nginx/html/demo/latest-live -type f -exec chmod 0644 {} +
 USER 101:101
 EXPOSE 8083

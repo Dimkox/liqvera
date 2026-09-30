@@ -14,7 +14,8 @@
     "@liqvera/mezo-protocol": "file:../../packages/mezo-protocol",
     "@x402/core": "2.16.0",
     "@x402/evm": "2.16.0",
-    "@x402/paywall": "2.16.0"
+    "@x402/paywall": "2.16.0",
+    "mipd": "0.0.7"
   },
   "devDependencies": {
     "typescript": "5.9.2",

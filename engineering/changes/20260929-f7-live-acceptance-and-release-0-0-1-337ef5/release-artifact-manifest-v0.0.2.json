@@ -4,8 +4,8 @@
     "product": "Liqvera",
     "version": "0.0.2",
     "tag": "v0.0.2",
-    "release_commit": "a75ba04b868473c057beb0e7f448eba8edaac6a7",
-    "release_tree": "d80652ebbc53c379a5ef833f82cbf3fdc135b493"
+    "release_commit": "70141b662ff949c7d06e7801143e29ae14d253be",
+    "release_tree": "1ede66694689d38e68b61560d67cd7a1dd614838"
   },
   "component_versions": {
     "root_workspace": "0.1.0.dev0",
@@ -27,8 +27,8 @@
   },
   "artifacts": [
     {"name": "liqvera-0.0.2.zip", "status": "NOT_BUILT", "size": null, "sha256": null},
-    {"name": "liqvera-installer-0.0.2.zip", "status": "BUILT_VERIFIED_NOT_PUBLISHED", "size": 41347, "sha256": "99ab4e1f0b0a39290f8b036eaf54e8d6ec14116c15bb048061c094fd5d355e3d"},
-    {"name": "liqvera-installer-0.0.2.zip.sha256", "status": "BUILT_VERIFIED_NOT_PUBLISHED", "size": 94, "sha256": "b31a021e2d90442275fae90105329cbb9c1d48164e4c7d98afd0817fb7b15512"},
+    {"name": "liqvera-installer-0.0.2.zip", "status": "BUILT_VERIFIED_NOT_PUBLISHED", "size": 42226, "sha256": "04e1cbc7b537be85addb1dd174fea2974f145685e782e589725b639cbc907b82"},
+    {"name": "liqvera-installer-0.0.2.zip.sha256", "status": "BUILT_VERIFIED_NOT_PUBLISHED", "size": 94, "sha256": "e8cb3822d2405a846f7359d9d1d2af09a55ac8bb84e9c9a1ffdad42cd81c9a69"},
     {"name": "install-liqvera-0.0.2.sh", "status": "BUILT_VERIFIED_NOT_PUBLISHED", "size": 970, "sha256": "b60385a4aea7a80bda9ca3479b162035914990a790174a4949520a6ba5c1a917"},
     {"name": "install-liqvera-0.0.2.sh.sha256", "status": "BUILT_VERIFIED_NOT_PUBLISHED", "size": 91, "sha256": "94dd72676456c1a5b9c04311be9321cd4d8d14bded65d6446fc7f34b62230d40"},
     {"name": "verify-liqvera-installer.py", "status": "BUILT_VERIFIED_NOT_PUBLISHED", "size": 24826, "sha256": "72e22cda1930d859be8093e3ec875ae5e673c842a41da849644147ae6b9fb207"},
@@ -39,9 +39,9 @@
     "builder": "scripts/build-liqvera-installer.py",
     "verifier": "scripts/verify-liqvera-installer.py",
     "reproducibility": "PASS_TWO_BYTE_IDENTICAL_BUILDS_AND_TWO_INDEPENDENT_VERIFICATIONS",
-    "inventory_sha256": "0ce551ba64e09bc343361c285b1a93ecb90fb9d4efe886020af878ad2a028d06",
+    "inventory_sha256": "4c912e694b8ee1f44c5dd0c1b31a33fc3906e16d9c6295ac20688c4e4e0fba23",
     "production_image_lock": "installer/manifests/image-lock-v0.0.2.json",
-    "mocked_linux_contract": "PASS_77_FOCUSED_ARCHIVE_LIFECYCLE_AND_OPERATOR_TESTS_AT_RELEASE_SUBJECT",
+    "mocked_linux_contract": "PASS_197_INSTALLER_TESTS_AT_RELEASE_SUBJECT",
     "clean_host_acceptance": "NOT_RUN"
   },
   "images": {

@@ -204,15 +204,15 @@ commit, each accepted by the independent verifier. Publication remains held
 for exact-fingerprint independent reviews.
 The earlier Task 7 artifact subject `55f08c5` is superseded by the final
 standalone-verifier repair. The current frozen candidate subject is
-`a75ba04b868473c057beb0e7f448eba8edaac6a7` / tree
-`d80652ebbc53c379a5ef833f82cbf3fdc135b493`. Two fresh clean builds are
+`70141b662ff949c7d06e7801143e29ae14d253be` / tree
+`1ede66694689d38e68b61560d67cd7a1dd614838`. Two fresh clean builds are
 byte-identical at archive SHA-256
-`99ab4e1f0b0a39290f8b036eaf54e8d6ec14116c15bb048061c094fd5d355e3d`;
+`04e1cbc7b537be85addb1dd174fea2974f145685e782e589725b639cbc907b82`;
 system Python and the pinned venv independently report 25 files and inventory
-`0ce551ba64e09bc343361c285b1a93ecb90fb9d4efe886020af878ad2a028d06`.
+`4c912e694b8ee1f44c5dd0c1b31a33fc3906e16d9c6295ac20688c4e4e0fba23`.
 The retained out-of-tree asset set at
-`/home/pall/grok-projects/liqvera-release-0.0.2-a75ba04` includes the 970-byte
-bootstrap, its 91-byte detached checksum, the 41,347-byte archive, its 94-byte
+`/home/pall/grok-projects/liqvera-release-0.0.2-70141b6` includes the 970-byte
+bootstrap, its 91-byte detached checksum, the 42,226-byte archive, its 94-byte
 detached checksum, the 24,826-byte standalone verifier, and its 94-byte
 detached checksum. Nothing is published; clean-host Docker acceptance remains
 `NOT_RUN`.
@@ -244,7 +244,8 @@ in-package implementation of the three frozen schemas, timestamps use the
 Python 3.9-compatible UTC API, and a download-layout test runs the real
 bootstrap then checks all packaged Python modules against the 3.9 grammar and
 standard-library-only boundary. The `a75ba04`/`99ab4e1f…55e3d` artifact is
-therefore retained only as superseded evidence pending a fresh double build.
+retained only as superseded evidence; the fresh exact-subject build above
+replaces it.
 The final lifecycle regression also covers the symmetric rollback crash after
 the `current` pointer switches but before install authority is rewritten.
 Rollback now persists an exact candidate/prior operation before the switch, so

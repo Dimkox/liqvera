@@ -42,15 +42,12 @@ BLOCKED_EXTERNAL, and zero FAIL. It remains **INCOMPLETE** and is not a single r
 workspace metadata `0.1.0.dev0`); only the Liqvera product VERSION advances to
 `0.0.2`.
 
-No v0.0.2 tag, push, or GitHub Release has been created. The immediately prior
-artifact evidence binds release commit
-`a75ba04b868473c057beb0e7f448eba8edaac6a7`, tree
-`d80652ebbc53c379a5ef833f82cbf3fdc135b493`, archive SHA-256
-`99ab4e1f0b0a39290f8b036eaf54e8d6ec14116c15bb048061c094fd5d355e3d`
-(41,347 bytes), and inner inventory
-`0ce551ba64e09bc343361c285b1a93ecb90fb9d4efe886020af878ad2a028d06`.
-That artifact is stale after the packaged runtime dependency repair and must be
-replaced by the next exact-subject double build before publication.
+No v0.0.2 tag, push, or GitHub Release has been created. Final artifact evidence
+binds release commit `70141b662ff949c7d06e7801143e29ae14d253be`, tree
+`1ede66694689d38e68b61560d67cd7a1dd614838`, archive SHA-256
+`04e1cbc7b537be85addb1dd174fea2974f145685e782e589725b639cbc907b82`
+(42,226 bytes), and inner inventory
+`4c912e694b8ee1f44c5dd0c1b31a33fc3906e16d9c6295ac20688c4e4e0fba23`.
 Two builds were byte-identical and both independently materialized 25 files.
 The detached checksum, bootstrap, bootstrap checksum, and verifier hashes are
 recorded in the release artifact manifest. All five Liqvera images use

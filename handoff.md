@@ -147,6 +147,10 @@ closed shadow blockers; log collection is streaming, byte-bounded and timed.
 Volume ownership parsing preserves the full Compose project before the fixed
 volume suffix. Second-cycle focused checks passed 63 tests and full
 installer+graph passed 398 tests.
+Final Task 5 code re-review removed an unsupported gateway CLI readiness probe.
+The adapter now performs a direct proxy-free bounded loopback `GET /readyz`,
+accepts only 200/503 JSON within 64 KiB, and validates the real gateway closed
+readiness fields plus mandatory safe blockers. Focused lifecycle checks pass 27.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

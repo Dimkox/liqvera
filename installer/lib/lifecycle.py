@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import fcntl
 import hashlib
+import http.client
 import json
 import os
 import re
@@ -62,11 +63,13 @@ class Adapter(Protocol):
 class ComposeAdapter:
     """Fixed-argv local Compose adapter; update remains fail-closed without backup proof."""
 
-    def __init__(self, root: Path, runner: object = subprocess.run) -> None:
+    def __init__(self, root: Path, runner: object = subprocess.run,
+                 readiness_probe: object | None = None) -> None:
         self.root = _safe_root(root)
         self.runner = runner
         self.releases: dict[str, Path] = {}
         self.runtime_binding: tuple[Path, str, str] | None = None
+        self.readiness_probe = readiness_probe or _read_readyz
 
     def bind_runtime(self, release: Path, compose: Path, env_file: Path) -> None:
         self.runtime_binding = (release.resolve(), _file_sha256(compose), _file_sha256(env_file))
@@ -129,15 +132,19 @@ class ComposeAdapter:
                 or not all(row.get("State") == "running" and row.get("Health") == "healthy"
                            for row in by_service.values())):
             return False
-        readiness = self._run(
-            (*base, "exec", "-T", "gateway", "node", "/app/gateway-entrypoint.js", "readiness", "--json"),
-            capture=True, timeout=10,
-        )
         try:
-            value = json.loads(readiness.stdout)
-        except (json.JSONDecodeError, UnicodeDecodeError):
+            value = self.readiness_probe()
+        except (OSError, ValueError, TimeoutError):
             return False
-        return value == {"status": "BLOCKED", "blockers": ["SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED"]}
+        required = {"SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED"}
+        return (isinstance(value, dict)
+                and set(value) == {"schema", "request_id", "ready", "storage_ready",
+                                   "configuration_ready", "integration_ready", "payment_ready", "blockers"}
+                and value.get("schema") == "mee-evidence-readiness/v1"
+                and value.get("ready") is False and value.get("storage_ready") is True
+                and value.get("integration_ready") is True and value.get("payment_ready") is False
+                and isinstance(value.get("blockers"), list)
+                and required.issubset(set(value["blockers"])))
 
     def migration_ledger(self) -> list[dict[str, str]]:
         raise LifecycleError("ROLLBACK_RESTORE_REQUIRED: database ledger adapter unavailable")
@@ -217,6 +224,26 @@ def _bounded_subprocess_output(argv: tuple[str, ...], limit: int, timeout: int) 
         if process.poll() is None:
             process.kill()
             process.wait(timeout=2)
+
+
+def _read_readyz() -> dict[str, object]:
+    connection = http.client.HTTPConnection("127.0.0.1", 8080, timeout=5)
+    try:
+        connection.request("GET", "/readyz", headers={"Accept": "application/json", "Connection": "close"})
+        response = connection.getresponse()
+        if response.status not in {200, 503}:
+            raise ValueError("unexpected readiness status")
+        if response.getheader("Location") is not None:
+            raise ValueError("readiness redirect forbidden")
+        data = response.read(65537)
+        if len(data) > 65536 or response.read(1):
+            raise ValueError("readiness response exceeds bound")
+        value = json.loads(data)
+        if not isinstance(value, dict):
+            raise ValueError("readiness response is not an object")
+        return value
+    finally:
+        connection.close()
 
 
 def _safe_root(root: Path) -> Path:

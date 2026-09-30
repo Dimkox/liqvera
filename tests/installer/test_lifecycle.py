@@ -262,7 +262,11 @@ def test_compose_adapter_uses_fixed_argv_and_never_removes_volumes(tmp_path: Pat
             output = b""
         return subprocess.CompletedProcess(argv, 0, output, b"")
 
-    adapter = LIFECYCLE.ComposeAdapter(root, runner)
+    readiness = {"schema": "mee-evidence-readiness/v1", "request_id": "0" * 36,
+                 "ready": False, "storage_ready": True, "configuration_ready": False,
+                 "integration_ready": True, "payment_ready": False,
+                 "blockers": ["SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED", "PAY_TO_MISSING"]}
+    adapter = LIFECYCLE.ComposeAdapter(root, runner, lambda: readiness)
     adapter.start("liqvera-test", current)
     assert adapter.health("liqvera-test") is True
     adapter.remove_runtime("liqvera-test")
@@ -412,3 +416,26 @@ def test_injected_log_adapter_rejects_oversized_capture(tmp_path: Path) -> None:
         return subprocess.CompletedProcess(argv, 0, b"x" * 65537, b"")
     with pytest.raises(LIFECYCLE.LifecycleError, match="LIFECYCLE_COMMAND_FAILED"):
         LIFECYCLE.ComposeAdapter(root, runner).logs("liqvera-test", "gateway", 100, "10m")
+
+
+def test_readiness_probe_uses_real_bounded_readyz_http_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+    body = json.dumps({"schema": "mee-evidence-readiness/v1", "request_id": "0" * 36,
+                       "ready": False, "storage_ready": True, "configuration_ready": False,
+                       "integration_ready": True, "payment_ready": False,
+                       "blockers": ["SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED"]}).encode()
+    class Response:
+        status = 503
+        def getheader(self, _: str) -> None: return None
+        def read(self, size: int) -> bytes:
+            nonlocal body
+            chunk, body = body[:size], body[size:]
+            return chunk
+    class Connection:
+        def __init__(self, host: str, port: int, timeout: int) -> None:
+            assert (host, port, timeout) == ("127.0.0.1", 8080, 5)
+        def request(self, method: str, path: str, headers: dict[str, str]) -> None:
+            assert method == "GET" and path == "/readyz" and headers["Connection"] == "close"
+        def getresponse(self) -> Response: return Response()
+        def close(self) -> None: pass
+    monkeypatch.setattr(LIFECYCLE.http.client, "HTTPConnection", Connection)
+    assert LIFECYCLE._read_readyz()["storage_ready"] is True

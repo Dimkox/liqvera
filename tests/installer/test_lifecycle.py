@@ -1,0 +1,253 @@
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+import subprocess
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = ROOT / "installer/lib/lifecycle.py"
+SPEC = importlib.util.spec_from_file_location("installer_lifecycle", MODULE_PATH)
+assert SPEC is not None and SPEC.loader is not None
+LIFECYCLE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(LIFECYCLE)
+
+LEDGER = [
+    {"name": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+    for path in sorted((ROOT / "apps/mezo-gateway/migrations").glob("*.sql"))
+]
+
+
+class FakeAdapter:
+    def __init__(self) -> None:
+        self.trace: list[tuple[object, ...]] = []
+        self.healthy = True
+        self.migration_committed = False
+        self.log_text = "ok\nAuthorization: Bearer CANARY\npostgres://user:secret@db/x\n"
+
+    def start(self, project: str, release: Path) -> None:
+        self.trace.append(("start", project, release.name))
+
+    def stop(self, project: str) -> None:
+        self.trace.append(("stop", project))
+
+    def health(self, project: str) -> bool:
+        self.trace.append(("health", project))
+        return self.healthy
+
+    def migration_ledger(self) -> list[dict[str, str]]:
+        return LEDGER
+
+    def backup(self, project: str) -> dict[str, object]:
+        self.trace.append(("backup", project))
+        return {"complete": True, "sha256": "b" * 64}
+
+    def migrate(self, project: str, release: Path) -> bool:
+        self.trace.append(("migrate", project, release.name))
+        return self.migration_committed
+
+    def remove_runtime(self, project: str) -> None:
+        self.trace.append(("remove_runtime", project))
+
+    def purge(self, targets: tuple[str, ...]) -> None:
+        self.trace.append(("purge", *targets))
+
+    def logs(self, project: str, service: str, tail: int, since: str) -> str:
+        self.trace.append(("logs", project, service, tail, since))
+        return self.log_text
+
+
+def release(root: Path, digest: str, *, compatible: bool = True) -> Path:
+    target = root / "releases" / f"0.0.2-{digest[:12]}"
+    target.mkdir(parents=True)
+    metadata = {
+        "schema_version": "liqvera-lifecycle-release/v1",
+        "product_version": "0.0.2",
+        "release_sha256": digest,
+        "git_commit": digest[:40],
+        "git_tree": digest[-40:],
+        "database_compatibility": LEDGER if compatible else LEDGER[:-1],
+    }
+    (target / "release.json").write_text(json.dumps(metadata))
+    return target
+
+
+def installed(tmp_path: Path) -> tuple[Path, str, Path]:
+    root = tmp_path / "install"
+    root.mkdir(mode=0o700)
+    (root / "state").mkdir(mode=0o700)
+    digest = "a" * 64
+    current = release(root, digest)
+    (root / "current").symlink_to(current.relative_to(root))
+    install_state = {
+        "product_version": "0.0.2", "release_sha256": digest,
+        "git_commit": "a" * 40, "git_tree": "a" * 40,
+        "compose_project": "liqvera-test", "last_completed_phase": "HEALTHY",
+    }
+    (root / "state/install-state.json").write_text(json.dumps(install_state))
+    return root, digest, current
+
+
+def test_start_stop_are_idempotent_and_status_is_closed(tmp_path: Path) -> None:
+    root, digest, _ = installed(tmp_path)
+    adapter = FakeAdapter()
+    assert LIFECYCLE.run_lifecycle(root, "stop", {}, adapter)["status"] == "STOPPED"
+    assert LIFECYCLE.run_lifecycle(root, "stop", {}, adapter)["status"] == "STOPPED"
+    assert LIFECYCLE.run_lifecycle(root, "start", {}, adapter)["status"] == "HEALTHY"
+    status = LIFECYCLE.run_lifecycle(root, "status", {}, adapter)
+    assert set(status) == {"schema_version", "status", "version", "release_sha256", "git_commit",
+                           "git_tree", "compose_project", "service_manager", "blockers"}
+    assert status["release_sha256"] == digest
+    assert [item[0] for item in adapter.trace].count("start") == 1
+    assert [item[0] for item in adapter.trace].count("stop") == 1
+
+
+def test_update_stages_and_health_checks_before_atomic_current_switch(tmp_path: Path) -> None:
+    root, old_digest, old = installed(tmp_path)
+    new_digest = "b" * 64
+    candidate = release(root, new_digest)
+    adapter = FakeAdapter()
+    result = LIFECYCLE.run_lifecycle(
+        root, "update", {"version": "0.0.2", "sha256": new_digest}, adapter,
+    )
+    assert result["status"] == "HEALTHY"
+    assert (root / "current").resolve() == candidate.resolve()
+    assert json.loads((root / "state/lifecycle.json").read_text())["previous"]["release_sha256"] == old_digest
+    assert adapter.trace.index(("health", "liqvera-test-candidate")) < len(adapter.trace)
+    assert old.exists()
+
+
+def test_failed_candidate_health_preserves_prior_pointer_and_data(tmp_path: Path) -> None:
+    root, _, old = installed(tmp_path)
+    release(root, "b" * 64)
+    adapter = FakeAdapter()
+    adapter.healthy = False
+    with pytest.raises(LIFECYCLE.LifecycleError, match="HEALTH_TIMEOUT"):
+        LIFECYCLE.run_lifecycle(root, "update", {"version": "0.0.2", "sha256": "b" * 64}, adapter)
+    assert (root / "current").resolve() == old.resolve()
+    assert ("stop", "liqvera-test-candidate") in adapter.trace
+    assert not any(item[0] == "purge" for item in adapter.trace)
+
+
+def test_update_crash_after_migration_never_repeats_migration(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    release(root, "b" * 64)
+    adapter = FakeAdapter()
+    adapter.migration_committed = True
+    with pytest.raises(LIFECYCLE.InjectedCrash):
+        LIFECYCLE.run_lifecycle(
+            root, "update", {"version": "0.0.2", "sha256": "b" * 64,
+                             "crash_after": "MIGRATION_COMMITTED"}, adapter,
+        )
+    adapter.trace.clear()
+    with pytest.raises(LIFECYCLE.LifecycleError, match="ROLLBACK_RESTORE_REQUIRED"):
+        LIFECYCLE.run_lifecycle(root, "start", {}, adapter)
+    assert not any(item[0] == "migrate" for item in adapter.trace)
+
+
+@pytest.mark.parametrize("phase", ["INTENT", "BACKUP_COMPLETE", "CANDIDATE_STARTED", "HEALTHY", "POINTER_SWITCHED"])
+def test_update_resumes_each_non_irreversible_crash_boundary(tmp_path: Path, phase: str) -> None:
+    root, _, _ = installed(tmp_path)
+    candidate = release(root, "b" * 64)
+    adapter = FakeAdapter()
+    with pytest.raises(LIFECYCLE.InjectedCrash, match=phase):
+        LIFECYCLE.run_lifecycle(
+            root, "update", {"version": "0.0.2", "sha256": "b" * 64, "crash_after": phase}, adapter,
+        )
+    result = LIFECYCLE.run_lifecycle(
+        root, "update", {"version": "0.0.2", "sha256": "b" * 64}, adapter,
+    )
+    assert result["status"] == "HEALTHY"
+    assert (root / "current").resolve() == candidate.resolve()
+    assert LIFECYCLE.load_lifecycle_state(root)["operation"] is None
+
+
+def test_rollback_after_migration_requires_exact_prior_compatibility(tmp_path: Path) -> None:
+    root, _, old = installed(tmp_path)
+    state = LIFECYCLE.bootstrap_state(root)
+    current = release(root, "b" * 64)
+    (root / "current").unlink()
+    (root / "current").symlink_to(current.relative_to(root))
+    state["previous"] = json.loads((old / "release.json").read_text())
+    state["current"] = json.loads((current / "release.json").read_text())
+    state["migration_committed"] = True
+    LIFECYCLE.write_lifecycle_state(root, state)
+    adapter = FakeAdapter()
+    assert LIFECYCLE.run_lifecycle(root, "rollback", {}, adapter)["status"] == "HEALTHY"
+    state = LIFECYCLE.load_lifecycle_state(root)
+    state["previous"]["database_compatibility"] = [*LEDGER[:-1], {**LEDGER[-1], "sha256": "0" * 64}]
+    state["migration_committed"] = True
+    LIFECYCLE.write_lifecycle_state(root, state)
+    with pytest.raises(LIFECYCLE.LifecycleError, match="ROLLBACK_RESTORE_REQUIRED"):
+        LIFECYCLE.run_lifecycle(root, "rollback", {}, adapter)
+
+
+def test_default_uninstall_preserves_data_and_purge_requires_exact_token(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    for name in ("config", "logs", "backups", "data"):
+        (root / name).mkdir(exist_ok=True)
+        (root / name / "sentinel").write_text(name)
+    adapter = FakeAdapter()
+    result = LIFECYCLE.run_lifecycle(root, "uninstall", {}, adapter)
+    assert result["status"] == "UNINSTALLED"
+    assert all((root / name / "sentinel").exists() for name in ("config", "logs", "backups", "data"))
+    preview = LIFECYCLE.purge_preview(root)
+    with pytest.raises(LIFECYCLE.LifecycleError, match="PURGE_CONFIRMATION_REQUIRED"):
+        LIFECYCLE.run_lifecycle(root, "uninstall", {"purge_data": True, "confirm_purge": "wrong"}, adapter)
+    LIFECYCLE.run_lifecycle(root, "uninstall", {"purge_data": True, "confirm_purge": preview["token"]}, adapter)
+    assert any(item[0] == "purge" for item in adapter.trace)
+
+
+def test_purge_refuses_symlink_or_broad_target(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    (root / "data").symlink_to(tmp_path)
+    with pytest.raises(LIFECYCLE.LifecycleError, match="PURGE_CONFIRMATION_REQUIRED"):
+        LIFECYCLE.purge_preview(root)
+
+
+def test_logs_are_bounded_redacted_and_validate_arguments(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    adapter = FakeAdapter()
+    result = LIFECYCLE.run_lifecycle(root, "logs", {"service": "gateway", "tail": 50, "since": "10m"}, adapter)
+    assert "CANARY" not in result["logs"] and "secret" not in result["logs"]
+    assert "[REDACTED]" in result["logs"]
+    with pytest.raises(LIFECYCLE.LifecycleError, match="CONFIG_INVALID"):
+        LIFECYCLE.run_lifecycle(root, "logs", {"service": "../../x", "tail": 10_000, "since": "all"}, adapter)
+
+
+def test_concurrent_lock_fails_closed_without_effect(tmp_path: Path) -> None:
+    root, _, _ = installed(tmp_path)
+    held = LIFECYCLE.LifecycleLock.acquire(root)
+    adapter = FakeAdapter()
+    try:
+        with pytest.raises(LIFECYCLE.LifecycleError, match="LIFECYCLE_BUSY"):
+            LIFECYCLE.run_lifecycle(root, "stop", {}, adapter)
+    finally:
+        held.close()
+    assert adapter.trace == []
+
+
+def test_compose_adapter_uses_fixed_argv_and_never_removes_volumes(tmp_path: Path) -> None:
+    root, _, current = installed(tmp_path)
+    (root / "config").mkdir()
+    (root / "config/runtime.env").write_text("LIQVERA_PAYMENT_ENABLED=false\n")
+    (current / "compose.yaml").write_text("services: {}\n")
+    calls: list[tuple[tuple[str, ...], dict[str, object]]] = []
+
+    def runner(argv: tuple[str, ...], **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+        calls.append((argv, kwargs))
+        output = json.dumps([
+            {"State": "running", "Health": "healthy"} for _ in range(6)
+        ]).encode() if argv[-3:] == ("ps", "--format", "json") else b""
+        return subprocess.CompletedProcess(argv, 0, output, b"")
+
+    adapter = LIFECYCLE.ComposeAdapter(root, runner)
+    adapter.start("liqvera-test", current)
+    assert adapter.health("liqvera-test") is True
+    adapter.remove_runtime("liqvera-test")
+    assert all(call[0][0] == "/usr/bin/docker" for call in calls)
+    assert all("--volumes" not in call[0] and "-v" not in call[0] for call in calls)
+    assert all(call[1]["env"] == {"PATH": "/usr/bin:/bin"} for call in calls)

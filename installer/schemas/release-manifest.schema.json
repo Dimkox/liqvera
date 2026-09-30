@@ -3,7 +3,7 @@
   "$id": "https://liqvera.example/schemas/liqvera-installer-release-v1.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "product_version", "git_commit", "git_tree", "compose_sha256", "launchers", "images", "migrations", "supported_linux"],
+  "required": ["schema_version", "product_version", "git_commit", "git_tree", "compose_sha256", "launchers", "images", "migrations", "database_compatibility", "supported_linux"],
   "properties": {
     "schema_version": {"const": "liqvera-installer-release/v1"},
     "product_version": {"const": "0.0.2"},
@@ -44,6 +44,15 @@
         {"$ref": "#/$defs/migration_005"}
       ],
       "items": false
+    },
+    "database_compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted_migrations", "down_migrations"],
+      "properties": {
+        "accepted_migrations": {"$ref": "#/properties/migrations"},
+        "down_migrations": {"const": false}
+      }
     },
     "supported_linux": {
       "type": "object",

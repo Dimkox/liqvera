@@ -69,6 +69,10 @@ def release_manifest() -> dict[str, object]:
             "postgres": f"postgres@sha256:{'6' * 64}",
         },
         "migrations": [{"name": name, "sha256": digest} for name, digest in MIGRATIONS],
+        "database_compatibility": {
+            "accepted_migrations": [{"name": name, "sha256": digest} for name, digest in MIGRATIONS],
+            "down_migrations": False,
+        },
         "supported_linux": {
             "architectures": ["amd64", "arm64"],
             "distributions": ["ubuntu", "debian", "fedora", "rhel"],

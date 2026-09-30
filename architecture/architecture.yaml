@@ -15538,6 +15538,9 @@ repository_inventory:
   - path: installer/install.sh
     node: runtime:liqvera-factory
     path_class: SHELL_SCRIPT
+  - path: installer/liqvera.sh
+    node: runtime:liqvera-factory
+    path_class: SHELL_SCRIPT
   - path: installer/lib/common.sh
     node: runtime:liqvera-factory
     path_class: SHELL_SCRIPT
@@ -15545,6 +15548,9 @@ repository_inventory:
     node: runtime:liqvera-factory
     path_class: RUNTIME_SOURCE
   - path: installer/lib/orchestration.py
+    node: runtime:liqvera-factory
+    path_class: RUNTIME_SOURCE
+  - path: installer/lib/lifecycle.py
     node: runtime:liqvera-factory
     path_class: RUNTIME_SOURCE
   - path: installer/manifests/v0.0.2.json
@@ -15581,6 +15587,9 @@ repository_inventory:
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: tests/installer/test_systemd_integration.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/installer/test_lifecycle.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: apps/mezo-gateway/src/migration-policy.ts

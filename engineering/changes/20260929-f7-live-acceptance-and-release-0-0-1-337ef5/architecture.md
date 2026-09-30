@@ -2,6 +2,21 @@
 
 > Typed authority: [`change-spec.yaml`](change-spec.yaml). This Markdown explains context and cannot override typed IDs, risk, acceptance criteria, forbidden outcomes, or approval scopes.
 
+## Installer Task 5 rulings (2026-09-30)
+
+- Lifecycle state is a separate closed `liqvera-lifecycle/v1` journal so the
+  released install-state v1 contract is not overloaded. Atomic intent and phase
+  markers bind candidate/prior identities, backup digest, exact migration
+  ledger, migration-commit fact, Compose project and service manager.
+- Release compatibility is exact 001–005 identity plus `down_migrations=false`;
+  it is not a version range. A post-migration rollback is permitted only when
+  the prior verified release accepts the observed exact ledger.
+- Update requires a complete coherent backup receipt before candidate mutation.
+  The production Compose adapter has no reviewed database-ledger/backup seam yet,
+  so production update fails closed; fake-only tests prove the state machine.
+- Default uninstall never removes volumes or retained data. Destructive purge
+  is a separate exact-token operation over five project-bound volume names.
+
 ## Installer Task 4 rulings (2026-09-30)
 
 - The Compose projection is shadow-only: `shadow` maps explicitly to runtime

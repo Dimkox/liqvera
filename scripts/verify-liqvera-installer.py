@@ -45,6 +45,7 @@ APPROVED_PATHS = frozenset(
         "lib/common.sh",
         "lib/runtime.py",
         "lib/orchestration.py",
+        "lib/lifecycle.py",
         "liqvera.sh",
         "compose.yaml",
         "config/liqvera.env.template",

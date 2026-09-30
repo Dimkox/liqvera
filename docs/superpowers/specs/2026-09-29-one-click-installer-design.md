@@ -81,7 +81,8 @@ liqvera-installer-0.0.2/
 ├── lib/
 │   ├── common.sh
 │   ├── runtime.py
-│   └── orchestration.py
+│   ├── orchestration.py
+│   └── lifecycle.py
 ├── schemas/
 │   ├── config.schema.json
 │   ├── install-state.schema.json

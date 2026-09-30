@@ -1,5 +1,16 @@
 # Test plan — F7 live acceptance and release 0.0.1
 
+## Installer Task 5
+
+- Exercise idempotent start/stop/status, the nonblocking lifecycle lock, bounded
+  redacted logs and fixed Docker argv with no volume deletion.
+- Inject crashes after intent, backup, candidate start, health, migration commit
+  and pointer switch; only non-irreversible phases resume automatically.
+- Prove health-before-pointer update, prior preservation on failure, exact-ledger
+  rollback compatibility, default data preservation and exact purge-token scope.
+- Keep real Docker, database, systemd, package and host mutations NOT_RUN in PR
+  tests; production update remains fail-closed without coherent backup proof.
+
 ## Installer Task 4
 
 - Assert the seven-role Compose topology, digest-only inputs, fixture mapping,

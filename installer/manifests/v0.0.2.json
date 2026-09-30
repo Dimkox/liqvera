@@ -18,5 +18,15 @@
     {"name": "003_live_grant_consumption.sql", "sha256": "bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0"},
     {"name": "004_receipt_confirmation_provenance.sql", "sha256": "96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a"},
     {"name": "005_receipt_confirmation_count.sql", "sha256": "e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11"}
-  ]
+  ],
+  "database_compatibility": {
+    "accepted_migrations": [
+      {"name": "001_ledger.sql", "sha256": "bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b"},
+      {"name": "002_fix_immutable_ledger_identity.sql", "sha256": "981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb"},
+      {"name": "003_live_grant_consumption.sql", "sha256": "bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0"},
+      {"name": "004_receipt_confirmation_provenance.sql", "sha256": "96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a"},
+      {"name": "005_receipt_confirmation_count.sql", "sha256": "e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11"}
+    ],
+    "down_migrations": false
+  }
 }

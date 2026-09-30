@@ -110,6 +110,21 @@ and reload/enable failure restores the prior unit or returns Compose fallback.
 The source manifest remains `runnable=false` with null images until Task 6 binds
 real reviewed digests. No Docker, database, or systemd mutation was performed.
 
+Task 5 now adds the Linux `liqvera.sh` lifecycle wrapper and a closed,
+atomically persisted lifecycle journal. One nonblocking descriptor-root lock
+serializes status/log/start/stop/update/rollback/uninstall operations. Updates
+consume only an already verified immutable staged release, record every durable
+boundary, require a coherent backup receipt and exact 001–005 compatibility,
+health-check the candidate before atomically switching `current`, and resume
+non-irreversible crash phases. A migration-committed uncertain phase never
+blindly reruns and requires compatible forward recovery or explicit restore;
+down migrations do not exist. Default uninstall removes runtime only and
+preserves configuration, logs, backups and volumes. Purge uses an exact token
+bound to the install root, release and five named volumes, rejecting symlinked
+or broad targets. Production Compose update remains deliberately fail-closed
+until a reviewed database-ledger/coherent-backup adapter exists; ordinary
+start/stop/logs/down use fixed absolute Docker argv without `--volumes`.
+
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result
 `b31bc68310c471d35de079d1e0a13232aa39dff4e99b42a9d21b9ce2dbe770de`

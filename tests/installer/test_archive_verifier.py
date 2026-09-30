@@ -55,6 +55,7 @@ def manifest(files: dict[str, bytes]) -> bytes:
             )
         },
         "migrations": migrations,
+        "database_compatibility": {"accepted_migrations": migrations, "down_migrations": False},
         "supported_linux": {
             "architectures": ["amd64", "arm64"],
             "distributions": ["ubuntu", "debian", "fedora", "rhel"],
@@ -70,7 +71,8 @@ def valid_files() -> dict[str, bytes]:
         "lib/common.sh": (ROOT / "installer/lib/common.sh").read_bytes(),
         "lib/runtime.py": (ROOT / "installer/lib/runtime.py").read_bytes(),
         "lib/orchestration.py": (ROOT / "installer/lib/orchestration.py").read_bytes(),
-        "liqvera.sh": b"#!/usr/bin/env bash\nexit 0\n",
+        "lib/lifecycle.py": (ROOT / "installer/lib/lifecycle.py").read_bytes(),
+        "liqvera.sh": (ROOT / "installer/liqvera.sh").read_bytes(),
         "compose.yaml": b"services: {}\n",
         "config/liqvera.env.template": b"LIQVERA_PAYMENT_ENABLED=false\n",
         "config/ports.env.template": b"LIQVERA_WEB_HOST=127.0.0.1\n",

@@ -5,6 +5,7 @@ import importlib.util
 import json
 import os
 import stat
+import struct
 import subprocess
 import sys
 import zipfile
@@ -243,6 +244,33 @@ def test_raced_empty_destination_is_preserved_and_publication_fails(
     assert list(destination.iterdir()) == []
 
 
+def test_parent_replacement_cannot_redirect_materialization_or_false_publish(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive = tmp_path / "release.zip"
+    expected = write_archive(archive)
+    parent = tmp_path / "parent"
+    parent.mkdir()
+    held_parent = tmp_path / "held-parent"
+    destination = parent / "release"
+    original_write = VERIFIER._write_payloads
+
+    def swap_parent_then_write(temporary_fd: int, payloads: dict[str, bytes]) -> None:
+        parent.rename(held_parent)
+        parent.mkdir()
+        decoy = parent / "do-not-delete"
+        decoy.write_text("preserve", encoding="utf-8")
+        original_write(temporary_fd, payloads)
+
+    monkeypatch.setattr(VERIFIER, "_write_payloads", swap_parent_then_write)
+
+    with pytest.raises(VERIFIER.VerificationError):
+        VERIFIER.verify_installer(archive, expected, destination)
+    assert not destination.exists()
+    assert (parent / "do-not-delete").read_text(encoding="utf-8") == "preserve"
+    assert not (held_parent / "release").exists()
+
+
 @pytest.mark.parametrize(
     "bad_name",
     [
@@ -397,6 +425,58 @@ def test_member_limit_is_rejected_before_zipfile_allocates_inventory(
             info.external_attr = (stat.S_IFREG | 0o600) << 16
             package.writestr(info, b"")
     expected = sha(archive.read_bytes())
+    called = False
+    original_zipfile = VERIFIER.zipfile.ZipFile
+
+    def forbidden_parser(*args, **kwargs):
+        nonlocal called
+        called = True
+        return original_zipfile(*args, **kwargs)
+
+    monkeypatch.setattr(VERIFIER.zipfile, "ZipFile", forbidden_parser)
+    assert_failed_without_materialization(archive, expected, tmp_path / "release")
+    assert called is False
+
+
+def test_hidden_zip64_locator_is_rejected_before_zipfile_parser(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive = tmp_path / "hidden-zip64.zip"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_STORED) as package:
+        for index in range(VERIFIER.MAX_MEMBERS + 1):
+            info = zipfile.ZipInfo(PREFIX + f"tiny-{index:05d}")
+            info.create_system = 3
+            info.external_attr = (stat.S_IFREG | 0o600) << 16
+            package.writestr(info, b"")
+    raw = archive.read_bytes()
+    end_offset = raw.rfind(b"PK\x05\x06")
+    original_cd = VERIFIER._EOCD.unpack_from(raw, end_offset)[6]
+    fields = VERIFIER._CENTRAL_HEADER.unpack_from(raw, original_cd)
+    header_length = VERIFIER._CENTRAL_HEADER.size + fields[10] + fields[11] + fields[12]
+    header = bytearray(raw[original_cd : original_cd + header_length])
+    zip64_record_size = 56
+    struct.pack_into("<H", header, 32, zip64_record_size + 20)
+    zip64_offset = end_offset + len(header)
+    zip64_record = struct.pack(
+        "<4sQ2H2L4Q",
+        b"PK\x06\x06",
+        44,
+        45,
+        45,
+        0,
+        0,
+        VERIFIER.MAX_MEMBERS + 2,
+        VERIFIER.MAX_MEMBERS + 2,
+        zip64_offset - original_cd,
+        original_cd,
+    )
+    locator = struct.pack("<4sLQL", b"PK\x06\x07", 0, zip64_offset, 1)
+    small_cd = bytes(header) + zip64_record + locator
+    forged = raw[:end_offset] + small_cd + VERIFIER._EOCD.pack(
+        b"PK\x05\x06", 0, 0, 1, 1, len(small_cd), end_offset, 0
+    )
+    archive.write_bytes(forged)
+    expected = sha(forged)
     called = False
     original_zipfile = VERIFIER.zipfile.ZipFile
 

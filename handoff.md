@@ -34,7 +34,14 @@ non-ZIP64 single-disk central directory before stdlib allocation; requires the
 exact approved asset/migration path set; rejects parser-altered NUL and all
 control names; and publishes through Linux `renameat2(RENAME_NOREPLACE)` against
 a bound parent directory. FIFO inputs and raced destinations fail without
-publication. Task 3 Linux preflight remains the next implementation boundary.
+publication. Task 2 re-review exposed two further divergence points, now closed:
+temporary creation, every directory/file write, cleanup, and no-replace publish
+are all relative to held directory descriptors, with selected-path identity
+revalidated before success; parent replacement cannot redirect bytes or create
+a false empty publication. EOCD-adjacent or embedded ZIP64 locator/end records
+are rejected before `ZipFile`, so its parsed directory cannot exceed the
+preflighted ordinary central directory. Task 3 Linux preflight remains the next
+implementation boundary.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

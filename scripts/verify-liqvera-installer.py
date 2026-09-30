@@ -11,11 +11,10 @@ import io
 import json
 import os
 import re
-import shutil
+import secrets
 import stat
 import struct
 import sys
-import tempfile
 import unicodedata
 import zipfile
 from dataclasses import asdict, dataclass
@@ -135,6 +134,8 @@ def _preflight_zip(data: bytes) -> None:
     ) = _EOCD.unpack_from(data, offset)
     if signature != b"PK\x05\x06" or offset + _EOCD.size + comment_size != len(data):
         raise VerificationError("ARCHIVE_INVALID: inconsistent ZIP end record")
+    if offset >= 20 and data[offset - 20 : offset - 16] == b"PK\x06\x07":
+        raise VerificationError("ARCHIVE_INVALID: ZIP64 locator is forbidden")
     if disk_number != 0 or central_disk != 0 or disk_entries != total_entries:
         raise VerificationError("ARCHIVE_INVALID: multidisk ZIP is forbidden")
     if total_entries in {0xFFFF} or central_size == 0xFFFFFFFF or central_offset == 0xFFFFFFFF:
@@ -143,6 +144,9 @@ def _preflight_zip(data: bytes) -> None:
         raise VerificationError("ARCHIVE_INVALID: member count outside bounds")
     if central_size > MAX_METADATA_BYTES or central_offset + central_size != offset:
         raise VerificationError("ARCHIVE_INVALID: central directory outside bounds")
+    central_bytes = data[central_offset:offset]
+    if b"PK\x06\x06" in central_bytes or b"PK\x06\x07" in central_bytes:
+        raise VerificationError("ARCHIVE_INVALID: embedded ZIP64 metadata is forbidden")
 
     cursor = central_offset
     central_end = central_offset + central_size
@@ -330,6 +334,94 @@ def _rename_noreplace(parent_fd: int, temporary_name: str, destination_name: str
         )
 
 
+def _create_private_directory(parent_fd: int, destination_name: str) -> tuple[str, int]:
+    for _ in range(16):
+        name = f".{destination_name}.{secrets.token_hex(12)}"
+        try:
+            os.mkdir(name, 0o700, dir_fd=parent_fd)
+        except FileExistsError:
+            continue
+        descriptor = os.open(
+            name,
+            os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
+            dir_fd=parent_fd,
+        )
+        return name, descriptor
+    raise VerificationError("ARCHIVE_INVALID: unable to allocate private materialization directory")
+
+
+def _open_child_directory(parent_fd: int, name: str) -> int:
+    try:
+        os.mkdir(name, 0o700, dir_fd=parent_fd)
+    except FileExistsError:
+        pass
+    try:
+        return os.open(
+            name,
+            os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
+            dir_fd=parent_fd,
+        )
+    except OSError as exc:
+        raise VerificationError("ARCHIVE_INVALID: unsafe materialization directory") from exc
+
+
+def _write_payloads(temporary_fd: int, payloads: dict[str, bytes]) -> None:
+    for relative, data in sorted(payloads.items()):
+        parts = PurePosixPath(relative).parts
+        directory_fd = os.dup(temporary_fd)
+        try:
+            for component in parts[:-1]:
+                child_fd = _open_child_directory(directory_fd, component)
+                os.close(directory_fd)
+                directory_fd = child_fd
+            try:
+                file_fd = os.open(
+                    parts[-1],
+                    os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW,
+                    0o600,
+                    dir_fd=directory_fd,
+                )
+            except OSError as exc:
+                raise VerificationError("ARCHIVE_INVALID: unsafe materialization target") from exc
+            with os.fdopen(file_fd, "wb") as handle:
+                handle.write(data)
+                handle.flush()
+                os.fsync(handle.fileno())
+        finally:
+            os.close(directory_fd)
+    os.fsync(temporary_fd)
+
+
+def _remove_tree_contents(directory_fd: int) -> None:
+    for name in os.listdir(directory_fd):
+        item = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+        if stat.S_ISDIR(item.st_mode):
+            child_fd = os.open(
+                name,
+                os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
+                dir_fd=directory_fd,
+            )
+            try:
+                _remove_tree_contents(child_fd)
+            finally:
+                os.close(child_fd)
+            os.rmdir(name, dir_fd=directory_fd)
+        else:
+            os.unlink(name, dir_fd=directory_fd)
+
+
+def _remove_owned_directory(parent_fd: int, name: str, directory_fd: int) -> None:
+    try:
+        named = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        return
+    opened = os.fstat(directory_fd)
+    if (named.st_dev, named.st_ino) != (opened.st_dev, opened.st_ino):
+        return
+    _remove_tree_contents(directory_fd)
+    os.rmdir(name, dir_fd=parent_fd)
+
+
 def _materialize(payloads: dict[str, bytes], destination: Path) -> None:
     parent = destination.parent
     if not destination.name or not parent.is_dir():
@@ -339,7 +431,9 @@ def _materialize(payloads: dict[str, bytes], destination: Path) -> None:
     except OSError as exc:
         raise VerificationError("ARCHIVE_INVALID: destination parent is unsafe") from exc
     parent_identity = os.fstat(parent_fd)
-    temporary: Path | None = None
+    temporary_name: str | None = None
+    temporary_fd: int | None = None
+    published = False
     try:
         try:
             os.stat(destination.name, dir_fd=parent_fd, follow_symlinks=False)
@@ -347,30 +441,32 @@ def _materialize(payloads: dict[str, bytes], destination: Path) -> None:
             pass
         else:
             raise VerificationError("ARCHIVE_INVALID: destination already exists")
-        temporary = Path(tempfile.mkdtemp(prefix=f".{destination.name}.", dir=parent))
+        temporary_name, temporary_fd = _create_private_directory(parent_fd, destination.name)
+        _write_payloads(temporary_fd, payloads)
+        _rename_noreplace(parent_fd, temporary_name, destination.name)
+        published = True
+        os.fsync(parent_fd)
         current_parent = parent.stat(follow_symlinks=False)
-        if (current_parent.st_dev, current_parent.st_ino) != (
-            parent_identity.st_dev,
-            parent_identity.st_ino,
+        published_stat = os.stat(destination.name, dir_fd=parent_fd, follow_symlinks=False)
+        selected_stat = destination.stat(follow_symlinks=False)
+        temporary_stat = os.fstat(temporary_fd)
+        expected_identity = (temporary_stat.st_dev, temporary_stat.st_ino)
+        if (
+            (current_parent.st_dev, current_parent.st_ino)
+            != (parent_identity.st_dev, parent_identity.st_ino)
+            or (published_stat.st_dev, published_stat.st_ino) != expected_identity
+            or (selected_stat.st_dev, selected_stat.st_ino) != expected_identity
         ):
             raise VerificationError("ARCHIVE_INVALID: destination parent changed")
-        os.chmod(temporary, 0o700)
-        for relative, data in sorted(payloads.items()):
-            target = temporary.joinpath(*PurePosixPath(relative).parts)
-            target.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-            with target.open("xb") as handle:
-                handle.write(data)
-                handle.flush()
-                os.fsync(handle.fileno())
-            os.chmod(target, 0o600)
-        _rename_noreplace(parent_fd, temporary.name, destination.name)
-        os.fsync(parent_fd)
-        temporary = None
+        temporary_name = None
     except Exception:
-        if temporary is not None:
-            shutil.rmtree(temporary, ignore_errors=True)
+        if temporary_fd is not None and temporary_name is not None:
+            cleanup_name = destination.name if published else temporary_name
+            _remove_owned_directory(parent_fd, cleanup_name, temporary_fd)
         raise
     finally:
+        if temporary_fd is not None:
+            os.close(temporary_fd)
         os.close(parent_fd)
 
 

@@ -87,9 +87,9 @@ Release exists yet. Inherited `mee-*` identifiers are preserved.
 
 The v0.0.2 operator package is **Linux-only** for Ubuntu 22.04, Ubuntu 24.04,
 Debian 12, Fedora 40, Fedora 41, and RHEL 9 on `amd64` or `arm64`. Minimums are Bash 5.2, Docker Engine 27, Docker Compose v2.30, 4 GiB free disk, and 2 GiB memory.
-The detached archive verifier requires only Python 3.9+ from the supported
-distribution and the standard library; it does not require a repository
-checkout or third-party Python packages.
+The detached archive verifier and installed lifecycle require only Python 3.9+
+from the supported distribution and the standard library; they do not require
+a repository checkout or third-party Python packages.
 The default is deliberately safe: Mezo chain 31611, shadow source, payment
 disabled, and loopback `127.0.0.1` ports 3000/8080/9090. It accepts secret-file
 references only; never put a password, token, wallet key, payment grant, or

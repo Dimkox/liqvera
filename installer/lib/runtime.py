@@ -16,11 +16,9 @@ import socket
 import stat
 import subprocess  # nosec B404: every executable and argv is closed below.
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
-
-from jsonschema import Draft202012Validator, ValidationError
 
 INSTALLER_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_SCHEMA = INSTALLER_ROOT / "schemas" / "config.schema.json"
@@ -90,10 +88,82 @@ def load_json_bytes(data: bytes, code: str, *, maximum: int = 1024 * 1024) -> ob
         raise InstallerError(code, "JSON is malformed") from exc
 
 
+def _schema_target(schema: dict[str, object], reference: str) -> object:
+    target: object = schema
+    for raw_part in reference.removeprefix("#/").split("/"):
+        part = raw_part.replace("~1", "/").replace("~0", "~")
+        if not isinstance(target, dict) or part not in target:
+            raise ValueError("unknown schema reference")
+        target = target[part]
+    return target
+
+
+def _canonical_json(value: object) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def _schema_validate(value: object, rule: object, root: dict[str, object]) -> None:
+    if not isinstance(rule, dict):
+        raise ValueError("invalid schema rule")
+    if "$ref" in rule:
+        target = _schema_target(root, str(rule["$ref"]))
+        _schema_validate(value, target, root)
+        return
+    if "const" in rule and _canonical_json(value) != _canonical_json(rule["const"]):
+        raise ValueError("const mismatch")
+    if "enum" in rule and _canonical_json(value) not in {_canonical_json(item) for item in rule["enum"]}:
+        raise ValueError("enum mismatch")
+    expected_type = rule.get("type")
+    allowed_types = expected_type if isinstance(expected_type, list) else [expected_type]
+    if expected_type is not None:
+        matches = any(
+            (kind == "object" and isinstance(value, dict))
+            or (kind == "array" and isinstance(value, list))
+            or (kind == "string" and isinstance(value, str))
+            or (kind == "integer" and isinstance(value, int) and not isinstance(value, bool))
+            or (kind == "boolean" and isinstance(value, bool))
+            or (kind == "null" and value is None)
+            for kind in allowed_types
+        )
+        if not matches:
+            raise ValueError("type mismatch")
+    if isinstance(value, dict):
+        required = set(rule.get("required", []))
+        properties = rule.get("properties", {})
+        if not isinstance(properties, dict) or not required.issubset(value):
+            raise ValueError("required property missing")
+        if rule.get("additionalProperties") is False and set(value) - set(properties):
+            raise ValueError("unexpected property")
+        for key, item in value.items():
+            if key in properties:
+                _schema_validate(item, properties[key], root)
+    elif isinstance(value, list):
+        if len(value) < int(rule.get("minItems", 0)) or len(value) > int(rule.get("maxItems", len(value))):
+            raise ValueError("array length mismatch")
+        prefix = rule.get("prefixItems", [])
+        if not isinstance(prefix, list):
+            raise ValueError("invalid prefix rules")
+        for index, item_rule in enumerate(prefix):
+            if index < len(value):
+                _schema_validate(value[index], item_rule, root)
+        if rule.get("items") is False and len(value) > len(prefix):
+            raise ValueError("unexpected array item")
+    elif isinstance(value, str):
+        if len(value) < int(rule.get("minLength", 0)) or len(value) > int(rule.get("maxLength", len(value))):
+            raise ValueError("string length mismatch")
+        if "pattern" in rule and re.search(str(rule["pattern"]), value) is None:
+            raise ValueError("string pattern mismatch")
+        if rule.get("format") == "date-time":
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                raise ValueError("timezone missing")
+
+
 def _validate(schema_path: Path, value: dict[str, object], code: str) -> None:
     try:
-        Draft202012Validator(_load_schema(schema_path)).validate(value)
-    except (OSError, json.JSONDecodeError, ValidationError) as exc:
+        schema = _load_schema(schema_path)
+        _schema_validate(value, schema, schema)
+    except (OSError, json.JSONDecodeError, TypeError, ValueError) as exc:
         raise InstallerError(code, "closed schema validation failed") from exc
 
 
@@ -745,7 +815,7 @@ def main(argv: list[str] | None = None, lifecycle_adapter: object | None = None)
             lifecycle_result = lifecycle_runtime.run_lifecycle(args.install_dir, "start", {}, adapter)
             if existing["last_completed_phase"] != "HEALTHY":
                 existing["last_completed_phase"] = "HEALTHY"
-                existing["updated_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+                existing["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
                 write_state_atomic(args.install_dir / "state/install-state.json", existing)
             print(json.dumps(lifecycle_result, sort_keys=True, separators=(",", ":")))
             return 0
@@ -780,7 +850,7 @@ def main(argv: list[str] | None = None, lifecycle_adapter: object | None = None)
             install_dependencies(str(facts["distribution"]), approval, _system_runner)
             facts = _collect_system_facts(args.install_dir, config, args.bash_version)
             outcome = preflight({"schema_version": "liqvera-preflight-request/v1", "install_root": str(args.install_dir), "config": config}, facts)
-        now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         state = {
             "schema_version": "liqvera-install-state/v1",
             "product_version": manifest["product_version"],
@@ -847,7 +917,7 @@ def main(argv: list[str] | None = None, lifecycle_adapter: object | None = None)
         adapter = lifecycle_adapter if lifecycle_adapter is not None else lifecycle_runtime.ComposeAdapter(args.install_dir)
         lifecycle_result = lifecycle_runtime.run_lifecycle(args.install_dir, "start", {}, adapter)
         state["last_completed_phase"] = "HEALTHY"
-        state["updated_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        state["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         write_state_atomic(args.install_dir / "state/install-state.json", state)
         print(json.dumps({**outcome, **lifecycle_result}, sort_keys=True, separators=(",", ":")))
         return 0

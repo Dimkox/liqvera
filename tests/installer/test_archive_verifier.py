@@ -192,6 +192,33 @@ def test_release_asset_verifier_is_python39_syntax_compatible() -> None:
     ast.parse(SCRIPT.read_text(encoding="utf-8"), feature_version=(3, 9))
 
 
+def test_download_layout_bootstrap_and_packaged_runtime_need_only_python39_stdlib(tmp_path: Path) -> None:
+    archive = tmp_path / "liqvera-installer-0.0.2.zip"
+    expected = write_archive(archive)
+    download = tmp_path / "download"
+    download.mkdir()
+    verifier = download / "verify-liqvera-installer.py"
+    bootstrap = download / "install-liqvera-0.0.2.sh"
+    verifier.write_bytes(SCRIPT.read_bytes())
+    bootstrap.write_bytes((ROOT / "scripts/install-liqvera-0.0.2.sh").read_bytes())
+    bootstrap.chmod(0o755)
+    config = download / "liqvera-config.json"
+    config.write_text("{}", encoding="utf-8")
+
+    completed = subprocess.run(
+        ["bash", str(bootstrap), str(archive), expected, str(verifier),
+         str(tmp_path / "verified"), str(tmp_path / "installed"), str(config)],
+        check=False, capture_output=True, text=True, cwd=download,
+        env={"PATH": "/usr/bin:/bin", "TMPDIR": str(tmp_path)},
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    for name in ("runtime.py", "orchestration.py", "lifecycle.py"):
+        source = (tmp_path / "verified/lib" / name).read_text(encoding="utf-8")
+        ast.parse(source, feature_version=(3, 9))
+        assert "jsonschema" not in source
+
+
 def test_rejects_wrong_outer_digest_and_existing_destination(tmp_path: Path) -> None:
     archive = tmp_path / "release.zip"
     expected = write_archive(archive)

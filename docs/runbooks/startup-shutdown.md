@@ -18,8 +18,9 @@ bash ./install-liqvera-0.0.2.sh \
 "$root/liqvera.sh" --install-root "$root" status --json
 ```
 
-The verifier is a standalone Python 3.9+ standard-library release asset. It
-must run from the download directory without a source checkout or `jsonschema`.
+The verifier and installed lifecycle use only Python 3.9+ and the standard
+library. The verifier must run from the download directory without a source
+checkout; neither path requires `jsonschema`.
 
 The config is closed: chain 31611, shadow source, payment disabled, loopback
 `127.0.0.1` ports, and required references to private database-password and

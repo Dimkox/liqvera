@@ -237,6 +237,14 @@ exact five targets and root/release-bound token, then exits without mutation;
 the confirmed second invocation remains required. Focused archive/lifecycle/
 operator checks pass 77 tests. All earlier v0.0.2 archive hashes are stale
 until the post-fix double build is recorded in a separate evidence commit.
+The following release review also found the installed runtime itself still
+depended on `jsonschema` and Python 3.11's `datetime.UTC`, despite bootstrap
+using the distribution `/usr/bin/python3`. Runtime validation is now a bounded
+in-package implementation of the three frozen schemas, timestamps use the
+Python 3.9-compatible UTC API, and a download-layout test runs the real
+bootstrap then checks all packaged Python modules against the 3.9 grammar and
+standard-library-only boundary. The `a75ba04`/`99ab4e1f…55e3d` artifact is
+therefore retained only as superseded evidence pending a fresh double build.
 During authorized multiarch publication the production web Docker build exposed
 strict TypeScript narrowing gaps in receipt verification and the reviewed JS
 x402 bridge import. The minimal source typing repair preserves all runtime

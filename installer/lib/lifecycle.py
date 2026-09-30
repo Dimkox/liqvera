@@ -24,6 +24,10 @@ HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 SINCE = re.compile(r"[1-9][0-9]{0,5}[smhd]\Z")
 SERVICES = frozenset({"postgres", "migrate", "capture", "report", "gateway", "web", "edge"})
 RUNNING_SERVICES = frozenset({"postgres", "capture", "report", "gateway", "web", "edge"})
+SAFE_SHADOW_REASONS = frozenset({
+    "SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED", "PAY_TO_MISSING",
+    "FINALITY_RULE_UNVERIFIED", "AUTHORIZATION_IDENTITY_UNVERIFIED",
+})
 COMPOSE_SHA256 = "e138eb47d6ade1b6dfc68458717a4034ebec6eb7ece571d1aabf2d02c6a1a85b"
 PHASES = frozenset({"HEALTHY", "STOPPED", "UNINSTALLED"})
 OPERATION_PHASES = frozenset({
@@ -137,14 +141,15 @@ class ComposeAdapter:
         except (OSError, ValueError, TimeoutError):
             return False
         required = {"SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED"}
+        blockers = value.get("blockers") if isinstance(value, dict) else None
         return (isinstance(value, dict)
                 and set(value) == {"schema", "request_id", "ready", "storage_ready",
                                    "configuration_ready", "integration_ready", "payment_ready", "blockers"}
                 and value.get("schema") == "mee-evidence-readiness/v1"
                 and value.get("ready") is False and value.get("storage_ready") is True
                 and value.get("integration_ready") is True and value.get("payment_ready") is False
-                and isinstance(value.get("blockers"), list)
-                and required.issubset(set(value["blockers"])))
+                and isinstance(blockers, list) and len(blockers) == len(set(blockers))
+                and required.issubset(set(blockers)) and set(blockers).issubset(SAFE_SHADOW_REASONS))
 
     def migration_ledger(self) -> list[dict[str, str]]:
         raise LifecycleError("ROLLBACK_RESTORE_REQUIRED: database ledger adapter unavailable")
@@ -227,7 +232,7 @@ def _bounded_subprocess_output(argv: tuple[str, ...], limit: int, timeout: int) 
 
 
 def _read_readyz() -> dict[str, object]:
-    connection = http.client.HTTPConnection("127.0.0.1", 8080, timeout=5)
+    connection = http.client.HTTPConnection("127.0.0.1", 3000, timeout=5)
     try:
         connection.request("GET", "/readyz", headers={"Accept": "application/json", "Connection": "close"})
         response = connection.getresponse()

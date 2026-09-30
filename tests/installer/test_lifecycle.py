@@ -432,10 +432,25 @@ def test_readiness_probe_uses_real_bounded_readyz_http_contract(monkeypatch: pyt
             return chunk
     class Connection:
         def __init__(self, host: str, port: int, timeout: int) -> None:
-            assert (host, port, timeout) == ("127.0.0.1", 8080, 5)
+            assert (host, port, timeout) == ("127.0.0.1", 3000, 5)
         def request(self, method: str, path: str, headers: dict[str, str]) -> None:
             assert method == "GET" and path == "/readyz" and headers["Connection"] == "close"
         def getresponse(self) -> Response: return Response()
         def close(self) -> None: pass
     monkeypatch.setattr(LIFECYCLE.http.client, "HTTPConnection", Connection)
     assert LIFECYCLE._read_readyz()["storage_ready"] is True
+
+
+def test_readiness_rejects_unknown_or_integrity_blocker(tmp_path: Path) -> None:
+    root, _, current = installed(tmp_path)
+    runtime_files(root, current)
+    rows = [{"Service": service, "State": "running", "Health": "healthy"}
+            for service in ("postgres", "capture", "report", "gateway", "web", "edge")]
+    rows.append({"Service": "migrate", "State": "exited", "Health": "", "ExitCode": 0})
+    def runner(argv: tuple[str, ...], **_: object) -> subprocess.CompletedProcess[bytes]:
+        return subprocess.CompletedProcess(argv, 0, json.dumps(rows).encode(), b"")
+    base = {"schema": "mee-evidence-readiness/v1", "request_id": "0" * 36,
+            "ready": False, "storage_ready": True, "configuration_ready": False,
+            "integration_ready": True, "payment_ready": False,
+            "blockers": ["SIMULATED_SOURCE", "EXTERNAL_GRANT_REQUIRED", "ARTIFACT_INTEGRITY_FAILURE"]}
+    assert LIFECYCLE.ComposeAdapter(root, runner, lambda: base).health("liqvera-test") is False

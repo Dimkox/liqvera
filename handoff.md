@@ -151,6 +151,10 @@ Final Task 5 code re-review removed an unsupported gateway CLI readiness probe.
 The adapter now performs a direct proxy-free bounded loopback `GET /readyz`,
 accepts only 200/503 JSON within 64 KiB, and validates the real gateway closed
 readiness fields plus mandatory safe blockers. Focused lifecycle checks pass 27.
+The final bounded correction targets the actually published edge endpoint at
+`127.0.0.1:3000/readyz` and accepts only the reviewed safe-shadow blocker set;
+unknown, storage, source and artifact-integrity blockers fail health. Focused
+lifecycle checks pass 28.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

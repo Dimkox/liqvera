@@ -260,12 +260,38 @@ services:
     secrets:
       - source: postgres_password_live
         target: postgres_password
+
+  gateway-net-live:
+    build:
+      context: ../..
+      dockerfile: deploy/mezo-evidence/Dockerfile.gateway
+    image: liqvera/mezo-gateway:local
+    command: [node, /app/db-loopback-proxy.js]
+    profiles: [live]
+    init: true
+    restart: unless-stopped
+    user: "10003:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 96
+    mem_limit: 128m
+    cpus: 0.25
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=8m"]
     networks:
-      gateway_db: { aliases: [postgres] }
       edge: { aliases: [gateway] }
+      gateway_db: {}
       gateway_report: {}
       operations: { aliases: [gateway-metrics] }
       payment_egress: {}
+    healthcheck:
+      test: [CMD, node, -e, "import('node:net').then(({createConnection}) => { const s=createConnection(5432,'127.0.0.1'); s.on('connect',()=>process.exit(0)); s.on('error',()=>process.exit(1)); })"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      postgres-live: { condition: service_healthy }
 
   migrate-fixture:
     <<: *migrate
@@ -359,8 +385,9 @@ services:
       PORT: "8080"
       METRICS_HOST: gateway-metrics
       METRICS_PORT: "9090"
-    network_mode: service:postgres-live
+    network_mode: service:gateway-net-live
     depends_on:
+      gateway-net-live: { condition: service_healthy }
       migrate-live: { condition: service_completed_successfully }
       report-live: { condition: service_healthy }
 

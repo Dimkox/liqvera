@@ -13,12 +13,20 @@ import { LivePaymentGrant } from '../src/security/live-grant.js';
 import { authorizeNewSettlement, databaseIdentity } from '../src/p3-operator.js';
 import { composeOfficialX402, readPrivateGrantFile } from '../src/security/live-composition.js';
 import { permit2Capability, settlementTransaction } from '../src/adapters/x402.js';
+import { loadConfig } from '../src/config.js';
 
 const payer='0x1111111111111111111111111111111111111111';
 const payTo='0x2222222222222222222222222222222222222222';
 const quote={id:'00000000-0000-4000-8000-000000000001',report_id:'00000000-0000-4000-8000-000000000002',report_sha256:'a'.repeat(64),terms:{expected_payer:payer,pay_to:payTo}} as Quote;
 const permit2='0x000000000022D473030F116dDEE9F6B43aC78BA3';
 const proxy='0x402085c248EeA27D92E8b30b2C58ed07f9E20001';
+
+test('grantless live runtime starts payment-not-ready',async()=>{
+  const config=await loadConfig({DATABASE_URL:'postgresql://liqvera:test@127.0.0.1:5432/liqvera',SOURCE_MODE:'live-public',PUBLIC_BASE_URL:'https://reports.invalid',CORS_ORIGINS:'https://reports.invalid',PAY_TO:payTo});
+  assert.equal(config.liveGrantFile,null); assert.equal(config.liveContext,null);
+  const payment=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://reports.invalid'),null);
+  assert.ok(payment.blockers().includes('EXTERNAL_GRANT_REQUIRED'));
+});
 function payload(): PaymentPayload { return {x402Version:2,accepted:{scheme:'exact',network:NETWORK,asset:ASSET,amount:AMOUNT,payTo,extra:{assetTransferMethod:'permit2',name:'Mezo USD',version:'1'}},payload:{signature:`0x${'1'.repeat(130)}`,permit2Authorization:{from:payer,permitted:{token:ASSET,amount:AMOUNT},spender:proxy,nonce:'42',deadline:'1790640300',witness:{to:payTo,validAfter:'0'}}},extensions:{eip2612GasSponsoring:{info:{description:'The facilitator accepts EIP-2612 gasless Permit to `Permit2` canonical contract.',from:payer,asset:ASSET,spender:permit2,amount:AMOUNT,nonce:'7',deadline:'1790640300',signature:`0x${'2'.repeat(130)}`,version:'1'},schema:{}}}} as unknown as PaymentPayload; }
 
 test('authorization identity binds exact Permit2 plus EIP-2612 sponsorship without raw signatures',async()=>{

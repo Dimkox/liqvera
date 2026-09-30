@@ -56,7 +56,16 @@ receipt evidence without signatures or wallet secrets.
 If any preflight is unavailable, report `BLOCKED_EXTERNAL` or the concrete
 failing gate. Do not fabricate a PASS, a transaction, or a hosted URL.
 
-To disable new payments, remove the `payment_grant_live` secret reference (or
-move the source file out of the Compose secret path) and recreate only
-`gateway-live`. Confirm `/readyz` returns `EXTERNAL_GRANT_REQUIRED`. Do not
-delete PostgreSQL/artifact volumes and do not resubmit UNKNOWN attempts.
+To disable new payments, use the checked-in override; do not edit Compose or
+move/delete the grant file:
+
+```bash
+docker compose --env-file env/live.env -p liqvera-live --profile live \
+  -f compose.yaml -f compose.live-disabled.yaml up -d --build --force-recreate gateway-live
+```
+
+The override atomically removes the grant secret mount and every grant-context
+variable. Confirm `/readyz` reports `EXTERNAL_GRANT_REQUIRED`. A missing or
+expired grant in the enabled profile intentionally fails startup; apply this
+override to obtain the supported payment-disabled live service. Preserve
+PostgreSQL/artifact volumes and never resubmit UNKNOWN attempts.

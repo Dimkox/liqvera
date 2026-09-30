@@ -1,5 +1,17 @@
 # Liqvera — handoff
 
+## 2026-09-30 R2 paywall topology and rollback repair
+
+The live PostgreSQL service is again confined to `gateway_db`. A dedicated,
+unprivileged `gateway-net-live` endpoint exposes only a bounded loopback TCP
+bridge to the gateway namespace, so the grant remains bound to
+`127.0.0.1:5432/liqvera` without putting PostgreSQL on edge, report,
+operations, or payment-egress networks. The checked-in
+`compose.live-disabled.yaml` removes the grant mount and its context together;
+the grantless runtime remains available and reports `EXTERNAL_GRANT_REQUIRED`.
+Missing/expired grants remain fail-closed in enabled mode. No secret value was
+read and no external call, payment, deployment, receipt, or release occurred.
+
 ## 2026-09-30 live Hyperliquid + Mezo Testnet paywall implementation
 
 The user explicitly approved the bounded design in chat. Live BTC identity is versioned and raw-digest-bound; ordinary gateway startup can consume an opt-in private grant file while rechecking expiry, payer, and durable consumption. Migrations 001--005 and UNKNOWN/reconcile-only behavior are unchanged; no secret value or external payment was used.

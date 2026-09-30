@@ -20,6 +20,7 @@ RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --from=build /workspace/apps/mezo-gateway/dist ./dist
 COPY --from=build /workspace/apps/mezo-gateway/migrations ./migrations
 COPY deploy/mezo-evidence/gateway-entrypoint.js /app/gateway-entrypoint.js
+COPY deploy/mezo-evidence/db-loopback-proxy.js /app/db-loopback-proxy.js
 USER 10003:10001
 EXPOSE 8080
 CMD ["node", "/app/gateway-entrypoint.js"]

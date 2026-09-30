@@ -185,6 +185,11 @@ nodes:
   owner: ci
   lifecycle: IMPLEMENTED
   requirements: []
+- id: workflow:installer-linux-contract
+  kind: Configuration
+  owner: release
+  lifecycle: IMPLEMENTED
+  requirements: []
 - id: test:workflow-policy
   kind: TestOrEval
   owner: ci

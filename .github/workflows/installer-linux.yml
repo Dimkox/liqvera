@@ -1,0 +1,44 @@
+name: Verify Linux installer contract
+
+on:
+  pull_request:
+    paths:
+      - "installer/**"
+      - "scripts/*liqvera-installer*"
+      - "scripts/install-liqvera-0.0.2.sh"
+      - "tests/installer/**"
+      - "docs/runbooks/**"
+      - "README.md"
+      - ".github/workflows/installer-linux.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: installer-linux-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-contract:
+    runs-on: [self-hosted, claw]
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact subject without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+      - name: Verify mocked Linux contract and deterministic package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x .venv/bin/python
+          .venv/bin/python -m pytest -q tests/installer tests/graph
+      - name: Record contract-only identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'subject=%s\ntree=%s\nevidence=MOCKED_CONTRACT_ONLY\n' \
+            "$(git rev-parse HEAD)" "$(git rev-parse 'HEAD^{tree}')"

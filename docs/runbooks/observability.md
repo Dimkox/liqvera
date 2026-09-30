@@ -1,5 +1,42 @@
 # Observability and alerting
 
+## Installed Linux stack
+
+Use the stable wrapper; it emits one closed JSON result and uses exit 0 only
+for a completed command:
+
+```bash
+root="${XDG_DATA_HOME:-$HOME/.local/share}/liqvera"
+"$root/liqvera.sh" --install-root "$root" status --json
+"$root/liqvera.sh" --install-root "$root" logs gateway --tail 200 --since 15m
+```
+
+Status contains schema, phase, product version, archive release digest,
+commit/tree, Compose project, service-manager mode, and blockers. Healthy
+shadow operation still reports `EXTERNAL_GRANT_REQUIRED` and
+`SIMULATED_SOURCE`; it never proves payment, live-market, or overall release
+acceptance. Logs accept only postgres, migrate, capture, report, gateway, web,
+or edge; tail is 1–1000 and duration is a positive bounded `s`, `m`, `h`, or
+`d` value. Output is capped and redacts authorization, password, token,
+signature, and credential-bearing URL forms.
+
+| Installer error | Non-destructive action |
+| --- | --- |
+| `UNSUPPORTED_LINUX` | Use a listed Linux release and architecture. |
+| `DEPENDENCY_MISSING` | Install the documented floors, or explicitly approve the printed dependency command. |
+| `UNSAFE_INSTALL_ROOT` | Choose a private local, non-symlinked root. |
+| `PORT_OCCUPIED` | Stop the conflicting local service; the candidate is stopped automatically. |
+| `RELEASE_DIGEST_MISMATCH` / `ARCHIVE_INVALID` | Delete only the failed download/materialization and reacquire reviewed assets. |
+| `CONFIG_INVALID` / `SECRET_REFERENCE_INVALID` | Correct the closed config or owner-only secret-file reference. |
+| `MIGRATION_MISMATCH` | Stop; preserve the database and reconcile exact migrations 001–005. |
+| `HEALTH_TIMEOUT` | Inspect bounded service logs and readiness blockers; do not switch current manually. |
+| `ROLLBACK_RESTORE_REQUIRED` | Preserve state and use reviewed forward recovery or coherent backup restore. |
+| `PURGE_CONFIRMATION_REQUIRED` | Re-run preview and inspect every target before supplying its exact token. |
+
+The lifecycle journal, installed state, release manifest, full inventory
+digest, migration checksums, config, and current pointer provide local recovery
+signals. Secrets remain referenced files and never belong in evidence.
+
 The edge exposes only public `/healthz`, `/readyz`, and documented `/v1/*`
 routes. Probe liveness and readiness separately from outside the host. The
 gateway must return readiness false for missing recipient, wrong chain/token,

@@ -7648,6 +7648,10 @@ edges:
   to: workflow:build-a2-claw
   kind: implements
   non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
+- from: contract:architecture-authority
+  to: workflow:installer-linux-contract
+  kind: implements
+  non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
 - from: module:graph-checker
   to: dataflow:capture-to-frozen-package
   kind: produces
@@ -8884,6 +8888,10 @@ edges:
   kind: specified_by
   non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
 - from: workflow:build-a2-claw
+  to: contract:architecture-authority
+  kind: specified_by
+  non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
+- from: workflow:installer-linux-contract
   to: contract:architecture-authority
   kind: specified_by
   non_proof_reason: AGGREGATE_SEMANTIC_CONTEXT
@@ -15604,6 +15612,12 @@ repository_inventory:
   - path: tests/installer/test_package_builder.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
+  - path: tests/installer/test_linux_acceptance.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: .github/workflows/installer-linux.yml
+    node: workflow:installer-linux-contract
+    path_class: WORKFLOW
   - path: apps/mezo-gateway/src/migration-policy.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE

@@ -191,6 +191,17 @@ traversable, admits only the two reviewed secret-file env keys, and rechecks
 current release identity against the independently pinned install state on
 every lifecycle read. Focused package/archive/runtime/lifecycle/systemd checks
 pass 155 tests.
+
+Task 7 now adds a non-publishing, read-only Claw workflow and a Linux-only
+operator contract covering the supported distro/architecture matrix, exact
+bootstrap and stable-wrapper commands, safe defaults, bounded logs/status,
+recovery, forward-only migrations, data-preserving uninstall and token-bound
+purge. The checked-in matrix uses mocked host facts and is labelled contract
+evidence; a real isolated clean-host Docker run remains `NOT_RUN`. The prior
+installer archive hashes are explicitly stale after integration repairs and
+will be replaced only by two byte-identical builds from the final Task 7 docs
+commit, each accepted by the independent verifier. Publication remains held
+for exact-fingerprint independent reviews.
 During authorized multiarch publication the production web Docker build exposed
 strict TypeScript narrowing gaps in receipt verification and the reviewed JS
 x402 bridge import. The minimal source typing repair preserves all runtime

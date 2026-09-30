@@ -6,7 +6,7 @@
 
 Built for [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
 
-This standalone repository was prepared from a technical snapshot. Start with the [specification](planning/LIQVERA_FACTORY_TZ.md), [current handoff](../handoff.md), and [PROVENANCE](../PROVENANCE.md). The remaining sections of this index describe the inherited technical baseline; they do not establish that the Mezo API or payments are implemented.
+This standalone repository was prepared from a technical snapshot. Start with the [specification](planning/LIQVERA_FACTORY_TZ.md), [current handoff](../handoff.md), and [PROVENANCE](../PROVENANCE.md). Runtime and testnet-payment code exists, including retained one-settlement evidence, but ordinary installation remains shadow-only with payment disabled; documentation never grants live payment or market authority.
 
 [Repository README](../README.md) · [Master Plan pointer](../MASTER_PLAN.md) · [Security](../SECURITY.md) · [Research index](research/README.md) · [Market demand and JTBD](research/user-needs/README.md) · [Kakao/Korea launch gate](research/MASTER_RESEARCH.md#kakaotalk-south-korea-launch-gate-2026-08-18)
 
@@ -40,6 +40,11 @@ This is the maintained navigation entry point for `docs/`. Documents are grouped
 Any agent changing PMF, packaging, ICP, pricing, connector priority, observer scope, reconciliation scope, product-facing claims, South Korea targeting, Kakao distribution, Korean localization, affiliate/referral behavior or consumer onboarding must read the canonical synthesis and the Kakao/Korea launch gate together with `ROADMAP.md`, `SECURITY.md`, and the accepted ADR. Research is not proof of implementation or legal clearance.
 
 ## Deployment and validation
+
+- [Linux self-hosting](../README.md#install-on-linux) — checksum-bound v0.0.2 operator install.
+- [Installer lifecycle and recovery](runbooks/startup-shutdown.md) — status, logs, start/stop, update, rollback and uninstall.
+- [Installer observability](runbooks/observability.md) — readiness, blockers, errors and redaction.
+- [v0.0.2 release evidence](../engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/release-notes-v0.0.2.md) — exact limitations and artifact accounting.
 
 - [`deployment.md`](deployment.md) — retained deployment notes; verify runtime scope before use.
 - [`validation.md`](validation.md) — verification evidence and iteration log.

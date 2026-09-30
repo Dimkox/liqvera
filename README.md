@@ -83,6 +83,51 @@ Release exists yet. Inherited `mee-*` identifiers are preserved.
 - [Security](SECURITY.md): data and trading restrictions.
 - [Provenance](PROVENANCE.md): source snapshot and public-import boundary.
 
+## Install on Linux
+
+The v0.0.2 operator package is **Linux-only** for Ubuntu 22.04, Ubuntu 24.04,
+Debian 12, Fedora 40, Fedora 41, and RHEL 9 on `amd64` or `arm64`. Minimums are Bash 5.2, Docker Engine 27, Docker Compose v2.30, 4 GiB free disk, and 2 GiB memory.
+The default is deliberately safe: Mezo chain 31611, shadow source, payment
+disabled, and loopback `127.0.0.1` ports 3000/8080/9090. It accepts secret-file
+references only; never put a password, token, wallet key, payment grant, or
+signature in the config or command line.
+
+Download these four release assets without executing them:
+`install-liqvera-0.0.2.sh`, its independently published checksum,
+`verify-liqvera-installer.py`, and `liqvera-installer-0.0.2.zip` plus its
+detached checksum. Never use `curl | bash`. From that download directory:
+
+```bash
+sha256sum --check install-liqvera-0.0.2.sh.sha256
+sha256sum --check liqvera-installer-0.0.2.zip.sha256
+bash ./install-liqvera-0.0.2.sh \
+  ./liqvera-installer-0.0.2.zip <published-archive-sha256> \
+  ./verify-liqvera-installer.py ./verified-liqvera \
+  "${XDG_DATA_HOME:-$HOME/.local/share}/liqvera" ./liqvera-config.json
+```
+
+The installed wrapper is
+`${XDG_DATA_HOME:-$HOME/.local/share}/liqvera/liqvera.sh`; it stages the exact
+verified release, runs migrations 001–005 once, starts Compose, and returns
+only after bounded health succeeds. Examples:
+
+```bash
+root="${XDG_DATA_HOME:-$HOME/.local/share}/liqvera"
+"$root/liqvera.sh" --install-root "$root" status --json
+"$root/liqvera.sh" --install-root "$root" logs gateway --tail 200 --since 15m
+"$root/liqvera.sh" --install-root "$root" stop
+"$root/liqvera.sh" --install-root "$root" start
+```
+
+Dependency installation is never implicit: `--install-deps` requires a visible
+exact command preview and typed digest approval. User systemd is opt-in only;
+Compose remains the fallback. Default uninstall preserves configuration,
+backups, logs, artifacts, and database volumes; purge requires the exact token
+printed by its preview. See the [startup and recovery runbook](docs/runbooks/startup-shutdown.md)
+and [observability runbook](docs/runbooks/observability.md). Repository tests
+provide mocked Linux contract evidence; an isolated clean-host Docker install
+remains `NOT_RUN` until a separately approved runner executes it.
+
 ```mermaid
 graph LR
     R[README] --- H[handoff]

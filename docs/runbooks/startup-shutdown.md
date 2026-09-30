@@ -1,6 +1,58 @@
 # Startup and shutdown
 
-## Prepare
+## Linux operator install
+
+The v0.0.2 installer is Linux-only. Obtain the bootstrap, verifier, archive,
+and detached checksum files from the same reviewed release, but obtain the
+published SHA-256 values through the independently reviewed release manifest.
+Never use `curl | bash` and never execute archive contents before verification.
+
+```bash
+sha256sum --check install-liqvera-0.0.2.sh.sha256
+sha256sum --check liqvera-installer-0.0.2.zip.sha256
+root="${XDG_DATA_HOME:-$HOME/.local/share}/liqvera"
+bash ./install-liqvera-0.0.2.sh \
+  ./liqvera-installer-0.0.2.zip <published-archive-sha256> \
+  ./verify-liqvera-installer.py ./verified-liqvera "$root" ./liqvera-config.json
+"$root/liqvera.sh" --install-root "$root" status --json
+```
+
+The config is closed: chain 31611, shadow source, payment disabled, loopback
+`127.0.0.1` ports, and optional references to private database-password and
+report-token files. It accepts no secret values, wallets, signatures, payment
+grants, mainnet, or exchange authority. `--install-deps` is optional and never
+silent: the installer prints the exact package-manager command and requires
+its typed digest before invoking `sudo`. User systemd is separately opt-in;
+the default and fallback service manager is Docker Compose.
+
+The stable wrapper supports idempotent `start`, `stop`, `status --json`, and
+bounded logs:
+
+```bash
+"$root/liqvera.sh" --install-root "$root" start
+"$root/liqvera.sh" --install-root "$root" stop
+"$root/liqvera.sh" --install-root "$root" logs gateway --tail 200 --since 15m
+"$root/liqvera.sh" --install-root "$root" update --version 0.0.2 --sha256 <verified-digest>
+"$root/liqvera.sh" --install-root "$root" rollback
+"$root/liqvera.sh" --install-root "$root" uninstall
+```
+
+Default uninstall removes runtime containers but preserves configuration,
+logs, backups, artifacts, and all five named volumes. Destructive removal is a
+two-step operation: first run `uninstall --purge-data` to obtain the exact
+root/release/volume-bound token, then repeat with
+`uninstall --purge-data --confirm-purge <token>`. Never guess or reuse a token.
+
+Interrupted download or checksum failure leaves no installed release. An
+occupied port, unsafe root, migration mismatch, or health timeout fails closed.
+Retry an unchanged verified install after correcting host preflight failures.
+After migration commit, rollback is allowed only when the prior image accepts
+the exact current ledger; otherwise preserve data and apply a reviewed forward
+repair or restore a coherent backup. No down migration exists.
+
+## Advanced source/developer Compose
+
+### Prepare
 
 Use a host with Docker Engine and Compose, sufficient persistent storage, a
 trusted clock, and backups. Review the exact tree, image build inputs, and
@@ -58,7 +110,7 @@ Before a demo, execute the repository's independent acceptance plan and
 record code SHA, image hashes, environment, UTC time, commands, exit codes,
 and omissions. Do not use a passing fixture run as live or payment evidence.
 
-## Stop or update
+### Stop or update
 
 Stop new quote creation at the gateway's reviewed operational gate before a
 planned update. Allow in-flight confirmed deliveries and reconciliation to

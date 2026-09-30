@@ -875,6 +875,15 @@ def main(argv: list[str] | None = None) -> int:
             result = run_lifecycle(args.install_root, "status", {}, ComposeAdapter(args.install_root))
             print(json.dumps(result, sort_keys=True, separators=(",", ":")))
             return 0
+        if args.command == "uninstall" and args.purge_data and not args.confirm_purge:
+            preview = purge_preview(args.install_root)
+            print(json.dumps({
+                "schema_version": "liqvera-purge-preview/v1",
+                "targets": list(preview["targets"]),
+                "token": preview["token"],
+            }, sort_keys=True, separators=(",", ":")))
+            print("PURGE_CONFIRMATION_REQUIRED", file=sys.stderr)
+            return 2
         options = vars(args).copy()
         options.pop("install_root", None)
         options.pop("command", None)

@@ -220,6 +220,16 @@ no-op return or any adapter start effect. Operator docs now require detached
 verification of the verifier itself, provide the closed two-secret-file config,
 and state truthfully that production update/rollback remain fail-closed until a
 coherent backup and migration-ledger adapter exists.
+Release review then found that the documented detached verifier still imported
+`jsonschema` and loaded its schema relative to a repository checkout. The
+verifier now freezes the exact v0.0.2 closed manifest contract in its standalone
+asset, uses only the Python 3.9+ standard library, and is exercised from an
+isolated download directory under `python -I`. The purge confirmation boundary
+now emits a canonical `liqvera-purge-preview/v1` JSON object containing the
+exact five targets and root/release-bound token, then exits without mutation;
+the confirmed second invocation remains required. Focused archive/lifecycle/
+operator checks pass 77 tests. All earlier v0.0.2 archive hashes are stale
+until the post-fix double build is recorded in a separate evidence commit.
 During authorized multiarch publication the production web Docker build exposed
 strict TypeScript narrowing gaps in receipt verification and the reviewed JS
 x402 bridge import. The minimal source typing repair preserves all runtime

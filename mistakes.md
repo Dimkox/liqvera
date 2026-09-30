@@ -302,3 +302,11 @@ only self-consistency. That digest must also cross the consumer boundary as an
 independent bootstrap-held input; placing it only inside another caller-mutable
 receipt recreates the same circular trust. Lock ownership must likewise begin before reconciliation,
 not merely before the final writes.
+
+## 2026-09-30 — The detached verifier retained checkout-local authority
+
+The first release asset imported `jsonschema` and found its manifest schema via
+the source tree, so the documented asset-only download could not verify an
+archive on a clean supported host. A detached verifier must carry its exact
+closed validation authority, stay within the oldest declared Python runtime,
+and be tested from an isolated download layout before artifact evidence freezes.

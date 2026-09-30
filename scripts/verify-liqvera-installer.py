@@ -19,11 +19,8 @@ import unicodedata
 import zipfile
 from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
+from typing import List, Optional
 
-from jsonschema import Draft202012Validator, ValidationError
-
-ROOT = Path(__file__).resolve().parents[1]
-RELEASE_SCHEMA = ROOT / "installer" / "schemas" / "release-manifest.schema.json"
 ARCHIVE_PREFIX = "liqvera-installer-0.0.2/"
 MAX_ARCHIVE_BYTES = 128 * 1024 * 1024
 MAX_MEMBER_BYTES = 16 * 1024 * 1024
@@ -38,6 +35,13 @@ MIGRATION_NAMES = (
     "004_receipt_confirmation_provenance.sql",
     "005_receipt_confirmation_count.sql",
 )
+MIGRATION_SHA256 = {
+    "001_ledger.sql": "bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b",
+    "002_fix_immutable_ledger_identity.sql": "981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb",
+    "003_live_grant_consumption.sql": "bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0",
+    "004_receipt_confirmation_provenance.sql": "96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a",
+    "005_receipt_confirmation_count.sql": "e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11",
+}
 APPROVED_PATHS = frozenset(
     {
         "install.sh",
@@ -89,6 +93,45 @@ class VerifiedRelease:
 class _Member:
     info: zipfile.ZipInfo
     path: str
+
+
+def _validate_release_manifest(value: object) -> dict[str, object]:
+    """Validate the frozen v0.0.2 contract without checkout-local dependencies."""
+    required = {
+        "schema_version", "product_version", "git_commit", "git_tree",
+        "compose_sha256", "launchers", "images", "migrations",
+        "database_compatibility", "supported_linux",
+    }
+    if not isinstance(value, dict) or set(value) != required:
+        raise VerificationError("ARCHIVE_INVALID: release manifest is invalid")
+    if value["schema_version"] != "liqvera-installer-release/v1" or value["product_version"] != "0.0.2":
+        raise VerificationError("ARCHIVE_INVALID: release manifest is invalid")
+    if not all(isinstance(value[key], str) and re.fullmatch(r"[0-9a-f]{40}", value[key])
+               for key in ("git_commit", "git_tree")):
+        raise VerificationError("ARCHIVE_INVALID: release manifest is invalid")
+    if not isinstance(value["compose_sha256"], str) or not SHA256.fullmatch(value["compose_sha256"]):
+        raise VerificationError("ARCHIVE_INVALID: release manifest is invalid")
+    launchers = value["launchers"]
+    if (not isinstance(launchers, dict) or set(launchers) != {"install.sh", "liqvera.sh"}
+            or not all(isinstance(item, str) and SHA256.fullmatch(item) for item in launchers.values())):
+        raise VerificationError("ARCHIVE_INVALID: release manifest is invalid")
+    images = value["images"]
+    image_pattern = re.compile(r"[^@\s]+@sha256:[0-9a-f]{64}\Z")
+    if (not isinstance(images, dict)
+            or set(images) != {"edge", "web", "gateway", "capture", "report", "postgres"}
+            or not all(isinstance(item, str) and image_pattern.fullmatch(item) for item in images.values())):
+        raise VerificationError("ARCHIVE_INVALID: release manifest is invalid")
+    migrations = [{"name": name, "sha256": MIGRATION_SHA256[name]} for name in MIGRATION_NAMES]
+    if value["migrations"] != migrations or value["database_compatibility"] != {
+        "accepted_migrations": migrations, "down_migrations": False,
+    }:
+        raise VerificationError("ARCHIVE_INVALID: release manifest is invalid")
+    if value["supported_linux"] != {
+        "architectures": ["amd64", "arm64"],
+        "distributions": ["ubuntu", "debian", "fedora", "rhel"],
+    }:
+        raise VerificationError("ARCHIVE_INVALID: release manifest is invalid")
+    return value
 
 
 def _capture_archive(path: Path) -> bytes:
@@ -299,10 +342,8 @@ def _validated_payloads(
 
     manifest_path = "manifests/release-manifest.json"
     try:
-        manifest = json.loads(payloads[manifest_path])
-        schema = json.loads(RELEASE_SCHEMA.read_bytes())
-        Draft202012Validator(schema).validate(manifest)
-    except (KeyError, json.JSONDecodeError, UnicodeDecodeError, ValidationError) as exc:
+        manifest = _validate_release_manifest(json.loads(payloads[manifest_path]))
+    except (KeyError, json.JSONDecodeError, UnicodeDecodeError, VerificationError) as exc:
         raise VerificationError("ARCHIVE_INVALID: release manifest is invalid") from exc
 
     if manifest["compose_sha256"] != hashlib.sha256(payloads["compose.yaml"]).hexdigest():
@@ -446,8 +487,8 @@ def _materialize(payloads: dict[str, bytes], destination: Path) -> None:
     except OSError as exc:
         raise VerificationError("ARCHIVE_INVALID: destination parent is unsafe") from exc
     parent_identity = os.fstat(parent_fd)
-    temporary_name: str | None = None
-    temporary_fd: int | None = None
+    temporary_name: Optional[str] = None
+    temporary_fd: Optional[int] = None
     published = False
     try:
         try:
@@ -522,7 +563,7 @@ def verify_installer(
     )
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("archive", type=Path)
     parser.add_argument("expected_sha256")

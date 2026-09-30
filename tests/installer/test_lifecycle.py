@@ -235,6 +235,21 @@ def test_default_uninstall_preserves_data_and_purge_requires_exact_token(tmp_pat
     assert any(item[0] == "purge" for item in adapter.trace)
 
 
+def test_cli_purge_without_confirmation_prints_exact_preview(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    root, _, _ = installed(tmp_path)
+    expected = LIFECYCLE.purge_preview(root)
+
+    assert LIFECYCLE.main(["--install-root", str(root), "uninstall", "--purge-data"]) == 2
+
+    captured = capsys.readouterr()
+    assert json.loads(captured.out) == {
+        "schema_version": "liqvera-purge-preview/v1",
+        "targets": list(expected["targets"]),
+        "token": expected["token"],
+    }
+    assert captured.err.strip() == "PURGE_CONFIRMATION_REQUIRED"
+
+
 def test_purge_refuses_symlink_or_broad_target(tmp_path: Path) -> None:
     root, _, _ = installed(tmp_path)
     (root / "data").symlink_to(tmp_path)

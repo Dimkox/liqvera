@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import hashlib
 import importlib.util
 import json
@@ -166,6 +167,29 @@ def test_valid_archive_materializes_only_after_complete_verification(tmp_path: P
         "product_version": "0.0.2",
         "schema_version": "verified-release-v1",
     }
+
+
+def test_release_asset_verifier_runs_without_repository_or_jsonschema(tmp_path: Path) -> None:
+    archive = tmp_path / "release.zip"
+    expected = write_archive(archive)
+    download = tmp_path / "download"
+    download.mkdir()
+    standalone = download / "verify-liqvera-installer.py"
+    standalone.write_bytes(SCRIPT.read_bytes())
+
+    completed = subprocess.run(
+        [sys.executable, "-I", str(standalone), str(archive), expected,
+         str(tmp_path / "standalone-release")],
+        check=False, capture_output=True, text=True, cwd=download,
+        env={"PATH": os.environ.get("PATH", "")},
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert json.loads(completed.stdout)["archive_sha256"] == expected
+
+
+def test_release_asset_verifier_is_python39_syntax_compatible() -> None:
+    ast.parse(SCRIPT.read_text(encoding="utf-8"), feature_version=(3, 9))
 
 
 def test_rejects_wrong_outer_digest_and_existing_destination(tmp_path: Path) -> None:

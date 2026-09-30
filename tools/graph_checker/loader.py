@@ -528,6 +528,8 @@ def _classify_repository_path(path: str) -> PathClass:
         return PathClass.SCHEMA_MANIFEST
     if normalized.startswith("installer/config/") and name.endswith(".template"):
         return PathClass.CONFIGURATION
+    if normalized.startswith("installer/lib/") and name.endswith(".py"):
+        return PathClass.RUNTIME_SOURCE
     if normalized in _EXTERNAL_TOOLING_CONFIG or normalized.startswith(".grok-stack/config/"):
         return PathClass.CONFIGURATION
     if normalized in {

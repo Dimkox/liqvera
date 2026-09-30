@@ -15529,6 +15529,15 @@ repository_inventory:
   - path: installer/config/ports.env.template
     node: manifest:runtime
     path_class: CONFIGURATION
+  - path: installer/install.sh
+    node: runtime:liqvera-factory
+    path_class: SHELL_SCRIPT
+  - path: installer/lib/common.sh
+    node: runtime:liqvera-factory
+    path_class: SHELL_SCRIPT
+  - path: installer/lib/runtime.py
+    node: runtime:liqvera-factory
+    path_class: RUNTIME_SOURCE
   - path: installer/schemas/config.schema.json
     node: contract:liqvera-evidence-runtime
     path_class: SCHEMA_MANIFEST
@@ -15545,6 +15554,12 @@ repository_inventory:
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: tests/installer/test_contracts.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/installer/fixtures/process-fixtures.json
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/installer/test_linux_installer.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: docs/competition/README.md

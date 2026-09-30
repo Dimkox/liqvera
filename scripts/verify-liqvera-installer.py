@@ -42,10 +42,15 @@ MIGRATION_NAMES = (
 APPROVED_PATHS = frozenset(
     {
         "install.sh",
+        "lib/common.sh",
+        "lib/runtime.py",
         "liqvera.sh",
         "compose.yaml",
         "config/liqvera.env.template",
         "config/ports.env.template",
+        "schemas/config.schema.json",
+        "schemas/install-state.schema.json",
+        "schemas/release-manifest.schema.json",
         "manifests/release-manifest.json",
         "manifests/migration-checksums.json",
         "LICENSE-NOTICE.md",

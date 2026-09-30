@@ -1,0 +1,14 @@
+{
+  "schema_version": "liqvera-installer-process-fixtures/v1",
+  "allowed_read_only": [
+    ["/usr/bin/docker", "version", "--format", "{{.Server.Version}}"],
+    ["/usr/bin/docker", "compose", "version", "--short"],
+    ["/usr/bin/docker", "info", "--format", "{{json .}}"]
+  ],
+  "dependency_commands": {
+    "debian": ["/usr/bin/sudo", "--", "/usr/bin/apt-get", "install", "docker-ce", "docker-compose-plugin"],
+    "fedora": ["/usr/bin/sudo", "--", "/usr/bin/dnf", "install", "docker-ce", "docker-compose-plugin"],
+    "rhel": ["/usr/bin/sudo", "--", "/usr/bin/dnf", "install", "docker-ce", "docker-compose-plugin"],
+    "ubuntu": ["/usr/bin/sudo", "--", "/usr/bin/apt-get", "install", "docker-ce", "docker-compose-plugin"]
+  }
+}

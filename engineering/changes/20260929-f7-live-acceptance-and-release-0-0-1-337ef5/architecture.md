@@ -2,6 +2,23 @@
 
 > Typed authority: [`change-spec.yaml`](change-spec.yaml). This Markdown explains context and cannot override typed IDs, risk, acceptance criteria, forbidden outcomes, or approval scopes.
 
+## Installer Task 3 rulings (2026-09-30)
+
+- The packaged Bash launcher delegates JSON/schema/state work to a packaged,
+  checksummed Python helper; Bash never parses JSON or persists state itself.
+- Task 3 accepts only the frozen Linux matrix and local Docker socket. Dependency
+  installation is a separate exact-argv action requiring both `--install-deps`
+  and a SHA-256 approval; there is no implicit privilege escalation.
+- Task 3's terminal state is `CONFIGURED`. `source_mode=shadow` remains a safety
+  assertion, not permission to select a fixture or start services.
+- Web, gateway, and metrics ports are preflight collision probes only. Task 4
+  owns whether gateway/metrics remain internal and which frontend port is
+  published.
+- The archive contract includes `lib/{common.sh,runtime.py}` and the three closed
+  schemas so the verified package contains every runtime dependency under its
+  inner checksums. A standalone Python dependency/bootstrap policy remains a
+  release-builder decision; Task 3 invokes only fixed `/usr/bin/python3`.
+
 ## Current behavior
 
 The runner can accept schema-shaped but semantically dishonest inventories,

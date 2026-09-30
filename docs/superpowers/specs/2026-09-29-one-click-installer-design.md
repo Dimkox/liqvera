@@ -78,6 +78,13 @@ The v0.0.2 GitHub Release contains:
 liqvera-installer-0.0.2/
 ├── install.sh
 ├── liqvera.sh
+├── lib/
+│   ├── common.sh
+│   └── runtime.py
+├── schemas/
+│   ├── config.schema.json
+│   ├── install-state.schema.json
+│   └── release-manifest.schema.json
 ├── compose.yaml
 ├── config/
 │   ├── liqvera.env.template

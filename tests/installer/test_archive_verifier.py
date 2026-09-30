@@ -67,10 +67,15 @@ def manifest(files: dict[str, bytes]) -> bytes:
 def valid_files() -> dict[str, bytes]:
     files = {
         "install.sh": b"#!/usr/bin/env bash\nexit 0\n",
+        "lib/common.sh": (ROOT / "installer/lib/common.sh").read_bytes(),
+        "lib/runtime.py": (ROOT / "installer/lib/runtime.py").read_bytes(),
         "liqvera.sh": b"#!/usr/bin/env bash\nexit 0\n",
         "compose.yaml": b"services: {}\n",
         "config/liqvera.env.template": b"LIQVERA_PAYMENT_ENABLED=false\n",
         "config/ports.env.template": b"LIQVERA_WEB_HOST=127.0.0.1\n",
+        "schemas/config.schema.json": (ROOT / "installer/schemas/config.schema.json").read_bytes(),
+        "schemas/install-state.schema.json": (ROOT / "installer/schemas/install-state.schema.json").read_bytes(),
+        "schemas/release-manifest.schema.json": (ROOT / "installer/schemas/release-manifest.schema.json").read_bytes(),
         "manifests/migration-checksums.json": json.dumps(
             {name: sha(data) for name, data in MIGRATIONS.items()},
             sort_keys=True,

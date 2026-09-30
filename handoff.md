@@ -40,8 +40,23 @@ are all relative to held directory descriptors, with selected-path identity
 revalidated before success; parent replacement cannot redirect bytes or create
 a false empty publication. EOCD-adjacent or embedded ZIP64 locator/end records
 are rejected before `ZipFile`, so its parsed directory cannot exceed the
-preflighted ordinary central directory. Task 3 Linux preflight remains the next
-implementation boundary.
+preflighted ordinary central directory. Task 3 now adds a Linux-only Bash
+entrypoint and bounded Python runtime for closed preflight, private reference-only
+configuration, atomic `CONFIGURED` state, read-only Docker probes, and an exact
+digest-approved dependency command. It supports the frozen Ubuntu/Debian/Fedora/
+RHEL and amd64/arm64 matrix, requires Bash 5.2, Docker 27, Compose 2.30, 4 GiB
+free disk, 2 GiB memory, the local Docker socket, safe install ancestry, and
+three available loopback ports. Ambient Docker/Compose/proxy authority is
+rejected; dependency mutation is impossible without `--install-deps` plus the
+exact NUL-joined command digest, and tests use only injected fakes. The verified
+archive allowlist now includes the digest-bound runtime helper and its closed
+schemas. Task 3 deliberately stops at `CONFIGURED`: Compose, migrations,
+systemd, health, lifecycle, and release building remain Task 4+ boundaries.
+Task 4 must still freeze the shadow fixture/runtime mapping, report-token
+handling, one-migrator/lock behavior, immutable image identities, service
+topology, and readiness semantics before it can mutate Docker state. The
+current development environment does not provision `shellcheck`; no download
+was attempted.
 
 Follow-up v0.0.2 preparation advances only root product VERSION to `0.0.2`;
 component versions remain unchanged. New sealed A07 result

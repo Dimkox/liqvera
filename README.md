@@ -93,14 +93,15 @@ single encrypted-signer submission delivered report
 recorded confirmations. The reviewed source/evidence release is now published
 as [v0.0.4](https://github.com/Dimkox/liqvera/releases/tag/v0.0.4).
 
-Current product identity: root `VERSION` is the pending `0.0.5` browser-hotfix
-release candidate;
+Current product identity: root `VERSION` is the published `0.0.5`
+browser-hotfix release;
 releases v0.0.1, [v0.0.2](https://github.com/Dimkox/liqvera/releases/tag/v0.0.2),
-v0.0.3, and [v0.0.4](https://github.com/Dimkox/liqvera/releases/tag/v0.0.4)
+v0.0.3, [v0.0.4](https://github.com/Dimkox/liqvera/releases/tag/v0.0.4),
+and [v0.0.5](https://github.com/Dimkox/liqvera/releases/tag/v0.0.5)
 are published milestones. v0.0.4 adds public historical-preview assets,
 EIP-6963 wallet discovery, transient receipt revalidation recovery, and fresh
 end-to-end public testnet evidence. v0.0.5 fixes standards-incompatible fresh
-quote and delivery date formatting; publication remains pending. The
+quote and delivery date formatting. The
 installable operator package remains v0.0.2. The root Python
 workspace remains `0.1.0.dev0`, and Stage A, evidence-report, protocol,
 gateway, and web component packages remain `0.1.0`. Inherited `mee-*`

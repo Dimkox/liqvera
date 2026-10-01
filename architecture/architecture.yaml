@@ -14526,6 +14526,9 @@ repository_inventory:
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/release-review-v0.0.5-hotfix-prep.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/release-review-v0.0.5-assets-final.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/p3-postgres-operation.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

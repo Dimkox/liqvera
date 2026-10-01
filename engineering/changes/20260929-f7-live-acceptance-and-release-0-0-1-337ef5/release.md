@@ -1,13 +1,17 @@
 # Release plan — F7 live acceptance and release 0.0.1
 
-## v0.0.5 hotfix candidate (2026-10-01)
+## Published v0.0.5 hotfix (2026-10-01)
 
 Root VERSION is `0.0.5`. The fresh quote and delivery browser paths now use the
 standards-safe shared UTC formatter; exact behavior commit `f34464521e85a2798a51a00c2d33cba60e809fbf`
 was deployed by recreating only `web-live` and passed a fresh quote Chrome
-smoke without signature or payment. The final publication commit/tree and the
-v0.0.5 tag/assets remain pending independent release review. The separately
-published installer remains immutable at v0.0.2.
+smoke without signature or payment. Release `v0.0.5` is published at
+`https://github.com/Dimkox/liqvera/releases/tag/v0.0.5`; remote main and the
+immutable tag target exact source commit `19284fb07fedd4909672c7e9a641cb066efbb7cc`
+(tree `744503327469d38be1c18f7af2413d452557bc92`). All five assets were
+redownloaded, matched the reviewed staging bytes, and passed `SHA256SUMS`.
+The separately published installer remains immutable at v0.0.2. Neither the
+v0.0.5 tag nor any release asset may be moved or replaced.
 
 ## Published v0.0.4 evidence (2026-10-01)
 
@@ -88,10 +92,10 @@ Published v0.0.4 is immutable. Signed-v2 deployment and payment evidence exist
 for exact runtime candidate `dcdc7ae`, and publication source/tag identity is
 `b4461ea`. No v0.0.4 tag or asset may be moved or replaced.
 
-Current v0.0.5 publication remains **NO-GO** until its exact final source
-commit/tree, recorded verifier receipt, reproducible external asset set, and
-independent exact-candidate release review all pass. The deployed web hotfix
-and Chrome smoke do not themselves authorize push, tag, or GitHub Release.
+Published v0.0.5 is immutable. Its exact source/tag identity is `19284fb`, its
+recorded verifier and asset-bound release review passed, and all five remote
+assets were redownloaded and matched the reviewed bytes. No tag move, asset
+replacement, or repeat payment is authorized by this publication record.
 
 P0 GO requires scope approval plus green repair tests/verifier/reviews. P1 GO
 requires valid immutable local result and reviewed omissions. P2/P3/P5 each

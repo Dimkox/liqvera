@@ -1,5 +1,30 @@
 # Liqvera — handoff
 
+## 2026-10-01 v0.0.5 publication complete
+
+Release `v0.0.5` is published at
+`https://github.com/Dimkox/liqvera/releases/tag/v0.0.5`. Remote main and the
+immutable tag target exact reviewed source commit
+`19284fb07fedd4909672c7e9a641cb066efbb7cc` (tree
+`744503327469d38be1c18f7af2413d452557bc92`). The asset-bound release review
+is GO. All five assets were freshly redownloaded; `SHA256SUMS` passed, every
+file matched the reviewed staging bytes, and GitHub-reported digests matched:
+
+- `liqvera-0.0.5-source.zip`: 2,651,686 bytes,
+  `36e04e8c15403f65ea8aae60e4ba11fe370e51c4d419714aba5fcdb7e627ffc2`
+- `RELEASE_NOTES.md`: 1,901 bytes,
+  `170becaccc16510c8fbebdf856caf84d4a304f2c7cacc1c0492c39245436ad2b`
+- `release-manifest.json`: 2,300 bytes,
+  `26bd334787d236d28f10f073fe3f2fd4f025e60be8dc3b7cbf06599dea8c8697`
+- `liqvera-0.0.5-source.zip.sha256`: 91 bytes,
+  `1dba5bd2140c8b45ae6665f6d363981f1799a86ee8f24876005949441ada4aeb`
+- `SHA256SUMS`: 360 bytes,
+  `212ce15145c4462ffb38613df602ed80481ea5420c7c446dcd9f1872e1a051c3`
+
+The installable operator remains v0.0.2. Publication performed no payment,
+exchange mutation, database/grant change, or tag/asset replacement; overall F7
+remains INCOMPLETE.
+
 ## 2026-10-01 v0.0.5 release preparation
 
 The root product candidate is now v0.0.5 for the fresh-quote Intl hotfix.

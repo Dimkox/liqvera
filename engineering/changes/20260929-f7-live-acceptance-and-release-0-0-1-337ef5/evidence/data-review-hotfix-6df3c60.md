@@ -1,8 +1,8 @@
 # Data review — fresh-quote date hotfix
 
-Status: **PASS**  
-Reviewed commit: `6df3c60a4a58a7a2022ab21c57556c7e36f8c96a`  
-Reviewed tree: `5546b8945fe40ae6367bb3386e588e548453d70d`  
+Status: **PASS**
+Reviewed commit: `6df3c60a4a58a7a2022ab21c57556c7e36f8c96a`
+Reviewed tree: `5546b8945fe40ae6367bb3386e588e548453d70d`
 Prior data review: `data-review-publication-c3f985b.md`
 
 ## Verdict

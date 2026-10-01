@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { walletChoices } from "../src/wallet-discovery.ts";
+import { discoverWalletChoices, walletChoices } from "../src/wallet-discovery.ts";
 import { readFile } from "node:fs/promises";
 
 const provider=label=>({label,async request(){return null;}});
@@ -15,10 +15,23 @@ test("EIP-6963 providers are deterministic and legacy is only fallback",()=>{
   assert.deepEqual(walletChoices({getProviders:()=>[]},null),[]);
 });
 
+test("connect-time discovery explicitly requests late EIP-6963 providers",async()=>{
+  const announced=[];const late=provider("late");
+  const store={getProviders:()=>announced};
+  const target={dispatchEvent(event){
+    assert.equal(event.type,"eip6963:requestProvider");
+    announced.push({info:{uuid:"late",name:"Late wallet",icon:"",rdns:"late.example"},provider:late});
+    return true;
+  }};
+  const found=await discoverWalletChoices(store,null,target,0);
+  assert.deepEqual(found.map(x=>[x.id,x.provider.label]),[["late","late"]]);
+});
+
 test("connect flow switches or adds pinned Mezo and preserves rejection",async()=>{
   const wallet=await readFile(new URL("../src/wallet.ts",import.meta.url),"utf8");
   const main=await readFile(new URL("../src/main.ts",import.meta.url),"utf8");
   assert.match(wallet,/wallet_switchEthereumChain/);assert.match(wallet,/error\.code!==4902/);
   assert.match(wallet,/wallet_addEthereumChain/);assert.match(wallet,/MEZO_TESTNET\.rpcUrl/);assert.match(wallet,/MEZO_TESTNET\.explorerUrl/);
   assert.match(main,/await switchToMezo\(provider\);[\s\S]*await walletAccount\(provider, true\)/);
+  assert.match(main,/await discoverWalletChoices\(walletStore,injectedWallet\(\)\)/);
 });

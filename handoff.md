@@ -1,5 +1,19 @@
 # Liqvera — handoff
 
+## 2026-10-01 public browser hotfix
+
+Headless Chrome reproduced the two user-visible failures against the deployed
+site. Historical JSON returned HTTP 200 and passed every identity check, but
+Chrome rejected the UI's incompatible `dateStyle`/`timeStyle` plus
+`timeZoneName` formatting options; the generic catch hid that TypeError. The
+historical formatter now uses a valid explicit UTC format and has an executable
+regression. Wallet connect now emits a fresh EIP-6963 provider request at click
+time and allows a short announcement window before re-reading the legacy
+fallback, covering providers injected after initial module evaluation. UI tests
+also require explicit `STEP 1`/`STEP 2` and `NOTE` labels instead of bare
+`01`/`02`/`03`, and the footer visibly identifies candidate v0.0.4. No payment
+or settlement retry is part of this hotfix.
+
 ## 2026-10-01 v0.0.4 deployed candidate and paid E2E
 
 Candidate `0f3e745d41022c33fbb075c9816b35b1c6a3cabe` was deployed at

@@ -7,9 +7,9 @@ import { quoteIsPayable, receiptMatchesQuote, type Capabilities, type Delivery, 
 import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./session";
 import { injectedWallet, switchToMezo, walletAccount, walletError, walletOnMezo, type Eip1193Provider } from "./wallet";
 import { bindWalletStateListeners, refreshWalletState, type WalletState } from "./wallet-events";
-import { walletChoices, walletStore, type WalletChoice } from "./wallet-discovery";
+import { discoverWalletChoices, walletChoices, walletStore, type WalletChoice } from "./wallet-discovery";
 import { installProductionX402Adapter, requestPaidReport, x402Available, X402CancelledBeforeSubmission } from "./x402";
-import { HISTORICAL_DEMO, validateHistoricalReport } from "./historical-demo";
+import { formatHistoricalDate, HISTORICAL_DEMO, validateHistoricalReport } from "./historical-demo";
 
 installProductionX402Adapter();
 
@@ -30,7 +30,7 @@ app.innerHTML = `
       </section>
       <div class="workspace-grid">
         <section class="panel request-panel" aria-labelledby="request-title">
-          <div class="panel-heading"><span class="step">01</span><div><p class="eyebrow">BUILD A REPORT</p><h2 id="request-title">Set your snapshot question</h2></div></div>
+          <div class="panel-heading"><span class="step">STEP 1</span><div><p class="eyebrow">BUILD A REPORT</p><h2 id="request-title">Set your snapshot question</h2></div></div>
           <p class="supporting">This is a calculation over the available snapshot depth, not a complete exchange book or guaranteed execution.</p>
           <div class="instrument"><span class="instrument-icon" aria-hidden="true">₿</span><span><strong>BTC linear perpetual</strong><small>Hyperliquid public order book</small></span><span class="readonly-tag">READ ONLY</span></div>
           <form id="report-form" novalidate>
@@ -42,16 +42,16 @@ app.innerHTML = `
           </form>
         </section>
         <section class="panel result-panel" aria-labelledby="result-title">
-          <div class="panel-heading"><span class="step">02</span><div><p class="eyebrow">STATUS & DELIVERY</p><h2 id="result-title">Your report</h2></div></div>
+          <div class="panel-heading"><span class="step">STEP 2</span><div><p class="eyebrow">STATUS & DELIVERY</p><h2 id="result-title">Your report</h2></div></div>
           <div id="announcement" class="announcement" role="status" aria-live="polite">Checking capabilities and saved session…</div>
           <div id="capability-status" class="capability-status"></div>
           <div id="result-content" class="result-content"><div class="empty-state"><div class="empty-graphic" aria-hidden="true"><span></span><span></span><span></span><span></span></div><h3>Waiting for a question</h3><p>Connect your wallet and ask for a fresh paid report, or inspect the sealed historical live example.</p><button id="historical-button" class="secondary-button" type="button">Show latest live report</button></div></div>
           <div class="result-actions"><button id="refresh-button" class="secondary-button hidden" type="button">Check status</button><button id="new-button" class="text-button hidden" type="button">Start another report</button></div>
         </section>
       </div>
-      <section class="boundary-strip" aria-label="Important context"><div><span>01</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>02</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>03</span><p><strong>No execution authority.</strong> No orders, custody, live trading, or guaranteed fills.</p></div></section>
+      <section class="boundary-strip" aria-label="Important context"><div><span>NOTE 1</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>NOTE 2</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>NOTE 3</span><p><strong>No execution authority.</strong> No orders, custody, live trading, or guaranteed fills.</p></div></section>
     </main>
-    <footer><span>Liqvera · Market reports you can verify.</span><span>Built for MEZO ₿ · Testnet experience · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a></span></footer>
+    <footer><span>Liqvera v0.0.4 · Market reports you can verify.</span><span>Built for MEZO ₿ · Testnet experience · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a></span></footer>
   </div>`;
 
 function el<T extends HTMLElement>(selector: string): T {
@@ -112,7 +112,7 @@ async function showHistoricalReport():Promise<void> {
     const card=node("div","status-card");
     card.append(node("p","eyebrow","HISTORICAL LIVE PUBLIC PREVIEW"),node("h3","","Sealed Hyperliquid BTC perpetual report"));
     const grid=node("div","data-grid report-grid");
-    appendField(grid,"Captured at",dateTime(HISTORICAL_DEMO.sourceAt));
+    appendField(grid,"Captured at",formatHistoricalDate(HISTORICAL_DEMO.sourceAt));
     appendField(grid,"Report ID",HISTORICAL_DEMO.reportId,"breakable span-all");
     appendField(grid,"Report SHA-256",HISTORICAL_DEMO.reportSha256,"breakable span-all");
     appendField(grid,"Bundle SHA-256",HISTORICAL_DEMO.bundleSha256,"breakable span-all");
@@ -512,7 +512,8 @@ async function submitPayment(): Promise<void> {
 }
 
 async function connectWallet(): Promise<void> {
-  refreshProviderChoices();
+  choices=await discoverWalletChoices(walletStore,injectedWallet());
+  renderProviderChoices();
   const selected=el<HTMLSelectElement>("#wallet-provider").value;
   provider=(choices.find(item=>item.id===selected)??choices[0])?.provider??null;
   if (!provider) { announcement("Install or enable an injected EVM wallet to continue.", "warning"); return; }
@@ -528,12 +529,15 @@ async function connectWallet(): Promise<void> {
   if (quote) renderQuote();
 }
 
-function refreshProviderChoices():void {
-  choices=walletChoices(walletStore,injectedWallet());
+function renderProviderChoices():void {
   const select=el<HTMLSelectElement>("#wallet-provider");const previous=select.value;select.replaceChildren();
   for(const choice of choices){const option=document.createElement("option");option.value=choice.id;option.textContent=choice.name;select.append(option);}
   if(choices.some(item=>item.id===previous))select.value=previous;
   select.classList.toggle("hidden",choices.length<=1);
+}
+function refreshProviderChoices():void {
+  choices=walletChoices(walletStore,injectedWallet());
+  renderProviderChoices();
 }
 
 async function refreshWallet(): Promise<void> {

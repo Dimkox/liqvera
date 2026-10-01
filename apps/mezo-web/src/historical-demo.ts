@@ -13,3 +13,7 @@ export function validateHistoricalReport(value:unknown):Record<string,any> {
       report.boundaries?.execution_promise !== false) throw new Error("Historical live report failed validation.");
   return report;
 }
+export function formatHistoricalDate(value:string):string {
+  const date=new Date(value);
+  return Number.isFinite(date.getTime())?date.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"medium",timeZone:"UTC"}):value;
+}

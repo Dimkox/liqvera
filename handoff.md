@@ -1,5 +1,15 @@
 # Liqvera — handoff
 
+## 2026-10-01 web image deployment build repair
+
+The first build of the EIP-6963/public-preview tree reproduced a deterministic
+failure: the unprivileged nginx base image could not chmod the copied demo
+assets during image construction. The Dockerfile now elevates only for the
+copy-time permission normalization and explicitly returns to UID/GID 101 for
+runtime. The checked-in npm lock was regenerated with the image's Node 22/npm
+toolchain so `npm ci` resolves the exact production build graph. Deployment,
+public smoke, and the fresh testnet paid E2E remain the next actions.
+
 ## 2026-09-30 wallet discovery and public asset permissions
 
 Connect Wallet now discovers lifetime EIP-6963 announcements through pinned

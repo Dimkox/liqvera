@@ -189,3 +189,7 @@ def test_metrics_are_private_and_csp_is_restrictive() -> None:
     assert "EXPOSE 8080 8443" in edge
     web_dockerfile = (ROOT / "deploy" / "mezo-evidence" / "Dockerfile.web").read_text()
     assert "find /usr/share/nginx/html/demo/latest-live -type f -exec chmod 0644 {} +" in web_dockerfile
+    root_at = web_dockerfile.index("USER root")
+    chmod_at = web_dockerfile.index("find /usr/share/nginx/html/demo/latest-live")
+    runtime_user_at = web_dockerfile.index("USER 101:101")
+    assert root_at < chmod_at < runtime_user_at

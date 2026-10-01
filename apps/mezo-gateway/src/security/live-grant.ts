@@ -1,52 +1,26 @@
-import { createHash } from 'node:crypto';
-import { AMOUNT, ASSET, CHAIN_ID, NETWORK } from '../domain/model.js';
-import { X402_PERMIT2 } from '@liqvera/mezo-protocol';
-
-const OID=/^[0-9a-f]{40}$/; const DIGEST=/^[0-9a-f]{64}$/; const ADDRESS=/^0x[0-9a-f]{40}$/;
-const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-const FIELDS=['schema','grant_id','subject_commit','subject_tree','plan_sha256','scheme','settlement_broadcaster','network','chain_id','asset','amount_atomic','buyer','pay_to','maximum_settlement_submissions','max_buyer_native_gas_wei','asset_transfer_method','permit2_address','permit2_proxy','approval_mode','required_extension','authorization_identity_version','facilitator_url','rpc_url','database_identity_kind','database_host_policy','database_identity','expires_at'];
-const DEFAULT_MAX_LIFETIME_MS=15*60_000;const DEMO_MAX_LIFETIME_MS=7*24*60*60_000;
-export class LivePaymentGrant {
-  private _digest:string;
-  get digest():string{return this._digest;}
-  private constructor(readonly raw:Readonly<Record<string,unknown>>) { this._digest=createHash('sha256').update(JSON.stringify(raw,Object.keys(raw).sort())).digest('hex'); }
-  static parse(value:unknown,now:Date,demoAnyPayer=false):LivePaymentGrant {
-    return LivePaymentGrant.parseValue(value,now,true,demoAnyPayer);
-  }
-  private static parseValue(value:unknown,now:Date,enforceExpiry:boolean,demoAnyPayer=false):LivePaymentGrant {
-    if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('LIVE_GRANT_INVALID'); const raw=value as Record<string,unknown>;
-    if(Object.keys(raw).sort().join()!==[...FIELDS].sort().join()||raw.schema!=='liqvera-mezo-payment-grant/v1'||!UUID.test(String(raw.grant_id))||!OID.test(String(raw.subject_commit))||!OID.test(String(raw.subject_tree))||!DIGEST.test(String(raw.plan_sha256))||
-      raw.scheme!=='exact'||raw.settlement_broadcaster!=='facilitator'||raw.network!==NETWORK||raw.chain_id!==CHAIN_ID||String(raw.asset).toLowerCase()!==ASSET.toLowerCase()||raw.amount_atomic!==AMOUNT||raw.maximum_settlement_submissions!==1||raw.max_buyer_native_gas_wei!=='100000000000000'||
-      raw.asset_transfer_method!==X402_PERMIT2.assetTransferMethod||raw.permit2_address!==X402_PERMIT2.permit2Address||raw.permit2_proxy!==X402_PERMIT2.exactProxyAddress||raw.approval_mode!==X402_PERMIT2.approvalMode||raw.required_extension!==X402_PERMIT2.requiredExtension||raw.authorization_identity_version!==X402_PERMIT2.authorizationIdentityVersion||
-      raw.facilitator_url!=='https://facilitator.vativ.io/'||raw.rpc_url!=='https://rpc.test.mezo.org/'||raw.database_identity_kind!=='sha256-credential-free-postgresql-endpoint/v1'||raw.database_host_policy!=='loopback-only/v1'||!DIGEST.test(String(raw.database_identity))||
-      !ADDRESS.test(String(raw.buyer))||!ADDRESS.test(String(raw.pay_to))||String(raw.buyer)===String(raw.pay_to)||/^0x0{40}$/.test(String(raw.pay_to)))throw new Error('LIVE_GRANT_INVALID');
-    const maximum=demoAnyPayer?DEMO_MAX_LIFETIME_MS:DEFAULT_MAX_LIFETIME_MS;
-    const expiry=Date.parse(String(raw.expires_at)); if(!Number.isFinite(expiry)||(enforceExpiry&&(expiry<=now.getTime()||expiry>now.getTime()+maximum)))throw new Error('LIVE_GRANT_EXPIRED');
-    return new LivePaymentGrant(Object.freeze({...raw}));
-  }
-  static parseBytes(bytes:Uint8Array,now:Date,demoAnyPayer=false):LivePaymentGrant {
-    return LivePaymentGrant.parseByteValue(bytes,now,true,demoAnyPayer);
-  }
-  static parseBytesForReconciliation(bytes:Uint8Array,now:Date):LivePaymentGrant {
-    return LivePaymentGrant.parseByteValue(bytes,now,false,false);
-  }
-  private static parseByteValue(bytes:Uint8Array,now:Date,enforceExpiry:boolean,demoAnyPayer:boolean):LivePaymentGrant {
-    if(bytes.byteLength===0||bytes.byteLength>16_384)throw new Error('LIVE_GRANT_INVALID');
-    let value:unknown;
-    try { value=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes)); }
-    catch { throw new Error('LIVE_GRANT_INVALID'); }
-    const parsed=LivePaymentGrant.parseValue(value,now,enforceExpiry,demoAnyPayer);
-    parsed._digest=createHash('sha256').update(bytes).digest('hex');
-    return parsed;
-  }
-  assertContext(input:{subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string;demoAnyPayer?:boolean}):void {
-    if(input.subjectCommit!==this.raw.subject_commit||input.subjectTree!==this.raw.subject_tree||input.planSha256!==this.raw.plan_sha256||(!input.demoAnyPayer&&input.buyer!==this.raw.buyer)||input.payTo!==this.raw.pay_to||
-      (input.databaseIdentity!==undefined&&input.databaseIdentity!==this.raw.database_identity))throw new Error('LIVE_GRANT_MISMATCH');
-  }
-  authorize(input:{subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string;demoAnyPayer?:boolean;now:Date}):void {
-    this.assertContext(input);
-    const expiry=Date.parse(String(this.raw.expires_at));
-    const maximum=input.demoAnyPayer?DEMO_MAX_LIFETIME_MS:DEFAULT_MAX_LIFETIME_MS;
-    if(expiry<=input.now.getTime()||expiry>input.now.getTime()+maximum)throw new Error('LIVE_GRANT_EXPIRED');
-  }
+import {createHash,createPublicKey,verify} from 'node:crypto';
+import canonicalizeModule = require('canonicalize');
+import duplicateJson from 'json-dup-key-validator';
+import {AMOUNT,ASSET,CHAIN_ID,NETWORK} from '../domain/model.js';
+import {X402_PERMIT2} from '@liqvera/mezo-protocol';
+const canonicalize=canonicalizeModule as unknown as (value:unknown)=>string|undefined;
+const OID=/^[0-9a-f]{40}$/s,DIGEST=/^[0-9a-f]{64}$/s,ADDRESS=/^0x[0-9a-f]{40}$/s,UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/s;
+const V1=['schema','grant_id','subject_commit','subject_tree','plan_sha256','scheme','settlement_broadcaster','network','chain_id','asset','amount_atomic','buyer','pay_to','maximum_settlement_submissions','max_buyer_native_gas_wei','asset_transfer_method','permit2_address','permit2_proxy','approval_mode','required_extension','authorization_identity_version','facilitator_url','rpc_url','database_identity_kind','database_host_policy','database_identity','expires_at'];
+const V2=['schema','grant_id','subject_commit','subject_tree','plan_sha256','scheme','settlement_broadcaster','network','chain_id','asset','amount_atomic','payer_policy','pay_to','maximum_settlement_submissions','max_total_amount_atomic','max_per_payer','max_buyer_native_gas_wei','asset_transfer_method','permit2_address','permit2_proxy','approval_mode','required_extension','authorization_identity_version','facilitator_url','rpc_url','database_identity_kind','database_host_policy','database_identity','issued_at','not_before','expires_at'];
+const DEFAULT_MAX=15*60_000,V2_MAX=24*60*60_000,SPKI=Buffer.from('302a300506032b6570032100','hex');
+type Context={subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string;now?:Date};
+export interface LiveGrantAuthority{grantDigest:string;grantId:string;schemaVersion:'v2';policySha256:string;keyId:string;signatureSha256:string;issuedAt:Date;notBefore:Date;expiresAt:Date;payTo:string;amountPer:string;maxSubmissions:number;maxTotal:string;maxPerPayer:1;payerPolicy:'ANY_VALID_X402_PAYER'}
+const fields=(r:Record<string,unknown>,f:string[])=>Object.keys(r).sort().join()=== [...f].sort().join();
+function strict(bytes:Uint8Array):unknown{try{return duplicateJson.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes),false);}catch{throw new Error('LIVE_GRANT_INVALID');}}
+function common(r:Record<string,unknown>):boolean{return r.scheme==='exact'&&r.settlement_broadcaster==='facilitator'&&r.network===NETWORK&&r.chain_id===CHAIN_ID&&String(r.asset).toLowerCase()===ASSET.toLowerCase()&&r.amount_atomic===AMOUNT&&r.asset_transfer_method===X402_PERMIT2.assetTransferMethod&&r.permit2_address===X402_PERMIT2.permit2Address&&r.permit2_proxy===X402_PERMIT2.exactProxyAddress&&r.approval_mode===X402_PERMIT2.approvalMode&&r.required_extension===X402_PERMIT2.requiredExtension&&r.authorization_identity_version===X402_PERMIT2.authorizationIdentityVersion&&r.facilitator_url==='https://facilitator.vativ.io/'&&r.rpc_url==='https://rpc.test.mezo.org/'&&r.database_identity_kind==='sha256-credential-free-postgresql-endpoint/v1'&&r.database_host_policy==='loopback-only/v1'&&DIGEST.test(String(r.database_identity))&&OID.test(String(r.subject_commit))&&OID.test(String(r.subject_tree))&&DIGEST.test(String(r.plan_sha256))&&UUID.test(String(r.grant_id))&&ADDRESS.test(String(r.pay_to))&&!/^0x0{40}$/s.test(String(r.pay_to));}
+export class LivePaymentGrant{
+ private constructor(readonly raw:Readonly<Record<string,unknown>>,readonly digest:string,readonly version:'v1'|'v2',readonly authority?:LiveGrantAuthority){}
+ get expectedPayer():string|undefined{return this.version==='v1'?String(this.raw.buyer):undefined;}
+ static parse(value:unknown,now:Date):LivePaymentGrant{return this.v1(value,now,true);}
+ private static v1(value:unknown,now:Date,enforce:boolean):LivePaymentGrant{if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('LIVE_GRANT_INVALID');const r=value as Record<string,unknown>;if(!fields(r,V1)||r.schema!=='liqvera-mezo-payment-grant/v1'||!common(r)||!ADDRESS.test(String(r.buyer))||r.buyer===r.pay_to||r.maximum_settlement_submissions!==1||r.max_buyer_native_gas_wei!=='100000000000000')throw new Error('LIVE_GRANT_INVALID');const expiry=Date.parse(String(r.expires_at));if(!Number.isFinite(expiry)||(enforce&&(expiry<=now.getTime()||expiry>now.getTime()+DEFAULT_MAX)))throw new Error('LIVE_GRANT_EXPIRED');const raw=Object.freeze({...r});return new LivePaymentGrant(raw,createHash('sha256').update(JSON.stringify(raw,Object.keys(raw).sort())).digest('hex'),'v1');}
+ static parseBytes(bytes:Uint8Array,now:Date,publicKey?:Uint8Array):LivePaymentGrant{if(!bytes.length||bytes.length>16_384)throw new Error('LIVE_GRANT_INVALID');const value=strict(bytes);if(value&&typeof value==='object'&&!Array.isArray(value)&&(value as Record<string,unknown>).schema==='liqvera-mezo-payment-grant-envelope/v2')return this.v2(value as Record<string,unknown>,bytes,now,publicKey);const parsed=this.v1(value,now,true);return new LivePaymentGrant(parsed.raw,createHash('sha256').update(bytes).digest('hex'),'v1');}
+ static parseBytesForReconciliation(bytes:Uint8Array,now:Date):LivePaymentGrant{const p=this.v1(strict(bytes),now,false);return new LivePaymentGrant(p.raw,createHash('sha256').update(bytes).digest('hex'),'v1');}
+ private static v2(e:Record<string,unknown>,envelopeBytes:Uint8Array,now:Date,publicKey?:Uint8Array):LivePaymentGrant{if(!fields(e,['schema','key_id','payload','signature'])||typeof e.payload!=='string'||typeof e.signature!=='string'||!DIGEST.test(String(e.key_id))||!publicKey||publicKey.length!==32)throw new Error('LIVE_GRANT_INVALID');const keyId=createHash('sha256').update(publicKey).digest('hex');if(e.key_id!==keyId)throw new Error('LIVE_GRANT_KEY_MISMATCH');let pb:Buffer,sig:Buffer;try{pb=Buffer.from(e.payload,'base64url');sig=Buffer.from(e.signature,'base64url');}catch{throw new Error('LIVE_GRANT_INVALID');}if(!pb.length||sig.length!==64)throw new Error('LIVE_GRANT_INVALID');const value=strict(pb);if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('LIVE_GRANT_INVALID');const r=value as Record<string,unknown>,canon=canonicalize(r);if(canon===undefined||!Buffer.from(canon).equals(pb))throw new Error('LIVE_GRANT_NOT_CANONICAL');if(!verify(null,pb,createPublicKey({key:Buffer.concat([SPKI,Buffer.from(publicKey)]),format:'der',type:'spki'}),sig))throw new Error('LIVE_GRANT_SIGNATURE_INVALID');const issued=Date.parse(String(r.issued_at)),notBefore=Date.parse(String(r.not_before)),expires=Date.parse(String(r.expires_at)),count=Number(r.maximum_settlement_submissions);if(!fields(r,V2)||r.schema!=='liqvera-mezo-payment-grant-policy/v2'||!common(r)||r.payer_policy!=='ANY_VALID_X402_PAYER'||!Number.isInteger(count)||count<1||count>1000||r.max_per_payer!==1||r.max_buyer_native_gas_wei!=='0'||r.max_total_amount_atomic!==(BigInt(AMOUNT)*BigInt(count)).toString()||![issued,notBefore,expires].every(Number.isFinite)||notBefore<issued||expires<=notBefore||expires>issued+V2_MAX||now.getTime()<notBefore||now.getTime()>=expires)throw new Error('LIVE_GRANT_INVALID');const digest=createHash('sha256').update(envelopeBytes).digest('hex'),policySha256=createHash('sha256').update(pb).digest('hex');const authority:LiveGrantAuthority={grantDigest:digest,grantId:String(r.grant_id),schemaVersion:'v2',policySha256,keyId,signatureSha256:createHash('sha256').update(sig).digest('hex'),issuedAt:new Date(issued),notBefore:new Date(notBefore),expiresAt:new Date(expires),payTo:String(r.pay_to),amountPer:AMOUNT,maxSubmissions:count,maxTotal:String(r.max_total_amount_atomic),maxPerPayer:1,payerPolicy:'ANY_VALID_X402_PAYER'};return new LivePaymentGrant(Object.freeze({...r}),digest,'v2',authority);}
+ assertContext(i:Context):void{if(i.subjectCommit!==this.raw.subject_commit||i.subjectTree!==this.raw.subject_tree||i.planSha256!==this.raw.plan_sha256||(this.version==='v1'&&i.buyer!==this.raw.buyer)||i.payTo!==this.raw.pay_to||(i.databaseIdentity!==undefined&&i.databaseIdentity!==this.raw.database_identity))throw new Error('LIVE_GRANT_MISMATCH');}
+ authorize(i:Context&{now:Date}):void{this.assertContext(i);const expiry=Date.parse(String(this.raw.expires_at));if(expiry<=i.now.getTime()||(this.version==='v1'&&expiry>i.now.getTime()+DEFAULT_MAX)||(this.version==='v2'&&i.now.getTime()<Date.parse(String(this.raw.not_before))))throw new Error('LIVE_GRANT_EXPIRED');}
 }

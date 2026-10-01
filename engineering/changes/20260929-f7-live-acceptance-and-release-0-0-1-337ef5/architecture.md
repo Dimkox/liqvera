@@ -1,5 +1,31 @@
 # Architecture — F7 live acceptance and release 0.0.1
 
+## 2026-10-01 signed v2 public-demo authority
+
+The owner-approved public testnet demo does not weaken the one-shot v1 grant.
+It uses a distinct `liqvera-mezo-payment-grant-envelope/v2`: the payload is
+RFC 8785/JCS canonical JSON carried as base64url, duplicate keys and unknown
+fields are rejected, and received payload bytes must equal their JCS encoding.
+An Ed25519 signature is checked against a non-secret runtime public key whose
+allowlisted `key_id` is the lowercase SHA-256 of the raw 32-byte key. The
+private issuer key is offline and never belongs in the gateway or repository.
+
+The signed policy binds exact commit, tree, plan, loopback database identity,
+Mezo chain 31611, MUSD, 0.01 MUSD per settlement, facilitator, Permit2/EIP-2612
+flow, payee, validity (at most 24 hours), `ANY_VALID_X402_PAYER`, zero buyer
+native gas, count, total amount, and one settlement per payer. Migration 006 is
+additive: immutable `live_grant_authorities` and `live_grant_reservations`
+retain authority and permanently spent ordinals. The same transaction locks
+the authority, checks time/count/sum/payer, inserts a reservation, and crosses
+`VERIFIED -> SUBMITTING` before facilitator I/O. UNKNOWN never releases budget;
+a transaction loser creates no reservation. Readiness derives remaining time,
+count, and amount from PostgreSQL, while an already-paid delivery is independent
+of later grant expiry.
+
+`canonicalize@2.1.0` (Apache-2.0) is pinned as the small RFC 8785 serializer;
+`json-dup-key-validator@1.0.3` (MIT) is pinned because ordinary `JSON.parse`
+cannot detect duplicate object names before signature-policy interpretation.
+
 ## 2026-09-30 bounded extension
 
 The sealed mapping binds raw Hyperliquid response digests and is rechecked offline. The gateway optionally reads `LIQVERA_LIVE_GRANT_FILE` through a no-follow, private-mode, single-link, size-bounded snapshot and retains the existing atomic grant-consumption boundary.

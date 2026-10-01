@@ -58,3 +58,15 @@
 Follow-up v0.0.2 preparation is separate: A07 is now retained as PASS and the
 external-case projection has zero blockers, but 21 cases remain NOT_RUN and no
 v0.0.2 artifact or publication exists.
+
+## 2026-10-01 signed v2 follow-up
+
+- [x] Preserve v1 exact-buyer grants as one-shot authority.
+- [x] Add strict JCS/Ed25519 v2 envelope and pinned public-key identity.
+- [x] Add migration 006 immutable authorities and append-only reservations.
+- [x] Reserve count/amount/payer atomically with `VERIFIED -> SUBMITTING`.
+- [x] Derive v2 readiness from durable remaining budget and validity.
+- [x] Prove signature mutations and disposable-PostgreSQL concurrency,
+  exhaustion, restart, rollback, and immutability behavior.
+- [ ] Obtain independent code, test, security, data, and release review before
+  any deploy, payment, push, tag, or release.

@@ -5,7 +5,7 @@ import { LivePaymentGrant } from './live-grant.js';
 import { constants } from 'node:fs';
 import { lstat, open } from 'node:fs/promises';
 
-export interface LiveCompositionInput { grantBytes:Uint8Array; context:LivePaymentContext&{databaseIdentity:string}; observedAt:Date; now?:()=>Date }
+export interface LiveCompositionInput { grantBytes:Uint8Array; publicKey?:Uint8Array; context:LivePaymentContext&{databaseIdentity:string}; observedAt:Date; now?:()=>Date }
 export interface GrantReadHooks { afterOpen?:()=>Promise<void>; afterRead?:()=>Promise<void> }
 
 function safe(stat:{isFile():boolean;nlink:number|bigint;mode:number|bigint;size:number|bigint}):boolean {
@@ -34,7 +34,7 @@ export async function readPrivateGrantFile(path:string,hooks:GrantReadHooks={}):
 export function composeOfficialX402(identity:AuthorizationPolicy,finality:FinalityPolicy,reader:MezoReceiptReader,
   publicBase:URL,input:LiveCompositionInput|null):OfficialX402 {
   if(!input)return new OfficialX402(identity,finality,reader,publicBase,null,null);
-  const grant=LivePaymentGrant.parseBytes(input.grantBytes,input.observedAt,input.context.demoAnyPayer===true);
+  const grant=LivePaymentGrant.parseBytes(input.grantBytes,input.observedAt,input.publicKey);
   grant.authorize({...input.context,now:input.observedAt});
   return new OfficialX402(identity,finality,reader,publicBase,grant,input.context,input.now);
 }

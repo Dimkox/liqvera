@@ -1,5 +1,22 @@
 # Liqvera — handoff
 
+## 2026-10-01 signed v2 grant authority
+
+Public-demo reuse is now a separate signed v2 authority; v1 remains exact-buyer
+and one-shot. The v2 payload must be duplicate-free RFC 8785/JCS bytes signed by
+Ed25519, and its `key_id` must equal SHA-256 of the configured raw public key.
+It binds the exact runtime, payment path, payee, 24-hour maximum validity,
+count/total budgets, one settlement per payer, and zero buyer native gas.
+Migration 006 stores immutable authority metadata and append-only reservations;
+the reservation and `VERIFIED -> SUBMITTING` transition are one transaction,
+UNKNOWN consumes budget permanently, and readiness is database-derived.
+
+Gateway tests passed 51 with zero failures. Seven disposable-PostgreSQL tests
+then passed without skips, including twenty-pool v2 contention, exhaustion,
+restart, and append-only enforcement. Eight focused Python contract/installer
+tests passed. Test keys are generated ephemerally; no issuer private key is in
+the repository or runtime. No deploy, payment, push, tag, or release occurred.
+
 ## 2026-10-01 review repair in progress
 
 The browser review repairs now bind account/chain listeners to the selected

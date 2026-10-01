@@ -85,7 +85,7 @@ migration 005 persists it for replay without an RPC re-query.
 - Integration: local PostgreSQL/container/browser only after P0; no ambient or
   shared service. Exact public/testnet integration only under P2/P3 grants.
 - Disposable PostgreSQL: with only `TEST_DATABASE_URL` and
-  `TEST_DATABASE_DISPOSABLE=1`, migrate fresh 001→005 twice, verify checksums,
+  `TEST_DATABASE_DISPOSABLE=1`, migrate fresh 001→006 twice, verify checksums,
   race 20 separate pools through `markSubmitting`, retry after restart, inject
   an in-transaction failure, and reject update/delete of consumption rows.
 - Contract: schemas, frozen A01–A30 inventory, official pinned x402 types,
@@ -99,6 +99,12 @@ P3 database identity accepts only numeric loopback or fully loopback-resolved
 `localhost`; remote DNS, non-loopback addresses, query/socket/TLS overrides and
 fragments fail before Pool construction. Migration 005 is bound by checksum
 `e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11`.
+Migration 006 is bound by checksum
+`92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a`.
+Signed-v2 tests generate an ephemeral Ed25519 key pair in-process, reject
+signature/key-id/duplicate-key/noncanonical/runtime/lifetime mutations, and
+exercise two-payer exhaustion, twenty-pool contention, restart, truthful
+readiness, and append-only reservations on disposable PostgreSQL.
 
 ## Manual checks
 

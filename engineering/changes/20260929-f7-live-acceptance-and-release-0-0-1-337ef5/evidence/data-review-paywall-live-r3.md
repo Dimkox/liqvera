@@ -1,8 +1,8 @@
 # Independent data review R3 — public testnet demo persistence
 
-Status: **FAIL**  
-Reviewed commit: `cba005b1c07aafadb4dd15743b7184143143dcf5`  
-Reviewed tree: `75151ba8b154b72fd77d3df844beb4d3eca89dac`  
+Status: **FAIL**
+Reviewed commit: `cba005b1c07aafadb4dd15743b7184143143dcf5`
+Reviewed tree: `75151ba8b154b72fd77d3df844beb4d3eca89dac`
 Scope: schema compatibility, grant consumption, quote/attempt state, entitlement
 revalidation, and persistence evidence added after R2.
 

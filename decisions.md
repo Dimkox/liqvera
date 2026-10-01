@@ -237,3 +237,10 @@ EIP-2612 extension so the buyer signs off chain and never sends an approval tran
 Use the retained encrypted faucet keystore only inside a short-lived local
 EIP-712 signer subprocess, passing typed data in and returning only signatures.
 This enabled repeatable x402 testnet demos without exposing or copying the raw private key.
+
+## 2026-10-01 — Keep reusable demo authority out of v1
+
+Use a signed, canonical v2 policy plus immutable database reservations instead
+of an environment flag that broadens the v1 buyer. This keeps the old one-shot
+boundary intact and makes every reusable dimension issuer-authorized and
+durably budgeted.

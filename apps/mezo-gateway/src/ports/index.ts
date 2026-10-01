@@ -1,5 +1,6 @@
 import type { PaymentPayload, PaymentRequirements } from '@x402/core/types';
 import type { Artifact, Attempt, AuthorizationIdentity, Confirmation, Quote, QuoteInput, Reason, Receipt } from '../domain/model.js';
+import type {LiveGrantAuthority} from '../security/live-grant.js';
 export interface ReportService {
   healthy(): Promise<boolean>;
   build(reportId: string, input: QuoteInput, signal: AbortSignal): Promise<Artifact>;
@@ -15,6 +16,7 @@ export interface PaymentPort {
   blockers(): Reason[];
   readonly expectedPayer?: string;
   readonly liveGrantDigest?: string;
+  readonly liveGrantAuthority?: LiveGrantAuthority;
   requirements(quote: Quote): Promise<{ header: string; value: PaymentRequirements }>;
   verify(header: string, quote: Quote): Promise<{ payload: PaymentPayload; requirements: PaymentRequirements; identity: AuthorizationIdentity }>;
   settle(payload: PaymentPayload, requirements: PaymentRequirements): Promise<{ tx_hash: string | null }>;

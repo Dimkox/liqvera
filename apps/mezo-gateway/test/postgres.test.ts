@@ -13,6 +13,7 @@ import { Ledger } from '../src/adapters/postgres.js';
 import { PublicError, type QuoteInput } from '../src/domain/model.js';
 import type { Gateway } from '../src/application/gateway.js';
 import { retainAndRecover } from '../src/workers/retention.js';
+import type {LiveGrantAuthority} from '../src/security/live-grant.js';
 
 const execFileAsync = promisify(execFile);
 const databaseUrl = process.env.TEST_DATABASE_URL;
@@ -23,6 +24,7 @@ const MIGRATION_002_SHA256 = '981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b
 const MIGRATION_003_SHA256 = 'bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0';
 const MIGRATION_004_SHA256 = '96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a';
 const MIGRATION_005_SHA256 = 'e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11';
+const MIGRATION_006_SHA256 = '92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a';
 const BODY: QuoteInput = {
   instrument_id: 'hyperliquid:BTC:perpetual',
   side: 'BUY',
@@ -53,7 +55,7 @@ after(async () => {
   if (pool) await pool.end();
 });
 
-async function verifiedAttempt(ledger: Ledger, suffix: string) {
+async function verifiedAttempt(ledger: Ledger, suffix: string,version:'v1'|'v2'='v1',payer=BODY.expected_payer,grantDigest=suffix.padStart(64,'b'),grantId=randomUUID()) {
   const scope = suffix.padStart(64, '0');
   const request = await ledger.createRequest(scope, `grant-${suffix}`, BODY);
   await ledger.publish(request, {
@@ -69,12 +71,12 @@ async function verifiedAttempt(ledger: Ledger, suffix: string) {
   const attempt = await ledger.beginAttempt(quote, {
     identity: suffix.padStart(64, 'a'), version: 'test/v1', payer: BODY.expected_payer,
     valid_until: new Date(Date.now()+600_000).toISOString(),
-    correlation: { live_grant_digest: suffix.padStart(64, 'b'), live_grant_id: randomUUID() },
+    correlation: { live_grant_digest:grantDigest,live_grant_id:grantId,live_grant_version:version,from:payer },
   });
   return { quote, attempt };
 }
 
-test('fresh migration applies 001 through 005 once, reruns by checksum, and keeps audit rows append-only', { skip: skipReason }, async () => {
+test('fresh migration applies 001 through 006 once, reruns by checksum, and keeps audit rows append-only', { skip: skipReason }, async () => {
   const migrations = await pool.query<{ name: string; sha256: string }>(
     'SELECT name,sha256 FROM gateway_migrations ORDER BY name',
   );
@@ -84,6 +86,7 @@ test('fresh migration applies 001 through 005 once, reruns by checksum, and keep
     { name: '003_live_grant_consumption.sql', sha256: MIGRATION_003_SHA256 },
     { name: '004_receipt_confirmation_provenance.sql', sha256: MIGRATION_004_SHA256 },
     { name: '005_receipt_confirmation_count.sql', sha256: MIGRATION_005_SHA256 },
+    { name: '006_signed_live_grant_authority.sql', sha256: MIGRATION_006_SHA256 },
   ]);
 
   const audit = await pool.query<{ id: string }>("INSERT INTO audit_events(event) VALUES('TEST_ONLY') RETURNING id");
@@ -137,6 +140,7 @@ test('an existing empty-receipt 001 ledger upgrades through 004 without replacin
       { name: '003_live_grant_consumption.sql', sha256: MIGRATION_003_SHA256 },
       { name: '004_receipt_confirmation_provenance.sql', sha256: MIGRATION_004_SHA256 },
       { name: '005_receipt_confirmation_count.sql', sha256: MIGRATION_005_SHA256 },
+      { name: '006_signed_live_grant_authority.sql', sha256: MIGRATION_006_SHA256 },
     ]);
   } finally {
     await upgrade.end();
@@ -195,6 +199,20 @@ test('twenty pools consume one grant once; restart loses and rollback preserves 
   const consumption=(await pool.query('SELECT grant_digest FROM live_grant_consumptions WHERE payment_attempt_id=$1',[first.attempt.id])).rows[0]!;
   await assert.rejects(pool.query('UPDATE live_grant_consumptions SET grant_digest=$2 WHERE grant_digest=$1',[consumption.grant_digest,'f'.repeat(64)]),/append-only record/);
   await assert.rejects(pool.query('DELETE FROM live_grant_consumptions WHERE grant_digest=$1',[consumption.grant_digest]),/append-only record/);
+});
+
+test('signed v2 authority reserves atomically, exhausts budget, survives restart, and is append-only',{skip:skipReason},async()=>{
+  const ledger=new Ledger(pool),digest='d'.repeat(64),grantId=randomUUID(),now=Date.now();
+  const authority:LiveGrantAuthority={grantDigest:digest,grantId,schemaVersion:'v2',policySha256:'e'.repeat(64),keyId:'f'.repeat(64),signatureSha256:'1'.repeat(64),issuedAt:new Date(now-1000),notBefore:new Date(now-1000),expiresAt:new Date(now+600_000),payTo:'0x2222222222222222222222222222222222222222',amountPer:'10000000000000000',maxSubmissions:2,maxTotal:'20000000000000000',maxPerPayer:1,payerPolicy:'ANY_VALID_X402_PAYER'};
+  await ledger.activateGrant(authority);assert.equal(await ledger.grantAvailable(digest),true);
+  const first=await verifiedAttempt(ledger,'41','v2','0x1111111111111111111111111111111111111111',digest,grantId);
+  const pools=Array.from({length:20},()=>new Pool({connectionString:databaseUrl,max:1}));
+  try{const results=await Promise.all(pools.map(value=>new Ledger(value).markSubmitting(first.attempt)));assert.equal(results.filter(value=>value==='SUBMITTING').length,1);}finally{await Promise.all(pools.map(value=>value.end()));}
+  const second=await verifiedAttempt(ledger,'42','v2','0x3333333333333333333333333333333333333333',digest,grantId);const restarted=new Pool({connectionString:databaseUrl,max:1});try{assert.equal(await new Ledger(restarted).markSubmitting(second.attempt),'SUBMITTING');}finally{await restarted.end();}
+  assert.equal(await ledger.grantAvailable(digest),false);
+  const third=await verifiedAttempt(ledger,'43','v2','0x4444444444444444444444444444444444444444',digest,grantId);assert.equal(await ledger.markSubmitting(third.attempt),'GRANT_CONSUMED');
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM live_grant_reservations WHERE grant_digest=$1',[digest])).rows[0]!.count,2);
+  await assert.rejects(pool.query('DELETE FROM live_grant_reservations WHERE grant_digest=$1',[digest]),/append-only record/);
 });
 
 test('unimplemented artifact recovery stays fail closed in RECOVERY', { skip: skipReason }, async () => {

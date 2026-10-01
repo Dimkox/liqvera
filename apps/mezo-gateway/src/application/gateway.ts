@@ -16,8 +16,8 @@ export class Gateway {
   private async currentBlockers():Promise<Reason[]> {
     const blockers=this.blockers();const digest=this.payment.liveGrantDigest;
     if(digest) {
-      const spent=await this.ledger.pool.query('SELECT 1 FROM live_grant_consumptions WHERE grant_digest=$1 LIMIT 1',[digest]);
-      if(spent.rowCount)blockers.push('EXTERNAL_GRANT_REQUIRED');
+      if(this.payment.liveGrantAuthority){if(!await this.ledger.grantAvailable(digest))blockers.push('EXTERNAL_GRANT_REQUIRED');}
+      else {const spent=await this.ledger.pool.query('SELECT 1 FROM live_grant_consumptions WHERE grant_digest=$1 LIMIT 1',[digest]);if(spent.rowCount)blockers.push('EXTERNAL_GRANT_REQUIRED');}
     }
     return [...new Set(blockers)];
   }

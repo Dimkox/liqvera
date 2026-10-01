@@ -3,6 +3,7 @@ import { Pool, type PoolClient, type QueryResultRow } from 'pg';
 import { AMOUNT, ASSET, CHAIN_ID, NETWORK, PublicError, type Artifact, type Attempt, type AuthorizationIdentity,
   type Confirmation, type Preview, type Quote, type QuoteInput, type Reason, type ReportRequest } from '../domain/model.js';
 import { digest } from '../security/input.js';
+import type {LiveGrantAuthority} from '../security/live-grant.js';
 
 const QUOTE_SELECT = `SELECT q.*,a.report_sha256,a.bundle_sha256,a.metadata AS artifact FROM quotes q JOIN artifacts a USING(report_id)`;
 export async function consumeLiveGrant(
@@ -33,6 +34,19 @@ export class Ledger {
   }
   async healthy(): Promise<boolean> {
     try { await this.pool.query('SELECT scope_hash FROM access_scopes LIMIT 0'); return true; } catch { return false; }
+  }
+  async activateGrant(authority:LiveGrantAuthority):Promise<void>{
+    await this.pool.query(`INSERT INTO live_grant_authorities(grant_digest,grant_id,schema_version,policy_sha256,key_id,signature_sha256,issued_at,not_before,expires_at,pay_to,amount_per,max_submissions,max_total,max_per_payer,payer_policy)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) ON CONFLICT(grant_digest) DO NOTHING`,
+    [authority.grantDigest,authority.grantId,authority.schemaVersion,authority.policySha256,authority.keyId,authority.signatureSha256,authority.issuedAt,authority.notBefore,authority.expiresAt,authority.payTo,authority.amountPer,authority.maxSubmissions,authority.maxTotal,authority.maxPerPayer,authority.payerPolicy]);
+    const row=(await this.pool.query('SELECT policy_sha256 FROM live_grant_authorities WHERE grant_digest=$1',[authority.grantDigest])).rows[0];
+    if(row?.policy_sha256!==authority.policySha256)throw new Error('LIVE_GRANT_AUTHORITY_MISMATCH');
+  }
+  async grantAvailable(digest:string):Promise<boolean>{
+    const result=await this.pool.query(`SELECT 1 FROM live_grant_authorities a WHERE a.grant_digest=$1 AND now()>=a.not_before AND now()<a.expires_at
+      AND (SELECT count(*) FROM live_grant_reservations r WHERE r.grant_digest=a.grant_digest)<a.max_submissions
+      AND COALESCE((SELECT sum(amount_atomic) FROM live_grant_reservations r WHERE r.grant_digest=a.grant_digest),0)+a.amount_per<=a.max_total`,[digest]);
+    return Boolean(result.rowCount);
   }
   async createRequest(scope: string, key: string, body: QuoteInput): Promise<ReportRequest> {
     return this.transaction(async db => {
@@ -126,7 +140,20 @@ export class Ledger {
       const grantDigest=current.correlation?.live_grant_digest;
       const grantId=current.correlation?.live_grant_id;
       if(typeof grantDigest!=='string'||!/^[0-9a-f]{64}$/.test(grantDigest)||typeof grantId!=='string')return 'INVALID_STATE';
-      if(!await consumeLiveGrant(db,grantDigest,grantId,attempt.id)) {
+      let reserved=false;
+      if(current.correlation?.live_grant_version==='v2'){
+        const authority=(await db.query(`SELECT * FROM live_grant_authorities WHERE grant_digest=$1 FOR UPDATE`,[grantDigest])).rows[0];
+        const payer=String(current.correlation.from??'');
+        if(authority&&new Date(authority.not_before)<=new Date()&&new Date(authority.expires_at)>new Date()){
+          const totals=(await db.query(`SELECT count(*)::int AS count,COALESCE(sum(amount_atomic),0)::text AS total FROM live_grant_reservations WHERE grant_digest=$1`,[grantDigest])).rows[0]!;
+          const ordinal=Number(totals.count)+1;
+          if(ordinal<=Number(authority.max_submissions)&&BigInt(totals.total)+BigInt(AMOUNT)<=BigInt(authority.max_total)){
+            const inserted=await db.query(`INSERT INTO live_grant_reservations(grant_digest,ordinal,payment_attempt_id,payer,amount_atomic) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING ordinal`,[grantDigest,ordinal,attempt.id,payer,AMOUNT]);
+            reserved=Boolean(inserted.rowCount);
+          }
+        }
+      }else reserved=await consumeLiveGrant(db,grantDigest,grantId,attempt.id);
+      if(!reserved) {
         await db.query("UPDATE payment_attempts SET state='REJECTED',updated_at=now() WHERE id=$1",[attempt.id]);
         await db.query("UPDATE quotes SET state='READY' WHERE id=$1 AND state='PAYMENT_PENDING'",[attempt.quote_id]);
         await db.query("INSERT INTO audit_events(quote_id,payment_attempt_id,event) VALUES($1,$2,'GRANT_ALREADY_CONSUMED')",[attempt.quote_id,attempt.id]);

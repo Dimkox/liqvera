@@ -24,11 +24,14 @@ async function main():Promise<void> {
   const reader=new MezoReceiptReader(new MezoReadonlyRpc(),identity,finality);
   const liveInput=config.liveGrantFile&&config.liveContext?{
     grantBytes:await readPrivateGrantFile(config.liveGrantFile),
-    context:{...config.liveContext,databaseIdentity:await databaseIdentity(config.databaseUrl),demoAnyPayer:config.testnetDemoAnyPayer},observedAt:new Date(),
+    publicKey:config.liveGrantPublicKey,
+    context:{...config.liveContext,databaseIdentity:await databaseIdentity(config.databaseUrl)},observedAt:new Date(),
   }:null;
   const payments=composeOfficialX402(identity,finality,reader,config.publicBase,liveInput);
+  const ledger=new Ledger(pool);
+  if(payments.liveGrantAuthority)await ledger.activateGrant(payments.liveGrantAuthority);
   await payments.initialize();
-  const gateway=new Gateway(new Ledger(pool),new HttpReportService(config.reportUrl,config.reportToken),new ImmutableArtifacts(config.artifactRoot),payments,contracts,config);
+  const gateway=new Gateway(ledger,new HttpReportService(config.reportUrl,config.reportToken),new ImmutableArtifacts(config.artifactRoot),payments,contracts,config);
   const server=createServer({maxHeaderSize:32768,requestTimeout:20000,headersTimeout:10000},createApp(gateway,config.origins));
   server.keepAliveTimeout=5000;server.maxRequestsPerSocket=100;
   const stopWorkers=startWorkers(gateway);

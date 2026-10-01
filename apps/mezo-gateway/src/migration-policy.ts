@@ -9,6 +9,7 @@ export const APPROVED_MIGRATIONS:MigrationIdentity[]=[
   {name:'003_live_grant_consumption.sql',sha256:'bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0'},
   {name:'004_receipt_confirmation_provenance.sql',sha256:'96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a'},
   {name:'005_receipt_confirmation_count.sql',sha256:'e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11'},
+  {name:'006_signed_live_grant_authority.sql',sha256:'92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a'},
 ];
 
 export function validateMigrationAuthority(authority:MigrationIdentity[]):void{

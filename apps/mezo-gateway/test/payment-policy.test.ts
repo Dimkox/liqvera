@@ -16,6 +16,7 @@ import { composeOfficialX402, readPrivateGrantFile } from '../src/security/live-
 import { permit2Capability, settlementTransaction } from '../src/adapters/x402.js';
 import { loadConfig } from '../src/config.js';
 import { assertSaleFresh, MAX_SALE_AGE_MS } from '../src/workers/builds.js';
+import {createHash,generateKeyPairSync,sign} from 'node:crypto';
 
 const payer='0x1111111111111111111111111111111111111111';
 const payTo='0x2222222222222222222222222222222222222222';
@@ -134,6 +135,7 @@ test('finality requires twelve canonical confirmations and rejects reorg',async(
 });
 
 function grantRaw(){return {schema:'liqvera-mezo-payment-grant/v1',grant_id:'00000000-0000-4000-8000-000000000099',subject_commit:'a'.repeat(40),subject_tree:'b'.repeat(40),plan_sha256:'c'.repeat(64),scheme:'exact',settlement_broadcaster:'facilitator',network:NETWORK,chain_id:31611,asset:ASSET,amount_atomic:AMOUNT,buyer:payer,pay_to:payTo,maximum_settlement_submissions:1,max_buyer_native_gas_wei:'100000000000000',asset_transfer_method:'permit2',permit2_address:permit2,permit2_proxy:proxy,approval_mode:'eip2612-gas-sponsoring',required_extension:'eip2612GasSponsoring',authorization_identity_version:'liqvera-permit2-eip2612-identity/v1',facilitator_url:'https://facilitator.vativ.io/',rpc_url:'https://rpc.test.mezo.org/',database_identity_kind:'sha256-credential-free-postgresql-endpoint/v1',database_host_policy:'loopback-only/v1',database_identity:'d'.repeat(64),expires_at:'2026-09-29T00:05:00Z'};}
+function signedV2(overrides:Record<string,unknown>={}){const {privateKey,publicKey}=generateKeyPairSync('ed25519');const raw=publicKey.export({format:'der',type:'spki'}).subarray(-32);const policy={approval_mode:'eip2612-gas-sponsoring',asset:ASSET,asset_transfer_method:'permit2',amount_atomic:AMOUNT,authorization_identity_version:'liqvera-permit2-eip2612-identity/v1',chain_id:31611,database_host_policy:'loopback-only/v1',database_identity:'d'.repeat(64),database_identity_kind:'sha256-credential-free-postgresql-endpoint/v1',expires_at:'2026-09-29T12:00:00.000Z',facilitator_url:'https://facilitator.vativ.io/',grant_id:'00000000-0000-4000-8000-000000000098',issued_at:'2026-09-29T00:00:00.000Z',max_buyer_native_gas_wei:'0',max_per_payer:1,max_total_amount_atomic:(BigInt(AMOUNT)*3n).toString(),maximum_settlement_submissions:3,network:NETWORK,not_before:'2026-09-29T00:00:00.000Z',pay_to:payTo,payer_policy:'ANY_VALID_X402_PAYER',permit2_address:permit2,permit2_proxy:proxy,plan_sha256:'c'.repeat(64),required_extension:'eip2612GasSponsoring',rpc_url:'https://rpc.test.mezo.org/',schema:'liqvera-mezo-payment-grant-policy/v2',scheme:'exact',settlement_broadcaster:'facilitator',subject_commit:'a'.repeat(40),subject_tree:'b'.repeat(40),...overrides};const bytes=Buffer.from(JSON.stringify(Object.fromEntries(Object.entries(policy).sort())));const envelope={schema:'liqvera-mezo-payment-grant-envelope/v2',key_id:createHash('sha256').update(raw).digest('hex'),payload:bytes.toString('base64url'),signature:sign(null,bytes,privateKey).toString('base64url')};return {bytes:Buffer.from(JSON.stringify(envelope)),publicKey:raw};}
 
 test('live grant binds exact facilitator-sponsored settlement and buyer gas authority',()=>{
   const raw=grantRaw();
@@ -225,38 +227,21 @@ test('valid exact grant activates facilitator-sponsored composition without netw
   }),/LIVE_GRANT_MISMATCH/);
 });
 
-test('opt-in testnet demo accepts quote payer while default remains grant buyer bound',async()=>{
-  const base={grantBytes:new TextEncoder().encode(JSON.stringify(grantRaw())),observedAt:new Date('2026-09-29T00:00:00Z'),
-    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64)}};
-  const bound=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://liqvera.site'),base);
-  assert.equal(bound.expectedPayer,payer);
-  const demo=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://liqvera.site'),
-    {...base,context:{...base.context,demoAnyPayer:true}});
-  assert.equal(demo.expectedPayer,undefined);
-  assert.equal(demo.liveGrantDigest,undefined);
-  assert.match(bound.liveGrantDigest!,/^[0-9a-f]{64}$/);
-  assert.doesNotThrow(()=>LivePaymentGrant.parse(grantRaw(),new Date('2026-09-29T00:00:00Z')).authorize({...base.context,
-    demoAnyPayer:true,buyer:'0x3333333333333333333333333333333333333333',now:new Date('2026-09-29T00:01:00Z')}));
-  const config=await loadConfig({DATABASE_URL:'postgresql://127.0.0.1/liqvera',SOURCE_MODE:'live-public',PAY_TO:payTo,
-    LIQVERA_LIVE_GRANT_FILE:'/run/secrets/payment_grant',LIQVERA_SUBJECT_COMMIT:'a'.repeat(40),LIQVERA_SUBJECT_TREE:'b'.repeat(40),
-    LIQVERA_PLAN_SHA256:'c'.repeat(64),LIQVERA_LIVE_BUYER:payer,LIQVERA_TESTNET_DEMO_ANY_PAYER:'1'});
-  assert.equal(config.testnetDemoAnyPayer,true);
-  await assert.rejects(loadConfig({DATABASE_URL:'postgresql://127.0.0.1/liqvera',SOURCE_MODE:'live-public',LIQVERA_TESTNET_DEMO_ANY_PAYER:'1'}),/INVALID_INPUT/);
+test('signed v2 authority permits any quote payer while v1 remains buyer bound',()=>{
+  const context={subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64)};
+  const bound=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://liqvera.site'),{grantBytes:Buffer.from(JSON.stringify(grantRaw())),observedAt:new Date('2026-09-29T00:00:00Z'),context});
+  const signed=signedV2();const reusable=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://liqvera.site'),{grantBytes:signed.bytes,publicKey:signed.publicKey,observedAt:new Date('2026-09-29T00:01:00Z'),context});
+  assert.equal(bound.expectedPayer,payer);assert.equal(reusable.expectedPayer,undefined);assert.equal(reusable.liveGrantAuthority?.maxSubmissions,3);assert.match(reusable.liveGrantDigest!,/^[0-9a-f]{64}$/);
 });
 
-test('demo grant lifetime is at most seven days while default remains fifteen minutes',()=>{
-  const now=new Date('2026-09-29T00:00:00Z');
-  const sixDays={...grantRaw(),expires_at:'2026-10-05T00:00:00Z'};
-  assert.throws(()=>LivePaymentGrant.parse(sixDays,now),/LIVE_GRANT_EXPIRED/);
-  const demo=LivePaymentGrant.parse(sixDays,now,true);
-  const context={subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,demoAnyPayer:true};
-  assert.doesNotThrow(()=>demo.authorize({...context,now:new Date('2026-10-04T23:59:59Z')}));
-  assert.throws(()=>demo.authorize({...context,now:new Date('2026-10-05T00:00:00Z')}),/LIVE_GRANT_EXPIRED/);
-  assert.doesNotThrow(()=>LivePaymentGrant.parse({...grantRaw(),expires_at:'2026-10-06T00:00:00Z'},now,true));
-  assert.throws(()=>LivePaymentGrant.parse({...grantRaw(),expires_at:'2026-10-06T00:00:00.001Z'},now,true),/LIVE_GRANT_EXPIRED/);
+test('signed v2 rejects bad signatures, noncanonical payloads and lifetime over 24 hours',()=>{
+  const now=new Date('2026-09-29T00:01:00Z');const good=signedV2();assert.doesNotThrow(()=>LivePaymentGrant.parseBytes(good.bytes,now,good.publicKey));
+  const tampered=JSON.parse(good.bytes.toString());tampered.signature=`A${tampered.signature.slice(1)}`;assert.throws(()=>LivePaymentGrant.parseBytes(Buffer.from(JSON.stringify(tampered)),now,good.publicKey),/SIGNATURE/);
+  const tooLong=signedV2({expires_at:'2026-09-30T00:00:00.001Z'});assert.throws(()=>LivePaymentGrant.parseBytes(tooLong.bytes,now,tooLong.publicKey),/INVALID/);
+  const duplicate=Buffer.from('{"schema":"liqvera-mezo-payment-grant-envelope/v2","schema":"x"}');assert.throws(()=>LivePaymentGrant.parseBytes(duplicate,now,good.publicKey),/INVALID/);
 });
 
-test('full demo verification binds the quote payer rather than the grant buyer',async()=>{
+test('full signed v2 verification binds the quote payer',async()=>{
   const quotePayer='0x3333333333333333333333333333333333333333';
   const demoQuote={...quote,terms:{...quote.terms,expected_payer:quotePayer}} as Quote;
   const wire=payload() as unknown as Record<string,unknown>;
@@ -264,9 +249,10 @@ test('full demo verification binds the quote payer rather than the grant buyer',
   ((wire.extensions as {eip2612GasSponsoring:{info:{from:string}}}).eip2612GasSponsoring.info.from)=quotePayer;
   const policy={reviewed:true,version:'test/v1',identify:()=>({payer:quotePayer,identity:'a'.repeat(64),version:'test/v1',valid_until:'2099-01-01T00:00:00Z',correlation:{}}),async bindsTransfer(){return true;}};
   const reader={nativeBalanceSnapshot:async()=>({balance:'0',block_number:'0x1',block_hash:`0x${'1'.repeat(64)}`})};
+  const signed=signedV2();
   const payment=composeOfficialX402(policy as never,new MezoFinalityPolicy(12),reader as never,new URL('https://liqvera.site'),{
-    grantBytes:new TextEncoder().encode(JSON.stringify(grantRaw())),observedAt:new Date('2026-09-29T00:00:00Z'),
-    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64),demoAnyPayer:true},
+    grantBytes:signed.bytes,publicKey:signed.publicKey,observedAt:new Date('2026-09-29T00:01:00Z'),
+    context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64)},
     now:()=>new Date('2026-09-29T00:01:00Z'),
   });
   const requirements={scheme:'exact',network:NETWORK,asset:ASSET,amount:AMOUNT,payTo,extra:{assetTransferMethod:'permit2',name:'Mezo USD',version:'1'}};

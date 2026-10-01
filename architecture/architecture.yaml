@@ -14448,6 +14448,21 @@ repository_inventory:
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/release-review-paywall-live-r3.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/code-review-web-hotfix-cba005b.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/data-review-paywall-live-r3.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/release-review-v0.0.4-final.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/security-review-web-hotfix-cba005b.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/test-review-paywall-live-r3.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/p3-postgres-operation.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
@@ -15258,6 +15273,9 @@ repository_inventory:
   - path: apps/mezo-gateway/migrations/005_receipt_confirmation_count.sql
     node: contract:liqvera-gateway-ledger
     path_class: MIGRATION
+  - path: apps/mezo-gateway/migrations/006_signed_live_grant_authority.sql
+    node: contract:liqvera-gateway-ledger
+    path_class: MIGRATION
   - path: apps/mezo-gateway/scripts/copy-resources.mjs
     node: artifact:liqvera-gateway
     path_class: BUILD_PACKAGING
@@ -15334,6 +15352,9 @@ repository_inventory:
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/src/security/live-grant.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/types/json-dup-key-validator.d.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/src/security/live-composition.ts
@@ -15583,6 +15604,9 @@ repository_inventory:
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: tests/contracts/test_live_grant_consumption.py
+    node: test:mezo-evidence-contracts
+    path_class: TEST_SOURCE
+  - path: tests/contracts/test_signed_grant_authority.py
     node: test:mezo-evidence-contracts
     path_class: TEST_SOURCE
   - path: scripts/run-mezo-acceptance.py

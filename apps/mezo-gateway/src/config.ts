@@ -15,6 +15,7 @@ export interface RuntimeConfig extends GatewayConfig {
   metricsPort: number;
   liveGrantFile: string|null;
   testnetDemoAnyPayer: boolean;
+  liveGrantPublicKey: Uint8Array|undefined;
   liveContext: {subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string}|null;
 }
 export async function databaseUrl(env:NodeJS.ProcessEnv):Promise<string> {
@@ -49,7 +50,11 @@ export async function loadConfig(env:NodeJS.ProcessEnv=process.env):Promise<Runt
   const testnetDemoAnyPayer=env.LIQVERA_TESTNET_DEMO_ANY_PAYER==='1';
   if(env.LIQVERA_TESTNET_DEMO_ANY_PAYER!==undefined&&!['0','1'].includes(env.LIQVERA_TESTNET_DEMO_ANY_PAYER))throw new PublicError('INVALID_INPUT');
   if(testnetDemoAnyPayer&&(!liveGrantFile||sourceMode!=='live-public'))throw new PublicError('INVALID_INPUT');
-  return {databaseUrl:await databaseUrl(env),sourceMode,payTo,publicBase,origins,port,liveGrantFile,liveContext,testnetDemoAnyPayer,
+  const publicKeyHex=env.LIQVERA_LIVE_GRANT_PUBLIC_KEY||undefined;
+  if(publicKeyHex!==undefined&&!/^[0-9a-f]{64}$/.test(publicKeyHex))throw new PublicError('INVALID_INPUT');
+  const liveGrantPublicKey=publicKeyHex?Buffer.from(publicKeyHex,'hex'):undefined;
+  if(testnetDemoAnyPayer&&!liveGrantPublicKey)throw new PublicError('INVALID_INPUT');
+  return {databaseUrl:await databaseUrl(env),sourceMode,payTo,publicBase,origins,port,liveGrantFile,liveContext,testnetDemoAnyPayer,liveGrantPublicKey,
     host:env.HOST??'0.0.0.0',artifactRoot:env.ARTIFACT_ROOT??'/data/artifacts',reportToken,metricsHost,metricsPort,
     reportUrl:fixedInternalUrl(env.REPORT_SERVICE_URL??'http://report:8082')};
 }

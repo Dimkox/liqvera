@@ -69,4 +69,3 @@ Required repair:
 - `apps/mezo-gateway: npm test`: **51 passed, 0 failed, 6 skipped**; skips require an explicitly disposable PostgreSQL URL.
 - `apps/mezo-web: npm run build`: typecheck completed, then Vite failed because existing `node_modules/.vite-temp` was not writable (`EACCES`). This is a local workspace-permission limitation, not evidence against SEC-04 and not a passing build claim.
 - Public asset SHA-256: report `8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd`; ZIP `a6cc771d3fb8428325d32855fef53417f7da25c893db3a99b49802f482adc4fc`.
-

@@ -9,8 +9,8 @@ import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type Quote, type Rec
 import { paymentHeader } from '../security/input.js';
 import { boundedJson } from './http.js';
 import { MezoReceiptReader } from './mezo-rpc.js';
-import type { LivePaymentGrant } from '../security/live-grant.js';
-export interface LivePaymentContext { subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string;demoAnyPayer?:boolean }
+import type { LiveGrantAuthority,LivePaymentGrant } from '../security/live-grant.js';
+export interface LivePaymentContext { subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string;databaseIdentity?:string }
 // Policy implementations require reviewed scheme-specific identity, nonce,
 // replay-domain, chain correlation and finality evidence. Configuration cannot
 // flip these defaults into an approval.
@@ -57,10 +57,9 @@ function facilitatorTransport(facilitator:URL) { return {
 export class OfficialX402 implements PaymentPort {
   private readonly server:x402ResourceServer;
   private initialized=false;
-  get expectedPayer():string|undefined { return this.liveContext?.demoAnyPayer?undefined:this.liveContext?.buyer; }
-  // Public testnet demo authority is reusable across independently guarded quotes;
-  // quote/authorization uniqueness remains the exactly-once settlement boundary.
-  get liveGrantDigest():string|undefined { return this.liveContext?.demoAnyPayer?undefined:this.grant?.digest; }
+  get expectedPayer():string|undefined { return this.grant?.expectedPayer; }
+  get liveGrantDigest():string|undefined { return this.grant?.digest; }
+  get liveGrantAuthority():LiveGrantAuthority|undefined{return this.grant?.authority;}
   constructor(private readonly identity: AuthorizationPolicy,private readonly finality: FinalityPolicy,private readonly reader: MezoReceiptReader,private readonly publicBase: URL,
     private readonly grant: LivePaymentGrant|null=null,private readonly liveContext:LivePaymentContext|null=null,private readonly now:()=>Date=()=>new Date(),
     facilitator:URL=defaultFacilitator) {
@@ -109,18 +108,20 @@ export class OfficialX402 implements PaymentPort {
     if(identity.payer!==quote.terms.expected_payer||!identity.identity||identity.identity.length>512||identity.version!==this.identity.version||
       !Number.isFinite(Date.parse(identity.valid_until))||Date.parse(identity.valid_until)<=Date.now())throw new PublicError('PAYMENT_REJECTED',409);
     this.authorizeGrant();
-    if((!this.liveContext!.demoAnyPayer&&this.liveContext!.buyer!==identity.payer)||this.liveContext!.payTo!==quote.terms.pay_to)throw new PublicError('PAYMENT_REJECTED',409);
+    if((this.grant!.version==='v1'&&this.liveContext!.buyer!==identity.payer)||this.liveContext!.payTo!==quote.terms.pay_to)throw new PublicError('PAYMENT_REJECTED',409);
     const balance=await this.reader.nativeBalanceSnapshot(identity.payer);
     identity.correlation.buyer_native_balance_before=balance.balance;
     identity.correlation.buyer_native_balance_before_block_number=balance.block_number;
     identity.correlation.buyer_native_balance_before_block_hash=balance.block_hash;
     identity.correlation.live_grant_digest=this.grant!.digest;
     identity.correlation.live_grant_id=String(this.grant!.raw.grant_id);
+    identity.correlation.live_grant_version=this.grant!.version;
     return {payload,requirements,identity};
   }
   async settle(payload: PaymentPayload,requirements: PaymentRequirements) {
-    this.ready();
-    this.authorizeGrant();
+    // The database transaction already reserved authority and crossed
+    // VERIFIED -> SUBMITTING. Rechecking an expiring file grant here could
+    // strand a durable reservation without making the sole facilitator call.
     const result=await this.server.settlePayment(payload,requirements);
     // A transaction-bearing settlement_pending response is spent and enters
     // confirm-only reconciliation exactly like a successful submission.

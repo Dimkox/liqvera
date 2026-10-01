@@ -75,19 +75,22 @@ The historical live public probe returned `COMPATIBILITY_PASS_PAYMENT_BLOCKED`.
 F7 now implements an explicit Permit2 authorization identity with required
 EIP-2612 gas sponsorship, twelve-block canonical finality, an exact one-submit
 testnet grant, and pinned official x402 browser composition. Ordinary startup intentionally has no live grant, so
-payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`. Four
+payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`. Five
 explicitly authorized 0.01 test MUSD settlements are retained: the original
-sealed A13/A14 evidence payment and three automated hackathon-demo payments.
-All four reached canonical finality with zero buyer native-gas spend. The first
+sealed A13/A14 evidence payment and four automated hackathon-demo payments.
+All five reached canonical finality with zero buyer native-gas spend. The first
 new demo request timed out client-side but settled on-chain and was recovered
 confirm-only from its canonical Transfer log; no grant submitted settlement
-twice. No mainnet payment, exchange mutation, custody action, or deployment
-was performed.
+twice. The v0.0.4 candidate deployment also proved a fresh public Hyperliquid
+report, paid JSON plus ZIP delivery, and offline bundle verification at 22
+confirmations. No mainnet payment, exchange mutation, or custody action was
+performed.
 
-Current product identity: root `VERSION` is `0.0.3`; releases v0.0.1,
-[v0.0.2](https://github.com/Dimkox/liqvera/releases/tag/v0.0.2), and v0.0.3
-are published milestones. v0.0.3 records the live-public snapshot and three
-new automated Mezo Testnet demo payments; the installable operator package
+Current product identity: root `VERSION` is the unpublished `0.0.4` candidate;
+releases v0.0.1, [v0.0.2](https://github.com/Dimkox/liqvera/releases/tag/v0.0.2),
+and v0.0.3 are published milestones. v0.0.4 adds public historical-preview
+assets, EIP-6963 wallet discovery, transient receipt revalidation recovery, and
+fresh end-to-end public testnet evidence; the installable operator package
 remains v0.0.2. The root Python
 workspace remains `0.1.0.dev0`, and Stage A, evidence-report, protocol,
 gateway, and web component packages remain `0.1.0`. Inherited `mee-*`

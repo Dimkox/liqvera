@@ -1,5 +1,12 @@
 # Release plan — F7 live acceptance and release 0.0.1
 
+## v0.0.4 candidate evidence (2026-10-01)
+
+The deployed candidate and fresh one-submit Mezo Testnet E2E are recorded in
+[`evidence/acceptance-v0.0.4.md`](evidence/acceptance-v0.0.4.md). Root VERSION
+is `0.0.4`; review, tag, push, and GitHub Release remain pending and are not
+claimed by this evidence.
+
 ## Follow-up v0.0.2 candidate
 
 Root product VERSION is now `0.0.2`; component versions remain `0.1.0` and

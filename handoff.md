@@ -1,5 +1,32 @@
 # Liqvera — handoff
 
+## 2026-10-01 v0.0.4 deployed candidate and paid E2E
+
+Candidate `0f3e745d41022c33fbb075c9816b35b1c6a3cabe` was deployed at
+`https://liqvera.site` after regenerating the bounded demo grant against its
+exact commit/tree. Public `/`, `/readyz`, report JSON, and evidence ZIP returned
+HTTP 200; readiness reported payment ready. Historical report and ZIP SHA-256
+remained respectively
+`8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd`
+and `a6cc771d3fb8428325d32855fef53417f7da25c893db3a99b49802f482adc4fc`.
+The deployed footer contains the exact version-neutral releases URL and no tag
+URL; the EIP-6963/legacy/switch/add/rejection suite and production web build
+passed.
+
+One new encrypted-signer submission paid fresh live-public report
+`aa96d734-a394-4334-bec0-eca92eb4bd7d`, sourced from Hyperliquid at
+`2026-10-01T00:11:13.143Z`. Transaction
+`0xc5344f48b973d10f5925912e8c5f0b8c69ecdfe4e01ee15209f81771b0cccb6f`
+reached 22 observed confirmations. JSON delivery and subsequent ZIP delivery
+both returned HTTP 200; the first ZIP read safely returned transient 202 while
+the quote remained PAID, then succeeded without resubmission. Report SHA-256 is
+`7a4aac444250b63b919d34e2429e39af7202d1029c950c6110103484abec57a7`;
+bundle SHA-256 is
+`7afec508ad2eb5c86551c5fba703463bfe0033bfbc18988d4ccb036b533bce02`.
+The repository offline verifier accepted the exact downloaded ZIP. Root VERSION
+is now the unpublished `0.0.4` candidate; push/tag/release remain pending route
+reviews.
+
 ## 2026-10-01 web image deployment build repair
 
 The first build of the EIP-6963/public-preview tree reproduced a deterministic

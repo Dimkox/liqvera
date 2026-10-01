@@ -1,5 +1,21 @@
 # Liqvera — handoff
 
+## 2026-10-01 review repair in progress
+
+The browser review repairs now bind account/chain listeners to the selected
+EIP-6963 provider, make STEP badges unambiguous at narrow widths, and verify
+both historical report and ZIP SHA-256 values before rendering or download.
+Executable tests cover the 4902 add-chain path and the exact historical bundle
+with the repository offline verifier. The canonical release note now describes
+the unpublished v0.0.4 candidate truthfully. Focused web tests passed 26/26,
+the production web build passed, and the focused offline-bundle test passed.
+
+The data architect rejected reusable v1 grants. The approved next change is a
+separate signed v2 authority using canonical JCS payload bytes, a pinned
+Ed25519 public-key fingerprint, additive migration 006, and append-only atomic
+reservations. V1 remains one-shot. No deploy, payment, push, tag, or release
+occurred during this review repair.
+
 ## 2026-10-01 public browser hotfix
 
 Headless Chrome reproduced the two user-visible failures against the deployed

@@ -7,7 +7,7 @@ The deployed candidate and fresh one-submit Mezo Testnet E2E are recorded in
 is `0.0.4`; review, tag, push, and GitHub Release remain pending and are not
 claimed by this evidence.
 
-## Follow-up v0.0.2 candidate
+## Historical v0.0.2 candidate state (2026-09-30, superseded)
 
 Root product VERSION is now `0.0.2`; component versions remain `0.1.0` and
 root workspace metadata remains `0.1.0.dev0`. New A07 sealed evidence plus the
@@ -15,13 +15,19 @@ retained A13/A14 and A29 evidence closes the external-case set when projected
 across results: 9 PASS, 21 NOT_RUN, zero BLOCKED_EXTERNAL, zero FAIL. This is
 still INCOMPLETE and is not a single runner overall PASS. See
 `evidence/acceptance-v0.0.2.md`, `release-notes-v0.0.2.md`, and the pending
-`release-artifact-manifest-v0.0.2.json`. No v0.0.2 artifact, push, tag, or
-GitHub Release exists.
+`release-artifact-manifest-v0.0.2.json`. At that historical checkpoint no
+v0.0.2 artifact, push, tag, or GitHub Release existed. v0.0.2 and v0.0.3 are
+now published historical milestones; the installable operator package remains
+v0.0.2.
 
-## Deployment
+## Current v0.0.4 deployment and publication state (2026-10-01)
 
-No hosted deployment. P5 only fast-forwards canonical `main`, creates annotated
-`v0.0.1`, and creates/publishes the GitHub Release after exact grants.
+Paid acceptance was executed against deployed candidate
+`0f3e745d41022c33fbb075c9816b35b1c6a3cabe`. Browser hotfix candidate
+`cba005b1c07aafadb4dd15743b7184143143dcf5` was subsequently deployed and
+publicly smoke-tested without another payment. Later review repairs are not
+claimed as deployed until separately verified. v0.0.4 push, tag, and GitHub
+Release remain pending.
 
 ## Published release
 
@@ -38,7 +44,8 @@ Public asset download verification passed:
 
 A29 passed through a credential-disabled anonymous recursive clone: root
 VERSION `0.0.1`, kernel VERSION `2.0.19`, submodule
-`cb9af4073ba6c3d515145164d771c75ebdfa3224`. No hosted deployment was made.
+`cb9af4073ba6c3d515145164d771c75ebdfa3224`. No hosted deployment was made for
+that historical v0.0.1 publication step.
 
 ## Feature flags / staged rollout
 

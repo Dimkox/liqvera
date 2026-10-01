@@ -46,3 +46,15 @@ export function bindWalletStateListeners(provider: WalletEventProvider | null, s
     provider.removeListener?.("chainChanged", listener);
   };
 }
+
+export function createWalletListenerOwner(sink:WalletStateSink):{replace(provider:WalletEventProvider|null):void;dispose():void} {
+  let active:WalletEventProvider|null=null;
+  let unbind=():void=>undefined;
+  return {
+    replace(provider) {
+      if(provider===active)return;
+      unbind();active=provider;unbind=bindWalletStateListeners(provider,sink);
+    },
+    dispose() { unbind();unbind=()=>undefined;active=null; },
+  };
+}

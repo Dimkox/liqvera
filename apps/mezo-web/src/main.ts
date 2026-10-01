@@ -6,10 +6,10 @@ import { executePaymentAttempt, executeRecovery } from "./browser-orchestration"
 import { quoteIsPayable, receiptMatchesQuote, type Capabilities, type Delivery, type Quote, type RequestStatus, type Side } from "./contracts";
 import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./session";
 import { injectedWallet, switchToMezo, walletAccount, walletError, walletOnMezo, type Eip1193Provider } from "./wallet";
-import { bindWalletStateListeners, refreshWalletState, type WalletState } from "./wallet-events";
+import { createWalletListenerOwner, refreshWalletState, type WalletState } from "./wallet-events";
 import { discoverWalletChoices, walletChoices, walletStore, type WalletChoice } from "./wallet-discovery";
 import { installProductionX402Adapter, requestPaidReport, x402Available, X402CancelledBeforeSubmission } from "./x402";
-import { formatHistoricalDate, HISTORICAL_DEMO, validateHistoricalReport } from "./historical-demo";
+import { formatHistoricalDate, HISTORICAL_DEMO, verifyHistoricalAssets } from "./historical-demo";
 
 installProductionX402Adapter();
 
@@ -101,14 +101,20 @@ function snapshotAge(value: string): string {
   return minutes < 1 ? "Less than a minute old" : `${minutes} minute${minutes === 1 ? "" : "s"} old now`;
 }
 
+let historicalDownloadUrl:string|null=null;
 async function showHistoricalReport():Promise<void> {
   const target=el<HTMLDivElement>("#result-content");
   target.replaceChildren(node("p","status-card","Loading sealed historical report…"));
   announcement("Loading sealed historical report. No wallet or payment is required.");
   try {
-    const response=await fetch(HISTORICAL_DEMO.reportUrl,{credentials:"omit",redirect:"error"});
-    if(!response.ok)throw new Error("Historical preview could not be loaded.");
-    const report=validateHistoricalReport(await response.json());
+    const [reportResponse,bundleResponse]=await Promise.all([
+      fetch(HISTORICAL_DEMO.reportUrl,{credentials:"omit",redirect:"error"}),
+      fetch(HISTORICAL_DEMO.bundleUrl,{credentials:"omit",redirect:"error"}),
+    ]);
+    if(!reportResponse.ok||!bundleResponse.ok)throw new Error("Historical preview could not be loaded.");
+    const reportBytes=new Uint8Array(await reportResponse.arrayBuffer());
+    const bundleBytes=new Uint8Array(await bundleResponse.arrayBuffer());
+    const report=await verifyHistoricalAssets(reportBytes,bundleBytes);
     const card=node("div","status-card");
     card.append(node("p","eyebrow","HISTORICAL LIVE PUBLIC PREVIEW"),node("h3","","Sealed Hyperliquid BTC perpetual report"));
     const grid=node("div","data-grid report-grid");
@@ -118,7 +124,9 @@ async function showHistoricalReport():Promise<void> {
     appendField(grid,"Bundle SHA-256",HISTORICAL_DEMO.bundleSha256,"breakable span-all");
     appendField(grid,"Snapshot calculation",`${report.request.side} ${report.request.quantity_base} BTC · VWAP ${report.calculation.display.vwap}`);
     card.append(grid,node("p","safety-note","Historical capture from 30 Sep 2026. It is not fresh market data, an execution promise, or a new run. No payment transaction exists for this public preview."));
-    const download=document.createElement("a");download.className="secondary-button";download.href=HISTORICAL_DEMO.bundleUrl;
+    if(historicalDownloadUrl)URL.revokeObjectURL(historicalDownloadUrl);
+    historicalDownloadUrl=URL.createObjectURL(new Blob([bundleBytes],{type:"application/zip"}));
+    const download=document.createElement("a");download.className="secondary-button";download.href=historicalDownloadUrl;
     download.download="liqvera-historical-live-evidence.zip";download.textContent="Download evidence ZIP";
     card.append(download);target.replaceChildren(card);announcement("Historical sealed report loaded. Payment is not required.");
   } catch { target.replaceChildren(node("p","safety-note","Historical preview could not be loaded. The paid fresh-report flow is unchanged."));announcement("Historical preview could not be loaded.","error"); }
@@ -135,6 +143,7 @@ let quote: Quote | null = null;
 let delivery: Delivery | null = null;
 let busy = false;
 let polling = false;
+const walletListeners=createWalletListenerOwner({applyWalletState});
 
 function setBusy(value: boolean): void {
   busy = value;
@@ -515,7 +524,8 @@ async function connectWallet(): Promise<void> {
   choices=await discoverWalletChoices(walletStore,injectedWallet());
   renderProviderChoices();
   const selected=el<HTMLSelectElement>("#wallet-provider").value;
-  provider=(choices.find(item=>item.id===selected)??choices[0])?.provider??null;
+  const selectedProvider=(choices.find(item=>item.id===selected)??choices[0])?.provider??null;
+  walletListeners.replace(selectedProvider);provider=selectedProvider;
   if (!provider) { announcement("Install or enable an injected EVM wallet to continue.", "warning"); return; }
   try {
     await switchToMezo(provider);
@@ -541,7 +551,6 @@ function refreshProviderChoices():void {
 }
 
 async function refreshWallet(): Promise<void> {
-  provider = injectedWallet();
   if (!provider) applyWalletState({ account: null, onMezo: false });
   else try { await refreshWalletState(provider, { applyWalletState }); }
   catch { applyWalletState({ account: null, onMezo: false }); }
@@ -597,9 +606,8 @@ async function boot(): Promise<void> {
     el<HTMLInputElement>("#quantity").value = flow.quantity;
     el<HTMLInputElement>(`input[name="side"][value="${flow.side}"]`).checked = true;
   }
-  refreshProviderChoices();provider=choices[0]?.provider??null;
+  refreshProviderChoices();provider=choices[0]?.provider??null;walletListeners.replace(provider);
   walletStore.subscribe(()=>refreshProviderChoices());
-  bindWalletStateListeners(provider, { applyWalletState });
   await refreshWallet();
   try {
     cap = await getCapabilities();

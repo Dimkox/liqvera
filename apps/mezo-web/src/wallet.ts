@@ -1,6 +1,6 @@
 import { assertMezoTestnetChainId } from "@liqvera/mezo-protocol";
 import { MEZO_TESTNET } from "@liqvera/mezo-protocol";
-import { CHAIN_HEX, isAddress } from "./contracts";
+import { CHAIN_HEX, isAddress } from "./contracts.ts";
 
 export interface Eip1193Provider {
   request(args: { method: string; params?: unknown[] }): Promise<unknown>;

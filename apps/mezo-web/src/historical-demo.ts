@@ -17,3 +17,16 @@ export function formatHistoricalDate(value:string):string {
   const date=new Date(value);
   return Number.isFinite(date.getTime())?date.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"medium",timeZone:"UTC"}):value;
 }
+async function sha256(bytes:Uint8Array,subtle:SubtleCrypto):Promise<string> {
+  const digest=await subtle.digest("SHA-256",bytes as BufferSource);
+  return Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,"0")).join("");
+}
+export async function verifyHistoricalAssets(reportBytes:Uint8Array,bundleBytes:Uint8Array,
+  subtle:SubtleCrypto=crypto.subtle):Promise<Record<string,any>> {
+  if(await sha256(reportBytes,subtle)!==HISTORICAL_DEMO.reportSha256)throw new Error("Historical report digest mismatch.");
+  if(await sha256(bundleBytes,subtle)!==HISTORICAL_DEMO.bundleSha256)throw new Error("Historical bundle digest mismatch.");
+  let value:unknown;
+  try { value=JSON.parse(new TextDecoder("utf-8",{fatal:true}).decode(reportBytes)); }
+  catch { throw new Error("Historical report encoding is invalid."); }
+  return validateHistoricalReport(value);
+}

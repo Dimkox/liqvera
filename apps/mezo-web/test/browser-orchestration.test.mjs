@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { executePaymentAttempt, executeRecovery } from "../src/browser-orchestration.ts";
-import { bindWalletStateListeners } from "../src/wallet-events.ts";
+import { bindWalletStateListeners, createWalletListenerOwner } from "../src/wallet-events.ts";
 
 const payer = "0x1111111111111111111111111111111111111111";
 const quoteId = "11111111-1111-4111-8111-111111111111";
@@ -171,8 +171,24 @@ test("wallet event failure clears state, does not poison the queue, and next eve
 
 test("main composes wallet events directly with the state-only sink", async () => {
   const main = await readFile(new URL("../src/main.ts", import.meta.url), "utf8");
-  const boundary = "bindWalletStateListeners(provider, { applyWalletState });";
+  const boundary = "createWalletListenerOwner({applyWalletState})";
   assert.equal(main.split(boundary).length - 1, 1);
+  assert.match(main,/walletListeners\.replace\(selectedProvider\);provider=selectedProvider/);
   const eventModule = await readFile(new URL("../src/wallet-events.ts", import.meta.url), "utf8");
   assert.doesNotMatch(eventModule, /submitPayment|requestPaidReport|adapter/i);
+});
+
+test("late selected provider owns listeners and replaces the prior binding",async()=>{
+  const makeProvider=()=>{const listeners=new Map();return {listeners,account:payer,chain:"0x7b7b",
+    async request({method}){return method==="eth_accounts"?[this.account]:this.chain;},
+    on(event,listener){listeners.set(event,listener);},removeListener(event,listener){if(listeners.get(event)===listener)listeners.delete(event);}};};
+  const first=makeProvider(),late=makeProvider(),states=[];
+  const owner=createWalletListenerOwner({applyWalletState(state){states.push(state);}});
+  owner.replace(first);owner.replace(late);
+  assert.equal(first.listeners.size,0);assert.equal(late.listeners.size,2);
+  late.account="0x2222222222222222222222222222222222222222";late.chain="0x1";
+  late.listeners.get("accountsChanged")([]);late.listeners.get("chainChanged")("0x1");
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.deepEqual(states.at(-1),{account:late.account,onMezo:false});
+  owner.dispose();assert.equal(late.listeners.size,0);
 });

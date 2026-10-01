@@ -1,3 +1,4 @@
+import hashlib
 from pathlib import Path
 from uuid import UUID
 
@@ -18,6 +19,7 @@ from mee_readonly_analyzer.vwap import Side
 CAPTURE_ID = UUID("123e4567-e89b-42d3-a456-426614174010")
 REPORT_ID = UUID("123e4567-e89b-42d3-a456-426614174011")
 ENGINE_COMMIT = "c" * 40
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def _built(tmp_path: Path):
@@ -95,6 +97,18 @@ def test_live_btc_identity_is_digest_bound_and_offline_reproducible(tmp_path: Pa
             report_id=REPORT_ID, side=Side.BUY,
             quantity_base=ExactDecimal.parse("0.15"), engine_commit=ENGINE_COMMIT,
         ))
+
+
+def test_public_historical_assets_match_pins_and_verify_offline(tmp_path: Path) -> None:
+    report = ROOT / "apps/mezo-web/public/demo/latest-live/report.json"
+    bundle = ROOT / "apps/mezo-web/public/demo/latest-live/evidence.zip"
+    assert hashlib.sha256(report.read_bytes()).hexdigest() == "8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd"
+    assert hashlib.sha256(bundle.read_bytes()).hexdigest() == "a6cc771d3fb8428325d32855fef53417f7da25c893db3a99b49802f482adc4fc"
+    assert verify_bundle(bundle, expected_report_sha256=hashlib.sha256(report.read_bytes()).hexdigest()).document["report_id"] == "d84fb495-8b22-49c1-99a3-a2b763afc977"
+    changed = tmp_path / "changed.zip"
+    raw = bytearray(bundle.read_bytes()); raw[len(raw) // 2] ^= 1; changed.write_bytes(raw)
+    with pytest.raises(EvidenceRejected, match="INVALID_DATASET"):
+        verify_bundle(changed, expected_report_sha256=hashlib.sha256(report.read_bytes()).hexdigest())
 
 
 def test_tampered_bundle_and_trusted_digest_are_rejected(tmp_path: Path) -> None:

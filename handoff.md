@@ -1,5 +1,13 @@
 # Liqvera — handoff
 
+## 2026-10-01 signed-v2 final review gate
+
+Independent code, test, security, data, and release re-reviews all PASS for
+commit `95d438b`. The reviewed candidate keeps v0.0.2 immutable, independently
+pins the v2 issuer, requires the explicit any-payer flag, and preserves
+migration-006 budgets forward-only. Deployment and a fresh paid v2 acceptance
+remain separate authorized operations and have not yet occurred at this point.
+
 ## 2026-10-01 signed-v2 re-review repairs
 
 The v2 issuer trust root is now release-pinned independently of runtime

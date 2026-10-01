@@ -1,5 +1,37 @@
 # Liqvera — handoff
 
+## 2026-10-01 v0.0.4 publication complete
+
+Release `v0.0.4` is published at
+`https://github.com/Dimkox/liqvera/releases/tag/v0.0.4`. Remote main and the
+immutable tag point to reviewed source commit
+`b4461ea3e3385f8bbeaa94194db57e89f3a97a23` (tree
+`6eefbde46ca5f00ef04600665fd885f1df27f547`). The final independent asset
+review is PASS.
+
+The first post-publication redownload correctly exposed that
+`RELEASE_NOTES.md` had been used as the GitHub release body but had not been
+uploaded as an asset. The exact reviewed 2,164-byte file was then uploaded; no
+tag move or replacement of an existing asset occurred. A final fresh download
+of all five assets matched the reviewed staging bytes with `cmp`, every entry
+covered by `SHA256SUMS` passed, and GitHub-reported sizes/digests matched:
+
+- `liqvera-0.0.4-source.zip`: 2,636,383 bytes,
+  `13346632a2b0160aeb4d3442fea9e890085d893c48df8dd698bc2a9fcaf55b80`
+- `RELEASE_NOTES.md`: 2,164 bytes,
+  `a8652db1faa8283b07e90dc1097baed295e61e2425765f1d08e26f6395ed9101`
+- `release-manifest.json`: 2,479 bytes,
+  `dddd644cf9f5f60626d8bc08ceba6b62178171cbedd68e0798dca1c7b28d7021`
+- `liqvera-0.0.4-source.zip.sha256`: 91 bytes,
+  `60c0dc4afc9c4dcd842eefd7378290b96cb0d54a9422a9a859ad49beb179f3c3`
+- `SHA256SUMS`: 360 bytes,
+  `7e83d4b53addb05e62e6c4edeb068f9bb6ba9ab61f90106529c33974fa77afe8`
+
+The installable operator remains v0.0.2; no v0.0.4 installer was published.
+The release remains a source/evidence milestone, overall F7 remains
+`INCOMPLETE`, and no additional deployment, payment, or exchange mutation was
+performed during publication.
+
 ## 2026-10-01 v0.0.4 publication review
 
 Independent code, test, security, and data reviews PASS for publication

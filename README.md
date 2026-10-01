@@ -90,14 +90,16 @@ performed. Final signed-v2 acceptance deployed exact commit
 20-settlement/0.20-test-MUSD total authority and one settlement per payer. Its
 single encrypted-signer submission delivered report
 `c956cd81-5ec2-439b-909b-4a9d8474cce3` plus an offline-verified ZIP at 23
-recorded confirmations; publication is still pending.
+recorded confirmations. The reviewed source/evidence release is now published
+as [v0.0.4](https://github.com/Dimkox/liqvera/releases/tag/v0.0.4).
 
-Current product identity: root `VERSION` is the unpublished `0.0.4` candidate;
+Current product identity: root `VERSION` is the published `0.0.4` release;
 releases v0.0.1, [v0.0.2](https://github.com/Dimkox/liqvera/releases/tag/v0.0.2),
-and v0.0.3 are published milestones. v0.0.4 adds public historical-preview
-assets, EIP-6963 wallet discovery, transient receipt revalidation recovery, and
-fresh end-to-end public testnet evidence; the installable operator package
-remains v0.0.2. The root Python
+v0.0.3, and [v0.0.4](https://github.com/Dimkox/liqvera/releases/tag/v0.0.4)
+are published milestones. v0.0.4 adds public historical-preview assets,
+EIP-6963 wallet discovery, transient receipt revalidation recovery, and fresh
+end-to-end public testnet evidence; the installable operator package remains
+v0.0.2. The root Python
 workspace remains `0.1.0.dev0`, and Stage A, evidence-report, protocol,
 gateway, and web component packages remain `0.1.0`. Inherited `mee-*`
 identifiers are preserved.

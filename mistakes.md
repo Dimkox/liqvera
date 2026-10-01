@@ -318,3 +318,11 @@ the source tree, so the documented asset-only download could not verify an
 archive on a clean supported host. A detached verifier must carry its exact
 closed validation authority, stay within the oldest declared Python runtime,
 and be tested from an isolated download layout before artifact evidence freezes.
+
+## 2026-10-01 — Release body was mistaken for an uploaded asset
+
+The first v0.0.4 publication supplied `RELEASE_NOTES.md` as the GitHub release
+body but omitted it from the upload list, even though the reviewed asset set
+and `SHA256SUMS` required a downloadable file. Compare the remote asset-name
+set to the reviewed allowlist before declaring upload complete, then redownload
+and byte-compare every asset; release-body rendering is not asset publication.

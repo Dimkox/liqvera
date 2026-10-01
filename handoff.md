@@ -1,5 +1,19 @@
 # Liqvera — handoff
 
+## 2026-10-01 v0.0.4 publication review
+
+Independent code, test, security, and data reviews PASS for publication
+fingerprint `c3f985bd8df743d6c2c0a186dcf99c69329f6b13`. The release review is
+NO-GO on one isolated blocker: no immutable v0.0.4 source-archive asset set is
+yet bound to an exact final source commit/tree. Runtime, deployment, paid E2E,
+rollback, migration, and secret boundaries have no remaining review finding.
+
+The next step is to freeze a final source commit containing these review
+records, build the versioned source archive plus release notes, manifest,
+`SHA256SUMS`, and detached checksum in ignored external staging, and validate
+the exact bytes. The v0.0.2 installer and all historical release assets remain
+immutable; no new installer is part of v0.0.4.
+
 ## 2026-10-01 signed-v2 deployment and final paid acceptance
 
 Exact clean candidate `dcdc7ae6086007d1ccaab8bc563c137c0e099feb`

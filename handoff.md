@@ -12,8 +12,21 @@ The regression first failed against the duplicate formatter, then passed after
 all four fresh quote/delivery timestamps were routed through
 `formatHistoricalDate`. A repository search found no remaining production use
 of the forbidden option combination. Focused web tests and the production web
-build pass. Deployment/public Chrome evidence is pending the exact hotfix
-commit; no payment or signing is part of this hotfix.
+build pass, as does `python3 scripts/grok_verify.py --mode pr --no-record`.
+
+Web commit `f34464521e85a2798a51a00c2d33cba60e809fbf` (tree
+`39bddd9cdf4ab3ab8de8cf5c7be58c30cb9b49f3`) was deployed by rebuilding and
+recreating only `web-live`; gateway, PostgreSQL, the signed grant, and all
+payment state remained untouched. Public readiness stayed fully ready, and the
+historical report plus ZIP returned HTTP 200.
+
+A real headless Chrome session discovered a synthetic EIP-6963 provider,
+connected on Mezo chain 31611, and created fresh live-public request
+`dc776db0-ecd9-4d46-8852-0d1fffde0f03` / quote
+`a9c8de9b-9cb9-4a63-b2ae-c41e1ca0f799`. Both `Snapshot time` and `Quote
+expires` rendered, the status reached “Evidence is ready,” and Chrome reported
+no runtime or console exception. The smoke stopped before the payment button:
+no wallet signature, settlement submission, or payment retry occurred.
 
 ## 2026-10-01 v0.0.4 publication complete
 

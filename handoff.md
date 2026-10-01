@@ -1,5 +1,39 @@
 # Liqvera — handoff
 
+## 2026-10-01 signed-v2 deployment and final paid acceptance
+
+Exact clean candidate `dcdc7ae6086007d1ccaab8bc563c137c0e099feb`
+(tree `2459af5d0202a7d8e63ce44548d1f70fa0221ab6`) was deployed to
+`https://liqvera.site` after the fingerprint-bound verifier and all five final
+reviews passed. A validated pre-migration PostgreSQL dump was retained, and
+migration 006 applied once without replacing the database. The externally held
+pinned Ed25519 issuer signed a 23-hour v2 authority for at most 20 settlements,
+`200000000000000000` total atomic test MUSD, and one settlement per payer. The
+gateway remains additionally gated by `LIQVERA_TESTNET_DEMO_ANY_PAYER=1`.
+
+Public readiness reported `ready=true` and `payment_ready=true`. Exact
+historical report/ZIP SHA-256 values remained
+`8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd`
+and `a6cc771d3fb8428325d32855fef53417f7da25c893db3a99b49802f482adc4fc`.
+Headless Chrome proved live EIP-6963 discovery, Mezo 31611 connection,
+historical integrity/render/download, and the separate repository plus exact
+version-neutral releases links.
+
+Exactly one encrypted-signer submission paid fresh Hyperliquid report
+`c956cd81-5ec2-439b-909b-4a9d8474cce3` (source time
+`2026-10-01T01:37:22.535Z`) under quote
+`b15c2a5a-6343-4cbf-b26d-f538ae73dbc8`. Transaction
+`0x4a04dc72c9f4b9051262b5c14db18369b9140d3012f7b02c3c8d3c6952778455`
+confirmed in block `15882012`; delivered receipt evidence recorded 23
+confirmations. Report SHA-256 is
+`da6515c2435b64ed8054a90d05d7087f7e52a3482aa3f0705d122caf83c70748`;
+bundle SHA-256 is
+`051a3be6c5099eb140caf10d14e880febae0919fc6c8074fafcca2705882d473`.
+JSON and ZIP delivery returned HTTP 200 and the repository offline verifier
+accepted the exact ZIP. A Cloudflare HTTP/2 connection loss interrupted one
+read-only ZIP transfer after payment; the same entitlement subsequently
+delivered without another settlement. No push, tag, or GitHub Release occurred.
+
 ## 2026-10-01 signed-v2 final review gate
 
 Independent code, test, security, data, and release re-reviews all PASS for

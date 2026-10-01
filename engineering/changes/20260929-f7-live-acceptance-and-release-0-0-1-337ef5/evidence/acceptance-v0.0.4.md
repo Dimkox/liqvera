@@ -2,6 +2,49 @@
 
 Date: 2026-10-01 UTC
 
+## Signed-v2 final candidate
+
+- Deployed commit: `dcdc7ae6086007d1ccaab8bc563c137c0e099feb`
+- Deployed tree: `2459af5d0202a7d8e63ce44548d1f70fa0221ab6`
+- Migration 006: applied exactly once after a validated PostgreSQL custom-format
+  backup; existing ledger/artifact volumes were preserved
+- Signed authority: 23 hours, 20 maximum settlement submissions,
+  `200000000000000000` maximum total atomic test MUSD, one per payer
+- Public `/readyz`: `ready=true`, `payment_ready=true`
+- Headless Chrome: EIP-6963 provider discovery, Mezo chain 31611, historical
+  integrity/render/download, repository link, and exact version-neutral
+  `https://github.com/Dimkox/liqvera/releases` link passed
+- Historical report SHA-256:
+  `8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd`
+- Historical bundle SHA-256:
+  `a6cc771d3fb8428325d32855fef53417f7da25c893db3a99b49802f482adc4fc`
+
+Exactly one encrypted-signer invocation submitted the final v2 payment. It
+initially returned `PAYMENT_UNCERTAIN`; read-only reconciliation observed the
+existing transaction and moved the quote to `PAID` without another settlement.
+
+- Hyperliquid source time: `2026-10-01T01:37:22.535Z`
+- Report ID: `c956cd81-5ec2-439b-909b-4a9d8474cce3`
+- Quote ID: `b15c2a5a-6343-4cbf-b26d-f538ae73dbc8`
+- Transaction:
+  `0x4a04dc72c9f4b9051262b5c14db18369b9140d3012f7b02c3c8d3c6952778455`
+- Explorer:
+  `https://explorer.test.mezo.org/tx/0x4a04dc72c9f4b9051262b5c14db18369b9140d3012f7b02c3c8d3c6952778455`
+- Receipt block: `15882012`
+- Confirmations in delivered receipt: `23`
+- Report SHA-256:
+  `da6515c2435b64ed8054a90d05d7087f7e52a3482aa3f0705d122caf83c70748`
+- Evidence ZIP SHA-256:
+  `051a3be6c5099eb140caf10d14e880febae0919fc6c8074fafcca2705882d473`
+
+Both paid JSON and ZIP delivery returned HTTP 200. The exact ZIP passed the
+repository offline verifier against the quoted report digest. A transient
+Cloudflare HTTP/2 connection loss interrupted one post-payment read-only ZIP
+transfer; the same paid entitlement later delivered successfully. No payment
+resubmission, mainnet call, exchange mutation, push, tag, or release occurred.
+
+## Earlier v0.0.4 candidate evidence
+
 ## Candidate and public smoke
 
 - Deployed candidate: `0f3e745d41022c33fbb075c9816b35b1c6a3cabe`

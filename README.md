@@ -73,18 +73,24 @@ healthcheck was added. See
 
 The historical live public probe returned `COMPATIBILITY_PASS_PAYMENT_BLOCKED`.
 F7 now implements an explicit Permit2 authorization identity with required
-EIP-2612 gas sponsorship, twelve-block canonical finality, an exact one-submit
-testnet grant, and pinned official x402 browser composition. Ordinary startup intentionally has no live grant, so
-payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`. Five
+EIP-2612 gas sponsorship, twelve-block canonical finality, the preserved v1
+one-submit grant, a release-pinned signed-v2 bounded authority, and pinned
+official x402 browser composition. Ordinary startup intentionally has no live
+grant, so payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`. Six
 explicitly authorized 0.01 test MUSD settlements are retained: the original
-sealed A13/A14 evidence payment and four automated hackathon-demo payments.
-All five reached canonical finality with zero buyer native-gas spend. The first
+sealed A13/A14 evidence payment and five automated hackathon-demo payments.
+All six reached canonical finality with zero buyer native-gas spend. The first
 new demo request timed out client-side but settled on-chain and was recovered
 confirm-only from its canonical Transfer log; no grant submitted settlement
 twice. The v0.0.4 candidate deployment also proved a fresh public Hyperliquid
 report, paid JSON plus ZIP delivery, and offline bundle verification at 22
 confirmations. No mainnet payment, exchange mutation, or custody action was
-performed.
+performed. Final signed-v2 acceptance deployed exact commit
+`dcdc7ae6086007d1ccaab8bc563c137c0e099feb` with a
+20-settlement/0.20-test-MUSD total authority and one settlement per payer. Its
+single encrypted-signer submission delivered report
+`c956cd81-5ec2-439b-909b-4a9d8474cce3` plus an offline-verified ZIP at 23
+recorded confirmations; publication is still pending.
 
 Current product identity: root `VERSION` is the unpublished `0.0.4` candidate;
 releases v0.0.1, [v0.0.2](https://github.com/Dimkox/liqvera/releases/tag/v0.0.2),

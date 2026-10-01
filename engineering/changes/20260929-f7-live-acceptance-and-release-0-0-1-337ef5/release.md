@@ -4,8 +4,9 @@
 
 The deployed candidate and fresh one-submit Mezo Testnet E2E are recorded in
 [`evidence/acceptance-v0.0.4.md`](evidence/acceptance-v0.0.4.md). Root VERSION
-is `0.0.4`; review, tag, push, and GitHub Release remain pending and are not
-claimed by this evidence.
+is `0.0.4`. Exact reviewed candidate `dcdc7ae6086007d1ccaab8bc563c137c0e099feb`
+is now deployed with signed-v2 paid acceptance; tag, push, and GitHub Release
+remain pending and are not claimed by this evidence.
 
 ## Historical v0.0.2 candidate state (2026-09-30, superseded)
 
@@ -22,12 +23,13 @@ v0.0.2.
 
 ## Current v0.0.4 deployment and publication state (2026-10-01)
 
-Paid acceptance was executed against deployed candidate
+Earlier paid acceptance was executed against deployed candidate
 `0f3e745d41022c33fbb075c9816b35b1c6a3cabe`. Browser hotfix candidate
 `cba005b1c07aafadb4dd15743b7184143143dcf5` was subsequently deployed and
-publicly smoke-tested without another payment. Later review repairs are not
-claimed as deployed until separately verified. v0.0.4 push, tag, and GitHub
-Release remain pending.
+publicly smoke-tested without another payment. Final reviewed signed-v2
+candidate `dcdc7ae6086007d1ccaab8bc563c137c0e099feb` was then deployed and
+completed exactly one fresh paid acceptance with offline-verified JSON/ZIP
+delivery. v0.0.4 push, tag, and GitHub Release remain pending.
 
 ## Published release
 
@@ -69,10 +71,10 @@ assets. Its one authorized Mezo Testnet settlement remains scoped A13/A14
 evidence and does not authorize a retry.
 
 Current v0.0.4 publication is pending. Signed-v2 head deployment and payment
-evidence do not exist, and the historical evidence above cannot be promoted to
-this head. Push, tag, GitHub Release, deployment, and payment remain NO-GO until
-the exact candidate passes fingerprint-bound verification, independent reviews,
-and the applicable release gates.
+evidence now exist for exact candidate `dcdc7ae`; fingerprint-bound verification
+and all five independent reviews passed before deployment. Push, tag, and GitHub
+Release remain NO-GO until a separate publication decision; this operational
+acceptance does not itself publish the candidate.
 
 P0 GO requires scope approval plus green repair tests/verifier/reviews. P1 GO
 requires valid immutable local result and reviewed omissions. P2/P3/P5 each

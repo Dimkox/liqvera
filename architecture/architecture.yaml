@@ -14511,6 +14511,21 @@ repository_inventory:
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/test-review-publication-c3f985b.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/code-review-intl-hotfix-6df3c60.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/test-review-intl-hotfix-6df3c60.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/security-review-intl-hotfix-6df3c60.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/data-review-hotfix-6df3c60.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/release-review-v0.0.5-hotfix-prep.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/p3-postgres-operation.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION

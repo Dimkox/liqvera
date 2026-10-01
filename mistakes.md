@@ -334,3 +334,10 @@ inventory the separate fresh quote/delivery formatter, and public smoke stopped
 before rendering a real fresh quote. Search every duplicate formatter when a
 browser compatibility bug is fixed, and make fresh quote rendering—not merely
 page load, wallet discovery, and historical preview—part of the Chrome smoke.
+
+## 2026-10-01 — The canonical release plan lagged completed publication
+
+The v0.0.4 README and handoff were reconciled after publication, but the active
+change package still described its push, tag, and GitHub Release as pending.
+Post-publication closure must search and update every canonical release-state
+record, not only the public README and operational handoff.

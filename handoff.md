@@ -1,5 +1,16 @@
 # Liqvera — handoff
 
+## 2026-10-01 v0.0.5 release preparation
+
+The root product candidate is now v0.0.5 for the fresh-quote Intl hotfix.
+README, browser footer, VERSION, and the canonical release plan agree;
+components remain 0.1.0 and the separately published installer remains v0.0.2.
+Five independent hotfix reviews of `6df3c60` are retained in the active change
+package: code, test, security, and data PASS; the release review correctly
+reported NO-GO until version identity, canonical publication state, and a
+closed reproducible v0.0.5 asset set are prepared. Push, tag, and GitHub
+Release remain pending a new exact-candidate release PASS.
+
 ## 2026-10-01 fresh-quote date rendering hotfix
 
 The fresh quote and paid-delivery render path now uses the same standards-safe

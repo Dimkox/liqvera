@@ -28,7 +28,7 @@ test("historical preview UI exposes loading error and accessible mobile-safe con
   assert.match(source,/https:\/\/github\.com\/Dimkox\/liqvera/);
   assert.match(source,/href="https:\/\/github\.com\/Dimkox\/liqvera\/releases"/);
   assert.doesNotMatch(source,/releases\/tag\//);
-  assert.match(source,/Liqvera v0\.0\.4/);
+  assert.match(source,/Liqvera v0\.0\.5/);
   assert.match(source,/<span class="step">STEP 1<\/span>/);
   assert.match(source,/<span class="step">STEP 2<\/span>/);
   assert.doesNotMatch(source,/<span class="step">0[12]<\/span>/);

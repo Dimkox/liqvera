@@ -1,12 +1,24 @@
 # Release plan — F7 live acceptance and release 0.0.1
 
-## v0.0.4 candidate evidence (2026-10-01)
+## v0.0.5 hotfix candidate (2026-10-01)
+
+Root VERSION is `0.0.5`. The fresh quote and delivery browser paths now use the
+standards-safe shared UTC formatter; exact behavior commit `f34464521e85a2798a51a00c2d33cba60e809fbf`
+was deployed by recreating only `web-live` and passed a fresh quote Chrome
+smoke without signature or payment. The final publication commit/tree and the
+v0.0.5 tag/assets remain pending independent release review. The separately
+published installer remains immutable at v0.0.2.
+
+## Published v0.0.4 evidence (2026-10-01)
 
 The deployed candidate and fresh one-submit Mezo Testnet E2E are recorded in
 [`evidence/acceptance-v0.0.4.md`](evidence/acceptance-v0.0.4.md). Root VERSION
-is `0.0.4`. Exact reviewed candidate `dcdc7ae6086007d1ccaab8bc563c137c0e099feb`
-is now deployed with signed-v2 paid acceptance; tag, push, and GitHub Release
-remain pending and are not claimed by this evidence.
+was `0.0.4`. Exact reviewed candidate `dcdc7ae6086007d1ccaab8bc563c137c0e099feb`
+was deployed with signed-v2 paid acceptance. Release `v0.0.4` is published at
+`https://github.com/Dimkox/liqvera/releases/tag/v0.0.4`; its immutable tag
+targets source commit `b4461ea3e3385f8bbeaa94194db57e89f3a97a23`
+(tree `6eefbde46ca5f00ef04600665fd885f1df27f547`). The five published asset
+hashes are recorded in root `handoff.md`; v0.0.4 assets and tag must not move.
 
 ## Historical v0.0.2 candidate state (2026-09-30, superseded)
 
@@ -21,7 +33,7 @@ v0.0.2 artifact, push, tag, or GitHub Release existed. v0.0.2 and v0.0.3 are
 now published historical milestones; the installable operator package remains
 v0.0.2.
 
-## Current v0.0.4 deployment and publication state (2026-10-01)
+## v0.0.4 deployment and publication state (2026-10-01)
 
 Earlier paid acceptance was executed against deployed candidate
 `0f3e745d41022c33fbb075c9816b35b1c6a3cabe`. Browser hotfix candidate
@@ -29,7 +41,9 @@ Earlier paid acceptance was executed against deployed candidate
 publicly smoke-tested without another payment. Final reviewed signed-v2
 candidate `dcdc7ae6086007d1ccaab8bc563c137c0e099feb` was then deployed and
 completed exactly one fresh paid acceptance with offline-verified JSON/ZIP
-delivery. v0.0.4 push, tag, and GitHub Release remain pending.
+delivery. v0.0.4 main, tag, and all five assets were subsequently published
+and independently redownloaded byte-for-byte. The later v0.0.5 web-only hotfix
+does not mutate that release or its payment/database state.
 
 ## Published release
 
@@ -70,11 +84,14 @@ payment under that authority or any mutation of its immutable tag, release, or
 assets. Its one authorized Mezo Testnet settlement remains scoped A13/A14
 evidence and does not authorize a retry.
 
-Current v0.0.4 publication is pending. Signed-v2 head deployment and payment
-evidence now exist for exact candidate `dcdc7ae`; fingerprint-bound verification
-and all five independent reviews passed before deployment. Push, tag, and GitHub
-Release remain NO-GO until a separate publication decision; this operational
-acceptance does not itself publish the candidate.
+Published v0.0.4 is immutable. Signed-v2 deployment and payment evidence exist
+for exact runtime candidate `dcdc7ae`, and publication source/tag identity is
+`b4461ea`. No v0.0.4 tag or asset may be moved or replaced.
+
+Current v0.0.5 publication remains **NO-GO** until its exact final source
+commit/tree, recorded verifier receipt, reproducible external asset set, and
+independent exact-candidate release review all pass. The deployed web hotfix
+and Chrome smoke do not themselves authorize push, tag, or GitHub Release.
 
 P0 GO requires scope approval plus green repair tests/verifier/reviews. P1 GO
 requires valid immutable local result and reviewed omissions. P2/P3/P5 each

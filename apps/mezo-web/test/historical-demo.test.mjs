@@ -35,3 +35,13 @@ test("historical preview UI exposes loading error and accessible mobile-safe con
   assert.match(style,/\.step\{[^}]*min-width:72px[^}]*width:auto[^}]*white-space:nowrap/);
   assert.match(source,/rel="noopener noreferrer"/);
 });
+
+test("fresh quote render uses the standards-safe shared UTC formatter", async () => {
+  const source=await readFile(new URL("../src/main.ts",import.meta.url),"utf8");
+  assert.doesNotThrow(()=>formatHistoricalDate("2026-10-01T01:37:22.535Z"));
+  assert.match(formatHistoricalDate("2026-10-01T01:37:22.535Z"),/2026/);
+  assert.doesNotMatch(source,/function dateTime\(/);
+  assert.doesNotMatch(source,/dateStyle[\s\S]{0,160}timeStyle[\s\S]{0,160}timeZoneName/);
+  assert.match(source,/"Snapshot time", formatHistoricalDate\(q\.preview\.snapshot_at\)/);
+  assert.match(source,/"Quote expires", formatHistoricalDate\(q\.terms\.expires_at\)/);
+});

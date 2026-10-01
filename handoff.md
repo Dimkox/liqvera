@@ -1,5 +1,20 @@
 # Liqvera — handoff
 
+## 2026-10-01 fresh-quote date rendering hotfix
+
+The fresh quote and paid-delivery render path now uses the same standards-safe
+UTC formatter as the historical preview. The removed duplicate formatter
+combined `dateStyle`, `timeStyle`, and `timeZoneName`; Chromium and Node reject
+that ECMA-402 option combination with `TypeError: Invalid option : option`, so a
+valid live quote failed only when its snapshot and expiry reached the browser.
+
+The regression first failed against the duplicate formatter, then passed after
+all four fresh quote/delivery timestamps were routed through
+`formatHistoricalDate`. A repository search found no remaining production use
+of the forbidden option combination. Focused web tests and the production web
+build pass. Deployment/public Chrome evidence is pending the exact hotfix
+commit; no payment or signing is part of this hotfix.
+
 ## 2026-10-01 v0.0.4 publication complete
 
 Release `v0.0.4` is published at

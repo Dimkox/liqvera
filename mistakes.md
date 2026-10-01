@@ -326,3 +326,11 @@ body but omitted it from the upload list, even though the reviewed asset set
 and `SHA256SUMS` required a downloadable file. Compare the remote asset-name
 set to the reviewed allowlist before declaring upload complete, then redownload
 and byte-compare every asset; release-body rendering is not asset publication.
+
+## 2026-10-01 — A duplicate date formatter escaped the historical-preview fix
+
+The historical preview repair made its formatter ECMA-402-safe but did not
+inventory the separate fresh quote/delivery formatter, and public smoke stopped
+before rendering a real fresh quote. Search every duplicate formatter when a
+browser compatibility bug is fixed, and make fresh quote rendering—not merely
+page load, wallet discovery, and historical preview—part of the Chrome smoke.

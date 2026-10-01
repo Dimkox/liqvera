@@ -88,11 +88,6 @@ function readableError(error: unknown): string {
   return "The request could not be completed. Check status before trying another action.";
 }
 
-function dateTime(value: string): string {
-  const date = new Date(value);
-  return Number.isFinite(date.getTime()) ? date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "medium", timeZoneName: "short" }) : value;
-}
-
 function snapshotAge(value: string): string {
   const elapsed = Date.now() - Date.parse(value);
   if (!Number.isFinite(elapsed)) return "Unknown age";
@@ -208,7 +203,7 @@ function renderQuote(): void {
   appendField(grid, "Instrument", "Hyperliquid BTC linear perpetual", "span-all");
   appendField(grid, "Hypothetical side", q.preview.side);
   appendField(grid, "Quantity", `${q.preview.quantity_base} BTC`);
-  appendField(grid, "Snapshot time", dateTime(q.preview.snapshot_at), "span-all");
+  appendField(grid, "Snapshot time", formatHistoricalDate(q.preview.snapshot_at), "span-all");
   appendField(grid, "Age now", snapshotAge(q.preview.snapshot_at));
   appendField(grid, "Snapshot quality", "Valid for snapshot calculation");
   target.append(grid);
@@ -228,7 +223,7 @@ function renderQuote(): void {
   appendField(termsGrid, "Token", q.terms.asset, "breakable span-all");
   appendField(termsGrid, "Recipient", q.terms.pay_to, "breakable span-all");
   appendField(termsGrid, "Expected payer", q.terms.expected_payer, "breakable span-all");
-  appendField(termsGrid, "Quote expires", dateTime(q.terms.expires_at), "span-all");
+  appendField(termsGrid, "Quote expires", formatHistoricalDate(q.terms.expires_at), "span-all");
   appendField(termsGrid, "Paid report retention", `At least ${q.retention.paid_days} days`);
   appendField(termsGrid, "Unpaid cleanup grace", `At least ${q.retention.unpaid_grace_seconds} seconds`);
   appendField(termsGrid, "Ledger retention", `At least ${q.retention.ledger_days} days`);
@@ -266,7 +261,7 @@ function renderDelivery(): void {
   target.append(node("p", "supporting", "Hypothetical snapshot sweep over the available public order-book depth. No exchange trade occurred."));
   const grid = node("div", "data-grid report-grid");
   appendField(grid, "Side & size", `${report.request.side} ${report.request.quantity_base} BTC`);
-  appendField(grid, "Snapshot time", dateTime(report.source.source_at));
+  appendField(grid, "Snapshot time", formatHistoricalDate(report.source.source_at));
   appendField(grid, "Snapshot age now", snapshotAge(report.source.source_at));
   appendField(grid, "Sampled levels", `${report.source.available_bid_levels} bid / ${report.source.available_ask_levels} ask`);
   appendField(grid, "VWAP (display)", report.calculation.display.vwap);
@@ -288,7 +283,7 @@ function renderDelivery(): void {
   const receiptGrid = node("div", "data-grid");
   appendField(receiptGrid, "Report SHA-256", receipt.report_sha256, "breakable span-all");
   appendField(receiptGrid, "Payment", `${q.terms.price_musd} test ${MUSD_TESTNET.symbol}`);
-  appendField(receiptGrid, "Confirmed", dateTime(receipt.confirmed_at));
+  appendField(receiptGrid, "Confirmed", formatHistoricalDate(receipt.confirmed_at));
   appendField(receiptGrid, "Block / log", `${receipt.block_number} / ${receipt.log_index}`);
   appendField(receiptGrid, "Finality policy", receipt.finality_policy_version);
   appendField(receiptGrid, "Transaction", receipt.tx_hash, "breakable span-all");

@@ -415,7 +415,7 @@ def _read_json(path: Path, error: str) -> dict[str, object]:
 
 
 def _validate_ledger(value: object) -> list[dict[str, str]]:
-    if not isinstance(value, list) or len(value) != 6:
+    if not isinstance(value, list) or len(value) != 5:
         raise LifecycleError("MIGRATION_MISMATCH")
     result: list[dict[str, str]] = []
     for index, row in enumerate(value, 1):

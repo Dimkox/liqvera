@@ -1,5 +1,23 @@
 # Liqvera — handoff
 
+## 2026-10-01 signed-v2 re-review repairs
+
+The v2 issuer trust root is now release-pinned independently of runtime
+configuration. The committed machine allowlist and compiled gateway constant
+contain only the public key and its full lowercase raw-key SHA-256 ID; an
+unapproved correctly signing runtime key is rejected. The private issuer key
+was generated externally at
+`/home/pall/grok-projects/liqvera-live-deploy/issuer/live-grant-ed25519-v1.pem`
+with mode 0600 and was neither printed nor committed.
+
+`LIQVERA_TESTNET_DEMO_ANY_PAYER=1` is again a real second gate for signed-v2
+`ANY_VALID_X402_PAYER`; flag zero rejects v2 and flag one never widens v1.
+Published installer v0.0.2 remains frozen at migrations 001–005; migration 006
+belongs to the current product/live path. Release text now scopes completed
+publication to historical v0.0.1, and rollback explicitly preserves all
+migration-006 authority and spent-budget evidence forward-only. No deploy,
+payment, push, tag, or release occurred.
+
 ## 2026-10-01 signed v2 grant authority
 
 Public-demo reuse is now a separate signed v2 authority; v1 remains exact-buyer

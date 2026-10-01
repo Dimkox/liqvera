@@ -244,3 +244,10 @@ Use a signed, canonical v2 policy plus immutable database reservations instead
 of an environment flag that broadens the v1 buyer. This keeps the old one-shot
 boundary intact and makes every reusable dimension issuer-authorized and
 durably budgeted.
+
+## 2026-10-01 — Pin the grant issuer independently of deployment config
+
+Compile the reviewed Ed25519 public key and its raw-key SHA-256 ID into the
+release, while keeping the private issuer key external and offline. A runtime
+key is accepted only when it matches that release edit, so environment control
+cannot mint a new trust root.

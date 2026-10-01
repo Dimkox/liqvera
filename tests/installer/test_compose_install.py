@@ -18,7 +18,7 @@ SPEC.loader.exec_module(ORCHESTRATION)
 
 MIGRATIONS = [
     (path.name, hashlib.sha256(path.read_bytes()).hexdigest())
-    for path in sorted((ROOT / "apps/mezo-gateway/migrations").glob("*.sql"))
+    for path in sorted((ROOT / "apps/mezo-gateway/migrations").glob("00[1-5]_*.sql"))
 ]
 
 

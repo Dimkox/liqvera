@@ -1,3 +1,5 @@
+import hashlib
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -22,3 +24,17 @@ def test_v2_authority_is_signed_and_v1_has_no_ambient_any_payer_widening() -> No
     assert "ANY_VALID_X402_PAYER" in grant
     assert "demoAnyPayer" not in grant
     assert "demoAnyPayer" not in adapter
+
+
+def test_release_allowlist_pins_public_key_and_rotation_requires_edit() -> None:
+    value = json.loads((ROOT / "apps/mezo-gateway/config/live-grant-issuer-allowlist.json").read_text())
+    assert value["schema"] == "liqvera-live-grant-issuer-allowlist/v1"
+    assert len(value["issuers"]) == 1
+    issuer = value["issuers"][0]
+    raw = bytes.fromhex(issuer["public_key_hex"])
+    assert len(raw) == 32
+    assert hashlib.sha256(raw).hexdigest() == issuer["key_id"]
+    compiled = (ROOT / "apps/mezo-gateway/src/security/live-grant-issuers.ts").read_text()
+    assert issuer["key_id"] in compiled
+    assert issuer["public_key_hex"] in compiled
+    assert "LIVE_GRANT_ISSUER_UNAPPROVED" in compiled

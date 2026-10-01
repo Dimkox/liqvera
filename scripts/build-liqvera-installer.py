@@ -22,7 +22,6 @@ MIGRATIONS = (
     "001_ledger.sql", "002_fix_immutable_ledger_identity.sql",
     "003_live_grant_consumption.sql", "004_receipt_confirmation_provenance.sql",
     "005_receipt_confirmation_count.sql",
-    "006_signed_live_grant_authority.sql",
 )
 SOURCE_MAP = {
     "install.sh": "installer/install.sh", "Caddyfile": "installer/Caddyfile",

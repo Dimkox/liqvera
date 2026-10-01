@@ -1,0 +1,11 @@
+{
+  "schema": "liqvera-live-grant-issuer-allowlist/v1",
+  "issuers": [
+    {
+      "key_id": "468688f235df364eee8f37b3815808f2c6e4fc09dcc96015269b64405d0f8708",
+      "public_key_hex": "fab4189d8fa6e7fa0c488e74914295e7b5fc9941f87348db7eaa40a9988e6822",
+      "status": "ACTIVE",
+      "purpose": "MEZO_TESTNET_PUBLIC_DEMO_V2"
+    }
+  ]
+}

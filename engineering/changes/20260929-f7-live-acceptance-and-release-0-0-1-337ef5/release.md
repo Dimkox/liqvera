@@ -63,9 +63,16 @@ metrics or evidence.
 
 ## Go/no-go criteria
 
-Publication is complete. **NO-GO** remains for another payment or any mutation
-of the immutable tag/release/assets. One authorized Mezo Testnet settlement is
-retained as scoped A13/A14 evidence and does not authorize a retry.
+Historical v0.0.1 publication is complete. **NO-GO** remains for another
+payment under that authority or any mutation of its immutable tag, release, or
+assets. Its one authorized Mezo Testnet settlement remains scoped A13/A14
+evidence and does not authorize a retry.
+
+Current v0.0.4 publication is pending. Signed-v2 head deployment and payment
+evidence do not exist, and the historical evidence above cannot be promoted to
+this head. Push, tag, GitHub Release, deployment, and payment remain NO-GO until
+the exact candidate passes fingerprint-bound verification, independent reviews,
+and the applicable release gates.
 
 P0 GO requires scope approval plus green repair tests/verifier/reviews. P1 GO
 requires valid immutable local result and reviewed omissions. P2/P3/P5 each

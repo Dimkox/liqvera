@@ -41,6 +41,18 @@ receipt rows; otherwise stop and preserve the database for an explicitly
 designed provenance recovery. Once applied, retain its append-only observation
 columns on application rollback because they are the durable A13 audit source.
 
+Migration 006 is forward-only. `live_grant_authorities` and
+`live_grant_reservations` are audit, replay-prevention, and settlement-budget
+evidence. Application rollback must preserve every authority row, reservation,
+spent ordinal, count and amount debit, and per-payer uniqueness record. UNKNOWN
+reservations remain permanently spent. Never delete, rewind, truncate, recreate,
+or backfill this budget to make authority appear available again.
+
+To roll application code below migration 006, first apply the checked-in
+grantless override and confirm `EXTERNAL_GRANT_REQUIRED`; retain schema 006 and
+all rows, then forward-fix application compatibility. There is no down migration
+or reservation-release path.
+
 Partial publication is additive: if main pushed but tag/release failed, verify
 the pushed SHA and resume only the missing approved step. Never force-push or
 move a published tag. An incorrect published release is superseded by a new

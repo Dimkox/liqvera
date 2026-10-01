@@ -25,7 +25,7 @@ SPEC.loader.exec_module(VERIFIER)
 PREFIX = "liqvera-installer-0.0.2/"
 MIGRATIONS = {
     path.name: path.read_bytes()
-    for path in sorted((ROOT / "apps" / "mezo-gateway" / "migrations").glob("*.sql"))
+    for path in sorted((ROOT / "apps" / "mezo-gateway" / "migrations").glob("00[1-5]_*.sql"))
 }
 
 

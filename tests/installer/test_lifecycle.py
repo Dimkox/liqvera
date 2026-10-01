@@ -18,7 +18,7 @@ SPEC.loader.exec_module(LIFECYCLE)
 
 LEDGER = [
     {"name": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
-    for path in sorted((ROOT / "apps/mezo-gateway/migrations").glob("*.sql"))
+    for path in sorted((ROOT / "apps/mezo-gateway/migrations").glob("00[1-5]_*.sql"))
 ]
 IMAGES = {name: f"registry.invalid/liqvera/{name}@sha256:{hashlib.sha256(name.encode()).hexdigest()}"
           for name in ("edge", "web", "gateway", "capture", "report", "postgres")}

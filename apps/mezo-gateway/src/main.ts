@@ -25,6 +25,7 @@ async function main():Promise<void> {
   const liveInput=config.liveGrantFile&&config.liveContext?{
     grantBytes:await readPrivateGrantFile(config.liveGrantFile),
     publicKey:config.liveGrantPublicKey,
+    allowAnyPayer:config.testnetDemoAnyPayer,
     context:{...config.liveContext,databaseIdentity:await databaseIdentity(config.databaseUrl)},observedAt:new Date(),
   }:null;
   const payments=composeOfficialX402(identity,finality,reader,config.publicBase,liveInput);

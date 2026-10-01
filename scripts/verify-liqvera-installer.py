@@ -34,7 +34,6 @@ MIGRATION_NAMES = (
     "003_live_grant_consumption.sql",
     "004_receipt_confirmation_provenance.sql",
     "005_receipt_confirmation_count.sql",
-    "006_signed_live_grant_authority.sql",
 )
 MIGRATION_SHA256 = {
     "001_ledger.sql": "bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b",
@@ -42,7 +41,6 @@ MIGRATION_SHA256 = {
     "003_live_grant_consumption.sql": "bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0",
     "004_receipt_confirmation_provenance.sql": "96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a",
     "005_receipt_confirmation_count.sql": "e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11",
-    "006_signed_live_grant_authority.sql": "92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a",
 }
 APPROVED_PATHS = frozenset(
     {

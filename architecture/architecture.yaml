@@ -14463,6 +14463,21 @@ repository_inventory:
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/test-review-paywall-live-r3.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/code-review-final-87d8ac4.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/data-review-paywall-live-r4.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/release-review-v0.0.4-signed-v2.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/security-review-signed-grant-87d8ac4.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
+  - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/test-review-paywall-live-r4.md
+    node: document:graph-authority-handoff
+    path_class: DOCUMENTATION
   - path: engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/evidence/p3-postgres-operation.md
     node: document:graph-authority-handoff
     path_class: DOCUMENTATION
@@ -15252,6 +15267,9 @@ repository_inventory:
   - path: apps/mezo-gateway/package-lock.json
     node: configuration:mezo-gateway-package
     path_class: CONFIGURATION
+  - path: apps/mezo-gateway/config/live-grant-issuer-allowlist.json
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/tsconfig.json
     node: configuration:mezo-gateway-package
     path_class: CONFIGURATION
@@ -15354,6 +15372,9 @@ repository_inventory:
   - path: apps/mezo-gateway/src/security/live-grant.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/src/security/live-grant-issuers.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/src/types/json-dup-key-validator.d.ts
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
@@ -15388,6 +15409,9 @@ repository_inventory:
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/test/payment-policy.test.ts
+    node: runtime:mezo-gateway
+    path_class: RUNTIME_SOURCE
+  - path: apps/mezo-gateway/test/fixtures/approved-v2-policy.json
     node: runtime:mezo-gateway
     path_class: RUNTIME_SOURCE
   - path: apps/mezo-gateway/test/facilitator-sponsored.test.ts

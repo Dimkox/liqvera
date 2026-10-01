@@ -26,6 +26,19 @@ of later grant expiry.
 `json-dup-key-validator@1.0.3` (MIT) is pinned because ordinary `JSON.parse`
 cannot detect duplicate object names before signature-policy interpretation.
 
+The release trust root is independently compiled in
+`live-grant-issuers.ts` and mirrored by the closed machine-readable issuer
+allowlist. Runtime `LIQVERA_LIVE_GRANT_PUBLIC_KEY` must match that exact public
+key and the envelope must name its exact key ID; configuration cannot introduce
+a signer. Rotation requires an explicit reviewed release edit. The issuer
+private key exists only at the external operator location
+`/home/pall/grok-projects/liqvera-live-deploy/issuer/live-grant-ed25519-v1.pem`
+with mode 0600 and is never a gateway input or repository artifact.
+
+Signed `ANY_VALID_X402_PAYER` is necessary but not sufficient: the operator
+must also set `LIQVERA_TESTNET_DEMO_ANY_PAYER=1`. Flag zero rejects v2 while
+flag one cannot widen unsigned input or v1 exact-buyer authority.
+
 ## 2026-09-30 bounded extension
 
 The sealed mapping binds raw Hyperliquid response digests and is rechecked offline. The gateway optionally reads `LIQVERA_LIVE_GRANT_FILE` through a no-follow, private-mode, single-link, size-bounded snapshot and retains the existing atomic grant-consumption boundary.

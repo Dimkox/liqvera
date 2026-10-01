@@ -5,7 +5,7 @@ import { LivePaymentGrant } from './live-grant.js';
 import { constants } from 'node:fs';
 import { lstat, open } from 'node:fs/promises';
 
-export interface LiveCompositionInput { grantBytes:Uint8Array; publicKey?:Uint8Array; context:LivePaymentContext&{databaseIdentity:string}; observedAt:Date; now?:()=>Date }
+export interface LiveCompositionInput { grantBytes:Uint8Array; publicKey?:Uint8Array; allowAnyPayer?:boolean; context:LivePaymentContext&{databaseIdentity:string}; observedAt:Date; now?:()=>Date }
 export interface GrantReadHooks { afterOpen?:()=>Promise<void>; afterRead?:()=>Promise<void> }
 
 function safe(stat:{isFile():boolean;nlink:number|bigint;mode:number|bigint;size:number|bigint}):boolean {
@@ -35,6 +35,7 @@ export function composeOfficialX402(identity:AuthorizationPolicy,finality:Finali
   publicBase:URL,input:LiveCompositionInput|null):OfficialX402 {
   if(!input)return new OfficialX402(identity,finality,reader,publicBase,null,null);
   const grant=LivePaymentGrant.parseBytes(input.grantBytes,input.observedAt,input.publicKey);
+  if(grant.version==='v2'&&input.allowAnyPayer!==true)throw new Error('LIVE_GRANT_ANY_PAYER_NOT_ENABLED');
   grant.authorize({...input.context,now:input.observedAt});
   return new OfficialX402(identity,finality,reader,publicBase,grant,input.context,input.now);
 }

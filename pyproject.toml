@@ -15,7 +15,7 @@ dependencies = [
   "orjson==3.12.0",
   "structlog==26.1.0",
   "hyperliquid-python-sdk==0.24.0",
-  "eth-account==0.13.7",
+  "eth-account==0.14.0",
   "jsonschema==4.26.0",
   "referencing==0.37.0",
 ]
@@ -23,7 +23,7 @@ dependencies = [
 [project.optional-dependencies]
 # The 27 MB venue SDK is needed only by the authenticated Lighter signer path.
 lighter-trading = [
-  "lighter-sdk==1.1.4",
+  "lighter-sdk==1.1.6",
 ]
 dev = [
   "bandit==1.9.4",
@@ -32,8 +32,8 @@ dev = [
   "pytest==9.1.1",
   "pytest-asyncio==1.4.0",
   "pytest-cov==7.1.0",
-  "ruff==0.16.9",
-  "mypy==2.3.1",
+  "ruff==0.16.10",
+  "mypy==2.4.0",
 ]
 
 [build-system]

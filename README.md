@@ -39,9 +39,9 @@ Reports describe the observed snapshot. They do not place trades, promise execut
 
 The public preview, downloads and report-generation services are running. The deployed services produced the October 12, 2026 preview, and its bundle passed offline reproduction. Browser verification confirms that the preview renders and offers the verified ZIP.
 
-The current payment network is **Mezo Testnet, chain 31611**. **New payments are disabled pending valid payment authority.** The wallet-free preview remains available. Mainnet payments are not enabled.
+The deployed payment configuration is **Mezo Mainnet, chain 31612**, at **0.01 MUSD per report**. **New payments are disabled pending valid payment authority.** The wallet-free preview remains available; successful Mainnet paid delivery has not yet been demonstrated.
 
-All seven deployed containers passed health checks. The [deployment and security report](docs/security/2026-10-12-production.md) identifies their exact images and records dependency scans, fixes and the evidence behind remaining scanner matches.
+All seven deployed containers passed health checks. The [deployment and security report](docs/security/2026-10-12-mainnet.md) identifies their exact images and records dependency scans, fixes and the evidence behind remaining scanner matches.
 
 ## Run locally
 

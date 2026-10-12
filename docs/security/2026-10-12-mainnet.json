@@ -1,0 +1,253 @@
+{
+  "schema": "liqvera-mainnet-security-audit/v1",
+  "audited_at": "2026-10-12T23:08:19.054063+00:00",
+  "source_commit": "6ee3bbe50c78c724264cecc14414725cfd56369a",
+  "scope": "Only the two rebuilt Mainnet images: gateway and web. Unchanged capture/report/edge/PostgreSQL images retain their earlier exact-image audit. No ignored or suppressed findings. Image scans do not prove public deployment or payment acceptance.",
+  "images": {
+    "gateway": {
+      "image_id": "sha256:38cb2ac89be756677cced23f5de254650a7d950bb07f305b86cd3c6f255e7334",
+      "source_commit": "6ee3bbe50c78c724264cecc14414725cfd56369a",
+      "tag": "liqvera-production/gateway:mainnet",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2024-9410",
+          "package": "ada-libs",
+          "version": "3.3.0-r0",
+          "severity": "Medium",
+          "disposition": "not_affected",
+          "evidence": "The advisory concerns Ada.cx Sentry configuration. Installed ada-libs is the unrelated ada-url C++ URL parser. Grype matched an ambiguous product name."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 4
+      }
+    },
+    "web": {
+      "image_id": "sha256:aadd7b7c3cbbc3aada93ddd537404802b7771de75276837efdaa4a0cf2646d36",
+      "source_commit": "6ee3bbe50c78c724264cecc14414725cfd56369a",
+      "tag": "liqvera-production/web:mainnet",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 3
+      }
+    }
+  },
+  "scanner_status": {
+    "gateway": {
+      "image_id": "sha256:38cb2ac89be756677cced23f5de254650a7d950bb07f305b86cd3c6f255e7334",
+      "trivy_exit": 0,
+      "grype_exit": 0
+    },
+    "web": {
+      "image_id": "sha256:aadd7b7c3cbbc3aada93ddd537404802b7771de75276837efdaa4a0cf2646d36",
+      "trivy_exit": 0,
+      "grype_exit": 0
+    }
+  },
+  "new_untriaged_findings": [],
+  "raw_counts": {
+    "trivy": 0,
+    "grype": 7
+  },
+  "trivy": {
+    "Version": "0.74.0",
+    "VulnerabilityDB": {
+      "Version": 2,
+      "NextUpdate": "2026-10-13T13:18:23.16392058Z",
+      "UpdatedAt": "2026-10-12T13:18:23.1639207Z",
+      "DownloadedAt": "2026-10-12T16:36:57.447175007Z"
+    },
+    "CheckBundle": {
+      "Digest": "sha256:1583562f8b90ed2a071b99f0e5ffff6b57e4ceb6ca3e4796577b4e6a339eb74c",
+      "DownloadedAt": "2026-09-30T16:10:19.322988759Z"
+    }
+  },
+  "grype": {
+    "version": "0.120.1",
+    "database": {
+      "schemaVersion": "v6.1.10",
+      "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-12T00:38:50Z_1791787522.tar.zst?checksum=sha256%3Af1d61e7be5caa87b18ab7519f71982399f4d43d8f407edd24717903acef3d83d",
+      "built": "2026-10-12T06:45:22Z",
+      "path": "/tmp/liqvera-current-audit/grype-db/6/vulnerability.db",
+      "valid": true
+    }
+  },
+  "database_refresh": "Uses the current databases refreshed earlier today in the full production audit; no database update was requested for these two incremental scans.",
+  "dependency_evidence": {
+    "unchanged_since": "f5de466",
+    "comparison": "Node lockfiles, Python lockfiles and deploy/security have an empty source diff through 6ee3bbe. Earlier fresh package audits are retained in docs/security/2026-10-12-production.json; this incremental audit did not repeat package queries.",
+    "prior_local_summary_sha256": "cebbb78b9bcaddd2ebf419b71fbbec0e806c2a96d65507080418b6c2ee2e8584"
+  },
+  "read_only_mainnet_preflight": {
+    "schema": "liqvera-mainnet-readonly-preflight/v1",
+    "checked_at": "2026-10-12T22:57:35.696Z",
+    "status": "pass",
+    "rpc": "https://mezo-mainnet.boar.network",
+    "chain_id": 31612,
+    "observed_block": 12471627,
+    "asset": {
+      "address": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186",
+      "name": "Mezo USD",
+      "symbol": "MUSD",
+      "decimals": 18,
+      "domain_fields": "0x0f",
+      "domain": {
+        "name": "Mezo USD",
+        "version": "1",
+        "chainId": "31612",
+        "verifyingContract": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"
+      },
+      "domain_separator": "0x0a43819914359cf08d7ef52ccb53aadf5478d3d2fc676003ccb84491d09a3e93",
+      "recomputed_domain_separator": "0x0a43819914359cf08d7ef52ccb53aadf5478d3d2fc676003ccb84491d09a3e93",
+      "standalone_version_call": {
+        "code": 3,
+        "message": "execution reverted",
+        "data": "0x"
+      }
+    },
+    "bytecode": {
+      "musdCode": {
+        "address": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186",
+        "bytes": 6436,
+        "keccak256": "0xebef2e2ffe044523a359a32307f10ff88b116a7099c6ded1e9329bf815e051c9"
+      },
+      "proxyCode": {
+        "address": "0x402085c248EeA27D92E8b30b2C58ed07f9E20001",
+        "bytes": 2913,
+        "keccak256": "0xce6429c0bb49284660683287c0a8fe548a88379072327d026626909d202048b9"
+      },
+      "permit2Code": {
+        "address": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+        "bytes": 9152,
+        "keccak256": "0xe45cbd2fc9fafd4eea29d837da8bf0772d5d6975a3e1bfe56e9f1a47395b1d9f"
+      }
+    },
+    "facilitator": {
+      "url": "https://facilitator.vativ.io",
+      "network": "eip155:31612",
+      "version": 2,
+      "scheme": "exact",
+      "asset": {
+        "address": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186",
+        "symbol": "MUSD",
+        "decimals": 18,
+        "eip712": {
+          "name": "Mezo USD",
+          "version": "1"
+        },
+        "assetTransferMethod": "permit2",
+        "supportsEip2612": true
+      },
+      "extensions": [
+        "eip2612GasSponsoring"
+      ]
+    },
+    "checks": {
+      "chain": true,
+      "metadata": true,
+      "musdCode": true,
+      "proxyCode": true,
+      "permit2Code": true,
+      "domain": true,
+      "domainSeparator": true,
+      "facilitatorNetwork": true,
+      "facilitatorMusd": true,
+      "sponsoringExtension": true
+    },
+    "scope": "Read-only eth_chainId, eth_blockNumber, eth_getCode, eth_call and public /supported only. No wallet, signature, private grant, transaction, payment or live settlement. Bytecode presence and hash are recorded; not a source-code equivalence audit.",
+    "raw_files": [
+      "rpc-request.json",
+      "rpc-response.json",
+      "facilitator-supported.json"
+    ],
+    "official_reference": "https://mezo.org/docs/developers/getting-started/musd-payments-x402/"
+  },
+  "payment_boundary": "Mainnet grant remains disabled; no payment, signature or settlement was performed by this audit.",
+  "raw_archive": {
+    "file": "2026-10-12-mainnet-raw.tar.gz",
+    "sha256": "3f49c8a82d0db0175b4f43c10a56d21a64820773a9f8674eae4a321e96a3d33f",
+    "members": {
+      "dependency-security-input.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "facilitator-supported.json": "05d18102a3bebc2133e4e38afa2ef0cfbc941c993c8220b4ca67c4f2d5e3b69c",
+      "gateway-busybox.sha256": "482f4b5bbd24ebbed9a674403650170b156ae369417ba6f46300bb7b8da9f3d0",
+      "gateway-grype.json": "9a3eb94e4e025375a254e5630e57edd4fba22575d9e7d1b3fb294d864c28a8dd",
+      "gateway-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gateway-trivy.json": "59347b20edb53bccedabb51f021742e6c69f46f9db7dfa677153c7fbb2dfa93e",
+      "gateway-trivy.log": "207585c5669ac114fcc5a27311bb3ec952a331d9200256764342dd67e7e198a0",
+      "grype-db.json": "09dfc6b54b4575eda10e1816cf2779839245b6a1ace84cd1211c104e1fdf59b3",
+      "image-scan-status.json": "1f0bde2c3f20262aa3bdac836d1b9a6101af37362935203d3cee2bc36aff0ec8",
+      "preflight.json": "bce358997fca0f3bb41ddb4df615f8fc62927a156802aa5728c067ed970ce02a",
+      "rpc-request.json": "430fbbd7f7983981302eb35121246538cee7c6e597ee40291e2b861d3c372337",
+      "rpc-response.json": "e776286ba26a705a95a47eef9cfb30aaf12422c5a8288d08b4cec354e2d9388a",
+      "security-vex.json": "b1f99befb3ae4e17aaba007bd4820a9dd58ea94874500d84eb22f0da1b4fa328",
+      "trivy-version.json": "ef4e3eeb2497a11487471f47660a65d569651c6feae1a18f75f3dca8a16fa94a",
+      "web-busybox.sha256": "482f4b5bbd24ebbed9a674403650170b156ae369417ba6f46300bb7b8da9f3d0",
+      "web-grype.json": "48d630aafbdf08f7e8888853011f5bc8a5351ccdd6db95c75e20015575fa084c",
+      "web-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "web-trivy.json": "366ba448f8496afc1483f1ea9324f075ad7bc5842f7970984ba2e37a102a4d9b",
+      "web-trivy.log": "66582d5fd6f3e205d8f3516b10449651781a1938291eb591720157726396373d"
+    }
+  }
+}

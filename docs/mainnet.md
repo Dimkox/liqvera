@@ -29,3 +29,7 @@ The API and public preview remain available without a valid grant, while payment
 Build the gateway normally and set `LIQVERA_NETWORK=mainnet` in its runtime environment. Build the web image with `--build-arg LIQVERA_NETWORK=mainnet`. Run migrations on the new database, verify the ledger identity and use the same unchanged 0.01 MUSD price and approved recipient.
 
 Preserve the previous gateway/web images and Testnet database for rollback. Reverting requires restoring the matching application network and database together; never relabel existing receipts or sealed reports. The published v0.0.2 installer remains a separate Testnet operator and does not install this Mainnet configuration.
+
+## Public deployment
+
+The public gateway and browser run this Mainnet configuration as of October 12, 2026, from source `6ee3bbe`. The existing recipient and 0.01 MUSD price are unchanged. All seven containers are healthy; HTTPS and browser checks confirm the Mainnet identity and working wallet-free preview. Payment authority is absent, so new payments remain disabled. The [deployment and security evidence](security/2026-10-12-mainnet.md) identifies exact running images, ledger separation and retained recovery state.

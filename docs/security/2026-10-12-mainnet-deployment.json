@@ -1,0 +1,80 @@
+{
+  "source_commit": "6ee3bbe50c78c724264cecc14414725cfd56369a",
+  "network": "eip155:31612",
+  "database_name": "liqvera_mainnet",
+  "database_volume": "liqvera-live_mainnet_postgres_data_6ee3bbe_final",
+  "payment_authority_installed": false,
+  "payment_submitted": false,
+  "backup_location": "/home/pall/.local/state/liqvera/recovery/2026-10-12-mainnet-final",
+  "replacement_services": {
+    "postgres-live": {
+      "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+      "container": "7b0e854787c1c4261e3d2061f9d787acd779915cdfcaef9f77c50de61473ccb9",
+      "previous_image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+      "rollback_container": "liqvera-live-postgres-live-1-testnet-6ee3bbe"
+    },
+    "gateway-live": {
+      "image": "sha256:38cb2ac89be756677cced23f5de254650a7d950bb07f305b86cd3c6f255e7334",
+      "container": "7f9e30887c15c35c4d797053044235a5800e39d7a4f617898a116eb395461352",
+      "previous_image": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4",
+      "rollback_container": "liqvera-live-gateway-live-1-testnet-6ee3bbe"
+    },
+    "web-live": {
+      "image": "sha256:aadd7b7c3cbbc3aada93ddd537404802b7771de75276837efdaa4a0cf2646d36",
+      "container": "4c22481f844f4691d325b750bdd9e880d886cd9a6633df658dd22a825c3bb99a",
+      "previous_image": "sha256:e980139a889c55872a42baaec5d07bfbff3f9c58272c862e018bffe9c2e37baa",
+      "rollback_container": "liqvera-live-web-live-1-testnet-6ee3bbe"
+    }
+  },
+  "checked_at": "2026-10-12T23:15:49.044619+00:00",
+  "components": {
+    "postgres-live": {
+      "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+      "container": "7b0e854787c1c4261e3d2061f9d787acd779915cdfcaef9f77c50de61473ccb9",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "evidence-capture-live": {
+      "image": "sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5",
+      "container": "a3e883cc55be7c7e86b26b60e40966813a4a93d539dd694eebb356d6f5bf1770",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "report-live": {
+      "image": "sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15",
+      "container": "b758fd6ef9687b9d7879196ae0a0c0f34ba9fcaca52d3c538e25e32fbb28829a",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "gateway-net-live": {
+      "image": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4",
+      "container": "1cd40f4d85953ea90bcb3cded71b428061b5b1910ac659805132cf3d3f12a58c",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "gateway-live": {
+      "image": "sha256:38cb2ac89be756677cced23f5de254650a7d950bb07f305b86cd3c6f255e7334",
+      "container": "7f9e30887c15c35c4d797053044235a5800e39d7a4f617898a116eb395461352",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "web-live": {
+      "image": "sha256:aadd7b7c3cbbc3aada93ddd537404802b7771de75276837efdaa4a0cf2646d36",
+      "container": "4c22481f844f4691d325b750bdd9e880d886cd9a6633df658dd22a825c3bb99a",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "edge-live": {
+      "image": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+      "container": "1ad60d97283df9eb61b05d2f0520d64db8dacd95f8936a8210431b3891ef3798",
+      "health": "healthy",
+      "restarts": 0
+    }
+  },
+  "recipient_unchanged": true,
+  "testnet_database_preserved": true,
+  "ledger_verified": {
+    "chain_id": 31612,
+    "payment_attempts": 0
+  }
+}

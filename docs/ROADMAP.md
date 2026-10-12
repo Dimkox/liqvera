@@ -2,11 +2,11 @@
 
 ## Implemented
 
-Public capture, exact analysis, canonical report and evidence ZIP construction, offline verification, browser wallet/quote/delivery flow, PostgreSQL gateway, guarded testnet payments, isolated Compose profiles and Linux installer contracts exist in this repository. Historical paid testnet delivery is recorded in published releases.
+Public capture, exact analysis, canonical report and evidence ZIP construction, offline verification, browser wallet/quote/delivery flow, PostgreSQL gateway, guarded Mezo payments, isolated Compose profiles and Linux installer contracts exist in this repository. Historical paid testnet delivery is recorded in published releases.
 
 ## Current work
 
-Standalone documentation, technical identifiers and the audited production rollout are complete. Mainnet configuration is being verified with separate ledger state and unchanged owner recipient/price; real paid acceptance still requires valid external authority and a wallet-authorized payment.
+Standalone documentation, technical identifiers and the audited production rollout are complete. Mainnet configuration is deployed with separate ledger state and unchanged owner recipient/price. Public HTTPS, preview downloads and browser checks pass. Real paid acceptance still requires valid external authority and a wallet-authorized payment.
 
 ## Release gates
 

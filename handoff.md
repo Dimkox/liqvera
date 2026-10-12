@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-12 — Mainnet deployment and exact-image audit
+
+Source `6ee3bbe` is published on GitHub main and its Mainnet gateway/browser images are deployed. All seven containers are healthy with zero restarts; exact running images match their security audits. The approved recipient and 0.01 MUSD price are unchanged. A fresh `liqvera_mainnet` database has seven migrations and immutable chain identity 31612; no Mainnet payment was submitted. Testnet state, stopped rollback containers and coherent private backups are retained. The operational Compose manifest now pins Mainnet configuration and passes validation. An initial Docker create failure automatically rolled back; removing the incompatible inherited exposed-port declaration allowed the subsequent fresh-volume rollout to complete.
+
+Fresh public HTTPS checks pass for landing, health, capabilities and both preview assets with exact SHA-256 values. Browser checks show Mainnet and the working preview with zero runtime exceptions. Payment readiness remains false because external authority is absent; no Mainnet paid acceptance is claimed. The owner has a pending scope question about ordinary wallet-authorized payments without the additional operator grant; no such behavior change has been made.
+
+The two rebuilt images passed four Trivy/Grype scans with zero new or untriaged findings. Seven raw Grype occurrences are fully dispositioned as reviewed BusyBox backports or an unrelated-product match. Unchanged images and dependency inputs retain the preceding complete audit. The raw archive and all 19 member digests were verified. [Mainnet evidence](docs/security/2026-10-12-mainnet.md) records scans, exact deployment inventory, public checks and browser results. README and submission materials now describe the actual Mainnet deployment and payment limitation. Documentation links and whitespace checks pass. No Dependabot PR was changed or merged.
+
 ## 2026-10-12 — explicit Mainnet network support
 
 Owner requested Mezo Mainnet and confirmed preserving the existing recipient and 0.01 MUSD price. LIQVERA_NETWORK selects one paired chain/token/RPC configuration in gateway runtime and browser build, defaulting to Testnet. Browser Mainnet sessions are separate, and labels/signing domains/explorer follow the selection. Migration007 adds paired network constraints and immutable ledger network identity; startup rejects a mismatched database before payment initialization or workers. Historical001–006 remain byte-identical. The Docker entrypoint accepts a validated separate database name. Existing external grant checks remain intact; no Mainnet authority or payment was created.

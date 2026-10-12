@@ -1,0 +1,78 @@
+{
+  "/": {
+    "http": 200,
+    "bytes": 576,
+    "sha256": "ab92fc61eb1cf57e8b985fa73acd766441811f3bef9cf2f1be801cb6490b7b4b"
+  },
+  "/healthz": {
+    "http": 200,
+    "bytes": 108,
+    "sha256": "4b74eab9bc515bc904628cab62778bb879eb9e3d2dca228a508b9a30517cc2af",
+    "body": {
+      "schema": "liqvera-evidence-health/v1",
+      "request_id": "8e5a9776-5259-4522-8611-68aeb976381c",
+      "status": "alive"
+    }
+  },
+  "/readyz": {
+    "http": 503,
+    "bytes": 272,
+    "sha256": "e69a9561d488682e940c65d3ed49f32a30988cc01cc45130b4af12879e090a0a",
+    "body": {
+      "schema": "liqvera-evidence-readiness/v1",
+      "request_id": "c7d8a258-f642-4135-8616-45aa8caced36",
+      "ready": false,
+      "storage_ready": true,
+      "integration_ready": true,
+      "configuration_ready": true,
+      "payment_ready": false,
+      "blockers": [
+        "EXTERNAL_GRANT_REQUIRED",
+        "PAYMENT_SERVICE_UNAVAILABLE"
+      ]
+    }
+  },
+  "/v1/capabilities": {
+    "http": 200,
+    "bytes": 675,
+    "sha256": "b683dff6d5681d6e660cbcc580258fe5dd3288467bd64b6371443d827930f6a3",
+    "body": {
+      "schema": "liqvera-evidence-capabilities/v1",
+      "request_id": "f0a8d9e4-163c-47d6-a358-3133306849b2",
+      "instrument_id": "hyperliquid:BTC:perpetual",
+      "instrument_label": "Hyperliquid BTC linear perpetual",
+      "network": "eip155:31612",
+      "asset": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186",
+      "decimals": 18,
+      "price_musd": "0.01",
+      "amount_atomic": "10000000000000000",
+      "source_mode": "live-public",
+      "limitations": [
+        "Mainnet only. Read-only analytics.",
+        "Calculation over the available snapshot depth; this is not a complete exchange book or guaranteed execution.",
+        "Fees, funding, and net P&L are not calculated."
+      ],
+      "payment_ready": false,
+      "blockers": [
+        "EXTERNAL_GRANT_REQUIRED",
+        "PAYMENT_SERVICE_UNAVAILABLE"
+      ]
+    }
+  },
+  "/demo/latest-live/report.json": {
+    "http": 200,
+    "bytes": 4913,
+    "sha256": "0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2"
+  },
+  "/demo/latest-live/evidence.zip": {
+    "http": 200,
+    "bytes": 38188,
+    "sha256": "3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0"
+  },
+  "mainnet_assertions": {
+    "network": "eip155:31612",
+    "asset_verified": true,
+    "payment_ready": false,
+    "preview_hashes_verified": true
+  }
+}

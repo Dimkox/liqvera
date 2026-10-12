@@ -31,7 +31,7 @@ export function createApp(gateway:Gateway,origins:ReadonlySet<string>) {
   const id=(request:Request,name:string):string=>{
     const value=request.params[name];if(typeof value!=='string'||value.length!==36||!uuidPattern.test(value))throw new PublicError('NOT_FOUND',404);return value;
   };
-  app.get('/healthz',route(async(_request,response)=>({status:200,shape:'health',body:{schema:'mee-evidence-health/v1',request_id:response.locals.requestId,status:'alive'}})));
+  app.get('/healthz',route(async(_request,response)=>({status:200,shape:'health',body:{schema:'liqvera-evidence-health/v1',request_id:response.locals.requestId,status:'alive'}})));
   app.get('/readyz',route(async(_request,response)=>gateway.readiness(response.locals.requestId)));
   app.get('/v1/capabilities',readBudget,route(async(_request,response)=>gateway.capabilities(response.locals.requestId)));
   app.post('/v1/report-quotes',scoped,readBudget,express.raw({type:'application/json',limit:16384,inflate:false}),route(async(request,response)=>{

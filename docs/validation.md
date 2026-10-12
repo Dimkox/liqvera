@@ -1,46 +1,25 @@
-# Validation record — 2026-07-20
+# Validating Liqvera
 
-This record covers the Stage 0 shadow-only foundation. It is evidence for build and safety mechanics, not authorization for live trading.
+Start from a clean checkout of the intended branch. Record `git rev-parse HEAD`, compare ancestry with main and published tags, and inspect `git status`. Never infer project capabilities from a stale worktree.
 
-## Result
+## Local checks
 
-| Check | Environment | Result |
-|---|---|---|
-| `gofmt`, `go vet`, unit tests, coverage, binary build | Windows, Go 1.26.5 | Pass |
-| `go test -race ./...` | Claw, `golang:1.26.5-bookworm` | Pass |
-| GitHub Actions workflow lint | Local `actionlint` validator | Pass |
-| Hadolint | Claw, `hadolint/hadolint:v2.14.0-alpine` | Pass, 0 findings |
-| Checkov Dockerfile scan | Claw, `bridgecrew/checkov:3.3.8` | Pass, 92 checks and 0 failures |
-| Docker `verify` stage | Claw, Docker Engine 29.6.2 | Pass |
-| Docker production image | Claw, Docker Engine 29.6.2 | Pass |
-| Hardened runtime smoke | Claw, read-only root, all capabilities dropped, no-new-privileges, no network | Healthy |
-| PostgreSQL migration up/down | Claw, PostgreSQL 18.3 | Pass: 12 tables up, RLS on 11 tenant tables, 0 tables after down |
+```sh
+make verify PYTHON=.venv/bin/python
+make liqvera-gateway liqvera-web
+npm test --prefix apps/mezo-gateway
+npm test --prefix apps/mezo-web
+make mvp PYTHON=.venv/bin/python
+```
 
-The Checkov process could not download optional Prisma Cloud guideline mappings because that external endpoint timed out. Its local Dockerfile scan completed with exit code 0 and all 92 checks passing.
+The Python suite covers exact arithmetic, sealed capture, hostile bundles, installed-package boundaries, schema/state contracts and installer behavior. Node tests cover API validation, payment authority, retry/finality/recovery and browser orchestration. A skipped PostgreSQL test is not a pass: provision a disposable loopback database named `liqvera_f4_test_<suffix>`, set `TEST_DATABASE_URL` and `TEST_DATABASE_DISPOSABLE=1`, then run `npm run test:postgres --prefix apps/mezo-gateway`. Never use an existing application database.
 
-## Dockerfile validation iterations
+Build Python wheels with `make liqvera-python` from clean source. Install them using `--no-index --find-links` into a fresh environment outside the source tree. Build and verify a canonical fixture bundle with the installed CLIs, and confirm tampering is rejected. The prototype ZIP has a separate format.
 
-| Iteration | Finding | Change | Revalidation |
-|---|---|---|---|
-| 1 | The bundled Windows validator failed before analysis because its Cygwin temporary virtual environment could not locate `pip`. | Used the documented container-based fallback on Claw. | Hadolint and Checkov passed. |
-| 2 | Base image tags were versioned but not immutable. | Pinned the Go builder and Alpine runtime to registry digests. | Both scanners, both build stages, and Linux race tests passed. |
-| 3 | The Dockerfile frontend tag was mutable. | Pinned `docker/dockerfile:1` to the digest resolved by Docker. | Hadolint, Checkov, and production build passed. |
+## Security
 
-## Runtime and image facts
+Run npm audit against both lockfiles, pip-audit against the exact installed runtime/dev closure and Trivy against each built image ID, including PostgreSQL and edge. Refresh advisory data and retain scanner versions, timestamps, digest bindings and unsuppressed results. Optional external Getzilla at commit `540c12f93e798c2f483455a5086ab0018ac3216e` supports `python3 /path/to/getzilla/scripts/getzilla_vulns.py --online --json` from this repository. A direct-pin scan alone does not cover transitive or OS dependencies.
 
-- Production image size: 6,469,262 bytes (about 6.17 MiB).
-- Runtime identity: numeric non-root user/group `10001:10001`.
-- Health check: loopback `GET /healthz` through BusyBox `wget`.
-- Runtime smoke used `--read-only`, `--cap-drop=ALL`, `--security-opt=no-new-privileges`, and `--network none`.
-- `/v1/meta` reported `mode=shadow`, `live_execution=false`, and `withdrawals=false`.
-- No package manager, source tree, Go toolchain, configuration, or credentials are copied into the production stage.
+## Acceptance
 
-Alpine is retained instead of a shell-free runtime because the image owns an executable Docker health check. The process itself remains a statically linked Go binary with no shell entrypoint.
-
-## Remaining release gates
-
-- Add SBOM generation and vulnerability scanning after the dependency graph exists.
-- Add PostgreSQL repository integration and transaction/outbox tests.
-- Add exchange-contract conformance tests, recorded WebSocket replay, and fault injection.
-- Add signed image provenance before any registry promotion.
-- Keep live execution disabled until shadow evidence and an explicit release decision exist.
+`make liqvera-acceptance ACCEPTANCE_OUTPUT=/absolute/new/result.json` executes the checked-in offline plan and writes bounded source-bound evidence. Its verifier requires the independently obtained result digest. Most external cases are deliberately NOT_RUN; partial local evidence is not overall PASS. Live payment, deployment and clean-host installer validation require their own scoped execution and evidence.

@@ -1,5 +1,5 @@
 {
-  "schema": "mee-evidence-states/v1",
+  "schema": "liqvera-evidence-states/v1",
   "machines": [
     {
       "name": "report_request",

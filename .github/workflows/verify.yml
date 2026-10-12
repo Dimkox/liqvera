@@ -1,0 +1,58 @@
+name: Verify Liqvera
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  product:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "22"
+      - name: Prepare Python
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -r requirements-dev.lock
+          .venv/bin/pip install --no-deps --no-build-isolation -e .
+      - name: Verify Python and documentation
+        run: |
+          make verify PYTHON=.venv/bin/python
+          .venv/bin/python scripts/check-docs.py
+      - name: Build and test gateway and browser
+        run: |
+          make liqvera-gateway liqvera-web
+          npm test --prefix apps/mezo-gateway
+          npm test --prefix apps/mezo-web
+      - name: Audit dependency closures
+        run: |
+          .venv/bin/pip-audit -r requirements.lock
+          .venv/bin/pip-audit -r requirements-dev.lock
+          npm audit --prefix apps/mezo-gateway
+          npm audit --prefix apps/mezo-web
+  edge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Build and validate the standard Caddy edge
+        run: |
+          docker build -f deploy/mezo-evidence/Dockerfile.edge -t liqvera-edge:ci .
+          docker run --rm --network none -e LIQVERA_SITE_ADDRESS=:8080 \
+            -v "$PWD/deploy/mezo-evidence/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            liqvera-edge:ci caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+      - name: Check reachable Go vulnerabilities
+        run: |
+          docker run --rm -e GOTOOLCHAIN=local \
+            -v "$PWD/deploy/edge-build:/src:ro" -w /src \
+            golang:1.27.2-alpine@sha256:f92b6ef800e499660581efdabdf25d9d817a9d124eaf900924f0504e7e27e12d \
+            sh -c 'go install golang.org/x/vuln/cmd/govulncheck@v1.9.0 && govulncheck ./...'

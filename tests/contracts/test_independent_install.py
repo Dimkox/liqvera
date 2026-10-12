@@ -1,4 +1,4 @@
-"""Install mee-contracts into a fresh venv outside the checkout."""
+"""Install liqvera-contracts into a fresh venv outside the checkout."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ def test_contracts_wheel_installs_outside_checkout(tmp_path: Path) -> None:
     venv.EnvBuilder(with_pip=True, symlinks=True).create(install_venv)
     build_python = build_venv / "bin" / "python"
     install_python = install_venv / "bin" / "python"
-    _run([str(build_python), "-m", "pip", "install", "hatchling==1.31.0"])
+    _run([str(build_python), "-m", "pip", "install", "hatchling==1.32.4"])
     _run(
         [
             str(build_python),
@@ -50,8 +50,8 @@ def test_contracts_wheel_installs_outside_checkout(tmp_path: Path) -> None:
         ],
         cwd=build_root,
     )
-    produced = sorted((build_root / "dist").glob("mee_contracts-0.1.0-py3-none-any.whl"))
-    assert produced, "expected mee_contracts 0.1.0 wheel"
+    produced = sorted((build_root / "dist").glob("liqvera_contracts-0.2.0-py3-none-any.whl"))
+    assert produced, "expected liqvera_contracts 0.2.0 wheel"
     wheel = produced[-1]
     copied = dist_dir / wheel.name
     copied.write_bytes(wheel.read_bytes())
@@ -70,8 +70,8 @@ def test_contracts_wheel_installs_outside_checkout(tmp_path: Path) -> None:
             str(install_python),
             "-I",
             "-c",
-            "import mee_contracts; from mee_contracts.evidence import EvidenceReader; "
-            "assert EvidenceReader.__module__ == 'mee_contracts.evidence'",
+            "import liqvera_contracts; from liqvera_contracts.evidence import EvidenceReader; "
+            "assert EvidenceReader.__module__ == 'liqvera_contracts.evidence'",
         ],
         cwd=tmp_path,
     )
@@ -83,13 +83,13 @@ def test_contracts_wheel_installs_outside_checkout(tmp_path: Path) -> None:
             "--python",
             str(install_python),
             "--distribution",
-            "mee-contracts",
+            "liqvera-contracts",
             "--allow-namespace",
-            "mee_contracts",
+            "liqvera_contracts",
             "--forbid-namespace",
-            "mee_public_capture",
-            "mee_readonly_analyzer",
-            "multi_exchange_engine",
+            "liqvera_public_capture",
+            "liqvera_readonly_analyzer",
+            "liqvera_workspace",
             "--forbid-dependency",
             "httpx",
             "websockets",
@@ -99,4 +99,4 @@ def test_contracts_wheel_installs_outside_checkout(tmp_path: Path) -> None:
             "eth-account",
         ]
     )
-    assert "installed boundary passed: mee-contracts" in inspect.stdout
+    assert "installed boundary passed: liqvera-contracts" in inspect.stdout

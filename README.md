@@ -1,347 +1,83 @@
 # Liqvera
 
-> Public hackathon judge: **https://liqvera.site**. With the reviewed live
-> grant, `LIQVERA_TESTNET_DEMO_ANY_PAYER=1` lets any connected EVM account on
-> Mezo Testnet 31611 own its quote and pay exactly `0.01` test MUSD. Default
-> startup remains buyer-bound and grant-required; UNKNOWN is confirm-only. On
-> mobile, open the URL in the wallet's in-app browser.
-
-The landing page also offers a wallet-free historical live preview captured
-from public Hyperliquid at `2026-09-30T23:32:40.858Z`. It serves the exact
-sealed report and evidence ZIP; it is not a fresh quote, new run, payment
-receipt, or execution promise.
-
 **Market reports you can verify.**
 
-Built for [MEZO ₿](https://mezo.org/) — [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
+Liqvera turns public Hyperliquid BTC perpetual order-book snapshots into exact, reproducible market reports. The application includes a browser UI, a PostgreSQL-backed gateway, isolated capture and report services, downloadable evidence bundles, and an offline verifier. Access payments use test MUSD on Mezo Testnet (chain 31611) through a guarded x402 integration.
 
-Verifiable reports from public Hyperliquid BTC perpetual order-book snapshots,
-with planned access payments in test MUSD on Mezo Testnet.
+Built for [MEZO](https://mezo.org/) and [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10). [Repository](https://github.com/Dimkox/liqvera) · [Published releases](https://github.com/Dimkox/liqvera/releases) · [Demo](https://liqvera.site).
 
-## Project state
+## Current state
 
-F0 imported a public technical snapshot with independent Git history. F1 is
-complete-with-blockers: publication inventory, public salvage verification,
-the pinned Python development toolchain, and the public compatibility lock
-are implemented. [ADR-0002](docs/adr/0002-liqvera-report-payment-boundary.md)
-accepts only the runtime and payment boundary. The overall change remains
-`implementing`. F2's static contract phase is complete and independently
-approved at `3729bdc131ca4ac971ab04e735da2e113d68ad71`: 446 contract tests
-and 1087 full-suite tests plus 85 subtests pass. See the
-[bound F2 evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f2-contracts.md).
-F3's canonical offline artifact path is locally verified and `ready`. F4 local
-gateway/ledger verification is `ready`: the exact lock, strict cleanup-adapter
-regressions, and five disposable PostgreSQL checks passed pinned verification
-and independent review. F5's focused fake-only Node slice around the real
-gateway and reconciliation orchestration is locally verified and `ready`.
-F6 has deterministic production-orchestration and static operations checks for
-guarded cancel, wrong-network and wallet changes, reload identity and
-no-resettlement, fixture zero-egress topology, internal-only metrics, resource
-and security bounds, and CSP; its route is locally verified and reviewed. F7
-P0 now hardens the acceptance producer with exact A01–A30 semantic reduction,
-closed case-specific observations, an exact pinned dispatcher capability,
-same-byte plan validation, final clean Git revalidation, atomic create-only
-publication, and a post-seal verifier. The output is tamper-evident and made
-read-only locally; filesystem permissions are not claimed as immutability. The
-checked-in offline plan intentionally executes only five currently bound local
-assertions; every other case remains truthful `NOT_RUN` or `BLOCKED_EXTERNAL`
-until its complete criterion has an approved dispatcher. The corrected
-release-candidate result at `76c0b63` is **INCOMPLETE** with 5 PASS, 4
-`BLOCKED_EXTERNAL`, 21 `NOT_RUN`, and no FAIL. Separately retained sealed
-evidence records A13 and A14 PASS on Mezo Testnet using one settlement of 0.01
-test MUSD, 50 observed confirmations, and zero buyer native-gas spend. The
-earlier full result is not an overall PASS because A08/A09 used the system
-Python; the runner now pins the repository `.venv` for those cases. Final
-release-commit acceptance, A29, artifacts, reviews, tag, push, and GitHub
-Release were subsequently completed for v0.0.1. A follow-up sealed A07 run now
-proves canonical `SOURCE_UNAVAILABLE` with no fixture fallback or artifact.
-Aggregating the distinct sealed sources yields 9 PASS, 21 `NOT_RUN`, zero
-`BLOCKED_EXTERNAL`, and zero FAIL; this is not a single runner overall PASS and
-remains **INCOMPLETE**. The local protocol package pins official Mezo MUSD
-material and recorded `mezo-org` source revisions. Separate Liqvera factory
-targets do not change the existing Stage A three-wheel factory. All 156 frozen
-vectors remain `NOT_RUN`; focused local tests are not relabelled as vector,
-payment, deployment, or release acceptance.
+The latest published source release is **v0.0.5**. This branch migrates the complete application to Liqvera component identifiers at **0.2.0**; it is an unpublished breaking migration. The separately published Linux operator is **v0.0.2**. See [migration and recovery](docs/migration.md) before using existing state.
 
-At implementation commit `37d3e2cf3c64ef2c5d260bccf64e4f107e3f2c25`,
-`make verify` passed with 641 tests and 85 subtests. The command
-`grok_verify.py --mode pr --no-record` exited 1 due to two pre-existing LOW
-Trivy `DS-0026` findings in the one-shot Stage A Dockerfiles
-(`BLOCKED_TRIVY_HEALTHCHECK_POLICY`). No scanner exception or artificial
-healthcheck was added. See
-[verification evidence](engineering/changes/2026-09-24-mezo-evidence/evidence/f1-verification.md).
+The application and payment path exist. Historical reviewed testnet settlements delivered JSON and ZIP artifacts, with the final signed-authority acceptance recording 23 confirmations. This does not authorize another payment or establish current uptime. The 2026-10-12 check found the public landing and historical preview available, but the gateway restarting and `/healthz` and `/readyz` returning 502. [Security baseline and runtime observations](docs/security/2026-10-12-baseline.md) record the exact source and running images. Remediation and local checks are tracked in [handoff.md](handoff.md).
 
-The historical live public probe returned `COMPATIBILITY_PASS_PAYMENT_BLOCKED`.
-F7 now implements an explicit Permit2 authorization identity with required
-EIP-2612 gas sponsorship, twelve-block canonical finality, the preserved v1
-one-submit grant, a release-pinned signed-v2 bounded authority, and pinned
-official x402 browser composition. Ordinary startup intentionally has no live
-grant, so payment readiness remains false with `EXTERNAL_GRANT_REQUIRED`. Six
-explicitly authorized 0.01 test MUSD settlements are retained: the original
-sealed A13/A14 evidence payment and five automated hackathon-demo payments.
-All six reached canonical finality with zero buyer native-gas spend. The first
-new demo request timed out client-side but settled on-chain and was recovered
-confirm-only from its canonical Transfer log; no grant submitted settlement
-twice. The v0.0.4 candidate deployment also proved a fresh public Hyperliquid
-report, paid JSON plus ZIP delivery, and offline bundle verification at 22
-confirmations. No mainnet payment, exchange mutation, or custody action was
-performed. Final signed-v2 acceptance deployed exact commit
-`dcdc7ae6086007d1ccaab8bc563c137c0e099feb` with a
-20-settlement/0.20-test-MUSD total authority and one settlement per payer. Its
-single encrypted-signer submission delivered report
-`c956cd81-5ec2-439b-909b-4a9d8474cce3` plus an offline-verified ZIP at 23
-recorded confirmations. The reviewed source/evidence release is now published
-as [v0.0.4](https://github.com/Dimkox/liqvera/releases/tag/v0.0.4).
+The historical acceptance aggregate is 9 PASS and 21 NOT_RUN, not an overall acceptance PASS. A new local test run does not turn unexecuted live cases into passing cases.
 
-Current product identity: root `VERSION` is the published `0.0.5`
-browser-hotfix release;
-releases v0.0.1, [v0.0.2](https://github.com/Dimkox/liqvera/releases/tag/v0.0.2),
-v0.0.3, [v0.0.4](https://github.com/Dimkox/liqvera/releases/tag/v0.0.4),
-and [v0.0.5](https://github.com/Dimkox/liqvera/releases/tag/v0.0.5)
-are published milestones. v0.0.4 adds public historical-preview assets,
-EIP-6963 wallet discovery, transient receipt revalidation recovery, and fresh
-end-to-end public testnet evidence. v0.0.5 fixes standards-incompatible fresh
-quote and delivery date formatting. The
-installable operator package remains v0.0.2. The root Python
-workspace remains `0.1.0.dev0`, and Stage A, evidence-report, protocol,
-gateway, and web component packages remain `0.1.0`. Inherited `mee-*`
-identifiers are preserved.
+## Run locally
 
-## Start here
+Requirements: Python 3.12+, Node.js 22 or 24, npm, and Git. Docker with Compose is needed for service and database integration.
 
-- [Canonical specification](docs/planning/LIQVERA_FACTORY_TZ.md): stages F0–F7 and A01–A30.
-- [Handoff](handoff.md): current evidence, blockers, and next action.
-- [Documentation](docs/README.md): technical foundation and historical context.
-- [Security](SECURITY.md): data and trading restrictions.
-- [Provenance](PROVENANCE.md): source snapshot and public-import boundary.
-
-## Install on Linux
-
-The v0.0.2 operator package is **Linux-only** for Ubuntu 22.04, Ubuntu 24.04,
-Debian 12, Fedora 40, Fedora 41, and RHEL 9 on `amd64` or `arm64`. Minimums are Bash 5.2, Docker Engine 27, Docker Compose v2.30, 4 GiB free disk, and 2 GiB memory.
-The detached archive verifier and installed lifecycle require only Python 3.9+
-from the supported distribution and the standard library; they do not require
-a repository checkout or third-party Python packages.
-The default is deliberately safe: Mezo chain 31611, shadow source, payment
-disabled, and loopback `127.0.0.1` ports 3000/8080/9090. It accepts secret-file
-references only; never put a password, token, wallet key, payment grant, or
-signature in the config or command line.
-
-Download these four release assets without executing them:
-`install-liqvera-0.0.2.sh`, `verify-liqvera-installer.py`, and
-`liqvera-installer-0.0.2.zip`, plus a detached checksum for every executable
-or payload asset. Never use `curl | bash`. From that download directory:
-
-```bash
-sha256sum --check install-liqvera-0.0.2.sh.sha256
-sha256sum --check verify-liqvera-installer.py.sha256
-sha256sum --check liqvera-installer-0.0.2.zip.sha256
-bash ./install-liqvera-0.0.2.sh \
-  ./liqvera-installer-0.0.2.zip <published-archive-sha256> \
-  ./verify-liqvera-installer.py ./verified-liqvera \
-  "${XDG_DATA_HOME:-$HOME/.local/share}/liqvera" ./liqvera-config.json
-```
-
-The installed wrapper is
-`${XDG_DATA_HOME:-$HOME/.local/share}/liqvera/liqvera.sh`; it stages the exact
-verified release, runs migrations 001–005 once, starts Compose, and returns
-only after bounded health succeeds. Examples:
-
-```bash
-root="${XDG_DATA_HOME:-$HOME/.local/share}/liqvera"
-"$root/liqvera.sh" --install-root "$root" status --json
-"$root/liqvera.sh" --install-root "$root" logs gateway --tail 200 --since 15m
-"$root/liqvera.sh" --install-root "$root" stop
-"$root/liqvera.sh" --install-root "$root" start
-```
-
-Dependency installation is never implicit: `--install-deps` requires a visible
-exact command preview and typed digest approval. User systemd is opt-in only;
-Compose remains the fallback. Default uninstall preserves configuration,
-backups, logs, artifacts, and database volumes; purge requires the exact token
-printed by its preview. See the [startup and recovery runbook](docs/runbooks/startup-shutdown.md)
-and [observability runbook](docs/runbooks/observability.md). Repository tests
-provide mocked Linux contract evidence; an isolated clean-host Docker install
-remains `NOT_RUN` until a separately approved runner executes it.
-
-```mermaid
-graph LR
-    R[README] --- H[handoff]
-    R --- T[Specification]
-    R --- P[PROVENANCE]
-    R --- D[Documentation]
-    H --- T
-    H --- P
-    H --- D
-    T --- P
-    T --- D
-    P --- D
-```
-
-## Technical foundation
-
-| Location | Responsibility |
-| --- | --- |
-| `packages/contracts` | Exact types and Stage A contracts |
-| `packages/public-capture` | Public capture and frozen evidence packages |
-| `packages/readonly-analyzer` | Reconstruction, validation, and exact analytics |
-| `packages/evidence-report` | Canonical report construction, deterministic bundles, offline verification, and the local fixture demo |
-| `packages/mezo-protocol` | Pinned official Mezo Testnet and MUSD metadata with upstream provenance |
-| `services/evidence-capture`, `services/evidence-report` | Internal-only capture and immutable report service contracts |
-| `apps/mezo-gateway` | F2 HTTP API, PostgreSQL ledger, reconciliation, and fail-closed x402 boundary |
-| `apps/mezo-web` | Mezo Testnet browser flow and injected-wallet boundary |
-| `deploy/mezo-evidence` | Isolated Compose, image, proxy, and secret-file definitions |
-| `tools/mezo_acceptance` | Result-producing A01–A30 offline/live acceptance orchestrator |
-| `tools/mezo_compatibility.py` | Closed compatibility validator and bounded public transport |
-| `docs/compatibility/mezo-evidence-v1.json` | Fixed testnet, token, protocol, and SDK boundary |
-| `schemas/mezo-evidence/v1/` | F2 JSON Schemas, OpenAPI, state graphs and exact/future runtime vectors |
-| `tests/contracts/test_mezo_*.py` | Offline F2 contract consistency and existing arithmetic characterization |
-
-Capture produces frozen packages consumed by the analyzer and report builder
-through shared contracts. Python owns evidence and exact analytics; the
-TypeScript/Express gateway serves immutable artifacts and keeps payment state
-in PostgreSQL; the Vite browser application owns user wallet interaction. The
-inherited Go Stage-0 implementation has been removed from the active tree; its
-source remains recoverable at import commit
-`8734907d489168a8a6567b93bc85920001fefd85`, while five safety invariants remain
-covered by Python conformance tests. These components are code-complete but
-unverified, and their `NOT_RUN` obligations do not establish settlement or
-acceptance.
-
-Use Python 3.12+ for the Stage A packages, Make, and an isolated environment:
-
-```bash
+```sh
 python3 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev]'
-PATH="$PWD/.venv/bin:$PATH" make verify
+.venv/bin/python -m pip install -e '.[dev,audit]'
+make verify PYTHON=.venv/bin/python
+make liqvera-gateway liqvera-web
+npm test --prefix apps/mezo-gateway
+npm test --prefix apps/mezo-web
 ```
 
-Adaptive Grok Build Pro is development tooling, not product source. It is a
-Git submodule pinned to `v2.0.19` commit
-`cb9af4073ba6c3d515145164d771c75ebdfa3224`; this version is selected for its
-bounded parallel Python verifier. After cloning, initialize and validate it
-explicitly—ordinary product commands never fetch it:
-
-```bash
-git submodule update --init --recursive
-python3 tooling/run-adaptive-grok.py --check
-```
-
-The exact BMad `6.10.0` npm identity is recorded for optional use, but no BMad
-implementation or generated skill tree is vendored. See
-[`tooling/README.md`](tooling/README.md) and
-[`tooling/tooling-lock.json`](tooling/tooling-lock.json).
-
-`make demo` runs the fixture demonstration. `make product` requires Docker;
-container builds and the full clean-machine README/demo acceptance were not
-run during F1 closure. Public salvage verifies pinned target bytes and reports
-`source_objects=unavailable`; private-source verification is not claimed.
-
-The new factory surfaces are intentionally separate:
-
-```bash
-make liqvera-python
-make liqvera-gateway
-make liqvera-web
-make liqvera-images
-make liqvera-compose
-make liqvera-acceptance ACCEPTANCE_OUTPUT=/new/path/result.json
-```
-
-`liqvera-acceptance` uses the checked-in local-only
-`acceptance/offline-plan.json`. `ACCEPTANCE_OUTPUT` must be inside a new
-out-of-repository directory; the runner creates that directory mode 0700 and
-refuses overwrite. A local INCOMPLETE result is expected until every remaining
-criterion has complete executable evidence and the separately gated external
-phases are authorized. Verify a retained result and every runner/plan/evidence
-binding with `make liqvera-acceptance-verify ACCEPTANCE_OUTPUT=/path/result.json
-ACCEPTANCE_RESULT_SHA256=<sha256>`.
-
-`liqvera-gateway` has now been exercised locally through its exact lock,
-typecheck/build, loopback adapter suite, and disposable PostgreSQL tests. The
-gateway-owned fake-only F5 suite additionally executes `Gateway.read`,
-`reconcileOne`, and `recoverUnsubmitted` without a database or network. These
-tests do not establish production payment readiness: F7's concrete identity
-and finality policies plus browser composition remain externally unexercised
-and need independent review and an exact short-lived grant. All 156 vectors
-remain `NOT_RUN`.
-The
-other listed targets remain separately evidenced. The gateway and web
-lockfiles were generated with lifecycle scripts disabled; dependency audit
-findings remain release-risk input, not acceptance. The current gateway audit
-observation is 32 advisories (28 moderate, 4 high); the retained web observation
-is 31 (27 moderate, 4 high). No forced or breaking audit fix is included in F4.
+Gateway database tests require an explicitly disposable loopback PostgreSQL database. Without one, those tests are reported as skipped. [Validation instructions](docs/validation.md) explain how to run the additional checks.
 
 ## F3 MVP prototype
 
-The current branch includes an intentionally unhardened, fixture-only
-prototype of the future report flow:
+`make mvp PYTHON=.venv/bin/python` runs the small fixture prototype and writes `.mvp/output/report.json` and `.mvp/output/evidence.zip`. Its output is explicitly **SIMULATED / UNVERIFIED**. Payments and live verification are not implemented **in this prototype**; the full application has separate canonical report and payment paths. `make mvp-web PYTHON=.venv/bin/python` starts its loopback demo UI.
 
-```bash
-make mvp
+The canonical report package provides `liqvera-evidence-build`, `liqvera-evidence-verify`, and `liqvera-evidence-report-service`. Install built wheels to use these CLIs. The verifier checks bundle integrity and recalculates results without network access; an optional trusted report digest binds the result to an independently obtained receipt.
+
+```sh
+make liqvera-python PYTHON=.venv/bin/python
+python3 -m venv /tmp/liqvera-reader
+/tmp/liqvera-reader/bin/pip install --no-index --find-links=dist/liqvera/python liqvera-evidence-report==0.2.0
+/tmp/liqvera-reader/bin/liqvera-evidence-verify /path/to/evidence.zip --report-sha256 TRUSTED_DIGEST
 ```
 
-It captures the built-in public-data fixture, builds a simulated BTC report,
-and writes `.mvp/output/report.json` plus `.mvp/output/evidence.zip`. Optional
-`MVP_SIDE` and `MVP_QUANTITY` environment variables default to `BUY` and
-`0.15`. Each run replaces only `.mvp/package` and `.mvp/output`.
+Artifact builds require a clean source checkout and bind output to its exact commit. The prototype ZIP and canonical service ZIP are different formats; use the matching verifier.
 
-`make mvp` remains the CLI artifact demo. The integrated interactive local
-product demo starts with:
+## How the pieces connect
 
-```bash
-make mvp-web
+```mermaid
+flowchart LR
+    Browser[Browser UI] --> Edge[HTTPS edge]
+    Edge --> Gateway[Gateway]
+    Gateway --> Ledger[(PostgreSQL ledger)]
+    Gateway --> Report[Report service]
+    Report --> Capture[Public capture service]
+    Capture --> Market[Hyperliquid public API]
+    Report --> Artifacts[(Sealed JSON and ZIP)]
+    Gateway --> Artifacts
+    Gateway --> Testnet[Guarded Mezo Testnet payment]
+    Artifacts --> Verifier[Offline verifier]
 ```
 
-Open <http://127.0.0.1:8765>. Choose `BUY` or `SELL`, enter an exact BTC
-quantity and an illustrative expected payer address, then create a run. The
-page shows a fixture-backed preview and quote. Select the explicit
-**Confirm simulated unlock — NO TRANSFER** action to view the full report and
-download its JSON and evidence ZIP. Reloading the page in the same browser
-session recovers the active run. The expected payer is display-only; no wallet
-authentication or payment occurs.
-
-The server binds to `127.0.0.1:8765` by default. Set `MVP_HOST` and/or
-`MVP_PORT` in the environment to override the bind address and port, for
-example `MVP_PORT=9000 make mvp-web`. The browser demo keeps its local fixture
-package in `.mvp/store/package`, SQLite state in `.mvp/store/ledger.sqlite3`,
-and immutable reports and ZIPs under `.mvp/store/artifacts/<report_id>/`.
-Stop the foreground server with Ctrl-C; local state remains for the next run.
-The evidence-report wheel also exposes `mee-evidence-demo`; an installed run
-uses `$PWD/.mvp` unless `MVP_STATE_ROOT` names an absolute state directory.
-
-Both demos are **SIMULATED**, **UNVERIFIED**, read-only analytics over fixture
-data. Payments and live verification are not implemented. The browser unlock
-transfers nothing and is not x402 or settlement.
-Neither demo establishes verified F3–F7 completion, runtime acceptance,
-report chargeability, testnet payment, or permission for live exchange
-mutations. The interactive implementation is factory-bound but deliberately
-not yet verified.
-
-The optional public compatibility probe is separate from offline verification:
-
-```bash
-PATH="$PWD/.venv/bin:$PATH" python -B scripts/check-mezo-compatibility.py \
-  --lock docs/compatibility/mezo-evidence-v1.json
-```
-
-The live probe requires POSIX real-time timer support, the main thread, and
-no existing active real-time alarm; unsupported contexts fail closed before
-network I/O. Each request has one 12-second total deadline, a 2 MiB decoded
-body limit, a separate 64 KiB framing limit, and an 8 KiB line limit. Chunk
-extensions, trailers, malformed framing, redirects, and ambient proxies are
-refused. The timer and previous signal handler are restored on every exit.
+| Path | Responsibility |
+| --- | --- |
+| `apps/mezo-web` | Wallet discovery, quote/report flow, historical preview and downloads |
+| `apps/mezo-gateway` | HTTP API, payment state, entitlement, PostgreSQL migrations and workers |
+| `packages/contracts` | Exact arithmetic and shared market/evidence types |
+| `packages/public-capture` | Credential-free capture and immutable input publication |
+| `packages/readonly-analyzer` | Frozen-input validation and exact depth calculations |
+| `packages/evidence-report` | Canonical reports, bundles, service and offline verification |
+| `packages/mezo-protocol` | Pinned official Mezo protocol metadata and upstream notices |
+| `schemas/mezo-evidence/v1` | OpenAPI, JSON schemas, state graphs and contract vectors |
+| `deploy/mezo-evidence` | Isolated fixture/live-public Compose profiles |
+| `installer` | Verified Linux installation and lifecycle contracts |
+| `tools/mezo_acceptance` | Evidence-bound acceptance producer and verifier |
 
 ## Boundaries
 
-Only public market data and read-only analytics are permitted at the exchange
-boundary. Payment code is testnet-only and remains disabled until its external
-gates close. Mainnet, trading, custody, merchant private keys,
-user secrets, and exchange credentials are excluded. Fixture data is simulated
-and cannot establish live-report or payment acceptance. Shadow-only remains
-the safety default.
+Reports describe a hypothetical sweep of an observed snapshot. They do not include fees, funding, net P&L, or a promise of execution. Hashes establish internal integrity, not independent exchange authenticity. Public-data failure must not fall back to fixture data. There is no live exchange trading authority.
 
-Private upstream Git history, secrets, and environments were not imported.
-Inherited GitHub Actions were disabled during publication; F1 made no remote
-settings changes. The original `Proprietary` metadata is retained; public
-visibility does not grant a new license.
+Payment startup is fail-closed. A valid external authority, bound payer/recipient, exact testnet asset/amount, sponsored authorization and canonical finality are required. An unknown submission is confirm-only, never a reason to retry settlement. Historical bundles remain byte-identical; their old identifiers are isolated compatibility data, not active package names.
+
+[Documentation](docs/README.md) · [Architecture](docs/architecture.md) · [Specification](docs/specification.md) · [Deployment](docs/deployment.md) · [Security](SECURITY.md) · [Roadmap](docs/ROADMAP.md)

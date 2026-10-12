@@ -1,6 +1,6 @@
 {
-  "name": "mee-mezo-gateway",
-  "version": "0.1.0",
+  "name": "liqvera-mezo-gateway",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -19,10 +19,8 @@
     "@liqvera/mezo-protocol": "file:../../packages/mezo-protocol",
     "@x402/core": "2.16.0",
     "@x402/evm": "2.16.0",
-    "@x402/express": "2.16.0",
     "@x402/extensions": "2.16.0",
-    "@x402/paywall": "2.16.0",
-    "ajv": "8.17.1",
+    "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "canonicalize": "2.1.0",
     "express": "5.1.0",
@@ -39,8 +37,7 @@
   "overrides": {
     "@x402/core": "2.16.0",
     "@x402/evm": "2.16.0",
-    "@x402/express": "2.16.0",
-    "@x402/paywall": "2.16.0",
-    "@x402/extensions": "2.16.0"
+    "@x402/extensions": "2.16.0",
+    "ws": "8.21.0"
   }
 }

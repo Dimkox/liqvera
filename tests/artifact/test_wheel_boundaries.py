@@ -20,10 +20,10 @@ def wheels(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 def test_wheels_exclude_go_and_foreign_namespaces(wheels: Path) -> None:
-    names = sorted(path.name for path in wheels.glob("mee_*.whl"))
+    names = sorted(path.name for path in wheels.glob("liqvera_*.whl"))
     assert len(names) == 3
-    forbidden = ("cmd/", "internal/", "go.mod", "go.sum", "multi_exchange_engine/")
-    for wheel in wheels.glob("mee_*.whl"):
+    forbidden = ("cmd/", "internal/", "go.mod", "go.sum", "liqvera_workspace/")
+    for wheel in wheels.glob("liqvera_*.whl"):
         with zipfile.ZipFile(wheel) as archive:
             members = tuple(archive.namelist())
         for item in members:

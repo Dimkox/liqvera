@@ -8,8 +8,8 @@ from pathlib import Path
 from uuid import UUID
 
 import pytest
-from mee_readonly_analyzer.__main__ import main
-from mee_readonly_analyzer.config import load_analyzer_configuration
+from liqvera_readonly_analyzer.__main__ import main
+from liqvera_readonly_analyzer.config import load_analyzer_configuration
 
 from tests.readonly_analyzer.package_factory import (
     write_sufficient_package,
@@ -21,7 +21,7 @@ RUN = UUID("00000000-0000-0000-0000-000000000001")
 
 def _run_cli(monkeypatch: pytest.MonkeyPatch, environ: Mapping[str, str]) -> int:
     monkeypatch.setattr(
-        "mee_readonly_analyzer.__main__.load_analyzer_configuration",
+        "liqvera_readonly_analyzer.__main__.load_analyzer_configuration",
         lambda: load_analyzer_configuration(environ),
     )
     return main()
@@ -38,14 +38,14 @@ def test_valid_package_emits_insufficient_evidence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     package = write_valid_package(tmp_path / "pkg", RUN)
-    code = _run_cli(monkeypatch, {"MEE_FROZEN_PACKAGE": str(package)})
+    code = _run_cli(monkeypatch, {"LIQVERA_FROZEN_PACKAGE": str(package)})
     document, err = _stdout_document(capsys)
     assert code == 0
     assert err == ""
-    assert document["schema"] == "mee-stage-a-decision/v1"
+    assert document["schema"] == "liqvera-stage-a-decision/v1"
     assert document["decision"] == "INSUFFICIENT_EVIDENCE"
     assert document["capture_run_id"] == str(RUN)
-    assert document["package_schema"] == "mee-readonly-frozen-package/v1"
+    assert document["package_schema"] == "liqvera-readonly-frozen-package/v1"
     reasons = document["reasons"]
     assert isinstance(reasons, list) and reasons
     assert all(isinstance(item, str) and item.startswith("INSUFFICIENT_") for item in reasons)
@@ -61,7 +61,7 @@ def test_extra_undeclared_file_emits_invalid_dataset(
 ) -> None:
     package = write_valid_package(tmp_path / "pkg", RUN)
     (package / "stale.bin").write_bytes(b"old")
-    code = _run_cli(monkeypatch, {"MEE_FROZEN_PACKAGE": str(package)})
+    code = _run_cli(monkeypatch, {"LIQVERA_FROZEN_PACKAGE": str(package)})
     document, _err = _stdout_document(capsys)
     assert code == 1
     assert document["decision"] == "INVALID_DATASET"
@@ -76,7 +76,7 @@ def test_malformed_mapping_emits_invalid_dataset(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     package = write_valid_package(tmp_path / "pkg", RUN, mappings=[{"mapping_id": "bad"}])
-    code = _run_cli(monkeypatch, {"MEE_FROZEN_PACKAGE": str(package)})
+    code = _run_cli(monkeypatch, {"LIQVERA_FROZEN_PACKAGE": str(package)})
     document, _err = _stdout_document(capsys)
     assert code == 1
     assert document["decision"] == "INVALID_DATASET"
@@ -101,7 +101,7 @@ def test_sufficient_empty_mappings_emits_invalid_record(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     package = write_sufficient_package(tmp_path / "pkg", RUN, mappings=[])
-    code = _run_cli(monkeypatch, {"MEE_FROZEN_PACKAGE": str(package)})
+    code = _run_cli(monkeypatch, {"LIQVERA_FROZEN_PACKAGE": str(package)})
     document, _err = _stdout_document(capsys)
     assert code == 1
     assert document["decision"] == "INVALID_DATASET"
@@ -113,11 +113,11 @@ def test_sufficient_extend_package_exits_zero(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     package = write_sufficient_package(tmp_path / "pkg", RUN)
-    code = _run_cli(monkeypatch, {"MEE_FROZEN_PACKAGE": str(package)})
+    code = _run_cli(monkeypatch, {"LIQVERA_FROZEN_PACKAGE": str(package)})
     document, err = _stdout_document(capsys)
     assert code == 0
     assert err == ""
-    assert document["schema"] == "mee-stage-a-decision/v1"
+    assert document["schema"] == "liqvera-stage-a-decision/v1"
     assert document["decision"] == "EXTEND_LONGER_SHADOW"
     assert document["reasons"] == ["EXTEND_ALL_V2_GATES_PASS"]
     assert document["capture_run_id"] == str(RUN)

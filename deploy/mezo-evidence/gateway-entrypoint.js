@@ -10,9 +10,9 @@ if (!['postgres', '127.0.0.1'].includes(databaseHost)) throw new Error('PostgreS
 const url = new URL(`postgresql://liqvera@${databaseHost}:5432/liqvera`);
 url.password = password;
 
-const command = process.argv[2] || 'npm';
-const args = process.argv.length > 2 ? process.argv.slice(3) : ['start'];
-const isMigration = command === 'npm' && args[0] === 'run' && args[1] === 'migrate';
+const command = process.argv[2] || 'node';
+const args = process.argv.length > 2 ? process.argv.slice(3) : ['dist/main.js'];
+const isMigration = command === 'node' && args.length === 1 && args[0] === 'dist/migrate.js';
 if (!isMigration) {
   const reportTokenPath = process.env.REPORT_SERVICE_TOKEN_FILE;
   if (!reportTokenPath || !readFileSync(reportTokenPath, 'utf8').trim()) {

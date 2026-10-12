@@ -1,1 +1,0 @@
-claw-engine-runner ALL=(root) NOPASSWD: /usr/local/libexec/mee-controller-ledger-write ""

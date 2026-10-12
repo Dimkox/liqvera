@@ -12,7 +12,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "mee-evidence-capture/v1"
+      "const": "liqvera-evidence-capture/v1"
     },
     "capture_id": {
       "$ref": "primitives.schema.json#/$defs/id"

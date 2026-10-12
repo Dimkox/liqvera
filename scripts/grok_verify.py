@@ -1,1 +1,0 @@
-../tooling/run-adaptive-grok.py

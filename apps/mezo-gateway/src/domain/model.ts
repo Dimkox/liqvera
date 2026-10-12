@@ -20,7 +20,7 @@ export type AttemptState = 'RECEIVED' | 'VERIFIED' | 'SUBMITTING' | 'CONFIRMED' 
 export interface QuoteInput { instrument_id: typeof INSTRUMENT; side: 'BUY' | 'SELL'; quantity_base: string; expected_payer: string }
 export interface ReportRequest { id: string; scope_hash: string; canonical_body: QuoteInput; body_hash: string;
   state: RequestState; report_id: string; quote_id: string | null; reason: Reason | null; created_at: Date }
-export interface Terms { version: 'mee-evidence-terms/v1'; network: typeof NETWORK; chain_id: typeof CHAIN_ID;
+export interface Terms { version: 'liqvera-evidence-terms/v1'; network: typeof NETWORK; chain_id: typeof CHAIN_ID;
   asset: typeof ASSET; decimals: 18; amount_atomic: typeof AMOUNT; price_musd: '0.01'; pay_to: string;
   expected_payer: string; expires_at: string }
 export interface Preview { instrument_id: typeof INSTRUMENT; side: 'BUY' | 'SELL'; quantity_base: string;
@@ -37,7 +37,7 @@ export interface AuthorizationIdentity { identity: string; version: string; paye
 export interface Attempt { id: string; quote_id: string; state: AttemptState; authorization_identity: string;
   identity_version: string; authorization_valid_until: Date; correlation: Record<string,string>;
   tx_hash: string | null; submitted_at: Date | null; reconciliation_count: number }
-export interface Receipt { schema: 'mee-evidence-receipt/v1'; quote_id: string; report_id: string;
+export interface Receipt { schema: 'liqvera-evidence-receipt/v1'; quote_id: string; report_id: string;
   payment_attempt_id: string; report_sha256: string; network: typeof NETWORK; chain_id: typeof CHAIN_ID;
   asset: typeof ASSET; amount_atomic: typeof AMOUNT; payer: string; pay_to: string;
   tx_hash: string; block_hash: string; block_number: number; log_index: number; confirmed_at: string;

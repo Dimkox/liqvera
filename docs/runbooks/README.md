@@ -1,12 +1,6 @@
 # Liqvera deployment runbooks
 
-These procedures describe the F6 code surface. Both Compose profiles have
-been resolved and checked statically, but the stack has not been built,
-started, or accepted. F6–F7 remain
-`IMPLEMENTED_UNVERIFIED`; a green container healthcheck is not release or
-payment approval. Use the [canonical specification](../planning/LIQVERA_FACTORY_TZ.md)
-and [ADR-0002](../adr/0002-liqvera-report-payment-boundary.md) for the safety
-boundary.
+These procedures cover the current application and its isolated fixture/live-public profiles. A passing local healthcheck does not authorize payment or release. Use the [specification](../specification.md), [architecture](../architecture.md), [migration](../migration.md) and [handoff](../../handoff.md) for current boundaries and executed evidence.
 
 | Procedure | Use |
 | --- | --- |
@@ -44,8 +38,7 @@ All roles drop Linux capabilities, run without root, use read-only root
 filesystems, and have bounded CPU, memory, process counts, and healthchecks.
 The migration job must exit successfully before the gateway starts. Persistent
 named volumes hold captures, artifacts, PostgreSQL data, and
-Caddy state. The images currently use versioned base tags; pin audited image
-digests and record the built image hashes before any actual release.
+Caddy state. Base images are digest-pinned; rescan and record the built image hashes before any release.
 
 No environment file may contain database passwords, private keys, wallet
 seeds, bearer capabilities, signatures, or exchange credentials. Local

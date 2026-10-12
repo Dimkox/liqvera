@@ -15,7 +15,7 @@ export { boundedFetch, boundedFetchJson, boundedResponseJson } from "./x402-tran
  * but not an EIP-1193 payment API. No caller may construct PAYMENT-SIGNATURE.
  */
 export interface OfficialX402BrowserAdapter {
-  readonly sdk: "@x402/paywall/2.16.0";
+  readonly sdk: "@x402/core/2.16.0";
   requestPaidReport(input: {
     path: string;
     bearerCapability: string;
@@ -33,7 +33,7 @@ let reviewedAdapter: OfficialX402BrowserAdapter | null = null;
 
 /** Register only after an exact SDK API/type review and payment safety review. */
 export function registerReviewedX402Adapter(adapter: OfficialX402BrowserAdapter): void {
-  if (adapter.sdk !== "@x402/paywall/2.16.0") throw new Error("Unreviewed x402 adapter version.");
+  if (adapter.sdk !== "@x402/core/2.16.0") throw new Error("Unreviewed x402 adapter version.");
   reviewedAdapter = adapter;
 }
 
@@ -47,7 +47,7 @@ export async function requestPaidReport(input: Omit<Parameters<OfficialX402Brows
 }
 
 class ProductionX402BrowserAdapter implements OfficialX402BrowserAdapter {
-  readonly sdk="@x402/paywall/2.16.0" as const;
+  readonly sdk="@x402/core/2.16.0" as const;
   async requestPaidReport(input: Parameters<OfficialX402BrowserAdapter["requestPaidReport"]>[0]): Promise<Delivery|"recovering"> {
     if(input.path!==`/v1/reports/${input.quote.report_id}`||input.payer.toLowerCase()!==input.quote.terms.expected_payer||
       input.quote.terms.network!=="eip155:31611"||input.quote.terms.asset.toLowerCase()!=="0x118917a40faf1cd7a13db0ef56c86de7973ac503"||

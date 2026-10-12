@@ -14,8 +14,8 @@ from uuid import UUID
 from zipfile import ZIP_STORED, ZipFile
 
 import pytest
-from mee_contracts.exact import ExactDecimal
-from mee_readonly_analyzer.vwap import Side
+from liqvera_contracts.exact import ExactDecimal
+from liqvera_readonly_analyzer.vwap import Side
 
 PACKAGE_SRC = Path(__file__).parents[2] / "packages" / "evidence-report" / "src"
 
@@ -37,24 +37,24 @@ def mvp_modules(monkeypatch: pytest.MonkeyPatch):
     class MvpReportRejected(ValueError):
         pass
 
-    canonical = ModuleType("mee_evidence_report.canonical")
+    canonical = ModuleType("liqvera_evidence_report.canonical")
     canonical.canonical_json_bytes = lambda value: (
         json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode()
         + b"\n"
     )
-    model = ModuleType("mee_evidence_report.model")
+    model = ModuleType("liqvera_evidence_report.model")
     model.MvpReportRequest = MvpReportRequest
     model.MvpReportRejected = MvpReportRejected
-    builder = ModuleType("mee_evidence_report.builder")
+    builder = ModuleType("liqvera_evidence_report.builder")
     builder.build_simulated_report = lambda package_root, request: None
     monkeypatch.setitem(sys.modules, canonical.__name__, canonical)
     monkeypatch.setitem(sys.modules, model.__name__, model)
     monkeypatch.setitem(sys.modules, builder.__name__, builder)
-    sys.modules.pop("mee_evidence_report.bundle", None)
-    sys.modules.pop("mee_evidence_report.cli", None)
+    sys.modules.pop("liqvera_evidence_report.bundle", None)
+    sys.modules.pop("liqvera_evidence_report.cli", None)
 
-    bundle = importlib.import_module("mee_evidence_report.bundle")
-    cli = importlib.import_module("mee_evidence_report.cli")
+    bundle = importlib.import_module("liqvera_evidence_report.bundle")
+    cli = importlib.import_module("liqvera_evidence_report.cli")
     return bundle, cli, MvpReportRejected
 
 

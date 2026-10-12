@@ -1,1 +1,6 @@
 *
+!deploy/
+!deploy/edge-build/
+!deploy/edge-build/go.mod
+!deploy/edge-build/go.sum
+!deploy/edge-build/main.go

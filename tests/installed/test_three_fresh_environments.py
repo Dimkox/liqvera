@@ -28,12 +28,12 @@ def wheels(tmp_path_factory: pytest.TempPathFactory) -> Path:
 @pytest.mark.parametrize(
     ("distribution", "allowed", "forbidden"),
     [
-        ("mee-contracts", {"mee_contracts"}, {"mee_public_capture", "mee_readonly_analyzer"}),
-        ("mee-public-capture", {"mee_contracts", "mee_public_capture"}, {"mee_readonly_analyzer"}),
+        ("liqvera-contracts", {"liqvera_contracts"}, {"liqvera_public_capture", "liqvera_readonly_analyzer"}),
+        ("liqvera-public-capture", {"liqvera_contracts", "liqvera_public_capture"}, {"liqvera_readonly_analyzer"}),
         (
-            "mee-readonly-analyzer",
-            {"mee_contracts", "mee_readonly_analyzer"},
-            {"mee_public_capture"},
+            "liqvera-readonly-analyzer",
+            {"liqvera_contracts", "liqvera_readonly_analyzer"},
+            {"liqvera_public_capture"},
         ),
     ],
 )

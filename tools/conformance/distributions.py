@@ -6,6 +6,7 @@ import hashlib
 import json
 import subprocess
 import sys
+import tempfile
 import venv
 from dataclasses import dataclass
 from pathlib import Path
@@ -13,20 +14,18 @@ from pathlib import Path
 from tools.conformance.runner import ConformanceError, require_clean_exact_head
 
 DISTRIBUTIONS: tuple[tuple[str, Path], ...] = (
-    ("mee-contracts", Path("packages/contracts")),
-    ("mee-public-capture", Path("packages/public-capture")),
-    ("mee-readonly-analyzer", Path("packages/readonly-analyzer")),
+    ("liqvera-contracts", Path("packages/contracts")),
+    ("liqvera-public-capture", Path("packages/public-capture")),
+    ("liqvera-readonly-analyzer", Path("packages/readonly-analyzer")),
 )
 
 ALLOWED_NAMESPACES: dict[str, frozenset[str]] = {
-    "mee-contracts": frozenset({"mee_contracts"}),
-    "mee-public-capture": frozenset({"mee_contracts", "mee_public_capture"}),
-    "mee-readonly-analyzer": frozenset({"mee_contracts", "mee_readonly_analyzer"}),
+    "liqvera-contracts": frozenset({"liqvera_contracts"}),
+    "liqvera-public-capture": frozenset({"liqvera_contracts", "liqvera_public_capture"}),
+    "liqvera-readonly-analyzer": frozenset({"liqvera_contracts", "liqvera_readonly_analyzer"}),
 }
 
-FORBIDDEN_SHARED: frozenset[str] = frozenset({"multi_exchange_engine"})
-
-CAPTURE_PINNED = ("httpx==0.28.1", "websockets==17.0.1")
+FORBIDDEN_SHARED: frozenset[str] = frozenset({"liqvera"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,12 +56,26 @@ def build_all(
     if require_clean:
         require_clean_exact_head(source_sha, repository)
     output.mkdir(parents=True, exist_ok=True)
-    built: list[BuiltArtifact] = []
-    for name, package in DISTRIBUTIONS:
-        artifact = _build_wheel(repository / package, output, name)
-        built.append(artifact)
-    _download_pinned_wheels(output)
-    return tuple(built)
+    # Resolve into a fresh wheelhouse. Existing higher-version dependencies
+    # must never override the audited lock after a branch switch or downgrade.
+    with tempfile.TemporaryDirectory(prefix=".wheelhouse-", dir=output) as temporary:
+        staging = Path(temporary)
+        built = tuple(
+            _build_wheel(repository / package, staging, name)
+            for name, package in DISTRIBUTIONS
+        )
+        _download_pinned_wheels(staging, repository)
+        wheels = tuple(staging.glob("*.whl"))
+        published_names = {wheel.name for wheel in wheels}
+        for wheel in wheels:
+            wheel.replace(output / wheel.name)
+        for stale in output.glob("*.whl"):
+            if stale.name not in published_names:
+                stale.unlink()
+        return tuple(
+            BuiltArtifact(item.distribution, output / item.path.name, item.sha256)
+            for item in built
+        )
 
 
 def inspect_installed(python: Path, distribution: str) -> InstalledDistribution:
@@ -85,6 +98,7 @@ def install_one(python: Path, wheels: Path, distribution: str) -> InstalledDistr
         "install",
         "--disable-pip-version-check",
         "--no-cache-dir",
+        "--no-index",
         "--find-links",
         str(wheels),
         distribution,
@@ -144,9 +158,9 @@ for item in root.iterdir():
     name = item.name
     if name.endswith(".dist-info") or name.endswith(".data"):
         continue
-    if item.is_dir() and (name.startswith("mee_") or name == "multi_exchange_engine"):
+    if item.is_dir() and (name.startswith("liqvera_") or name == "liqvera"):
         names.append(name)
-    elif name.endswith(".py") and name.startswith("mee_"):
+    elif name.endswith(".py") and name.startswith("liqvera_"):
         names.append(name[:-3])
 print(json.dumps(names))
 """
@@ -167,7 +181,7 @@ def _wheel_name_matches(filename: str, distribution: str) -> bool:
     return filename.startswith(prefix) and filename.endswith(".whl")
 
 
-def _download_pinned_wheels(output: Path) -> None:
+def _download_pinned_wheels(output: Path, repository: Path) -> None:
     commands = (
         [
             sys.executable,
@@ -177,7 +191,9 @@ def _download_pinned_wheels(output: Path) -> None:
             "--disable-pip-version-check",
             "--dest",
             str(output),
-            *CAPTURE_PINNED,
+            "--only-binary=:all:",
+            "-r",
+            str(repository / "requirements.lock"),
         ],
         [
             sys.executable,
@@ -196,7 +212,8 @@ def _download_pinned_wheels(output: Path) -> None:
             "cp312",
             "--platform",
             "musllinux_1_2_x86_64",
-            "websockets==17.0.1",
+            "-r",
+            str(repository / "requirements.lock"),
         ],
     )
     for command in commands:

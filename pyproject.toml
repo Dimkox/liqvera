@@ -1,40 +1,18 @@
 [project]
-name = "multi-exchange-engine"
-version = "0.1.0.dev0"
-description = "Stage A public-evidence workspace: mee-contracts, mee-public-capture, mee-readonly-analyzer"
+name = "liqvera"
+version = "0.2.0"
+description = "Stage A public-evidence workspace: liqvera-contracts, liqvera-public-capture, liqvera-readonly-analyzer"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { text = "Proprietary" }
 authors = [
   { name = "Dimkox" },
 ]
-dependencies = [
-  "pydantic==2.13.5",
-  "httpx==0.28.1",
-  "websockets==17.1",
-  "orjson==3.12.0",
-  "structlog==26.1.0",
-  "hyperliquid-python-sdk==0.24.0",
-  "eth-account==0.13.7",
-  "jsonschema==4.26.0",
-  "referencing==0.37.0",
-]
+dependencies = ["httpx==0.28.1", "websockets==17.1", "jsonschema==4.23.0", "referencing==0.35.1"]
 
 [project.optional-dependencies]
-# The 27 MB venue SDK is needed only by the authenticated Lighter signer path.
-lighter-trading = [
-  "lighter-sdk==1.1.4",
-]
-dev = [
-  "bandit==1.9.4",
-  "PyYAML==6.0.3",
-  "hatchling==1.32.4",
-  "pytest==9.1.1",
-  "pytest-asyncio==1.4.0",
-  "pytest-cov==7.1.0",
-  "ruff==0.16.9",
-  "mypy==2.3.1",
-]
+dev = ["pip==26.2.1", "hatchling==1.32.4", "editables==0.5", "PyYAML==6.0.3", "pytest==9.1.1", "pytest-asyncio==1.4.0", "pytest-cov==7.1.0", "ruff==0.16.9"]
+audit = ["pip-audit==2.10.1"]
 
 [build-system]
 requires = ["hatchling==1.32.4"]
@@ -53,7 +31,6 @@ testpaths = [
   "tests/public_capture",
   "tests/readonly_analyzer",
   "tests/conformance",
-  "tests/graph",
   "tests/installed",
   "tests/artifact",
   "tests/evidence_report",
@@ -95,9 +72,9 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 python_version = "3.11"
 strict = true
 packages = [
-  "mee_contracts",
-  "mee_public_capture",
-  "mee_readonly_analyzer",
-  "mee_evidence_report",
+  "liqvera_contracts",
+  "liqvera_public_capture",
+  "liqvera_readonly_analyzer",
+  "liqvera_evidence_report",
   "tools.mezo_acceptance",
 ]

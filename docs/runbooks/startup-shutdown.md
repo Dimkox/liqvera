@@ -2,7 +2,7 @@
 
 ## Linux operator install
 
-The v0.0.2 installer is Linux-only. Obtain the bootstrap, verifier, archive,
+The v0.0.2 installer is Linux-only. Its supported host contract covers Ubuntu 22.04, Ubuntu 24.04, Debian 12, Fedora 40, Fedora 41 and RHEL 9 on amd64 or arm64. It requires Bash 5.2+, Docker Engine 27+, Compose v2.30+, at least 4 GiB free disk and 2 GiB RAM. This matrix has mocked contract coverage; clean-host execution remains separate. Obtain the bootstrap, verifier, archive,
 and detached checksum files from the same reviewed release, but obtain the
 published SHA-256 values through the independently reviewed release manifest.
 Never use `curl | bash` and never execute archive contents before verification.
@@ -108,9 +108,7 @@ Compose may resolve all secret declarations while parsing either profile, so
 keep all four files present. The report token must be mounted only into report
 and gateway; never pass it to capture.
 
-The local F6 phase statically resolves both profiles but explicitly defers
-container execution. When runtime verification is separately authorized,
-first inspect the resolved configuration without pasting its
+For a new isolated local validation environment, first inspect the resolved configuration without pasting its
 secret paths or values into public logs. Start only one profile per project:
 
 ```bash

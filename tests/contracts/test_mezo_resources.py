@@ -28,7 +28,7 @@ PREVIEW = {
 }
 
 REPORT = {
-    "schema": "mee-evidence-report/v1",
+    "schema": "liqvera-evidence-report/v1",
     "report_id": ID,
     "identity": {
         "venue": "hyperliquid",
@@ -82,7 +82,7 @@ REPORT = {
     },
     "reproducibility": {
         "engine_commit": "c" * 40,
-        "package_versions": [{"name": "mee-readonly-analyzer", "version": "0.1.0"}],
+        "package_versions": [{"name": "liqvera-readonly-analyzer", "version": "0.1.0"}],
         "lockfile_digests": [{"path": "locks/python.lock", "sha256": HASH}],
         "calculation_version": "snapshot-sweep/v1",
         "policy_version": "snapshot-policy/v1",
@@ -100,7 +100,7 @@ REPORT = {
 }
 
 TERMS = {
-    "version": "mee-evidence-terms/v1",
+    "version": "liqvera-evidence-terms/v1",
     "network": "eip155:31611",
     "chain_id": 31611,
     "asset": ASSET,
@@ -112,7 +112,7 @@ TERMS = {
     "expires_at": EXPIRES,
 }
 RECEIPT = {
-    "schema": "mee-evidence-receipt/v1",
+    "schema": "liqvera-evidence-receipt/v1",
     "quote_id": OTHER_ID,
     "report_id": ID,
     "payment_attempt_id": ID,
@@ -145,7 +145,7 @@ EXAMPLES = {
     "preview": PREVIEW,
     "terms": TERMS,
     "quote": {
-        "schema": "mee-evidence-quote/v1",
+        "schema": "liqvera-evidence-quote/v1",
         "request_id": ID,
         "report_request_id": ID,
         "quote_id": OTHER_ID,
@@ -164,7 +164,7 @@ EXAMPLES = {
         },
     },
     "request_status": {
-        "schema": "mee-evidence-request-status/v1",
+        "schema": "liqvera-evidence-request-status/v1",
         "request_id": ID,
         "report_request_id": ID,
         "status_location": f"/v1/report-requests/{ID}",
@@ -172,13 +172,13 @@ EXAMPLES = {
     },
     "receipt": RECEIPT,
     "paid_report": {
-        "schema": "mee-evidence-delivery/v1",
+        "schema": "liqvera-evidence-delivery/v1",
         "request_id": ID,
         "report": REPORT,
         "receipt": RECEIPT,
     },
     "capabilities": {
-        "schema": "mee-evidence-capabilities/v1",
+        "schema": "liqvera-evidence-capabilities/v1",
         "request_id": ID,
         "instrument_id": "hyperliquid:BTC:perpetual",
         "instrument_label": "Hyperliquid BTC linear perpetual",
@@ -192,9 +192,9 @@ EXAMPLES = {
         "payment_ready": False,
         "blockers": ["PAY_TO_MISSING"],
     },
-    "health": {"schema": "mee-evidence-health/v1", "request_id": ID, "status": "alive"},
+    "health": {"schema": "liqvera-evidence-health/v1", "request_id": ID, "status": "alive"},
     "readiness": {
-        "schema": "mee-evidence-readiness/v1",
+        "schema": "liqvera-evidence-readiness/v1",
         "request_id": ID,
         "ready": False,
         "storage_ready": True,
@@ -267,8 +267,8 @@ def test_report_rejects_unsafe_artifact_paths(path):
 def test_stage_a_verdict_remains_independent_and_exact():
     changed = deepcopy(REPORT)
     changed["quality"]["stage_a"] = {
-        "schema": "mee-stage-a-decision/v1",
-        "package_schema": "mee-readonly-frozen-package/v1",
+        "schema": "liqvera-stage-a-decision/v1",
+        "package_schema": "liqvera-readonly-frozen-package/v1",
         "capture_run_id": None,
         "decision": "INSUFFICIENT_EVIDENCE",
         "reasons": ["INSUFFICIENT_ACQUISITION_WINDOW"],

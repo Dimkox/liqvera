@@ -126,7 +126,7 @@ def test_every_public_reason_has_one_versioned_error_envelope(code: str) -> None
     c.validate(
         c.load("error.schema.json"),
         {
-            "schema": "mee-evidence-error/v1",
+            "schema": "liqvera-evidence-error/v1",
             "request_id": "123e4567-e89b-42d3-a456-426614174000",
             "code": code,
             "message": "Request could not be completed.",
@@ -138,7 +138,7 @@ def test_every_public_reason_has_one_versioned_error_envelope(code: str) -> None
 @pytest.mark.parametrize(
     "change",
     [
-        {"schema": "mee-evidence-error/v2"},
+        {"schema": "liqvera-evidence-error/v2"},
         {"code": "UNKNOWN"},
         {"message": ""},
         {"message": "x" * 257},
@@ -150,7 +150,7 @@ def test_every_public_reason_has_one_versioned_error_envelope(code: str) -> None
 )
 def test_error_envelope_rejects_unknown_versions_codes_and_leak_fields(change: dict) -> None:
     error = {
-        "schema": "mee-evidence-error/v1",
+        "schema": "liqvera-evidence-error/v1",
         "request_id": "123e4567-e89b-42d3-a456-426614174000",
         "code": "INVALID_INPUT",
         "message": "Invalid request.",
@@ -163,7 +163,7 @@ def test_error_envelope_rejects_unknown_versions_codes_and_leak_fields(change: d
 @pytest.mark.parametrize("field", ["schema", "request_id", "code", "message"])
 def test_error_envelope_requires_every_safe_field(field: str) -> None:
     error = {
-        "schema": "mee-evidence-error/v1",
+        "schema": "liqvera-evidence-error/v1",
         "request_id": "123e4567-e89b-42d3-a456-426614174000",
         "code": "INVALID_INPUT",
         "message": "Invalid request.",

@@ -6,7 +6,7 @@ import json
 from uuid import UUID
 
 import pytest
-from mee_contracts.decision import StageADecision, StageADecisionCode, StageAReasonCode
+from liqvera_contracts.decision import StageADecision, StageADecisionCode, StageAReasonCode
 
 RUN = UUID("00000000-0000-0000-0000-000000000001")
 
@@ -97,8 +97,8 @@ def test_canonical_json_round_trip_uses_sorted_keys() -> None:
         "reasons",
         "schema",
     )
-    assert document["schema"] == "mee-stage-a-decision/v1"
-    assert document["package_schema"] == "mee-readonly-frozen-package/v1"
+    assert document["schema"] == "liqvera-stage-a-decision/v1"
+    assert document["package_schema"] == "liqvera-readonly-frozen-package/v1"
     assert document["decision"] == "INSUFFICIENT_EVIDENCE"
     assert document["capture_run_id"] == str(RUN)
     assert document["reasons"] == [

@@ -8,24 +8,24 @@ import pytest
 
 
 def test_stage_a_namespaces_import() -> None:
-    import mee_contracts
-    import mee_public_capture
-    import mee_readonly_analyzer
+    import liqvera_contracts
+    import liqvera_public_capture
+    import liqvera_readonly_analyzer
 
-    assert mee_contracts.__version__ == "0.1.0"
-    assert mee_public_capture.__version__ == "0.1.0"
-    assert mee_readonly_analyzer.__version__ == "0.1.0"
-    assert mee_public_capture.Venue.HYPERLIQUID.value == "HYPERLIQUID"
-    assert mee_contracts.EvidenceReader is not None
-    assert mee_contracts.StageADecisionCode.INVALID_DATASET.value == "INVALID_DATASET"
-    assert "GO" not in {item.value for item in mee_contracts.StageADecisionCode}
-    assert "ClosedLifecycle" not in mee_public_capture.__all__
+    assert liqvera_contracts.__version__ == "0.2.0"
+    assert liqvera_public_capture.__version__ == "0.2.0"
+    assert liqvera_readonly_analyzer.__version__ == "0.2.0"
+    assert liqvera_public_capture.Venue.HYPERLIQUID.value == "HYPERLIQUID"
+    assert liqvera_contracts.EvidenceReader is not None
+    assert liqvera_contracts.StageADecisionCode.INVALID_DATASET.value == "INVALID_DATASET"
+    assert "GO" not in {item.value for item in liqvera_contracts.StageADecisionCode}
+    assert "ClosedLifecycle" not in liqvera_public_capture.__all__
 
 
 def test_stage_a_entrypoints_use_fail_closed_config() -> None:
-    from mee_public_capture.config import load_public_configuration
-    from mee_public_capture.runtime import run_public_capture
-    from mee_readonly_analyzer.config import AnalyzerConfigError, load_analyzer_configuration
+    from liqvera_public_capture.config import load_public_configuration
+    from liqvera_public_capture.runtime import run_public_capture
+    from liqvera_readonly_analyzer.config import AnalyzerConfigError, load_analyzer_configuration
 
     assert run_public_capture(load_public_configuration({})) == 0
     try:
@@ -36,11 +36,11 @@ def test_stage_a_entrypoints_use_fail_closed_config() -> None:
 
 
 def test_stage_a_analyzer_rejects_credential_env_names(tmp_path: Path) -> None:
-    from mee_readonly_analyzer.config import AnalyzerConfigError, load_analyzer_configuration
+    from liqvera_readonly_analyzer.config import AnalyzerConfigError, load_analyzer_configuration
 
     with pytest.raises(AnalyzerConfigError, match="credential environment is forbidden"):
         load_analyzer_configuration(
-            {"MEE_FROZEN_PACKAGE": str(tmp_path), "VENUE_TOKEN": "1"}
+            {"LIQVERA_FROZEN_PACKAGE": str(tmp_path), "VENUE_TOKEN": "1"}
         )
 
 

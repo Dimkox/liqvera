@@ -167,7 +167,7 @@ def test_error_examples_hide_existence_and_payment_details():
         assert set(examples) == {"missing", "other_scope", "guessed_id", "public_tx_hash"}
         assert len({json.dumps(v["value"], sort_keys=True) for v in examples.values()}) == 1
         assert next(iter(examples.values()))["value"] == {
-            "schema": "mee-evidence-error/v1", "request_id": UUID,
+            "schema": "liqvera-evidence-error/v1", "request_id": UUID,
             "code": "NOT_FOUND", "message": "Resource not found."}
     report = contract["paths"]["/v1/reports/{report_id}"]["get"]
     assert report["responses"]["402"]["content"]["application/json"]["example"]["code"] == "PAYMENT_REQUIRED"

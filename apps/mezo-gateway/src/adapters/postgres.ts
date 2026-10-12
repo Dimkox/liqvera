@@ -20,7 +20,7 @@ function toQuote(row: QueryResultRow): Quote {
   return { id: row.id, report_request_id: row.report_request_id, scope_hash: row.scope_hash, report_id: row.report_id,
     report_sha256: row.report_sha256, bundle_sha256: row.bundle_sha256, state: row.state, expires_at: row.expires_at,
     preview: row.preview, artifact: row.artifact,
-    terms: { version: 'mee-evidence-terms/v1', network: NETWORK, chain_id: CHAIN_ID, asset: ASSET,
+    terms: { version: 'liqvera-evidence-terms/v1', network: NETWORK, chain_id: CHAIN_ID, asset: ASSET,
       amount_atomic: AMOUNT, decimals: 18, price_musd: '0.01', pay_to: row.pay_to,
       expected_payer: row.expected_payer, expires_at: row.expires_at.toISOString() } };
 }
@@ -182,7 +182,7 @@ export class Ledger {
     if (!row) return null;
     const attempt: Attempt = { ...row.attempt, authorization_valid_until: new Date(row.attempt.authorization_valid_until), submitted_at: row.attempt.submitted_at ? new Date(row.attempt.submitted_at):null };
     return { attempt, retain_until:row.retain_until, confirmation: { response_header:row.response_header, receipt: {
-      schema:'mee-evidence-receipt/v1',quote_id:quote.id,report_id:quote.report_id,payment_attempt_id:attempt.id,report_sha256:quote.report_sha256,
+      schema:'liqvera-evidence-receipt/v1',quote_id:quote.id,report_id:quote.report_id,payment_attempt_id:attempt.id,report_sha256:quote.report_sha256,
       network:NETWORK,chain_id:CHAIN_ID,asset:ASSET,amount_atomic:AMOUNT,payer:row.payer,pay_to:row.pay_to,
       tx_hash:row.tx_hash,block_hash:row.block_hash,block_number:Number(row.block_number),log_index:row.log_index,
       confirmed_at:row.confirmed_at.toISOString(),finality_policy_version:row.finality_policy_version,

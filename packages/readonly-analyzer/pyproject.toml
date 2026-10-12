@@ -1,6 +1,6 @@
 [project]
-name = "mee-readonly-analyzer"
-version = "0.1.0"
+name = "liqvera-readonly-analyzer"
+version = "0.2.0"
 description = "Network-free frozen-package evidence reader"
 requires-python = ">=3.12"
 license = { text = "Proprietary" }
@@ -8,15 +8,15 @@ authors = [
   { name = "Dimkox" },
 ]
 dependencies = [
-  "mee-contracts==0.1.0",
+  "liqvera-contracts==0.2.0",
 ]
 
 [project.scripts]
-mee-readonly-analyzer = "mee_readonly_analyzer.__main__:main"
+liqvera-readonly-analyzer = "liqvera_readonly_analyzer.__main__:main"
 
 [build-system]
-requires = ["hatchling==1.31.0"]
+requires = ["hatchling==1.32.4"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mee_readonly_analyzer"]
+packages = ["src/liqvera_readonly_analyzer"]

@@ -1,15 +1,9 @@
 exclude_dirs:
   - tests
-  - engineering
   - dist
   - examples
-  - .grok-stack
-  - .grok
-  - .agents
-  - _bmad
   - src
-  - multi_exchange_engine
-  - research
+  - liqvera_workspace
   - scripts
   - tools
   - cmd

@@ -6,8 +6,8 @@ import hashlib
 from uuid import UUID
 
 import pytest
-from mee_contracts.evidence import RawPublicEnvelope
-from mee_readonly_analyzer.reconstruction import ReconstructionError, reconstruct_books
+from liqvera_contracts.evidence import RawPublicEnvelope
+from liqvera_readonly_analyzer.reconstruction import ReconstructionError, reconstruct_books
 
 RUN = UUID("00000000-0000-0000-0000-000000000001")
 FIXTURE_BOOK = (

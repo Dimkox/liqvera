@@ -7,9 +7,9 @@ from decimal import Decimal
 from uuid import UUID
 
 import pytest
-from mee_contracts.evidence import RawPublicEnvelope
-from mee_contracts.market import BookLevel
-from mee_readonly_analyzer.reconstruction import ReconstructionError, reconstruct_books
+from liqvera_contracts.evidence import RawPublicEnvelope
+from liqvera_contracts.market import BookLevel
+from liqvera_readonly_analyzer.reconstruction import ReconstructionError, reconstruct_books
 
 RUN = UUID("00000000-0000-0000-0000-000000000001")
 FIXTURE_BOOK = (
@@ -49,7 +49,7 @@ def test_fixture_book_reconstructs_uncrossed_btc_snapshot() -> None:
     assert snapshot.best_bid.price < snapshot.best_ask.price
     assert book.envelope_index == 0
     assert book.payload_sha256 == hashlib.sha256(FIXTURE_BOOK).hexdigest()
-    assert book.decoder_id == "mee-hyperliquid-l2book-snapshot/v1"
+    assert book.decoder_id == "liqvera-hyperliquid-l2book-snapshot/v1"
     assert book.epoch_id == 0
     assert book.mapping_id is None
     assert book.mapping is None

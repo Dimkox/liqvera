@@ -3,25 +3,12 @@ branch = True
 source =
     packages
     scripts
-    tooling
     tools
 omit =
     tests/*
-    scripts/grok_approve.py
-    scripts/grok_change.py
-    scripts/grok_deploy.py
-    scripts/grok_doctor.py
-    scripts/grok_review.py
-    scripts/grok_route.py
-    scripts/grok_status.py
-    scripts/grok_verify.py
-    scripts/research/tests/*
-    tooling/adaptive-grok-build-pro/*
     packages/*/build/*
     packages/*/dist/*
     */__pycache__/*
-    engineering/*
-
 [report]
 skip_empty = True
 show_missing = True

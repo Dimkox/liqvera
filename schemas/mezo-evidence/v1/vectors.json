@@ -1,5 +1,5 @@
 {
-  "schema": "mee-evidence-vectors/v1",
+  "schema": "liqvera-evidence-vectors/v1",
   "vectors": [
     {
       "id": "valid-fixture-no-sale",
@@ -2671,7 +2671,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -2711,7 +2711,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -2751,7 +2751,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -2791,7 +2791,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -2831,7 +2831,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -2871,7 +2871,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -2911,7 +2911,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -2951,7 +2951,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -2991,7 +2991,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -3031,7 +3031,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -3071,7 +3071,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -3111,7 +3111,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -3151,7 +3151,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -3191,7 +3191,7 @@
         "price_musd": "0.01",
         "decimals": 18,
         "terms": {
-          "version": "mee-evidence-terms/v1",
+          "version": "liqvera-evidence-terms/v1",
           "network": "eip155:31611",
           "chain_id": 31611,
           "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",

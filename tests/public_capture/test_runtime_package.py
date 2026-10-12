@@ -8,16 +8,20 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
-from mee_contracts.decision import StageADecisionCode, StageAReasonCode
-from mee_public_capture.config import PublicConfigError, load_public_configuration
-from mee_public_capture.package import REVIEWED_BTC, REVIEWED_LIGHTER_BTC, write_frozen_package
-from mee_public_capture.runtime import FIXTURE_BOOK, FIXTURE_LIGHTER_SNAPSHOT, run_public_capture
-from mee_readonly_analyzer.frozen_package.reader import FrozenPackageEvidenceReader
-from mee_readonly_analyzer.identity import bind_reconstructed_books
-from mee_readonly_analyzer.reconstruction import reconstruct_books
-from mee_readonly_analyzer.verdict import evaluate_frozen_package
+from liqvera_contracts.decision import StageADecisionCode, StageAReasonCode
+from liqvera_public_capture.config import PublicConfigError, load_public_configuration
+from liqvera_public_capture.package import REVIEWED_BTC, REVIEWED_LIGHTER_BTC, write_frozen_package
+from liqvera_public_capture.runtime import (
+    FIXTURE_BOOK,
+    FIXTURE_LIGHTER_SNAPSHOT,
+    run_public_capture,
+)
+from liqvera_readonly_analyzer.frozen_package.reader import FrozenPackageEvidenceReader
+from liqvera_readonly_analyzer.identity import bind_reconstructed_books
+from liqvera_readonly_analyzer.reconstruction import reconstruct_books
+from liqvera_readonly_analyzer.verdict import evaluate_frozen_package
 
-_RUNTIME = Path("packages/public-capture/src/mee_public_capture/runtime.py")
+_RUNTIME = Path("packages/public-capture/src/liqvera_public_capture/runtime.py")
 _INSUFFICIENT_REASONS = (
     StageAReasonCode.INSUFFICIENT_ACQUISITION_WINDOW,
     StageAReasonCode.INSUFFICIENT_COMPLETE_UTC_DAYS,
@@ -53,9 +57,9 @@ def _fixture_package(tmp_path: Path, venues: str) -> Path:
     root.mkdir()
     config = load_public_configuration(
         {
-            "MEE_CAPTURE_OUT": str(root),
-            "MEE_CAPTURE_SOURCE": "fixture",
-            "MEE_PUBLIC_VENUES": venues,
+            "LIQVERA_CAPTURE_OUT": str(root),
+            "LIQVERA_CAPTURE_SOURCE": "fixture",
+            "LIQVERA_PUBLIC_VENUES": venues,
         }
     )
     assert run_public_capture(config) == 0

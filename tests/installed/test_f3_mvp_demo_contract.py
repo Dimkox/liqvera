@@ -27,9 +27,9 @@ def test_runner_freezes_the_fixture_only_mvp_boundary() -> None:
     for expected in (
         'MVP_SIDE", "BUY"',
         'MVP_QUANTITY", "0.15"',
-        'MEE_CAPTURE_SOURCE": "fixture"',
-        'MEE_PUBLIC_VENUES": "hyperliquid"',
-        'MEE_CAPTURE_OUT": str(package_root)',
+        'LIQVERA_CAPTURE_SOURCE": "fixture"',
+        'LIQVERA_PUBLIC_VENUES": "hyperliquid"',
+        'LIQVERA_CAPTURE_OUT": str(package_root)',
         '"--package"',
         '"--output"',
         '"--side"',
@@ -38,7 +38,7 @@ def test_runner_freezes_the_fixture_only_mvp_boundary() -> None:
         "run_public_capture",
         "report_cli.main",
         "SIMULATED / UNVERIFIED",
-        "Payments and live verification are not implemented.",
+        "Payments and live verification are not implemented in this prototype.",
     ):
         assert expected in source
 

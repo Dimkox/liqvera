@@ -1,9 +1,8 @@
 # Internal evidence report service and offline CLI
 
-Code status: IMPLEMENTED_UNVERIFIED. Execution, tests, hostile-archive checks,
-installed-wheel validation, performance measurement, and acceptance are pending.
+Current implementation is exercised by local contract and integration tests. See the root handoff for the latest executed evidence and remaining external acceptance.
 
-Run `mee-evidence-report-service` or `python -m mee_evidence_report.service`.
+Run `liqvera-evidence-report-service` or `python -m liqvera_evidence_report.service`.
 Configuration: `LIQVERA_CAPTURE_ROOT` (read-only raw volume),
 `LIQVERA_ARTIFACT_ROOT` (owned output volume), `LIQVERA_ENGINE_COMMIT` (required
 40 lowercase hex source commit), `LIQVERA_SOURCE_MODE` (`fixture` by default),
@@ -81,9 +80,9 @@ without normalization. The legacy fixture demo interfaces remain available.
 The canonical build and verifier entrypoints are:
 
 ```text
-mee-evidence-build --package /raw/CAPTURE_ID --output-root /artifacts \
+liqvera-evidence-build --package /raw/CAPTURE_ID --output-root /artifacts \
   --report-id REPORT_UUID --side BUY --quantity 0.15 --engine-commit COMMIT_SHA
-mee-evidence-verify /artifacts/REPORT_UUID/evidence.zip --report-sha256 TRUSTED_SHA256
+liqvera-evidence-verify /artifacts/REPORT_UUID/evidence.zip --report-sha256 TRUSTED_SHA256
 ```
 
 The build command requires an existing output root and never overwrites a report.
@@ -92,7 +91,7 @@ a wallet, database, network, or source checkout. It validates packaged F2/F3
 schemas with pinned jsonschema/referencing; remote references have no retriever.
 These dependencies provide maintained Draft 2020-12 validation instead of a new
 schema dialect. Wheel resources contain the original frozen schemas and runtime
-dependency list. Factory packaging must additionally retain a full installation
+dependency list. Release packaging must additionally retain a full installation
 lock; the runtime list identifies direct analytical/schema dependencies only.
 
 Bundles are sorted `ZIP_STORED`, fixed 1980 timestamp, fixed regular-file mode,

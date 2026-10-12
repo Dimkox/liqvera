@@ -82,7 +82,7 @@ export class MezoReceiptReader {
     if(typeof beforeNumber!=='string'||!UINT.test(beforeNumber)||typeof beforeHash!=='string'||!HASH.test(beforeHash)||BigInt(beforeNumber)>BigInt(String(receipt.blockNumber)))
       throw new PublicError('MANUAL_REVIEW',202);
     const transferIdentity=createHash('sha256').update(`${attempt.authorization_identity}\n${attempt.tx_hash}\n${matches[0]!.logIndex}`).digest('hex');
-    return { schema:'mee-evidence-receipt/v1',quote_id:quote.id,report_id:quote.report_id,payment_attempt_id:attempt.id,
+    return { schema:'liqvera-evidence-receipt/v1',quote_id:quote.id,report_id:quote.report_id,payment_attempt_id:attempt.id,
       report_sha256:quote.report_sha256,network:NETWORK,chain_id:CHAIN_ID,asset:ASSET,amount_atomic:AMOUNT,
       payer:quote.terms.expected_payer,pay_to:quote.terms.pay_to,tx_hash:attempt.tx_hash,block_hash:receipt.blockHash,
       block_number:safeInteger(receipt.blockNumber),log_index:safeInteger(matches[0]!.logIndex),

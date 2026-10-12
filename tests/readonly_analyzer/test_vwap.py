@@ -10,14 +10,14 @@ from pathlib import Path
 from uuid import UUID
 
 import pytest
-from mee_contracts.evidence import RawPublicEnvelope
-from mee_contracts.exact import ExactDecimal
-from mee_contracts.market import InstrumentIdentity
-from mee_contracts.provenance import MappingDecision, MarketMappingEvidence
-from mee_contracts.reasons import ShadowRejectCode
-from mee_readonly_analyzer.identity import IdentityBindError, bind_reconstructed_books
-from mee_readonly_analyzer.reconstruction import reconstruct_books
-from mee_readonly_analyzer.vwap import (
+from liqvera_contracts.evidence import RawPublicEnvelope
+from liqvera_contracts.exact import ExactDecimal
+from liqvera_contracts.market import InstrumentIdentity
+from liqvera_contracts.provenance import MappingDecision, MarketMappingEvidence
+from liqvera_contracts.reasons import ShadowRejectCode
+from liqvera_readonly_analyzer.identity import IdentityBindError, bind_reconstructed_books
+from liqvera_readonly_analyzer.reconstruction import reconstruct_books
+from liqvera_readonly_analyzer.vwap import (
     DepthRejected,
     ExecutableFill,
     Side,
@@ -292,7 +292,7 @@ def test_non_book_input_is_vwap_error() -> None:
 
 def test_vwap_source_forbids_clock_network_and_truncated_kernel() -> None:
     source = Path(inspect.getfile(sweep_depth)).read_text(encoding="utf-8")
-    assert "mee_public_capture" not in source
+    assert "liqvera_public_capture" not in source
     assert "httpx" not in source
     assert "import time" not in source
     assert "from time " not in source

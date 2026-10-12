@@ -6,11 +6,11 @@ import json
 from decimal import Decimal
 
 import pytest
-from mee_contracts.economics import (
+from liqvera_contracts.economics import (
     STAGE_A_SEALED_ECONOMICS_SCHEMA,
     SealedStageAEconomics,
 )
-from mee_contracts.exact import ExactDecimal, ExactError
+from liqvera_contracts.exact import ExactDecimal, ExactError
 
 
 def _document(**overrides: object) -> dict[str, object]:
@@ -87,7 +87,7 @@ def test_to_canonical_json_is_sorted_compact_ascii() -> None:
     (
         _document(extra=True),
         {key: value for key, value in _document().items() if key != "total_net"},
-        _document(schema="mee-stage-a-sealed-economics/v0"),
+        _document(schema="liqvera-stage-a-sealed-economics/v0"),
         [],
     ),
 )

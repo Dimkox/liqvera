@@ -10,13 +10,13 @@ from pathlib import Path
 from uuid import UUID
 
 import pytest
-from mee_contracts.evidence import RawPublicEnvelope
-from mee_contracts.exact import ExactDecimal
-from mee_contracts.market import InstrumentIdentity
-from mee_contracts.provenance import MappingDecision, MarketMappingEvidence
-from mee_readonly_analyzer.identity import bind_reconstructed_books
-from mee_readonly_analyzer.reconstruction import reconstruct_books
-from mee_readonly_analyzer.vwap import DepthRejected, Side, sweep_depth
+from liqvera_contracts.evidence import RawPublicEnvelope
+from liqvera_contracts.exact import ExactDecimal
+from liqvera_contracts.market import InstrumentIdentity
+from liqvera_contracts.provenance import MappingDecision, MarketMappingEvidence
+from liqvera_readonly_analyzer.identity import bind_reconstructed_books
+from liqvera_readonly_analyzer.reconstruction import reconstruct_books
+from liqvera_readonly_analyzer.vwap import DepthRejected, Side, sweep_depth
 
 ROOT = Path(__file__).resolve().parents[2] / "schemas/mezo-evidence/v1"
 ASSERTIONS = {
@@ -195,7 +195,7 @@ def test_records_rejects_invalid_on_disk_envelope(tmp_path, monkeypatch, mutatio
     c = support()
     document = strict_json((ROOT / "vectors.json").read_text())
     if mutation == "wrong_version":
-        document["schema"] = "mee-evidence-vectors/v2"
+        document["schema"] = "liqvera-evidence-vectors/v2"
     elif mutation == "missing_version":
         del document["schema"]
     else:
@@ -1069,6 +1069,6 @@ def test_mutation_self_checks_reject_weakened_vectors(mutation):
     elif mutation == "extra_expected":
         sweep["expected"]["arbitrary"] = {}
     else:
-        document["schema"] = "mee-evidence-vectors/v2"
+        document["schema"] = "liqvera-evidence-vectors/v2"
     with pytest.raises((AssertionError, ValueError)):
         check_document(document)

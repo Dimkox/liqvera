@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from mee_contracts.exact import ExactDecimal
+from liqvera_contracts.exact import ExactDecimal
 
 
 @dataclass(frozen=True, slots=True)

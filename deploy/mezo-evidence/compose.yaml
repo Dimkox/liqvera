@@ -59,7 +59,10 @@ x-report: &report
     start_period: 20s
 
 x-postgres: &postgres
-  image: postgres:16-alpine
+  build:
+    context: ../..
+    dockerfile: deploy/mezo-evidence/Dockerfile.postgres
+  image: liqvera/postgres:local
   init: true
   restart: unless-stopped
   user: "70:70"
@@ -125,7 +128,7 @@ x-migrate: &migrate
     context: ../..
     dockerfile: deploy/mezo-evidence/Dockerfile.gateway
   image: liqvera/mezo-gateway:local
-  command: [node, /app/gateway-entrypoint.js, npm, run, migrate]
+  command: [node, /app/gateway-entrypoint.js, node, dist/migrate.js]
   restart: "no"
   user: "10003:10001"
   read_only: true

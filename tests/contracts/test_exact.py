@@ -5,7 +5,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 import pytest
-from mee_contracts.exact import (
+from liqvera_contracts.exact import (
     ExactDecimal,
     ExactDivisionError,
     ExactError,

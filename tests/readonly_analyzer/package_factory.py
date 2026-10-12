@@ -6,8 +6,8 @@ import json
 from pathlib import Path
 from uuid import UUID
 
-from mee_readonly_analyzer.frozen_package.codec import canonical_json_bytes, sha256_bytes
-from mee_readonly_analyzer.frozen_package.types import PACKAGE_SCHEMA
+from liqvera_readonly_analyzer.frozen_package.codec import canonical_json_bytes, sha256_bytes
+from liqvera_readonly_analyzer.frozen_package.types import PACKAGE_SCHEMA
 
 FIXTURE_BOOK = (
     b'{"coin":"BTC","time":1,"levels":[[{"px":"1.0","sz":"1.0"}],[{"px":"1.1","sz":"1.0"}]]}'
@@ -81,7 +81,7 @@ def passing_economics(**overrides: object) -> dict[str, object]:
         "independent_episode_count": 20,
         "largest_episode_concentration": "0.24",
         "median_net": "1",
-        "schema": "mee-stage-a-sealed-economics/v1",
+        "schema": "liqvera-stage-a-sealed-economics/v1",
         "survived_both_fee_cases": True,
         "survived_delay_300ms": True,
         "survived_delay_500ms": True,
@@ -257,7 +257,7 @@ def write_valid_package(
 def rebind_member(root: Path, relative: str, payload: bytes) -> None:
     target = root / relative
     target.write_bytes(payload)
-    from mee_readonly_analyzer.frozen_package.codec import decode_canonical_json
+    from liqvera_readonly_analyzer.frozen_package.codec import decode_canonical_json
 
     manifest = decode_canonical_json((root / "manifest.json").read_bytes())
     assert isinstance(manifest, dict)

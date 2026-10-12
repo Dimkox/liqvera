@@ -10,3 +10,5 @@
 **/*.pem
 **/*.key
 **/node_modules/**
+
+!requirements.lock

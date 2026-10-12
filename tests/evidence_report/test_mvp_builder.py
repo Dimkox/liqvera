@@ -6,15 +6,15 @@ from pathlib import Path
 from uuid import UUID
 
 import pytest
-from mee_contracts.exact import ExactDecimal
-from mee_evidence_report import (
+from liqvera_contracts.exact import ExactDecimal
+from liqvera_evidence_report import (
     MvpReportRejected,
     MvpReportRequest,
     build_simulated_report,
     canonical_json_bytes,
 )
-from mee_public_capture.package import REVIEWED_BTC, write_frozen_package
-from mee_readonly_analyzer.vwap import Side
+from liqvera_public_capture.package import REVIEWED_BTC, write_frozen_package
+from liqvera_readonly_analyzer.vwap import Side
 
 _RUN_ID = UUID("123e4567-e89b-42d3-a456-426614174001")
 _REPORT_ID = UUID("123e4567-e89b-42d3-a456-426614174000")
@@ -116,7 +116,7 @@ def test_fixture_report_is_simulated_read_only_and_discloses_mvp_limits(
     # Catches fixture elevation to chargeable/live status or payment authority.
     document = build_simulated_report(_package(tmp_path), _request(Side.BUY)).document
 
-    assert document["schema"] == "mee-evidence-report/v1"
+    assert document["schema"] == "liqvera-evidence-report/v1"
     assert document["source"]["source_mode"] == "fixture"
     assert document["source"]["source_at"] == "2023-11-14T22:13:20Z"
     assert document["source"]["created_at"] == "2023-11-14T22:13:20Z"

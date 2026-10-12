@@ -2,7 +2,7 @@
 
 Liqvera — **Market reports you can verify.** Built for MEZO ₿ at The Mezo Buildathon.
 
-These are preparation documents, not a submission or proof of a running payment flow. The imported Multi-Exchange Engine baseline and subsequent Liqvera commits must be distinguished in the final entry. The canonical scope and acceptance criteria are in [`LIQVERA_FACTORY_TZ.md`](../planning/LIQVERA_FACTORY_TZ.md); provenance is in [`PROVENANCE.md`](../../PROVENANCE.md).
+These are preparation documents, not a submission or proof of a running payment flow. Record the exact source release and current validation state in the final entry. The canonical scope and acceptance criteria are in [specification](../specification.md); provenance is in [`PROVENANCE.md`](../../PROVENANCE.md).
 
 ## Acceptance runner
 

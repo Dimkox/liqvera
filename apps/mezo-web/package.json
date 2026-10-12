@@ -1,6 +1,6 @@
 {
   "name": "@liqvera/mezo-web",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,11 +14,13 @@
     "@liqvera/mezo-protocol": "file:../../packages/mezo-protocol",
     "@x402/core": "2.16.0",
     "@x402/evm": "2.16.0",
-    "@x402/paywall": "2.16.0",
     "mipd": "0.0.7"
   },
   "devDependencies": {
     "typescript": "5.9.2",
-    "vite": "7.1.5"
+    "vite": "7.3.7"
+  },
+  "overrides": {
+    "ws": "8.21.0"
   }
 }

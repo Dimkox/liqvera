@@ -1,10 +1,9 @@
 # Internal evidence capture service
 
-Code status: IMPLEMENTED_UNVERIFIED. No capture, test suite, image, or live
-request has been executed for this implementation.
+Current implementation is exercised by local contract and integration tests. See the root handoff for the latest executed evidence and remaining external acceptance.
 
-Run `mee-evidence-capture-service` or
-`python -m mee_public_capture.evidence_service`. Bind port is 8081 by default.
+Run `liqvera-evidence-capture-service` or
+`python -m liqvera_public_capture.evidence_service`. Bind port is 8081 by default.
 The service is internal only and must never be published by the edge proxy.
 
 Configuration: `LIQVERA_CAPTURE_ROOT` (absolute, owned raw volume),
@@ -28,9 +27,7 @@ body bytes, request bodies, HTTP status, UTC timestamps, monotonic elapsed time,
 and hashes are retained. Capture is synchronous so timeout cancellation cannot
 leave a background request running. There are no retries or fixture fallback.
 
-Live metadata has `identity_status=UNVERIFIED` and no approved mapping. A later
-reviewed source artifact and implementation must close the missing economic
-identity properties; an environment flag cannot authorize that transition.
+Live metadata is checked against the pinned BTC perpetual identity evidence; missing or mismatched properties fail closed. An environment flag cannot approve another instrument.
 Fixture timestamps and mappings are explicitly synthetic. The old Stage A
 writer and demo paths retain their existing behavior.
 

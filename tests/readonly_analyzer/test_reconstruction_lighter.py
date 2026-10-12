@@ -11,10 +11,10 @@ from pathlib import Path
 from uuid import UUID
 
 import pytest
-from mee_contracts.evidence import RawPublicEnvelope
-from mee_contracts.market import BookLevel, InstrumentIdentity
-from mee_contracts.provenance import MappingDecision, MarketMappingEvidence
-from mee_readonly_analyzer.reconstruction import ReconstructionError, reconstruct_books
+from liqvera_contracts.evidence import RawPublicEnvelope
+from liqvera_contracts.market import BookLevel, InstrumentIdentity
+from liqvera_contracts.provenance import MappingDecision, MarketMappingEvidence
+from liqvera_readonly_analyzer.reconstruction import ReconstructionError, reconstruct_books
 
 RUN = UUID("00000000-0000-0000-0000-000000000001")
 LIGHTER_SNAPSHOT = (
@@ -30,7 +30,7 @@ LIGHTER_UPDATE = (
 FIXTURE_BOOK = (
     b'{"coin":"BTC","time":1,"levels":[[{"px":"1.0","sz":"1.0"}],[{"px":"1.1","sz":"1.0"}]]}'
 )
-LIGHTER_DECODER_ID = "mee-lighter-subscribed-order-book-snapshot/v1"
+LIGHTER_DECODER_ID = "liqvera-lighter-subscribed-order-book-snapshot/v1"
 IDENTITY = InstrumentIdentity(
     base_asset="BTC",
     quote_asset="USD",
@@ -254,7 +254,7 @@ def test_received_timestamp_is_envelope_observed_at() -> None:
 def test_hyperliquid_decoder_id_on_lighter_snapshot_raises() -> None:
     book = reconstruct_books((_envelope(LIGHTER_SNAPSHOT),))[0]
     with pytest.raises(ReconstructionError):
-        replace(book, decoder_id="mee-hyperliquid-l2book-snapshot/v1")
+        replace(book, decoder_id="liqvera-hyperliquid-l2book-snapshot/v1")
 
 
 def test_none_sequence_on_lighter_snapshot_raises() -> None:
@@ -736,10 +736,10 @@ def test_non_tuple_mappings_raise() -> None:
 
 
 def test_lighter_source_forbids_clock_network_and_capture() -> None:
-    from mee_readonly_analyzer.reconstruction import lighter
+    from liqvera_readonly_analyzer.reconstruction import lighter
 
     source = Path(inspect.getfile(lighter)).read_text(encoding="utf-8")
-    assert "mee_public_capture" not in source
+    assert "liqvera_public_capture" not in source
     assert "LighterBookReducer" not in source
     assert "httpx" not in source
     assert "import time" not in source

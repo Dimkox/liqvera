@@ -1,4 +1,4 @@
-"""Frozen package reader behavior on mee_contracts types."""
+"""Frozen package reader behavior on liqvera_contracts types."""
 
 from __future__ import annotations
 
@@ -6,9 +6,9 @@ from pathlib import Path
 from uuid import UUID
 
 import pytest
-from mee_contracts.provenance import MappingDecision
-from mee_readonly_analyzer.frozen_package.reader import FrozenPackageEvidenceReader
-from mee_readonly_analyzer.frozen_package.types import FrozenPackageError
+from liqvera_contracts.provenance import MappingDecision
+from liqvera_readonly_analyzer.frozen_package.reader import FrozenPackageEvidenceReader
+from liqvera_readonly_analyzer.frozen_package.types import FrozenPackageError
 
 from tests.readonly_analyzer.package_factory import (
     SAMPLE_LIGHTER_MAPPING,

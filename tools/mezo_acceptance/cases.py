@@ -1,4 +1,4 @@
-"""Stable acceptance inventory from LIQVERA_FACTORY_TZ.md section 15."""
+"""Stable Liqvera acceptance inventory; see docs/specification.md."""
 
 from dataclasses import dataclass
 

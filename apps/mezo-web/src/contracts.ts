@@ -13,7 +13,7 @@ export type Side = "BUY" | "SELL";
 export type QuoteState = "READY" | "PAYMENT_PENDING" | "PAYMENT_UNCERTAIN" | "PAID" | "EXPIRED" | "MANUAL_REVIEW";
 
 export interface Capabilities {
-  schema: "mee-evidence-capabilities/v1";
+  schema: "liqvera-evidence-capabilities/v1";
   instrument_id: typeof INSTRUMENT;
   instrument_label: string;
   network: typeof NETWORK;
@@ -28,7 +28,7 @@ export interface Capabilities {
 }
 
 export interface Quote {
-  schema: "mee-evidence-quote/v1";
+  schema: "liqvera-evidence-quote/v1";
   quote_id: string;
   report_request_id: string;
   report_id: string;
@@ -46,7 +46,7 @@ export interface Quote {
     expires_at: string;
   };
   terms: {
-    version: "mee-evidence-terms/v1";
+    version: "liqvera-evidence-terms/v1";
     network: typeof NETWORK;
     chain_id: typeof CHAIN_ID;
     asset: typeof ASSET;
@@ -67,7 +67,7 @@ export interface Quote {
 }
 
 export interface RequestStatus {
-  schema: "mee-evidence-request-status/v1";
+  schema: "liqvera-evidence-request-status/v1";
   report_request_id: string;
   status_location: string;
   state: "PREPARING" | "READY" | "REJECTED" | "BUILD_FAILED";
@@ -76,7 +76,7 @@ export interface RequestStatus {
 }
 
 export interface Receipt {
-  schema: "mee-evidence-receipt/v1";
+  schema: "liqvera-evidence-receipt/v1";
   quote_id: string;
   report_id: string;
   report_sha256: string;
@@ -106,7 +106,7 @@ export interface Receipt {
 }
 
 export interface Report {
-  schema: "mee-evidence-report/v1";
+  schema: "liqvera-evidence-report/v1";
   report_id: string;
   identity: { venue: string; instrument_id: string; product_kind: string; payoff_kind: string; quantity_unit: string };
   request: { side: Side; quantity_base: string };
@@ -122,13 +122,13 @@ export interface Report {
 }
 
 export interface Delivery {
-  schema: "mee-evidence-delivery/v1";
+  schema: "liqvera-evidence-delivery/v1";
   report: Report;
   receipt: Receipt;
 }
 
 export interface ApiErrorBody {
-  schema: "mee-evidence-error/v1";
+  schema: "liqvera-evidence-error/v1";
   request_id: string;
   code: string;
   message: string;
@@ -152,7 +152,7 @@ export function quoteIsPayable(quote: Quote, payer: string): boolean {
     quote.preview.snapshot_status === "VALID_FOR_SNAPSHOT_CALCULATION" &&
     quote.preview.instrument_id === INSTRUMENT &&
     quote.preview.price_musd === PRICE_MUSD &&
-    terms.version === "mee-evidence-terms/v1" &&
+    terms.version === "liqvera-evidence-terms/v1" &&
     terms.network === NETWORK && terms.chain_id === CHAIN_ID &&
     terms.asset.toLowerCase() === ASSET.toLowerCase() &&
     terms.decimals === ASSET_DECIMALS && terms.amount_atomic === AMOUNT_ATOMIC &&
@@ -163,7 +163,7 @@ export function quoteIsPayable(quote: Quote, payer: string): boolean {
 }
 
 export function receiptMatchesQuote(receipt: Receipt, quote: Quote): boolean {
-  return receipt.schema === "mee-evidence-receipt/v1" &&
+  return receipt.schema === "liqvera-evidence-receipt/v1" &&
     receipt.quote_id === quote.quote_id && receipt.report_id === quote.report_id &&
     receipt.report_sha256 === quote.report_sha256 && isSha256(receipt.report_sha256) &&
     receipt.network === NETWORK && receipt.chain_id === CHAIN_ID &&

@@ -30,7 +30,7 @@ export class Gateway {
     if(database&&!await this.salesHealthy())blockers.push('ARTIFACT_INTEGRITY_FAILURE');
     const unique=[...new Set(blockers)];const payment=unique.length===0;
     metrics.readiness(payment);
-    return {status:storage&&integration&&payment?200:503,shape:'readiness',body:{schema:'mee-evidence-readiness/v1',request_id:requestId,
+    return {status:storage&&integration&&payment?200:503,shape:'readiness',body:{schema:'liqvera-evidence-readiness/v1',request_id:requestId,
       ready:storage&&integration&&payment,storage_ready:storage,integration_ready:integration,configuration_ready:!!this.config.payTo,
       payment_ready:payment,blockers:unique}};
   }
@@ -145,7 +145,7 @@ export class Gateway {
     const headers={'PAYMENT-RESPONSE':entitlement.confirmation.response_header};
     if(kind==='bundle')return {status:200,bytes,headers:{...headers,'Content-Type':'application/zip','Content-Disposition':`attachment; filename="${quote.report_id}.zip"`}};
     const report:unknown=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));this.contracts.assert('report',report);
-    const body={schema:'mee-evidence-delivery/v1',request_id:requestId,report,receipt:entitlement.confirmation.receipt};
+    const body={schema:'liqvera-evidence-delivery/v1',request_id:requestId,report,receipt:entitlement.confirmation.receipt};
     // Keep the immutable report's original bytes inside the delivery envelope.
     // Digest verification never relies on parsing and reserializing JSON.
     const prefix=JSON.stringify({schema:body.schema,request_id:requestId}).slice(0,-1)+',"report":';

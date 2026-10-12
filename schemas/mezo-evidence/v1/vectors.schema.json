@@ -237,7 +237,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "mee-evidence-vectors/v1"
+      "const": "liqvera-evidence-vectors/v1"
     },
     "vectors": {
       "type": "array",

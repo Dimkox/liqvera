@@ -51,7 +51,7 @@ function quote(id = '00000000-0000-4000-8000-000000000001'): Quote {
     expires_at: new Date('2099-01-01T00:00:00Z'),
     artifact,
     terms: {
-      version: 'mee-evidence-terms/v1',
+      version: 'liqvera-evidence-terms/v1',
       network: NETWORK,
       chain_id: CHAIN_ID,
       asset: ASSET,
@@ -77,7 +77,7 @@ function quote(id = '00000000-0000-4000-8000-000000000001'): Quote {
 
 function receipt(q: Quote, attempt: Attempt): Receipt {
   return {
-    schema: 'mee-evidence-receipt/v1',
+    schema: 'liqvera-evidence-receipt/v1',
     quote_id: q.id,
     report_id: q.report_id,
     payment_attempt_id: attempt.id,

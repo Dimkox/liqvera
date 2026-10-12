@@ -2,7 +2,7 @@ import importlib
 import unittest
 from decimal import Decimal
 
-market = importlib.import_module("mee_contracts.market")
+market = importlib.import_module("liqvera_contracts.market")
 
 
 class MarketCatalogTests(unittest.TestCase):

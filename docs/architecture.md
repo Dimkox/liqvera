@@ -1,126 +1,27 @@
-# Liqvera — architecture and safety invariants
+# Liqvera architecture
 
-The architecture of the Liqvera buildathon product is described in the [current specification](planning/LIQVERA_FACTORY_TZ.md). This document preserves the invariants and history of the Multi-Exchange Engine technical baseline.
+The browser and gateway are TypeScript applications. Capture, exact arithmetic, report construction and offline verification are Python packages. PostgreSQL owns durable quote, grant, payment and entitlement state. Filesystem volumes own sealed inputs and output artifacts. Caddy terminates public HTTPS; nginx serves the static browser application.
 
-[Repository README](../README.md) · [Accepted Python ADR](adr/0001-python-universal-arbitrage-core.md) · [Roadmap](ROADMAP.md) · [Technical strategy](research/TECHNICAL_STRATEGY.md) · [Repository audit](research/REPOSITORY_CONNECTIVITY_AUDIT.md)
+## Request and data flow
 
-## Status
+A browser discovers an EIP-6963 wallet, checks Mezo Testnet 31611, and requests a quote scoped to the expected payer. The gateway records the request and asks the internal report service to build evidence. Capture queries the fixed public Hyperliquid endpoints, seals exact bytes and source metadata, and publishes immutable input. The report service validates that input and computes rational/exact-decimal depth results, then publishes JSON and ZIP with hashes. The gateway binds the quote and entitlement to those exact hashes.
 
-This document preserves the **retired Go Stage-0 foundation and its safety
-invariants**. The Go source is no longer present in the active tree and is not
-the authoritative runtime-language decision.
+The payment adapter validates x402 Permit2 and EIP-2612 sponsorship, a bound external authority, recipient, amount and asset. PostgreSQL atomically consumes authority and moves to SUBMITTING before settlement. Unknown outcomes are confirm-only. Delivery follows canonical-chain receipt checks and at least twelve confirmations. Restart cannot grant permission to submit twice.
 
-The Liqvera F3–F7 implementation now adds a Python evidence/report layer, a
-TypeScript/Express gateway with PostgreSQL state, a separate Vite browser
-application, and an isolated Compose deployment. Those surfaces are
-`IMPLEMENTED_UNVERIFIED`: their graph identities and factories exist, but the
-deferred build, test, browser, container, security, fault, and acceptance phase
-has not run. The official Mezo protocol package supplies pinned read-only MUSD
-metadata to the gateway and browser; it does not grant minting, custody,
-administrative, mainnet, or exchange-mutation authority.
+## Isolation
 
-The accepted forward runtime is the Python modular monolith in
-[`adr/0001-python-universal-arbitrage-core.md`](adr/0001-python-universal-arbitrage-core.md).
-The former Go implementation remains a historical `TEST_ONLY_EXECUTABLE_SPEC`
-at import commit `8734907d489168a8a6567b93bc85920001fefd85`; its five conformance
-rows are `RETIRED` and point to that immutable Git object. The superseded Go
-image and `Dockerfile.a2` packaging owner are retired. Retirement never makes
-Go packageable in Stage A.
+Capture receives no database, payment or report-service credentials. Report mounts capture read-only, owns output artifacts and requires an internal bearer token. Gateway reads artifacts and owns ledger transitions. Only the live-public profile has the specifically required capture, payment and TLS egress networks. Fixture services have no external egress. Metrics remain on the operations network.
 
-Do not infer that a live adapter, trading endpoint or production execution path exists from either architecture document.
+The browser receives no private signing key, server credential or live authority file. The historical preview validates two pinned asset hashes and fixed report identity before rendering. Those published bytes are never rewritten during branding changes.
 
-The separately invoked P3 acceptance operator is not part of ordinary gateway
-startup. It accepts human-wallet-produced Permit2 and EIP-2612/x402 signatures but
-never wallet keys, validates the clean Git subject and exact 001–005 migration
-ledger before external I/O, and relies on PostgreSQL's atomic grant consumption
-plus `SUBMITTING` transition before its sole settlement. An ambiguous result is
-durably spent and confirm-only.
+## Exactness and integrity
 
-## Retired Go foundation decision
+Money, prices and quantities cross JSON boundaries as strings. Calculations use exact arithmetic and explicit display rounding. Crossed, stale, malformed or insufficient data fail closed. The offline verifier validates bounded ZIP metadata, paths, members and digests before recalculating. It neither authenticates the exchange nor arms execution.
 
-The first implemented foundation was a Go modular monolith with two future deployment boundaries:
+SQL migrations 001–006 and their ledger hashes remain unchanged by the namespace migration. Old persisted JSON is not silently relabelled. [Migration guidance](migration.md) defines recovery and separation of historical state.
 
-1. Control plane: authentication, configuration, portfolio views, and audit.
-2. Private execution worker: venue credentials, order ownership, reducer, reconciliation, and risk reservations.
+## Build ownership
 
-They remained one binary until isolation or measured load required a split. PostgreSQL was the authoritative state store. Redis, NATS, and a Python sidecar were intentionally absent from that foundation.
+Four independently installable Python packages, two Node applications and the protocol metadata package are built from this repository. A clean-source check binds release artifacts to the selected commit. No external delivery framework or private host controller is needed. Optional Getzilla auditing is invoked from an external pinned checkout and does not become an application dependency.
 
-The active Python design reuses the invariants below while changing the runtime and package structure.
-
-## Development tooling boundary
-
-Adaptive Grok Build Pro is linked as a tooling-only Git submodule at exact
-release `v2.0.19`/commit `cb9af4073ba6c3d515145164d771c75ebdfa3224`.
-Liqvera owns only policy/configuration, runtime state, discovery links, and a
-launcher that validates the gitlink, tag, version, and clean checkout before
-execution. `.grok-test-runner.json` opts into the release's bounded parallel
-Python runner. BMad is not installed in the repository; only the exact
-`bmad-method@6.10.0` artifact identity and SRI are retained. Neither tool is a
-runtime architecture node or product dependency.
-
-## Safety invariants
-
-- Money, price, quantity, fees, and P&L use exact integer fixed-point or equivalent exact-decimal values.
-- JSON decimal values are strings; ambiguous binary floating-point money boundaries are rejected.
-- An HTTP acceptance is never interpreted as a fill.
-- Unknown order outcomes freeze new submissions until authoritative reconciliation.
-- Residual hedging starts only after primary-leg cumulative fills are authoritative under the accepted saga policy.
-- Only orders present in the exact ownership registry can be cancelled. There is no broad unscoped cancel operation.
-- RFQ and CLOB capabilities use different contracts.
-- Tenant and account identifiers are present in execution, ownership, risk, event, credential, and audit persistence.
-- Credential rows store only encrypted envelopes and tenant/account-bound AAD.
-- Execution events and audit records are append-only.
-- Shadow-only mode remains the default; documentation does not arm live trading.
-- Ticker equality never proves cross-venue hedge equivalence.
-- Missing, stale, crossed or non-reproducible market evidence produces no opportunity.
-
-## Conceptual state flow
-
-```mermaid
-stateDiagram-v2
-    [*] --> Created
-    Created --> PreflightOK
-    PreflightOK --> Reserved
-    Reserved --> Submitting
-    Submitting --> PartiallyFilled
-    Submitting --> Reconciling: unknown outcome
-    Reconciling --> Submitting: authoritative open order
-    Reconciling --> PartiallyFilled: authoritative fill
-    PartiallyFilled --> Hedging: primary fills authoritative
-    Hedging --> Open: residual neutralized
-    PartiallyFilled --> Open: primary delta is zero
-    Open --> Closing
-    Closing --> Closed
-    Reconciling --> ManualIntervention: ambiguous evidence
-```
-
-The exact active Python state model must be defined by code/tests and the accepted ADR. This diagram records the invariant intent, not proof of implementation.
-
-## Deferred deliberately
-
-- production Hyperliquid and Lighter mutation adapters;
-- live paired execution;
-- user-capital deployment;
-- credential KMS implementation;
-- Telegram trading confirmation;
-- Variational RFQ execution;
-- automatic withdrawals;
-- live arming and production deployment.
-
-Each item requires its own contract, fault tests, shadow evidence and release gate.
-
-## A2 packaging and CI boundary
-
-The A2 raw-evidence collector is a separately pinned Python image. It is public-data only and must contain neither trading SDK authority nor venue trading credentials.
-
-Its deployment/CI claims are maintained in [`a2-deployment.md`](a2-deployment.md) and must be verified against current workflow files and tests. Historical Go Docker behavior must not be confused with the accepted Python runtime direction.
-
-## Strategy relationship
-
-For why the project is intentionally narrow, read:
-
-- [`research/MASTER_RESEARCH.md`](research/MASTER_RESEARCH.md);
-- [`research/PMF_CRITICAL_REVIEW.md`](research/PMF_CRITICAL_REVIEW.md);
-- [`research/TECHNICAL_STRATEGY.md`](research/TECHNICAL_STRATEGY.md).
-
-Research governs what should be attempted; code, tests and ADRs govern what exists.
+See [the specification](specification.md), [security](../SECURITY.md) and [validation](validation.md) for current proof and limitations.

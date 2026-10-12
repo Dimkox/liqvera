@@ -21,7 +21,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "mee-evidence-algorithm/v1"
+      "const": "liqvera-evidence-algorithm/v1"
     },
     "calculation_version": {
       "const": "snapshot-sweep/v1"

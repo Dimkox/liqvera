@@ -27,7 +27,7 @@ function strings(value: unknown): string[] {
 
 function validateCapabilities(value: unknown): Capabilities {
   const data = record(value);
-  if (data.schema !== "mee-evidence-capabilities/v1" || data.instrument_id !== INSTRUMENT ||
+  if (data.schema !== "liqvera-evidence-capabilities/v1" || data.instrument_id !== INSTRUMENT ||
       data.network !== NETWORK || data.asset !== ASSET || data.decimals !== ASSET_DECIMALS ||
       data.price_musd !== PRICE_MUSD || data.amount_atomic !== AMOUNT_ATOMIC ||
       (data.source_mode !== "live-public" && data.source_mode !== "fixture") ||
@@ -42,14 +42,14 @@ function validateQuote(value: unknown): Quote {
   const preview = record(data.preview);
   const terms = record(data.terms);
   const retention = record(data.retention);
-  if (data.schema !== "mee-evidence-quote/v1" || !isUuid(string(data.quote_id)) ||
+  if (data.schema !== "liqvera-evidence-quote/v1" || !isUuid(string(data.quote_id)) ||
       !isUuid(string(data.report_request_id)) || !isUuid(string(data.report_id)) ||
       !isSha256(string(data.report_sha256)) || !isSha256(string(data.bundle_sha256)) ||
       !["READY", "PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "PAID", "EXPIRED", "MANUAL_REVIEW"].includes(string(data.state)) ||
       preview.instrument_id !== INSTRUMENT || !["BUY", "SELL"].includes(string(preview.side)) ||
       preview.snapshot_status !== "VALID_FOR_SNAPSHOT_CALCULATION" ||
       preview.price_musd !== PRICE_MUSD ||
-      terms.version !== "mee-evidence-terms/v1" || terms.network !== NETWORK ||
+      terms.version !== "liqvera-evidence-terms/v1" || terms.network !== NETWORK ||
       terms.chain_id !== CHAIN_ID || terms.asset !== ASSET || terms.decimals !== ASSET_DECIMALS ||
       terms.amount_atomic !== AMOUNT_ATOMIC || terms.price_musd !== PRICE_MUSD ||
       !isAddress(string(terms.pay_to)) || !isAddress(string(terms.expected_payer)) ||
@@ -69,7 +69,7 @@ function validateQuote(value: unknown): Quote {
 
 function validateRequest(value: unknown): RequestStatus {
   const data = record(value);
-  if (data.schema !== "mee-evidence-request-status/v1" || !isUuid(string(data.report_request_id)) ||
+  if (data.schema !== "liqvera-evidence-request-status/v1" || !isUuid(string(data.report_request_id)) ||
       data.status_location !== `/v1/report-requests/${data.report_request_id}` ||
       !["PREPARING", "READY", "REJECTED", "BUILD_FAILED"].includes(string(data.state))) {
     throw new Error("Unexpected request status.");
@@ -90,9 +90,9 @@ export function validateDelivery(value: unknown, reportId: string): Delivery {
   const display = record(calculation.display);
   const quality = record(report.quality);
   const boundaries = record(report.boundaries);
-  if (data.schema !== "mee-evidence-delivery/v1" || report.schema !== "mee-evidence-report/v1" ||
+  if (data.schema !== "liqvera-evidence-delivery/v1" || report.schema !== "liqvera-evidence-report/v1" ||
       report.report_id !== reportId || receipt.report_id !== reportId ||
-      receipt.schema !== "mee-evidence-receipt/v1" ||
+      receipt.schema !== "liqvera-evidence-receipt/v1" ||
       identity.instrument_id !== INSTRUMENT || identity.product_kind !== "perpetual" ||
       !isUuid(string(receipt.quote_id)) || !isSha256(string(receipt.report_sha256)) ||
       receipt.network !== NETWORK || receipt.chain_id !== CHAIN_ID || receipt.asset !== ASSET ||
@@ -137,7 +137,7 @@ async function errorFor(response: Response): Promise<ApiFailure> {
   let requestId: string | undefined;
   try {
     const body = await response.json() as ApiErrorBody;
-    if (body.schema === "mee-evidence-error/v1") {
+    if (body.schema === "liqvera-evidence-error/v1") {
       code = body.code;
       message = body.message;
       requestId = body.request_id;

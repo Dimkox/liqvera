@@ -47,7 +47,7 @@ def _reachable(machine: dict, start: str) -> set[str]:
 
 
 def _assert_graph_consistent(graph: dict) -> None:
-    assert graph["schema"] == "mee-evidence-states/v1"
+    assert graph["schema"] == "liqvera-evidence-states/v1"
     assert {machine["name"] for machine in graph["machines"]} == {
         "report_request",
         "quote",

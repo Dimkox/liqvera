@@ -23,12 +23,12 @@ def test_dockerfiles_copy_wheels_not_source_trees() -> None:
         assert "COPY cmd/" not in text
         assert "COPY internal/" not in text
         assert "go.mod" not in text
-        assert "multi_exchange_engine" not in text
+        assert "liqvera_workspace" not in text
         assert "ENTRYPOINT" in text
 
 
 def test_dockerfiles_use_digest_pinned_python_base() -> None:
-    pin = "python:3.12.13-alpine3.23@sha256:601d3d3797e90e2534782e69c85fafb7971b43f24c7b1b079b7e48dd435e458d"
+    pin = "python:3.12.15-alpine3.23@sha256:1fd55c2f838c4f76262f9eeed899ff9168ea96ac383c61667d6f204325e1f169"
     for path in IMAGES:
         assert pin in path.read_text(encoding="utf-8")
 
@@ -36,11 +36,11 @@ def test_dockerfiles_use_digest_pinned_python_base() -> None:
 def test_images_default_to_data_volume_without_credentials() -> None:
     capture = IMAGES[0].read_text(encoding="utf-8")
     analyzer = IMAGES[1].read_text(encoding="utf-8")
-    assert "ENV MEE_CAPTURE_OUT=/data" in capture
-    assert "ENV MEE_FROZEN_PACKAGE=/data" in analyzer
+    assert "ENV LIQVERA_CAPTURE_OUT=/data" in capture
+    assert "ENV LIQVERA_FROZEN_PACKAGE=/data" in analyzer
     stack_text = COMPOSE.read_text(encoding="utf-8")
-    assert "mee-public-capture:stage-a" in stack_text
-    assert "mee-readonly-analyzer:stage-a" in stack_text
+    assert "liqvera-public-capture:stage-a" in stack_text
+    assert "liqvera-readonly-analyzer:stage-a" in stack_text
     lowered = stack_text.casefold()
     assert "password" not in lowered
     assert "secret" not in lowered
@@ -53,15 +53,15 @@ def test_prod_wraps_fixture_compose_stack() -> None:
     assert "docker compose -f compose.stage-a.yml" in makefile
     assert "docker volume create" not in makefile
     stack = yaml.safe_load(COMPOSE.read_text(encoding="utf-8"))
-    assert stack["name"] == "mee-stage-a"
-    assert stack["volumes"]["package"]["name"] == "mee-stage-a-data"
+    assert stack["name"] == "liqvera-stage-a"
+    assert stack["volumes"]["package"]["name"] == "liqvera-stage-a-data"
     prepare = stack["services"]["prepare-data"]
     capture = stack["services"]["capture"]
     analyzer = stack["services"]["analyzer"]
     assert prepare["user"] == "0:0"
     assert capture["user"] == "65534:65534"
     assert analyzer["user"] == "65534:65534"
-    assert capture["environment"]["MEE_CAPTURE_SOURCE"] == "fixture"
+    assert capture["environment"]["LIQVERA_CAPTURE_SOURCE"] == "fixture"
     assert analyzer["volumes"] == ["package:/data:ro"]
     for service in (prepare, capture, analyzer):
         assert service["network_mode"] == "none"

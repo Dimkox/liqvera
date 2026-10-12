@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema", "request_id", "code", "message"],
   "properties": {
-    "schema": {"const": "mee-evidence-error/v1"},
+    "schema": {"const": "liqvera-evidence-error/v1"},
     "request_id": {"$ref": "primitives.schema.json#/$defs/id"},
     "code": {"$ref": "reasons.schema.json"},
     "message": {"type": "string", "minLength": 1, "maxLength": 256}

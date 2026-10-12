@@ -34,13 +34,13 @@ def test_operator_docs_publish_exact_linux_safe_command_contract() -> None:
     assert "never" in combined.lower()
 
 
-def test_installer_workflow_is_nonpublishing_claw_only_and_bounded() -> None:
+def test_installer_workflow_is_nonpublishing_and_bounded() -> None:
     workflow = yaml.safe_load((ROOT / ".github/workflows/installer-linux.yml").read_text())
     assert workflow["permissions"] == {"contents": "read"}
     assert workflow["concurrency"]["cancel-in-progress"] is True
     assert set(workflow["jobs"]) == {"linux-contract"}
     job = workflow["jobs"]["linux-contract"]
-    assert job["runs-on"] == ["self-hosted", "claw"]
+    assert job["runs-on"] == "ubuntu-24.04"
     assert job["timeout-minutes"] <= 20
     rendered = str(workflow)
     assert "tests/installer" in rendered
@@ -89,7 +89,7 @@ def test_mocked_supported_linux_matrix_is_explicitly_contract_only(
 
 
 def test_docs_keep_clean_host_and_external_acceptance_truthful() -> None:
-    notes = (ROOT / "engineering/changes/20260929-f7-live-acceptance-and-release-0-0-1-337ef5/release-notes-v0.0.2.md").read_text()
+    notes = (ROOT / "docs/deployment.md").read_text()
     assert "409" in notes or "installer" in notes
     assert "mocked" in notes.lower()
     assert "clean-host" in notes

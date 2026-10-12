@@ -13,7 +13,7 @@ from decimal import Decimal
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
-from mee_contracts.exact import ExactDecimal, ExactError
+from liqvera_contracts.exact import ExactDecimal, ExactError
 
 ROOT = Path(__file__).resolve().parents[2] / "schemas" / "mezo-evidence" / "v1"
 BASE = "https://schemas.liqvera.invalid/mezo-evidence/v1/"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Liqvera Python wheel set without changing the Stage A factory."""
+"""Build the complete Liqvera Python wheel set from a clean source commit."""
 
 from __future__ import annotations
 
@@ -17,9 +17,8 @@ if str(ROOT) not in sys.path:
 from tools.conformance.distributions import build_all
 from tools.conformance.runner import ConformanceError, require_clean_exact_head
 
-REPORT_DISTRIBUTION = "mee-evidence-report"
+REPORT_DISTRIBUTION = "liqvera-evidence-report"
 REPORT_PACKAGE = Path("packages/evidence-report")
-REPORT_RUNTIME_PINS = ("jsonschema==4.23.0", "referencing==0.35.1")
 
 
 def _report_wheel(output: Path) -> Path:
@@ -41,32 +40,10 @@ def _report_wheel(output: Path) -> Path:
     )
     if completed.returncode != 0:
         raise ConformanceError(completed.stderr or completed.stdout or "report wheel build failed")
-    wheels = sorted(output.glob("mee_evidence_report-*.whl"))
+    wheels = sorted(output.glob("liqvera_evidence_report-*.whl"))
     if len(wheels) != 1:
         raise ConformanceError(f"expected exactly one report wheel, got {wheels}")
     return wheels[0]
-
-
-def _download_report_dependencies(output: Path) -> None:
-    completed = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "pip",
-            "download",
-            "--disable-pip-version-check",
-            "--dest",
-            str(output),
-            *REPORT_RUNTIME_PINS,
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if completed.returncode != 0:
-        raise ConformanceError(
-            completed.stderr or completed.stdout or "report dependency download failed"
-        )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -79,7 +56,6 @@ def main(argv: list[str] | None = None) -> int:
         require_clean_exact_head(args.source_sha, ROOT)
         stage_a = build_all(args.source_sha, output, root=ROOT, require_clean=False)
         report = _report_wheel(output)
-        _download_report_dependencies(output)
     except ConformanceError as error:
         print(error, file=sys.stderr)
         return 1

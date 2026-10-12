@@ -1,46 +1,19 @@
 # Liqvera security
 
-[Repository README](README.md) · [Roadmap](docs/ROADMAP.md) · [Architecture invariants](docs/architecture.md) · [Technical strategy](docs/research/TECHNICAL_STRATEGY.md) · [Repository audit](docs/research/REPOSITORY_CONNECTIVITY_AUDIT.md)
+Liqvera consumes public market data and produces evidence. It has no authority to submit exchange orders, withdraw funds or use private venue credentials. Testnet report payments are a separate, explicitly bounded integration; they do not authorize trading.
 
-## Secrets
+## Secrets and trust
 
-Never commit wallet keys, API secrets, authentication tokens, seed phrases, or exported account sessions. Use agent/API wallets without withdrawal rights where the venue supports them. Rotate any credential exposed in chat, logs, terminal history, screenshots or Git history.
+Never commit or log keys, passwords, bearer capabilities, wallet signatures, private grants or secret-file contents. Use separate database and internal-report credentials. Capture receives neither. The browser uses the user's wallet through supported signing interfaces and never receives private key material. Signed authority is externally issued and bound to reviewed source, database, plan and budget.
 
-Run a full-history secret scan before enabling branch protection, sharing an archive or publishing any repository snapshot. Scanning only the current tree is insufficient.
+Missing/expired authority, malformed inputs, stale source data, ambiguous payment outcomes and artifact digest mismatch fail closed. Unknown settlement is confirm-only. SQL migrations and sealed artifacts are immutable. Source cleanup must never rewrite their identity or reset a consumed grant.
 
-Research collectors, competitor inventories and public-data services must not acquire runtime trading authority merely because they share a repository.
+## Untrusted data
 
-## Trading safety status
+HTTP input, market payloads and imported ZIP files are untrusted. Enforce bounded size, exact schemas and decimal syntax, safe paths, strict archive metadata and offline resource resolution. Hashes prove integrity relative to retained bytes; they do not independently attest the exchange. Reports make no execution or profit promise.
 
-Live trading is not approved. The current adapters lack fully demonstrated restart-safe idempotency and complete source-of-truth reconciliation after uncertain network outcomes. A timeout must be treated as `UNKNOWN`, not as proof of rejection, until the venue is queried and private events are reconciled.
+## Dependencies and disclosure
 
-Required before live use:
+Audit exact Python and Node dependency closures and built OS images against current advisory data. Include development tools, transitive packages and every deployment component. Record unsuppressed findings with scanner/database timestamps; an empty direct-pin scan is insufficient. See [the current baseline](docs/security/2026-10-12-baseline.md) and [validation](docs/validation.md).
 
-- persistent client-order identity;
-- verified private streams and REST/source-of-truth reconciliation;
-- event deduplication and sequence handling;
-- persisted two-leg state transitions;
-- authoritative cumulative-fill accounting;
-- residual exposure limits and emergency hedging;
-- risk reservation and kill switch;
-- venue precision, multiplier and minimum checks at the final boundary;
-- restart, event-reordering and fault-injection tests;
-- explicit operator arming and minimal-capital canary evidence.
-
-## Credential boundary
-
-Initial production design must fail closed:
-
-- withdrawal permission is prohibited;
-- separate subaccounts/API keys are preferred;
-- CEX keys require IP restriction where supported;
-- secrets are encrypted at rest and never logged;
-- user/tenant scope is present in every credential and execution lookup;
-- revocation is supported without deleting the audit trail;
-- a research statement or partner program never changes credential permissions.
-
-## Product and legal boundary
-
-The repository does not promise risk-free yield or authorize distribution in a jurisdiction. Automated strategies, derivatives marketing, user-key custody and profit-share models require separate review.
-
-Strategic and product-market-fit conclusions are maintained in [`docs/research/MASTER_RESEARCH.md`](docs/research/MASTER_RESEARCH.md) and [`docs/research/PMF_CRITICAL_REVIEW.md`](docs/research/PMF_CRITICAL_REVIEW.md). Runtime safety always overrides growth or monetization assumptions.
+Report vulnerabilities privately to the repository owner with affected commit/image, reproduction and impact; do not publish credentials or an exploit against the live service. Publication, deployment, grant renewal and new payments require explicit scoped authorization. Before sharing a release, review source and history for secrets and verify checksums, license notices and recovery evidence.

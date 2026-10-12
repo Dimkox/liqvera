@@ -1,0 +1,6 @@
+liqvera-contracts==0.2.0
+liqvera-readonly-analyzer==0.2.0
+liqvera-public-capture==0.2.0
+liqvera-evidence-report==0.2.0
+jsonschema==4.23.0
+referencing==0.35.1

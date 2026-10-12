@@ -14,9 +14,7 @@ include = [
 
 exclude = [
   ".git",
-  ".grok-stack/runtime",
   "dist",
-  "engineering",
   "examples",
   "__pycache__",
 ]

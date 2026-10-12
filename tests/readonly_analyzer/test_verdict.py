@@ -6,13 +6,13 @@ import json
 from pathlib import Path
 from uuid import UUID
 
-from mee_contracts.decision import StageADecisionCode, StageAReasonCode
-from mee_public_capture.config import load_public_configuration
-from mee_public_capture.runtime import run_public_capture
-from mee_readonly_analyzer.frozen_package.reader import FrozenPackageEvidenceReader
-from mee_readonly_analyzer.identity import bind_reconstructed_books
-from mee_readonly_analyzer.reconstruction import reconstruct_books
-from mee_readonly_analyzer.verdict import evaluate_frozen_package
+from liqvera_contracts.decision import StageADecisionCode, StageAReasonCode
+from liqvera_public_capture.config import load_public_configuration
+from liqvera_public_capture.runtime import run_public_capture
+from liqvera_readonly_analyzer.frozen_package.reader import FrozenPackageEvidenceReader
+from liqvera_readonly_analyzer.identity import bind_reconstructed_books
+from liqvera_readonly_analyzer.reconstruction import reconstruct_books
+from liqvera_readonly_analyzer.verdict import evaluate_frozen_package
 
 from tests.readonly_analyzer.package_factory import (
     passing_economics,
@@ -52,9 +52,9 @@ def test_capture_written_fixture_is_insufficient_not_invalid(tmp_path: Path) -> 
     root.mkdir()
     config = load_public_configuration(
         {
-            "MEE_CAPTURE_OUT": str(root),
-            "MEE_CAPTURE_SOURCE": "fixture",
-            "MEE_PUBLIC_VENUES": "hyperliquid,lighter",
+            "LIQVERA_CAPTURE_OUT": str(root),
+            "LIQVERA_CAPTURE_SOURCE": "fixture",
+            "LIQVERA_PUBLIC_VENUES": "hyperliquid,lighter",
         }
     )
     assert run_public_capture(config) == 0

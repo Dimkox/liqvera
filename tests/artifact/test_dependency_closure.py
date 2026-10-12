@@ -26,12 +26,12 @@ def wheels(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 def test_dependency_closures(tmp_path: Path, wheels: Path) -> None:
-    contracts = install_one(make_venv(tmp_path / "c"), wheels, "mee-contracts")
-    capture = install_one(make_venv(tmp_path / "p"), wheels, "mee-public-capture")
-    analyzer = install_one(make_venv(tmp_path / "a"), wheels, "mee-readonly-analyzer")
+    contracts = install_one(make_venv(tmp_path / "c"), wheels, "liqvera-contracts")
+    capture = install_one(make_venv(tmp_path / "p"), wheels, "liqvera-public-capture")
+    analyzer = install_one(make_venv(tmp_path / "a"), wheels, "liqvera-readonly-analyzer")
     assert _names(contracts.dependencies) == set()
-    assert "mee-contracts" in _names(capture.dependencies)
-    assert "mee-readonly-analyzer" not in _names(capture.dependencies)
-    assert _names(analyzer.dependencies) == {"mee-contracts"}
+    assert "liqvera-contracts" in _names(capture.dependencies)
+    assert "liqvera-readonly-analyzer" not in _names(capture.dependencies)
+    assert _names(analyzer.dependencies) == {"liqvera-contracts"}
     assert "httpx" not in _names(analyzer.dependencies)
     assert "websockets" not in _names(analyzer.dependencies)

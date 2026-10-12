@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from mee_contracts.exact import ExactDecimal
+from liqvera_contracts.exact import ExactDecimal
 
 from tests.conformance.invariants import apply_cumulative
 

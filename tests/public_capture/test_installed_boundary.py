@@ -1,4 +1,4 @@
-"""Install mee-public-capture into a fresh venv outside the checkout."""
+"""Install liqvera-public-capture into a fresh venv outside the checkout."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACTS = ROOT / "packages" / "contracts"
 CAPTURE = ROOT / "packages" / "public-capture"
-SRC = CAPTURE / "src" / "mee_public_capture"
+SRC = CAPTURE / "src" / "liqvera_public_capture"
 INSPECT = ROOT / "scripts" / "inspect-installed-distribution.py"
 
 
@@ -36,27 +36,26 @@ def _build_wheel(python: Path, source: Path, name: str, tmp_path: Path) -> Path:
         ignore=shutil.ignore_patterns("dist", "*.egg-info", "__pycache__"),
     )
     _run([str(python), "-m", "hatchling", "build", "--target", "wheel"], cwd=build_root)
-    wheels = sorted((build_root / "dist").glob(f"{name}-0.1.0-py3-none-any.whl"))
-    assert wheels, f"expected {name} 0.1.0 wheel"
+    wheels = sorted((build_root / "dist").glob(f"{name}-0.2.0-py3-none-any.whl"))
+    assert wheels, f"expected {name} 0.2.0 wheel"
     return wheels[-1]
 
 
 def test_public_capture_metadata_and_source_boundary() -> None:
     metadata = tomllib.loads((CAPTURE / "pyproject.toml").read_text(encoding="utf-8"))
-    assert metadata["project"]["name"] == "mee-public-capture"
+    assert metadata["project"]["name"] == "liqvera-public-capture"
     assert metadata["project"]["scripts"] == {
-        "mee-public-capture": "mee_public_capture.__main__:main",
-        "mee-evidence-capture-service": "mee_public_capture.evidence_service:main",
+        "liqvera-public-capture": "liqvera_public_capture.__main__:main",
+        "liqvera-evidence-capture-service": "liqvera_public_capture.evidence_service:main",
     }
     assert metadata["project"]["dependencies"] == [
-        "mee-contracts==0.1.0",
+        "liqvera-contracts==0.2.0",
         "httpx==0.28.1",
-        "websockets==17.0.1",
+        "websockets==17.1",
     ]
     forbidden = {
-        "multi_exchange_engine",
-        "mee_readonly_analyzer",
-        "adaptive_grok",
+        "liqvera_workspace",
+        "liqvera_readonly_analyzer",
         "psycopg",
         "asyncpg",
         "eth_account",
@@ -79,9 +78,9 @@ def test_public_capture_has_only_public_entry_point(tmp_path: Path) -> None:
     venv.EnvBuilder(with_pip=True, symlinks=True).create(install_venv)
     build_python = build_venv / "bin" / "python"
     install_python = install_venv / "bin" / "python"
-    _run([str(build_python), "-m", "pip", "install", "hatchling==1.31.0"])
-    contracts_wheel = _build_wheel(build_python, CONTRACTS, "mee_contracts", tmp_path)
-    capture_wheel = _build_wheel(build_python, CAPTURE, "mee_public_capture", tmp_path)
+    _run([str(build_python), "-m", "pip", "install", "hatchling==1.32.4"])
+    contracts_wheel = _build_wheel(build_python, CONTRACTS, "liqvera_contracts", tmp_path)
+    capture_wheel = _build_wheel(build_python, CAPTURE, "liqvera_public_capture", tmp_path)
     _run([str(install_python), "-m", "pip", "install", "--no-deps", str(contracts_wheel)])
     _run([str(install_python), "-m", "pip", "install", "--no-deps", str(capture_wheel)])
     probe = _run(
@@ -89,18 +88,18 @@ def test_public_capture_has_only_public_entry_point(tmp_path: Path) -> None:
             str(install_python),
             "-I",
             "-c",
-            "import importlib.metadata, mee_public_capture;"
+            "import importlib.metadata, liqvera_public_capture;"
             "eps=importlib.metadata.entry_points();"
             "group=eps.select(group='console_scripts') if hasattr(eps,'select') else [];"
             "scripts={item.name: item.value for item in group};"
-            "print(scripts['mee-public-capture']);"
-            "assert 'mee_readonly_analyzer' not in mee_public_capture.__name__;"
-            "import mee_public_capture as pkg;"
-            "assert pkg.__name__=='mee_public_capture'",
+            "print(scripts['liqvera-public-capture']);"
+            "assert 'liqvera_readonly_analyzer' not in liqvera_public_capture.__name__;"
+            "import liqvera_public_capture as pkg;"
+            "assert pkg.__name__=='liqvera_public_capture'",
         ],
         cwd=tmp_path,
     )
-    assert probe.stdout.strip() == "mee_public_capture.__main__:main"
+    assert probe.stdout.strip() == "liqvera_public_capture.__main__:main"
     missing = _run(
         [
             str(install_python),
@@ -108,8 +107,8 @@ def test_public_capture_has_only_public_entry_point(tmp_path: Path) -> None:
             "-c",
             "import importlib.util, json;"
             "print(json.dumps({"
-            "'analyzer': importlib.util.find_spec('mee_readonly_analyzer') is not None,"
-            "'legacy': importlib.util.find_spec('multi_exchange_engine') is not None"
+            "'analyzer': importlib.util.find_spec('liqvera_readonly_analyzer') is not None,"
+            "'legacy': importlib.util.find_spec('liqvera_workspace') is not None"
             "}))",
         ],
         cwd=tmp_path,
@@ -123,14 +122,14 @@ def test_public_capture_has_only_public_entry_point(tmp_path: Path) -> None:
             "--python",
             str(install_python),
             "--distribution",
-            "mee-public-capture",
+            "liqvera-public-capture",
             "--allow-namespace",
-            "mee_public_capture",
+            "liqvera_public_capture",
             "--forbid-namespace",
-            "mee_readonly_analyzer",
-            "multi_exchange_engine",
+            "liqvera_readonly_analyzer",
+            "liqvera_workspace",
             "--allow-dependency",
-            "mee-contracts",
+            "liqvera-contracts",
             "httpx",
             "websockets",
             "--forbid-dependency",
@@ -150,14 +149,14 @@ def test_public_capture_has_only_public_entry_point(tmp_path: Path) -> None:
             "account",
         ]
     )
-    assert "installed boundary passed: mee-public-capture" in inspect.stdout
+    assert "installed boundary passed: liqvera-public-capture" in inspect.stdout
     launched = _run(
         [
             str(install_python),
             "-I",
             "-c",
-            "from mee_public_capture.config import load_public_configuration;"
-            "from mee_public_capture.runtime import run_public_capture;"
+            "from liqvera_public_capture.config import load_public_configuration;"
+            "from liqvera_public_capture.runtime import run_public_capture;"
             "raise SystemExit(run_public_capture(load_public_configuration({})))",
         ],
         cwd=tmp_path,

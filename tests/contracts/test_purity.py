@@ -1,4 +1,4 @@
-"""Purity and export contracts for the mee-contracts distribution."""
+"""Purity and export contracts for the liqvera-contracts distribution."""
 
 from __future__ import annotations
 
@@ -8,14 +8,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACTS = ROOT / "packages" / "contracts"
-SRC = CONTRACTS / "src" / "mee_contracts"
+SRC = CONTRACTS / "src" / "liqvera_contracts"
 
 
 def test_contracts_pyproject_has_empty_dependency_closure() -> None:
     metadata = tomllib.loads((CONTRACTS / "pyproject.toml").read_text(encoding="utf-8"))
     project = metadata["project"]
-    assert project["name"] == "mee-contracts"
-    assert project["version"] == "0.1.0"
+    assert project["name"] == "liqvera-contracts"
+    assert project["version"] == "0.2.0"
     assert project.get("dependencies", []) == []
     assert "dependencies" in metadata["project"]
 
@@ -31,10 +31,9 @@ def test_contracts_source_has_no_forbidden_imports() -> None:
         "pydantic",
         "orjson",
         "structlog",
-        "multi_exchange_engine",
-        "mee_public_capture",
-        "mee_readonly_analyzer",
-        "adaptive_grok",
+        "liqvera_workspace",
+        "liqvera_public_capture",
+        "liqvera_readonly_analyzer",
     }
     for path in sorted(SRC.glob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
@@ -48,7 +47,7 @@ def test_contracts_source_has_no_forbidden_imports() -> None:
 
 
 def test_contracts_package_exports_kernel() -> None:
-    import mee_contracts as pkg
+    import liqvera_contracts as pkg
 
     assert pkg.ShadowRejectCode.DEPTH_INSUFFICIENT.value == "DEPTH_INSUFFICIENT"
     assert pkg.fraction_from_decimal is not None
@@ -56,7 +55,7 @@ def test_contracts_package_exports_kernel() -> None:
     assert pkg.EvidenceReader is not None
     assert pkg.StageADecisionCode.INVALID_DATASET.value == "INVALID_DATASET"
     assert "GO" not in {item.value for item in pkg.StageADecisionCode}
-    assert "multi_exchange_engine" not in pkg.__all__
+    assert "liqvera_workspace" not in pkg.__all__
 
 
 def test_contracts_exports_reader_protocol() -> None:

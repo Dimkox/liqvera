@@ -7,7 +7,7 @@
   "additionalProperties": false,
   "required": ["schema", "machines", "bindings", "uniqueness", "invariants"],
   "properties": {
-    "schema": {"const": "mee-evidence-states/v1"},
+    "schema": {"const": "liqvera-evidence-states/v1"},
     "machines": {
       "type": "array",
       "items": {"$ref": "#/$defs/machine"},

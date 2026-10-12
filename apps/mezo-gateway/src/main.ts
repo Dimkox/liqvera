@@ -16,7 +16,7 @@ import { databaseIdentity } from './p3-operator.js';
 async function main():Promise<void> {
   const config=await loadConfig();
   const pool=new Pool({connectionString:config.databaseUrl,max:12,connectionTimeoutMillis:3000,idleTimeoutMillis:30000,
-    application_name:'mee-mezo-gateway',statement_timeout:5000});
+    application_name:'liqvera-mezo-gateway',statement_timeout:5000});
   pool.on('error',()=>logEvent({event:'DATABASE_UNAVAILABLE'}));
   const contracts=await Contracts.load(new URL('./contracts/',import.meta.url));
   const identity=new MezoAuthorizationPolicy();

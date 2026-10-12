@@ -2,7 +2,7 @@
 
 import unittest
 
-from mee_contracts.reasons import (
+from liqvera_contracts.reasons import (
     SHADOW_REASON_ORDER,
     ShadowRejectCode,
 )

@@ -29,7 +29,7 @@
       "type": "object", "additionalProperties": false,
       "required": ["version", "network", "chain_id", "asset", "decimals", "amount_atomic", "price_musd", "pay_to", "expected_payer", "expires_at"],
       "properties": {
-        "version": {"const": "mee-evidence-terms/v1"},
+        "version": {"const": "liqvera-evidence-terms/v1"},
         "network": {"$ref": "#/$defs/network"},
         "chain_id": {"$ref": "#/$defs/chain_id"},
         "asset": {"$ref": "#/$defs/asset"},
@@ -56,7 +56,7 @@
       "type": "object", "additionalProperties": false,
       "required": ["schema", "request_id", "report_request_id", "quote_id", "report_id", "report_sha256", "bundle_sha256", "state", "preview", "terms", "retention"],
       "properties": {
-        "schema": {"const": "mee-evidence-quote/v1"},
+        "schema": {"const": "liqvera-evidence-quote/v1"},
         "request_id": {"$ref": "primitives.schema.json#/$defs/id"},
         "report_request_id": {"$ref": "primitives.schema.json#/$defs/id"},
         "quote_id": {"$ref": "primitives.schema.json#/$defs/id"},
@@ -72,17 +72,17 @@
     "status_location": {"type": "string", "pattern": "^/v1/report-requests/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![\\s\\S])"},
     "request_status": {
       "oneOf": [
-        {"type": "object", "additionalProperties": false, "required": ["schema", "request_id", "report_request_id", "status_location", "state"], "properties": {"schema": {"const": "mee-evidence-request-status/v1"}, "request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "report_request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "status_location": {"$ref": "#/$defs/status_location"}, "state": {"const": "PREPARING"}}},
-        {"type": "object", "additionalProperties": false, "required": ["schema", "request_id", "report_request_id", "status_location", "state", "quote_id"], "properties": {"schema": {"const": "mee-evidence-request-status/v1"}, "request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "report_request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "status_location": {"$ref": "#/$defs/status_location"}, "state": {"const": "READY"}, "quote_id": {"$ref": "primitives.schema.json#/$defs/id"}}},
-        {"type": "object", "additionalProperties": false, "required": ["schema", "request_id", "report_request_id", "status_location", "state", "reason"], "properties": {"schema": {"const": "mee-evidence-request-status/v1"}, "request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "report_request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "status_location": {"$ref": "#/$defs/status_location"}, "state": {"const": "REJECTED"}, "reason": {"type": "string", "enum": ["INVALID_INPUT", "INVALID_DATASET", "STALE_SOURCE", "CLOCK_SKEW", "IDENTITY_UNVERIFIED", "IDENTITY_MISMATCH", "CROSSED_BOOK", "DEPTH_INSUFFICIENT", "UNSUPPORTED_INSTRUMENT", "SIMULATED_SOURCE"]}}},
-        {"type": "object", "additionalProperties": false, "required": ["schema", "request_id", "report_request_id", "status_location", "state", "reason"], "properties": {"schema": {"const": "mee-evidence-request-status/v1"}, "request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "report_request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "status_location": {"$ref": "#/$defs/status_location"}, "state": {"const": "BUILD_FAILED"}, "reason": {"type": "string", "enum": ["SOURCE_UNAVAILABLE", "STORAGE_UNAVAILABLE", "ARTIFACT_INTEGRITY_FAILURE"]}}}
+        {"type": "object", "additionalProperties": false, "required": ["schema", "request_id", "report_request_id", "status_location", "state"], "properties": {"schema": {"const": "liqvera-evidence-request-status/v1"}, "request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "report_request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "status_location": {"$ref": "#/$defs/status_location"}, "state": {"const": "PREPARING"}}},
+        {"type": "object", "additionalProperties": false, "required": ["schema", "request_id", "report_request_id", "status_location", "state", "quote_id"], "properties": {"schema": {"const": "liqvera-evidence-request-status/v1"}, "request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "report_request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "status_location": {"$ref": "#/$defs/status_location"}, "state": {"const": "READY"}, "quote_id": {"$ref": "primitives.schema.json#/$defs/id"}}},
+        {"type": "object", "additionalProperties": false, "required": ["schema", "request_id", "report_request_id", "status_location", "state", "reason"], "properties": {"schema": {"const": "liqvera-evidence-request-status/v1"}, "request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "report_request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "status_location": {"$ref": "#/$defs/status_location"}, "state": {"const": "REJECTED"}, "reason": {"type": "string", "enum": ["INVALID_INPUT", "INVALID_DATASET", "STALE_SOURCE", "CLOCK_SKEW", "IDENTITY_UNVERIFIED", "IDENTITY_MISMATCH", "CROSSED_BOOK", "DEPTH_INSUFFICIENT", "UNSUPPORTED_INSTRUMENT", "SIMULATED_SOURCE"]}}},
+        {"type": "object", "additionalProperties": false, "required": ["schema", "request_id", "report_request_id", "status_location", "state", "reason"], "properties": {"schema": {"const": "liqvera-evidence-request-status/v1"}, "request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "report_request_id": {"$ref": "primitives.schema.json#/$defs/id"}, "status_location": {"$ref": "#/$defs/status_location"}, "state": {"const": "BUILD_FAILED"}, "reason": {"type": "string", "enum": ["SOURCE_UNAVAILABLE", "STORAGE_UNAVAILABLE", "ARTIFACT_INTEGRITY_FAILURE"]}}}
       ]
     },
     "receipt": {
       "type": "object", "additionalProperties": false,
       "required": ["schema", "quote_id", "report_id", "payment_attempt_id", "report_sha256", "network", "chain_id", "asset", "amount_atomic", "payer", "pay_to", "tx_hash", "block_hash", "block_number", "log_index", "confirmed_at", "finality_policy_version", "transaction_from", "buyer_native_balance_before", "buyer_native_balance_after", "buyer_native_gas_spent", "observation_before_block_number", "observation_before_block_hash", "observation_after_block_number", "observation_after_block_hash", "confirmations", "authorization_identity", "transfer_identity"],
       "properties": {
-        "schema": {"const": "mee-evidence-receipt/v1"},
+        "schema": {"const": "liqvera-evidence-receipt/v1"},
         "quote_id": {"$ref": "primitives.schema.json#/$defs/id"},
         "report_id": {"$ref": "primitives.schema.json#/$defs/id"},
         "payment_attempt_id": {"$ref": "primitives.schema.json#/$defs/id"},
@@ -116,7 +116,7 @@
       "type": "object", "additionalProperties": false,
       "required": ["schema", "request_id", "report", "receipt"],
       "properties": {
-        "schema": {"const": "mee-evidence-delivery/v1"},
+        "schema": {"const": "liqvera-evidence-delivery/v1"},
         "request_id": {"$ref": "primitives.schema.json#/$defs/id"},
         "report": {"$ref": "report.schema.json"},
         "receipt": {"$ref": "#/$defs/receipt"}
@@ -130,7 +130,7 @@
       ],
       "required": ["schema", "request_id", "instrument_id", "instrument_label", "network", "asset", "decimals", "price_musd", "amount_atomic", "source_mode", "limitations", "payment_ready", "blockers"],
       "properties": {
-        "schema": {"const": "mee-evidence-capabilities/v1"},
+        "schema": {"const": "liqvera-evidence-capabilities/v1"},
         "request_id": {"$ref": "primitives.schema.json#/$defs/id"},
         "instrument_id": {"$ref": "quote-request.schema.json#/properties/instrument_id"},
         "instrument_label": {"const": "Hyperliquid BTC linear perpetual"},
@@ -149,7 +149,7 @@
       "type": "object", "additionalProperties": false,
       "required": ["schema", "request_id", "status"],
       "properties": {
-        "schema": {"const": "mee-evidence-health/v1"},
+        "schema": {"const": "liqvera-evidence-health/v1"},
         "request_id": {"$ref": "primitives.schema.json#/$defs/id"},
         "status": {"const": "alive"}
       }
@@ -169,7 +169,7 @@
       ],
       "required": ["schema", "request_id", "ready", "storage_ready", "configuration_ready", "integration_ready", "payment_ready", "blockers"],
       "properties": {
-        "schema": {"const": "mee-evidence-readiness/v1"},
+        "schema": {"const": "liqvera-evidence-readiness/v1"},
         "request_id": {"$ref": "primitives.schema.json#/$defs/id"},
         "ready": {"type": "boolean"},
         "storage_ready": {"type": "boolean"},

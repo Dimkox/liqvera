@@ -1,4 +1,4 @@
-"""Install mee-readonly-analyzer into a fresh venv outside the checkout."""
+"""Install liqvera-readonly-analyzer into a fresh venv outside the checkout."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACTS = ROOT / "packages" / "contracts"
 ANALYZER = ROOT / "packages" / "readonly-analyzer"
-SRC = ANALYZER / "src" / "mee_readonly_analyzer"
+SRC = ANALYZER / "src" / "liqvera_readonly_analyzer"
 INSPECT = ROOT / "scripts" / "inspect-installed-distribution.py"
 
 
@@ -35,23 +35,23 @@ def _build_wheel(python: Path, source: Path, name: str, tmp_path: Path) -> Path:
         ignore=shutil.ignore_patterns("dist", "*.egg-info", "__pycache__"),
     )
     _run([str(python), "-m", "hatchling", "build", "--target", "wheel"], cwd=build_root)
-    wheels = sorted((build_root / "dist").glob(f"{name}-0.1.0-py3-none-any.whl"))
-    assert wheels, f"expected {name} 0.1.0 wheel"
+    wheels = sorted((build_root / "dist").glob(f"{name}-0.2.0-py3-none-any.whl"))
+    assert wheels, f"expected {name} 0.2.0 wheel"
     return wheels[-1]
 
 
 def test_analyzer_source_has_no_writer_or_network() -> None:
     metadata = tomllib.loads((ANALYZER / "pyproject.toml").read_text(encoding="utf-8"))
-    assert metadata["project"]["dependencies"] == ["mee-contracts==0.1.0"]
+    assert metadata["project"]["dependencies"] == ["liqvera-contracts==0.2.0"]
     assert metadata["project"]["scripts"] == {
-        "mee-readonly-analyzer": "mee_readonly_analyzer.__main__:main"
+        "liqvera-readonly-analyzer": "liqvera_readonly_analyzer.__main__:main"
     }
     forbidden = {
         "httpx",
         "websockets",
         "psycopg",
-        "multi_exchange_engine",
-        "mee_public_capture",
+        "liqvera_workspace",
+        "liqvera_public_capture",
         "aiohttp",
     }
     for path in SRC.rglob("*.py"):
@@ -75,9 +75,9 @@ def test_analyzer_wheel_installs_outside_checkout(tmp_path: Path) -> None:
     venv.EnvBuilder(with_pip=True, symlinks=True).create(install_venv)
     build_python = build_venv / "bin" / "python"
     install_python = install_venv / "bin" / "python"
-    _run([str(build_python), "-m", "pip", "install", "hatchling==1.31.0"])
-    contracts = _build_wheel(build_python, CONTRACTS, "mee_contracts", tmp_path)
-    analyzer = _build_wheel(build_python, ANALYZER, "mee_readonly_analyzer", tmp_path)
+    _run([str(build_python), "-m", "pip", "install", "hatchling==1.32.4"])
+    contracts = _build_wheel(build_python, CONTRACTS, "liqvera_contracts", tmp_path)
+    analyzer = _build_wheel(build_python, ANALYZER, "liqvera_readonly_analyzer", tmp_path)
     _run([str(install_python), "-m", "pip", "install", "--no-deps", str(contracts)])
     _run([str(install_python), "-m", "pip", "install", "--no-deps", str(analyzer)])
     inspect = _run(
@@ -87,14 +87,14 @@ def test_analyzer_wheel_installs_outside_checkout(tmp_path: Path) -> None:
             "--python",
             str(install_python),
             "--distribution",
-            "mee-readonly-analyzer",
+            "liqvera-readonly-analyzer",
             "--allow-namespace",
-            "mee_readonly_analyzer",
+            "liqvera_readonly_analyzer",
             "--forbid-namespace",
-            "mee_public_capture",
-            "multi_exchange_engine",
+            "liqvera_public_capture",
+            "liqvera_workspace",
             "--allow-dependency",
-            "mee-contracts",
+            "liqvera-contracts",
             "--forbid-dependency",
             "httpx",
             "websockets",
@@ -111,4 +111,4 @@ def test_analyzer_wheel_installs_outside_checkout(tmp_path: Path) -> None:
             "atomic_write",
         ]
     )
-    assert "installed boundary passed: mee-readonly-analyzer" in inspect.stdout
+    assert "installed boundary passed: liqvera-readonly-analyzer" in inspect.stdout

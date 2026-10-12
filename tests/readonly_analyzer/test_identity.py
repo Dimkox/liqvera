@@ -11,11 +11,11 @@ from pathlib import Path
 from uuid import UUID
 
 import pytest
-from mee_contracts.evidence import RawPublicEnvelope
-from mee_contracts.market import InstrumentIdentity
-from mee_contracts.provenance import MappingDecision, MarketMappingEvidence
-from mee_readonly_analyzer.identity import IdentityBindError, bind_reconstructed_books
-from mee_readonly_analyzer.reconstruction import ReconstructionError, reconstruct_books
+from liqvera_contracts.evidence import RawPublicEnvelope
+from liqvera_contracts.market import InstrumentIdentity
+from liqvera_contracts.provenance import MappingDecision, MarketMappingEvidence
+from liqvera_readonly_analyzer.identity import IdentityBindError, bind_reconstructed_books
+from liqvera_readonly_analyzer.reconstruction import ReconstructionError, reconstruct_books
 
 RUN = UUID("00000000-0000-0000-0000-000000000001")
 FIXTURE_BOOK = (
@@ -511,7 +511,7 @@ def test_lighter_channel_must_be_order_book_digits() -> None:
 
 def test_identity_source_forbids_clock_network_and_valid_for() -> None:
     source = Path(inspect.getfile(bind_reconstructed_books)).read_text(encoding="utf-8")
-    assert "mee_public_capture" not in source
+    assert "liqvera_public_capture" not in source
     assert "httpx" not in source
     assert "import time" not in source
     assert "from time " not in source

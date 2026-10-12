@@ -38,9 +38,9 @@ def _clean_owned_directory(mvp_root: Path, target: Path) -> Path:
 
 
 def main() -> int:
-    from mee_evidence_report import cli as report_cli
-    from mee_public_capture.config import load_public_configuration
-    from mee_public_capture.runtime import run_public_capture
+    from liqvera_evidence_report import cli as report_cli
+    from liqvera_public_capture.config import load_public_configuration
+    from liqvera_public_capture.runtime import run_public_capture
 
     repository_root = Path(__file__).resolve().parents[1]
     mvp_root = _validated_mvp_root(repository_root)
@@ -52,14 +52,14 @@ def main() -> int:
     quantity = os.environ.get("MVP_QUANTITY", "0.15")
 
     print("Liqvera F3 MVP: SIMULATED / UNVERIFIED fixture demonstration")
-    print("Payments and live verification are not implemented.")
+    print("Payments and live verification are not implemented in this prototype.")
 
     capture_config = load_public_configuration(
         {
-            "MEE_PUBLIC_VENUES": "hyperliquid",
-            "MEE_PUBLIC_MODE": "public",
-            "MEE_CAPTURE_SOURCE": "fixture",
-            "MEE_CAPTURE_OUT": str(package_root),
+            "LIQVERA_PUBLIC_VENUES": "hyperliquid",
+            "LIQVERA_PUBLIC_MODE": "public",
+            "LIQVERA_CAPTURE_SOURCE": "fixture",
+            "LIQVERA_CAPTURE_OUT": str(package_root),
         }
     )
     capture_exit = run_public_capture(capture_config)
@@ -84,7 +84,7 @@ def main() -> int:
 
     print(f"MVP report: {output_root / 'report.json'}")
     print(f"MVP evidence: {output_root / 'evidence.zip'}")
-    print("SIMULATED / UNVERIFIED: Payments and live verification are not implemented.")
+    print("SIMULATED / UNVERIFIED: Payments and live verification are not implemented in this prototype.")
     return 0
 
 

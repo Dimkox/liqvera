@@ -11,7 +11,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "mee-evidence-bundle-manifest/v1"
+      "const": "liqvera-evidence-bundle-manifest/v1"
     },
     "serialization_version": {
       "const": "canonical-json/v1"

@@ -78,10 +78,10 @@ def test_installed_canonical_f3_builds_and_verifies_outside_checkout(tmp_path: P
             str(python),
             "-c",
             (
-                "import mee_contracts, mee_public_capture, mee_readonly_analyzer, "
-                "mee_evidence_report; "
+                "import liqvera_contracts, liqvera_public_capture, liqvera_readonly_analyzer, "
+                "liqvera_evidence_report; "
                 "print('\\n'.join(str(module.__file__) for module in "
-                "(mee_contracts, mee_public_capture, mee_readonly_analyzer, mee_evidence_report)))"
+                "(liqvera_contracts, liqvera_public_capture, liqvera_readonly_analyzer, liqvera_evidence_report)))"
             ),
         ],
         cwd=tmp_path,
@@ -99,7 +99,7 @@ def test_installed_canonical_f3_builds_and_verifies_outside_checkout(tmp_path: P
             "-c",
             (
                 "from pathlib import Path; from uuid import UUID; "
-                "from mee_public_capture.evidence_package import capture_package; "
+                "from liqvera_public_capture.evidence_package import capture_package; "
                 f"capture_package(Path({str(captures)!r}), UUID({CAPTURE_ID!r}), source_mode='fixture')"
             ),
         ],
@@ -110,7 +110,7 @@ def test_installed_canonical_f3_builds_and_verifies_outside_checkout(tmp_path: P
     artifacts.mkdir()
     built = _run(
         [
-            str(environment / "bin" / "mee-evidence-build"),
+            str(environment / "bin" / "liqvera-evidence-build"),
             "--package",
             str(captures / CAPTURE_ID),
             "--output-root",
@@ -134,7 +134,7 @@ def test_installed_canonical_f3_builds_and_verifies_outside_checkout(tmp_path: P
 
     verified = _run(
         [
-            str(environment / "bin" / "mee-evidence-verify"),
+            str(environment / "bin" / "liqvera-evidence-verify"),
             str(artifacts / REPORT_ID / "evidence.zip"),
             "--report-sha256",
             receipt["report_sha256"],

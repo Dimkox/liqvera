@@ -1,40 +1,21 @@
-# Validation and deployment host
+# Liqvera deployment
 
-## Claw access paths
+The source stack is under `deploy/mezo-evidence`. Use separate projects for fixture and live-public profiles. A source build is not permission to deploy to an existing service. Review [migration](migration.md), [security](../SECURITY.md), and current CVE results first.
 
-The Claw host is available through both the local network and Tailscale:
+## Local fixture composition
 
-| Path | Address |
-|---|---|
-| LAN | `[redacted private IP]` |
-| Tailscale IPv4 | `100.119.249.65` |
-| Tailscale MagicDNS | `claw.taild9f611.ts.net` |
+Prepare the fixture example environment with the exact source SHA and private local secret files as described in [startup](runbooks/startup-shutdown.md). Fixture capture is synthetic, payment readiness is false and all service networks are internal. Build images under candidate-specific names when a live stack shares the Docker daemon; never overwrite its `:local` image tags during validation.
 
-- Hostname: `claw`.
-- SSH user: `pall`.
-- Prefer the Tailscale hostname outside the LAN.
-- Credentials are never stored in this repository, Docker build arguments, image layers, CI logs, or Basic Memory.
+The edge binds fixture HTTP to loopback. Check `/healthz`, `/readyz` and `/v1/capabilities`; a static HTML 200 response at another path is not gateway health. Preserve named volumes when stopping services. Never use `down --volumes` against payment or evidence state.
 
-During the 2026-07-20 validation run, the direct Tailscale IPv4 connection timed out from the validating workstation while the LAN route succeeded. The Tailscale address and MagicDNS name remain documented access paths; verify current Tailscale peer/routing state before relying on that route for deployment.
+## Linux operator
 
-Verified on 2026-07-20:
+The published operator version is v0.0.2 and remains a distinct immutable release. Obtain its bootstrap, verifier, archive and independently trusted SHA-256 values from the matching release. Verify before executing; never pipe a remote script into a shell. The standard-library installer accepts only closed shadow/payment-disabled configuration and references to private secret files. It supports start, stop, status, bounded logs and uninstall; default uninstall preserves data.
 
-- Docker Engine `29.6.2`.
-- Docker Compose `5.3.1`.
-- Architecture `x86_64`.
-- `golang:1.26.5-alpine3.23` and `alpine:3.23.3` manifests are available from Claw.
+Update and rollback are fail-closed with ROLLBACK_RESTORE_REQUIRED until coherent backup/restore and migration-ledger support is implemented. Local installer validation is mocked contract evidence, not clean-host proof. The historical aggregate remains 9 PASS, 21 NOT_RUN, not a single runner overall PASS.
 
-## Isolation rule
+## Live-public operation
 
-- `/home/operator/app-stack` is the existing live application area and is outside this project's validation scope.
-- Temporary validation uses a dedicated path below `/home/operator/codex-validation/`.
-- This repository currently defines CI only. It contains no automatic deployment and no live-execution arming path.
+TLS/DNS, fixed public origin, private database and internal token files, exact source bindings and a reviewed external payment authority are operator prerequisites. Ordinary startup cannot make a payment. Existing signed authority expires and must never be silently renewed. The latest observed live gateway returned 502 on 2026-10-12; see the [baseline](security/2026-10-12-baseline.md).
 
-## Intended validation command
-
-```bash
-docker build --target verify -t multi-exchange-engine:verify .
-docker build -t multi-exchange-engine:dev .
-docker run --rm --read-only --cap-drop=ALL --security-opt=no-new-privileges \
-  -p 8080:8080 multi-exchange-engine:dev
-```
+Back up PostgreSQL and both artifact/input volumes coherently before changes. Preserve the migration ledger, canonical payment identity and unknown outcomes. An update that changes source-bound authority needs new review; namespace migration is not authorization to mutate existing records.

@@ -16,11 +16,11 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from uuid import UUID
 
-from mee_evidence_report.local_flow import LocalDemoError, LocalDemoFlow
-from mee_evidence_report.local_store import LocalDemoStore
-from mee_public_capture.config import load_public_configuration
-from mee_public_capture.runtime import run_public_capture
-from mee_readonly_analyzer.frozen_package.reader import FrozenPackageEvidenceReader
+from liqvera_evidence_report.local_flow import LocalDemoError, LocalDemoFlow
+from liqvera_evidence_report.local_store import LocalDemoStore
+from liqvera_public_capture.config import load_public_configuration
+from liqvera_public_capture.runtime import run_public_capture
+from liqvera_readonly_analyzer.frozen_package.reader import FrozenPackageEvidenceReader
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 _CAPABILITY = re.compile(r"[0-9a-f]{64}\Z")
@@ -56,7 +56,7 @@ def _web_root() -> Path:
     source = _REPOSITORY_ROOT / "web"
     if source.is_dir() and not source.is_symlink():
         return source
-    packaged = files("mee_evidence_report").joinpath("resources", "demo-web")
+    packaged = files("liqvera_evidence_report").joinpath("resources", "demo-web")
     root = Path(str(packaged))
     if not root.is_dir() or root.is_symlink():
         raise RuntimeError("Liqvera local demo web assets are unavailable")
@@ -105,10 +105,10 @@ def _fixture_package(store_root: Path) -> Path:
     try:
         config = load_public_configuration(
             {
-                "MEE_PUBLIC_VENUES": "hyperliquid",
-                "MEE_PUBLIC_MODE": "public",
-                "MEE_CAPTURE_SOURCE": "fixture",
-                "MEE_CAPTURE_OUT": str(temporary),
+                "LIQVERA_PUBLIC_VENUES": "hyperliquid",
+                "LIQVERA_PUBLIC_MODE": "public",
+                "LIQVERA_CAPTURE_SOURCE": "fixture",
+                "LIQVERA_CAPTURE_OUT": str(temporary),
             }
         )
         if run_public_capture(config) != 0:

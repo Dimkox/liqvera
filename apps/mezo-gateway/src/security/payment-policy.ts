@@ -1,3 +1,4 @@
+import { MEZO_CONFIG } from '../domain/model.js';
 import { createHash } from 'node:crypto';
 import type { PaymentPayload } from '@x402/core/types';
 import { PERMIT2_ADDRESS, x402ExactPermit2ProxyABI, x402ExactPermit2ProxyAddress } from '@x402/evm';
@@ -72,7 +73,7 @@ export class MezoAuthorizationPolicy implements AuthorizationPolicy {
 export class MezoFinalityPolicy implements FinalityPolicy {
   readonly reviewed=true;
   readonly version: string;
-  constructor(private readonly confirmations=12){ if(!Number.isSafeInteger(confirmations)||confirmations<1)throw new Error('FINALITY_POLICY_INVALID'); this.version=`mezo-testnet-canonical-${confirmations}/v1`; }
+  constructor(private readonly confirmations=12){ if(!Number.isSafeInteger(confirmations)||confirmations<1)throw new Error('FINALITY_POLICY_INVALID'); this.version=`mezo-${MEZO_CONFIG.name}-canonical-${confirmations}/v1`; }
   async isFinal(receiptValue: unknown,blockValue: unknown,rpc: ReadonlyRpc): Promise<boolean> {
     try {
       const receipt=object(receiptValue),block=object(blockValue);

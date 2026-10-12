@@ -1,7 +1,8 @@
-import { isAddress, isUuid, type Side } from "./contracts";
+import { CHAIN_ID, isAddress, isUuid, type Side } from "./contracts.ts";
 
-const CAPABILITY_KEY = "liqvera:v1:capability";
-const FLOW_KEY = "liqvera:v1:flow";
+const PREFIX = CHAIN_ID === 31611 ? "liqvera:v1" : `liqvera:${CHAIN_ID}:v1`;
+const CAPABILITY_KEY = `${PREFIX}:capability`;
+const FLOW_KEY = `${PREFIX}:flow`;
 
 export interface SavedFlow {
   version: 1;

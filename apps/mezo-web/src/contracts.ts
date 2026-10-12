@@ -1,10 +1,10 @@
-import { MEZO_TESTNET, MUSD_TESTNET } from "@liqvera/mezo-protocol";
+import { MEZO, MUSD } from "./network.ts";
 
-export const NETWORK = MEZO_TESTNET.caip2;
-export const CHAIN_ID = MEZO_TESTNET.chainId;
-export const CHAIN_HEX = `0x${MEZO_TESTNET.chainId.toString(16)}`;
-export const ASSET = MUSD_TESTNET.address;
-export const ASSET_DECIMALS = MUSD_TESTNET.decimals;
+export const NETWORK = MEZO.caip2;
+export const CHAIN_ID = MEZO.chainId;
+export const CHAIN_HEX = `0x${MEZO.chainId.toString(16)}`;
+export const ASSET = MUSD.address;
+export const ASSET_DECIMALS = MUSD.decimals;
 export const AMOUNT_ATOMIC = "10000000000000000";
 export const PRICE_MUSD = "0.01";
 export const INSTRUMENT = "hyperliquid:BTC:perpetual";

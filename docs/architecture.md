@@ -4,7 +4,7 @@ The browser and gateway are TypeScript applications. Capture, exact arithmetic, 
 
 ## Request and data flow
 
-A browser discovers an EIP-6963 wallet, checks Mezo Testnet 31611, and requests a quote scoped to the expected payer. The gateway records the request and asks the internal report service to build evidence. Capture queries the fixed public Hyperliquid endpoints, seals exact bytes and source metadata, and publishes immutable input. The report service validates that input and computes rational/exact-decimal depth results, then publishes JSON and ZIP with hashes. The gateway binds the quote and entitlement to those exact hashes.
+A browser discovers an EIP-6963 wallet, checks its configured Mezo network, and requests a quote scoped to the expected payer. The gateway records the request and asks the internal report service to build evidence. Capture queries the fixed public Hyperliquid endpoints, seals exact bytes and source metadata, and publishes immutable input. The report service validates that input and computes rational/exact-decimal depth results, then publishes JSON and ZIP with hashes. The gateway binds the quote and entitlement to those exact hashes.
 
 The payment adapter validates x402 Permit2 and EIP-2612 sponsorship, a bound external authority, recipient, amount and asset. PostgreSQL atomically consumes authority and moves to SUBMITTING before settlement. Unknown outcomes are confirm-only. Delivery follows canonical-chain receipt checks and at least twelve confirmations. Restart cannot grant permission to submit twice.
 
@@ -18,7 +18,7 @@ The browser receives no private signing key, server credential or live authority
 
 Money, prices and quantities cross JSON boundaries as strings. Calculations use exact arithmetic and explicit display rounding. Crossed, stale, malformed or insufficient data fail closed. The offline verifier validates bounded ZIP metadata, paths, members and digests before recalculating. It neither authenticates the exchange nor arms execution.
 
-SQL migrations 001–006 and their ledger hashes remain unchanged by the namespace migration. Old persisted JSON is not silently relabelled. [Migration guidance](migration.md) defines recovery and separation of historical state.
+SQL migrations 001–006 and their ledger hashes remain unchanged. Forward migration 007 adds immutable per-ledger network identity and paired network/token constraints. Mainnet uses separate database state, and startup rejects the wrong ledger network. Old persisted JSON is not silently relabelled. [Migration guidance](migration.md) defines recovery and separation of historical state.
 
 ## Build ownership
 

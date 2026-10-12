@@ -7,9 +7,9 @@ Liqvera produces verifiable public-market reports for Hyperliquid BTC linear per
 ## User flow
 
 1. A visitor can inspect the immutable historical live preview without a wallet. It is labelled with its capture time.
-2. The full browser flow discovers a wallet, validates chain 31611 and scopes a fresh quote to its payer. Account/network changes invalidate unsafe in-flight browser state.
+2. The full browser flow discovers a wallet, validates the configured Mezo chain (31611 Testnet or 31612 Mainnet) and scopes a fresh quote to its payer. Account/network changes invalidate unsafe in-flight browser state.
 3. The gateway creates a report request. Public source failure yields SOURCE_UNAVAILABLE, without fixture fallback.
-4. Completed immutable artifacts determine the quote. A valid testnet authority permits an exact 0.01 test-MUSD x402 payment with sponsored gas; ordinary startup has no such authority.
+4. Completed immutable artifacts determine the quote. A valid network-bound authority permits an exact 0.01 MUSD x402 payment with sponsored gas; ordinary startup has no such authority.
 5. Confirmed entitlement allows repeated delivery of the same JSON and evidence ZIP without resettlement. Reload and recovery use existing request/quote identity.
 6. The recipient can verify an exported canonical ZIP offline and optionally compare an independently trusted report digest.
 
@@ -21,7 +21,7 @@ Internal services use separate endpoints and network boundaries. [Capture servic
 
 ## Payment authority
 
-Only Mezo Testnet 31611 and the pinned MUSD metadata are supported. The server verifies Permit2/EIP-2612 authorization, canonical identity and at least twelve confirmations. Signed v2 grants bind reviewed source, plan, database and a bounded budget; v1 remains single-submit. Activation is not implied by deployment, a test, an environment flag alone or this document. Expired/exhausted/unknown authority cannot submit again. Ambiguous settlement consumes the attempt and allows confirmation only.
+Explicit network selection supports Mezo Testnet 31611 and Mainnet 31612 with their corresponding pinned MUSD assets. The default is Testnet; Mainnet requires a matching browser build, runtime configuration and separate ledger. See [Mainnet configuration](mainnet.md). The server verifies Permit2/EIP-2612 authorization, canonical identity and at least twelve confirmations. Signed v2 grants bind reviewed source, plan, database and a bounded budget; v1 remains single-submit. Activation is not implied by deployment, a test, an environment flag alone or this document. Expired/exhausted/unknown authority cannot submit again. Ambiguous settlement consumes the attempt and allows confirmation only.
 
 ## Artifacts and operations
 

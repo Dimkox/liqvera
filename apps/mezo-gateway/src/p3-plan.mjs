@@ -1,11 +1,13 @@
+import { mezoNetwork } from "@liqvera/mezo-protocol";
+const selected=mezoNetwork(process.env.LIQVERA_NETWORK ?? "testnet");
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
-const paymentPlan={scheme:"exact",settlement_broadcaster:"facilitator",network:"eip155:31611",chain_id:31611,
-  asset:"0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",amount_atomic:"10000000000000000",maximum_settlement_submissions:1,
+const paymentPlan={scheme:"exact",settlement_broadcaster:"facilitator",network:selected.chain.caip2,chain_id:selected.chain.chainId,
+  asset:selected.asset.address,amount_atomic:"10000000000000000",maximum_settlement_submissions:1,
   max_buyer_native_gas_wei:"100000000000000",asset_transfer_method:"permit2",permit2_address:"0x000000000022D473030F116dDEE9F6B43aC78BA3",
   permit2_proxy:"0x402085c248EeA27D92E8b30b2C58ed07f9E20001",approval_mode:"eip2612-gas-sponsoring",required_extension:"eip2612GasSponsoring",
-  authorization_identity_version:"liqvera-permit2-eip2612-identity/v1",facilitator_url:"https://facilitator.vativ.io/",rpc_url:"https://rpc.test.mezo.org/",
+  authorization_identity_version:"liqvera-permit2-eip2612-identity/v1",facilitator_url:"https://facilitator.vativ.io/",rpc_url:new URL(selected.chain.rpcUrl).href,
   database_identity_kind:"sha256-credential-free-postgresql-endpoint/v1",database_host_policy:"loopback-only/v1"};
 function canonical(value) {
   if(Array.isArray(value))return `[${value.map(canonical).join(",")}]`;

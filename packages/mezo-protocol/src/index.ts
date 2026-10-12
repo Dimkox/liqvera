@@ -27,6 +27,20 @@ export const MUSD_TESTNET = {
 
 export type MusdTestnetAddress = typeof MUSD_TESTNET.address;
 
+/** Mainnet metadata: https://mezo.org/docs/developers/getting-started/musd-payments-x402/ */
+export const MEZO_MAINNET = {
+  name: "Mezo Mainnet", chainId: 31612, caip2: "eip155:31612",
+  rpcUrl: "https://mezo-mainnet.boar.network", explorerUrl: "https://explorer.mezo.org",
+} as const;
+export const MUSD_MAINNET = {
+  name: "Mezo USD", symbol: "MUSD", address: "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186", decimals: 18,
+} as const;
+export function mezoNetwork(name: unknown = "testnet") {
+  if (name === "testnet") return {name: "testnet", chain: MEZO_TESTNET, asset: MUSD_TESTNET} as const;
+  if (name === "mainnet") return {name: "mainnet", chain: MEZO_MAINNET, asset: MUSD_MAINNET} as const;
+  throw new Error("MEZO_NETWORK_INVALID");
+}
+
 export const MUSD_TRANSFER_EVENT = {
   name: "Transfer",
   signature: "Transfer(address,address,uint256)",

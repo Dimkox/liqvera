@@ -5,9 +5,9 @@
   "description": "Closed response resources; F4 and F5 must enforce scope, state, integrity, receipt equality, and payment readiness at runtime.",
   "$defs": {
     "nonzero_address": {"type": "string", "minLength": 42, "maxLength": 42, "pattern": "^0x[0-9a-f]*[1-9a-f][0-9a-f]*(?![\\s\\S])"},
-    "network": {"const": "eip155:31611"},
-    "chain_id": {"const": 31611},
-    "asset": {"const": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"},
+    "network": {"enum": ["eip155:31611", "eip155:31612"]},
+    "chain_id": {"enum": [31611, 31612]},
+    "asset": {"enum": ["0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503", "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"]},
     "decimals": {"const": 18},
     "amount_atomic": {"const": "10000000000000000"},
     "price_musd": {"const": "0.01"},
@@ -26,6 +26,7 @@
       }
     },
     "terms": {
+      "oneOf": [{"properties": {"network": {"const": "eip155:31611"}, "asset": {"const": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"}, "chain_id": {"const": 31611}}}, {"properties": {"network": {"const": "eip155:31612"}, "asset": {"const": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"}, "chain_id": {"const": 31612}}}],
       "type": "object", "additionalProperties": false,
       "required": ["version", "network", "chain_id", "asset", "decimals", "amount_atomic", "price_musd", "pay_to", "expected_payer", "expires_at"],
       "properties": {
@@ -79,6 +80,7 @@
       ]
     },
     "receipt": {
+      "oneOf": [{"properties": {"network": {"const": "eip155:31611"}, "asset": {"const": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"}, "chain_id": {"const": 31611}}}, {"properties": {"network": {"const": "eip155:31612"}, "asset": {"const": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"}, "chain_id": {"const": 31612}}}],
       "type": "object", "additionalProperties": false,
       "required": ["schema", "quote_id", "report_id", "payment_attempt_id", "report_sha256", "network", "chain_id", "asset", "amount_atomic", "payer", "pay_to", "tx_hash", "block_hash", "block_number", "log_index", "confirmed_at", "finality_policy_version", "transaction_from", "buyer_native_balance_before", "buyer_native_balance_after", "buyer_native_gas_spent", "observation_before_block_number", "observation_before_block_hash", "observation_after_block_number", "observation_after_block_hash", "confirmations", "authorization_identity", "transfer_identity"],
       "properties": {
@@ -124,10 +126,7 @@
     },
     "capabilities": {
       "type": "object", "additionalProperties": false,
-      "oneOf": [
-        {"properties": {"payment_ready": {"const": false}, "blockers": {"minItems": 1}}},
-        {"properties": {"payment_ready": {"const": true}, "source_mode": {"const": "live-public"}, "blockers": {"maxItems": 0}}}
-      ],
+      "oneOf": [{"properties": {"payment_ready": {"const": false}, "blockers": {"minItems": 1}, "network": {"const": "eip155:31611"}, "asset": {"const": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"}}}, {"properties": {"payment_ready": {"const": false}, "blockers": {"minItems": 1}, "network": {"const": "eip155:31612"}, "asset": {"const": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"}}}, {"properties": {"payment_ready": {"const": true}, "source_mode": {"const": "live-public"}, "blockers": {"maxItems": 0}, "network": {"const": "eip155:31611"}, "asset": {"const": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"}}}, {"properties": {"payment_ready": {"const": true}, "source_mode": {"const": "live-public"}, "blockers": {"maxItems": 0}, "network": {"const": "eip155:31612"}, "asset": {"const": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"}}}],
       "required": ["schema", "request_id", "instrument_id", "instrument_label", "network", "asset", "decimals", "price_musd", "amount_atomic", "source_mode", "limitations", "payment_ready", "blockers"],
       "properties": {
         "schema": {"const": "liqvera-evidence-capabilities/v1"},

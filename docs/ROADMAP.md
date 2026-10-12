@@ -6,7 +6,7 @@ Public capture, exact analysis, canonical report and evidence ZIP construction, 
 
 ## Current work
 
-Finish the approved technical namespace migration on the complete application; remove obsolete development-process dependencies; remediate and rescan Python, npm and container dependencies; verify isolated service operation and preserve published artifact identity. Resolve the existing gateway startup failure through bounded diagnosis before any reviewed deployment.
+Standalone documentation, technical identifiers and the audited production rollout are complete. Mainnet configuration is being verified with separate ledger state and unchanged owner recipient/price; real paid acceptance still requires valid external authority and a wallet-authorized payment.
 
 ## Release gates
 
@@ -14,4 +14,4 @@ Run the complete local suites, real disposable database integration and canonica
 
 ## Deferred
 
-Installer update/rollback requires coherent backup and migration-ledger support. Remaining external acceptance cases require explicit execution and evidence. Additional instruments need economic identity mapping and source validation. Mainnet payments, custody, private venue access, exchange order execution, withdrawals and personalized trading advice are outside the current product boundary.
+Installer update/rollback requires coherent backup and migration-ledger support. Remaining external acceptance cases require explicit execution and evidence. Additional instruments need economic identity mapping and source validation. Custody, private venue access, exchange order execution, withdrawals and personalized trading advice are outside the current product boundary.

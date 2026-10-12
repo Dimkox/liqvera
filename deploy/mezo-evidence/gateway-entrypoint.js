@@ -7,7 +7,9 @@ const password = readFileSync(secretPath, 'utf8').trimEnd();
 if (!password) throw new Error('PostgreSQL password file is empty');
 const databaseHost = process.env.LIQVERA_DATABASE_HOST || 'postgres';
 if (!['postgres', '127.0.0.1'].includes(databaseHost)) throw new Error('PostgreSQL host is not allowed');
-const url = new URL(`postgresql://liqvera@${databaseHost}:5432/liqvera`);
+const databaseName = process.env.LIQVERA_DATABASE_NAME || "liqvera";
+if (!/^liqvera(?:_[a-z0-9_]+)?$/.test(databaseName)) throw new Error("PostgreSQL database name is invalid");
+const url = new URL(`postgresql://liqvera@${databaseHost}:5432/${databaseName}`);
 url.password = password;
 
 const command = process.argv[2] || 'node';

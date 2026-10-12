@@ -31,7 +31,7 @@ function validateCapabilities(value: unknown): Capabilities {
       data.network !== NETWORK || data.asset !== ASSET || data.decimals !== ASSET_DECIMALS ||
       data.price_musd !== PRICE_MUSD || data.amount_atomic !== AMOUNT_ATOMIC ||
       (data.source_mode !== "live-public" && data.source_mode !== "fixture") ||
-      typeof data.payment_ready !== "boolean") throw new Error("Gateway capability terms do not match this testnet app.");
+      typeof data.payment_ready !== "boolean") throw new Error("Gateway capability terms do not match the selected payment network.");
   strings(data.limitations);
   strings(data.blockers);
   return data as unknown as Capabilities;

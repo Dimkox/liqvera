@@ -1,4 +1,5 @@
-import { MEZO_TESTNET, MUSD_PERMIT, X402_PERMIT2 } from "@liqvera/mezo-protocol";
+import { MUSD_PERMIT, X402_PERMIT2 } from "@liqvera/mezo-protocol";
+import { MEZO, MUSD } from "./network.ts";
 import type { Delivery, Quote } from "./contracts";
 import type { Eip1193Provider } from "./wallet";
 import type { ClientEvmSigner } from "@x402/evm";
@@ -50,14 +51,14 @@ class ProductionX402BrowserAdapter implements OfficialX402BrowserAdapter {
   readonly sdk="@x402/core/2.16.0" as const;
   async requestPaidReport(input: Parameters<OfficialX402BrowserAdapter["requestPaidReport"]>[0]): Promise<Delivery|"recovering"> {
     if(input.path!==`/v1/reports/${input.quote.report_id}`||input.payer.toLowerCase()!==input.quote.terms.expected_payer||
-      input.quote.terms.network!=="eip155:31611"||input.quote.terms.asset.toLowerCase()!=="0x118917a40faf1cd7a13db0ef56c86de7973ac503"||
+      input.quote.terms.network!==MEZO.caip2||input.quote.terms.asset.toLowerCase()!==MUSD.address.toLowerCase()||
       input.quote.terms.amount_atomic!=="10000000000000000")throw new Error("Payment terms changed. No payment was submitted.");
     const signer:ClientEvmSigner={address:input.payer as `0x${string}`,signTypedData:async message=>{
       const signature=await input.provider.request({method:"eth_signTypedData_v4",params:[input.payer,JSON.stringify(message)]});
       if(typeof signature!=="string"||!/^0x[0-9a-fA-F]{130}$/.test(signature))throw new X402CancelledBeforeSubmission();
       return signature as `0x${string}`;
     }};
-    const protocol=createProductionProtocol(signer,MEZO_TESTNET.rpcUrl);
+    const protocol=createProductionProtocol(signer,MEZO.rpcUrl,MEZO.caip2);
     const headers={Authorization:`Bearer ${input.bearerCapability}`,Accept:"application/json"};
     try {
       const challengeRead=await boundedFetchJson(fetch,input.path,{headers},65_536);

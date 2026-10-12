@@ -17,6 +17,7 @@ export async function consumeLiveGrant(
   return Boolean(consumed.rowCount);
 }
 function toQuote(row: QueryResultRow): Quote {
+  if(row.network!==NETWORK||row.chain_id!==CHAIN_ID||row.asset!==ASSET)throw new Error('LEDGER_NETWORK_MISMATCH');
   return { id: row.id, report_request_id: row.report_request_id, scope_hash: row.scope_hash, report_id: row.report_id,
     report_sha256: row.report_sha256, bundle_sha256: row.bundle_sha256, state: row.state, expires_at: row.expires_at,
     preview: row.preview, artifact: row.artifact,
@@ -26,6 +27,13 @@ function toQuote(row: QueryResultRow): Quote {
 }
 export class Ledger {
   constructor(readonly pool: Pool) {}
+  async assertNetwork(): Promise<void> {
+    await this.transaction(async db => {
+      await db.query('INSERT INTO ledger_network(chain_id) VALUES($1) ON CONFLICT(singleton) DO NOTHING',[CHAIN_ID]);
+      const row=(await db.query('SELECT chain_id FROM ledger_network WHERE singleton=true')).rows[0];
+      if(row?.chain_id!==CHAIN_ID)throw new Error('LEDGER_NETWORK_MISMATCH');
+    });
+  }
   async transaction<T>(run: (db: PoolClient) => Promise<T>): Promise<T> {
     const db = await this.pool.connect();
     try { await db.query('BEGIN'); await db.query("SET LOCAL statement_timeout='5s'");

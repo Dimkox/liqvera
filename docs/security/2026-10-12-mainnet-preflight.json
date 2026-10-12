@@ -1,0 +1,84 @@
+{
+  "schema": "liqvera-mainnet-readonly-preflight/v1",
+  "checked_at": "2026-10-12T22:57:35.696Z",
+  "status": "pass",
+  "rpc": "https://mezo-mainnet.boar.network",
+  "chain_id": 31612,
+  "observed_block": 12471627,
+  "asset": {
+    "address": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186",
+    "name": "Mezo USD",
+    "symbol": "MUSD",
+    "decimals": 18,
+    "domain_fields": "0x0f",
+    "domain": {
+      "name": "Mezo USD",
+      "version": "1",
+      "chainId": "31612",
+      "verifyingContract": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"
+    },
+    "domain_separator": "0x0a43819914359cf08d7ef52ccb53aadf5478d3d2fc676003ccb84491d09a3e93",
+    "recomputed_domain_separator": "0x0a43819914359cf08d7ef52ccb53aadf5478d3d2fc676003ccb84491d09a3e93",
+    "standalone_version_call": {
+      "code": 3,
+      "message": "execution reverted",
+      "data": "0x"
+    }
+  },
+  "bytecode": {
+    "musdCode": {
+      "address": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186",
+      "bytes": 6436,
+      "keccak256": "0xebef2e2ffe044523a359a32307f10ff88b116a7099c6ded1e9329bf815e051c9"
+    },
+    "proxyCode": {
+      "address": "0x402085c248EeA27D92E8b30b2C58ed07f9E20001",
+      "bytes": 2913,
+      "keccak256": "0xce6429c0bb49284660683287c0a8fe548a88379072327d026626909d202048b9"
+    },
+    "permit2Code": {
+      "address": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "bytes": 9152,
+      "keccak256": "0xe45cbd2fc9fafd4eea29d837da8bf0772d5d6975a3e1bfe56e9f1a47395b1d9f"
+    }
+  },
+  "facilitator": {
+    "url": "https://facilitator.vativ.io",
+    "network": "eip155:31612",
+    "version": 2,
+    "scheme": "exact",
+    "asset": {
+      "address": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186",
+      "symbol": "MUSD",
+      "decimals": 18,
+      "eip712": {
+        "name": "Mezo USD",
+        "version": "1"
+      },
+      "assetTransferMethod": "permit2",
+      "supportsEip2612": true
+    },
+    "extensions": [
+      "eip2612GasSponsoring"
+    ]
+  },
+  "checks": {
+    "chain": true,
+    "metadata": true,
+    "musdCode": true,
+    "proxyCode": true,
+    "permit2Code": true,
+    "domain": true,
+    "domainSeparator": true,
+    "facilitatorNetwork": true,
+    "facilitatorMusd": true,
+    "sponsoringExtension": true
+  },
+  "scope": "Read-only eth_chainId, eth_blockNumber, eth_getCode, eth_call and public /supported only. No wallet, signature, private grant, transaction, payment or live settlement. Bytecode presence and hash are recorded; not a source-code equivalence audit.",
+  "raw_files": [
+    "rpc-request.json",
+    "rpc-response.json",
+    "facilitator-supported.json"
+  ],
+  "official_reference": "https://mezo.org/docs/developers/getting-started/musd-payments-x402/"
+}

@@ -51,6 +51,7 @@ before(async () => {
   await runMigrator(databaseUrl!);
   await runMigrator(databaseUrl!);
   pool = new Pool({ connectionString: databaseUrl, max: 30 });
+  await new Ledger(pool).assertNetwork();
 });
 
 after(async () => {
@@ -78,7 +79,7 @@ async function verifiedAttempt(ledger: Ledger, suffix: string,version:'v1'|'v2'=
   return { quote, attempt };
 }
 
-test('fresh migration applies 001 through 006 once, reruns by checksum, and keeps audit rows append-only', { skip: skipReason }, async () => {
+test('fresh migration applies 001 through 007 once, reruns by checksum, and keeps audit rows append-only', { skip: skipReason }, async () => {
   const migrations = await pool.query<{ name: string; sha256: string }>(
     'SELECT name,sha256 FROM gateway_migrations ORDER BY name',
   );
@@ -89,6 +90,7 @@ test('fresh migration applies 001 through 006 once, reruns by checksum, and keep
     { name: '004_receipt_confirmation_provenance.sql', sha256: MIGRATION_004_SHA256 },
     { name: '005_receipt_confirmation_count.sql', sha256: MIGRATION_005_SHA256 },
     { name: '006_signed_live_grant_authority.sql', sha256: MIGRATION_006_SHA256 },
+    { name: '007_network_identity.sql', sha256: '377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6' },
   ]);
 
   const audit = await pool.query<{ id: string }>("INSERT INTO audit_events(event) VALUES('TEST_ONLY') RETURNING id");
@@ -143,6 +145,7 @@ test('an existing empty-receipt 001 ledger upgrades through 004 without replacin
       { name: '004_receipt_confirmation_provenance.sql', sha256: MIGRATION_004_SHA256 },
       { name: '005_receipt_confirmation_count.sql', sha256: MIGRATION_005_SHA256 },
       { name: '006_signed_live_grant_authority.sql', sha256: MIGRATION_006_SHA256 },
+    { name: '007_network_identity.sql', sha256: '377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6' },
     ]);
   } finally {
     await upgrade.end();
@@ -380,4 +383,23 @@ test('real startup survives invalid grant and keeps new payments disabled', {ski
     const post=await fetch(`http://127.0.0.1:${port}/v1/report-quotes`,{method:'POST'});
     assert.notEqual(post.status,201);assert.notEqual(post.status,202);
   }finally{child.kill('SIGTERM');await exited;await rm(directory,{recursive:true,force:true});}
+});
+
+test('Mainnet ledger has a distinct immutable network identity and rejects Testnet startup', {skip:skipReason}, async()=>{
+  const url=new URL(databaseUrl!);const name=url.pathname.slice(1)+'_network';
+  assert.match(name,/^liqvera_f4_test_[a-z0-9_]+_network$/);
+  const adminUrl=new URL(url);adminUrl.pathname='/postgres';
+  const admin=new Pool({connectionString:adminUrl.toString()});await admin.query(`CREATE DATABASE "${name}"`);await admin.end();
+  url.pathname='/'+name;await runMigrator(url.toString());
+  const script=`import {Pool} from 'pg';import {Ledger} from './dist/adapters/postgres.js';
+    const pool=new Pool({connectionString:process.argv[1]});const ledger=new Ledger(pool);await ledger.assertNetwork();
+    console.log(JSON.stringify((await pool.query('SELECT chain_id FROM ledger_network')).rows));await pool.end();`;
+  const result=await execFileAsync(process.execPath,['--input-type=module','-e',script,url.toString()],{env:{...process.env,LIQVERA_NETWORK:'mainnet'}});
+  assert.deepEqual(JSON.parse(result.stdout),[{chain_id:31612}]);
+  const mainnet=new Pool({connectionString:url.toString()});
+  try {
+    await assert.rejects(()=>new Ledger(mainnet).assertNetwork(),/LEDGER_NETWORK_MISMATCH/);
+    await assert.rejects(()=>mainnet.query('UPDATE ledger_network SET chain_id=31611'),/append-only/);
+    assert.deepEqual((await mainnet.query('SELECT chain_id FROM ledger_network')).rows,[{chain_id:31612}]);
+  } finally {await mainnet.end();}
 });

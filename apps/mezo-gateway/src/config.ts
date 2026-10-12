@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { address, PublicError } from './domain/model.js';
+import { address, PublicError, MEZO_CONFIG } from './domain/model.js';
 import { fixedInternalUrl } from './adapters/http.js';
 import type { GatewayConfig } from './application/gateway.js';
 export interface RuntimeConfig extends GatewayConfig {
@@ -14,7 +14,7 @@ export interface RuntimeConfig extends GatewayConfig {
   metricsHost: string;
   metricsPort: number;
   liveGrantFile: string|null;
-  testnetDemoAnyPayer: boolean;
+  allowAnyPayer: boolean;
   liveGrantPublicKey: Uint8Array|undefined;
   liveContext: {subjectCommit:string;subjectTree:string;planSha256:string;buyer:string;payTo:string}|null;
 }
@@ -47,14 +47,17 @@ export async function loadConfig(env:NodeJS.ProcessEnv=process.env):Promise<Runt
     if(!/^[0-9a-f]{40}$/.test(env.LIQVERA_SUBJECT_COMMIT)||!/^[0-9a-f]{40}$/.test(env.LIQVERA_SUBJECT_TREE)||!/^[0-9a-f]{64}$/.test(env.LIQVERA_PLAN_SHA256))throw new PublicError('INVALID_INPUT');
     liveContext={subjectCommit:env.LIQVERA_SUBJECT_COMMIT,subjectTree:env.LIQVERA_SUBJECT_TREE,planSha256:env.LIQVERA_PLAN_SHA256,buyer:address(env.LIQVERA_LIVE_BUYER),payTo};
   }
-  const testnetDemoAnyPayer=env.LIQVERA_TESTNET_DEMO_ANY_PAYER==='1';
-  if(env.LIQVERA_TESTNET_DEMO_ANY_PAYER!==undefined&&!['0','1'].includes(env.LIQVERA_TESTNET_DEMO_ANY_PAYER))throw new PublicError('INVALID_INPUT');
-  if(testnetDemoAnyPayer&&(!liveGrantFile||sourceMode!=='live-public'))throw new PublicError('INVALID_INPUT');
+  if(env.LIQVERA_ANY_PAYER!==undefined&&env.LIQVERA_TESTNET_DEMO_ANY_PAYER!==undefined)throw new PublicError('INVALID_INPUT');
+  if(MEZO_CONFIG.name==='mainnet'&&env.LIQVERA_TESTNET_DEMO_ANY_PAYER!==undefined)throw new PublicError('INVALID_INPUT');
+  const anyPayer=env.LIQVERA_ANY_PAYER??env.LIQVERA_TESTNET_DEMO_ANY_PAYER;
+  if(anyPayer!==undefined&&!['0','1'].includes(anyPayer))throw new PublicError('INVALID_INPUT');
+  const allowAnyPayer=anyPayer==='1';
+  if(allowAnyPayer&&(!liveGrantFile||sourceMode!=='live-public'))throw new PublicError('INVALID_INPUT');
   const publicKeyHex=env.LIQVERA_LIVE_GRANT_PUBLIC_KEY||undefined;
   if(publicKeyHex!==undefined&&!/^[0-9a-f]{64}$/.test(publicKeyHex))throw new PublicError('INVALID_INPUT');
   const liveGrantPublicKey=publicKeyHex?Buffer.from(publicKeyHex,'hex'):undefined;
-  if(testnetDemoAnyPayer&&!liveGrantPublicKey)throw new PublicError('INVALID_INPUT');
-  return {databaseUrl:await databaseUrl(env),sourceMode,payTo,publicBase,origins,port,liveGrantFile,liveContext,testnetDemoAnyPayer,liveGrantPublicKey,
+  if(allowAnyPayer&&!liveGrantPublicKey)throw new PublicError('INVALID_INPUT');
+  return {databaseUrl:await databaseUrl(env),sourceMode,payTo,publicBase,origins,port,liveGrantFile,liveContext,allowAnyPayer,liveGrantPublicKey,
     host:env.HOST??'0.0.0.0',artifactRoot:env.ARTIFACT_ROOT??'/data/artifacts',reportToken,metricsHost,metricsPort,
     reportUrl:fixedInternalUrl(env.REPORT_SERVICE_URL??'http://report:8082')};
 }

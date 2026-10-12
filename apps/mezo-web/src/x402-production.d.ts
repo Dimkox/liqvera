@@ -8,6 +8,6 @@ export interface Permit2Boundary {
   domainVersion: string;
   requiredExtension: string;
 }
-export function createProductionProtocol(signer: ClientEvmSigner, rpcUrl: string): x402HTTPClient;
+export function createProductionProtocol(signer: ClientEvmSigner, rpcUrl: string, network?: "eip155:31611" | "eip155:31612"): x402HTTPClient;
 export function requirePermit2Challenge(required: PaymentRequired, permit: Permit2Boundary): void;
 export function requireSponsoredPayment(payment: PaymentPayload, permit: Permit2Boundary): void;

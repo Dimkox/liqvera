@@ -1,8 +1,8 @@
 import { x402Client, x402HTTPClient } from "@x402/core/client";
 import { ExactEvmScheme } from "@x402/evm";
 
-export function createProductionProtocol(signer, rpcUrl) {
-  return new x402HTTPClient(new x402Client().register("eip155:31611", new ExactEvmScheme(signer, { rpcUrl })));
+export function createProductionProtocol(signer, rpcUrl, network = "eip155:31611") {
+  return new x402HTTPClient(new x402Client().register(network, new ExactEvmScheme(signer, { rpcUrl })));
 }
 
 export function requirePermit2Challenge(required, permit) {

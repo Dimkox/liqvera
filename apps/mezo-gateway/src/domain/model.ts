@@ -1,8 +1,10 @@
-import { MEZO_TESTNET, MUSD_TESTNET } from '@liqvera/mezo-protocol';
-export const NETWORK = MEZO_TESTNET.caip2;
-export const CHAIN_ID = MEZO_TESTNET.chainId;
-export const ASSET = MUSD_TESTNET.address;
-export const DECIMALS = MUSD_TESTNET.decimals;
+import { mezoNetwork } from '@liqvera/mezo-protocol';
+export const MEZO_CONFIG = mezoNetwork(process.env.LIQVERA_NETWORK ?? 'testnet');
+export const RPC_URL = MEZO_CONFIG.chain.rpcUrl;
+export const NETWORK = MEZO_CONFIG.chain.caip2;
+export const CHAIN_ID = MEZO_CONFIG.chain.chainId;
+export const ASSET = MEZO_CONFIG.asset.address;
+export const DECIMALS = MEZO_CONFIG.asset.decimals;
 export const AMOUNT = '10000000000000000' as const;
 export const INSTRUMENT = 'hyperliquid:BTC:perpetual' as const;
 export const RETENTION = Object.freeze({ paid_days: 7, unpaid_grace_seconds: 900, ledger_days: 30,

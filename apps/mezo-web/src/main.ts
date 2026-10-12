@@ -1,5 +1,5 @@
 import "./style.css";
-import { MEZO_TESTNET, MUSD_TESTNET } from "@liqvera/mezo-protocol";
+import { MEZO, NETWORK_LABEL, TOKEN_LABEL } from "./network.ts";
 import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest } from "./api";
 import { canPay, paymentNotice, walletStatus } from "./browser-flow";
 import { executePaymentAttempt, executeRecovery } from "./browser-orchestration";
@@ -21,12 +21,12 @@ app.innerHTML = `
   <div class="page-shell">
     <header class="site-header">
       <a class="brand" href="/" aria-label="Liqvera home"><span class="brand-mark" aria-hidden="true">L</span><span>Liqvera</span></a>
-      <div class="header-right"><span class="network-chip"><span class="pulse-dot" aria-hidden="true"></span> MEZO TESTNET ONLY</span><span class="header-caption">Market reports you can verify.</span></div>
+      <div class="header-right"><span class="network-chip"><span class="pulse-dot" aria-hidden="true"></span> ${NETWORK_LABEL.toUpperCase()}</span><span class="header-caption">Market reports you can verify.</span></div>
     </header>
     <main id="workspace">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy"><p class="eyebrow">PUBLIC MARKET DATA · PRIVATE ACCESS</p><h1 id="hero-title">A clearer view of the <em>available</em> book.</h1><p class="lead">Explore a hypothetical sweep of a public Hyperliquid BTC perpetual snapshot. Review the evidence before trusting the calculation.</p></div>
-        <div class="hero-aside" aria-label="Product boundaries"><div class="aside-label">REPORT BOUNDARIES</div><p>Read-only analytics</p><p>No exchange order or execution</p><p>Mezo Testnet payment only</p></div>
+        <div class="hero-aside" aria-label="Product boundaries"><div class="aside-label">REPORT BOUNDARIES</div><p>Read-only analytics</p><p>No exchange order or execution</p><p>${NETWORK_LABEL} payments</p></div>
       </section>
       <div class="workspace-grid">
         <section class="panel request-panel" aria-labelledby="request-title">
@@ -36,7 +36,7 @@ app.innerHTML = `
           <form id="report-form" novalidate>
             <fieldset><legend>Hypothetical side</legend><div class="segment"><label><input type="radio" name="side" value="BUY" checked /><span>BUY</span></label><label><input type="radio" name="side" value="SELL" /><span>SELL</span></label></div></fieldset>
             <label class="field-label" for="quantity">Quantity <span>BTC</span></label><input id="quantity" name="quantity" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0.15" aria-describedby="quantity-hint" /><p id="quantity-hint" class="field-hint">A positive decimal string, up to 8 places. The report shows a hypothetical sweep.</p>
-            <div class="wallet-box"><div><span class="eyebrow">EXPECTED PAYER</span><strong id="wallet-label">No wallet connected</strong><span id="chain-label">Connect an EVM wallet on Mezo Testnet.</span></div><div class="wallet-actions"><label for="wallet-provider" class="field-hint">Wallet provider</label><select id="wallet-provider" class="hidden" aria-label="Choose wallet provider"></select><button id="connect-button" type="button" class="text-button">Connect wallet</button><button id="switch-button" type="button" class="text-button hidden">Switch network</button></div></div>
+            <div class="wallet-box"><div><span class="eyebrow">EXPECTED PAYER</span><strong id="wallet-label">No wallet connected</strong><span id="chain-label">Connect an EVM wallet on ${NETWORK_LABEL}.</span></div><div class="wallet-actions"><label for="wallet-provider" class="field-hint">Wallet provider</label><select id="wallet-provider" class="hidden" aria-label="Choose wallet provider"></select><button id="connect-button" type="button" class="text-button">Connect wallet</button><button id="switch-button" type="button" class="text-button hidden">Switch network</button></div></div>
             <button id="create-button" class="primary-button" type="submit" disabled>Request a report <span aria-hidden="true">↗</span></button>
             <p id="create-note" class="form-note">Checking service capabilities…</p>
           </form>
@@ -51,7 +51,7 @@ app.innerHTML = `
       </div>
       <section class="boundary-strip" aria-label="Important context"><div><span>NOTE 1</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>NOTE 2</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>NOTE 3</span><p><strong>No execution authority.</strong> No orders, custody, live trading, or guaranteed fills.</p></div></section>
     </main>
-    <footer><span>Liqvera v0.0.5 · Market reports you can verify.</span><span>Built for MEZO ₿ · Testnet experience · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a></span></footer>
+    <footer><span>Liqvera v0.0.5 · Market reports you can verify.</span><span>Built for MEZO ₿ · ${NETWORK_LABEL} · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a></span></footer>
   </div>`;
 
 function el<T extends HTMLElement>(selector: string): T {
@@ -161,7 +161,7 @@ function updateControls(): void {
     !cap.payment_ready ? "Payment and new quotes are currently unavailable." :
     !x402Available() ? "The browser payment adapter awaits SDK verification; no payment can be submitted." :
     !account ? "Connect an injected wallet to continue." :
-    !onChain ? "Switch to Mezo Testnet to continue." :
+    !onChain ? `Switch to ${NETWORK_LABEL} to continue.` :
     flow ? "This session already has a report. Check its status or start another after it finishes." :
     "The server will prepare the evidence before showing any payment terms.";
 }
@@ -215,11 +215,11 @@ function renderQuote(): void {
   limits.append(list);
   target.append(limits);
   const terms = node("div", "terms-box");
-  terms.append(node("p", "eyebrow", "TESTNET ACCESS TERMS"));
+  terms.append(node("p", "eyebrow", `${NETWORK_LABEL.toUpperCase()} ACCESS TERMS`));
   const termsGrid = node("div", "data-grid");
-  appendField(termsGrid, "Price", `${q.terms.price_musd} test ${MUSD_TESTNET.symbol}`);
+  appendField(termsGrid, "Price", `${q.terms.price_musd} ${TOKEN_LABEL}`);
   appendField(termsGrid, "Atomic amount", q.terms.amount_atomic);
-  appendField(termsGrid, "Network", `Mezo Testnet · ${q.terms.network}`);
+  appendField(termsGrid, "Network", `${NETWORK_LABEL} · ${q.terms.network}`);
   appendField(termsGrid, "Token", q.terms.asset, "breakable span-all");
   appendField(termsGrid, "Recipient", q.terms.pay_to, "breakable span-all");
   appendField(termsGrid, "Expected payer", q.terms.expected_payer, "breakable span-all");
@@ -237,14 +237,14 @@ function renderQuote(): void {
   } else if (q.state === "READY") {
     const paymentAllowed = canPay({ flow, quoteState: q.state, connectedAccount: account, onMezo: onChain,
       paymentReady: Boolean(cap?.payment_ready), adapterAvailable: x402Available() }) && quoteIsPayable(q, account ?? "");
-    const button = node("button", "primary-button", "Confirm testnet payment in wallet");
+    const button = node("button", "primary-button", `Confirm ${NETWORK_LABEL} payment in wallet`);
     button.type = "button";
     button.disabled = !paymentAllowed || busy;
     button.addEventListener("click", () => { void submitPayment(); });
     target.append(button);
     if (!x402Available()) target.append(node("p", "form-note", "The reviewed x402 browser adapter is not installed. No payment can be submitted from this build."));
     else if (account?.toLowerCase() !== q.terms.expected_payer.toLowerCase()) target.append(node("p", "safety-note", "The connected wallet differs from the quote payer. Reconnect the quoted wallet; this quote cannot be paid by another account."));
-    else if (!onChain) target.append(node("p", "safety-note", "Switch the wallet to Mezo Testnet before payment."));
+    else if (!onChain) target.append(node("p", "safety-note", `Switch the wallet to ${NETWORK_LABEL} before payment.`));
   }
 }
 
@@ -279,19 +279,19 @@ function renderDelivery(): void {
   limitations.append(list);
   target.append(limitations);
   const receiptBox = node("div", "terms-box");
-  receiptBox.append(node("p", "eyebrow", "TESTNET RECEIPT"));
+  receiptBox.append(node("p", "eyebrow", `${NETWORK_LABEL.toUpperCase()} RECEIPT`));
   const receiptGrid = node("div", "data-grid");
   appendField(receiptGrid, "Report SHA-256", receipt.report_sha256, "breakable span-all");
-  appendField(receiptGrid, "Payment", `${q.terms.price_musd} test ${MUSD_TESTNET.symbol}`);
+  appendField(receiptGrid, "Payment", `${q.terms.price_musd} ${TOKEN_LABEL}`);
   appendField(receiptGrid, "Confirmed", formatHistoricalDate(receipt.confirmed_at));
   appendField(receiptGrid, "Block / log", `${receipt.block_number} / ${receipt.log_index}`);
   appendField(receiptGrid, "Finality policy", receipt.finality_policy_version);
   appendField(receiptGrid, "Transaction", receipt.tx_hash, "breakable span-all");
   receiptBox.append(receiptGrid);
   if (/^0x[0-9a-f]{64}$/.test(receipt.tx_hash)) {
-    const explorerBase = new URL(MEZO_TESTNET.explorerUrl);
-    if (explorerBase.protocol === "https:" && explorerBase.origin === "https://explorer.test.mezo.org") {
-      const explorer = node("a", "external-link", "View testnet transaction ↗");
+    const explorerBase = new URL(MEZO.explorerUrl);
+    if (explorerBase.protocol === "https:" && ["https://explorer.test.mezo.org", "https://explorer.mezo.org"].includes(explorerBase.origin)) {
+      const explorer = node("a", "external-link", `View ${NETWORK_LABEL} transaction ↗`);
       explorer.href = `${explorerBase.origin}/tx/${receipt.tx_hash}`;
       explorer.target = "_blank";
       explorer.rel = "noopener noreferrer";
@@ -527,8 +527,8 @@ async function connectWallet(): Promise<void> {
     account = await walletAccount(provider, true);
     onChain = await walletOnMezo(provider);
     if (!account) announcement("The wallet did not provide an account.", "warning");
-    else if (!onChain) announcement("Wallet could not switch to Mezo Testnet (chain 31611).", "warning");
-    else announcement("Wallet connected on Mezo Testnet. No payment has been requested.");
+    else if (!onChain) announcement(`Wallet could not switch to ${NETWORK_LABEL} (chain ${MEZO.chainId}).`, "warning");
+    else announcement(`Wallet connected on ${NETWORK_LABEL}. No payment has been requested.`);
   } catch (error) { announcement(walletError(error), "warning"); }
   updateControls();
   if (quote) renderQuote();
@@ -561,7 +561,7 @@ function applyWalletState(state: WalletState): void {
 el<HTMLButtonElement>("#connect-button").addEventListener("click", () => { void connectWallet(); });
 el<HTMLButtonElement>("#switch-button").addEventListener("click", async () => {
   if (!provider) return;
-  try { await switchToMezo(provider); await refreshWallet(); announcement("Wallet switched to Mezo Testnet."); }
+  try { await switchToMezo(provider); await refreshWallet(); announcement(`Wallet switched to ${NETWORK_LABEL}.`); }
   catch (error) { announcement(walletError(error), "warning"); }
 });
 el<HTMLButtonElement>("#refresh-button").addEventListener("click", () => { void resumeFlow(); });
@@ -609,7 +609,7 @@ async function boot(): Promise<void> {
     renderCapability();
     if (!cap.payment_ready) announcement("The gateway has not enabled canonical payment. Review its current blockers.", "warning");
     else if (!x402Available()) announcement("Quotes can be reviewed, but payment remains disabled until the official browser SDK binding is verified.", "warning");
-    else announcement("Mezo Testnet service is available. Connect your wallet to begin.");
+    else announcement(`${NETWORK_LABEL} service is available. Connect your wallet to begin.`);
   } catch (error) { announcement(readableError(error), "error"); }
   updateControls();
   if (flow) await resumeFlow();

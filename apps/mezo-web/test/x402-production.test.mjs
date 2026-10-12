@@ -29,3 +29,15 @@ test("production guards reject API drift before submission",async()=>{
   assert.throws(()=>requirePermit2Challenge({...required,accepts:[{...required.accepts[0],extra:{assetTransferMethod:"eip3009"}}]},boundary),/sponsorship/);
   assert.throws(()=>requireSponsoredPayment({accepted:required.accepts[0],extensions:{}},boundary),/gas-sponsored/);
 });
+
+test('Mainnet SDK signs both authorization domains for 31612 and mainnet MUSD',async()=>{
+  const signed=[];const asset='0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186';
+  const signer={address:payer,readContract:async({functionName})=>functionName==='allowance'?0n:7n,
+    signTypedData:async message=>{signed.push(message);return `0x${'A'.repeat(130)}`;}};
+  const challenge={...required,accepts:[{...required.accepts[0],network:'eip155:31612',asset}]};
+  const payment=await createProductionProtocol(signer,'https://mezo-mainnet.boar.network','eip155:31612').createPaymentPayload(challenge);
+  requireSponsoredPayment(payment,boundary);
+  assert.deepEqual(signed.map(s=>Number(s.domain.chainId)),[31612,31612]);
+  assert.equal(signed[1].domain.verifyingContract.toLowerCase(),asset.toLowerCase());
+  assert.equal(payment.accepted.network,'eip155:31612');
+});

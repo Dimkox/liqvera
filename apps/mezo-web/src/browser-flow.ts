@@ -1,3 +1,4 @@
+import { MEZO, NETWORK_LABEL } from "./network.ts";
 export interface BrowserFlowState {
   readonly version: 1;
   readonly side: "BUY" | "SELL";
@@ -57,8 +58,8 @@ export function canPay(input: {
 
 export function walletStatus(providerAvailable: boolean, onMezo: boolean): string {
   if (!providerAvailable) return "No injected EVM wallet found.";
-  if (onMezo) return "Mezo Testnet · chain 31611";
-  return "Wrong network · switch to Mezo Testnet (31611).";
+  if (onMezo) return `${NETWORK_LABEL} · chain ${MEZO.chainId}`;
+  return `Wrong network · switch to ${NETWORK_LABEL} (${MEZO.chainId}).`;
 }
 
 export function paymentNotice(quoteState: string | null, guard: BrowserFlowState["paymentGuard"] | null): string | null {

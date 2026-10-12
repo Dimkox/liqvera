@@ -446,3 +446,12 @@ def test_public_resources_reject_credentials_and_internal_artifacts():
                       "internal_path", "raw_proof"):
             with pytest.raises(c.ContractError):
                 validate_resource(name, {**EXAMPLES[name], field: "private"})
+
+
+def test_mainnet_terms_bind_network_chain_and_token_as_one_identity():
+    terms = {**TERMS, "network": "eip155:31612", "chain_id": 31612,
+             "asset": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"}
+    validate_resource("terms", terms)
+    for field in ("network", "chain_id", "asset"):
+        with pytest.raises(c.ContractError):
+            validate_resource("terms", {**terms, field: TERMS[field]})

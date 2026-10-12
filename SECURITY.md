@@ -1,6 +1,6 @@
 # Liqvera security
 
-Liqvera consumes public market data and produces evidence. It has no authority to submit exchange orders, withdraw funds or use private venue credentials. Testnet report payments are a separate, explicitly bounded integration; they do not authorize trading.
+Liqvera consumes public market data and produces evidence. It has no authority to submit exchange orders, withdraw funds or use private venue credentials. Mezo report payments are a separate, explicitly bounded integration; they do not authorize trading.
 
 ## Secrets and trust
 

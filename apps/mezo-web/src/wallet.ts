@@ -1,5 +1,4 @@
-import { assertMezoTestnetChainId } from "@liqvera/mezo-protocol";
-import { MEZO_TESTNET } from "@liqvera/mezo-protocol";
+import { MEZO } from "./network.ts";
 import { CHAIN_HEX, isAddress } from "./contracts.ts";
 
 export interface Eip1193Provider {
@@ -28,7 +27,7 @@ export async function walletAccount(provider: Eip1193Provider, requestAccess: bo
 export async function walletOnMezo(provider: Eip1193Provider): Promise<boolean> {
   const chain = await provider.request({ method: "eth_chainId" });
   if (typeof chain !== "string" || !/^0x[0-9a-f]+$/i.test(chain)) return false;
-  try { assertMezoTestnetChainId(Number.parseInt(chain, 16)); return true; }
+  try { return Number.parseInt(chain, 16) === MEZO.chainId; }
   catch { return false; }
 }
 
@@ -36,8 +35,8 @@ export async function switchToMezo(provider: Eip1193Provider): Promise<void> {
   try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_HEX }] }); }
   catch (error) {
     if(typeof error!=="object"||error===null||!("code" in error)||error.code!==4902)throw error;
-    await provider.request({method:"wallet_addEthereumChain",params:[{chainId:CHAIN_HEX,chainName:MEZO_TESTNET.name,
-      nativeCurrency:{name:"Bitcoin",symbol:"BTC",decimals:18},rpcUrls:[MEZO_TESTNET.rpcUrl],blockExplorerUrls:[MEZO_TESTNET.explorerUrl]}]});
+    await provider.request({method:"wallet_addEthereumChain",params:[{chainId:CHAIN_HEX,chainName:MEZO.name,
+      nativeCurrency:{name:"Bitcoin",symbol:"BTC",decimals:18},rpcUrls:[MEZO.rpcUrl],blockExplorerUrls:[MEZO.explorerUrl]}]});
   }
   if (!(await walletOnMezo(provider))) throw new Error("Wallet is still on a different network.");
 }

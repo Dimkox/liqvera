@@ -27,3 +27,7 @@ Payment signing and settlement are outside this package. Consumers must use the
 official x402 SDK and retain Liqvera's fail-closed payment-readiness gates. The
 full pinned upstream deployment artifact is available only for provenance and
 contract inspection at `@liqvera/mezo-protocol/vendor/MUSD.matsnet.json`.
+
+## Mainnet selection
+
+`mezoNetwork("mainnet")` returns the official Mainnet31612 chain, MUSD asset and public RPC; `mezoNetwork("testnet")` retains the original Testnet metadata. Unknown selections throw. The vendored Testnet deployment artifact remains unchanged; Mainnet metadata is documented in [network configuration](../../docs/mainnet.md) and independently checked against the live public contracts before deployment.

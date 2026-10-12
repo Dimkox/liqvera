@@ -1,3 +1,4 @@
+import { APPROVED_MIGRATIONS } from './migration-policy.js';
 import { readFile, open, lstat } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -15,14 +16,7 @@ import { LivePaymentGrant } from './security/live-grant.js';
 import type { Attempt } from './domain/model.js';
 import { P3_PLAN_DIGEST } from './p3-plan.mjs';
 
-const migrations=new Map([
-  ['001_ledger.sql','bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b'],
-  ['002_fix_immutable_ledger_identity.sql','981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb'],
-  ['003_live_grant_consumption.sql','bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0'],
-  ['004_receipt_confirmation_provenance.sql','96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a'],
-  ['005_receipt_confirmation_count.sql','e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11'],
-  ['006_signed_live_grant_authority.sql','92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a'],
-]);
+const migrations=new Map(APPROVED_MIGRATIONS.map(row=>[row.name,row.sha256]));
 const fields=['schema','quote_id','scope_hash','report_id','payment_signature','buyer','pay_to'];
 function fail(message:string):never{throw new Error(message);}
 function exactObject(value:unknown):Record<string,unknown>{if(!value||typeof value!=='object'||Array.isArray(value))fail('P3_INPUT_INVALID');return value as Record<string,unknown>}

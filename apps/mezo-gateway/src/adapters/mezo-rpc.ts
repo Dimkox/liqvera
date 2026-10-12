@@ -1,9 +1,8 @@
 import { createHash } from 'node:crypto';
-import { AMOUNT, ASSET, CHAIN_ID, NETWORK, PublicError, type Attempt, type Quote, type Receipt } from '../domain/model.js';
+import { AMOUNT, ASSET, CHAIN_ID, NETWORK, RPC_URL, PublicError, type Attempt, type Quote, type Receipt } from '../domain/model.js';
 import type { AuthorizationPolicy, FinalityPolicy, ReadonlyRpc } from '../ports/index.js';
 import { boundedJson } from './http.js';
-import { MEZO_TESTNET, MUSD_ABI, MUSD_TRANSFER_EVENT, MUSD_PERMIT, assertMezoTestnetChainId } from '@liqvera/mezo-protocol';
-const RPC_URL=MEZO_TESTNET.rpcUrl;
+import { MUSD_ABI, MUSD_TRANSFER_EVENT, MUSD_PERMIT } from '@liqvera/mezo-protocol';
 const TRANSFER=MUSD_TRANSFER_EVENT.topic0;
 // Export the provenance-backed ABI and permit metadata for reviewed policy
 // bindings; the gateway never invents its own EIP-712 signing domain.
@@ -42,7 +41,7 @@ export class MezoReceiptReader {
   }
   async confirmation(quote: Quote,attempt: Attempt): Promise<Receipt|null> {
     if (!this.identity.reviewed || !this.finality.reviewed || !attempt.tx_hash || !HASH.test(attempt.tx_hash)) return null;
-    try { assertMezoTestnetChainId(safeInteger(await this.rpc.call('eth_chainId',[]))); }
+    try { if(safeInteger(await this.rpc.call('eth_chainId',[]))!==CHAIN_ID)throw new Error('CHAIN_MISMATCH'); }
     catch { throw new PublicError('MANUAL_REVIEW',202); }
     const raw=await this.rpc.call('eth_getTransactionReceipt',[attempt.tx_hash]); if(raw===null)return null;
     const receipt=object(raw);

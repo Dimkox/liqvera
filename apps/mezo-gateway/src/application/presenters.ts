@@ -1,4 +1,4 @@
-import { AMOUNT, ASSET, INSTRUMENT, NETWORK, RETENTION, type Quote, type Reason, type ReportRequest } from '../domain/model.js';
+import { AMOUNT, ASSET, INSTRUMENT, NETWORK, MEZO_CONFIG, RETENTION, type Quote, type Reason, type ReportRequest } from '../domain/model.js';
 export function quoteResource(quote: Quote,requestId: string) {
   return {schema:'liqvera-evidence-quote/v1',request_id:requestId,report_request_id:quote.report_request_id,quote_id:quote.id,
     report_id:quote.report_id,report_sha256:quote.report_sha256,bundle_sha256:quote.bundle_sha256,state:quote.state,
@@ -15,7 +15,7 @@ const messages: Partial<Record<Reason,string>>={
   UNAUTHORIZED:'Authorization required.',NOT_FOUND:'Resource not found.',PAYMENT_REQUIRED:'Payment required for this report.',
   PAYMENT_UNCERTAIN:'Checking the payment already submitted.',MANUAL_REVIEW:'The existing payment requires operator review.',
   QUOTE_EXPIRED:'This unpaid quote has expired.',IDEMPOTENCY_CONFLICT:'This idempotency key is bound to a different request.',
-  PAYMENT_NOT_READY:'Testnet payment is not ready.',SIMULATED_SOURCE:'Fixture reports cannot be sold.',
+  PAYMENT_NOT_READY:`${MEZO_CONFIG.name==='mainnet'?'Mainnet':'Testnet'} payment is not ready.`,SIMULATED_SOURCE:'Fixture reports cannot be sold.',
   ARTIFACT_INTEGRITY_FAILURE:'The retained artifact is unavailable or failed integrity verification.',
   RATE_LIMITED:'Request budget exceeded. Try again after the stated delay.'
 };
@@ -23,7 +23,7 @@ export const errorResource=(code: Reason,requestId: string)=>({schema:'liqvera-e
 export function capabilitiesResource(requestId: string,sourceMode: 'fixture'|'live-public',blockers: Reason[]) {
   return {schema:'liqvera-evidence-capabilities/v1',request_id:requestId,instrument_id:INSTRUMENT,
     instrument_label:'Hyperliquid BTC linear perpetual',network:NETWORK,asset:ASSET,decimals:18,price_musd:'0.01',amount_atomic:AMOUNT,
-    source_mode:sourceMode,limitations:['Testnet only. Read-only analytics.',
+    source_mode:sourceMode,limitations:[`${MEZO_CONFIG.name==='mainnet'?'Mainnet':'Testnet'} only. Read-only analytics.`,
       'Calculation over the available snapshot depth; this is not a complete exchange book or guaranteed execution.',
       'Fees, funding, and net P&L are not calculated.'],payment_ready:blockers.length===0,blockers};
 }

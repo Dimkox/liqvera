@@ -1,5 +1,7 @@
 # Gateway startup incident — 2026-10-12
 
+Historical incident record. The compatible hotfix described below was subsequently replaced by the [complete audited production rollout](../security/2026-10-12-production.md).
+
 The public gateway repeatedly exited before listening, returning HTTP 502 through the edge. An isolated diagnostic using its exact image passed configuration, contract loading, read-only database connectivity, private-file validation and database identity. Payment grant composition returned `LIVE_GRANT_INVALID`. This identifies the failing stage; no grant contents were disclosed and no new grant was issued.
 
 Source fix: `c7b19bcbd2b7774a0abd218d18dfb40bea0684b2`, published to GitHub main. Known grant-validation failures now log `PAYMENTS_DISABLED` with a bounded code and select the existing grantless adapter. Invalid authority cannot initialize new payments or activate a ledger authority. Unexpected errors still fail. Existing confirmation, delivery and workers retain their ordinary behavior.
@@ -23,6 +25,6 @@ The replacement retains normal worker behavior, including confirmation and reten
 
 ## Operator recovery references
 
-Private backups are located at `/home/pall/.local/state/liqvera/recovery/2026-10-12-gateway/`; contents are not in Git. The stopped rollback container is `liqvera-live-gateway-before-startup-fix`. The persistent image override is `/home/pall/grok-projects/liqvera-live-deploy/compose.startup-fix.yaml`; include it after the existing deployment Compose files on future recreations. Do not run migrations or replace historical images with the breaking namespace migration as part of this hotfix.
+Private backups are located at `/home/pall/.local/state/liqvera/recovery/2026-10-12-gateway/`; contents are not in Git. The stopped rollback container is `liqvera-live-gateway-before-startup-fix`. The current deployment uses `/home/pall/.local/share/liqvera/deploy/compose.json`; the old hotfix override is superseded. Follow the complete production record for current recovery references.
 
 Rollback consists of stopping the replacement gateway, preserving its state, restoring the retained container under its original name and starting it. This returns the previous image and its known startup fault; it is a recovery option, not a working fix. Never roll back the ledger or sealed evidence independently.

@@ -1,0 +1,101 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "urn:liqvera:security-assessment:production-candidate:f5de466:2026-10-12",
+  "author": "Liqvera repository security audit",
+  "timestamp": "2026-10-12T22:44:41.148756+00:00",
+  "version": 2,
+  "tooling": "Manual upstream/source triage with Trivy 0.74.0, Grype 0.120.1 and govulncheck 1.9.0",
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2025-60876",
+        "@id": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+      },
+      "products": [
+        {
+          "@id": "urn:liqvera:image:sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5"
+        },
+        {
+          "@id": "urn:liqvera:image:sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15"
+        },
+        {
+          "@id": "urn:liqvera:image:sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4"
+        },
+        {
+          "@id": "urn:liqvera:image:sha256:e980139a889c55872a42baaec5d07bfbff3f9c58272c862e018bffe9c2e37baa"
+        },
+        {
+          "@id": "urn:liqvera:image:sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec"
+        },
+        {
+          "@id": "urn:liqvera:image:sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233"
+        }
+      ],
+      "status": "fixed",
+      "action_statement": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image.",
+      "action_statement_timestamp": "2026-10-12T19:04:42+00:00"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-15367",
+        "@id": "https://nvd.nist.gov/vuln/detail/CVE-2025-15367"
+      },
+      "products": [
+        {
+          "@id": "urn:liqvera:image:sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5"
+        },
+        {
+          "@id": "urn:liqvera:image:sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15"
+        }
+      ],
+      "status": "fixed",
+      "action_statement": "CPython b234a2b67539f787e191d2ef19a7cbdce32874e7 production backport applied; non-root control-character regression passes in every Python image.",
+      "action_statement_timestamp": "2026-10-12T19:04:42+00:00"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2026-12345",
+        "@id": "https://nvd.nist.gov/vuln/detail/CVE-2026-12345"
+      },
+      "products": [
+        {
+          "@id": "urn:liqvera:image:sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5"
+        },
+        {
+          "@id": "urn:liqvera:image:sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15"
+        }
+      ],
+      "status": "fixed",
+      "action_statement": "CPython 3.14 backport 58ed0259cae509a19138795df302fe60b544dc74 applied to tempfile and shutil; non-root symlink-race regression passes in every Python image.",
+      "action_statement_timestamp": "2026-10-12T19:04:42+00:00"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-9410",
+        "@id": "https://www.tenable.com/security/research/tra-2024-41"
+      },
+      "products": [
+        {
+          "@id": "urn:liqvera:image:sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4"
+        }
+      ],
+      "status": "not_affected",
+      "justification": "component_not_present",
+      "impact_statement": "The advisory concerns Ada.cx Sentry configuration. Installed ada-libs is the unrelated ada-url C++ URL parser. Grype matched an ambiguous product name."
+    },
+    {
+      "vulnerability": {
+        "name": "GO-2026-5932",
+        "@id": "https://pkg.go.dev/vuln/GO-2026-5932"
+      },
+      "products": [
+        {
+          "@id": "urn:liqvera:image:sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233"
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present",
+      "impact_statement": "The advisory concerns golang.org/x/crypto/openpgp, absent from the standard Caddy dependency graph/binary. govulncheck 1.9.0 on the final binary reports zero affected symbols or imported packages; only the containing module matches."
+    }
+  ]
+}

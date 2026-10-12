@@ -1,0 +1,64 @@
+{
+  "source_commit": "f5de4664189e5a3441b521699cd2d5f69d4cfbaf",
+  "components": {
+    "postgres-live": {
+      "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+      "container": "3820ad072f57c5fb12200c3c642f33b52002b67cbbe0323ac4e430bb6e514b1e",
+      "previous_image": "sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+      "rollback_container": "liqvera-live-postgres-live-1-before-28f9a1c",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "evidence-capture-live": {
+      "image": "sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5",
+      "container": "a3e883cc55be7c7e86b26b60e40966813a4a93d539dd694eebb356d6f5bf1770",
+      "previous_image": "sha256:fe8ec4ab09dcfe09747d0b8e9908d704b36b81b8f8d1cb6c0c1929b1058746c1",
+      "rollback_container": "liqvera-live-evidence-capture-live-1-before-28f9a1c",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "report-live": {
+      "image": "sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15",
+      "container": "b758fd6ef9687b9d7879196ae0a0c0f34ba9fcaca52d3c538e25e32fbb28829a",
+      "previous_image": "sha256:9afae1abb274078ebf66edd58e044c2fa21781385df06a0214f8274d82c4fdb1",
+      "rollback_container": "liqvera-live-report-live-1-before-28f9a1c",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "gateway-net-live": {
+      "image": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4",
+      "container": "1cd40f4d85953ea90bcb3cded71b428061b5b1910ac659805132cf3d3f12a58c",
+      "previous_image": "sha256:ebd33681d08998d85e9241f10394383f61a6ae8f1312e53d1bfd528ee192a92f",
+      "rollback_container": "liqvera-live-gateway-net-live-1-before-28f9a1c",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "gateway-live": {
+      "image": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4",
+      "container": "aea9890976c53ca6eb53c99eff190c167a352703fd4d5939f687889535151ca3",
+      "previous_image": "sha256:5e0d12f44d5462b07d2e5fcf8a5b14f17a468a493e4f219fab5c4235a4086ddc",
+      "rollback_container": "liqvera-live-gateway-live-1-before-28f9a1c",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "web-live": {
+      "image": "sha256:e980139a889c55872a42baaec5d07bfbff3f9c58272c862e018bffe9c2e37baa",
+      "container": "fa0daa1c52575d2507afc9a4f53818cc01892e33c4bdfdcfea26250efb0f6d0f",
+      "previous_image": "sha256:55a406183496281df064b8e1ed7d294b722ce029a77f075d49d1f5f2f586c9ff",
+      "health": "healthy",
+      "restarts": 0,
+      "rollback_note": "Original image retained; Compose removed the stopped previous web container while replacing the preview. Restore image using current web service configuration."
+    },
+    "edge-live": {
+      "image": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+      "container": "1ad60d97283df9eb61b05d2f0520d64db8dacd95f8936a8210431b3891ef3798",
+      "previous_image": "sha256:ce96ee08be3bfbc14058dfea90437415ec6295dad673bee167b35f01cae8be11",
+      "rollback_container": "liqvera-live-edge-live-1-before-28f9a1c",
+      "health": "healthy",
+      "restarts": 0
+    }
+  },
+  "backup_location": "/home/pall/.local/state/liqvera/recovery/2026-10-12-production",
+  "sql_migrations": false,
+  "volumes_recreated": false
+}

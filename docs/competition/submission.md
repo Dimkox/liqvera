@@ -36,11 +36,11 @@ Prepared 2026-10-12. This is an existing project before the buildathon; this doc
 
 - Project: <https://liqvera.site>
 - Public source: <https://github.com/Dimkox/liqvera>
-- Published source baseline for this draft: [c7b19bc](https://github.com/Dimkox/liqvera/commit/c7b19bc). The public runtime received only the compatible gateway startup hotfix; publication of source does not imply rollout of all rebuilt images.
+- Current preview source: [f5de466](https://github.com/Dimkox/liqvera/commit/f5de466). All seven production containers now use audited images; the public preview is a new October 12 live-public Liqvera report verified offline.
 - Deck: [presentation.pdf](presentation.pdf), seven slides; editable source: [presentation.html](presentation.html).
 - Video: record and upload the [two-minute pitch](pitch-script.md); no video URL exists in this package yet.
 - Architecture and boundaries: [specification](../specification.md).
-- Local validation and image audit: [remediation report](../security/2026-10-12-remediation.md), bound to source `76b63ec`; it does not certify the later hotfix or running production images.
+- Local validation: [remediation report](../security/2026-10-12-remediation.md). Current deployed image IDs, fresh advisory scans and functional evidence: [production audit](../security/2026-10-12-production.md).
 - Gateway hotfix verification: 61 gateway tests passed against a disposable database. Consult the current [handoff](../../handoff.md) for publication and deployment evidence.
 
 ## Official requirements and dates

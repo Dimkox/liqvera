@@ -16,6 +16,8 @@ Update and rollback are fail-closed with ROLLBACK_RESTORE_REQUIRED until coheren
 
 ## Live-public operation
 
-TLS/DNS, fixed public origin, private database and internal token files, exact source bindings and a reviewed external payment authority are operator prerequisites. Ordinary startup cannot make a payment. Existing signed authority expires and must never be silently renewed. The latest observed live gateway returned 502 on 2026-10-12; see the [baseline](security/2026-10-12-baseline.md).
+TLS/DNS, fixed public origin, private database and internal token files, exact source bindings and a reviewed external payment authority are operator prerequisites. Ordinary startup cannot make a payment. Existing signed authority expires and must never be silently renewed. The full updated stack was deployed on 2026-10-12 and all seven containers passed health checks. API liveness is available; new payments remain gated. See the [production record](security/2026-10-12-production.md).
 
 Back up PostgreSQL and both artifact/input volumes coherently before changes. Preserve the migration ledger, canonical payment identity and unknown outcomes. An update that changes source-bound authority needs new review; namespace migration is not authorization to mutate existing records.
+
+The current host deployment manifest is `/home/pall/.local/share/liqvera/deploy/compose.json` (private, mode 0600). It pins the deployed image tags and references existing external networks and volumes. Use this manifest for subsequent operations; obsolete worktree manifests do not describe the current deployment. Recovery backups are under `/home/pall/.local/state/liqvera/recovery/2026-10-12-production/`. Never commit their contents.

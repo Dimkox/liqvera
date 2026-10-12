@@ -1,0 +1,81 @@
+{
+  "public_https": {
+    "/": {
+      "http": 200,
+      "bytes": 576,
+      "sha256": "a334a36049660df0414469d032e0121fc36d7df06ce8f47e95d5c20bc8f58736"
+    },
+    "/healthz": {
+      "http": 200,
+      "bytes": 108,
+      "sha256": "26c668e1fad691efa907144d64480d9c6769542590e0c0e9589140219147c872",
+      "body": {
+        "schema": "liqvera-evidence-health/v1",
+        "request_id": "f9f6a007-6431-438f-b4b7-6bb12911c662",
+        "status": "alive"
+      }
+    },
+    "/readyz": {
+      "http": 503,
+      "bytes": 272,
+      "sha256": "70535f63c4400c1fadf4086328d16dccb02d467a459e3d063de59e9b3eaf57da",
+      "body": {
+        "schema": "liqvera-evidence-readiness/v1",
+        "request_id": "abe60bf0-4f6a-48e0-8dd0-610109d2de6d",
+        "ready": false,
+        "storage_ready": true,
+        "integration_ready": true,
+        "configuration_ready": true,
+        "payment_ready": false,
+        "blockers": [
+          "EXTERNAL_GRANT_REQUIRED",
+          "PAYMENT_SERVICE_UNAVAILABLE"
+        ]
+      }
+    },
+    "/v1/capabilities": {
+      "http": 200,
+      "bytes": 675,
+      "sha256": "fc2dbf5391d2a74b4485374201913ee429ca2d462523f84ca1863e0b4e935bf6",
+      "body": {
+        "schema": "liqvera-evidence-capabilities/v1",
+        "request_id": "90da7b3a-f217-4670-aa25-70f4090b4e1d",
+        "instrument_id": "hyperliquid:BTC:perpetual",
+        "instrument_label": "Hyperliquid BTC linear perpetual",
+        "network": "eip155:31611",
+        "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+        "decimals": 18,
+        "price_musd": "0.01",
+        "amount_atomic": "10000000000000000",
+        "source_mode": "live-public",
+        "limitations": [
+          "Testnet only. Read-only analytics.",
+          "Calculation over the available snapshot depth; this is not a complete exchange book or guaranteed execution.",
+          "Fees, funding, and net P&L are not calculated."
+        ],
+        "payment_ready": false,
+        "blockers": [
+          "EXTERNAL_GRANT_REQUIRED",
+          "PAYMENT_SERVICE_UNAVAILABLE"
+        ]
+      }
+    },
+    "/demo/latest-live/report.json": {
+      "http": 200,
+      "bytes": 4913,
+      "sha256": "0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2"
+    },
+    "/demo/latest-live/evidence.zip": {
+      "http": 200,
+      "bytes": 38188,
+      "sha256": "3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0"
+    }
+  },
+  "browser_origin": {
+    "historical_preview": true,
+    "request_without_wallet_disabled": true,
+    "runtime_exceptions": 0,
+    "displayed_report": "HISTORICAL LIVE PUBLIC PREVIEW\n\nSealed Hyperliquid BTC perpetual report\nCaptured at\nOct 12, 2026, 10:38:07 PM\nReport ID\n3c02f1e7-e197-487b-bac7-bf8b73823a38\nReport SHA-256\n0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2\nBundle SHA-256\n3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0\nSnapshot calculation\nBUY 0.01 BTC \u00b7 VWAP 82574\n\nSealed historical capture; see its timestamp above. It is not fresh market data, an execution promise, or a new run. No payment transaction exists for this public preview.\n\nDownload evidence ZIP"
+  },
+  "network_note": "Direct audit-host egress repeatedly stalled on the ZIP body; the configured HTTPS proxy completed every endpoint and both exact asset hashes passed."
+}

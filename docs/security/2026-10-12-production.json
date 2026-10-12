@@ -1,0 +1,529 @@
+{
+  "schema": "liqvera-production-security-audit/v1",
+  "audited_at": "2026-10-12T22:44:41.148756+00:00",
+  "source_commit": "f5de4664189e5a3441b521699cd2d5f69d4cfbaf",
+  "scope": "Six exact final production image IDs, seven intended containers; gateway-net reuses gateway. Web refreshed from f5de466 with new Liqvera preview evidence. Candidate scanning does not prove deployed-state identity. No ignore rules or finding suppression.",
+  "images": {
+    "capture": {
+      "tag": "liqvera-audit/capture:current",
+      "image_id": "sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-15367",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "CPython b234a2b67539f787e191d2ef19a7cbdce32874e7 production backport applied; non-root control-character regression passes in every Python image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2026-12345",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "CPython 3.14 backport 58ed0259cae509a19138795df302fe60b544dc74 applied to tempfile and shutil; non-root symlink-race regression passes in every Python image."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 5
+      },
+      "source_commit": "76b63ecaa5782614435850b1cfbda80ac02684eb"
+    },
+    "report": {
+      "tag": "liqvera-audit/report:current",
+      "image_id": "sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-15367",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "CPython b234a2b67539f787e191d2ef19a7cbdce32874e7 production backport applied; non-root control-character regression passes in every Python image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2026-12345",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "CPython 3.14 backport 58ed0259cae509a19138795df302fe60b544dc74 applied to tempfile and shutil; non-root symlink-race regression passes in every Python image."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 5
+      },
+      "source_commit": "76b63ecaa5782614435850b1cfbda80ac02684eb"
+    },
+    "web": {
+      "tag": "liqvera-production/web:preview",
+      "image_id": "sha256:e980139a889c55872a42baaec5d07bfbff3f9c58272c862e018bffe9c2e37baa",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 3
+      },
+      "source_commit": "f5de4664189e5a3441b521699cd2d5f69d4cfbaf"
+    },
+    "edge": {
+      "tag": "liqvera-audit/edge:current",
+      "image_id": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "trivy",
+          "id": "GO-2026-5932",
+          "package": "golang.org/x/crypto",
+          "version": "v0.58.0",
+          "severity": "UNKNOWN",
+          "disposition": "not_affected",
+          "evidence": "The advisory concerns golang.org/x/crypto/openpgp, absent from the standard Caddy dependency graph/binary. govulncheck 1.9.0 on the final binary reports zero affected symbols or imported packages; only the containing module matches."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        }
+      ],
+      "counts": {
+        "trivy": 1,
+        "grype": 3
+      },
+      "source_commit": "76b63ecaa5782614435850b1cfbda80ac02684eb"
+    },
+    "postgres": {
+      "tag": "liqvera-audit/postgres:current",
+      "image_id": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 3
+      },
+      "source_commit": "76b63ecaa5782614435850b1cfbda80ac02684eb"
+    },
+    "gateway": {
+      "tag": "liqvera-production/gateway:28f9a1c",
+      "image_id": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4",
+      "platform": "linux/amd64",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2024-9410",
+          "package": "ada-libs",
+          "version": "3.3.0-r0",
+          "severity": "Medium",
+          "disposition": "not_affected",
+          "evidence": "The advisory concerns Ada.cx Sentry configuration. Installed ada-libs is the unrelated ada-url C++ URL parser. Grype matched an ambiguous product name."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 4
+      },
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "source_commit": "28f9a1c9575c30fdd9d8720663d2e0b20c6308fd"
+    }
+  },
+  "new_untriaged_findings": [],
+  "raw_counts": {
+    "trivy": 1,
+    "grype": 23
+  },
+  "scanner_status": [
+    {
+      "image": "capture",
+      "scanner": "trivy",
+      "exit": 0
+    },
+    {
+      "image": "capture",
+      "scanner": "grype",
+      "exit": 0
+    },
+    {
+      "image": "report",
+      "scanner": "trivy",
+      "exit": 0
+    },
+    {
+      "image": "report",
+      "scanner": "grype",
+      "exit": 0
+    },
+    {
+      "image": "web",
+      "scanner": "trivy",
+      "exit": 0
+    },
+    {
+      "image": "web",
+      "scanner": "grype",
+      "exit": 0
+    },
+    {
+      "image": "edge",
+      "scanner": "trivy",
+      "exit": 0
+    },
+    {
+      "image": "edge",
+      "scanner": "grype",
+      "exit": 0
+    },
+    {
+      "image": "postgres",
+      "scanner": "trivy",
+      "exit": 0
+    },
+    {
+      "image": "postgres",
+      "scanner": "grype",
+      "exit": 0
+    },
+    {
+      "image": "gateway",
+      "scanner": "trivy",
+      "exit": 0
+    },
+    {
+      "image": "gateway",
+      "scanner": "grype",
+      "exit": 0
+    }
+  ],
+  "trivy": {
+    "Version": "0.74.0",
+    "VulnerabilityDB": {
+      "Version": 2,
+      "NextUpdate": "2026-10-13T13:18:23.16392058Z",
+      "UpdatedAt": "2026-10-12T13:18:23.1639207Z",
+      "DownloadedAt": "2026-10-12T16:36:57.447175007Z"
+    },
+    "CheckBundle": {
+      "Digest": "sha256:1583562f8b90ed2a071b99f0e5ffff6b57e4ceb6ca3e4796577b4e6a339eb74c",
+      "DownloadedAt": "2026-09-30T16:10:19.322988759Z"
+    }
+  },
+  "grype": {
+    "version": "0.120.1",
+    "database": {
+      "schemaVersion": "v6.1.10",
+      "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-12T00:38:50Z_1791787522.tar.zst?checksum=sha256%3Af1d61e7be5caa87b18ab7519f71982399f4d43d8f407edd24717903acef3d83d",
+      "built": "2026-10-12T06:45:22Z",
+      "path": "/tmp/liqvera-current-audit/grype-db/6/vulnerability.db",
+      "valid": true
+    }
+  },
+  "database_refresh": "Both database update commands succeeded; providers currently return the same database builds used earlier today.",
+  "dependencies": {
+    "getzilla": {
+      "accepted": [],
+      "dependencies": 231,
+      "findings": [],
+      "manifests": [
+        "apps/mezo-gateway/package-lock.json",
+        "apps/mezo-web/package-lock.json",
+        "packages/contracts/pyproject.toml",
+        "packages/evidence-report/pyproject.toml",
+        "packages/public-capture/pyproject.toml",
+        "packages/readonly-analyzer/pyproject.toml",
+        "pyproject.toml"
+      ],
+      "source": "OSV API",
+      "status": "pass",
+      "summary": "no known vulnerabilities in 231 pinned dependencies (OSV API)"
+    },
+    "python": {
+      "pypi": {
+        "dependencies": 53,
+        "findings": 0
+      },
+      "osv": {
+        "dependencies": 53,
+        "findings": 0
+      }
+    },
+    "npm": {
+      "gateway": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "web": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    },
+    "lock_sha256": {
+      "requirements-dev.lock": "8fadc7f93b6656ac16bbaf2b02825e87d731ba9f24aa22425c3f71b4e9ccee05",
+      "apps/mezo-gateway/package-lock.json": "0e5f366d2cbda468908ab0166b57343fdccd34cb5d984c42ba977999f70a15a5",
+      "apps/mezo-web/package-lock.json": "07b5d41e7539d6a0cf5d19c228c54e64a10296ebcf28e38fbf1fcece61200185"
+    },
+    "locks_unchanged_since": "76b63ec"
+  },
+  "cisa_kev": {
+    "version": "2026.10.08",
+    "released": "2026-10-08T20:09:18.9833Z",
+    "count": 1739,
+    "matched_remaining_cves": []
+  },
+  "vex_basis": "docs/security/2026-10-12-remediation-vex.json",
+  "gateway_backport_hash_check": {
+    "status": "pass",
+    "sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+    "path": "/bin/busybox",
+    "image_id": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4"
+  },
+  "raw_archive": {
+    "file": "security-raw.tar.gz",
+    "sha256": "1ae7baec0677184cc0c0d3f9edace1159d929d6c0a32ab1d3d9518209239a967",
+    "members": {
+      "candidate-inventory.json": "9d86bf92aa66bd691eb308001e1c2f74a00e455ea0c004d57858feab23ccda38",
+      "capture-grype.json": "d9644cefd8941f92132183d81fc5b5c5ef8f0f28bf3c7e5478804f7be89847e7",
+      "capture-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "capture-trivy.json": "08634ae23bb7e6f373e4a3c843c2f7dfa3b957c5bed5ed0d3ac7dbb68db11398",
+      "capture-trivy.log": "b1832fb181113e9e9917886ce4eeaa9846123ccab04323e34a2fead0cad15b58",
+      "cisa-kev.json": "fb1621beec7db19d99c1f919dede3d4cc01ad88acd16f79f1592929c4826dfee",
+      "edge-grype.json": "b11fb1cd965b66ea5c7d6ab06abe85200c2af5ef3b8acd133eb2651e9fb61d87",
+      "edge-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "edge-trivy.json": "1485d51b621ee901987466ac4236e982913600a115402e5b1e5a19ea95338b43",
+      "edge-trivy.log": "24c33914f64c0cbfb171418057ae728b8210a6768963b7c998bd564bd949e39c",
+      "gateway-busybox.sha256": "482f4b5bbd24ebbed9a674403650170b156ae369417ba6f46300bb7b8da9f3d0",
+      "gateway-grype.json": "ae46065b0929b6f7087b01d4e1a6b3c4e6412da4933b67c81dac60eff8d556e4",
+      "gateway-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gateway-scan-status.json": "b9aa62e0d408e2882ca46cc16155b428c328641a85c8732d184066e06cd6fe59",
+      "gateway-trivy.json": "680c32f33edb028849e0104dbb241df422979e6025878c3d9f8173c0a63dc9d7",
+      "gateway-trivy.log": "adfabd67d6e64a7d81c8c986ec51fc811351e2088cf4f6f457eadfc83bbd49a0",
+      "getzilla.json": "6d4818aa932cb87db5636213dda9a641ddd122424b54cacb4d62b9f5fde2073e",
+      "getzilla.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "grype-db-update.log": "97ec010778b01fd39aec529c2f452b6ad779693c1c2ce729a4ef79cf43fbbfc4",
+      "grype-db.json": "09dfc6b54b4575eda10e1816cf2779839245b6a1ace84cd1211c104e1fdf59b3",
+      "npm-gateway.json": "43c83c39f94ea68e0f6eb81de355f5df1a6e2986f050220934809aa318f3b5f5",
+      "npm-gateway.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "npm-web.json": "f31fc1e790ec4d173b02536f1eafdd4df1b59278ab38a4d60dee41d5afdfb3a5",
+      "npm-web.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "postgres-grype.json": "8bc7aae20755dc742bcf7cf29f0a12e8e9cb44d1f29439a637aa5453b43accc0",
+      "postgres-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "postgres-trivy.json": "1739da94d81d2aa15e3e418d26656377c6319c2c11281febc5c333d2ee94819b",
+      "postgres-trivy.log": "d06e957a10871999b86407efc7cf3a20d3e9639ed67abda2539372551cab3211",
+      "python-osv.json": "25573a1fc6c16e0bfc9889f9a009827a3309a1b18128fd29c4f62abe24bc4188",
+      "python-osv.log": "15950a68a7ed99c59779717acefdceb3f69cfd31bde67d2c954f2a3cea4d7955",
+      "python-pypi.json": "066bab82d88bc68d208685c9539c02c77c7aeebcf85f73630d4285a4b4ddb2e6",
+      "python-pypi.log": "15950a68a7ed99c59779717acefdceb3f69cfd31bde67d2c954f2a3cea4d7955",
+      "report-grype.json": "9f3b9f7b6481d4bde294fa7bc947e651c4085c3fb364e4993d663e3d14607a52",
+      "report-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "report-trivy.json": "059d82148f68b493891f99a158889924290384dcd75a9fad37f3835bcf701b1c",
+      "report-trivy.log": "9b1eeb945cd04f6a017ab080533cdd0e1d2d88633d72174b1fab0d44fccf8267",
+      "scan-status.json": "a1db7a0795c37eeea231f5be54770e889800e3b41b3234f0916218f4f6f92ee0",
+      "security-vex.json": "87afd0f53724e1249747800c55d167a4b2cbf68af5f0b079f3ea02b813ed72f6",
+      "trivy-db-update.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trivy-version.json": "ef4e3eeb2497a11487471f47660a65d569651c6feae1a18f75f3dca8a16fa94a",
+      "web-busybox.sha256": "482f4b5bbd24ebbed9a674403650170b156ae369417ba6f46300bb7b8da9f3d0",
+      "web-grype.json": "db89682c44f6cfe3ed2d6f76a3c750a88d55726c5a49ea6d10a59725e4e07d03",
+      "web-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "web-refresh-scan-status.json": "94ad431b01dcfe6fb6e20d571e839e0b6aa3f1ab0263b9cae1594047b4c48efb",
+      "web-trivy.json": "e31519e14d298dfa59bf2ea43e082dacc8e61f132b1726c3f38781475709abc9",
+      "web-trivy.log": "0efd9e35fc7663de12adcbe22bd14a3f800cf4bba0a27af74b21226cc8f317a8"
+    }
+  },
+  "web_backport_hash_check": {
+    "status": "pass",
+    "sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+    "path": "/bin/busybox",
+    "image_id": "sha256:e980139a889c55872a42baaec5d07bfbff3f9c58272c862e018bffe9c2e37baa"
+  },
+  "web_refresh_scanner_status": [
+    {
+      "image": "web",
+      "scanner": "trivy",
+      "exit": 0
+    },
+    {
+      "image": "web",
+      "scanner": "grype",
+      "exit": 0
+    }
+  ]
+}

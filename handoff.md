@@ -8,7 +8,7 @@ Startup now handles only known grant-validation failures by logging a bounded PA
 
 Verification: all 61 gateway tests passed against a fresh disposable PostgreSQL database, including actual main-process startup with an invalid grant, HTTP liveness/capabilities and payment blockers. Independent read-only review found no blocking issue. The prior full-product and eight-image audit remains bound to its recorded commit; this follow-up changes gateway startup only.
 
-Next: publish the checked commits to origin/main; apply the two-file compatible startup fix to the existing public gateway without namespace or database migration; prepare contest materials. The full namespace/CVE rollout remains distinct from the compatible startup hotfix.
+Published `c7b19bc` to origin/main and deployed its compatible two-file gateway hotfix. Public landing, health, capabilities and immutable preview return 200; readiness reports storage/integration/configuration ready and payments unavailable. The gateway is healthy with zero restarts. Private coherent backups and the stopped previous container are retained. [Incident and recovery record](docs/runbooks/2026-10-12-gateway-startup.md) records exact images and operator paths. Full namespace/CVE image rollout remains distinct from this startup hotfix. Next: finish contest materials and review GitHub CI.
 
 ## 2026-10-12 — standalone migration and exact-image security verification completed locally
 

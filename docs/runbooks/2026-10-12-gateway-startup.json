@@ -1,0 +1,79 @@
+{
+  "old_image": "sha256:ebd33681d08998d85e9241f10394383f61a6ae8f1312e53d1bfd528ee192a92f",
+  "new_image": "sha256:5e0d12f44d5462b07d2e5fcf8a5b14f17a468a493e4f219fab5c4235a4086ddc",
+  "new_container": "282e08cdbaf0c24c4bd83e88218e114ec411221ceed7ee121f8582c2dea34f70",
+  "rollback_container": "liqvera-live-gateway-before-startup-fix",
+  "source_commit": "c7b19bcbd2b7774a0abd218d18dfb40bea0684b2",
+  "environment_changed": false,
+  "mounts_changed": false,
+  "migrations_run": false,
+  "public_checks": {
+    "/": {
+      "status": 200,
+      "sha256": "4910343fddead027d75bf3defb02941b11625168ca878bcf9395fb520662202a"
+    },
+    "/healthz": {
+      "status": 200,
+      "body": {
+        "schema": "mee-evidence-health/v1",
+        "request_id": "e8017d61-33fb-4eaa-8b12-8b2c5f116032",
+        "status": "alive"
+      }
+    },
+    "/readyz": {
+      "status": 503,
+      "body": {
+        "schema": "mee-evidence-readiness/v1",
+        "request_id": "b7ceff92-a6de-4297-90dd-635cc24d9605",
+        "ready": false,
+        "storage_ready": true,
+        "integration_ready": true,
+        "configuration_ready": true,
+        "payment_ready": false,
+        "blockers": [
+          "EXTERNAL_GRANT_REQUIRED",
+          "PAYMENT_SERVICE_UNAVAILABLE"
+        ]
+      }
+    },
+    "/v1/capabilities": {
+      "status": 200,
+      "body": {
+        "schema": "mee-evidence-capabilities/v1",
+        "request_id": "3aaa8218-ba3a-4597-87f2-7e1f49db4d3b",
+        "instrument_id": "hyperliquid:BTC:perpetual",
+        "instrument_label": "Hyperliquid BTC linear perpetual",
+        "network": "eip155:31611",
+        "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+        "decimals": 18,
+        "price_musd": "0.01",
+        "amount_atomic": "10000000000000000",
+        "source_mode": "live-public",
+        "limitations": [
+          "Testnet only. Read-only analytics.",
+          "Calculation over the available snapshot depth; this is not a complete exchange book or guaranteed execution.",
+          "Fees, funding, and net P&L are not calculated."
+        ],
+        "payment_ready": false,
+        "blockers": [
+          "EXTERNAL_GRANT_REQUIRED",
+          "PAYMENT_SERVICE_UNAVAILABLE"
+        ]
+      }
+    },
+    "/demo/latest-live/report.json": {
+      "status": 200,
+      "sha256": "8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd"
+    }
+  },
+  "verification": {
+    "gateway_tests_passed": 61,
+    "gateway_tests_skipped": 0,
+    "independent_review": "no blocking issues",
+    "isolated_compatibility_preview": true
+  },
+  "file_hashes": {
+    "main.js": "dabd0b36de48042d4a9e9c352595470c52c011cbb9ac291ff0701031126955db",
+    "security/live-composition.js": "f103b48fa8bd276c04111707fa4e0eaed47892489f487d769dc05fd5ee546121"
+  }
+}

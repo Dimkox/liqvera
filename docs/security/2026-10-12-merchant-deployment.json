@@ -1,0 +1,61 @@
+{
+  "source_commit": "5f87329392f5823c0757831cfadf6ccb19b81b3c",
+  "image_id": "sha256:226733a2ee759d28fb610768bccfba6b3f49cb6b76edad9cc29d3aac92d62b6c",
+  "container_id": "3c67c076043c44a1d34aa9ed21419c1553fb008a6a6978ff7aefcfbe0e484608",
+  "payment_mode": "merchant",
+  "network": "eip155:31612",
+  "price_musd": "0.01",
+  "recipient_unchanged": true,
+  "ready": {
+    "schema": "liqvera-evidence-readiness/v1",
+    "request_id": "4141bdd8-2a68-4f55-a081-c545844123c2",
+    "ready": true,
+    "storage_ready": true,
+    "integration_ready": true,
+    "configuration_ready": true,
+    "payment_ready": true,
+    "blockers": []
+  },
+  "rollback_container": "liqvera-live-gateway-live-1-before-merchant-5f87329",
+  "backup_location": "/home/pall/.local/state/liqvera/recovery/2026-10-12-merchant-5f87329",
+  "migration": "008_merchant_nonce.sql",
+  "buyer_signature_submitted": false,
+  "payment_submitted": false,
+  "components": {
+    "postgres-live": {
+      "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "evidence-capture-live": {
+      "image": "sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "report-live": {
+      "image": "sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "gateway-net-live": {
+      "image": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "gateway-live": {
+      "image": "sha256:226733a2ee759d28fb610768bccfba6b3f49cb6b76edad9cc29d3aac92d62b6c",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "web-live": {
+      "image": "sha256:aadd7b7c3cbbc3aada93ddd537404802b7771de75276837efdaa4a0cf2646d36",
+      "health": "healthy",
+      "restarts": 0
+    },
+    "edge-live": {
+      "image": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+      "health": "healthy",
+      "restarts": 0
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "/": {
+    "http": 200,
+    "bytes": 576,
+    "sha256": "ab92fc61eb1cf57e8b985fa73acd766441811f3bef9cf2f1be801cb6490b7b4b"
+  },
+  "/healthz": {
+    "http": 200,
+    "bytes": 108,
+    "sha256": "49cd94f4e11e3e240cbc1e6ffc2068ed4240a1b47fc20148062a5464e89e00d2",
+    "body": {
+      "schema": "liqvera-evidence-health/v1",
+      "request_id": "eb7dec7c-2c94-44bb-9f74-84ba0121d706",
+      "status": "alive"
+    }
+  },
+  "/readyz": {
+    "http": 200,
+    "bytes": 215,
+    "sha256": "82538cbe651e6f4a4aff7a5e080ef2d7f43f413b78569545c8fd1fa649ff599c",
+    "body": {
+      "schema": "liqvera-evidence-readiness/v1",
+      "request_id": "57a4abfc-53c3-4a99-a44f-638e380580d3",
+      "ready": true,
+      "storage_ready": true,
+      "integration_ready": true,
+      "configuration_ready": true,
+      "payment_ready": true,
+      "blockers": []
+    }
+  },
+  "/v1/capabilities": {
+    "http": 200,
+    "bytes": 619,
+    "sha256": "d65cc635eba2457f0d51f4abb2f5d281a34f3379411e229b905ac3fdad764adf",
+    "body": {
+      "schema": "liqvera-evidence-capabilities/v1",
+      "request_id": "ea2c788e-6a83-43b0-99e2-028840edf075",
+      "instrument_id": "hyperliquid:BTC:perpetual",
+      "instrument_label": "Hyperliquid BTC linear perpetual",
+      "network": "eip155:31612",
+      "asset": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186",
+      "decimals": 18,
+      "price_musd": "0.01",
+      "amount_atomic": "10000000000000000",
+      "source_mode": "live-public",
+      "limitations": [
+        "Mainnet only. Read-only analytics.",
+        "Calculation over the available snapshot depth; this is not a complete exchange book or guaranteed execution.",
+        "Fees, funding, and net P&L are not calculated."
+      ],
+      "payment_ready": true,
+      "blockers": []
+    }
+  },
+  "/demo/latest-live/report.json": {
+    "http": 200,
+    "bytes": 4913,
+    "sha256": "0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2"
+  },
+  "/demo/latest-live/evidence.zip": {
+    "http": 200,
+    "bytes": 38188,
+    "sha256": "3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0"
+  }
+}

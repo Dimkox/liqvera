@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-12 — merchant checkout deployed
+
+Gateway source `5f87329` is deployed in explicit merchant mode with the unchanged recipient and 0.01 MUSD price. Migration 008 passed; all seven exact-image containers are healthy with zero restarts. The private manifest is updated, the previous gateway is retained, and a coherent backup precedes the migration. Rollback must preserve all subsequent payment rows and avoid the older migration CLI.
+
+Public HTTPS health, readiness and capabilities return 200 with `payment_ready=true`, Mainnet31612 and no blockers. A real fresh public-market report reached READY; its unsigned 402 challenge binds the Mainnet asset, recipient, price and sponsorship extension. Unpaid report and ZIP remain unavailable. Preview hashes remain correct. Headless Chrome also created a fresh quote and enabled the payment-confirmation button with no runtime exceptions, using a non-signing wallet stub and canonical Origin through the relay. No buyer signature or Mainnet payment was submitted during validation, so full real paid-delivery acceptance is not claimed.
+
+[Merchant deployment and security evidence](docs/security/2026-10-12-merchant.md) identifies the exact new gateway. Trivy reports zero, Grype four retained backport/unrelated-product matches; no new or untriaged finding. All ten raw archive member digests were verified. Unchanged images and package inputs retain the preceding audit. README and competition materials now describe enabled wallet checkout and the remaining live-acceptance boundary.
+
 ## 2026-10-12 — ordinary wallet checkout
 
 Owner requires the complete deployed product for the competition after clarification that the extra operator grant prevents normal purchases. Explicit merchant mode now supports per-purchase wallet authorization at the unchanged recipient and 0.01 MUSD price; grant mode remains the default for existing operator workflows. Fixture and mixed grant/merchant configuration are rejected. No exchange execution or server-held buyer key is introduced.

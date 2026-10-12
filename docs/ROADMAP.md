@@ -6,7 +6,7 @@ Public capture, exact analysis, canonical report and evidence ZIP construction, 
 
 ## Current work
 
-Standalone documentation, technical identifiers and the audited production rollout are complete. Mainnet configuration is deployed with separate ledger state and unchanged owner recipient/price. Public HTTPS, preview downloads and browser checks pass. Real paid acceptance still requires valid external authority and a wallet-authorized payment.
+Standalone documentation, technical identifiers and the audited production rollout are complete. Mainnet configuration is deployed with separate ledger state and unchanged owner recipient/price. Public HTTPS, preview downloads and browser checks pass. Merchant checkout is enabled with per-purchase wallet authorization, fixed terms and durable nonce protection. Fresh quote/challenge checks pass; real Mainnet paid-delivery acceptance remains to be recorded.
 
 ## Release gates
 

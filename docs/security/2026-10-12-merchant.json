@@ -1,0 +1,115 @@
+{
+  "schema": "liqvera-merchant-security-audit/v1",
+  "audited_at": "2026-10-12T23:28:34.647935+00:00",
+  "source_commit": "5f87329392f5823c0757831cfadf6ccb19b81b3c",
+  "scope": "Only the rebuilt merchant gateway image. Unchanged web/capture/report/edge/PostgreSQL images retain their earlier exact-image audit. No ignored or suppressed findings. Image scans do not prove public deployment or payment acceptance.",
+  "images": {
+    "gateway": {
+      "image_id": "sha256:226733a2ee759d28fb610768bccfba6b3f49cb6b76edad9cc29d3aac92d62b6c",
+      "source_commit": "5f87329392f5823c0757831cfadf6ccb19b81b3c",
+      "tag": "liqvera-production/gateway:merchant",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to pinned Alpine recipe; identical patched binary in all eight images; eight regression cases pass, 304 applets retained. Corresponding source is included in each image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2024-9410",
+          "package": "ada-libs",
+          "version": "3.3.0-r0",
+          "severity": "Medium",
+          "disposition": "not_affected",
+          "evidence": "The advisory concerns Ada.cx Sentry configuration. Installed ada-libs is the unrelated ada-url C++ URL parser. Grype matched an ambiguous product name."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 4
+      }
+    }
+  },
+  "scanner_status": {
+    "gateway": {
+      "image_id": "sha256:226733a2ee759d28fb610768bccfba6b3f49cb6b76edad9cc29d3aac92d62b6c",
+      "trivy_exit": 0,
+      "grype_exit": 0
+    }
+  },
+  "new_untriaged_findings": [],
+  "raw_counts": {
+    "trivy": 0,
+    "grype": 4
+  },
+  "trivy": {
+    "Version": "0.74.0",
+    "VulnerabilityDB": {
+      "Version": 2,
+      "NextUpdate": "2026-10-13T13:18:23.16392058Z",
+      "UpdatedAt": "2026-10-12T13:18:23.1639207Z",
+      "DownloadedAt": "2026-10-12T16:36:57.447175007Z"
+    },
+    "CheckBundle": {
+      "Digest": "sha256:1583562f8b90ed2a071b99f0e5ffff6b57e4ceb6ca3e4796577b4e6a339eb74c",
+      "DownloadedAt": "2026-09-30T16:10:19.322988759Z"
+    }
+  },
+  "grype": {
+    "version": "0.120.1",
+    "database": {
+      "schemaVersion": "v6.1.10",
+      "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-12T00:38:50Z_1791787522.tar.zst?checksum=sha256%3Af1d61e7be5caa87b18ab7519f71982399f4d43d8f407edd24717903acef3d83d",
+      "built": "2026-10-12T06:45:22Z",
+      "path": "/tmp/liqvera-current-audit/grype-db/6/vulnerability.db",
+      "valid": true
+    }
+  },
+  "database_refresh": "Uses the current databases refreshed earlier today in the full production audit; no database update was requested for these incremental image scans.",
+  "dependency_evidence": {
+    "unchanged_since": "f5de466",
+    "comparison": "Node lockfiles, Python lockfiles and deploy/security have an empty source diff through 5f87329. Earlier fresh package audits are retained in docs/security/2026-10-12-production.json; this incremental audit did not repeat package queries.",
+    "prior_local_summary_sha256": "cebbb78b9bcaddd2ebf419b71fbbec0e806c2a96d65507080418b6c2ee2e8584"
+  },
+  "payment_boundary": "This audit did not inspect or change deployment configuration. No payment, signature or settlement was performed; image scanning is not paid acceptance.",
+  "raw_archive": {
+    "file": "2026-10-12-merchant-raw.tar.gz",
+    "sha256": "b8c7d4a999ac5c90dcacf4dcc94be339c16070e7df89176cc15e6f34fbc0e0cf",
+    "members": {
+      "dependency-security-input.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gateway-busybox.sha256": "482f4b5bbd24ebbed9a674403650170b156ae369417ba6f46300bb7b8da9f3d0",
+      "gateway-grype.json": "a0dbb1cbab567201c6ae321ca9831587413c3eaea121abcdc38f20542a8c3702",
+      "gateway-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gateway-trivy.json": "d1153e88691369ab216aea9ad28ea0db78c3bf11003dd7e6e9dfaf159535d8f3",
+      "gateway-trivy.log": "7dcc3eb25e71863e98718504e436530e6916c52afc609a4fd2b5c355a212328a",
+      "grype-db.json": "09dfc6b54b4575eda10e1816cf2779839245b6a1ace84cd1211c104e1fdf59b3",
+      "image-scan-status.json": "a3a3db3fcd963f186b030fbd5fc06561ba81e4c4677964950c24c6aa1a8a1e94",
+      "security-vex.json": "1c6093ca7caf51232c92ed2af2a7428a62799e0a01e197ef34fe82bfdf1d6138",
+      "trivy-version.json": "ef4e3eeb2497a11487471f47660a65d569651c6feae1a18f75f3dca8a16fa94a"
+    }
+  }
+}

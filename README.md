@@ -35,13 +35,15 @@ Each report includes its inputs, calculations and evidence. Download the JSON fo
 
 Reports describe the observed snapshot. They do not place trades, promise execution, or include fees, funding or net P&L. Hashes establish evidence integrity; they do not independently authenticate an exchange.
 
-## Demo status
+## Live service
 
 The public preview, downloads and report-generation services are running. The deployed services produced the October 12, 2026 preview, and its bundle passed offline reproduction. Browser verification confirms that the preview renders and offers the verified ZIP.
 
-The deployed payment configuration is **Mezo Mainnet, chain 31612**, at **0.01 MUSD per report**. **New payments are disabled pending valid payment authority.** The wallet-free preview remains available; successful Mainnet paid delivery has not yet been demonstrated.
+The service runs on **Mezo Mainnet, chain 31612**, at **0.01 MUSD per report**. **Wallet checkout is enabled.** Connect a wallet, request a fresh report, review its terms and confirm payment in your wallet. The wallet-free preview remains available.
 
-All seven deployed containers passed health checks. The [deployment and security report](docs/security/2026-10-12-mainnet.md) identifies their exact images and records dependency scans, fixes and the evidence behind remaining scanner matches.
+Public checks verify fresh live-report generation and the exact Mainnet payment challenge. A complete real Mainnet paid-delivery acceptance has not yet been recorded.
+
+All seven deployed containers passed health checks. The [deployment and security report](docs/security/2026-10-12-merchant.md) identifies their exact images and records dependency scans, fixes and the evidence behind remaining scanner matches.
 
 ## Run locally
 

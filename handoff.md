@@ -1,5 +1,9 @@
 # Liqvera handoff
 
+## 2026-10-12 — production rollout and refreshed public evidence
+
+All seven production containers were replaced with the six freshly scanned runtime images; each is healthy with zero restarts. Existing database and evidence volumes are retained, with private coherent backups and stopped rollback containers. The complete namespace/security migration is now deployed. New payments remain gated by external authority; no payment was submitted or grant renewed. The live capture/report path produced a new public-data report and its bundle reproduced offline with network disabled. The public preview now publishes this new Liqvera report and its exact pinned hashes, replacing the September preview without modifying its historical bytes in Git or prior releases. Browser tests and production build verify the new asset pair. Final deployment/security evidence is being consolidated.
+
 ## 2026-10-12 — gateway startup fix and GitHub publication
 
 User requested completion and publication to GitHub main, followed by contest preparation. The public gateway failure was isolated with its exact running image: configuration, contracts, read-only database connection, private-file validation and database identity passed; grant composition returned LIVE_GRANT_INVALID. No grant values were printed or changed.

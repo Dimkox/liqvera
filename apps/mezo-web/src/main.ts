@@ -118,7 +118,7 @@ async function showHistoricalReport():Promise<void> {
     appendField(grid,"Report SHA-256",HISTORICAL_DEMO.reportSha256,"breakable span-all");
     appendField(grid,"Bundle SHA-256",HISTORICAL_DEMO.bundleSha256,"breakable span-all");
     appendField(grid,"Snapshot calculation",`${report.request.side} ${report.request.quantity_base} BTC · VWAP ${report.calculation.display.vwap}`);
-    card.append(grid,node("p","safety-note","Historical capture from 30 Sep 2026. It is not fresh market data, an execution promise, or a new run. No payment transaction exists for this public preview."));
+    card.append(grid,node("p","safety-note","Sealed historical capture; see its timestamp above. It is not fresh market data, an execution promise, or a new run. No payment transaction exists for this public preview."));
     if(historicalDownloadUrl)URL.revokeObjectURL(historicalDownloadUrl);
     historicalDownloadUrl=URL.createObjectURL(new Blob([bundleBytes],{type:"application/zip"}));
     const download=document.createElement("a");download.className="secondary-button";download.href=historicalDownloadUrl;

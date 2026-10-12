@@ -341,3 +341,7 @@ The v0.0.4 README and handoff were reconciled after publication, but the active
 change package still described its push, tag, and GitHub Release as pending.
 Post-publication closure must search and update every canonical release-state
 record, not only the public README and operational handoff.
+
+## 2026-10-12 — Verify the branch baseline before cleanup
+
+I treated a stale checked-out F1 branch as the latest product without first inventorying main, tags, remote refs, and worktrees. This caused incorrect documentation and whole-product verification claims; the complete UI/API/payment implementation remained intact on origin/main. Future repository cleanup starts by confirming ancestry and the latest published implementation before editing or interpreting missing files.

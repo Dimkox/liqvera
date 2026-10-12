@@ -1,5 +1,12 @@
 # Liqvera — handoff
 
+## 2026-10-12 baseline correction and current-release audit
+
+Work now starts from complete origin/main `9748440`, after v0.0.5. Prior cleanup on `chore/liqvera-standalone` started from stale F1 and did not assess the full product. Its whole-product claims are withdrawn. No implementation was lost; that branch is retained for reference only. UI, gateway, payments, reports, and installer are present on this baseline.
+
+The [current audit](docs/security/2026-10-12-baseline.md) records live image IDs, fresh dependency findings, and the existing gateway restart/HTTP 502 condition. No live state was changed. Next: remove obsolete tooling, migrate approved technical identifiers, rewrite current documentation, remediate dependencies and validate all product components in isolation. Published sealed artifacts must keep their bytes and hashes.
+
+
 ## 2026-10-01 v0.0.5 publication complete
 
 Release `v0.0.5` is published at

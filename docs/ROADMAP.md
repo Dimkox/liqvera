@@ -6,7 +6,7 @@ Public capture, exact analysis, canonical report and evidence ZIP construction, 
 
 ## Current work
 
-Standalone documentation, technical identifiers and the audited production rollout are complete. Mainnet configuration is deployed with separate ledger state and unchanged owner recipient/price. Public HTTPS, preview downloads and browser checks pass. Merchant checkout is enabled with per-purchase wallet authorization, fixed terms and durable nonce protection. Fresh quote/challenge checks pass; real Mainnet paid-delivery acceptance remains to be recorded.
+Standalone documentation, technical identifiers and the audited production rollout are complete. The public demo runs on Mezo Testnet with preserved historical payment state and the unchanged owner recipient/0.01 test-MUSD price. Mainnet configuration and its separate ledger remain available for a future switch. Public HTTPS, preview downloads and browser checks pass. Merchant checkout is enabled with per-purchase wallet authorization, fixed terms and durable nonce protection. Fresh quote/challenge checks pass; a new paid-delivery acceptance on the current Testnet deployment remains to be recorded.
 
 ## Release gates
 

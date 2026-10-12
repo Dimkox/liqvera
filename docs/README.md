@@ -4,6 +4,7 @@
 - [Architecture](architecture.md): component ownership and state.
 - [Validation](validation.md): local suites, artifacts and acceptance limits.
 - [Deployment](deployment.md): isolated profiles and installer boundaries.
+- [Testnet demo](runbooks/testnet-demo.md): wallet checkout, test tokens and standalone deployment.
 - [Mainnet configuration](mainnet.md): network selection, ledger separation and payment authority.
 - [Migration](migration.md): component namespace changes and historical data.
 - [Operations](runbooks/README.md): startup, recovery, monitoring and incidents.

@@ -1,5 +1,15 @@
 # Liqvera handoff
 
+## 2026-10-12 — public demo restored to Testnet
+
+The owner's latest decision selects Mezo Testnet for the working competition demo, superseding the earlier Mainnet deployment. Gateway source `5f87329` runs in merchant mode; browser source `f9ff498` was rebuilt for Testnet. The recipient and 0.01 test-MUSD price are unchanged. All seven containers are healthy with zero restarts at verification.
+
+The original Testnet database volume is active, retaining two confirmed attempts and one manual-review attempt. Forward migrations 007/008 were applied. Mainnet state, stopped rollback containers and coherent private backups are retained. The operational manifest is updated and validated; do not restore old dumps over subsequent payments. The source repository now includes a separate Testnet merchant Compose override and a repeatable demo runbook. Independent read-only review confirmed resolved configuration and found no blocker.
+
+Public HTTPS health/readiness/capabilities and both preview downloads pass; the downloaded preview ZIP reproduces with the current verifier. A fresh public-market report reaches READY with the correct Testnet 402 challenge; unpaid delivery remains closed. Headless Chrome renders preview and fresh quote, with payment confirmation enabled and no exceptions using a non-signing wallet stub. The Testnet merchant SDK/configuration checks pass. No new payment was signed or submitted. Historical funded-wallet evidence exists, but its former signing command was not found; a pending owner question asks for a signing interface or a purchase from their wallet. New confirmed paid delivery plus verified downloads remains the acceptance gap.
+
+[Exact Testnet deployment/security evidence](docs/security/2026-10-12-testnet.md) records the new browser image: Trivy zero, Grype three reviewed BusyBox-backport matches and no untriaged finding. The archive and all ten member hashes were checked. Other runtime images retain their exact-image audits. README, deployment guide and contest materials now consistently describe the public Testnet demo. Next: record a fresh wallet-authorized purchase and verify delivered JSON/ZIP offline; do not count an unsigned challenge as payment acceptance.
+
 ## 2026-10-12 — merchant checkout deployed
 
 Gateway source `5f87329` is deployed in explicit merchant mode with the unchanged recipient and 0.01 MUSD price. Migration 008 passed; all seven exact-image containers are healthy with zero restarts. The private manifest is updated, the previous gateway is retained, and a coherent backup precedes the migration. Rollback must preserve all subsequent payment rows and avoid the older migration CLI.

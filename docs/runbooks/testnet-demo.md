@@ -1,82 +1,39 @@
-# Fixture and testnet demo
+# Liqvera Testnet demo
 
-## Fixture walkthrough
+The public demo at https://liqvera.site uses **Mezo Testnet, chain 31611**. Each fresh report costs **0.01 test MUSD**. Market data comes from public Hyperliquid endpoints; payment uses test tokens. The wallet-free preview is a separately labelled sealed report.
 
-The `fixture` profile is deterministic and uses `SIMULATED` evidence. It can
-show the preview, read-only report structure, and offline verification. It
-must not return a canonical payable x402 quote, invoke a wallet transfer, or
-be presented as a live Hyperliquid snapshot. Label the screen and any
-recording accordingly.
+## Present the demo
 
-## Live-public + Mezo Testnet gate
+1. Open the site and connect an EVM wallet. Accept the switch to Mezo Testnet.
+2. Enter a BUY or SELL quantity. Request a report and review the fresh snapshot, limitations, hashes, recipient and 0.01 test-MUSD price.
+3. Confirm the payment in the wallet. The official x402 flow requests limited Permit2/EIP-2612 signatures; the facilitator sponsors settlement gas.
+4. Wait for confirmed delivery, then download the JSON and evidence ZIP. Repeated retrieval uses the same entitlement and does not require another payment.
+5. Verify the ZIP offline against the report digest. Preserve the transaction hash and receipt as acceptance evidence.
 
-For `https://liqvera.site`, set `LIQVERA_TESTNET_DEMO_ANY_PAYER=1` only with
-the reviewed grant. Any connected EVM account on Mezo Testnet 31611 can then
-own its quote and pay exactly `0.01` test MUSD. Omit it (or set `0`) for the
-default buyer-bound mode. Source availability, exact payment terms,
-authorization uniqueness, one settlement per quote, and UNKNOWN confirm-only
-recovery remain fail-closed. Mobile judges may need the wallet in-app browser.
+A 402 challenge is a request for payment, not a receipt. If settlement is uncertain, use **Check status**; do not submit a second payment. The gateway reconciles the existing attempt and requires at least twelve canonical confirmations. See [payment recovery](payment-recovery.md).
 
-Create `deploy/mezo-evidence/secrets/live_payment_grant` outside Git with owner
-UID 10003, mode `0400`, and the reviewed one-shot grant JSON. Set the non-secret
-`LIQVERA_SUBJECT_COMMIT`, `LIQVERA_SUBJECT_TREE`, `LIQVERA_PLAN_SHA256`,
-`LIQVERA_LIVE_BUYER`, and `LIQVERA_PAY_TO` values to the exact identities bound
-inside that grant. Ordinary startup derives the credential-free database
-identity from `DATABASE_URL`; a non-loopback or mismatched endpoint fails before
-facilitator initialization. Never put grant JSON or wallet signatures in env.
+The wallet must hold test MUSD. The official [faucet](https://faucet.test.mezo.org/) supplies test BTC/MEZO; test MUSD is available through [Mezo Testnet borrowing](https://testnet.mezo.org/feature/borrow). Never enter wallet keys or seed phrases into Liqvera. The site receives signatures, not private keys.
 
-Before payment, `/readyz` must report `payment_ready=true`. After the one-shot
-grant is durably consumed it must return `EXTERNAL_GRANT_REQUIRED`; existing
-PAID delivery and UNKNOWN confirm-only reconciliation remain available.
+## Deploy from this repository
 
-The `live` profile permits public Hyperliquid capture and only Mezo Testnet
-payment. Before presenting a paid flow, the owner must review all of these
-against real evidence:
+Use Docker Compose 2.24.4 or later. Prepare the database and internal report secret files described in [startup](startup-shutdown.md), and set `LIQVERA_ENGINE_COMMIT`, `LIQVERA_PUBLIC_ORIGIN`, `LIQVERA_SITE_ADDRESS` and `LIQVERA_PAY_TO`. The recipient must be distinct from the buyer. These settings are public metadata, not private keys.
 
-1. The gateway reports a real live-public report with retained raw response,
-   provenance, valid freshness, and a passing independent offline verifier.
-2. The gateway's chain probe returns `31611`; token bytecode and 18 decimals
-   match MUSD `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503`; the official
-   facilitator supports `eip155:31611` and the selected x402 scheme.
-3. `LIQVERA_PAY_TO` is a dedicated, verified merchant test wallet address,
-   distinct from the buyer. The operator has established a reviewed
-   authorization identity and receipt-finality rule. A blank address or
-   `FINALITY_RULE_UNVERIFIED` is a blocker, not a demo shortcut. The reserved
-   `LIQVERA_FINALITY_CONFIRMATIONS` example variable is not consumed.
-4. The buyer uses a separate test wallet with test BTC and test MUSD. The
-   wallet is on chain `31611`. No merchant private key enters the stack.
-5. The acceptance runner and security review have passed for this exact
-   source SHA and image set. The owner explicitly approves the testnet
-   transaction and the amount `0.01` test MUSD
-   (`10000000000000000` atomic units).
+For a new Testnet deployment:
 
-The participant requests a BTC perpetual BUY or SELL quantity, reviews the
-snapshot time, limitations, price, expiry, recipient, and testnet label, and
-confirms in their wallet. A 402 is an authorization request, not a payment
-receipt. Show the paid report only after confirmed receipt, specific MUSD
-Transfer evidence, and durable entitlement. A delayed or unknown settlement
-goes to [payment recovery](payment-recovery.md); do not ask the participant
-to pay again. The evidence ZIP remains protected by the same entitlement and
-is independently verifiable offline. Record transaction hash and sanitized
-receipt evidence without signatures or wallet secrets.
-
-If any preflight is unavailable, report `BLOCKED_EXTERNAL` or the concrete
-failing gate. Do not fabricate a PASS, a transaction, or a hosted URL.
-
-To disable new payments, use the checked-in override; do not edit Compose or
-move/delete the grant file:
-
-```bash
-docker compose --env-file env/live.env -p liqvera-live --profile live \
-  -f compose.yaml -f compose.live-disabled.yaml up -d --build --force-recreate gateway-live
+```sh
+cd deploy/mezo-evidence
+docker compose -p liqvera-testnet --profile live \
+  -f compose.yaml -f compose.testnet-demo.yaml config --quiet
+docker compose -p liqvera-testnet --profile live \
+  -f compose.yaml -f compose.testnet-demo.yaml up -d --build
 ```
 
-The override atomically removes the grant secret mount and every grant-context
-variable. Confirm `/readyz` reports `EXTERNAL_GRANT_REQUIRED`. A missing or
-expired grant in the enabled profile intentionally fails startup; apply this
-override to obtain the supported payment-disabled live service. Preserve
-PostgreSQL/artifact volumes and never resubmit UNKNOWN attempts.
+The explicit override selects Testnet in the gateway and browser, enables merchant checkout and removes operator-grant variables and mounts. Every purchase still needs a valid buyer signature. The default configuration retains the separate grant workflow; fixture services cannot make payments.
 
-## Invalid or expired payment authority
+For an existing deployment, use its retained operational manifest and reviewed recovery procedure. Do not create a new project over existing volumes or point Testnet at a Mainnet ledger. Preserve historical SQL migration bytes, apply forward migrations through 008, and keep all pending/unknown records. Merchant startup rejects a missing nonce index or wrong ledger network. Back up durable state before migration; never restore an earlier database over later purchases.
 
-A known grant-validation failure at startup logs `PAYMENTS_DISABLED` with a bounded code. The gateway continues serving its normal APIs using the grantless adapter; new payments remain unavailable and readiness reports the blockers. Existing confirmation and delivery safeguards remain active. The grant is neither renewed nor rewritten. Unexpected startup errors remain fatal.
+## Acceptance and current evidence
+
+Check `/healthz`, `/readyz` and `/v1/capabilities`: readiness must be HTTP 200, network `eip155:31611`, token `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503`, price `0.01`, and `payment_ready=true`.
+
+The [current deployment record](../security/2026-10-12-testnet.md) covers exact images, CVE scans, fresh public-report generation, payment challenge and browser checks. Historical paid Testnet delivery exists. A new successful payment must be recorded with its own transaction, confirmed receipt and verified downloads; historical receipts and unsigned browser tests do not prove that new run.

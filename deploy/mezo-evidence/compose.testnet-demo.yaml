@@ -1,0 +1,30 @@
+# Explicit public-data Testnet checkout. Compose 2.24.4+ is required for !override.
+# Database migration and original state must be preserved when changing networks.
+services:
+  gateway-live:
+    environment: !override
+      SOURCE_MODE: live-public
+      LIQVERA_NETWORK: testnet
+      LIQVERA_PAYMENT_MODE: merchant
+      LIQVERA_DATABASE_HOST: 127.0.0.1
+      LIQVERA_DATABASE_NAME: liqvera
+      REPORT_SERVICE_URL: http://report:8082
+      REPORT_SERVICE_TOKEN_FILE: /run/secrets/report_service_token
+      ARTIFACT_ROOT: /data/artifacts
+      PUBLIC_BASE_URL: ${LIQVERA_PUBLIC_ORIGIN:?set the public HTTPS origin}
+      CORS_ORIGINS: ${LIQVERA_PUBLIC_ORIGIN:?set the public HTTPS origin}
+      PAY_TO: ${LIQVERA_PAY_TO:?set the merchant address}
+      PORT: "8080"
+      METRICS_HOST: gateway-metrics
+      METRICS_PORT: "9090"
+    secrets: !override
+      - source: postgres_password_live
+        target: postgres_password
+      - source: report_token_live
+        target: report_service_token
+  web-live:
+    build:
+      args:
+        LIQVERA_NETWORK: testnet
+secrets:
+  payment_grant_live: !reset null

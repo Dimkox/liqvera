@@ -8,25 +8,25 @@ Prepared 2026-10-12. This is an existing project before the buildathon; this doc
 
 **Category:** Verifiable reports and MUSD payments
 
-**TL;DR:** Liqvera combines reproducible public-market reports with MUSD access-payment integration on Mezo Mainnet, so recipients can inspect the evidence and verify calculations offline.
+**TL;DR:** Liqvera combines reproducible public-market reports with MUSD access-payment integration on Mezo Testnet, so recipients can inspect the evidence and verify calculations offline.
 
-**How it works:** Market screenshots and headline prices hide the depth behind a hypothetical order. Liqvera captures public Hyperliquid BTC perpetual order-book snapshots and calculates filled quantity, notional, VWAP, worst price and price impact using exact arithmetic. Each canonical report includes source metadata, input hashes and a downloadable evidence bundle. An offline verifier checks integrity and recomputes the results. The gateway's x402 integration is configured for MUSD on Mezo Mainnet to bind access to exact report and bundle hashes. Historical testnet paid delivery has been demonstrated. A wallet-free historical preview is available; Mainnet wallet checkout is enabled at 0.01 MUSD per report. Reports do not execute trades or include fees, funding or net P&L.
+**How it works:** Market screenshots and headline prices hide the depth behind a hypothetical order. Liqvera captures public Hyperliquid BTC perpetual order-book snapshots and calculates filled quantity, notional, VWAP, worst price and price impact using exact arithmetic. Each canonical report includes source metadata, input hashes and a downloadable evidence bundle. An offline verifier checks integrity and recomputes the results. The gateway's x402 integration is configured for MUSD on Mezo Testnet to bind access to exact report and bundle hashes. Historical testnet paid delivery has been demonstrated. A wallet-free historical preview is available; Testnet wallet checkout is enabled at 0.01 test MUSD per report. Reports do not execute trades or include fees, funding or net P&L.
 
 **Target group:** The initial audience hypothesis is analysts, developers and technically experienced users who want reproducible BTC market-depth evidence. The desktop-first browser and offline verifier support inspection and sharing. There is no validated customer-demand or regional-adoption claim. Track 2 fit: make MUSD useful for access to independently inspectable digital information.
 
-**Tech stack:** TypeScript, Vite, Node.js/Express, PostgreSQL, Python, Docker Compose, Caddy, x402, and Mezo Mainnet. Public Hyperliquid data; no exchange trading credentials.
+**Tech stack:** TypeScript, Vite, Node.js/Express, PostgreSQL, Python, Docker Compose, Caddy, x402, and Mezo Testnet. Public Hyperliquid data; no exchange trading credentials.
 
 **Track:** Track 2 — Access and Distribution for MUSD/MEZO.
 
-**Chain configured:** Mezo Mainnet, chain ID 31612. Public gateway and browser are deployed; merchant checkout is enabled; a confirmed Mainnet paid-delivery acceptance has not yet been recorded.
+**Chain configured:** Mezo Testnet, chain ID 31611. Public gateway and browser are deployed; merchant checkout is enabled; a new paid-delivery acceptance on this deployment has not yet been recorded.
 
 **Project status:** Existing project. The published baseline predates the buildathon. Describe and link the actual features added during the competition after they exist; do not count this preparation as work completed during Wave 1.
 
-**Project readiness:** Mainnet gateway and browser are deployed with merchant checkout enabled at 0.01 MUSD. Public landing, health, readiness, capabilities and preview downloads pass; a fresh live report reached READY and returned the correct Mainnet payment challenge. The buyer must confirm each purchase in their wallet. Historical confirmed paid delivery was on Testnet; complete real Mainnet paid-delivery acceptance has not yet been recorded. The historical acceptance aggregate remains 9 PASS and 21 NOT_RUN, not an overall acceptance pass.
+**Project readiness:** Testnet gateway and browser are deployed with merchant checkout enabled at 0.01 test MUSD. Public landing, health, readiness, capabilities and preview downloads pass; a fresh live report reached READY and returned the correct Testnet payment challenge. The buyer must confirm each purchase in their wallet. Historical confirmed paid delivery was on Testnet; a new paid-delivery acceptance on this deployment has not yet been recorded. The historical acceptance aggregate remains 9 PASS and 21 NOT_RUN, not an overall acceptance pass.
 
 **Future milestones — proposals, not completed commitments:**
 
-1. By October 26: demonstrate a clearly scoped MUSD-access improvement against the pre-event baseline, with a working supported-network flow and recorded evidence. Any new payment requires its separate authorized operator procedure.
+1. By October 26: demonstrate a clearly scoped MUSD-access improvement against the pre-event baseline, with a working supported-network flow and recorded evidence. Each payment requires the buyer’s wallet confirmation.
 2. By November 15: act on Wave 1 feedback, improve report discovery and recovery usability, and show meaningful additional progress with repeatable validation.
 3. Within 30 days after the event: run a small pilot with prospective report users, validate repeat usage and willingness to pay, and publish a prioritized roadmap based on evidence.
 
@@ -40,7 +40,7 @@ Prepared 2026-10-12. This is an existing project before the buildathon; this doc
 - Deck: [presentation.pdf](presentation.pdf), seven slides; editable source: [presentation.html](presentation.html).
 - Video: record and upload the [two-minute pitch](pitch-script.md); no video URL exists in this package yet.
 - Architecture and boundaries: [specification](../specification.md).
-- Local validation: [remediation report](../security/2026-10-12-remediation.md). Current deployed image IDs, fresh advisory scans and functional evidence: [production audit](../security/2026-10-12-production.md).
+- Local validation: [remediation report](../security/2026-10-12-remediation.md). Current deployed image IDs, advisory scans and functional evidence: [Testnet audit](../security/2026-10-12-testnet.md).
 - Gateway hotfix verification: 61 gateway tests passed against a disposable database. Consult the current [handoff](../../handoff.md) for publication and deployment evidence.
 
 ## Official requirements and dates

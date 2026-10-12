@@ -1,0 +1,137 @@
+{
+  "scope": "Public HTTPS quote generation and unsigned payment challenge only; no wallet or settlement",
+  "quote": {
+    "schema": "liqvera-evidence-quote/v1",
+    "request_id": "8c375004-ac46-4bc0-96be-e208d73bbc9a",
+    "report_request_id": "5f0838f2-7ff9-497e-b30e-f46958eb0828",
+    "quote_id": "3fad2b8b-0df1-4125-baf2-9c38a473aedc",
+    "report_id": "05126eb9-09f8-4ecf-a263-ecec5625f5f8",
+    "report_sha256": "aa84af7d4c09a302e91689552ee6e3f07829518f541c0e378f56bd43810c955a",
+    "bundle_sha256": "b292755edb7a891d2fd44849701538cb55551cb9a50fb7aace6c7c549a960560",
+    "state": "READY",
+    "preview": {
+      "side": "BUY",
+      "expires_at": "2026-10-12T23:52:11.369Z",
+      "price_musd": "0.01",
+      "limitations": [
+        "Public snapshot identity is policy-validated; exchange authenticity is not independently attested.",
+        "Calculation over the available snapshot depth, at most 20 levels per side.",
+        "Hypothetical snapshot sweep; no fees, funding, net PnL, or execution guarantee.",
+        "Hashes establish integrity relative to the bundle, not exchange authenticity."
+      ],
+      "snapshot_at": "2026-10-12T23:50:10.585Z",
+      "instrument_id": "hyperliquid:BTC:perpetual",
+      "quantity_base": "0.01",
+      "snapshot_status": "VALID_FOR_SNAPSHOT_CALCULATION"
+    },
+    "terms": {
+      "version": "liqvera-evidence-terms/v1",
+      "network": "eip155:31611",
+      "chain_id": 31611,
+      "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+      "amount_atomic": "10000000000000000",
+      "decimals": 18,
+      "price_musd": "0.01",
+      "pay_to": "0xd7f52d1ddb5dc8678191f14e439fc5db67541535",
+      "expected_payer": "0x1111111111111111111111111111111111111111",
+      "expires_at": "2026-10-12T23:52:11.369Z"
+    },
+    "retention": {
+      "paid_days": 7,
+      "unpaid_grace_seconds": 900,
+      "ledger_days": 30,
+      "authorization_validity_floor": true,
+      "deletion_must_not_enable_replay": true
+    }
+  },
+  "challenge": {
+    "x402Version": 2,
+    "resource": {
+      "url": "https://liqvera.site/v1/reports/05126eb9-09f8-4ecf-a263-ecec5625f5f8",
+      "description": "Liqvera immutable BTC perpetual snapshot report",
+      "mimeType": "application/json"
+    },
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "eip155:31611",
+        "amount": "10000000000000000",
+        "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+        "payTo": "0xd7f52d1ddb5dc8678191f14e439fc5db67541535",
+        "maxTimeoutSeconds": 120,
+        "extra": {
+          "assetTransferMethod": "permit2",
+          "name": "Mezo USD",
+          "version": "1"
+        }
+      }
+    ],
+    "extensions": {
+      "eip2612GasSponsoring": {
+        "info": {
+          "description": "The facilitator accepts EIP-2612 gasless Permit to `Permit2` canonical contract.",
+          "version": "1"
+        },
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$",
+              "description": "The address of the sender."
+            },
+            "asset": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$",
+              "description": "The address of the ERC-20 token contract."
+            },
+            "spender": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$",
+              "description": "The address of the spender (Canonical Permit2)."
+            },
+            "amount": {
+              "type": "string",
+              "pattern": "^[0-9]+$",
+              "description": "The amount to approve (uint256). Typically MaxUint."
+            },
+            "nonce": {
+              "type": "string",
+              "pattern": "^[0-9]+$",
+              "description": "The current nonce of the sender."
+            },
+            "deadline": {
+              "type": "string",
+              "pattern": "^[0-9]+$",
+              "description": "The timestamp at which the signature expires."
+            },
+            "signature": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]+$",
+              "description": "The 65-byte concatenated signature (r, s, v) as a hex string."
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^[0-9]+(\\.[0-9]+)*$",
+              "description": "Schema version identifier."
+            }
+          },
+          "required": [
+            "from",
+            "asset",
+            "spender",
+            "amount",
+            "nonce",
+            "deadline",
+            "signature",
+            "version"
+          ]
+        }
+      }
+    }
+  },
+  "report_without_payment_http": 402,
+  "bundle_without_payment_http": 402,
+  "payment_submitted": false
+}

@@ -32,6 +32,6 @@ Build the gateway normally and set `LIQVERA_NETWORK=mainnet` in its runtime envi
 
 Preserve the previous gateway/web images and Testnet database for rollback. Reverting requires restoring the matching application network and database together; never relabel existing receipts or sealed reports. The published v0.0.2 installer remains a separate Testnet operator and does not install this Mainnet configuration.
 
-## Public deployment
+## Public demo network
 
-The public gateway and browser run this Mainnet configuration as of October 12, 2026, with gateway source `5f87329` and browser source `6ee3bbe`. The existing recipient and 0.01 MUSD price are unchanged. All seven containers are healthy; HTTPS and browser checks confirm the Mainnet identity and working wallet-free preview. Merchant checkout is enabled: readiness returns 200 and `payment_ready=true`. Fresh report generation and the unsigned Mainnet payment challenge passed public checks. Actual paid-delivery acceptance still requires a buyer wallet signature and confirmed settlement. The [deployment and security evidence](security/2026-10-12-merchant.md) identifies exact running images, ledger separation and retained recovery state.
+The public demo currently runs on **Mezo Testnet (31611)** at the owner's request. Mainnet remains a supported configuration, with its separate database and recovery containers retained. The current [Testnet deployment record](security/2026-10-12-testnet.md) identifies exact images and checks; the [demo guide](runbooks/testnet-demo.md) explains wallet checkout and test-token setup. Earlier Mainnet records describe their dated deployment, not the active demo.

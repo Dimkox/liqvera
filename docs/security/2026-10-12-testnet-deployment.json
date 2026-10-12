@@ -1,0 +1,86 @@
+{
+  "deployment_source": "f9ff498410bbd377e218cb28484c0cf7864a5dcd",
+  "gateway_source": "5f87329392f5823c0757831cfadf6ccb19b81b3c",
+  "web_source": "f9ff498410bbd377e218cb28484c0cf7864a5dcd",
+  "network": "eip155:31611",
+  "database": "liqvera",
+  "database_volume": "liqvera-live_postgres_data",
+  "price_test_musd": "0.01",
+  "recipient_unchanged": true,
+  "payment_mode": "merchant",
+  "images": {
+    "postgres-live": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+    "gateway-live": "sha256:226733a2ee759d28fb610768bccfba6b3f49cb6b76edad9cc29d3aac92d62b6c",
+    "web-live": "sha256:03d08123a9ee2afe50caa78269bf889057f76537f28eff400e77f539f7bd7971"
+  },
+  "ready": {
+    "schema": "liqvera-evidence-readiness/v1",
+    "request_id": "381d2c37-db5b-4cee-8c3b-a46d66792e30",
+    "ready": true,
+    "storage_ready": true,
+    "integration_ready": true,
+    "configuration_ready": true,
+    "payment_ready": true,
+    "blockers": []
+  },
+  "preexisting_testnet_attempts": "CONFIRMED|2\nMANUAL_REVIEW|1",
+  "rollback_containers": {
+    "postgres-live": "liqvera-live-postgres-live-1-mainnet-f9ff498",
+    "gateway-live": "liqvera-live-gateway-live-1-mainnet-f9ff498",
+    "web-live": "liqvera-live-web-live-1-mainnet-f9ff498"
+  },
+  "backup_location": "/home/pall/.local/state/liqvera/recovery/2026-10-12-testnet-f9ff498",
+  "payment_submitted": false,
+  "verified_at": "2026-10-12T23:55:01.923289+00:00",
+  "inventory": [
+    {
+      "container": "/liqvera-live-postgres-live-1",
+      "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+      "state": "running",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-gateway-live-1",
+      "image": "sha256:226733a2ee759d28fb610768bccfba6b3f49cb6b76edad9cc29d3aac92d62b6c",
+      "state": "running",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-web-live-1",
+      "image": "sha256:03d08123a9ee2afe50caa78269bf889057f76537f28eff400e77f539f7bd7971",
+      "state": "running",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-edge-live-1",
+      "image": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+      "state": "running",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-gateway-net-live-1",
+      "image": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4",
+      "state": "running",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-report-live-1",
+      "image": "sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15",
+      "state": "running",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-evidence-capture-live-1",
+      "image": "sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5",
+      "state": "running",
+      "health": "healthy",
+      "restarts": "0"
+    }
+  ]
+}

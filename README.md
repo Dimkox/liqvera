@@ -39,11 +39,11 @@ Reports describe the observed snapshot. They do not place trades, promise execut
 
 The public preview, downloads and report-generation services are running. The deployed services produced the October 12, 2026 preview, and its bundle passed offline reproduction. Browser verification confirms that the preview renders and offers the verified ZIP.
 
-The service runs on **Mezo Mainnet, chain 31612**, at **0.01 MUSD per report**. **Wallet checkout is enabled.** Connect a wallet, request a fresh report, review its terms and confirm payment in your wallet. The wallet-free preview remains available.
+The service runs on **Mezo Testnet, chain 31611**, at **0.01 test MUSD per report**. **Wallet checkout is enabled.** Connect a wallet, request a fresh report, review its terms and confirm payment in your wallet. The wallet-free preview remains available.
 
-Public checks verify fresh live-report generation and the exact Mainnet payment challenge. A complete real Mainnet paid-delivery acceptance has not yet been recorded.
+Public checks verify fresh live-report generation and the exact Testnet payment challenge. A new paid-delivery acceptance on this deployment still requires a buyer signature and verified downloads.
 
-All seven deployed containers passed health checks. The [deployment and security report](docs/security/2026-10-12-merchant.md) identifies their exact images and records dependency scans, fixes and the evidence behind remaining scanner matches.
+All seven deployed containers passed health checks. The [deployment and security report](docs/security/2026-10-12-testnet.md) identifies their exact images and records dependency scans, fixes and the evidence behind remaining scanner matches.
 
 ## Run locally
 
@@ -60,7 +60,7 @@ npm test --prefix apps/mezo-web
 
 Follow the [startup guide](docs/runbooks/startup-shutdown.md) to configure and start the service stack. The isolated fixture profile uses synthetic data and cannot make payments. Database tests require an explicitly disposable database; see [validation](docs/validation.md).
 
-Ordinary wallet checkout uses `LIQVERA_PAYMENT_MODE=merchant` with a fixed recipient and the selected Mezo network; see [Mainnet setup](docs/mainnet.md). The default grant mode retains the bounded operator workflow.
+Ordinary wallet checkout uses `LIQVERA_PAYMENT_MODE=merchant` with a fixed recipient and the selected Mezo network; see the [Testnet demo guide](docs/runbooks/testnet-demo.md). The default grant mode retains the bounded operator workflow.
 
 For a smaller local fixture demonstration:
 
@@ -112,7 +112,8 @@ Capture has no wallet or exchange trading credentials. Payment validation binds 
 | [Specification](docs/specification.md) | Product behavior and boundaries |
 | [Architecture](docs/architecture.md) | Components, data flow and isolation |
 | [Deployment](docs/deployment.md) | Service setup, operations and recovery |
-| [Mainnet setup](docs/mainnet.md) | Network selection, ledger separation and payment authority |
+| [Testnet demo](docs/runbooks/testnet-demo.md) | Wallet checkout, test tokens and standalone deployment |
+| [Mainnet configuration](docs/mainnet.md) | Optional network selection and ledger separation |
 | [Validation](docs/validation.md) | Tests, builds and verification commands |
 | [Security](SECURITY.md) | Trust boundaries and vulnerability reporting |
 | [Buildathon materials](docs/competition/submission.md) | Project presentation and submission draft |

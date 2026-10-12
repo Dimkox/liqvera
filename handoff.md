@@ -1,5 +1,15 @@
 # Liqvera handoff
 
+## 2026-10-12 — gateway startup fix and GitHub publication
+
+User requested completion and publication to GitHub main, followed by contest preparation. The public gateway failure was isolated with its exact running image: configuration, contracts, read-only database connection, private-file validation and database identity passed; grant composition returned LIVE_GRANT_INVALID. No grant values were printed or changed.
+
+Startup now handles only known grant-validation failures by logging a bounded PAYMENTS_DISABLED code and composing the existing grantless payment adapter. HTTP APIs, historical delivery and ordinary workers continue; new payments stay closed. Strict callers still throw and unexpected exceptions are not swallowed. The proposed special recovery mode was removed. No chain or token configuration changed.
+
+Verification: all 61 gateway tests passed against a fresh disposable PostgreSQL database, including actual main-process startup with an invalid grant, HTTP liveness/capabilities and payment blockers. Independent read-only review found no blocking issue. The prior full-product and eight-image audit remains bound to its recorded commit; this follow-up changes gateway startup only.
+
+Next: publish the checked commits to origin/main; apply the two-file compatible startup fix to the existing public gateway without namespace or database migration; prepare contest materials. The full namespace/CVE rollout remains distinct from the compatible startup hotfix.
+
 ## 2026-10-12 — standalone migration and exact-image security verification completed locally
 
 Baseline: origin/main `97484401d50fa3fb28ebd813cc8320e7e51c72f5`, after published v0.0.5. The earlier cleanup branch started from stale F1 and its whole-product conclusions are withdrawn. Full web, gateway, payments, reports and installer remain present. No live deployment, payment, database or grant change has been made.

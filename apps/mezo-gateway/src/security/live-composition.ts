@@ -30,12 +30,21 @@ export async function readPrivateGrantFile(path:string,hooks:GrantReadHooks={}):
   } finally { await handle.close(); }
 }
 
-/** Explicit harness seam: ordinary production startup passes null and cannot initialize payment. */
+/** Invalid authority may disable new payments at startup, never authorize them. */
 export function composeOfficialX402(identity:AuthorizationPolicy,finality:FinalityPolicy,reader:MezoReceiptReader,
-  publicBase:URL,input:LiveCompositionInput|null):OfficialX402 {
+  publicBase:URL,input:LiveCompositionInput|null,onUnavailable?:(code:string)=>void):OfficialX402 {
   if(!input)return new OfficialX402(identity,finality,reader,publicBase,null,null);
-  const grant=LivePaymentGrant.parseBytes(input.grantBytes,input.observedAt,input.publicKey);
-  if(grant.version==='v2'&&input.allowAnyPayer!==true)throw new Error('LIVE_GRANT_ANY_PAYER_NOT_ENABLED');
-  grant.authorize({...input.context,now:input.observedAt});
-  return new OfficialX402(identity,finality,reader,publicBase,grant,input.context,input.now);
+  try {
+    const grant=LivePaymentGrant.parseBytes(input.grantBytes,input.observedAt,input.publicKey);
+    if(grant.version==='v2'&&input.allowAnyPayer!==true)throw new Error('LIVE_GRANT_ANY_PAYER_NOT_ENABLED');
+    grant.authorize({...input.context,now:input.observedAt});
+    return new OfficialX402(identity,finality,reader,publicBase,grant,input.context,input.now);
+  } catch(error:unknown) {
+    const rejected=new Set(['LIVE_GRANT_INVALID','LIVE_GRANT_EXPIRED','LIVE_GRANT_MISMATCH',
+      'LIVE_GRANT_ANY_PAYER_NOT_ENABLED','LIVE_GRANT_KEY_MISMATCH','LIVE_GRANT_SIGNATURE_INVALID',
+      'LIVE_GRANT_NOT_CANONICAL','LIVE_GRANT_ISSUER_UNAPPROVED']);
+    if(!onUnavailable||!(error instanceof Error)||!rejected.has(error.message))throw error;
+    onUnavailable(error.message);
+    return new OfficialX402(identity,finality,reader,publicBase,null,null);
+  }
 }

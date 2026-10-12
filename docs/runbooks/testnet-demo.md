@@ -76,3 +76,7 @@ variable. Confirm `/readyz` reports `EXTERNAL_GRANT_REQUIRED`. A missing or
 expired grant in the enabled profile intentionally fails startup; apply this
 override to obtain the supported payment-disabled live service. Preserve
 PostgreSQL/artifact volumes and never resubmit UNKNOWN attempts.
+
+## Invalid or expired payment authority
+
+A known grant-validation failure at startup logs `PAYMENTS_DISABLED` with a bounded code. The gateway continues serving its normal APIs using the grantless adapter; new payments remain unavailable and readiness reports the blockers. Existing confirmation and delivery safeguards remain active. The grant is neither renewed nor rewritten. Unexpected startup errors remain fatal.

@@ -28,7 +28,7 @@ async function main():Promise<void> {
     allowAnyPayer:config.testnetDemoAnyPayer,
     context:{...config.liveContext,databaseIdentity:await databaseIdentity(config.databaseUrl)},observedAt:new Date(),
   }:null;
-  const payments=composeOfficialX402(identity,finality,reader,config.publicBase,liveInput);
+  const payments=composeOfficialX402(identity,finality,reader,config.publicBase,liveInput,code=>logEvent({event:'PAYMENTS_DISABLED',code}));
   const ledger=new Ledger(pool);
   if(payments.liveGrantAuthority)await ledger.activateGrant(payments.liveGrantAuthority);
   await payments.initialize();

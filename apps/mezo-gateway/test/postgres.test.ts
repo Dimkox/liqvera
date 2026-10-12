@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
-import { readFile } from 'node:fs/promises';
+import { readFile, mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
@@ -345,4 +347,37 @@ test('lost cleanup response retries already-absent result and updates the ledger
     pool.query('UPDATE payment_attempts SET tx_hash=$2 WHERE quote_id=$1', [quoteId, `0x${'2'.repeat(64)}`]),
     /immutable transaction association/,
   );
+});
+
+
+test('real startup survives invalid grant and keeps new payments disabled', {skip:skipReason,timeout:15000}, async()=>{
+  const directory=await mkdtemp(join(tmpdir(),'liqvera-startup-'));
+  const grant=join(directory,'invalid-grant');
+  await writeFile(grant,'{}',{mode:0o600});
+  const reserve=createServer();reserve.listen(0,'127.0.0.1');await once(reserve,'listening');
+  const address=reserve.address();assert.ok(address&&typeof address==='object');const port=address.port;
+  await new Promise<void>(resolve=>reserve.close(()=>resolve()));
+  const metrics=createServer();metrics.listen(0,'127.0.0.1');await once(metrics,'listening');
+  const metricsAddress=metrics.address();assert.ok(metricsAddress&&typeof metricsAddress==='object');
+  await new Promise<void>(resolve=>metrics.close(()=>resolve()));
+  const env={PATH:process.env.PATH,DATABASE_URL:databaseUrl!,SOURCE_MODE:'live-public',HOST:'127.0.0.1',PORT:String(port),
+    METRICS_PORT:String(metricsAddress.port),PUBLIC_BASE_URL:`http://127.0.0.1:${port}`,ARTIFACT_ROOT:directory,
+    LIQVERA_LIVE_GRANT_FILE:grant,LIQVERA_SUBJECT_COMMIT:'a'.repeat(40),LIQVERA_SUBJECT_TREE:'b'.repeat(40),LIQVERA_PLAN_SHA256:'c'.repeat(64),
+    LIQVERA_LIVE_BUYER:'0x1111111111111111111111111111111111111111',PAY_TO:'0x2222222222222222222222222222222222222222'};
+  const child=spawn(process.execPath,[fileURLToPath(new URL('../../dist/main.js',import.meta.url))],{env,stdio:['ignore','pipe','pipe']});
+  let output='';child.stdout.on('data',chunk=>{output+=String(chunk);});child.stderr.on('data',chunk=>{output+=String(chunk);});
+  const exited=once(child,'exit');
+  try {
+    const deadline=Date.now()+10000;
+    while(!output.includes('GATEWAY_STARTED')&&child.exitCode===null&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,25));
+    assert.match(output,/GATEWAY_STARTED/);
+    assert.match(output,/PAYMENTS_DISABLED/);assert.match(output,/LIVE_GRANT_INVALID/);
+    assert.doesNotMatch(output,/STARTUP_FAILED/);
+    assert.equal((await fetch(`http://127.0.0.1:${port}/healthz`)).status,200);
+    const capabilities=await fetch(`http://127.0.0.1:${port}/v1/capabilities`);assert.equal(capabilities.status,200);
+    const body=await capabilities.json() as {payment_ready:boolean;blockers:string[]};
+    assert.equal(body.payment_ready,false);assert.ok(body.blockers.includes('EXTERNAL_GRANT_REQUIRED'));
+    const post=await fetch(`http://127.0.0.1:${port}/v1/report-quotes`,{method:'POST'});
+    assert.notEqual(post.status,201);assert.notEqual(post.status,202);
+  }finally{child.kill('SIGTERM');await exited;await rm(directory,{recursive:true,force:true});}
 });

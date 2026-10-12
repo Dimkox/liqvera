@@ -8,7 +8,7 @@ Built for [MEZO](https://mezo.org/) and [The Mezo Buildathon](https://app.akindo
 
 ## Current state
 
-The latest published source release is **v0.0.5**. This branch migrates the complete application to Liqvera component identifiers at **0.2.0**; it is an unpublished breaking migration. The separately published Linux operator is **v0.0.2**. See [migration and recovery](docs/migration.md) before using existing state.
+The latest published source release is **v0.0.5**. Current source migrates the complete application to Liqvera component identifiers at **0.2.0**; this breaking migration is not yet packaged as a tagged release. The separately published Linux operator is **v0.0.2**. See [migration and recovery](docs/migration.md) before using existing state.
 
 The application and payment path exist. Historical reviewed testnet settlements delivered JSON and ZIP artifacts, with the final signed-authority acceptance recording 23 confirmations. This does not authorize another payment or establish current uptime. The 2026-10-12 check found the public landing and historical preview available, but the gateway restarting and `/healthz` and `/readyz` returning 502. [Security baseline and runtime observations](docs/security/2026-10-12-baseline.md) record the exact source and running images. [Completed remediation and local verification](docs/security/2026-10-12-remediation.md) cover eight rebuilt images, independent advisory sources and 1,167 passing tests plus 85 subtests. Remaining raw scanner matches have explicit backport or non-applicability evidence. Public deployment has not been updated.
 

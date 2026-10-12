@@ -300,3 +300,30 @@ test('private grant reader accepts only one stable bounded private regular file'
     await assert.rejects(readPrivateGrantFile(path,{afterRead:async()=>{await writeFile(path,new TextEncoder().encode('{"other":true}'));}}),/LIVE_GRANT_FILE_CHANGED/);
   } finally { await rm(root,{recursive:true,force:true}); }
 });
+
+test('startup can keep the API alive with invalid authority while all payment paths stay closed',async()=>{
+  const codes:string[]=[];
+  const input={grantBytes:Buffer.from('{}'),observedAt:new Date(),context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64)}};
+  const payment=composeOfficialX402(new MezoAuthorizationPolicy(),new MezoFinalityPolicy(12),{} as never,new URL('https://reports.invalid'),input,(code:string)=>codes.push(code));
+  await payment.initialize();
+  assert.deepEqual(codes,['LIVE_GRANT_INVALID']);
+  assert.equal(payment.liveGrantAuthority,undefined);
+  assert.equal(payment.liveGrantDigest,undefined);
+  assert.ok(payment.blockers().includes('EXTERNAL_GRANT_REQUIRED'));
+  await assert.rejects(payment.requirements(quote),(error:unknown)=>error instanceof PublicError&&error.code==='PAYMENT_NOT_READY');
+  await assert.rejects(payment.verify('unused',quote),(error:unknown)=>error instanceof PublicError&&error.code==='PAYMENT_NOT_READY');
+});
+
+
+test('startup payment fallback handles expiry but never masks unexpected programming errors',()=>{
+  const codes:string[]=[];
+  const identity=new MezoAuthorizationPolicy(),finality=new MezoFinalityPolicy(12),base=new URL('https://reports.invalid');
+  const input={grantBytes:Buffer.from(JSON.stringify(grantRaw())),observedAt:new Date('2026-10-12T00:00:00Z'),context:{subjectCommit:'a'.repeat(40),subjectTree:'b'.repeat(40),planSha256:'c'.repeat(64),buyer:payer,payTo,databaseIdentity:'d'.repeat(64)}};
+  const payment=composeOfficialX402(identity,finality,{} as never,base,input,code=>codes.push(code));
+  assert.deepEqual(codes,['LIVE_GRANT_EXPIRED']);
+  assert.equal(payment.liveGrantAuthority,undefined);
+  assert.ok(payment.blockers().includes('EXTERNAL_GRANT_REQUIRED'));
+  const failure=new Error('unexpected internal failure');
+  assert.throws(()=>composeOfficialX402(identity,finality,{} as never,base,{...input,get grantBytes():Uint8Array{throw failure;}},code=>codes.push(code)),error=>error===failure);
+  assert.deepEqual(codes,['LIVE_GRANT_EXPIRED']);
+});

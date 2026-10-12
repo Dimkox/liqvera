@@ -1,6 +1,6 @@
 # Liqvera handoff
 
-## 2026-10-12 — complete product migrated; final independent image audit in progress
+## 2026-10-12 — standalone migration and exact-image security verification completed locally
 
 Baseline: origin/main `97484401d50fa3fb28ebd813cc8320e7e51c72f5`, after published v0.0.5. The earlier cleanup branch started from stale F1 and its whole-product conclusions are withdrawn. Full web, gateway, payments, reports and installer remain present. No live deployment, payment, database or grant change has been made.
 
@@ -16,6 +16,10 @@ No Go application, Go module or Go source remains in the repository. Docker buil
 
 Independent read-only review found no remaining Critical/Important issue after the subsequent fixes. CI now builds/checks the upstream proxy and runs the Python and BusyBox security regressions. The acceptance verifier now finds the repository's declared environment when invoked with a bare system Python; a strengthened no-site-packages test failed before the fix and passes afterward. The non-root Python 3.14 runtime suite passed 786 tests plus 85 subtests; its one system-interpreter failure was fixed and passed separately (787 runtime cases in total). A preliminary full-suite run inside root/Alpine was unsuitable for Ubuntu installer/permission checks and is not reported as passing. The final host `make verify` passed: 1167 tests and 85 subtests in 357.38 seconds, including the source/artifact guard.
 
-Next: build clean-commit artifacts and the two standalone Python images, persist final exact-image scans/backport dispositions and functional evidence, then remove only audit-owned resources. Public deployment remains unchanged and its observed gateway failure is not fixed by these source changes.
+Clean source `76b63ecaa5782614435850b1cfbda80ac02684eb` produced the final wheels and all eight runtime images. [Final security report](docs/security/2026-10-12-remediation.md), JSON, image-bound VEX and the raw evidence archive are persisted. Archive SHA-256 and all 39 member hashes were verified; all 34 unsuppressed scanner occurrences (33 Grype, one Trivy) have exact-image dispositions. Documentation checks pass for 38 documents. The final six-service fixture used the exact audited images and reproduced its bundle offline.
+
+Audit-owned fixture containers, networks and volumes, disposable PostgreSQL, standalone capture volume and loopback relay have been removed. Built images, local artifacts and evidence remain available for review. No audit-named container remains.
+
+The requested source cleanup, migration, remediation and local verification are complete. Next work is a separately scoped public gateway recovery/deployment with existing-state and payment safeguards. Public deployment remains unchanged and its observed gateway failure is not fixed by these source changes.
 
 Reference plan: [current cleanup](docs/superpowers/plans/2026-10-12-standalone-current.md). Prior release evidence is retained in Git at v0.0.5 and the published assets.

@@ -18,7 +18,9 @@ Build Python wheels with `make liqvera-python` from clean source. Install them u
 
 ## Security
 
-Run npm audit against both lockfiles, pip-audit against the exact installed runtime/dev closure and Trivy against each built image ID, including PostgreSQL and edge. Refresh advisory data and retain scanner versions, timestamps, digest bindings and unsuppressed results. Optional external Getzilla at commit `540c12f93e798c2f483455a5086ab0018ac3216e` supports `python3 /path/to/getzilla/scripts/getzilla_vulns.py --online --json` from this repository. A direct-pin scan alone does not cover transitive or OS dependencies.
+Run npm audit against both lockfiles, pip-audit against the exact installed runtime/dev closure and both Trivy and Grype against each built image ID, including PostgreSQL and edge. Refresh advisory data and retain scanner versions, timestamps, digest bindings and unsuppressed results. Optional external Getzilla at commit `540c12f93e798c2f483455a5086ab0018ac3216e` supports `python3 /path/to/getzilla/scripts/getzilla_vulns.py --online --json` from this repository. A direct-pin scan alone does not cover transitive or OS dependencies.
+
+Run the non-root CPython and BusyBox regressions in `deploy/security` on the resulting images. Audit the final Caddy binary with govulncheck. Keep backport dispositions separate from raw results, bound to exact image IDs; never substitute a suppression for a fix. [The completed 2026-10-12 audit](security/2026-10-12-remediation.md) includes raw evidence and scope limitations.
 
 ## Acceptance
 

@@ -14,6 +14,6 @@ HTTP input, market payloads and imported ZIP files are untrusted. Enforce bounde
 
 ## Dependencies and disclosure
 
-Audit exact Python and Node dependency closures and built OS images against current advisory data. Include development tools, transitive packages and every deployment component. Record unsuppressed findings with scanner/database timestamps; an empty direct-pin scan is insufficient. See [the current baseline](docs/security/2026-10-12-baseline.md) and [validation](docs/validation.md).
+Audit exact Python and Node dependency closures and built OS images against current advisory data. Include development tools, transitive packages and every deployment component. Record unsuppressed findings with scanner/database timestamps; an empty direct-pin scan is insufficient. See [the baseline](docs/security/2026-10-12-baseline.md), [completed remediation and exact-image evidence](docs/security/2026-10-12-remediation.md), and [validation](docs/validation.md).
 
 Report vulnerabilities privately to the repository owner with affected commit/image, reproduction and impact; do not publish credentials or an exploit against the live service. Publication, deployment, grant renewal and new payments require explicit scoped authorization. Before sharing a release, review source and history for secrets and verify checksums, license notices and recovery evidence.

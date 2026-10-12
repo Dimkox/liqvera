@@ -7,6 +7,7 @@
 - [Migration](migration.md): component namespace changes and historical data.
 - [Operations](runbooks/README.md): startup, recovery, monitoring and incidents.
 - [Security](../SECURITY.md): permissions, dependencies and disclosure.
+- [Security audit and remediation](security/2026-10-12-remediation.md): exact-image scans, backport dispositions and functional evidence.
 - [Roadmap](ROADMAP.md): remaining work and release gates.
 - [Current handoff](../handoff.md): exact verification state and next steps.
 

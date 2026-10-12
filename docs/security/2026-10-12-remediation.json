@@ -1,0 +1,704 @@
+{
+  "schema": "liqvera-security-audit/v1",
+  "audited_at": "2026-10-12T19:04:42+00:00",
+  "source_commit": "76b63ecaa5782614435850b1cfbda80ac02684eb",
+  "baseline_commit": "97484401d50fa3fb28ebd813cc8320e7e51c72f5",
+  "scope": "Eight locally rebuilt linux/amd64 runtime images and current dependency locks. No public deployment or new payment. Raw findings are retained, not suppressed.",
+  "scanners": {
+    "trivy": "Version: 0.74.0\nVulnerability DB:\n  Version: 2\n  UpdatedAt: 2026-10-12 13:18:23.1639207 +0000 UTC\n  NextUpdate: 2026-10-13 13:18:23.16392058 +0000 UTC\n  DownloadedAt: 2026-10-12 16:36:57.447175007 +0000 UTC\nCheck Bundle:\n  Digest: sha256:1583562f8b90ed2a071b99f0e5ffff6b57e4ceb6ca3e4796577b4e6a339eb74c\n  DownloadedAt: 2026-09-30 16:10:19.322988759 +0000 UTC\n",
+    "grype": {
+      "version": "0.120.1",
+      "database": {
+        "schemaVersion": "v6.1.10",
+        "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-12T00:38:50Z_1791787522.tar.zst?checksum=sha256%3Af1d61e7be5caa87b18ab7519f71982399f4d43d8f407edd24717903acef3d83d",
+        "built": "2026-10-12T06:45:22Z",
+        "path": "/tmp/liqvera-current-audit/grype-db/6/vulnerability.db",
+        "valid": true
+      }
+    },
+    "getzilla_commit": "540c12f93e798c2f483455a5086ab0018ac3216e",
+    "govulncheck": {
+      "version": "1.9.0",
+      "result": "=== Symbol Results ===\n\nNo vulnerabilities found.\n\nYour code is affected by 0 vulnerabilities.\nThis scan also found 0 vulnerabilities in packages you import and 1\nvulnerability in modules you require, but your code doesn't appear to call these\nvulnerabilities.\nUse '-show verbose' for more details.\n"
+    }
+  },
+  "dependencies": {
+    "getzilla": {
+      "accepted": [],
+      "dependencies": 231,
+      "findings": [],
+      "manifests": [
+        "apps/mezo-gateway/package-lock.json",
+        "apps/mezo-web/package-lock.json",
+        "packages/contracts/pyproject.toml",
+        "packages/evidence-report/pyproject.toml",
+        "packages/public-capture/pyproject.toml",
+        "packages/readonly-analyzer/pyproject.toml",
+        "pyproject.toml"
+      ],
+      "source": "OSV API",
+      "status": "pass",
+      "summary": "no known vulnerabilities in 231 pinned dependencies (OSV API)"
+    },
+    "python_pypi_findings": 0,
+    "python_osv_findings": 0,
+    "npm_gateway": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "npm_web": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    }
+  },
+  "cisa_kev": {
+    "catalog_version": "2026.10.08",
+    "date_released": "2026-10-08T20:09:18.9833Z",
+    "count": 1739,
+    "scope": "CVE identifiers remaining in final raw image scan matches",
+    "matched_cves": [],
+    "catalog_sha256": "fb1621beec7db19d99c1f919dede3d4cc01ad88acd16f79f1592929c4826dfee"
+  },
+  "images": {
+    "capture": {
+      "tag": "liqvera-audit/capture:current",
+      "image_id": "sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "grype_config_digest": "sha256:415bb2463c6f11426dd54b0f97875bd61682e63bcb7fa095a795ee3ba439b475",
+      "trivy_findings": [],
+      "grype_findings": [
+        {
+          "id": "CVE-2025-15367",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-15367"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2026-12345",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2026-12345"
+        }
+      ]
+    },
+    "report": {
+      "tag": "liqvera-audit/report:current",
+      "image_id": "sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "grype_config_digest": "sha256:e42e31e21c09373f893005a1e22ca6684a65ab754bdd5ee4a99b55ec77dba895",
+      "trivy_findings": [],
+      "grype_findings": [
+        {
+          "id": "CVE-2025-15367",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-15367"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2026-12345",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2026-12345"
+        }
+      ]
+    },
+    "gateway": {
+      "tag": "liqvera-audit/gateway:current",
+      "image_id": "sha256:6006be5a9a68d9dd13e75fca9a58f146886a118a7825889ebfcff40acdf8040f",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "grype_config_digest": "sha256:5a4d1198d3b7f8d986dd515936fab77db6c9d4e20741ae05b3d5277f97c90d23",
+      "trivy_findings": [],
+      "grype_findings": [
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2024-9410",
+          "package": "ada-libs",
+          "version": "3.3.0-r0",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2024-9410"
+        }
+      ]
+    },
+    "web": {
+      "tag": "liqvera-audit/web:current",
+      "image_id": "sha256:080fc954a3b915a28d191be1bc64319b21fd34956b79737db42e5eb5b1be1936",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "grype_config_digest": "sha256:3bc68f29b01b475188e6621197db5398faa8b59c8ec2340a47007873f54ce25d",
+      "trivy_findings": [],
+      "grype_findings": [
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        }
+      ]
+    },
+    "postgres": {
+      "tag": "liqvera-audit/postgres:current",
+      "image_id": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "grype_config_digest": "sha256:173f6736be4dc542df8e679936dfb7ea2a228c9aa739cb5d33056fb01b5be986",
+      "trivy_findings": [],
+      "grype_findings": [
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        }
+      ]
+    },
+    "edge": {
+      "tag": "liqvera-audit/edge:current",
+      "image_id": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "grype_config_digest": "sha256:2252b4b683d2fae075437322390c58af823803ea3beec76abe75ff2d81d01a3c",
+      "trivy_findings": [
+        {
+          "id": "GO-2026-5932",
+          "package": "golang.org/x/crypto",
+          "version": "v0.58.0",
+          "severity": "UNKNOWN",
+          "source": null
+        }
+      ],
+      "grype_findings": [
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        }
+      ]
+    },
+    "standalone-capture": {
+      "tag": "liqvera-public-capture:stage-a",
+      "image_id": "sha256:c4afdc1362b849c32855cb47bd66bf11229639c8d7f4dcbcbfac43681f0d7b3a",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "grype_config_digest": "sha256:208211c039c9991a65a1da723b31ab3481bd039b923745bc7c4ae0999b91eba6",
+      "trivy_findings": [],
+      "grype_findings": [
+        {
+          "id": "CVE-2025-15367",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-15367"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2026-12345",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2026-12345"
+        }
+      ]
+    },
+    "standalone-analyzer": {
+      "tag": "liqvera-readonly-analyzer:stage-a",
+      "image_id": "sha256:50862f0418cefde6005ad8e8ec3f5f6f57130f15fab5b077461bf21151e01f84",
+      "platform": "linux/amd64",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "grype_config_digest": "sha256:e860fe5c9ceeb8addd7d773a0ddb5cba9fee7700415279d5c590026add822a58",
+      "trivy_findings": [],
+      "grype_findings": [
+        {
+          "id": "CVE-2025-15367",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-15367"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+        },
+        {
+          "id": "CVE-2026-12345",
+          "package": "python",
+          "version": "3.14.8",
+          "severity": "Medium",
+          "namespace": "nvd:cpe",
+          "source": "https://nvd.nist.gov/vuln/detail/CVE-2026-12345"
+        }
+      ]
+    }
+  },
+  "validation": {
+    "host_python": {
+      "passed": 1167,
+      "subtests_passed": 85
+    },
+    "python314_runtime": {
+      "initial_passed": 786,
+      "subtests_passed": 85,
+      "one_failed_case_fixed_and_rerun": true,
+      "total_cases_passing_after_fix": 787
+    },
+    "gateway": {
+      "local_passed": 51,
+      "disposable_postgres_passed": 7
+    },
+    "browser_unit_tests_passed": 27,
+    "busybox_regression": {
+      "binary": "/bin/busybox",
+      "all_passed": true,
+      "cases": [
+        {
+          "case": "ordinary",
+          "returncode": 0,
+          "connected": true,
+          "injected_header": false,
+          "passed": true,
+          "request_line": "GET /audit HTTP/1.1"
+        },
+        {
+          "case": "percent_encoded",
+          "returncode": 0,
+          "connected": true,
+          "injected_header": false,
+          "passed": true,
+          "request_line": "GET /audit%20encoded HTTP/1.1"
+        },
+        {
+          "case": "path_crlf",
+          "returncode": 1,
+          "connected": false,
+          "injected_header": false,
+          "passed": true
+        },
+        {
+          "case": "path_cr",
+          "returncode": 1,
+          "connected": false,
+          "injected_header": false,
+          "passed": true
+        },
+        {
+          "case": "path_lf",
+          "returncode": 1,
+          "connected": false,
+          "injected_header": false,
+          "passed": true
+        },
+        {
+          "case": "path_tab",
+          "returncode": 1,
+          "connected": false,
+          "injected_header": false,
+          "passed": true
+        },
+        {
+          "case": "path_space",
+          "returncode": 1,
+          "connected": false,
+          "injected_header": false,
+          "passed": true
+        },
+        {
+          "case": "proxy_host_crlf",
+          "returncode": 1,
+          "connected": false,
+          "injected_header": false,
+          "passed": true
+        }
+      ]
+    },
+    "fixture_health": {
+      "capture": {
+        "image_id": "sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5",
+        "healthy": true,
+        "user": "10001:10001"
+      },
+      "report": {
+        "image_id": "sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15",
+        "healthy": true,
+        "user": "10002:10001"
+      },
+      "gateway": {
+        "image_id": "sha256:6006be5a9a68d9dd13e75fca9a58f146886a118a7825889ebfcff40acdf8040f",
+        "healthy": true,
+        "user": "10003:10001"
+      },
+      "web": {
+        "image_id": "sha256:080fc954a3b915a28d191be1bc64319b21fd34956b79737db42e5eb5b1be1936",
+        "healthy": true,
+        "user": "101:101"
+      },
+      "postgres": {
+        "image_id": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+        "healthy": true,
+        "user": "70:70"
+      },
+      "edge": {
+        "image_id": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+        "healthy": true,
+        "user": "10001:10001"
+      }
+    },
+    "functional": {
+      "/": {
+        "http": 200,
+        "bytes": 576,
+        "sha256": "73d307296a5a8a7b3c4bf6c9c763132299aa7bcd0a32ad486e6888ac6c1ebce4"
+      },
+      "/healthz": {
+        "http": 200,
+        "bytes": 108,
+        "sha256": "c23ab35f9bce0fc4a5d09d67d9887b89e559eb0bf688ddf3282c178d1289ad66",
+        "body": {
+          "schema": "liqvera-evidence-health/v1",
+          "request_id": "84022b79-1556-4b06-ac25-62633a9d2ba0",
+          "status": "alive"
+        }
+      },
+      "/readyz": {
+        "http": 503,
+        "bytes": 309,
+        "sha256": "2f99e960a89360043fd4a541057d6f3ab43a223573ccaf77ed1f5166056b6074",
+        "body": {
+          "schema": "liqvera-evidence-readiness/v1",
+          "request_id": "76a6bcda-820f-41b8-b5d0-30894c0a445f",
+          "ready": false,
+          "storage_ready": true,
+          "integration_ready": true,
+          "configuration_ready": false,
+          "payment_ready": false,
+          "blockers": [
+            "EXTERNAL_GRANT_REQUIRED",
+            "PAYMENT_SERVICE_UNAVAILABLE",
+            "PAY_TO_MISSING",
+            "SIMULATED_SOURCE"
+          ]
+        }
+      },
+      "/v1/capabilities": {
+        "http": 200,
+        "bytes": 707,
+        "sha256": "0cbeb423832ced0ed8438e5557b2f4d9763c9877d53d4288099992bcf4f8cbd0",
+        "body": {
+          "schema": "liqvera-evidence-capabilities/v1",
+          "request_id": "b475b47f-dc1a-470e-bd3e-ddc61b6c2134",
+          "instrument_id": "hyperliquid:BTC:perpetual",
+          "instrument_label": "Hyperliquid BTC linear perpetual",
+          "network": "eip155:31611",
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "price_musd": "0.01",
+          "amount_atomic": "10000000000000000",
+          "source_mode": "fixture",
+          "limitations": [
+            "Testnet only. Read-only analytics.",
+            "Calculation over the available snapshot depth; this is not a complete exchange book or guaranteed execution.",
+            "Fees, funding, and net P&L are not calculated."
+          ],
+          "payment_ready": false,
+          "blockers": [
+            "EXTERNAL_GRANT_REQUIRED",
+            "PAYMENT_SERVICE_UNAVAILABLE",
+            "PAY_TO_MISSING",
+            "SIMULATED_SOURCE"
+          ]
+        }
+      },
+      "/demo/latest-live/report.json": {
+        "http": 200,
+        "bytes": 4885,
+        "sha256": "8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd"
+      },
+      "/demo/latest-live/evidence.zip": {
+        "http": 200,
+        "bytes": 38132,
+        "sha256": "a6cc771d3fb8428325d32855fef53417f7da25c893db3a99b49802f482adc4fc"
+      },
+      "canonical_fixture_build": {
+        "status": 200,
+        "body": {
+          "bundle_sha256": "78956b51e211b7275a1ab982eaf7123db08afc5084bf639880fc620886b0bc9e",
+          "bundle_size_bytes": 14540,
+          "created_at": "2026-09-24T00:00:00Z",
+          "limitations": [
+            "SIMULATED fixture input and timestamps; never eligible for a chargeable quote.",
+            "Calculation over the available snapshot depth, at most 20 levels per side.",
+            "Hypothetical snapshot sweep; no fees, funding, net PnL, or execution guarantee.",
+            "Hashes establish integrity relative to the bundle, not exchange authenticity."
+          ],
+          "report_id": "0ae1ce89-6d8b-4984-a7e9-4d83ebd454a0",
+          "report_sha256": "ba336b3960c19c026ac751bbba762a320db64e0270fef0edf867a1cbba2ae630",
+          "report_size_bytes": 4889,
+          "snapshot_at": "2026-09-24T00:00:00Z",
+          "snapshot_status": "SIMULATED",
+          "source_mode": "fixture"
+        }
+      },
+      "offline_verification": {
+        "status": "INTEGRITY_REPRODUCED",
+        "report_sha256": "ba336b3960c19c026ac751bbba762a320db64e0270fef0edf867a1cbba2ae630",
+        "snapshot_status": "SIMULATED",
+        "exchange_authenticity_verified": false,
+        "execution_authority": "NONE"
+      }
+    },
+    "browser": {
+      "historical_preview": true,
+      "request_without_wallet_disabled": true,
+      "runtime_exceptions": 0,
+      "displayed_report": "HISTORICAL LIVE PUBLIC PREVIEW\n\nSealed Hyperliquid BTC perpetual report\nCaptured at\nSep 30, 2026, 11:32:40 PM\nReport ID\nd84fb495-8b22-49c1-99a3-a2b763afc977\nReport SHA-256\n8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd\nBundle SHA-256\na6cc771d3fb8428325d32855fef53417f7da25c893db3a99b49802f482adc4fc\nSnapshot calculation\nBUY 0.01 BTC \u00b7 VWAP 83618\n\nHistorical capture from 30 Sep 2026. It is not fresh market data, an execution promise, or a new run. No payment transaction exists for this public preview.\n\nDownload evidence ZIP"
+    },
+    "standalone_analyzer": {
+      "capture_run_id": "e5eb4915-3b18-4f58-b98f-9a8dcbe67492",
+      "decision": "INSUFFICIENT_EVIDENCE",
+      "package_schema": "liqvera-readonly-frozen-package/v1",
+      "reasons": [
+        "INSUFFICIENT_ACQUISITION_WINDOW",
+        "INSUFFICIENT_COMPLETE_UTC_DAYS",
+        "INSUFFICIENT_STRICT_HEALTHY_MINUTES",
+        "INSUFFICIENT_INDEPENDENT_EPISODES"
+      ],
+      "schema": "liqvera-stage-a-decision/v1"
+    },
+    "clean_commit_artifact_build": true
+  },
+  "raw_archive": {
+    "path": "2026-10-12-remediation-raw.tar.gz",
+    "sha256": "44bb03181bb3189c96bc61b5fc71edb1af619f27a6ef8bfb07c447713c3e318b",
+    "members": {
+      "browser-results.json": "a68f3476b1c2bfb40cc8d611e9bc251d1eb490aa78fa8ee636dbd6941e1df3f0",
+      "capture-final-grype.json": "650e03206c4be013e8a13f381cd8c7dd4ff2cad233539aa076eedd704a1c52ea",
+      "capture-final-trivy.json": "5e5ae72a0c8a685daccca6f866b829fdda4cd27dcc31cdbe136a41dec09f5675",
+      "capture-python-regression.log": "d8c2331bfc025132f609d37e98a1e0881f3231fb457283e3894d3f91d37b94ff",
+      "edge-final-grype.json": "9d7e77fd1fb6dcdb9c2df301eb7422119a10d1172149d889a2741afbe3fdfb85",
+      "edge-final-trivy.json": "434210ce1583b4d6fbb977757fab33eb665b333593a5c04e45f81350857603fa",
+      "exact-fixture-health.json": "e3421df21847bdbcfb16257ea7bb4a961585933690e8df62ede5b0c5af37521e",
+      "final-busybox-regression.json": "3d6bac3748bf20a80905c170efe3e708caf26bbc66a8be1b873347064efaac7f",
+      "final-edge-go-build.txt": "5077da1909add65b9a59c2724a5a050754cf48308bae95615673898b3ca8f846",
+      "final-edge-govulncheck.txt": "b5ae54ddcfa4cb39e85f84ad2d9e43556bd817c480eaab2a71bab63bfc29353b",
+      "final-host-verify.log": "84249a8e232bdb085c7e95b19fbb609ebc10ea47857b89f2b3ea023d991562b5",
+      "functional-results.json": "685e4a7a67d0f2f644ab0ce3bd83191973c4f72bdf319ab7d72173c89fa701c8",
+      "gateway-after-audit.json": "43c83c39f94ea68e0f6eb81de355f5df1a6e2986f050220934809aa318f3b5f5",
+      "gateway-final-grype.json": "0a76f4e8572b6b19451f58e0db49282401bb8894767f8efcc69399b65cfb7bb5",
+      "gateway-final-trivy.json": "a733121d4e5f8eddeca9148db8b78e82e76fcf74b6e90e33fd396431913f94b5",
+      "getzilla-final.json": "6d4818aa932cb87db5636213dda9a641ddd122424b54cacb4d62b9f5fde2073e",
+      "grype-final-db.json": "09dfc6b54b4575eda10e1816cf2779839245b6a1ace84cd1211c104e1fdf59b3",
+      "node24-gateway-tests.log": "b3c339a40055f27f0291f17e8babfc98ecc96ad01c06787d4111c2dc3e2c98af",
+      "node24-postgres-tests-fresh.log": "7ed7c808034c45bd2c9df05fc154c4167eb0322408ff5eb184391edc15dc8867",
+      "postgres-final-grype.json": "1b41b461307e169bf3cbbc9642b543d09ee5019c9461f6a69968899e9da51b0a",
+      "postgres-final-trivy.json": "006e4564c87b08114ea49821a84f3bbd4668855f21e787785ef87cf67222f7d2",
+      "python-final-osv.json": "25573a1fc6c16e0bfc9889f9a009827a3309a1b18128fd29c4f62abe24bc4188",
+      "python-final-pypi.json": "066bab82d88bc68d208685c9539c02c77c7aeebcf85f73630d4285a4b4ddb2e6",
+      "python314-system-python-test.log": "142e711fac20a466998c8bbeb42619edb1e1722cf84dfe39f564f9b894494392",
+      "report-final-grype.json": "29a92ffbb53e3fc9d43bc51b8b7cbf670065315555ebe96a18894eaffe5cb9f9",
+      "report-final-trivy.json": "954a74690138a9218862150f1ebbe82e99dfd2b3c054b0948f92f745f2d60d30",
+      "report-python-regression.log": "d8c2331bfc025132f609d37e98a1e0881f3231fb457283e3894d3f91d37b94ff",
+      "standalone-analyzer-final-grype.json": "9bea70b6861328155fcec6dbc723b99d333d29f789133717994fa39b00a414e6",
+      "standalone-analyzer-final-trivy.json": "e091b1f1d2889c05c599539a164d9dcacee09816d1ff95046422bf8aed67e88b",
+      "standalone-analyzer-python-regression.log": "d8c2331bfc025132f609d37e98a1e0881f3231fb457283e3894d3f91d37b94ff",
+      "standalone-analyzer-smoke.log": "c301bd3b4b005a7d2240a5c54aa24415af8b5550178fcdfe78cab640cd56c6d3",
+      "standalone-capture-final-grype.json": "1aaf7107bdfe9f0dc3e8b44cc71808769108c0b57924e8e5211d524be18f6b24",
+      "standalone-capture-final-trivy.json": "05f245bf6f3a4a7b9bea072b851dd74203162245d2781814b85271e0018aeb31",
+      "standalone-capture-python-regression.log": "d8c2331bfc025132f609d37e98a1e0881f3231fb457283e3894d3f91d37b94ff",
+      "standalone-capture-smoke.log": "eebfb06b5ff462add1ba05920d59fd9b570259ef81ad832a523cec07277e2c58",
+      "trivy-final-version.txt": "a66155508df915a0fd39b4f94152e15aa87a9cdc67a43f146bea930a261f91a7",
+      "web-after-audit.json": "f31fc1e790ec4d173b02536f1eafdd4df1b59278ab38a4d60dee41d5afdfb3a5",
+      "web-final-grype.json": "7da640c7a73196f02e3503bfed23ef0d9d6b8cbb723f30f91d9009033bc55b81",
+      "web-final-trivy.json": "c5f829c8f5238e4a96726a35579b1e3ded55b898439c3ce3a44ea1c709c8d0a3"
+    }
+  }
+}

@@ -487,6 +487,7 @@ def test_system_python_can_verify_venv_produced_seal(
     completed = subprocess.run(
         [
             "/usr/bin/python3",
+            "-S",  # Prove the verifier does not rely on globally installed packages.
             "-B",
             "scripts/verify-mezo-acceptance.py",
             str(output),

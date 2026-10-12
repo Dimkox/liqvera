@@ -18,3 +18,8 @@
 **/*.pem
 **/*.key
 **/node_modules/**
+
+!deploy/
+!deploy/security/
+!deploy/security/busybox/
+!deploy/security/busybox/**

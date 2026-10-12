@@ -1,1 +1,6 @@
 *
+
+!deploy/
+!deploy/security/
+!deploy/security/busybox/
+!deploy/security/busybox/**

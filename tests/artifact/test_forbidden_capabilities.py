@@ -28,7 +28,7 @@ def test_dockerfiles_copy_wheels_not_source_trees() -> None:
 
 
 def test_dockerfiles_use_digest_pinned_python_base() -> None:
-    pin = "python:3.12.15-alpine3.23@sha256:1fd55c2f838c4f76262f9eeed899ff9168ea96ac383c61667d6f204325e1f169"
+    pin = "python:3.14.8-alpine3.23@sha256:e7cff362a12454395f8dc99607c21a602ea880cdce03538877b90c2ba932b16f"
     for path in IMAGES:
         assert pin in path.read_text(encoding="utf-8")
 

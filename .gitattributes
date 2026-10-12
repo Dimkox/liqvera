@@ -1,0 +1,3 @@
+# Preserve upstream unified-diff context bytes, including blank context lines.
+deploy/security/*.patch -whitespace
+deploy/security/busybox/*.patch -whitespace

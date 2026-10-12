@@ -24,4 +24,6 @@ SQL migrations 001–006 and their ledger hashes remain unchanged by the namespa
 
 Four independently installable Python packages, two Node applications and the protocol metadata package are built from this repository. A clean-source check binds release artifacts to the selected commit. No external delivery framework or private host controller is needed. Optional Getzilla auditing is invoked from an external pinned checkout and does not become an application dependency.
 
+There is no Go application or module in this repository. The edge Dockerfile compiles the upstream Caddy proxy with patched dependencies. Runtime images carry reviewed CPython and BusyBox security backports under `deploy/security`; those are third-party fixes with regression tests, source provenance and retirement instructions. Gateway's Alpine Node LTS uses the patched system OpenSSL rather than an embedded older copy.
+
 See [the specification](specification.md), [security](../SECURITY.md) and [validation](validation.md) for current proof and limitations.

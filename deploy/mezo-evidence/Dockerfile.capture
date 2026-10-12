@@ -1,6 +1,11 @@
 # syntax=docker/dockerfile:1
-FROM python:3.12.15-alpine3.23@sha256:1fd55c2f838c4f76262f9eeed899ff9168ea96ac383c61667d6f204325e1f169 AS wheels
-RUN apk add --no-cache zlib=1.3.2-r1
+FROM alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS busybox-security
+RUN apk add --no-cache alpine-sdk perl linux-headers openssl-dev utmps-dev utmps-static zip
+COPY deploy/security/busybox/build.sh deploy/security/busybox/wget-CVE-2025-60876.patch /backport/
+RUN sh /backport/build.sh
+
+FROM python:3.14.8-alpine3.23@sha256:e7cff362a12454395f8dc99607c21a602ea880cdce03538877b90c2ba932b16f AS wheels
+RUN apk add --no-cache zlib=1.3.2-r1 libcrypto3=3.5.9-r0 libssl3=3.5.9-r0
 WORKDIR /src
 COPY requirements.lock /src/requirements.lock
 COPY packages/contracts packages/contracts
@@ -8,16 +13,23 @@ COPY packages/public-capture packages/public-capture
 RUN python -m pip wheel --no-cache-dir --constraint requirements.lock --wheel-dir /wheels \
     ./packages/contracts ./packages/public-capture
 
-FROM python:3.12.15-alpine3.23@sha256:1fd55c2f838c4f76262f9eeed899ff9168ea96ac383c61667d6f204325e1f169
-RUN apk add --no-cache zlib=1.3.2-r1
+FROM python:3.14.8-alpine3.23@sha256:e7cff362a12454395f8dc99607c21a602ea880cdce03538877b90c2ba932b16f
+RUN apk add --no-cache zlib=1.3.2-r1 libcrypto3=3.5.9-r0 libssl3=3.5.9-r0
+COPY deploy/security /security-patches
+RUN /bin/sh /security-patches/apply-python.sh && rm -rf /security-patches
 COPY --from=wheels /wheels /wheels
 RUN python -m pip install --no-cache-dir --no-index --find-links=/wheels liqvera-public-capture==0.2.0 \
-    && python -m pip uninstall -y pip && rm -rf /usr/local/lib/python3.12/ensurepip /wheels \
+    && python -m pip uninstall -y pip && rm -rf /usr/local/lib/python3.14/ensurepip /wheels \
     && addgroup -S -g 10001 liqvera \
     && adduser -S -D -H -u 10001 -G liqvera liqvera \
     && mkdir -p /data/captures \
     && chown 10001:10001 /data/captures \
     && chmod 0750 /data/captures
+# Install only after APK operations, which may replace the vendor binary.
+COPY --from=busybox-security /out/busybox /bin/busybox
+COPY --from=busybox-security /out/busybox.sha256 /out/original-applets.txt /out/patched-applets.txt /out/LICENSE /out/busybox-corresponding-source.tar.gz /usr/local/share/liqvera-security/busybox/
+RUN sed -i 's#/out/busybox#/bin/busybox#' /usr/local/share/liqvera-security/busybox/busybox.sha256 \
+    && sha256sum -c /usr/local/share/liqvera-security/busybox/busybox.sha256
 USER 10001:10001
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 LIQVERA_CAPTURE_PORT=8081 LIQVERA_CAPTURE_ROOT=/data/captures
 EXPOSE 8081

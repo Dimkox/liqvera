@@ -24,3 +24,12 @@
 **/node_modules/**
 
 !requirements.lock
+
+!deploy/
+!deploy/security/
+!deploy/security/**
+
+!deploy/
+!deploy/security/
+!deploy/security/busybox/
+!deploy/security/busybox/**

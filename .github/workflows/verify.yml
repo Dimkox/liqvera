@@ -7,6 +7,27 @@ on:
 permissions:
   contents: read
 jobs:
+  python-image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        component: [capture, report]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify Python security backports in the runtime image
+        run: |
+          docker build -f deploy/mezo-evidence/Dockerfile.${{ matrix.component }} -t liqvera-python:ci .
+          docker run --rm --network none --read-only --cap-drop ALL \
+            --tmpfs /tmp:rw,nosuid,nodev \
+            -v "$PWD/deploy/security/check-python-regressions.py:/check.py:ro" \
+            --entrypoint python liqvera-python:ci /check.py
+          docker run --rm --network none --read-only --cap-drop ALL \
+            --tmpfs /tmp:rw,nosuid,nodev \
+            -v "$PWD/deploy/security/busybox/check-regression.py:/check.py:ro" \
+            --entrypoint python liqvera-python:ci /check.py /bin/busybox
   product:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -52,7 +73,7 @@ jobs:
             liqvera-edge:ci caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
       - name: Check reachable Go vulnerabilities
         run: |
+          docker build --target builder -f deploy/mezo-evidence/Dockerfile.edge -t liqvera-edge-builder:ci .
           docker run --rm -e GOTOOLCHAIN=local \
-            -v "$PWD/deploy/edge-build:/src:ro" -w /src \
-            golang:1.27.2-alpine@sha256:f92b6ef800e499660581efdabdf25d9d817a9d124eaf900924f0504e7e27e12d \
-            sh -c 'go install golang.org/x/vuln/cmd/govulncheck@v1.9.0 && govulncheck ./...'
+            liqvera-edge-builder:ci \
+            sh -c 'go install golang.org/x/vuln/cmd/govulncheck@v1.9.0 && govulncheck github.com/caddyserver/caddy/v2/cmd/caddy'

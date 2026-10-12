@@ -2,12 +2,23 @@
 """Reload and verify a sealed Liqvera acceptance result and all bindings."""
 
 import argparse
+import importlib.util
+import os
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+# Verification needs the same declared dependencies as the producer, even when
+# an operator invokes the script with a bare system interpreter.
+if importlib.util.find_spec("jsonschema") is None:
+    environment = ROOT / ".venv"
+    python = environment / "bin" / "python"
+    if python.is_file() and (sys.prefix != str(environment) or sys.flags.no_site):
+        os.execv(str(python), [str(python), "-B", str(Path(__file__).resolve()), *sys.argv[1:]])
+    raise SystemExit("Install Liqvera dependencies in .venv before verifying acceptance evidence")
 
 from tools.mezo_acceptance.runner import verify_sealed_result
 

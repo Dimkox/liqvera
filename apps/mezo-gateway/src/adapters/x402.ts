@@ -5,7 +5,7 @@ import { declareEip2612GasSponsoringExtension } from '@x402/extensions';
 import { MUSD_PERMIT, X402_PERMIT2 } from '@liqvera/mezo-protocol';
 import type { PaymentPayload, PaymentRequirements, VerifyResponse, SettleResponse, SupportedResponse } from '@x402/core/types';
 import type { AuthorizationPolicy, FinalityPolicy, PaymentPort } from '../ports/index.js';
-import { AMOUNT, ASSET, NETWORK, PublicError, type Attempt, type Quote, type Receipt, type Reason } from '../domain/model.js';
+import { AMOUNT, ASSET, NETWORK, address, PublicError, type Attempt, type Quote, type Receipt, type Reason } from '../domain/model.js';
 import { paymentHeader } from '../security/input.js';
 import { boundedJson } from './http.js';
 import { MezoReceiptReader } from './mezo-rpc.js';
@@ -62,15 +62,17 @@ export class OfficialX402 implements PaymentPort {
   get liveGrantAuthority():LiveGrantAuthority|undefined{return this.grant?.authority;}
   constructor(private readonly identity: AuthorizationPolicy,private readonly finality: FinalityPolicy,private readonly reader: MezoReceiptReader,private readonly publicBase: URL,
     private readonly grant: LivePaymentGrant|null=null,private readonly liveContext:LivePaymentContext|null=null,private readonly now:()=>Date=()=>new Date(),
-    facilitator:URL=defaultFacilitator) {
+    facilitator:URL=defaultFacilitator,private readonly merchantPayTo:string|null=null) {
+    if(merchantPayTo!==null&&(address(merchantPayTo)!==merchantPayTo||grant||liveContext))throw new PublicError('INVALID_INPUT');
     this.server=new x402ResourceServer(facilitatorTransport(facilitator)).register(NETWORK,new ExactEvmScheme());
   }
   private authorizeGrant():void {
+    if(this.merchantPayTo)return;
     if(!this.grant||!this.liveContext)throw new PublicError('PAYMENT_NOT_READY');
     this.grant.authorize({...this.liveContext,now:this.now()});
   }
   async initialize(): Promise<void> {
-    if(!this.identity.reviewed||!this.finality.reviewed||!this.grant||!this.liveContext)return;
+    if(!this.identity.reviewed||!this.finality.reviewed||(!this.merchantPayTo&&(!this.grant||!this.liveContext)))return;
     this.authorizeGrant();
     await this.server.initialize();
     this.initialized=permit2Capability(this.server.getSupportedKind(2,NETWORK,'exact'),this.server.getFacilitatorExtensions(2,NETWORK,'exact'));
@@ -79,7 +81,7 @@ export class OfficialX402 implements PaymentPort {
     const reasons: Reason[]=[];
     if(!this.identity.reviewed)reasons.push('AUTHORIZATION_IDENTITY_UNVERIFIED');
     if(!this.finality.reviewed)reasons.push('FINALITY_RULE_UNVERIFIED');
-    if(!this.grant||!this.liveContext)reasons.push('EXTERNAL_GRANT_REQUIRED');
+    if(!this.merchantPayTo&&(!this.grant||!this.liveContext))reasons.push('EXTERNAL_GRANT_REQUIRED');
     else try { this.authorizeGrant(); } catch { reasons.push('EXTERNAL_GRANT_REQUIRED'); }
     if(!this.initialized)reasons.push('PAYMENT_SERVICE_UNAVAILABLE');
     return reasons;
@@ -87,6 +89,7 @@ export class OfficialX402 implements PaymentPort {
   private ready(): void { if(this.blockers().length)throw new PublicError('PAYMENT_NOT_READY'); }
   async requirements(quote: Quote) {
     this.ready();
+    if(this.merchantPayTo&&quote.terms.pay_to!==this.merchantPayTo)throw new PublicError('PAYMENT_REJECTED',409);
     const values=await this.server.buildPaymentRequirements({scheme:'exact',network:NETWORK,payTo:quote.terms.pay_to,
       price:{asset:ASSET,amount:AMOUNT},maxTimeoutSeconds:120,extra:{assetTransferMethod:X402_PERMIT2.assetTransferMethod,name:MUSD_PERMIT.domainName,version:MUSD_PERMIT.domainVersion}});
     if(values.length!==1)throw new PublicError('PAYMENT_NOT_READY');
@@ -108,14 +111,17 @@ export class OfficialX402 implements PaymentPort {
     if(identity.payer!==quote.terms.expected_payer||!identity.identity||identity.identity.length>512||identity.version!==this.identity.version||
       !Number.isFinite(Date.parse(identity.valid_until))||Date.parse(identity.valid_until)<=Date.now())throw new PublicError('PAYMENT_REJECTED',409);
     this.authorizeGrant();
-    if((this.grant!.version==='v1'&&this.liveContext!.buyer!==identity.payer)||this.liveContext!.payTo!==quote.terms.pay_to)throw new PublicError('PAYMENT_REJECTED',409);
+    if(!this.merchantPayTo&&((this.grant!.version==='v1'&&this.liveContext!.buyer!==identity.payer)||this.liveContext!.payTo!==quote.terms.pay_to))throw new PublicError('PAYMENT_REJECTED',409);
     const balance=await this.reader.nativeBalanceSnapshot(identity.payer);
     identity.correlation.buyer_native_balance_before=balance.balance;
     identity.correlation.buyer_native_balance_before_block_number=balance.block_number;
     identity.correlation.buyer_native_balance_before_block_hash=balance.block_hash;
-    identity.correlation.live_grant_digest=this.grant!.digest;
-    identity.correlation.live_grant_id=String(this.grant!.raw.grant_id);
-    identity.correlation.live_grant_version=this.grant!.version;
+    if(this.merchantPayTo)identity.correlation.payment_mode='merchant';
+    else {
+      identity.correlation.live_grant_digest=this.grant!.digest;
+      identity.correlation.live_grant_id=String(this.grant!.raw.grant_id);
+      identity.correlation.live_grant_version=this.grant!.version;
+    }
     return {payload,requirements,identity};
   }
   async settle(payload: PaymentPayload,requirements: PaymentRequirements) {

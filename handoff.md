@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-12 — ordinary wallet checkout
+
+Owner requires the complete deployed product for the competition after clarification that the extra operator grant prevents normal purchases. Explicit merchant mode now supports per-purchase wallet authorization at the unchanged recipient and 0.01 MUSD price; grant mode remains the default for existing operator workflows. Fixture and mixed grant/merchant configuration are rejected. No exchange execution or server-held buyer key is introduced.
+
+The same SDK signature verification, exact payment terms, artifact readback, canonical receipt/finality checks and confirm-only recovery remain active. Independent investigation found the existing quote-bound identity did not deduplicate the same Permit2 nonce across quotes; migration 008 adds a unique merchant network/payer/nonce index. Ledger submission independently checks configured recipient, payment mode, identity version, immutable terms and authorization expiry. Historical migrations and state remain unchanged.
+
+Regression tests failed before implementation for grantless merchant readiness, concurrent submission and cross-quote nonce reuse. All 71 gateway tests pass against disposable PostgreSQL, including repeated purchases, concurrency, mode isolation and expiry. Merchant startup additionally requires the migration 008 receipt and valid unique index; its missing-index regression failed before the fix. All 31 browser tests pass, and the two merchant SDK/configuration tests also pass with Mainnet selected. Independent read-only review found no remaining Critical/Important issue. Deployment and refreshed exact-image security evidence are next. No Mainnet purchase has been signed or submitted by the agent.
+
 ## 2026-10-12 — Mainnet deployment and exact-image audit
 
 Source `6ee3bbe` is published on GitHub main and its Mainnet gateway/browser images are deployed. All seven containers are healthy with zero restarts; exact running images match their security audits. The approved recipient and 0.01 MUSD price are unchanged. A fresh `liqvera_mainnet` database has seven migrations and immutable chain identity 31612; no Mainnet payment was submitted. Testnet state, stopped rollback containers and coherent private backups are retained. The operational Compose manifest now pins Mainnet configuration and passes validation. An initial Docker create failure automatically rolled back; removing the incompatible inherited exposed-port declaration allowed the subsequent fresh-volume rollout to complete.

@@ -3,6 +3,7 @@ import { Pool, type PoolClient, type QueryResultRow } from 'pg';
 import { AMOUNT, ASSET, CHAIN_ID, NETWORK, PublicError, type Artifact, type Attempt, type AuthorizationIdentity,
   type Confirmation, type Preview, type Quote, type QuoteInput, type Reason, type ReportRequest } from '../domain/model.js';
 import { digest } from '../security/input.js';
+import { APPROVED_MIGRATIONS } from '../migration-policy.js';
 import type {LiveGrantAuthority} from '../security/live-grant.js';
 
 const QUOTE_SELECT = `SELECT q.*,a.report_sha256,a.bundle_sha256,a.metadata AS artifact FROM quotes q JOIN artifacts a USING(report_id)`;
@@ -26,12 +27,19 @@ function toQuote(row: QueryResultRow): Quote {
       expected_payer: row.expected_payer, expires_at: row.expires_at.toISOString() } };
 }
 export class Ledger {
-  constructor(readonly pool: Pool) {}
+  constructor(readonly pool: Pool,private readonly merchantPayTo:string|null=null) {}
   async assertNetwork(): Promise<void> {
     await this.transaction(async db => {
       await db.query('INSERT INTO ledger_network(chain_id) VALUES($1) ON CONFLICT(singleton) DO NOTHING',[CHAIN_ID]);
       const row=(await db.query('SELECT chain_id FROM ledger_network WHERE singleton=true')).rows[0];
       if(row?.chain_id!==CHAIN_ID)throw new Error('LEDGER_NETWORK_MISMATCH');
+      if(this.merchantPayTo) {
+        const required=APPROVED_MIGRATIONS.find(m=>m.name==='008_merchant_nonce.sql')!;
+        const applied=(await db.query(`SELECT m.sha256,i.indisvalid,i.indisready,i.indisunique FROM gateway_migrations m
+          JOIN pg_index i ON i.indexrelid=to_regclass('merchant_permit2_nonce')
+          WHERE m.name=$1 AND i.indrelid=to_regclass('payment_attempts')`,[required.name])).rows[0];
+        if(applied?.sha256!==required.sha256||!applied.indisvalid||!applied.indisready||!applied.indisunique)throw new Error('MERCHANT_MIGRATION_REQUIRED');
+      }
     });
   }
   async transaction<T>(run: (db: PoolClient) => Promise<T>): Promise<T> {
@@ -127,7 +135,7 @@ export class Ledger {
       if (row.expires_at <= new Date()) throw new PublicError('QUOTE_EXPIRED',410);
       const attemptId = randomUUID();
       const inserted = await db.query<Attempt>(`INSERT INTO payment_attempts(id,quote_id,authorization_identity,identity_version,authorization_valid_until,correlation,state)
-        VALUES($1,$2,$3,$4,$5,$6,'RECEIVED') ON CONFLICT(authorization_identity) DO NOTHING RETURNING *`,
+        VALUES($1,$2,$3,$4,$5,$6,'RECEIVED') ON CONFLICT DO NOTHING RETURNING *`,
       [attemptId,quote.id,identity.identity,identity.version,identity.valid_until,identity.correlation]);
       if (!inserted.rows[0]) throw new PublicError('AUTHORIZATION_REUSED',409);
       await db.query("UPDATE payment_attempts SET state='VERIFIED',updated_at=now() WHERE id=$1",[attemptId]);
@@ -141,31 +149,40 @@ export class Ledger {
       const q = (await db.query('SELECT * FROM quotes WHERE id=$1 FOR UPDATE',[attempt.quote_id])).rows[0]!;
       const current = (await db.query<Attempt>('SELECT * FROM payment_attempts WHERE id=$1 FOR UPDATE',[attempt.id])).rows[0]!;
       if (current.state !== 'VERIFIED') return 'INVALID_STATE';
-      if (q.expires_at <= new Date()) {
+      if (q.expires_at <= new Date() || current.authorization_valid_until <= new Date()) {
         await db.query("UPDATE payment_attempts SET state='REJECTED',updated_at=now() WHERE id=$1",[attempt.id]);
         await db.query("UPDATE quotes SET state='EXPIRED' WHERE id=$1",[attempt.quote_id]); return 'EXPIRED';
       }
-      const grantDigest=current.correlation?.live_grant_digest;
-      const grantId=current.correlation?.live_grant_id;
-      if(typeof grantDigest!=='string'||!/^[0-9a-f]{64}$/.test(grantDigest)||typeof grantId!=='string')return 'INVALID_STATE';
-      let reserved=false;
-      if(current.correlation?.live_grant_version==='v2'){
-        const authority=(await db.query(`SELECT * FROM live_grant_authorities WHERE grant_digest=$1 FOR UPDATE`,[grantDigest])).rows[0];
-        const payer=String(current.correlation.from??'');
-        if(authority&&new Date(authority.not_before)<=new Date()&&new Date(authority.expires_at)>new Date()){
-          const totals=(await db.query(`SELECT count(*)::int AS count,COALESCE(sum(amount_atomic),0)::text AS total FROM live_grant_reservations WHERE grant_digest=$1`,[grantDigest])).rows[0]!;
-          const ordinal=Number(totals.count)+1;
-          if(ordinal<=Number(authority.max_submissions)&&BigInt(totals.total)+BigInt(AMOUNT)<=BigInt(authority.max_total)){
-            const inserted=await db.query(`INSERT INTO live_grant_reservations(grant_digest,ordinal,payment_attempt_id,payer,amount_atomic) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING ordinal`,[grantDigest,ordinal,attempt.id,payer,AMOUNT]);
-            reserved=Boolean(inserted.rowCount);
+      if(this.merchantPayTo) {
+        const c=current.correlation;
+        if(current.identity_version!=='liqvera-permit2-eip2612-identity/v1'||q.state!=='PAYMENT_PENDING'||c.payment_mode!=='merchant'||c.live_grant_digest!==undefined||
+          q.pay_to!==this.merchantPayTo||q.network!==NETWORK||q.chain_id!==CHAIN_ID||q.asset!==ASSET||q.amount_atomic!==AMOUNT||
+          c.network!==NETWORK||c.asset!==ASSET.toLowerCase()||c.amount!==AMOUNT||c.from!==q.expected_payer||c.to!==q.pay_to||
+          typeof c.nonce!=='string'||!/^(0|[1-9][0-9]*)$/.test(c.nonce))return 'INVALID_STATE';
+      } else {
+        if(current.correlation?.payment_mode!==undefined)return 'INVALID_STATE';
+        const grantDigest=current.correlation?.live_grant_digest;
+        const grantId=current.correlation?.live_grant_id;
+        if(typeof grantDigest!=='string'||!/^[0-9a-f]{64}$/.test(grantDigest)||typeof grantId!=='string')return 'INVALID_STATE';
+        let reserved=false;
+        if(current.correlation?.live_grant_version==='v2'){
+          const authority=(await db.query(`SELECT * FROM live_grant_authorities WHERE grant_digest=$1 FOR UPDATE`,[grantDigest])).rows[0];
+          const payer=String(current.correlation.from??'');
+          if(authority&&new Date(authority.not_before)<=new Date()&&new Date(authority.expires_at)>new Date()){
+            const totals=(await db.query(`SELECT count(*)::int AS count,COALESCE(sum(amount_atomic),0)::text AS total FROM live_grant_reservations WHERE grant_digest=$1`,[grantDigest])).rows[0]!;
+            const ordinal=Number(totals.count)+1;
+            if(ordinal<=Number(authority.max_submissions)&&BigInt(totals.total)+BigInt(AMOUNT)<=BigInt(authority.max_total)){
+              const inserted=await db.query(`INSERT INTO live_grant_reservations(grant_digest,ordinal,payment_attempt_id,payer,amount_atomic) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING ordinal`,[grantDigest,ordinal,attempt.id,payer,AMOUNT]);
+              reserved=Boolean(inserted.rowCount);
+            }
           }
+        }else reserved=await consumeLiveGrant(db,grantDigest,grantId,attempt.id);
+        if(!reserved) {
+          await db.query("UPDATE payment_attempts SET state='REJECTED',updated_at=now() WHERE id=$1",[attempt.id]);
+          await db.query("UPDATE quotes SET state='READY' WHERE id=$1 AND state='PAYMENT_PENDING'",[attempt.quote_id]);
+          await db.query("INSERT INTO audit_events(quote_id,payment_attempt_id,event) VALUES($1,$2,'GRANT_ALREADY_CONSUMED')",[attempt.quote_id,attempt.id]);
+          return 'GRANT_CONSUMED';
         }
-      }else reserved=await consumeLiveGrant(db,grantDigest,grantId,attempt.id);
-      if(!reserved) {
-        await db.query("UPDATE payment_attempts SET state='REJECTED',updated_at=now() WHERE id=$1",[attempt.id]);
-        await db.query("UPDATE quotes SET state='READY' WHERE id=$1 AND state='PAYMENT_PENDING'",[attempt.quote_id]);
-        await db.query("INSERT INTO audit_events(quote_id,payment_attempt_id,event) VALUES($1,$2,'GRANT_ALREADY_CONSUMED')",[attempt.quote_id,attempt.id]);
-        return 'GRANT_CONSUMED';
       }
       await db.query("UPDATE payment_attempts SET state='SUBMITTING',submitted_at=now(),updated_at=now(),next_reconcile_at=now()+interval '30 seconds' WHERE id=$1",[attempt.id]);
       await db.query("INSERT INTO audit_events(quote_id,payment_attempt_id,event) VALUES($1,$2,'SUBMIT_COMMITTED')",[attempt.quote_id,attempt.id]);

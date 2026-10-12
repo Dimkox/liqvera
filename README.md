@@ -58,6 +58,8 @@ npm test --prefix apps/mezo-web
 
 Follow the [startup guide](docs/runbooks/startup-shutdown.md) to configure and start the service stack. The isolated fixture profile uses synthetic data and cannot make payments. Database tests require an explicitly disposable database; see [validation](docs/validation.md).
 
+Ordinary wallet checkout uses `LIQVERA_PAYMENT_MODE=merchant` with a fixed recipient and the selected Mezo network; see [Mainnet setup](docs/mainnet.md). The default grant mode retains the bounded operator workflow.
+
 For a smaller local fixture demonstration:
 
 ```sh

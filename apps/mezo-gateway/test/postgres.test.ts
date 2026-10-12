@@ -58,7 +58,7 @@ after(async () => {
   if (pool) await pool.end();
 });
 
-async function verifiedAttempt(ledger: Ledger, suffix: string,version:'v1'|'v2'='v1',payer=BODY.expected_payer,grantDigest=suffix.padStart(64,'b'),grantId=randomUUID()) {
+async function verifiedAttempt(ledger: Ledger, suffix: string,version:'v1'|'v2'='v1',payer=BODY.expected_payer,grantDigest=suffix.padStart(64,'b'),grantId=randomUUID(),merchantNonce?:string,authorizationExpires=new Date(Date.now()+600_000)) {
   const scope = suffix.padStart(64, '0');
   const request = await ledger.createRequest(scope, `grant-${suffix}`, BODY);
   await ledger.publish(request, {
@@ -72,14 +72,14 @@ async function verifiedAttempt(ledger: Ledger, suffix: string,version:'v1'|'v2'=
   });
   const quote = await ledger.quote(scope, request.report_id, true);
   const attempt = await ledger.beginAttempt(quote, {
-    identity: suffix.padStart(64, 'a'), version: 'test/v1', payer: BODY.expected_payer,
-    valid_until: new Date(Date.now()+600_000).toISOString(),
-    correlation: { live_grant_digest:grantDigest,live_grant_id:grantId,live_grant_version:version,from:payer },
+    identity: suffix.padStart(64, 'a'), version: merchantNonce===undefined?'test/v1':'liqvera-permit2-eip2612-identity/v1', payer: BODY.expected_payer,
+    valid_until: authorizationExpires.toISOString(),
+    correlation: merchantNonce===undefined?{ live_grant_digest:grantDigest,live_grant_id:grantId,live_grant_version:version,from:payer }:{payment_mode:'merchant',network:'eip155:31611',asset:'0x118917a40faf1cd7a13db0ef56c86de7973ac503',amount:'10000000000000000',from:payer,to:'0x2222222222222222222222222222222222222222',nonce:merchantNonce},
   });
   return { quote, attempt };
 }
 
-test('fresh migration applies 001 through 007 once, reruns by checksum, and keeps audit rows append-only', { skip: skipReason }, async () => {
+test('fresh migration applies 001 through 008 once, reruns by checksum, and keeps audit rows append-only', { skip: skipReason }, async () => {
   const migrations = await pool.query<{ name: string; sha256: string }>(
     'SELECT name,sha256 FROM gateway_migrations ORDER BY name',
   );
@@ -91,6 +91,7 @@ test('fresh migration applies 001 through 007 once, reruns by checksum, and keep
     { name: '005_receipt_confirmation_count.sql', sha256: MIGRATION_005_SHA256 },
     { name: '006_signed_live_grant_authority.sql', sha256: MIGRATION_006_SHA256 },
     { name: '007_network_identity.sql', sha256: '377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6' },
+    { name: '008_merchant_nonce.sql', sha256: '562504aa3b54efc7e8e5b5b3eed3a4918c85ec305da775bd33279899dab2e2fe' },
   ]);
 
   const audit = await pool.query<{ id: string }>("INSERT INTO audit_events(event) VALUES('TEST_ONLY') RETURNING id");
@@ -146,6 +147,7 @@ test('an existing empty-receipt 001 ledger upgrades through 004 without replacin
       { name: '005_receipt_confirmation_count.sql', sha256: MIGRATION_005_SHA256 },
       { name: '006_signed_live_grant_authority.sql', sha256: MIGRATION_006_SHA256 },
     { name: '007_network_identity.sql', sha256: '377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6' },
+    { name: '008_merchant_nonce.sql', sha256: '562504aa3b54efc7e8e5b5b3eed3a4918c85ec305da775bd33279899dab2e2fe' },
     ]);
   } finally {
     await upgrade.end();
@@ -402,4 +404,49 @@ test('Mainnet ledger has a distinct immutable network identity and rejects Testn
     await assert.rejects(()=>mainnet.query('UPDATE ledger_network SET chain_id=31611'),/append-only/);
     assert.deepEqual((await mainnet.query('SELECT chain_id FROM ledger_network')).rows,[{chain_id:31612}]);
   } finally {await mainnet.end();}
+});
+
+
+test('merchant ledger allows repeat buyers with fresh nonces and submits each attempt once', {skip:skipReason}, async()=>{
+ const merchant=Reflect.construct(Ledger,[pool,'0x2222222222222222222222222222222222222222']) as Ledger;
+ const first=await verifiedAttempt(merchant,'71','v1',BODY.expected_payer,undefined,undefined,'701');
+ assert.equal(await new Ledger(pool).markSubmitting(first.attempt),'INVALID_STATE');
+ const results=await Promise.all(Array.from({length:20},()=>merchant.markSubmitting(first.attempt)));
+ assert.equal(results.filter(x=>x==='SUBMITTING').length,1);
+ assert.equal(await merchant.markSubmitting(first.attempt),'INVALID_STATE');
+ await merchant.unknown(first.attempt,null);
+ assert.equal(await merchant.markSubmitting(first.attempt),'INVALID_STATE');
+ const second=await verifiedAttempt(merchant,'72','v1',BODY.expected_payer,undefined,undefined,'702');
+ assert.equal(await new Ledger(pool,BODY.expected_payer).markSubmitting(second.attempt),'INVALID_STATE');
+ assert.equal(await merchant.markSubmitting(second.attempt),'SUBMITTING');
+ assert.equal((await pool.query('SELECT count(*)::int AS n FROM live_grant_consumptions WHERE payment_attempt_id=ANY($1::uuid[])',[[first.attempt.id,second.attempt.id]])).rows[0].n,0);
+});
+test('merchant nonce cannot be replayed across different quotes', {skip:skipReason}, async()=>{
+ const ledger=new Ledger(pool);
+ const results=await Promise.allSettled(['73','74'].map(suffix=>verifiedAttempt(ledger,suffix,'v1',BODY.expected_payer,undefined,undefined,'703')));
+ assert.equal(results.filter(x=>x.status==='fulfilled').length,1);
+ const rejected=results.find(x=>x.status==='rejected') as PromiseRejectedResult;
+ assert.equal(rejected.reason.code,'AUTHORIZATION_REUSED');
+});
+
+test('merchant mode cannot submit grant attempts or expired wallet authorizations', {skip:skipReason}, async()=>{
+ const ledger=new Ledger(pool,'0x2222222222222222222222222222222222222222');
+ const grant=await verifiedAttempt(ledger,'75');
+ assert.equal(await ledger.markSubmitting(grant.attempt),'INVALID_STATE');
+ const expired=await verifiedAttempt(ledger,'76','v1',BODY.expected_payer,undefined,undefined,'706',new Date(Date.now()-1000));
+ assert.equal(await ledger.markSubmitting(expired.attempt),'EXPIRED');
+ assert.equal((await pool.query('SELECT state FROM payment_attempts WHERE id=$1',[expired.attempt.id])).rows[0].state,'REJECTED');
+});
+
+test('merchant startup refuses absent nonce index or absent migration receipt', {skip:skipReason}, async()=>{
+ const ledger=new Ledger(pool,'0x2222222222222222222222222222222222222222');
+ await ledger.assertNetwork();
+ const sql=await readFile(new URL('../../migrations/008_merchant_nonce.sql',import.meta.url),'utf8');
+ await pool.query('DROP INDEX merchant_permit2_nonce');
+ try { await assert.rejects(ledger.assertNetwork(),/MERCHANT_MIGRATION_REQUIRED/); }
+ finally { await pool.query(sql); }
+ const receipt=(await pool.query("DELETE FROM gateway_migrations WHERE name='008_merchant_nonce.sql' RETURNING *")).rows[0];
+ try { await assert.rejects(ledger.assertNetwork(),/MERCHANT_MIGRATION_REQUIRED/); }
+ finally { await pool.query('INSERT INTO gateway_migrations(name,sha256,applied_at) VALUES($1,$2,$3)',[receipt.name,receipt.sha256,receipt.applied_at]); }
+ await ledger.assertNetwork();
 });

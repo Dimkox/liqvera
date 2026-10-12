@@ -3,6 +3,7 @@ import { address, PublicError, MEZO_CONFIG } from './domain/model.js';
 import { fixedInternalUrl } from './adapters/http.js';
 import type { GatewayConfig } from './application/gateway.js';
 export interface RuntimeConfig extends GatewayConfig {
+  paymentMode: 'grant'|'merchant';
   databaseUrl: string;
   publicBase: URL;
   origins: Set<string>;
@@ -40,6 +41,11 @@ export async function loadConfig(env:NodeJS.ProcessEnv=process.env):Promise<Runt
   const reportToken=env.REPORT_SERVICE_TOKEN_FILE?(await readFile(env.REPORT_SERVICE_TOKEN_FILE,'utf8')).trim():null;
   if(reportToken!==null&&(!/^[A-Za-z0-9_-]{32,256}$/.test(reportToken)))throw new PublicError('INVALID_INPUT');
   const payTo=env.PAY_TO?address(env.PAY_TO):null;
+  const paymentMode=env.LIQVERA_PAYMENT_MODE??'grant';
+  if(paymentMode!=='grant'&&paymentMode!=='merchant')throw new PublicError('INVALID_INPUT');
+  if(paymentMode==='merchant'&&(sourceMode!=='live-public'||!payTo||
+    ['LIQVERA_LIVE_GRANT_FILE','LIQVERA_LIVE_GRANT_PUBLIC_KEY','LIQVERA_ANY_PAYER','LIQVERA_TESTNET_DEMO_ANY_PAYER',
+     'LIQVERA_SUBJECT_COMMIT','LIQVERA_SUBJECT_TREE','LIQVERA_PLAN_SHA256','LIQVERA_LIVE_BUYER'].some(key=>env[key]!==undefined)))throw new PublicError('INVALID_INPUT');
   const liveGrantFile=env.LIQVERA_LIVE_GRANT_FILE??null;
   let liveContext:RuntimeConfig['liveContext']=null;
   if(liveGrantFile) {
@@ -57,7 +63,7 @@ export async function loadConfig(env:NodeJS.ProcessEnv=process.env):Promise<Runt
   if(publicKeyHex!==undefined&&!/^[0-9a-f]{64}$/.test(publicKeyHex))throw new PublicError('INVALID_INPUT');
   const liveGrantPublicKey=publicKeyHex?Buffer.from(publicKeyHex,'hex'):undefined;
   if(allowAnyPayer&&!liveGrantPublicKey)throw new PublicError('INVALID_INPUT');
-  return {databaseUrl:await databaseUrl(env),sourceMode,payTo,publicBase,origins,port,liveGrantFile,liveContext,allowAnyPayer,liveGrantPublicKey,
+  return {paymentMode,databaseUrl:await databaseUrl(env),sourceMode,payTo,publicBase,origins,port,liveGrantFile,liveContext,allowAnyPayer,liveGrantPublicKey,
     host:env.HOST??'0.0.0.0',artifactRoot:env.ARTIFACT_ROOT??'/data/artifacts',reportToken,metricsHost,metricsPort,
     reportUrl:fixedInternalUrl(env.REPORT_SERVICE_URL??'http://report:8082')};
 }

@@ -12,13 +12,14 @@ import { startWorkers } from './workers/scheduler.js';
 import { logEvent, telemetryHandler } from './security/observability.js';
 import { MezoAuthorizationPolicy, MezoFinalityPolicy } from './security/payment-policy.js';
 import { composeOfficialX402, readPrivateGrantFile } from './security/live-composition.js';
+import { OfficialX402 } from './adapters/x402.js';
 import { databaseIdentity } from './p3-operator.js';
 async function main():Promise<void> {
   const config=await loadConfig();
   const pool=new Pool({connectionString:config.databaseUrl,max:12,connectionTimeoutMillis:3000,idleTimeoutMillis:30000,
     application_name:'liqvera-mezo-gateway',statement_timeout:5000});
   pool.on('error',()=>logEvent({event:'DATABASE_UNAVAILABLE'}));
-  const ledger=new Ledger(pool);
+  const ledger=new Ledger(pool,config.paymentMode==='merchant'?config.payTo:null);
   await ledger.assertNetwork();
   const contracts=await Contracts.load(new URL('./contracts/',import.meta.url));
   const identity=new MezoAuthorizationPolicy();
@@ -30,7 +31,7 @@ async function main():Promise<void> {
     allowAnyPayer:config.allowAnyPayer,
     context:{...config.liveContext,databaseIdentity:await databaseIdentity(config.databaseUrl)},observedAt:new Date(),
   }:null;
-  const payments=composeOfficialX402(identity,finality,reader,config.publicBase,liveInput,code=>logEvent({event:'PAYMENTS_DISABLED',code}));
+  const payments=config.paymentMode==='merchant'?new OfficialX402(identity,finality,reader,config.publicBase,null,null,undefined,undefined,config.payTo):composeOfficialX402(identity,finality,reader,config.publicBase,liveInput,code=>logEvent({event:'PAYMENTS_DISABLED',code}));
   if(payments.liveGrantAuthority)await ledger.activateGrant(payments.liveGrantAuthority);
   await payments.initialize();
   const gateway=new Gateway(ledger,new HttpReportService(config.reportUrl,config.reportToken),new ImmutableArtifacts(config.artifactRoot),payments,contracts,config);

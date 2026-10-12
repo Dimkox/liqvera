@@ -11,6 +11,7 @@ export const APPROVED_MIGRATIONS:MigrationIdentity[]=[
   {name:'005_receipt_confirmation_count.sql',sha256:'e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11'},
   {name:'006_signed_live_grant_authority.sql',sha256:'92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a'},
   {name:'007_network_identity.sql',sha256:'377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6'},
+  {name:'008_merchant_nonce.sql',sha256:'562504aa3b54efc7e8e5b5b3eed3a4918c85ec305da775bd33279899dab2e2fe'},
 ];
 
 export function validateMigrationAuthority(authority:MigrationIdentity[]):void{

@@ -18,11 +18,13 @@ These values follow the official [network configuration](https://mezo.org/docs/u
 
 Use a new database **name**, not merely a replacement volume at the same endpoint. Preserve the Testnet database and its unresolved payment records. Migration 007 adds paired network/token constraints and an immutable single-network ledger identity; migrations 001–006 retain their original checksums. Startup binds an empty ledger to the selected network and rejects a mismatched ledger before enabling workers or payments. The browser uses separate Mainnet session keys and retains Testnet recovery state.
 
-## Payment authority
+## Wallet payments
 
-Keep the owner's approved recipient in `PAY_TO`. Mainnet moves real MUSD. An external grant must bind the selected network, token, RPC, amount, recipient, source commit/tree, plan digest and new database identity. Existing Testnet or expired authority cannot enable Mainnet payments. `LIQVERA_ANY_PAYER=1` permits a valid signed v2 policy; its budget, expiry and issuer checks still apply. The old Testnet-only environment flag is rejected on Mainnet.
+Set `LIQVERA_PAYMENT_MODE=merchant` for ordinary report purchases. Keep the approved recipient in `PAY_TO`; the price remains 0.01 MUSD. Merchant mode requires `SOURCE_MODE=live-public` and rejects all operator-grant environment variables. Do not mount a payment grant in this mode. Each purchase still requires the buyer's wallet signatures; the facilitator verifies them and sponsors settlement gas. The server has no buyer wallet key.
 
-The API and public preview remain available without a valid grant, while payment readiness remains false. Switching network configuration is not evidence of a successful payment. Paid acceptance requires an owner-authorized wallet signature, confirmed settlement and delivery of the exact report/ZIP; unknown outcomes remain confirm-only.
+The browser signs the selected chain and token. The gateway validates payer, recipient, exact amount and expiry, reads both artifact hashes, and durably reserves the Permit2 nonce before its sole settlement submission. Migration 008 prevents nonce reuse across different quotes, including concurrent requests. Repeated purchases by one wallet use new nonces. Unknown outcomes are confirm-only; delivery requires the confirmed on-chain transfer and matching report bytes.
+
+The default `LIQVERA_PAYMENT_MODE=grant` retains the bounded operator workflow. Its external grant must bind network, token, RPC, recipient, source, plan and database; expired or mismatched grants keep payments disabled. `LIQVERA_ANY_PAYER=1` applies only to signed v2 grant policies, not merchant mode. Fixture mode can never enable payments.
 
 ## Build and recovery
 

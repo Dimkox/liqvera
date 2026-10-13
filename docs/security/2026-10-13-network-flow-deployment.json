@@ -1,0 +1,69 @@
+{
+  "source_commit": "ee2a19c48b447a52d191959424da6f55e713bd68",
+  "web_image": "sha256:3eddb87fc9b6efaad46c68d29517947e6b3f25d6b19fe9d277fb978ecc24a861",
+  "previous_web_image": "sha256:53975c19727f90f9da1d55920a44aeaab3a4024340c9a1455186bb234105c971",
+  "network": "eip155:31611",
+  "public_asset": "index-Dw5JwIhL.js",
+  "health": "healthy",
+  "rollback_container": "liqvera-live-web-live-1-before-network-flow-ee2a19c",
+  "manifest_backup": "/home/pall/.local/state/liqvera/recovery/2026-10-13-network-flow-ee2a19c/compose.before.json",
+  "other_services_changed": false,
+  "payment_submitted": false,
+  "browser_verification": {
+    "transport": "Real Chrome via loopback relay to deployed origin with canonical API Origin.",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "provider": "Simulated Trust namespace EIP-1193 provider; starts on chain 1 and adds Mezo without selecting it.",
+    "observed": {
+      "before request": {
+        "disabled": false,
+        "note": "You can prepare a report now. Switch to Mezo Testnet to pay and unlock it.",
+        "wallet": "0x111111\u2026111111"
+      },
+      "quote ready": {
+        "paymentDisabled": true,
+        "chain": "0x1",
+        "signs": 0
+      },
+      "network": {
+        "chain": "0x7b7b",
+        "calls": [
+          "eth_accounts",
+          "eth_chainId",
+          "wallet_switchEthereumChain",
+          "wallet_addEthereumChain",
+          "eth_chainId",
+          "wallet_switchEthereumChain",
+          "eth_chainId",
+          "eth_accounts",
+          "eth_chainId"
+        ],
+        "notice": "Wallet switched to Mezo Testnet."
+      },
+      "payment boundary": {
+        "signs": 1,
+        "notice": "Wallet payment was canceled before submission. The quote remains unpaid."
+      }
+    },
+    "unsupported_network_candidate": {
+      "helpOpen": true,
+      "paymentDisabled": true,
+      "chain": "0x1",
+      "signs": 0
+    },
+    "physical_trust_app_tested": false,
+    "real_payment_submitted": false
+  },
+  "public_readiness": {
+    "schema": "liqvera-evidence-readiness/v1",
+    "request_id": "2aa47c10-3e45-4254-a2db-aeb292e04f69",
+    "ready": true,
+    "storage_ready": true,
+    "integration_ready": true,
+    "configuration_ready": true,
+    "payment_ready": true,
+    "blockers": []
+  }
+}

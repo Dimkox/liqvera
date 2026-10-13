@@ -1,0 +1,124 @@
+{
+  "schema": "liqvera-web-security-audit/v1",
+  "audited_at": "2026-10-13T09:04:30.104258+00:00",
+  "source_commit": "ee2a19c48b447a52d191959424da6f55e713bd68",
+  "scope": "Rebuilt Testnet browser image only. Other deployed images retain their prior exact-image evidence. No scanner findings suppressed.",
+  "images": {
+    "web": {
+      "image_id": "sha256:3eddb87fc9b6efaad46c68d29517947e6b3f25d6b19fe9d277fb978ecc24a861",
+      "source_commit": "ee2a19c48b447a52d191959424da6f55e713bd68",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to the pinned Alpine recipe. The binary matches the reviewed patched SHA-256 with eight prior security regressions passing; corresponding source is included in the image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to the pinned Alpine recipe. The binary matches the reviewed patched SHA-256 with eight prior security regressions passing; corresponding source is included in the image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to the pinned Alpine recipe. The binary matches the reviewed patched SHA-256 with eight prior security regressions passing; corresponding source is included in the image."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 3
+      }
+    }
+  },
+  "scanner_status": {
+    "web": {
+      "image_id": "sha256:3eddb87fc9b6efaad46c68d29517947e6b3f25d6b19fe9d277fb978ecc24a861",
+      "trivy_exit": 0,
+      "grype_exit": 0
+    }
+  },
+  "new_untriaged_findings": [],
+  "trivy": {
+    "Version": "0.74.0",
+    "VulnerabilityDB": {
+      "Version": 2,
+      "NextUpdate": "2026-10-13T13:18:23.16392058Z",
+      "UpdatedAt": "2026-10-12T13:18:23.1639207Z",
+      "DownloadedAt": "2026-10-12T16:36:57.447175007Z"
+    },
+    "CheckBundle": {
+      "Digest": "sha256:1583562f8b90ed2a071b99f0e5ffff6b57e4ceb6ca3e4796577b4e6a339eb74c",
+      "DownloadedAt": "2026-09-30T16:10:19.322988759Z"
+    }
+  },
+  "grype": {
+    "version": "0.120.1",
+    "database": {
+      "schemaVersion": "v6.1.10",
+      "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-12T00:41:00Z_1791873320.tar.zst?checksum=sha256%3Aed50c6deedbbe39f815f855fb55208a1f261ebec6a91d2847b1230200bbb7b20",
+      "built": "2026-10-13T06:35:20Z",
+      "path": "/tmp/liqvera-current-audit/grype-db/6/vulnerability.db",
+      "valid": true
+    }
+  },
+  "database_refresh": "Uses the scanner databases successfully refreshed earlier in this October 13 session: latest returned Trivy October 12 database and Grype October 13 database. Exact database timestamps and original refresh logs are recorded.",
+  "npm_audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "dependency_evidence": {
+    "reference_commit": "88ccb98",
+    "file": "apps/mezo-web/package-lock.json",
+    "sha256": "de095d790a386375e0f8f6a0df7929c0cef128c3caec81d27e28bdcb4ca9ef6c",
+    "identical": true
+  },
+  "payment_boundary": "No wallet signature or settlement performed by this audit.",
+  "raw_archive": {
+    "file": "2026-10-13-network-flow-raw.tar.gz",
+    "sha256": "d77947a0ce9ffb6f9dc1707a4eac68889c437fbad23f1aff2fa7f9f12ef30391",
+    "bytes": 37143,
+    "members": {
+      "dependency-comparison.json": "f7bd6c646bbc3b8b194b930d19f90fd3106fc34e4d704104bcb2ac5966ff62f7",
+      "npm-audit.json": "f31fc1e790ec4d173b02536f1eafdd4df1b59278ab38a4d60dee41d5afdfb3a5",
+      "web-busybox.sha256": "482f4b5bbd24ebbed9a674403650170b156ae369417ba6f46300bb7b8da9f3d0",
+      "web-grype.json": "a5a4a1d44b18f87c100783e049b46a243dca67a4e41dc822cfe6ed734a8f4506",
+      "web-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "web-trivy.json": "619f267106c3e08c458ccee01f9288d01bc4fd0e43ad92bad2fddfa32d62c60e",
+      "web-trivy.log": "546b308073683841852a5cdf80633ed232381bfa867e3da4059b8b39063e9705",
+      "grype-db.json": "84c7bb250e2c36fc19cd02ed1430d8c48bb1941f09a9e6f047697d0c46820b3c",
+      "trivy-version.json": "ef4e3eeb2497a11487471f47660a65d569651c6feae1a18f75f3dca8a16fa94a",
+      "image-scan-status.json": "b37b416cf57415ccc05c162c9e69929490748306a4e857ed10d76a2d8c1292d5",
+      "security-vex.json": "20136a8e25ca0bc0c88461fff97c0a6a965e6da2e225e73e8c3489dc0d5ca717",
+      "trivy-db-update.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "grype-db-update.log": "c7b4223d373ec352807b8acc11eb7e7406fdde188ecab4cafe351eec1decfe54",
+      "tests.log": "81962a5db90e63a42eff45fa27f99f1153309828abf0d3b2c90ae2fa2177394a",
+      "build.log": "83d59e66b38eef0d357e43ca975df8885d43fb15b485b24d0180d5dfca2945fc",
+      "image-build.log": "5a0c5b7a37c0d8912d2af40d006f141ada6b9393f5da92de2f3c3fe0bb9750fb",
+      "tests-before.log": "f71a9eda9966477619f92799a006390f037d0efb92c131d1ebd5be2efd5b17a9",
+      "browser-before.log": "00ae31f0c6bc6482b5800955c2cf13ce6a3b7cb04188e9d84c26b775819d3c5a",
+      "browser-after.log": "4a95ba00e1d795e04ec0ddd6a0050b8e4b2ae0b4e4e50b7eed0045ba8eaf72ba",
+      "browser.py": "3753ad7f8afd1a447804ab72f331d6174bcd0ee6aeafca05cb8d0a5562173194",
+      "browser-deployed.log": "4a95ba00e1d795e04ec0ddd6a0050b8e4b2ae0b4e4e50b7eed0045ba8eaf72ba",
+      "browser-unsupported.py": "28cd11ef7e302fdb39a35da6aadba3ce7b8febf21de5b944202c8cd9ad1cf95f",
+      "browser-unsupported.log": "265b477a68320148b4dc1e82349e595794eaf9cac019f4381ad903dead642af7",
+      "public-ready.json": "b67562001d67d71de83758802e1d646e90568f4f4ea5103f3cf290eb0f93b3b8"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "schema": "liqvera-wallet-connection-validation/v1",
+  "checked_at": "2026-10-13T09:59:52.437158+00:00",
+  "scope": "Local source validation; not a deployed release or physical wallet acceptance.",
+  "sdk": {
+    "appkit": "1.8.24",
+    "ethers": "6.17.0",
+    "mode": "full public AppKit constructor, basic connection-only mode"
+  },
+  "tests": {
+    "web_passed": 49,
+    "gateway_passed": 58,
+    "gateway_database_skipped": 13,
+    "python_artifact_operations_passed": 9
+  },
+  "npm_audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "package_lock_sha256": "503396cd096e71d48fd03ceaae1e2c7c6e2eddbdf394e7879271a5dce3e2b21f",
+  "qr": {
+    "real_sdk": true,
+    "origin": "localhost",
+    "project_id_scope": "Official Reown documentation localhost-only ID; never production",
+    "uri_created": true,
+    "svg_rendered": true,
+    "csp_violations": 0
+  },
+  "browser": {
+    "payment": {
+      "signs": 1,
+      "notice": "Wallet payment was canceled before submission. The quote remains unpaid.",
+      "csp": []
+    },
+    "disconnect": {
+      "wallet": "No wallet connected",
+      "paymentDisabled": true,
+      "hasQuote": true
+    },
+    "reconnect": {
+      "wallet": "0x111111\u2026111111",
+      "paymentDisabled": false,
+      "signs": 1,
+      "csp": []
+    },
+    "restored": {
+      "wallet": "0x111111\u2026111111",
+      "hasQuote": true,
+      "signs": 0,
+      "csp": []
+    },
+    "exceptions": [],
+    "add_without_select_verified": true
+  },
+  "limitations": [
+    "Injected wallet responses were simulated.",
+    "No physical mobile pairing or real signature/settlement occurred.",
+    "Owner Project ID configuration and published origin checks follow in a separate deployment."
+  ]
+}

@@ -9,7 +9,7 @@
         X-Content-Type-Options nosniff
         Referrer-Policy no-referrer
         X-Frame-Options DENY
-        Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'"
+    Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://api.web3modal.org; connect-src 'self' https://api.web3modal.org https://api.web3modal.com https://rpc.walletconnect.org https://pulse.walletconnect.org https://relay.walletconnect.org wss://relay.walletconnect.org https://relay.walletconnect.com wss://relay.walletconnect.com https://rpc.test.mezo.org https://mezo-mainnet.boar.network; frame-src https://verify.walletconnect.org https://verify.walletconnect.com; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'"
         -Server
     }
 

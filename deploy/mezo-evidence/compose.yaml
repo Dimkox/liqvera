@@ -145,6 +145,8 @@ x-web: &web
   build:
     context: ../..
     dockerfile: deploy/mezo-evidence/Dockerfile.web
+    args:
+      LIQVERA_WALLETCONNECT_PROJECT_ID: ${LIQVERA_WALLETCONNECT_PROJECT_ID:-}
   image: liqvera/mezo-web:local
   init: true
   restart: unless-stopped

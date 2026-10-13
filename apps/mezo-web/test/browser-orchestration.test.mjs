@@ -185,7 +185,7 @@ test("late selected provider owns listeners and replaces the prior binding",asyn
   const first=makeProvider(),late=makeProvider(),states=[];
   const owner=createWalletListenerOwner({applyWalletState(state){states.push(state);}});
   owner.replace(first);owner.replace(late);
-  assert.equal(first.listeners.size,0);assert.equal(late.listeners.size,2);
+  assert.equal(first.listeners.size,0);assert.deepEqual([...late.listeners.keys()].sort(),["accountsChanged","chainChanged","disconnect"]);
   late.account="0x2222222222222222222222222222222222222222";late.chain="0x1";
   late.listeners.get("accountsChanged")([]);late.listeners.get("chainChanged")("0x1");
   await new Promise(resolve=>setTimeout(resolve,0));

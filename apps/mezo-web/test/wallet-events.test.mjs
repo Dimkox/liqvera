@@ -46,3 +46,41 @@ test("unbinding discards queued wallet refreshes before they call the provider",
   assert.equal(calls, 0);
   assert.deepEqual(states, []);
 });
+
+test("manual refresh from a retired provider cannot overwrite its replacement", async () => {
+  let resolve;
+  const pending = new Promise(done => { resolve = done; });
+  const states = [];
+  const owner = createWalletListenerOwner({ applyWalletState(state) { states.push(state); } });
+  owner.replace(provider(() => pending));
+  const stale = owner.refresh();
+  owner.replace(provider(() => [payer]));
+  await owner.refresh();
+  resolve([]);
+  await stale;
+  assert.deepEqual(states, [{ account: payer, onMezo: true }]);
+});
+
+test("disconnect immediately clears readiness and invalidates pending event refresh", async () => {
+  let resolve;
+  const pending = new Promise(done => { resolve = done; });
+  const wallet = provider(() => pending);
+  const states = [];
+  bindWalletStateListeners(wallet, { applyWalletState(state) { states.push(state); } });
+  wallet.listeners.get("accountsChanged")([payer]);
+  await tick();
+  wallet.listeners.get("disconnect")();
+  resolve([payer]);
+  await tick();
+  assert.deepEqual(states, [{ account: null, onMezo: false }]);
+});
+
+test("disconnect also discards an event refresh still waiting in the queue", async () => {
+  const wallet = provider(() => [payer]);
+  const states = [];
+  bindWalletStateListeners(wallet, { applyWalletState(state) { states.push(state); } });
+  wallet.listeners.get("accountsChanged")([payer]);
+  wallet.listeners.get("disconnect")();
+  await tick();
+  assert.deepEqual(states, [{ account: null, onMezo: false }]);
+});

@@ -7,12 +7,9 @@ export interface Eip1193Provider {
   removeListener?(event: string, listener: (...args: unknown[]) => void): void;
 }
 
-declare global {
-  interface Window { ethereum?: Eip1193Provider; trustwallet?: { ethereum?: Eip1193Provider } }
-}
-
 export function injectedWallet(): Eip1193Provider | null {
-  return window.ethereum ?? window.trustwallet?.ethereum ?? null;
+  const browser = window as unknown as { ethereum?: Eip1193Provider; trustwallet?: { ethereum?: Eip1193Provider } };
+  return browser.ethereum ?? browser.trustwallet?.ethereum ?? null;
 }
 
 function firstAccount(value: unknown): string | null {

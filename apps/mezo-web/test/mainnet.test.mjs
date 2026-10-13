@@ -3,12 +3,18 @@ import test from 'node:test';
 globalThis.__LIQVERA_NETWORK__='mainnet';
 const {NETWORK,CHAIN_ID,ASSET,quoteIsPayable}=await import('../src/contracts.ts');
 const {walletOnMezo,switchToMezo}=await import('../src/wallet.ts');
+const {refreshWalletState}=await import('../src/wallet-events.ts');
 const {capability,loadFlow}=await import('../src/session.ts');
 test('Mainnet wallet switching uses 31612 and rejects a Testnet wallet',async()=>{
  assert.equal(NETWORK,'eip155:31612');assert.equal(CHAIN_ID,31612);assert.equal(ASSET,'0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186');
  assert.equal(await walletOnMezo({request:async()=> '0x7b7b'}),false);
  const calls=[];let chain='0x7b7b';const provider={request:async arg=>{calls.push(arg);if(arg.method==='eth_chainId')return chain;if(arg.method==='wallet_switchEthereumChain')chain=arg.params[0].chainId;}};
  await switchToMezo(provider);assert.equal(chain,'0x7b7c');assert.equal(calls[0].params[0].chainId,'0x7b7c');
+});
+test('Mainnet wallet events use the configured network',async()=>{
+ const states=[];
+ for(const chain of ['0x7b7b','0x7b7c'])await refreshWalletState({request:async({method})=>method==='eth_accounts'?['0x1111111111111111111111111111111111111111']:chain},{applyWalletState:state=>states.push(state)});
+ assert.deepEqual(states.map(state=>state.onMezo),[false,true]);
 });
 test('Mainnet never reuses the old Testnet capability or pending flow',()=>{
  const values=new Map([['liqvera:v1:capability','a'.repeat(43)],['liqvera:v1:flow','{"paymentGuard":"uncertain"}']]);

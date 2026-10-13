@@ -12,8 +12,11 @@
   },
   "dependencies": {
     "@liqvera/mezo-protocol": "file:../../packages/mezo-protocol",
+    "@reown/appkit": "1.8.24",
+    "@reown/appkit-adapter-ethers": "1.8.24",
     "@x402/core": "2.16.0",
     "@x402/evm": "2.16.0",
+    "ethers": "6.17.0",
     "mipd": "0.0.7",
     "viem": "2.56.9"
   },

@@ -6,7 +6,8 @@ import { executePaymentAttempt, executeRecovery } from "./browser-orchestration"
 import { quoteIsPayable, receiptMatchesQuote, type Capabilities, type Delivery, type Quote, type RequestStatus, type Side } from "./contracts";
 import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./session";
 import { injectedWallet, switchToMezo, walletAccount, walletError, walletOnMezo, type Eip1193Provider } from "./wallet";
-import { createWalletListenerOwner, refreshWalletState, type WalletState } from "./wallet-events";
+import { createWalletListenerOwner, type WalletState } from "./wallet-events";
+import { createWalletModal } from "./wallet-modal";
 import { discoverWalletChoices, walletChoices, walletStore, type WalletChoice } from "./wallet-discovery";
 import { installProductionX402Adapter, requestPaidReport, x402Available, X402CancelledBeforeSubmission } from "./x402";
 import { formatHistoricalDate, HISTORICAL_DEMO, verifyHistoricalAssets } from "./historical-demo";
@@ -151,6 +152,18 @@ let delivery: Delivery | null = null;
 let busy = false;
 let polling = false;
 const walletListeners=createWalletListenerOwner({applyWalletState});
+declare const __LIQVERA_WALLETCONNECT_PROJECT_ID__: string;
+const walletProjectId = __LIQVERA_WALLETCONNECT_PROJECT_ID__;
+const walletModal = walletProjectId ? createWalletModal(
+  async () => (await import("./wallet-appkit")).loadWalletAppKit(walletProjectId),
+  selected => {
+    if (provider === selected) return;
+    walletListeners.replace(selected);
+    provider = selected;
+    applyWalletState({ account: null, onMezo: false });
+    void refreshWallet();
+  },
+) : null;
 
 function setBusy(value: boolean): void {
   busy = value;
@@ -161,6 +174,7 @@ function updateControls(): void {
   const ready = Boolean(cap?.payment_ready && cap.source_mode === "live-public");
   const canCreate = ready && x402Available() && Boolean(bearer && account && !flow) && !busy;
   el<HTMLButtonElement>("#create-button").disabled = !canCreate;
+  el<HTMLButtonElement>("#connect-button").textContent = walletModal && account ? "Manage wallet" : "Connect wallet";
   el<HTMLButtonElement>("#refresh-button").classList.toggle("hidden", !flow);
   el<HTMLButtonElement>("#refresh-button").disabled = busy || polling;
   const lock = flow?.paymentGuard !== "clear" || (quote && ["PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "MANUAL_REVIEW"].includes(quote.state));
@@ -529,6 +543,11 @@ async function submitPayment(): Promise<void> {
 }
 
 async function connectWallet(): Promise<void> {
+  if (walletModal) {
+    try { await walletModal.open(); }
+    catch { announcement("Wallet connection could not open. Check your connection and try Connect wallet again.", "warning"); }
+    return;
+  }
   choices=await discoverWalletChoices(walletStore,injectedWallet());
   renderProviderChoices();
   const selected=el<HTMLSelectElement>("#wallet-provider").value;
@@ -564,9 +583,7 @@ function refreshProviderChoices():void {
 }
 
 async function refreshWallet(): Promise<void> {
-  if (!provider) applyWalletState({ account: null, onMezo: false });
-  else try { await refreshWalletState(provider, { applyWalletState }); }
-  catch { applyWalletState({ account: null, onMezo: false }); }
+  await walletListeners.refresh();
 }
 
 function applyWalletState(state: WalletState): void {
@@ -579,7 +596,12 @@ function applyWalletState(state: WalletState): void {
 el<HTMLButtonElement>("#connect-button").addEventListener("click", () => { void connectWallet(); });
 el<HTMLButtonElement>("#switch-button").addEventListener("click", async () => {
   if (!provider) return;
-  try { await switchToMezo(provider); await refreshWallet(); announcement(`Wallet switched to ${NETWORK_LABEL}.`); }
+  try {
+    if (walletModal) await walletModal.switchNetwork();
+    else await switchToMezo(provider);
+    await refreshWallet();
+    announcement(`Wallet switched to ${NETWORK_LABEL}.`);
+  }
   catch (error) {
     await refreshWallet();
     el<HTMLDetailsElement>("#network-help").open = true;
@@ -623,9 +645,14 @@ async function boot(): Promise<void> {
     el<HTMLInputElement>("#quantity").value = flow.quantity;
     el<HTMLInputElement>(`input[name="side"][value="${flow.side}"]`).checked = true;
   }
-  refreshProviderChoices();provider=choices[0]?.provider??null;walletListeners.replace(provider);
-  walletStore.subscribe(()=>refreshProviderChoices());
-  await refreshWallet();
+  if (walletModal) {
+    provider = null;
+    void walletModal.restore().catch(() => announcement("Wallet connection is temporarily unavailable. Try Connect wallet again.", "warning"));
+  } else {
+    refreshProviderChoices();provider=choices[0]?.provider??null;walletListeners.replace(provider);
+    walletStore.subscribe(()=>refreshProviderChoices());
+    await refreshWallet();
+  }
   try {
     cap = await getCapabilities();
     renderCapability();

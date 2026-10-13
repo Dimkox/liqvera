@@ -173,14 +173,23 @@ def test_metrics_are_private_and_csp_is_restrictive() -> None:
     assert "config.metricsPort,config.metricsHost" in main
     assert "liqvera_${name}_total{" not in metrics
     assert "liqvera_payment_ready{" not in metrics
-    expected_csp = (
-        "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
-        "connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'self'; "
-        "frame-ancestors 'none'; object-src 'none'"
-    )
     match = re.search(r'Content-Security-Policy "([^"]+)"', caddy)
-    assert match and match.group(1) == expected_csp
-    assert "unsafe-inline" not in caddy
+    assert match
+    policy = {parts[0]: set(parts[1:]) for directive in match.group(1).split(";") if (parts := directive.split())}
+    for directive in ("default-src", "base-uri", "frame-ancestors", "object-src"):
+        assert policy[directive] == {"'none'"}
+    assert policy["script-src"] == {"'self'"}
+    # AppKit renders Lit styles in shadow roots; scripts stay same-origin only.
+    assert policy["style-src"] == {"'self'", "'unsafe-inline'"}
+    assert policy["img-src"] == {"'self'", "data:", "blob:", "https://api.web3modal.org"}
+    assert policy["connect-src"] == {
+        "'self'", "https://api.web3modal.org", "https://api.web3modal.com",
+        "https://rpc.walletconnect.org", "https://pulse.walletconnect.org",
+        "https://relay.walletconnect.org", "wss://relay.walletconnect.org",
+        "https://relay.walletconnect.com", "wss://relay.walletconnect.com",
+        "https://rpc.test.mezo.org", "https://mezo-mainnet.boar.network",
+    }
+    assert policy["frame-src"] == {"https://verify.walletconnect.org", "https://verify.walletconnect.com"}
     assert "/metrics" not in caddy
     assert re.findall(r"<script[^>]*>", index) == ['<script type="module" src="/src/main.ts">']
     assert "<style" not in index and " style=" not in index

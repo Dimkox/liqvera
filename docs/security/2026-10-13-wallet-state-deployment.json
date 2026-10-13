@@ -1,0 +1,44 @@
+{
+  "source_commit": "88ccb983deb4dc473998ffaf2a662e86078fa823",
+  "web_image": "sha256:53975c19727f90f9da1d55920a44aeaab3a4024340c9a1455186bb234105c971",
+  "previous_web_image": "sha256:6ba39f318c349f635294eaba50c4979323ec843fd5d4ff190f7d702ef0a60505",
+  "network": "eip155:31611",
+  "public_asset": "index-ZwsKs2Tu.js",
+  "health": "healthy",
+  "rollback_container": "liqvera-live-web-live-1-before-wallet-state-88ccb98",
+  "manifest_backup": "/home/pall/.local/state/liqvera/recovery/2026-10-13-wallet-state-88ccb98/compose.before.json",
+  "other_services_changed": false,
+  "payment_submitted": false,
+  "browser_verification": {
+    "transport": "Real Chrome via loopback relay to the deployed origin; canonical API Origin.",
+    "providers": "Simulated EIP-1193 providers; one delayed previous provider and one Trust EIP-6963 announcement.",
+    "before": {
+      "disabled": true,
+      "note": "Connect an injected wallet to continue.",
+      "wallet": "No wallet connected"
+    },
+    "after": {
+      "disabled": false,
+      "note": "The server will prepare the evidence before showing any payment terms.",
+      "wallet": "0x111111\u2026111111"
+    },
+    "fresh_quote_and_signature_rejection": {
+      "signCalls": 1,
+      "amountType": "string",
+      "notice": "Wallet payment was canceled before submission. The quote remains unpaid.",
+      "canRetry": true
+    },
+    "physical_trust_app_tested": false,
+    "real_payment_submitted": false
+  },
+  "public_readiness": {
+    "schema": "liqvera-evidence-readiness/v1",
+    "request_id": "97ef0a72-b095-4f32-b680-29bab65b35c3",
+    "ready": true,
+    "storage_ready": true,
+    "integration_ready": true,
+    "configuration_ready": true,
+    "payment_ready": true,
+    "blockers": []
+  }
+}

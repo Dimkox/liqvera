@@ -1,5 +1,9 @@
 # Liqvera handoff
 
+## 2026-10-13 — published Android wallet handoff check
+
+A supplemental Chrome check with Android user-agent and mobile viewport passes against the published browser asset `index-BQP4zj3R.js`. The standard AppKit directory lists multiple wallets. Selecting Trust produces an SDK `window.open` call using `trust://wc` with a WalletConnect pairing value. The harness intercepts that call and records only scheme, host and pairing presence; it never launches or signs through an installed app. No browser exception or CSP violation occurs. [Raw result](docs/security/2026-10-13-walletconnect-android.json) preserves this narrower proof separately from the preceding immutable audit. No application or deployment change was needed.
+
 ## 2026-10-13 — WalletConnect published with the owner's project
 
 Source `e75ce59` is deployed at https://liqvera.site as browser `sha256:e4a2aeb5f71bcb74d747b746b9a83571e3d8ddf93d2e9ccbc26868aa597ee3f9`, asset `index-BQP4zj3R.js`, using the owner's public Reown project ID. The unchanged audited edge image now binds the matching immutable Caddy policy. Previous browser/edge containers and the private manifest are retained for rollback. All seven containers are healthy; other services, databases and sealed artifacts are unchanged. Public capabilities remain Testnet 31611, live-public, payment-ready, 0.01 test MUSD.

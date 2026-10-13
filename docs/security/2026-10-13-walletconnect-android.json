@@ -1,0 +1,105 @@
+{
+  "notice": "Mezo Testnet service is available. Connect your wallet to begin.",
+  "csp": [],
+  "modal": true,
+  "asset": [
+    "https://liqvera.site/assets/index-BQP4zj3R.js"
+  ],
+  "texts": [
+    "Connect wallet",
+    "Switch network",
+    "Request a report\n\u2197",
+    "Show latest live report",
+    "Check status",
+    "Start another report",
+    "",
+    "",
+    "Search Wallet\n80+"
+  ],
+  "walletButtons": [],
+  "body": [
+    "\n      \n        \n        \n          \n             \n          \n          \n          \n        \n        \n      \n    "
+  ],
+  "android_wallets": [
+    "Connect wallet",
+    "Switch network",
+    "Request a report\n\u2197",
+    "Show latest live report",
+    "Check status",
+    "Start another report",
+    "",
+    "",
+    "Trust Wallet",
+    "MetaMask",
+    "Binance Wallet",
+    "SafePal",
+    "TokenPocket",
+    "HOT Wallet",
+    "ITLX Wallet",
+    "Wigwam",
+    "AB Pay",
+    "PioneWallet",
+    "Openloop Connect"
+  ],
+  "handoff": {
+    "buttons": [
+      "Connect wallet",
+      "Switch network",
+      "Request a report\n\u2197",
+      "Show latest live report",
+      "Check status",
+      "Start another report",
+      "",
+      "",
+      "Mobile",
+      "Browser",
+      "",
+      "",
+      ""
+    ],
+    "links": [
+      {
+        "label": "Skip to report workspace",
+        "protocol": "https:",
+        "host": "liqvera.site",
+        "hasPairing": false
+      },
+      {
+        "label": "LLiqvera",
+        "protocol": "https:",
+        "host": "liqvera.site",
+        "hasPairing": false
+      },
+      {
+        "label": "Open in Trust Wallet",
+        "protocol": "https:",
+        "host": "link.trustwallet.com",
+        "hasPairing": false
+      },
+      {
+        "label": "Project repository \u2197",
+        "protocol": "https:",
+        "host": "github.com",
+        "hasPairing": false
+      },
+      {
+        "label": "Project releases \u2197",
+        "protocol": "https:",
+        "host": "github.com",
+        "hasPairing": false
+      }
+    ],
+    "csp": []
+  },
+  "sdk_mobile_handoffs": [
+    {
+      "protocol": "trust:",
+      "host": "wc",
+      "hasPairing": true
+    }
+  ],
+  "exceptions": [],
+  "checked_at": "2026-10-13T10:33:45.022303+00:00",
+  "scope": "Published HTTPS application in Chrome with Android user-agent and mobile viewport. Actual AppKit directory and pairing; window.open intercepted to inspect scheme/host and pairing presence without exposing URI. Does not exercise an installed wallet or signing.",
+  "harness_sha256": "dcff7b455edf3cc8a094a599f176cf78f20e39a80f46d3f82db67c1ad2be2c94"
+}

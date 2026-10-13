@@ -37,6 +37,10 @@ export async function switchToMezo(provider: Eip1193Provider): Promise<void> {
     if(typeof error!=="object"||error===null||!("code" in error)||error.code!==4902)throw error;
     await provider.request({method:"wallet_addEthereumChain",params:[{chainId:CHAIN_HEX,chainName:MEZO.name,
       nativeCurrency:{name:"Bitcoin",symbol:"BTC",decimals:18},rpcUrls:[MEZO.rpcUrl],blockExplorerUrls:[MEZO.explorerUrl]}]});
+    // Adding a chain does not select it (EIP-3085).
+    if (!(await walletOnMezo(provider))) {
+      await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_HEX }] });
+    }
   }
   if (!(await walletOnMezo(provider))) throw new Error("Wallet is still on a different network.");
 }

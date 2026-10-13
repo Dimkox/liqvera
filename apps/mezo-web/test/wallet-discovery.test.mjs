@@ -48,3 +48,32 @@ test("switch flow uses exact pinned Mezo parameters and fails closed",async()=>{
   assert.match(main,/await walletAccount\(provider, true\);[\s\S]*if \(account\) await switchToMezo\(provider\)/);
   assert.match(main,/await discoverWalletChoices\(walletStore,injectedWallet\(\)\)/);
 });
+
+test("a newly added chain is explicitly selected when the wallet does not select it", async () => {
+  let known = false;
+  let chain = "0x1";
+  const calls = [];
+  await switchToMezo({ async request({ method, params }) {
+    calls.push(method);
+    if (method === "wallet_switchEthereumChain") {
+      if (!known) throw { code: 4902 };
+      chain = params[0].chainId;
+    }
+    if (method === "wallet_addEthereumChain") known = true;
+    if (method === "eth_chainId") return chain;
+    return null;
+  }});
+  assert.equal(chain, "0x7b7b");
+  assert.equal(calls.filter(method => method === "wallet_switchEthereumChain").length, 2);
+});
+
+test("rejecting the switch after adding a chain remains a rejection", async () => {
+  let known = false;
+  const error = { code: 4001 };
+  await assert.rejects(() => switchToMezo({ async request({ method }) {
+    if (method === "wallet_switchEthereumChain") throw known ? error : { code: 4902 };
+    if (method === "wallet_addEthereumChain") known = true;
+    if (method === "eth_chainId") return "0x1";
+    return null;
+  }}), caught => caught === error);
+});

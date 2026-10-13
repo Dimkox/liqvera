@@ -42,6 +42,12 @@ app.innerHTML = `
               <a id="trust-wallet-link" class="secondary-button" href="https://link.trustwallet.com/open_url?coin_id=60&amp;url=https%3A%2F%2Fliqvera.site">Open in Trust Wallet</a>
               <p class="subtle">Continue in Trust Wallet’s browser, then tap Connect wallet. On a computer, use a wallet browser extension.</p>
             </div>
+            <details id="network-help" class="hidden">
+              <summary>Set up ${NETWORK_LABEL} in your wallet</summary>
+              <p class="supporting">Preparing a report does not require a network switch. To pay and unlock it, select ${NETWORK_LABEL} in your wallet. If it is missing, add a custom network with these settings:</p>
+              <p class="subtle">Network: ${MEZO.name}<br />Chain ID: ${MEZO.chainId}<br />RPC: ${MEZO.rpcUrl}<br />Currency: BTC<br />Explorer: ${MEZO.explorerUrl}</p>
+              <p class="subtle">After selecting the network in your wallet, tap Connect wallet to refresh.</p>
+            </details>
             <button id="create-button" class="primary-button" type="submit" disabled>Request a report <span aria-hidden="true">↗</span></button>
             <p id="create-note" class="form-note">Checking service capabilities…</p>
           </form>
@@ -152,7 +158,7 @@ function setBusy(value: boolean): void {
 
 function updateControls(): void {
   const ready = Boolean(cap?.payment_ready && cap.source_mode === "live-public");
-  const canCreate = ready && x402Available() && Boolean(bearer && account && onChain && !flow) && !busy;
+  const canCreate = ready && x402Available() && Boolean(bearer && account && !flow) && !busy;
   el<HTMLButtonElement>("#create-button").disabled = !canCreate;
   el<HTMLButtonElement>("#refresh-button").classList.toggle("hidden", !flow);
   el<HTMLButtonElement>("#refresh-button").disabled = busy || polling;
@@ -160,14 +166,15 @@ function updateControls(): void {
   el<HTMLButtonElement>("#new-button").classList.toggle("hidden", !flow || Boolean(lock));
   el<HTMLButtonElement>("#new-button").disabled = busy || polling;
   el<HTMLButtonElement>("#switch-button").classList.toggle("hidden", !provider || onChain);
+  el<HTMLDetailsElement>("#network-help").classList.toggle("hidden", !account || onChain);
   el<HTMLElement>("#wallet-label").textContent = account ? `${account.slice(0, 8)}…${account.slice(-6)}` : "No wallet connected";
   el<HTMLElement>("#chain-label").textContent = walletStatus(Boolean(provider), onChain);
   el<HTMLElement>("#create-note").textContent = !cap ? "Checking service capabilities…" :
     !cap.payment_ready ? "Payment and new quotes are currently unavailable." :
     !x402Available() ? "The browser payment adapter awaits SDK verification; no payment can be submitted." :
     !account ? "Connect an injected wallet to continue." :
-    !onChain ? `Switch to ${NETWORK_LABEL} to continue.` :
     flow ? "This session already has a report. Check its status or start another after it finishes." :
+    !onChain ? `You can prepare a report now. Switch to ${NETWORK_LABEL} to pay and unlock it.` :
     "The server will prepare the evidence before showing any payment terms.";
 }
 
@@ -572,7 +579,11 @@ el<HTMLButtonElement>("#connect-button").addEventListener("click", () => { void 
 el<HTMLButtonElement>("#switch-button").addEventListener("click", async () => {
   if (!provider) return;
   try { await switchToMezo(provider); await refreshWallet(); announcement(`Wallet switched to ${NETWORK_LABEL}.`); }
-  catch (error) { announcement(walletError(error), "warning"); }
+  catch (error) {
+    await refreshWallet();
+    el<HTMLDetailsElement>("#network-help").open = true;
+    announcement(`${walletError(error)} Select ${NETWORK_LABEL} in your wallet using the network settings in the report form.`, "warning");
+  }
 });
 el<HTMLButtonElement>("#refresh-button").addEventListener("click", () => { void resumeFlow(); });
 el<HTMLButtonElement>("#historical-button").addEventListener("click", () => { void showHistoricalReport(); });
@@ -589,7 +600,7 @@ el<HTMLButtonElement>("#new-button").addEventListener("click", () => {
 
 el<HTMLFormElement>("#report-form").addEventListener("submit", async event => {
   event.preventDefault();
-  if (!cap?.payment_ready || cap.source_mode !== "live-public" || !bearer || !account || !onChain || flow || busy) return;
+  if (!cap?.payment_ready || cap.source_mode !== "live-public" || !bearer || !account || flow || busy) return;
   const quantity = el<HTMLInputElement>("#quantity").value.trim();
   if (!/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,8})?$/.test(quantity) || !/[1-9]/.test(quantity)) {
     announcement("Enter a positive BTC quantity with no more than eight decimal places.", "error");

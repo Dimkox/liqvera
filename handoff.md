@@ -1,5 +1,11 @@
 # Liqvera handoff
 
+## 2026-10-13 — request preparation and wallet network selection
+
+The owner's screenshot establishes a connected account on a different network, with Request a report disabled. Public API quote preparation does not use wallet RPC or submit payment. Browser preparation now accepts the connected payer independently of the selected chain; payment still requires the configured Mezo network and revalidates account/network immediately before signing. Copy distinguishes preparation from payment and artifact access. Pinned manual network settings are available when the account is on another chain and expand if automatic switching fails.
+
+The network adapter also fixes an EIP-3085 error: adding a network does not imply selecting it. After adding an unknown chain, it explicitly requests selection if necessary and verifies the final chain. Rejection remains cancellation. Two new unit regressions fail before correction; all 42 browser tests and the Testnet build pass. A real Chrome regression against the prior deployed browser reproduces the screenshot's disabled state. Against the candidate, the same connected wrong-chain account creates a fresh live quote with zero signing calls and payment disabled; add-without-select then explicitly switches to Testnet, enables payment, and handles signature rejection safely. Wallet responses are simulated; no physical Trust app or signed payment was exercised. Independent read-only review found no blocker; specification and architecture match the separated preparation/payment stages. Next: audited browser-only rollout, deployed repetition and GitHub publication.
+
 ## 2026-10-13 — preserve the connected wallet after provider replacement
 
 Owner reports a grey Request a report button with “Connect an injected wallet to continue,” while Trust is visible. Public capabilities remain ready. Independent review reproduced an actual state defect: a pending event refresh from a previously selected provider can complete after replacement and erase the newly connected address. Real Chrome against deployed source a93605d reproduces the exact disabled-button message by delaying the previous provider’s response. This establishes a reproducible app defect, not proof of the precise sequence on the owner’s physical phone.

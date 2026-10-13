@@ -7,7 +7,7 @@ Liqvera produces verifiable public-market reports for Hyperliquid BTC linear per
 ## User flow
 
 1. A visitor can inspect the immutable historical live preview without a wallet. It is labelled with its capture time.
-2. The full browser flow discovers a wallet, validates the configured Mezo chain (31611 Testnet or 31612 Mainnet) and scopes a fresh quote to its payer. Account/network changes invalidate unsafe in-flight browser state.
+2. The full browser flow discovers a wallet and scopes a fresh quote to its payer. Preparing evidence and a quote does not require the wallet to switch networks. Payment requires the configured Mezo chain (31611 Testnet or 31612 Mainnet), with account and network revalidated before signing. Account/network changes invalidate unsafe in-flight browser state.
 3. The gateway creates a report request. Public source failure yields SOURCE_UNAVAILABLE, without fixture fallback.
 4. Completed immutable artifacts determine the quote. Explicit merchant mode permits an exact 0.01 MUSD x402 purchase with sponsored gas only after the buyer authorizes it in their wallet. Default grant mode also requires bounded operator authority.
 5. Confirmed entitlement allows repeated delivery of the same JSON and evidence ZIP without resettlement. Reload and recovery use existing request/quote identity.

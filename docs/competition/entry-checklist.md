@@ -19,12 +19,12 @@
 
 The video is a **silent, captioned preparation cut**, with screenshots of the real service and an actual preview-verifier result. Its wallet provider is a non-signing test stub, explicitly labelled in the frames. It is not a recording of a completed new purchase or work completed during Wave 1.
 
-## Remaining steps for a final entry
+## Follow-up after the owner-confirmed submission
 
-1. Record the owner-authorized 0.01 test-MUSD purchase with a real wallet. Preserve the transaction hash, canonical receipt and confirmed report/ZIP delivery; reproduce the downloaded paid bundle. The supplied wallet received test MEZO, which is not the report-payment asset. Its address alone does not provide a signer.
+1. As a separate post-update regression check, record the owner-authorized 0.01 test-MUSD purchase with a real wallet. Preserve the transaction hash, canonical receipt and confirmed report/ZIP delivery; reproduce the downloaded paid bundle. The supplied wallet received test MEZO, which is not the report-payment asset. Its address alone does not provide a signer.
 2. During Wave 1, implement and document a useful new extension against the baseline. Proposed scope: reduce Testnet funding friction and improve purchase/recovery guidance; validate report completion and independent reproduction with prospective users. These are proposals, not shipped features or demonstrated demand.
 3. Replace the pending-payment video segment with real paid evidence and describe the actual in-event changes. The current MP4 is downloadable; verify the final video URL in the AKINDO form and use supported video hosting if required.
-4. Complete the final entry through the owner's authenticated AKINDO account. Registration was previously reported complete; do not create a duplicate. This session has no authenticated AKINDO connection, has not accepted terms, and has not submitted an entry. Private registration details belong in that account, not this public repository.
+4. The owner confirms the entry is already submitted. Do not repeat registration or submission. This session has not accessed the account and cannot establish which attachment versions were submitted. Any future update should preserve the existing entry; private registration details belong in that account, not this repository.
 
 ## Opportunity and schedule
 

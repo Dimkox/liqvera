@@ -1,5 +1,11 @@
 # Liqvera handoff
 
+## 2026-10-13 — owner confirms submission already completed
+
+Owner explicitly confirms that the Liqvera entry has already been submitted. Treat submission as owner-confirmed; this session did not access or submit through the AKINDO account. Do not request duplicate registration/submission or turn a repeat payment into an invented competition eligibility gate. Historical successful paid Testnet delivery remains valid historical evidence; a fresh post-update payment is a separate regression check.
+
+Owner supplied `liqvera.live` as the relevant address. Current local DNS and independent Google DNS return NXDOMAIN for that name; do not silently substitute a domain or change the deployed origin. The previously verified deployment is `liqvera.site`. Resolve the supplied-domain discrepancy before changing links or infrastructure.
+
 ## 2026-10-13 — competition package and public author confirmed
 
 Owner confirmed public attribution as Dimkox and GitHub and authorized continued Buildathon preparation. The public profile has no additional name or social links; none were invented. Prior registration was reported complete, so the checklist does not ask for duplicate registration. No authenticated AKINDO connection is available and no entry or terms acceptance was submitted.

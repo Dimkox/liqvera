@@ -1,6 +1,6 @@
 # Liqvera — submission draft
 
-Prepared 2026-10-13. Existing project; pre-event baseline `607fa0d`. This package has not been submitted to AKINDO. The owner previously reported registration complete; this session has not independently verified that account state or accepted terms.
+Prepared 2026-10-13. Existing project; pre-event baseline `607fa0d`. The owner confirms that the Liqvera entry has already been submitted to AKINDO. This session has not accessed the account or verified which attachment versions were submitted. These files remain supporting preparation materials; do not submit a duplicate.
 
 ## Ready-to-paste project fields
 
@@ -58,6 +58,6 @@ Checked 2026-10-13 against the [AKINDO event](https://app.akindo.io/wave-hacks/O
 | Required materials | Live project link, public GitHub, product deck, two-minute pitch video. Submit through AKINDO before the wave deadline. |
 | Scoring | Mezo integration 30%; product/business viability 30%; technical implementation 20%; UX 10%; materials 10%. |
 
-Before submitting, complete the fresh signed payment segment, publish actual in-event progress and recheck all links. Use the owner-confirmed public attribution above; do not copy private registration details into this repository. A historical preview alone does not establish the complete current payment flow.
+For a subsequent update, document actual in-event progress and recheck links. A fresh signed payment is a recommended post-update regression check, not a separately stated competition eligibility requirement. Use the owner-confirmed public attribution above; do not copy private registration details into this repository. A historical preview alone does not establish the complete current payment flow.
 
 Registration asks for full name, email, Telegram, Discord, GitHub, experience, focus, existing-product status, country and continuation intent. The owner must review the displayed eligibility and terms; recipients must complete KYB for prizes. The official event description and required registration checkbox currently link different terms documents. Inspect the actual registration terms before accepting; this draft accepts neither.

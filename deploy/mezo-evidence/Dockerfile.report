@@ -13,8 +13,6 @@ COPY packages/public-capture packages/public-capture
 COPY packages/readonly-analyzer packages/readonly-analyzer
 COPY packages/evidence-report packages/evidence-report
 COPY schemas/mezo-evidence/v1 schemas/mezo-evidence/v1
-COPY web web
-COPY scripts/run-mvp-web.py scripts/run-mvp-web.py
 RUN python -m pip wheel --no-cache-dir --constraint requirements.lock --wheel-dir /wheels \
     ./packages/contracts ./packages/public-capture ./packages/readonly-analyzer ./packages/evidence-report
 

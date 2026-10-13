@@ -84,7 +84,7 @@ def _a27_observations(after: tuple[str, str], checks: list[str]) -> dict:
     if stage.returncode:
         raise RuntimeError("canonical Stage A verdict checks failed")
     stage_checks = sorted(set(re.findall(r"^(tests/[^ ]+::[^ ]+) PASSED", stage.stdout.decode(), re.MULTILINE)))
-    artifact_command = [PYTHON, "-B", "scripts/check-stage-a-artifacts.py", "--forbid-path",
+    artifact_command = [PYTHON, "-B", "scripts/check-python-artifacts.py", "--forbid-path",
                         "cmd/**", "internal/**", "go.mod", "go.sum", "--forbid-binary", "engine"]
     artifacts, artifact_result = _command_result(artifact_command, ROOT)
     if artifacts.returncode:

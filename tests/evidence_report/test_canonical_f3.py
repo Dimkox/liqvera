@@ -99,14 +99,13 @@ def test_live_btc_identity_is_digest_bound_and_offline_reproducible(tmp_path: Pa
         ))
 
 
-def test_public_historical_assets_match_pins_and_require_matching_verifier(tmp_path: Path) -> None:
+def test_public_preview_matches_pins_and_reproduces_offline(tmp_path: Path) -> None:
     report = ROOT / "apps/mezo-web/public/demo/latest-live/report.json"
     bundle = ROOT / "apps/mezo-web/public/demo/latest-live/evidence.zip"
-    assert hashlib.sha256(report.read_bytes()).hexdigest() == "8f8fd199de1674e5b3f154e50609792bd7bdd711e15cd8a8c15cd703bcaac7dd"
-    assert hashlib.sha256(bundle.read_bytes()).hexdigest() == "a6cc771d3fb8428325d32855fef53417f7da25c893db3a99b49802f482adc4fc"
-    # Namespace migration is breaking. Historical bytes require their matching release verifier.
-    with pytest.raises(EvidenceRejected, match="INVALID_DATASET"):
-        verify_bundle(bundle, expected_report_sha256=hashlib.sha256(report.read_bytes()).hexdigest())
+    assert hashlib.sha256(report.read_bytes()).hexdigest() == "0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2"
+    assert hashlib.sha256(bundle.read_bytes()).hexdigest() == "3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0"
+    reproduced = verify_bundle(bundle, expected_report_sha256=hashlib.sha256(report.read_bytes()).hexdigest())
+    assert reproduced.report_bytes == report.read_bytes()
     changed = tmp_path / "changed.zip"
     raw = bytearray(bundle.read_bytes()); raw[len(raw) // 2] ^= 1; changed.write_bytes(raw)
     with pytest.raises(EvidenceRejected, match="INVALID_DATASET"):

@@ -778,7 +778,7 @@ def evidence_reference(
             or artifact.get("argv_tail")
             != [
                 "-B",
-                "scripts/check-stage-a-artifacts.py",
+                "scripts/check-python-artifacts.py",
                 "--forbid-path",
                 "cmd/**",
                 "internal/**",

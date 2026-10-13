@@ -1,4 +1,4 @@
-"""Inspect Stage A package trees for forbidden Go inputs."""
+"""Inspect Liqvera package trees for forbidden Go inputs."""
 
 from __future__ import annotations
 

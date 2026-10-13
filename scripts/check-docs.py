@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main() -> int:
     errors = []
     paths = [*ROOT.glob("*.md"), *ROOT.joinpath("docs").rglob("*.md")]
-    for directory in ("services", "deploy", "installer", "packages"):
+    for directory in ("services", "deploy", "packages"):
         paths.extend(p for p in ROOT.joinpath(directory).rglob("*.md") if not any(part in {"node_modules", "dist", "__pycache__"} for part in p.parts))
     for path in sorted(paths):
         for match in re.finditer(r"\[[^\]]*\]\(([^)]+)\)", path.read_text()):

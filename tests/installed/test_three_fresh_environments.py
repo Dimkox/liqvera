@@ -1,4 +1,4 @@
-"""Hypothesis: each Stage A wheel installs only its allowed namespaces."""
+"""Hypothesis: each core Liqvera wheel installs only its allowed namespaces."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 @pytest.fixture(scope="module")
 def wheels(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    dest = tmp_path_factory.mktemp("stage-a-wheels")
+    dest = tmp_path_factory.mktemp("core-wheels")
     built = build_all("dirty", dest, root=ROOT, require_clean=False)
     assert {item.distribution for item in built} == set(ALLOWED_NAMESPACES)
     return dest

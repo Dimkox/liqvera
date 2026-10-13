@@ -27,7 +27,7 @@ Explicit network selection supports Mezo Testnet 31611 and Mainnet 31612 with th
 
 New component packages are version 0.2.0 with Liqvera CLI/import names and schema namespace. Historical assets remain immutable and need their matching verifier version. SQL migration bytes remain pinned. Containers run with non-root identities, restricted capabilities, read-only roots, resource limits and private volumes. The fixture profile cannot contact the payment network.
 
-The Linux operator v0.0.2 supports verified installation, start/stop/status/logs and explicit uninstall. Update and rollback remain fail-closed because coherent backup/restore integration is incomplete. Installer contract tests are not proof of clean-host installation.
+Docker Compose runs the web, gateway, capture, report, PostgreSQL and edge services. The same application supports isolated fixture validation and public Testnet operation; see the [startup guide](runbooks/startup-shutdown.md).
 
 ## Acceptance status
 

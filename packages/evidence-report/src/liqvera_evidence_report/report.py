@@ -1,4 +1,4 @@
-"""Canonical F3 reports built from one strictly inspected immutable input."""
+"""Canonical Liqvera reports built from one strictly inspected immutable input."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from uuid import UUID
 from liqvera_contracts.exact import ExactDecimal
 from liqvera_readonly_analyzer.vwap import DepthRejected, Side, sweep_depth
 
-from liqvera_evidence_report.builder import _display, _price_impact_bps, _rational, _timestamp
+from liqvera_evidence_report.calculation import _display, _price_impact_bps, _rational, _timestamp
 from liqvera_evidence_report.canonical import canonical_json_bytes
 from liqvera_evidence_report.evidence_io import EvidenceRejected, digest, identifier
 from liqvera_evidence_report.schema_validation import validate

@@ -1,7 +1,7 @@
 [project]
 name = "liqvera"
 version = "0.2.0"
-description = "Stage A public-evidence workspace: liqvera-contracts, liqvera-public-capture, liqvera-readonly-analyzer"
+description = "Liqvera market reports, public data capture and independent evidence verification"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Proprietary" }
@@ -34,7 +34,6 @@ testpaths = [
   "tests/installed",
   "tests/artifact",
   "tests/evidence_report",
-  "tests/installer",
 ]
 pythonpath = [
   ".",
@@ -61,7 +60,6 @@ include = [
   "tools/mezo_acceptance/**/*.py",
   "scripts/build-liqvera-python-distributions.py",
   "scripts/run-mezo-acceptance.py",
-  "scripts/run-mvp-web.py",
   "tools/conformance/**/*.py",
 ]
 

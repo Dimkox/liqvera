@@ -1,41 +1,15 @@
 # Observability and alerting
 
-## Installed Linux stack
+## Service status
 
-Use the stable wrapper; it emits one closed JSON result and uses exit 0 only
-for a completed command:
+Use the Compose project and manifest for the environment being inspected:
 
-```bash
-root="${XDG_DATA_HOME:-$HOME/.local/share}/liqvera"
-"$root/liqvera.sh" --install-root "$root" status --json
-"$root/liqvera.sh" --install-root "$root" logs gateway --tail 200 --since 15m
+```sh
+docker compose -f /path/to/compose.json ps
+docker compose -f /path/to/compose.json logs --tail 200 --since 15m gateway-live
 ```
 
-Status contains schema, phase, product version, archive release digest,
-commit/tree, Compose project, service-manager mode, and blockers. Healthy
-shadow operation still reports `EXTERNAL_GRANT_REQUIRED` and
-`SIMULATED_SOURCE`; it never proves payment, live-market, or overall release
-acceptance. Logs accept only postgres, migrate, capture, report, gateway, web,
-or edge; tail is 1–1000 and duration is a positive bounded `s`, `m`, `h`, or
-`d` value. Output is capped and redacts authorization, password, token,
-signature, and credential-bearing URL forms.
-
-| Installer error | Non-destructive action |
-| --- | --- |
-| `UNSUPPORTED_LINUX` | Use a listed Linux release and architecture. |
-| `DEPENDENCY_MISSING` | Install the documented floors, or explicitly approve the printed dependency command. |
-| `UNSAFE_INSTALL_ROOT` | Choose a private local, non-symlinked root. |
-| `PORT_OCCUPIED` | Stop the conflicting local service; the candidate is stopped automatically. |
-| `RELEASE_DIGEST_MISMATCH` / `ARCHIVE_INVALID` | Delete only the failed download/materialization and reacquire reviewed assets. |
-| `CONFIG_INVALID` / `SECRET_REFERENCE_INVALID` | Correct the closed config or owner-only secret-file reference. |
-| `MIGRATION_MISMATCH` | Stop; preserve the database and reconcile exact migrations 001–005. |
-| `HEALTH_TIMEOUT` | Inspect bounded service logs and readiness blockers; do not switch current manually. |
-| `ROLLBACK_RESTORE_REQUIRED` | Preserve state and use reviewed forward recovery or coherent backup restore. |
-| `PURGE_CONFIRMATION_REQUIRED` | Re-run preview and inspect every target before supplying its exact token. |
-
-The lifecycle journal, installed state, release manifest, full inventory
-digest, migration checksums, config, and current pointer provide local recovery
-signals. Secrets remain referenced files and never belong in evidence.
+Keep logs private and redact credentials before sharing them.
 
 The edge exposes only public `/healthz`, `/readyz`, and documented `/v1/*`
 routes. Probe liveness and readiness separately from outside the host. The
@@ -48,8 +22,7 @@ Prometheus text is served at `GET /metrics` on port 9090 bound to the
 gateway's `gateway-metrics` address on the internal `operations` network.
 Compose publishes no metrics port and Caddy has no `/metrics` route. An
 authorized operator may collect it only from an explicitly attached internal
-collector or bounded one-off probe. Do not add a host port or edge route. F6
-validates this topology statically and does not start a collector or container.
+collector or bounded one-off probe. Do not add a host port or edge route. Topology checks verify that these endpoints remain private.
 
 Collect bounded metrics without wallet addresses as labels:
 

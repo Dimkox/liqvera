@@ -4,6 +4,7 @@ import site
 import subprocess
 import sys
 from pathlib import Path
+from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT_ID = "123e4567-e89b-42d3-a456-426614174021"
@@ -45,6 +46,17 @@ def test_installed_canonical_f3_builds_and_verifies_outside_checkout(tmp_path: P
             cwd=tmp_path,
             env=build_env,
         )
+
+    # The shipped report package contains the canonical service and verifier only.
+    with ZipFile(next(wheels.glob("liqvera_evidence_report-*.whl"))) as wheel:
+        names = wheel.namelist()
+        assert not any("/demo-web/" in name or name.endswith("/demo_server.py") for name in names)
+        entries = wheel.read(next(name for name in names if name.endswith("/entry_points.txt"))).decode()
+        assert "liqvera-evidence-demo =" not in entries
+        assert "liqvera-evidence-report =" not in entries
+        assert "liqvera-evidence-build =" in entries
+        assert "liqvera-evidence-verify =" in entries
+        assert "liqvera-evidence-report-service =" in entries
 
     environment = tmp_path / "venv"
     _run(

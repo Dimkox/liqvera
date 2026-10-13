@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inspect an isolated installed distribution for Stage A namespace purity."""
+"""Inspect an isolated installed distribution for Liqvera namespace purity."""
 
 from __future__ import annotations
 

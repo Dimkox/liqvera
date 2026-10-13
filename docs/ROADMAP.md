@@ -2,7 +2,7 @@
 
 ## Implemented
 
-Public capture, exact analysis, canonical report and evidence ZIP construction, offline verification, browser wallet/quote/delivery flow, PostgreSQL gateway, guarded Mezo payments, isolated Compose profiles and Linux installer contracts exist in this repository. Historical paid testnet delivery is recorded in published releases.
+Public capture, exact analysis, canonical report and evidence ZIP construction, offline verification, browser wallet/quote/delivery flow, PostgreSQL gateway, guarded Mezo payments, isolated Compose profiles exist in this repository. Historical paid testnet delivery is recorded in published releases.
 
 ## Current work
 
@@ -14,4 +14,4 @@ Run the complete local suites, real disposable database integration and canonica
 
 ## Deferred
 
-Installer update/rollback requires coherent backup and migration-ledger support. Remaining external acceptance cases require explicit execution and evidence. Additional instruments need economic identity mapping and source validation. Custody, private venue access, exchange order execution, withdrawals and personalized trading advice are outside the current product boundary.
+Remaining external acceptance cases require explicit execution and evidence. Additional instruments need economic identity mapping and source validation. Custody, private venue access, exchange order execution, withdrawals and personalized trading advice are outside the current product boundary.

@@ -1,4 +1,4 @@
-"""Build and inspect the three Stage A wheels."""
+"""Build and inspect the three core Liqvera wheels."""
 
 from __future__ import annotations
 

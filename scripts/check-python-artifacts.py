@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed if Stage A package trees contain Go inputs or engine binaries."""
+"""Fail closed if Liqvera package trees contain Go inputs or engine binaries."""
 
 from __future__ import annotations
 
@@ -25,11 +25,11 @@ def main(argv: list[str] | None = None) -> int:
         roots.append(args.dist)
     hits = scan(tuple(roots), tuple(args.forbid_path), args.forbid_binary)
     if hits:
-        print("stage-a artifacts contain forbidden Go inputs:", file=sys.stderr)
+        print("Liqvera artifacts contain forbidden Go inputs:", file=sys.stderr)
         for hit in hits:
             print(hit, file=sys.stderr)
         return 1
-    print("stage-a artifacts contain no Go inputs")
+    print("Liqvera artifacts contain no Go inputs")
     return 0
 
 

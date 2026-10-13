@@ -8,12 +8,6 @@ Prepare the fixture example environment with the exact source SHA and private lo
 
 The edge binds fixture HTTP to loopback. Check `/healthz`, `/readyz` and `/v1/capabilities`; a static HTML 200 response at another path is not gateway health. Preserve named volumes when stopping services. Never use `down --volumes` against payment or evidence state.
 
-## Linux operator
-
-The published operator version is v0.0.2 and remains a distinct immutable release. Obtain its bootstrap, verifier, archive and independently trusted SHA-256 values from the matching release. Verify before executing; never pipe a remote script into a shell. The standard-library installer accepts only closed shadow/payment-disabled configuration and references to private secret files. It supports start, stop, status, bounded logs and uninstall; default uninstall preserves data.
-
-Update and rollback are fail-closed with ROLLBACK_RESTORE_REQUIRED until coherent backup/restore and migration-ledger support is implemented. Local installer validation is mocked contract evidence, not clean-host proof. The historical aggregate remains 9 PASS, 21 NOT_RUN, not a single runner overall PASS.
-
 ## Live-public operation
 
 TLS/DNS, fixed public origin, private database and internal token files, exact source bindings and explicit payment-mode configuration are operator prerequisites. Merchant mode requires a wallet signature per purchase; grant mode additionally requires external operator authority. Existing signed operator authority expires and must never be silently renewed. The full updated stack was deployed on 2026-10-12 and all seven containers passed health checks. API liveness and payment readiness are available; merchant checkout is enabled. Gateway and browser use Mezo Testnet (31611), with the preserved `liqvera` database and 0.01 test-MUSD price. See the [Testnet deployment record](security/2026-10-12-testnet.md) and [standalone Testnet setup](runbooks/testnet-demo.md).

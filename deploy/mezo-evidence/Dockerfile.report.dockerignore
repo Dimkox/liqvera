@@ -12,10 +12,6 @@
 !schemas/mezo-evidence/
 !schemas/mezo-evidence/v1/
 !schemas/mezo-evidence/v1/**
-!web/
-!web/**
-!scripts/
-!scripts/run-mvp-web.py
 **/.env
 **/.env.*
 **/secrets/**

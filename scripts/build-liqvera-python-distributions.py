@@ -54,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
     output = args.out.resolve()
     try:
         require_clean_exact_head(args.source_sha, ROOT)
-        stage_a = build_all(args.source_sha, output, root=ROOT, require_clean=False)
+        core_wheels = build_all(args.source_sha, output, root=ROOT, require_clean=False)
         report = _report_wheel(output)
     except ConformanceError as error:
         print(error, file=sys.stderr)
@@ -62,7 +62,7 @@ def main(argv: list[str] | None = None) -> int:
     artifacts = [
         *(
             {"distribution": item.distribution, "path": str(item.path), "sha256": item.sha256}
-            for item in stage_a
+            for item in core_wheels
         ),
         {
             "distribution": REPORT_DISTRIBUTION,

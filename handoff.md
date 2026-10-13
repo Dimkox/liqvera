@@ -1,5 +1,15 @@
 # Liqvera handoff
 
+## 2026-10-13 — one website and code product
+
+Owner explicitly requests removing the installer and remaining MEE/factory baggage, superseding the earlier installer-preservation instruction. Scope: retire the separate installer and prototype website/CLI/Compose targets, remove unused exchange credential templates/configuration, and retain the canonical web/gateway/capture/report/verifier with all payment guards. Published releases, recorded audit evidence, sealed bundles and existing ledger migrations remain immutable. One implementation owner edits code; independent read-only dependency review confirmed the removal boundaries.
+
+The canonical report imported four arithmetic/formatting helpers from the prototype builder. They are moved unchanged into calculation.py before prototype removal. Packaging now exports only canonical report build, verify and service entrypoints; the existing installed-wheel test gains a prototype-exclusion check, which failed against the previous wheel. Build scripts, acceptance artifact checks, Docker report inputs, documentation and repository policy are aligned with the single product. Active source/configuration has no MEE or external factory references. A generic test-data factory remains unrelated to delivery tooling. Historical audit evidence and Git/release history retain their original bytes.
+
+Verification: the full Python run passed 950 tests plus 85 subtests, with one stale preview test that had loaded the pre-edit September hashes. The corrected current-preview test and all canonical report/installed-wheel cases subsequently passed together (9 tests); the current bundle reproduces offline and tampering remains rejected. The installed-wheel exclusion regression failed before removal and passes afterward. Gateway: 58 local tests passed, 13 database tests skipped; browser: 35 passed. Both Node builds pass. Fixture and Testnet Compose configuration, 48-document link checks, whitespace checks and the artifact scanner pass. Independent read-only review found no Critical/Important issue and confirmed all four moved helper functions are AST-identical.
+
+The report image `sha256:f6eae719f387ba7f8b2f579f9839b3d708dadaa0598160faeaa61c37a400df11` built successfully. Its non-root, network-disabled verifier reproduces the published preview and confirms prototype modules are absent. This is a validation image, not a new deployment or security audit. Public readiness remains HTTP 200 with payment_ready=true. No live deployment, ledger, payment state or published release asset changed.
+
 ## 2026-10-13 — README describes the product
 
 Owner requests a straightforward introduction to the Liqvera website and code, without project history, deployment logs, repair narratives, acceptance commentary or installer promotion. README now presents the product, capabilities, demo flow, code components and supporting documentation. Detailed verification evidence remains in its existing documents. No runtime or installer files were changed. Documentation links and whitespace checks pass.
@@ -114,4 +124,4 @@ Audit-owned fixture containers, networks and volumes, disposable PostgreSQL, sta
 
 The requested source cleanup, migration, remediation and local verification are complete. Next work is a separately scoped public gateway recovery/deployment with existing-state and payment safeguards. Public deployment remains unchanged and its observed gateway failure is not fixed by these source changes.
 
-Reference plan: [current cleanup](docs/superpowers/plans/2026-10-12-standalone-current.md). Prior release evidence is retained in Git at v0.0.5 and the published assets.
+Reference plan: [current cleanup](https://github.com/Dimkox/liqvera/blob/51c14b1/docs/superpowers/plans/2026-10-12-standalone-current.md). Prior release evidence is retained in Git at v0.0.5 and the published assets.

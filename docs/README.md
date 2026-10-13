@@ -3,7 +3,7 @@
 - [Specification](specification.md): implemented product, API flow and safety boundaries.
 - [Architecture](architecture.md): component ownership and state.
 - [Validation](validation.md): local suites, artifacts and acceptance limits.
-- [Deployment](deployment.md): isolated profiles and installer boundaries.
+- [Deployment](deployment.md): Docker Compose profiles and service operation.
 - [Testnet demo](runbooks/testnet-demo.md): wallet checkout, test tokens and standalone deployment.
 - [Mainnet configuration](mainnet.md): network selection, ledger separation and payment authority.
 - [Migration](migration.md): component namespace changes and historical data.
@@ -13,5 +13,3 @@
 - [Roadmap](ROADMAP.md): remaining work and release gates.
 - [Mezo Buildathon materials](competition/submission.md): submission draft, deck and two-minute pitch script.
 - [Current handoff](../handoff.md): exact verification state and next steps.
-
-Current documentation describes Liqvera independently. Superseded plans, research and delivery-process receipts remain recoverable from Git history at the published releases.

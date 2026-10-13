@@ -1,5 +1,9 @@
 # Liqvera handoff
 
+## 2026-10-13 — reproducible wallet SDK dependency lock
+
+The clean Node 22/npm 10 image build rejected npm 11's incomplete optional peer resolution under the SDK's disabled Base Account connector. Regenerating the lock with the pinned image toolchain adds only nested optional `@x402/core` and `@x402/evm` 2.28.0 entries. Liqvera's direct/root payment packages remain 2.16.0; no payment behavior changed. Independent read-only review confirms the scope. Clean image `npm ci` and build now pass, all 49 browser tests pass after reinstall, and npm audit remains zero. The owner-ID image is built; exact-image scans and publication follow separately.
+
 ## 2026-10-13 — standard wallet connection integration
 
 Owner authorizes obtaining a Liqvera Reown project and implementing WalletConnect. Official AppKit 1.8.24 and Ethers adapter now own wallet discovery, QR/mobile pairing, connection persistence and account management when `LIQVERA_WALLETCONNECT_PROJECT_ID` is configured. The owner supplied the public ID after registering; it will be passed to the separate production build. No-ID builds retain injected-wallet support. The pinned public full AppKit constructor runs in basic connection-only mode, with unrelated features and remote feature overrides disabled. Provider subscriptions feed the existing payment adapter; no subscription signs or submits. SDK-managed network selection is checked against the actual provider, including add-without-select behavior. Disconnect and stale callbacks cannot resurrect old readiness or erase a replacement wallet. Saved quotes and unknown payment outcomes are retained.

@@ -4,7 +4,7 @@ The public demo at https://liqvera.site uses **Mezo Testnet, chain 31611**. Each
 
 ## Present the demo
 
-1. Open the site and connect an EVM wallet. Accept the switch to Mezo Testnet.
+1. Open the site and connect an EVM wallet. From ordinary mobile Chrome/Safari, choose **Open in Trust Wallet**, then **Connect wallet** inside its browser. Accept the switch to Mezo Testnet.
 2. Enter a BUY or SELL quantity. Request a report and review the fresh snapshot, limitations, hashes, recipient and 0.01 test-MUSD price.
 3. Confirm the payment in the wallet. The official x402 flow requests limited Permit2/EIP-2612 signatures; the facilitator sponsors settlement gas.
 4. Wait for confirmed delivery, then download the JSON and evidence ZIP. Repeated retrieval uses the same entitlement and does not require another payment.

@@ -45,6 +45,6 @@ test("switch flow uses exact pinned Mezo parameters and fails closed",async()=>{
   await assert.rejects(()=>switchToMezo({async request(input){if(input.method==="wallet_switchEthereumChain")return null;if(input.method==="eth_chainId")return "0x1";}}),/different network/);
 
   const main=await readFile(new URL("../src/main.ts",import.meta.url),"utf8");
-  assert.match(main,/await switchToMezo\(provider\);[\s\S]*await walletAccount\(provider, true\)/);
+  assert.match(main,/await walletAccount\(provider, true\);[\s\S]*if \(account\) await switchToMezo\(provider\)/);
   assert.match(main,/await discoverWalletChoices\(walletStore,injectedWallet\(\)\)/);
 });

@@ -8,11 +8,11 @@ export interface Eip1193Provider {
 }
 
 declare global {
-  interface Window { ethereum?: Eip1193Provider }
+  interface Window { ethereum?: Eip1193Provider; trustwallet?: { ethereum?: Eip1193Provider } }
 }
 
 export function injectedWallet(): Eip1193Provider | null {
-  return window.ethereum ?? null;
+  return window.ethereum ?? window.trustwallet?.ethereum ?? null;
 }
 
 function firstAccount(value: unknown): string | null {

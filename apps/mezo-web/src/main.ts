@@ -37,6 +37,11 @@ app.innerHTML = `
             <fieldset><legend>Hypothetical side</legend><div class="segment"><label><input type="radio" name="side" value="BUY" checked /><span>BUY</span></label><label><input type="radio" name="side" value="SELL" /><span>SELL</span></label></div></fieldset>
             <label class="field-label" for="quantity">Quantity <span>BTC</span></label><input id="quantity" name="quantity" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0.15" aria-describedby="quantity-hint" /><p id="quantity-hint" class="field-hint">A positive decimal string, up to 8 places. The report shows a hypothetical sweep.</p>
             <div class="wallet-box"><div><span class="eyebrow">EXPECTED PAYER</span><strong id="wallet-label">No wallet connected</strong><span id="chain-label">Connect an EVM wallet on ${NETWORK_LABEL}.</span></div><div class="wallet-actions"><label for="wallet-provider" class="field-hint">Wallet provider</label><select id="wallet-provider" class="hidden" aria-label="Choose wallet provider"></select><button id="connect-button" type="button" class="text-button">Connect wallet</button><button id="switch-button" type="button" class="text-button hidden">Switch network</button></div></div>
+            <div id="wallet-help" class="hidden">
+              <p class="supporting">Connect on your phone with Trust Wallet.</p>
+              <a id="trust-wallet-link" class="secondary-button" href="https://link.trustwallet.com/open_url?coin_id=60&amp;url=https%3A%2F%2Fliqvera.site">Open in Trust Wallet</a>
+              <p class="subtle">Continue in Trust Wallet’s browser, then tap Connect wallet. On a computer, use a wallet browser extension.</p>
+            </div>
             <button id="create-button" class="primary-button" type="submit" disabled>Request a report <span aria-hidden="true">↗</span></button>
             <p id="create-note" class="form-note">Checking service capabilities…</p>
           </form>
@@ -521,15 +526,20 @@ async function connectWallet(): Promise<void> {
   const selected=el<HTMLSelectElement>("#wallet-provider").value;
   const selectedProvider=(choices.find(item=>item.id===selected)??choices[0])?.provider??null;
   walletListeners.replace(selectedProvider);provider=selectedProvider;
-  if (!provider) { announcement("Install or enable an injected EVM wallet to continue.", "warning"); return; }
+  applyWalletState({account:null,onMezo:false});
+  el<HTMLElement>("#wallet-help").classList.toggle("hidden", Boolean(provider));
+  if (!provider) {
+    announcement("Open Liqvera in Trust Wallet to connect on your phone.", "warning");
+    return;
+  }
   try {
-    await switchToMezo(provider);
     account = await walletAccount(provider, true);
+    if (account) await switchToMezo(provider);
     onChain = await walletOnMezo(provider);
     if (!account) announcement("The wallet did not provide an account.", "warning");
     else if (!onChain) announcement(`Wallet could not switch to ${NETWORK_LABEL} (chain ${MEZO.chainId}).`, "warning");
     else announcement(`Wallet connected on ${NETWORK_LABEL}. No payment has been requested.`);
-  } catch (error) { announcement(walletError(error), "warning"); }
+  } catch (error) { await refreshWallet(); announcement(walletError(error), "warning"); }
   updateControls();
   if (quote) renderQuote();
 }

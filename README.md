@@ -26,7 +26,7 @@ Every report comes with the source snapshot and calculations behind it. Read the
 
 Open **[liqvera.site](https://liqvera.site)** and select **Show latest live report** to explore a sample without connecting a wallet.
 
-To request your own report, connect a wallet, choose the order parameters and confirm the report purchase. The demo uses **Mezo Testnet**, with reports priced at **0.01 test MUSD**.
+To request your own report, connect a wallet, choose the order parameters and confirm the report purchase. On your phone, select **Open in Trust Wallet** to continue in its browser, then connect your wallet. The demo uses **Mezo Testnet**, with reports priced at **0.01 test MUSD**.
 
 ## The code
 

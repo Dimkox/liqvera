@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-13 — Trust Wallet mobile connection
+
+Owner reports Connect wallet failing in ordinary mobile Chrome/Safari and confirms Trust Wallet is installed. The deployed browser at ad606e4 only looked for an injected provider; the actual no-provider browser reproduced an extension-install notice with no mobile route. Connect now offers Trust Wallet's official universal dApp link to the fixed public origin, with an explicit instruction to continue inside its browser. No session parameters, capabilities or payment data enter that link. The app also discovers window.trustwallet.ethereum when window.ethereum is absent and requests account access before switching chains.
+
+Independent review found stale network readiness after rejected reconnects. A strict-provider Chrome test reproduced it before the fix; connection now clears previous state and refreshes actual account/network after failure. The same browser check passes rejection, reconnection, fresh report creation and signature cancellation. A mobile viewport without a provider exposes the canonical Trust link. This uses emulated provider behavior, not a physical Trust app or a real signature. The new provider regression failed before the fix; all 37 browser tests and the Testnet build pass. Independent final review reports no Critical/Important findings. Next: audited browser-only rollout and deployed browser checks.
+
+The separate post-cleanup verification completed from clean source 3386caa: all 951 Python tests plus 85 subtests pass in one run, and the four-wheel build passes. Public endpoints and preview hashes pass. No additional cleanup breakage was found.
+
 ## 2026-10-13 — one website and code product
 
 Owner explicitly requests removing the installer and remaining MEE/factory baggage, superseding the earlier installer-preservation instruction. Scope: retire the separate installer and prototype website/CLI/Compose targets, remove unused exchange credential templates/configuration, and retain the canonical web/gateway/capture/report/verifier with all payment guards. Published releases, recorded audit evidence, sealed bundles and existing ledger migrations remain immutable. One implementation owner edits code; independent read-only dependency review confirmed the removal boundaries.

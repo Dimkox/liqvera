@@ -1,0 +1,58 @@
+{
+  "source_commit": "506b67608815b72cd906cf8ab46ae60585823732",
+  "web_image": "sha256:3ab707a276143dda374acd92bae5706adfcf5ced30ee6dc322ff11fc14e2efd9",
+  "previous_web_image": "sha256:3eddb87fc9b6efaad46c68d29517947e6b3f25d6b19fe9d277fb978ecc24a861",
+  "network": "eip155:31611",
+  "public_asset": "index-gpixMnFZ.js",
+  "health": "healthy",
+  "rollback_container": "liqvera-live-web-live-1-before-wallet-guidance-506b676",
+  "manifest_backup": "/home/pall/.local/state/liqvera/recovery/2026-10-13-wallet-guidance-506b676/compose.before.json",
+  "other_services_changed": false,
+  "payment_submitted": false,
+  "browser_verification": {
+    "provider": "Generic simulated window.ethereum EIP-1193 provider; no Trust namespace.",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "transport": "Real Chrome through loopback relay to deployed origin, canonical API Origin.",
+    "observed": {
+      "before request": {
+        "disabled": false,
+        "note": "You can prepare a report now. Switch to Mezo Testnet to pay and unlock it.",
+        "wallet": "0x111111\u2026111111"
+      },
+      "quote ready": {
+        "paymentDisabled": true,
+        "chain": "0x1",
+        "signs": 0
+      },
+      "network": {
+        "chain": "0x7b7b",
+        "calls": [
+          "eth_accounts",
+          "eth_chainId",
+          "wallet_switchEthereumChain",
+          "wallet_addEthereumChain",
+          "eth_chainId",
+          "wallet_switchEthereumChain",
+          "eth_chainId",
+          "eth_accounts",
+          "eth_chainId"
+        ],
+        "notice": "Wallet switched to Mezo Testnet."
+      },
+      "payment boundary": {
+        "signs": 1,
+        "notice": "Wallet payment was canceled before submission. The quote remains unpaid."
+      }
+    },
+    "without_provider": {
+      "notice": "Open liqvera.site in your EVM wallet\u2019s browser, or enable a wallet extension, then connect.",
+      "trustLink": "https://link.trustwallet.com/open_url?coin_id=60&url=https%3A%2F%2Fliqvera.site",
+      "helpVisible": true
+    },
+    "physical_wallet_tested": false,
+    "real_signature_created": false
+  }
+}

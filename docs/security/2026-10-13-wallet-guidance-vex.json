@@ -1,0 +1,23 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "urn:liqvera:security-assessment:wallet:506b67608815b72cd906cf8ab46ae60585823732:2026-10-13",
+  "author": "Liqvera repository security audit",
+  "timestamp": "2026-10-13T09:15:38.006053+00:00",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2025-60876",
+        "@id": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+      },
+      "products": [
+        {
+          "@id": "urn:liqvera:image:sha256:3ab707a276143dda374acd92bae5706adfcf5ced30ee6dc322ff11fc14e2efd9"
+        }
+      ],
+      "status": "fixed",
+      "action_statement": "Upstream-reviewed BusyBox URL guard applied to the pinned Alpine recipe. The binary matches the reviewed patched SHA-256 with eight prior security regressions passing; corresponding source is included in the image. SHA-256: 4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "action_statement_timestamp": "2026-10-13T09:15:38.006053+00:00"
+    }
+  ]
+}

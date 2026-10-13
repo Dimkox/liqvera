@@ -1,0 +1,116 @@
+{
+  "schema": "liqvera-web-security-audit/v1",
+  "audited_at": "2026-10-13T07:54:54.611514+00:00",
+  "source_commit": "a93605d20224c8711d51cf5eded93cff3832727d",
+  "scope": "Rebuilt Testnet browser image only. Other deployed images retain their prior exact-image evidence. No scanner findings suppressed.",
+  "images": {
+    "web": {
+      "image_id": "sha256:6ba39f318c349f635294eaba50c4979323ec843fd5d4ff190f7d702ef0a60505",
+      "source_commit": "a93605d20224c8711d51cf5eded93cff3832727d",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to the pinned Alpine recipe. The binary matches the reviewed patched SHA-256 with eight prior security regressions passing; corresponding source is included in the image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to the pinned Alpine recipe. The binary matches the reviewed patched SHA-256 with eight prior security regressions passing; corresponding source is included in the image."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Upstream-reviewed BusyBox URL guard applied to the pinned Alpine recipe. The binary matches the reviewed patched SHA-256 with eight prior security regressions passing; corresponding source is included in the image."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 3
+      }
+    }
+  },
+  "scanner_status": {
+    "web": {
+      "image_id": "sha256:6ba39f318c349f635294eaba50c4979323ec843fd5d4ff190f7d702ef0a60505",
+      "trivy_exit": 0,
+      "grype_exit": 0
+    }
+  },
+  "new_untriaged_findings": [],
+  "trivy": {
+    "Version": "0.74.0",
+    "VulnerabilityDB": {
+      "Version": 2,
+      "NextUpdate": "2026-10-13T13:18:23.16392058Z",
+      "UpdatedAt": "2026-10-12T13:18:23.1639207Z",
+      "DownloadedAt": "2026-10-12T16:36:57.447175007Z"
+    },
+    "CheckBundle": {
+      "Digest": "sha256:1583562f8b90ed2a071b99f0e5ffff6b57e4ceb6ca3e4796577b4e6a339eb74c",
+      "DownloadedAt": "2026-09-30T16:10:19.322988759Z"
+    }
+  },
+  "grype": {
+    "version": "0.120.1",
+    "database": {
+      "schemaVersion": "v6.1.10",
+      "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-12T00:41:00Z_1791873320.tar.zst?checksum=sha256%3Aed50c6deedbbe39f815f855fb55208a1f261ebec6a91d2847b1230200bbb7b20",
+      "built": "2026-10-13T06:35:20Z",
+      "path": "/tmp/liqvera-current-audit/grype-db/6/vulnerability.db",
+      "valid": true
+    }
+  },
+  "database_refresh": "Both database refreshes succeeded on October 13. The deployed image was rescanned after the Grype refresh completed. Exact database timestamps are recorded; Trivy returned the latest available October 12 database and Grype returned the October 13 database.",
+  "npm_audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "dependency_evidence": {
+    "baseline": "ad606e4",
+    "source_commit": "a93605d20224c8711d51cf5eded93cff3832727d",
+    "lockfile_unchanged": true,
+    "installed_package_entries_unchanged": true,
+    "change": "Browser code only; no dependency changes."
+  },
+  "payment_boundary": "No wallet signature or settlement performed by this audit.",
+  "raw_archive": {
+    "file": "2026-10-13-trust-wallet-raw.tar.gz",
+    "sha256": "ad544196ceb0e2445df3b834b8fcc2b94254f6012cc07c5ef911e63d207b73c9",
+    "bytes": 33238,
+    "members": {
+      "dependency-comparison.json": "f9e597576214c6e55dccb4a217b69d0c540c689085357fa7c33eb30b3c9e53bf",
+      "npm-audit.json": "f31fc1e790ec4d173b02536f1eafdd4df1b59278ab38a4d60dee41d5afdfb3a5",
+      "web-busybox.sha256": "482f4b5bbd24ebbed9a674403650170b156ae369417ba6f46300bb7b8da9f3d0",
+      "web-grype.json": "071ef69ebf9c374c240b947b45ff5ed67726ce836b1d6972843a0563d468e4f4",
+      "web-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "web-trivy.json": "fb343445273c63fed095e38e3dfea63565572631ec52f89291070b37f54df8f2",
+      "web-trivy.log": "b37b64ccf1e1daafd887eb48e1ebf66fc3c95c0d2892a5458864a5e480a8bf79",
+      "grype-db.json": "84c7bb250e2c36fc19cd02ed1430d8c48bb1941f09a9e6f047697d0c46820b3c",
+      "trivy-version.json": "ef4e3eeb2497a11487471f47660a65d569651c6feae1a18f75f3dca8a16fa94a",
+      "image-scan-status.json": "af47fac67f9630e96d5d3e8a37cabec10c5e6b9c892b22c2af92b0c6e89ffebf",
+      "security-vex.json": "88d47b358fd07a1f2a31dda3d5507439a9b06b92678056c0f449b4d6c5feae49",
+      "trivy-db-update.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "grype-db-update.log": "c7b4223d373ec352807b8acc11eb7e7406fdde188ecab4cafe351eec1decfe54",
+      "tests.log": "6a5be08403d4b3bbd513e774a7a071d5dfacdca3524ed78000b2af6d1e4ee4b8",
+      "build.log": "359187da8986794bbf3d4fe43af36ab6e30120d4dbb6f570475621be0e6cd51a"
+    }
+  }
+}

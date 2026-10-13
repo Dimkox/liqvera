@@ -1,0 +1,34 @@
+{
+  "source_commit": "a93605d20224c8711d51cf5eded93cff3832727d",
+  "web_image": "sha256:6ba39f318c349f635294eaba50c4979323ec843fd5d4ff190f7d702ef0a60505",
+  "previous_web_image": "sha256:5599dca2ff4a6c7e51397f761768e771436bd9bcd9510dee3846fdcf8df5073f",
+  "network": "eip155:31611",
+  "public_asset": "index-C3TyJw3r.js",
+  "health": "healthy",
+  "rollback_container": "liqvera-live-web-live-1-before-trust-a93605d",
+  "manifest_backup": "/home/pall/.local/state/liqvera/recovery/2026-10-13-trust-a93605d/compose.before.json",
+  "other_services_changed": false,
+  "payment_submitted": false,
+  "browser_verification": {
+    "transport": "Real Chrome through a loopback relay to the deployed public origin; API Origin remains canonical.",
+    "mobile_viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "no_injected_provider": {
+      "notice": "Open Liqvera in Trust Wallet to connect on your phone.",
+      "trustLink": "https://link.trustwallet.com/open_url?coin_id=60&url=https%3A%2F%2Fliqvera.site",
+      "helpVisible": true
+    },
+    "trust_provider": "Simulated strict window.trustwallet.ethereum provider; window.ethereum absent. Account permission required before chain switching.",
+    "reconnect": "Rejected chain switching disables requests; successful reconnect restores them.",
+    "signature_rejection": {
+      "signCalls": 1,
+      "amountType": "string",
+      "notice": "Wallet payment was canceled before submission. The quote remains unpaid.",
+      "canRetry": true
+    },
+    "physical_trust_app_tested": false,
+    "real_signature_created": false
+  }
+}

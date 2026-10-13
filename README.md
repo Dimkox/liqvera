@@ -1,50 +1,67 @@
 # Liqvera
 
-### Market reports you can verify.
+**Market reports you can verify.**
 
-**Understand BTC market depth. Explore the numbers. Verify the result.**
+Understand BTC market depth before you act. Liqvera turns public order-book snapshots into clear, downloadable reports with the evidence behind every calculation.
 
-[Open Liqvera](https://liqvera.site) · [Documentation](docs/README.md) · [Demo video](docs/competition/pitch.mp4)
+[Open the demo](https://liqvera.site) · [Watch the demo](docs/competition/pitch.mp4) · [Documentation](docs/README.md) · [Commit history](https://github.com/Dimkox/liqvera/commits/main/)
 
-Built for [Mezo](https://mezo.org/) and [The Mezo Buildathon](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10).
+## From an order size to a clear answer
 
-## From market data to a clear report
+A headline price tells you where the market is. Liqvera shows how a hypothetical buy or sell would fill against the available liquidity: the average price, filled quantity, worst price and price impact.
 
-Liqvera turns public Hyperliquid BTC order-book data into market-depth reports. Choose a buy or sell side and an order size to see how that order would fill against the available liquidity: average price, filled quantity and price impact.
+Built for analysts, researchers and developers, each report combines public Hyperliquid BTC perpetual market data with exact arithmetic and portable evidence. Explore the result in your browser, export it for analysis or reproduce the calculations independently.
 
-Every report comes with the source snapshot and calculations behind it. Read the result in your browser, download the JSON or keep the evidence ZIP to reproduce the calculations independently.
-
-## What you can do
-
-- **Explore market depth** — see how order size affects execution price and available liquidity.
-- **Inspect the evidence** — follow the report back to its market snapshot and inputs.
-- **Keep your reports** — download structured JSON and a portable evidence ZIP.
-- **Verify independently** — reproduce the calculations offline with the Liqvera verifier.
-- **Pay per report** — connect a Mezo wallet and use MUSD through x402.
+| What you get | Why it matters |
+| --- | --- |
+| Market-depth analysis | See how order size changes the calculated fill and price impact |
+| Timestamped source snapshot | Know which market data the report uses |
+| Downloadable JSON | Bring structured results into your own tools |
+| Evidence ZIP | Keep the source inputs, report and integrity hashes together |
+| Offline verification | Check the evidence and reproduce the calculations locally |
+| MUSD payments through x402 | Purchase access to an individual report with your wallet |
 
 ## Try Liqvera
 
-Open **[liqvera.site](https://liqvera.site)** and select **Show latest live report** to explore a sample without connecting a wallet.
+**[Explore the public demo →](https://liqvera.site)**
 
-To request your own report, select **Connect wallet**, choose your EVM wallet, set the order parameters and confirm the report purchase. Connect a browser extension, use WalletConnect on your phone or scan its QR code with your wallet. **Manage wallet** lets you manage or disconnect the session. Your wallet must support **Mezo Testnet** for payment; reports cost **0.01 test MUSD**.
+View the timestamped sample report without connecting a wallet. To request your own:
 
-## The code
+1. **Connect your wallet** using a browser extension or WalletConnect on your phone.
+2. **Choose buy or sell and a BTC quantity** to prepare a fresh report and review its price.
+3. **Confirm the purchase** in your wallet on Mezo Testnet.
+4. **Read, download and verify** your report. Confirmed access lets you retrieve the same report again without another payment, within its retention period.
 
-Liqvera combines a TypeScript web application and API with Python services for market capture, report generation and independent verification.
+The public demo runs on **Mezo Testnet (31611)**. Each report costs **0.01 test MUSD**. WalletConnect supports mobile pairing and QR connections; you can manage or disconnect your session from the app.
 
-| Component | Role |
+Reports describe a hypothetical sweep of the captured order book. Liqvera is a read-only analytics product: calculations cover the available snapshot depth and exclude fees and funding.
+
+## Built for verifiable delivery
+
+Liqvera connects market capture, report generation and MUSD payment in one web application. Payment access is bound to the exact report and evidence hashes. The offline verifier checks bundle integrity and recomputes results from the included inputs.
+
+**Stack:** TypeScript · Python · PostgreSQL · Reown AppKit / WalletConnect · x402 · Docker Compose.
+
+| Component | Source |
 | --- | --- |
-| Web application | Wallet connection, report requests and interactive results |
-| API gateway | Quotes, payments and report delivery |
-| Market capture | Public Hyperliquid order-book snapshots |
-| Report engine | Exact calculations and downloadable evidence |
-| Offline verifier | Evidence integrity checks and reproducible calculations |
-| PostgreSQL | Payment and report-access state |
+| Web application | [apps/mezo-web](apps/mezo-web) |
+| API and payment gateway | [apps/mezo-gateway](apps/mezo-gateway) |
+| Public market capture | [services/evidence-capture](services/evidence-capture) |
+| Report generation and verification | [services/evidence-report](services/evidence-report) |
+| API contract | [OpenAPI specification](schemas/mezo-evidence/v1/openapi.json) |
 
-See the [architecture](docs/architecture.md) for how the components connect, the [startup guide](docs/runbooks/startup-shutdown.md) to run the code, and the [validation guide](docs/validation.md) for tests.
+To run the project, clone the repository and follow the [startup guide](docs/runbooks/startup-shutdown.md). The [Testnet guide](docs/runbooks/testnet-demo.md) covers wallet checkout and deployment; the [validation guide](docs/validation.md) provides build and test commands.
 
-## Explore further
+## Source, history and versions
 
-[Product specification](docs/specification.md) · [Testnet guide](docs/runbooks/testnet-demo.md) · [Security](SECURITY.md) · [Buildathon presentation](docs/competition/README.md)
+Development is tracked publicly in Git. Use the links below to inspect changes, identify a version or review the evidence behind a build.
 
-Created by **[Dimkox](https://github.com/Dimkox)**.
+- **[Commit history](https://github.com/Dimkox/liqvera/commits/main/)** — dated changes and exact commit identifiers.
+- **[Releases](https://github.com/Dimkox/liqvera/releases)** — published release notes and assets.
+- **[Version tags](https://github.com/Dimkox/liqvera/tags)** — named source versions.
+- **[Compare revisions](https://github.com/Dimkox/liqvera/compare)** — review differences between commits, branches or tags.
+- **[Validation evidence](docs/security/2026-10-13-walletconnect.md)** — deployed version, security checks and the scope of functional verification.
+
+[Product specification](docs/specification.md) · [Architecture](docs/architecture.md) · [Security policy](SECURITY.md) · [Buildathon presentation](docs/competition/README.md)
+
+Built by **[Dimkox](https://github.com/Dimkox)** for the [Mezo ecosystem](https://mezo.org/).

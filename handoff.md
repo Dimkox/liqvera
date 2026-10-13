@@ -1,5 +1,9 @@
 # Liqvera handoff
 
+## 2026-10-13 — product README and GitHub presentation
+
+Owner requests a clean commercial README and direct version-history links for competition reviewers and automated checks. README now leads with product value, report deliverables, the wallet purchase flow, current Testnet price, source components and operating guides. Dedicated commit-history, releases, tags and comparison links make development evidence accessible without a project-origin narrative. GitHub About now describes verifiable BTC market-depth reports and Testnet MUSD payments; the homepage remains https://liqvera.site and relevant product topics are set. All 54-document local link checks and whitespace checks pass; the live demo and four GitHub history/version links each return HTTP 200. Documentation and repository presentation only; no runtime, dependency or deployment change, so application tests were not rerun.
+
 ## 2026-10-13 — competition submission requested after WalletConnect publication
 
 Owner requests sending the current project to the competition and does not require another payment regression first. Submission fields and short description now reflect deployed standard WalletConnect access and the latest verification scope; category is within the requested 3–5 words. Official AKINDO public event API currently reports Wave 1 totalSubmissionCount 0, start October 15 at 15:00 UTC and deadline October 26 at 15:00 UTC. This public count does not establish the owner's registration or draft status. Prior owner-confirmed submission is preserved as their report, not independently verified. No authenticated AKINDO connector/browser session is available; requested the existing entry URL to identify the record. No submission or account update was performed, and GitHub publication must not be reported as competition submission.

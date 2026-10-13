@@ -6,19 +6,21 @@ Prepared 2026-10-13. Existing project; pre-event baseline `607fa0d`. The owner c
 
 **Project name:** Liqvera
 
-**Category:** MUSD payments for market reports
+**Category:** MUSD market data payments
 
 **TL;DR:** Spend test MUSD on BTC market-depth reports you can download and independently verify.
 
 **How it works:** Market screenshots and headline prices hide the depth behind a hypothetical order. Liqvera captures public Hyperliquid BTC perpetual order-book snapshots and calculates filled quantity, notional, VWAP, worst price and price impact using exact arithmetic. Each canonical report includes source metadata, input hashes and a downloadable evidence bundle. An offline verifier checks integrity and recomputes the results. The gateway's x402 integration is configured for MUSD on Mezo Testnet to bind access to exact report and bundle hashes. Historical testnet paid delivery has been demonstrated. A wallet-free historical preview is available; Testnet wallet checkout is enabled at 0.01 test MUSD per report. Reports do not execute trades or include fees, funding or net P&L.
 
-**Target group:** The initial audience hypothesis is analysts, developers and technically experienced users who want reproducible BTC market-depth evidence. The desktop-first browser and offline verifier support inspection and sharing. There is no validated customer-demand or regional-adoption claim. Track 2 fit: make MUSD useful for access to independently inspectable digital information.
+**Target group:** The initial audience hypothesis is analysts, developers and technically experienced users who want reproducible BTC market-depth evidence. Browser-extension and mobile WalletConnect sessions support report access, while the offline verifier supports inspection and sharing. There is no validated customer-demand or regional-adoption claim. Track 2 fit: make MUSD useful for access to independently inspectable digital information.
 
-**Tech stack:** TypeScript, Vite, Node.js/Express, PostgreSQL, Python, Docker Compose, Caddy, x402, and Mezo Testnet. Public Hyperliquid data; no exchange trading credentials.
+**Tech stack:** TypeScript, Vite, Node.js/Express, PostgreSQL, Python, Docker Compose, Caddy, x402, Reown AppKit / WalletConnect, and Mezo Testnet. Public Hyperliquid data; no exchange trading credentials.
 
 **Track:** Track 2 — Access and Distribution for MUSD/MEZO.
 
 **Chain configured:** Mezo Testnet, chain ID 31611. Public gateway and browser are deployed; merchant checkout is enabled; a new paid-delivery acceptance on this deployment has not yet been recorded.
+
+**Wallet access:** The published demo uses standard Reown AppKit with browser extensions, WalletConnect QR/mobile pairing, account management and session restoration. It supports multiple EVM wallets. Report preparation works before network selection; payment requires Mezo Testnet. Browser tests cover network selection, cancellation and session recovery. Physical mobile pairing and a fresh signed purchase remain outside the latest verification.
 
 **Project status:** Existing project. The published baseline predates the buildathon. Describe and link the actual features added during the competition after they exist; do not count this preparation as work completed during Wave 1.
 
@@ -40,8 +42,8 @@ Prepared 2026-10-13. Existing project; pre-event baseline `607fa0d`. The owner c
 - Deck: [presentation.pdf](presentation.pdf), seven slides; editable source: [presentation.html](presentation.html).
 - Video: [two-minute captioned preparation cut](pitch.mp4), [public download](https://raw.githubusercontent.com/Dimkox/liqvera/main/docs/competition/pitch.mp4), [editable frames](pitch.html), and [script](pitch-script.md). Silent English captions; real interface captures; no new paid transaction is depicted. Replace the pending-payment segment and add in-event progress before the final competition upload.
 - Architecture and boundaries: [specification](../specification.md).
-- Local validation: [remediation report](../security/2026-10-12-remediation.md). Current deployed image IDs, advisory scans and functional evidence: [Testnet audit](../security/2026-10-12-testnet.md).
-- Merchant verification: 71 gateway tests against disposable PostgreSQL and 31 browser tests at source `5f87329`. [October 13 browser evidence](2026-10-13-browser-results.json) confirms a fresh unsigned quote; [download verification](2026-10-13-verification.json) reproduces the preview ZIP. See the [entry checklist](entry-checklist.md).
+- Local validation: [remediation report](../security/2026-10-12-remediation.md). Current deployed image IDs, advisory scans and functional evidence: [WalletConnect deployment audit](../security/2026-10-13-walletconnect.md).
+- Merchant verification: 71 gateway tests against disposable PostgreSQL and 31 browser tests at source `5f87329`. [October 13 browser evidence](2026-10-13-browser-results.json) confirms a fresh unsigned quote; [download verification](2026-10-13-verification.json) reproduces the preview ZIP. Latest wallet integration: 49 browser tests; published QR/relay and Android handoff checks pass within their documented scope. See the [entry checklist](entry-checklist.md).
 
 ## Official requirements and dates
 

@@ -1,5 +1,9 @@
 # Liqvera handoff
 
+## 2026-10-13 — competition submission requested after WalletConnect publication
+
+Owner requests sending the current project to the competition and does not require another payment regression first. Submission fields and short description now reflect deployed standard WalletConnect access and the latest verification scope; category is within the requested 3–5 words. Official AKINDO public event API currently reports Wave 1 totalSubmissionCount 0, start October 15 at 15:00 UTC and deadline October 26 at 15:00 UTC. This public count does not establish the owner's registration or draft status. Prior owner-confirmed submission is preserved as their report, not independently verified. No authenticated AKINDO connector/browser session is available; requested the existing entry URL to identify the record. No submission or account update was performed, and GitHub publication must not be reported as competition submission.
+
 ## 2026-10-13 — published Android wallet handoff check
 
 A supplemental Chrome check with Android user-agent and mobile viewport passes against the published browser asset `index-BQP4zj3R.js`. The standard AppKit directory lists multiple wallets. Selecting Trust produces an SDK `window.open` call using `trust://wc` with a WalletConnect pairing value. The harness intercepts that call and records only scheme, host and pairing presence; it never launches or signs through an installed app. No browser exception or CSP violation occurs. [Raw result](docs/security/2026-10-13-walletconnect-android.json) preserves this narrower proof separately from the preceding immutable audit. No application or deployment change was needed.

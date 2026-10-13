@@ -1,0 +1,18 @@
+{
+  "source_commit": "e75ce59a87238ad91cd09ad364ef524a50828299",
+  "web_image": "sha256:e4a2aeb5f71bcb74d747b746b9a83571e3d8ddf93d2e9ccbc26868aa597ee3f9",
+  "previous_web_image": "sha256:3ab707a276143dda374acd92bae5706adfcf5ced30ee6dc322ff11fc14e2efd9",
+  "edge_image_unchanged": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+  "edge_config_sha256": "b4ecec5957570d0d4c871429fe0e21159f14333315c39f7749a87a29b85c32cc",
+  "network": "eip155:31611",
+  "public_asset": "index-BQP4zj3R.js",
+  "health": "healthy",
+  "rollback_containers": [
+    "liqvera-live-edge-live-1-before-walletconnect-e75ce59",
+    "liqvera-live-web-live-1-before-walletconnect-e75ce59"
+  ],
+  "manifest_backup": "/home/pall/.local/state/liqvera/recovery/2026-10-13-walletconnect-e75ce59/compose.before.json",
+  "public_build_config": "/home/pall/.local/share/liqvera/deploy/walletconnect.env",
+  "other_services_changed": false,
+  "payment_submitted": false
+}

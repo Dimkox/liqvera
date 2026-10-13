@@ -26,7 +26,7 @@ Every report comes with the source snapshot and calculations behind it. Read the
 
 Open **[liqvera.site](https://liqvera.site)** and select **Show latest live report** to explore a sample without connecting a wallet.
 
-To request your own report, connect an EVM wallet, choose the order parameters and confirm the report purchase. Use a browser wallet extension on a computer, or open **liqvera.site** in your wallet's built-in browser on your phone. If several wallets are detected, select yours from **Wallet provider**. Your wallet must support **Mezo Testnet** for payment; reports cost **0.01 test MUSD**.
+To request your own report, select **Connect wallet**, choose your EVM wallet, set the order parameters and confirm the report purchase. Connect a browser extension, use WalletConnect on your phone or scan its QR code with your wallet. **Manage wallet** lets you manage or disconnect the session. Your wallet must support **Mezo Testnet** for payment; reports cost **0.01 test MUSD**.
 
 ## The code
 

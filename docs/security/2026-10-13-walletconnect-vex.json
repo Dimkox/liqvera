@@ -1,0 +1,51 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "urn:liqvera:security-assessment:walletconnect:e75ce59a87238ad91cd09ad364ef524a50828299",
+  "author": "Liqvera repository security audit",
+  "timestamp": "2026-10-13T10:22:37.833562+00:00",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2025-60876",
+        "@id": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+      },
+      "products": [
+        {
+          "@id": "urn:liqvera:image:sha256:e4a2aeb5f71bcb74d747b746b9a83571e3d8ddf93d2e9ccbc26868aa597ee3f9"
+        }
+      ],
+      "status": "fixed",
+      "action_statement": "Reviewed BusyBox URL guard backport; exact binary hash matches prior regression-tested image. Corresponding patched source is shipped in the runtime. SHA-256: 4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "action_statement_timestamp": "2026-10-13T10:22:37.833562+00:00"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-60876",
+        "@id": "https://nvd.nist.gov/vuln/detail/CVE-2025-60876"
+      },
+      "products": [
+        {
+          "@id": "urn:liqvera:image:sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233"
+        }
+      ],
+      "status": "fixed",
+      "action_statement": "Reviewed BusyBox URL guard backport; exact binary hash matches prior regression-tested image. Corresponding patched source is shipped in the runtime. SHA-256: 4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "action_statement_timestamp": "2026-10-13T10:22:37.833562+00:00"
+    },
+    {
+      "vulnerability": {
+        "name": "GO-2026-5932",
+        "@id": "https://pkg.go.dev/vuln/GO-2026-5932"
+      },
+      "products": [
+        {
+          "@id": "urn:liqvera:image:sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233"
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present",
+      "impact_statement": "The advisory concerns golang.org/x/crypto/openpgp, absent from the standard Caddy dependency graph/binary. govulncheck 1.9.0 on the final binary reports zero affected symbols or imported packages; only the containing module matches. The exact edge image is unchanged."
+    }
+  ]
+}

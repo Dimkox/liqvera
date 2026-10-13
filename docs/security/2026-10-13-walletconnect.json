@@ -1,0 +1,182 @@
+{
+  "schema": "liqvera-web-security-audit/v1",
+  "audited_at": "2026-10-13T10:22:37.833562+00:00",
+  "source_commit": "e75ce59a87238ad91cd09ad364ef524a50828299",
+  "scope": "New owner-ID Testnet browser image and unchanged edge image with updated bound Caddy policy; other services unchanged. No scanner findings suppressed.",
+  "images": {
+    "web": {
+      "image_id": "sha256:e4a2aeb5f71bcb74d747b746b9a83571e3d8ddf93d2e9ccbc26868aa597ee3f9",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Reviewed BusyBox URL guard backport; exact binary hash matches prior regression-tested image. Corresponding patched source is shipped in the runtime."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Reviewed BusyBox URL guard backport; exact binary hash matches prior regression-tested image. Corresponding patched source is shipped in the runtime."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r31",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Reviewed BusyBox URL guard backport; exact binary hash matches prior regression-tested image. Corresponding patched source is shipped in the runtime."
+        }
+      ],
+      "counts": {
+        "trivy": 0,
+        "grype": 3
+      }
+    },
+    "edge": {
+      "image_id": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+      "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642",
+      "findings": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Reviewed BusyBox URL guard backport; exact binary hash matches prior regression-tested image. Corresponding patched source is shipped in the runtime."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "busybox-binsh",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Reviewed BusyBox URL guard backport; exact binary hash matches prior regression-tested image. Corresponding patched source is shipped in the runtime."
+        },
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-60876",
+          "package": "ssl_client",
+          "version": "1.37.0-r30",
+          "severity": "Medium",
+          "disposition": "fixed",
+          "evidence": "Reviewed BusyBox URL guard backport; exact binary hash matches prior regression-tested image. Corresponding patched source is shipped in the runtime."
+        },
+        {
+          "scanner": "trivy",
+          "id": "GO-2026-5932",
+          "package": "golang.org/x/crypto",
+          "version": "v0.58.0",
+          "severity": "UNKNOWN",
+          "disposition": "not_affected",
+          "evidence": "The advisory concerns golang.org/x/crypto/openpgp, absent from the standard Caddy dependency graph/binary. govulncheck 1.9.0 on the final binary reports zero affected symbols or imported packages; only the containing module matches."
+        }
+      ],
+      "counts": {
+        "trivy": 1,
+        "grype": 3
+      }
+    }
+  },
+  "scanner_status": {
+    "web": {
+      "image_id": "sha256:e4a2aeb5f71bcb74d747b746b9a83571e3d8ddf93d2e9ccbc26868aa597ee3f9",
+      "trivy_exit": 0,
+      "grype_exit": 0
+    },
+    "edge": {
+      "image_id": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+      "trivy_exit": 0,
+      "grype_exit": 0
+    }
+  },
+  "new_untriaged_findings": [],
+  "npm_audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "osv_audit": {
+    "packages_checked": 323,
+    "affected_packages": 0
+  },
+  "dependency_locks": {
+    "web": "16419d7b37e72aabaf3a7e8b3ccc7bf23c6dd84974e57e94fd81ecd3bd872727"
+  },
+  "trivy": {
+    "Version": "0.74.0",
+    "VulnerabilityDB": {
+      "Version": 2,
+      "NextUpdate": "2026-10-13T13:18:23.16392058Z",
+      "UpdatedAt": "2026-10-12T13:18:23.1639207Z",
+      "DownloadedAt": "2026-10-12T16:36:57.447175007Z"
+    },
+    "CheckBundle": {
+      "Digest": "sha256:1583562f8b90ed2a071b99f0e5ffff6b57e4ceb6ca3e4796577b4e6a339eb74c",
+      "DownloadedAt": "2026-09-30T16:10:19.322988759Z"
+    }
+  },
+  "grype": {
+    "database": {
+      "schemaVersion": "v6.1.10",
+      "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-12T00:41:00Z_1791873320.tar.zst?checksum=sha256%3Aed50c6deedbbe39f815f855fb55208a1f261ebec6a91d2847b1230200bbb7b20",
+      "built": "2026-10-13T06:35:20Z",
+      "path": "/tmp/liqvera-current-audit/grype-db/6/vulnerability.db",
+      "valid": true
+    }
+  },
+  "payment_boundary": "Local wallet responses simulated; no real signature or settlement performed.",
+  "raw_archive": {
+    "file": "2026-10-13-walletconnect-raw.tar.gz",
+    "sha256": "c2aa90f9a7672b19d9e19ea07c8a14daa8b7719d60c80dd8e61b04825be2bc28",
+    "members": {
+      "osv-audit.json": "bd881e1537f6fa0e619f28ab4206519f1c253ef9b612c3ca9b8966f5aece4ecd",
+      "public-capabilities.json": "f3ae9e73b78cb0bd1ef0c9f0dbef5cca1ada4ab39f389269e2d4478f479dd960",
+      "public-browser.py": "73b94eba5e2cf92fd43baad8a3e76ec09c8e51e0d196a68cc770f708ecd7a2ed",
+      "npm-audit.json": "0f78b4b77396f2fe7a5a1a076ad5343851d5affb294c860cca5a9d36f8a63784",
+      "image-scan-status.json": "1e5c81e28c69043d356c59841c89ff3ab0568994e7e4856a1e78a650773e40ad",
+      "security-vex.json": "0df7779405afd82bd8bb6b98604d54a12788e59fd27610959931fdf6abc946f4",
+      "trivy-version.json": "ef4e3eeb2497a11487471f47660a65d569651c6feae1a18f75f3dca8a16fa94a",
+      "grype-db.json": "f24f725e68bf2295242029eaf1f4cb2837e42430bc41f5594a545743509f3360",
+      "trivy-db-update.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "grype-db-update.log": "97ec010778b01fd39aec529c2f452b6ad779693c1c2ce729a4ef79cf43fbbfc4",
+      "tests.log": "545b516d628073483bd96bc0fe4709cf26fe164f7da2e64692cb2d0dca61f097",
+      "image-build-final.log": "f1dbda9dbf607d89aee734620fe8bab28a70bceaebae00d65cc03664366644e4",
+      "browser.py": "0ba4e8fe7eb2db52030601388b4f80863bd8746ba4f41b5d75e39c26d3b06ad6",
+      "qr-owner-run.log": "8d0bed5f814725c8dcdbfa8aa7ab5972b1792f2b0b647a3690d0843af35a4018",
+      "injected.js": "e374453250f352c88084e900ae2f44cd46bcc90c4426b43b3a974dd5ec2dd410",
+      "injected.py": "3d08258c7b685a1e24cc6d06fa85ea6906df42eac42fc420ceb85f24cea10f9e",
+      "injected-run.log": "4df87e6614ffc7fe44bf56e18479fbf43771fbf63d83417ca2e79d212b456116",
+      "injected-result.json": "0534e06bea41dc8f5c7d9fb9357141aa8b5079ae8677edafb301dc5a37485d4c",
+      "web-trivy.json": "6a2b0235baf7e16f18940cbc94e3af2bb3253e2448b49a9bb5823a3b2ad29f17",
+      "web-trivy.log": "42d31fcbc02112a7b179a375de18a43f861cfe6941100854b61b52b18faf2b74",
+      "web-grype.json": "913a90209fab9fbaa808c56272eae117ef83d6f2a996e657709a10a4991c54e1",
+      "web-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "edge-trivy.json": "d034e81416caa573425b6223c13dfc879dcfc9bc4d627ddf39427b5fd8b83122",
+      "edge-trivy.log": "9b70ce7a6a736af037722ffdfff7fb57ef5dd987c382be55db5ce5607f21d372",
+      "edge-grype.json": "ee2df9c6bfe58249967f2627c256182429944028e64d91c7adf034125e28601f",
+      "edge-grype.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "web-busybox.sha256": "482f4b5bbd24ebbed9a674403650170b156ae369417ba6f46300bb7b8da9f3d0",
+      "edge-busybox.sha256": "482f4b5bbd24ebbed9a674403650170b156ae369417ba6f46300bb7b8da9f3d0",
+      "public-qr.json": "e24721425fba5eeacb6af5c5f7a291948afb37894244fc0a12d078d18359703e",
+      "public-browser.log": "022bfaa73653b0f15a1d114b297e3c729f03e5be9fbb525cc9ab5493ce91df16",
+      "public-injected.py": "c81af9a3434482e3d3c876fb916c88feb1803674434f9808c7f0e01b3fd2541d",
+      "public-injected-run.log": "200e167b4b1002ef6094302b962913ac23b6711e32aeb8c96a75dcb69d0a9db7",
+      "public-injected-result.json": "0534e06bea41dc8f5c7d9fb9357141aa8b5079ae8677edafb301dc5a37485d4c",
+      "deployment.json": "7e33f2e76df2095ada262aae4c9970302fcfc5182015188f732fd23442439cd5"
+    }
+  }
+}

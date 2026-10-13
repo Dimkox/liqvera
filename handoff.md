@@ -1,5 +1,15 @@
 # Liqvera handoff
 
+## 2026-10-13 — WalletConnect published with the owner's project
+
+Source `e75ce59` is deployed at https://liqvera.site as browser `sha256:e4a2aeb5f71bcb74d747b746b9a83571e3d8ddf93d2e9ccbc26868aa597ee3f9`, asset `index-BQP4zj3R.js`, using the owner's public Reown project ID. The unchanged audited edge image now binds the matching immutable Caddy policy. Previous browser/edge containers and the private manifest are retained for rollback. All seven containers are healthy; other services, databases and sealed artifacts are unchanged. Public capabilities remain Testnet 31611, live-public, payment-ready, 0.01 test MUSD.
+
+Published-origin Chrome verifies standard wallet selection, QR and a relay WebSocket upgrade with no observed relay errors or CSP violations. With an emulated wallet through the real SDK, the deployed browser passes fresh wrong-chain quote preparation, add-without-select correction, signature rejection, disconnect/reconnect and reload restoration without extra signatures. No physical mobile pairing or actual signed payment was performed. The site's published responses were fetched through the environment proxy; SDK connections were direct. A paused-fetch test-harness problem was corrected without changing application code.
+
+[Exact-image security/deployment evidence](docs/security/2026-10-13-walletconnect.md) records npm zero, OSV zero across 323 package/version pairs, browser Trivy zero, and unchanged reviewed BusyBox/OpenPGP matches. Scanner databases refreshed successfully. All raw archive member hashes pass. Independent source, lock and rollout reviews found no blocker. Source is on main; no PR or further app deployment is needed for this integration. Public build configuration is retained at `/home/pall/.local/share/liqvera/deploy/walletconnect.env`; no private key or password is needed by the frontend.
+
+The owner explicitly authorizes spending test tokens for acceptance checks. The supplied payer address has zero test MUSD at the latest read-only Testnet RPC check; the earlier 100-MEZO faucet transfer is a different asset. No signer is available to this session. A fresh signed purchase therefore remains outstanding, requiring test-MUSD funding and a wallet signature. No Mainnet payment is authorized. README now describes the published WalletConnect connection flow.
+
 ## 2026-10-13 — reproducible wallet SDK dependency lock
 
 The clean Node 22/npm 10 image build rejected npm 11's incomplete optional peer resolution under the SDK's disabled Base Account connector. Regenerating the lock with the pinned image toolchain adds only nested optional `@x402/core` and `@x402/evm` 2.28.0 entries. Liqvera's direct/root payment packages remain 2.16.0; no payment behavior changed. Independent read-only review confirms the scope. Clean image `npm ci` and build now pass, all 49 browser tests pass after reinstall, and npm audit remains zero. The owner-ID image is built; exact-image scans and publication follow separately.

@@ -1,0 +1,91 @@
+{
+  "verified_at": "2026-10-13T00:38:16.260247+00:00",
+  "video": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1280,
+        "height": 720,
+        "avg_frame_rate": "24/1"
+      }
+    ],
+    "format": {
+      "duration": "120.000000",
+      "size": "1384743"
+    }
+  },
+  "video_audio": "none; English captions burned in",
+  "video_scope": "pre-event preparation cut; real interface captures with non-signing wallet stub; no new payment",
+  "pdf_pages": 7,
+  "runtime_inventory": [
+    {
+      "container": "/liqvera-live-postgres-live-1",
+      "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-gateway-live-1",
+      "image": "sha256:226733a2ee759d28fb610768bccfba6b3f49cb6b76edad9cc29d3aac92d62b6c",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-web-live-1",
+      "image": "sha256:03d08123a9ee2afe50caa78269bf889057f76537f28eff400e77f539f7bd7971",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-edge-live-1",
+      "image": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-gateway-net-live-1",
+      "image": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-report-live-1",
+      "image": "sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15",
+      "health": "healthy",
+      "restarts": "0"
+    },
+    {
+      "container": "/liqvera-live-evidence-capture-live-1",
+      "image": "sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5",
+      "health": "healthy",
+      "restarts": "0"
+    }
+  ],
+  "files": {
+    "pitch.mp4": {
+      "bytes": 1384743,
+      "sha256": "814834020c01b907496161f21109d830f98335a7215f26c56a756e80aa622712"
+    },
+    "pitch.html": {
+      "bytes": 7939,
+      "sha256": "a7b1c3eada032d9faf28158a63a16c4525d5e1973cd8786184cb2e17fab3a36c"
+    },
+    "pitch.srt": {
+      "bytes": 2090,
+      "sha256": "045aa0ddae1b835c6a306f562a7ed759587f22fb1271c89c517588094c510b75"
+    },
+    "presentation.pdf": {
+      "bytes": 77328,
+      "sha256": "4e76c16a432524936d8d8038e963042bf925bf176852f8991010e1ca7581c42a"
+    },
+    "media/preview.png": {
+      "bytes": 160052,
+      "sha256": "9ac63c35408f3cae6655e0bc927827a97288d0658b05c58efcca44fb6612286f"
+    },
+    "media/fresh-quote.png": {
+      "bytes": 118965,
+      "sha256": "67cfd1fdd5735e54dfdee49c270b205551630b951bbb29d1eed02ae686c9d21e"
+    }
+  }
+}

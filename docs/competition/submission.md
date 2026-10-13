@@ -1,14 +1,14 @@
 # Liqvera — submission draft
 
-Prepared 2026-10-12. This is an existing project before the buildathon; this document is not a submitted entry. Personal registration and terms acceptance remain with the owner.
+Prepared 2026-10-13. Existing project; pre-event baseline `607fa0d`. This package has not been submitted to AKINDO. The owner previously reported registration complete; this session has not independently verified that account state or accepted terms.
 
 ## Ready-to-paste project fields
 
 **Project name:** Liqvera
 
-**Category:** Verifiable reports and MUSD payments
+**Category:** MUSD payments for market reports
 
-**TL;DR:** Liqvera combines reproducible public-market reports with MUSD access-payment integration on Mezo Testnet, so recipients can inspect the evidence and verify calculations offline.
+**TL;DR:** Spend test MUSD on BTC market-depth reports you can download and independently verify.
 
 **How it works:** Market screenshots and headline prices hide the depth behind a hypothetical order. Liqvera captures public Hyperliquid BTC perpetual order-book snapshots and calculates filled quantity, notional, VWAP, worst price and price impact using exact arithmetic. Each canonical report includes source metadata, input hashes and a downloadable evidence bundle. An offline verifier checks integrity and recomputes the results. The gateway's x402 integration is configured for MUSD on Mezo Testnet to bind access to exact report and bundle hashes. Historical testnet paid delivery has been demonstrated. A wallet-free historical preview is available; Testnet wallet checkout is enabled at 0.01 test MUSD per report. Reports do not execute trades or include fees, funding or net P&L.
 
@@ -30,7 +30,7 @@ Prepared 2026-10-12. This is an existing project before the buildathon; this doc
 2. By November 15: act on Wave 1 feedback, improve report discovery and recovery usability, and show meaningful additional progress with repeatable validation.
 3. Within 30 days after the event: run a small pilot with prospective report users, validate repeat usage and willingness to pay, and publish a prioritized roadmap based on evidence.
 
-**Team info:** Owner to supply members, roles and public X or LinkedIn profiles. Do not invent credentials, team size or personal details.
+**Team info:** Dimkox — project owner. Public GitHub: https://github.com/Dimkox. This public attribution is owner-confirmed. No other member, personal name, X or LinkedIn profile is asserted; the public GitHub profile supplies none.
 
 ## Links and evidence
 
@@ -38,14 +38,14 @@ Prepared 2026-10-12. This is an existing project before the buildathon; this doc
 - Public source: <https://github.com/Dimkox/liqvera>
 - Current preview source: [f5de466](https://github.com/Dimkox/liqvera/commit/f5de466). All seven production containers now use audited images; the public preview is a new October 12 live-public Liqvera report verified offline.
 - Deck: [presentation.pdf](presentation.pdf), seven slides; editable source: [presentation.html](presentation.html).
-- Video: record and upload the [two-minute pitch](pitch-script.md); no video URL exists in this package yet.
+- Video: [two-minute captioned preparation cut](pitch.mp4), [public download](https://raw.githubusercontent.com/Dimkox/liqvera/main/docs/competition/pitch.mp4), [editable frames](pitch.html), and [script](pitch-script.md). Silent English captions; real interface captures; no new paid transaction is depicted. Replace the pending-payment segment and add in-event progress before the final competition upload.
 - Architecture and boundaries: [specification](../specification.md).
 - Local validation: [remediation report](../security/2026-10-12-remediation.md). Current deployed image IDs, advisory scans and functional evidence: [Testnet audit](../security/2026-10-12-testnet.md).
-- Gateway hotfix verification: 61 gateway tests passed against a disposable database. Consult the current [handoff](../../handoff.md) for publication and deployment evidence.
+- Merchant verification: 71 gateway tests against disposable PostgreSQL and 31 browser tests at source `5f87329`. [October 13 browser evidence](2026-10-13-browser-results.json) confirms a fresh unsigned quote; [download verification](2026-10-13-verification.json) reproduces the preview ZIP. See the [entry checklist](entry-checklist.md).
 
 ## Official requirements and dates
 
-Checked 2026-10-12 against the [AKINDO event](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10) and its [public event API](https://api.akindo.io/public/wave-hacks/OVOO0gdrVU8379D10).
+Checked 2026-10-13 against the [AKINDO event](https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10) and its [public event API](https://api.akindo.io/public/wave-hacks/OVOO0gdrVU8379D10).
 
 | Item | Confirmed requirement or date |
 | --- | --- |
@@ -58,6 +58,6 @@ Checked 2026-10-12 against the [AKINDO event](https://app.akindo.io/wave-hacks/O
 | Required materials | Live project link, public GitHub, product deck, two-minute pitch video. Submit through AKINDO before the wave deadline. |
 | Scoring | Mezo integration 30%; product/business viability 30%; technical implementation 20%; UX 10%; materials 10%. |
 
-Before submitting, supply the video URL and team fields, verify the supported-network flow and current public availability, and replace proposed milestones with the owner's actual plan. Record what changed during the wave. A historical preview alone does not establish the required current working integration.
+Before submitting, complete the fresh signed payment segment, publish actual in-event progress and recheck all links. Use the owner-confirmed public attribution above; do not copy private registration details into this repository. A historical preview alone does not establish the complete current payment flow.
 
 Registration asks for full name, email, Telegram, Discord, GitHub, experience, focus, existing-product status, country and continuation intent. The owner must review the displayed eligibility and terms; recipients must complete KYB for prizes. The official event description and required registration checkbox currently link different terms documents. Inspect the actual registration terms before accepting; this draft accepts neither.

@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-13 — competition package and public author confirmed
+
+Owner confirmed public attribution as Dimkox and GitHub and authorized continued Buildathon preparation. The public profile has no additional name or social links; none were invented. Prior registration was reported complete, so the checklist does not ask for duplicate registration. No authenticated AKINDO connection is available and no entry or terms acceptance was submitted.
+
+The package now includes a two-minute silent captioned MP4, editable frames, SRT captions, the updated seven-page deck and ready-to-paste application fields. Real October 13 browser captures show the sealed preview and a fresh live quote; the non-signing wallet stub and missing fresh paid acceptance are explicit. Public endpoint/hash checks pass and the downloaded preview ZIP reproduces offline. Current test evidence is corrected to 71 gateway plus 31 browser tests at 5f87329; stale claims that checkout is disabled are removed. The MP4 decodes fully, has an exact 120-second duration at 1280×720, and the PDF has seven pages. Independent content review found no publication blocker; local links and whitespace checks pass. No application/runtime code changed.
+
+Official event facts were rechecked: Wave 1 starts October 15 at 15:00 UTC, deadline October 26 at 15:00 UTC. The pre-event baseline is 607fa0d. The entry checklist distinguishes preparation from actual in-event progress and documents the prize/support opportunity without promising rewards. Remaining work: real signed Testnet purchase, paid downloads/offline verification, actual in-event extension, and final authenticated submission. User supplied a public wallet and an independently checked successful 100-test-MEZO faucet transfer; that transfer is not MUSD funding or report payment. No wallet key or signer is available in this session.
+
 ## 2026-10-12 — public demo restored to Testnet
 
 The owner's latest decision selects Mezo Testnet for the working competition demo, superseding the earlier Mainnet deployment. Gateway source `5f87329` runs in merchant mode; browser source `f9ff498` was rebuilt for Testnet. The recipient and 0.01 test-MUSD price are unchanged. All seven containers are healthy with zero restarts at verification.

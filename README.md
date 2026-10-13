@@ -116,4 +116,4 @@ Capture has no wallet or exchange trading credentials. Payment validation binds 
 | [Mainnet configuration](docs/mainnet.md) | Optional network selection and ledger separation |
 | [Validation](docs/validation.md) | Tests, builds and verification commands |
 | [Security](SECURITY.md) | Trust boundaries and vulnerability reporting |
-| [Buildathon materials](docs/competition/submission.md) | Project presentation and submission draft |
+| [Buildathon package](docs/competition/README.md) | Deck, two-minute captioned video and submission checklist |

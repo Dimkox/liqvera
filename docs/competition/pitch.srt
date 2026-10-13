@@ -1,0 +1,31 @@
+1
+00:00:00,000 --> 00:00:15,000
+Liqvera makes market reports you can verify. We give test MUSD a concrete use: access to a public BTC market-depth report that you can download, inspect, and independently reproduce.
+
+2
+00:00:15,000 --> 00:00:30,000
+A headline price does not show the depth behind an order. Analysts and developers need the available liquidity, clear assumptions, and calculations they can check after a report leaves the original service.
+
+3
+00:00:30,000 --> 00:00:45,000
+Here is the real public preview. Its capture time, hypothetical order quantity, result, and hashes are visible. This is a sealed October 12 snapshot, clearly labelled, with an evidence ZIP available without payment.
+
+4
+00:00:45,000 --> 00:01:00,000
+The downloaded bundle passes our offline verifier. It checks integrity and recomputes the depth results using exact arithmetic. This establishes reproducibility from the included inputs. It does not prove exchange authenticity or promise execution.
+
+5
+00:01:00,000 --> 00:01:15,000
+For a fresh report, the service captures public Hyperliquid data and displays immutable terms. This actual browser check reached payment confirmation on Mezo Testnet. The wallet provider is a non-signing stub, so no purchase is claimed.
+
+6
+00:01:15,000 --> 00:01:30,000
+Our x402 gateway binds payment and delivery to exact report hashes. Confirmed access supports repeat downloads without charging again. Historical Testnet purchases succeeded; a new signed purchase on the current deployment remains the acceptance step.
+
+7
+00:01:30,000 --> 00:01:45,000
+The product includes the browser, gateway, public capture, report builder, PostgreSQL ledger, and offline verifier. Source-bound tests and exact-image security audits support the implementation. We publish their scope and preserve unresolved acceptance limits.
+
+8
+00:01:45,000 --> 00:02:00,000
+Liqvera enters Track Two as an existing project. Our proposed next steps are better access, user testing, and measurable progress between waves. Explore the demo and source. Built by Dimkox. Market reports you can verify.

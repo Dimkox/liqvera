@@ -1,0 +1,11 @@
+{
+  "testnet_label": true,
+  "historical_preview": true,
+  "wallet_provider": "smoke stub: public address and chain only; signing disabled",
+  "fresh_report_ready": true,
+  "payment_confirmation_enabled": true,
+  "wallet_signature_submitted": false,
+  "fresh_report_display": "IMMUTABLE QUOTE\nREADY\nReview before access\nInstrument\nHyperliquid BTC linear perpetual\nHypothetical side\nBUY\nQuantity\n0.01 BTC\nSnapshot time\nOct 13, 2026, 12:33:21 AM\nAge now\nLess than a minute old\nSnapshot quality\nValid for snapshot calculation\nCalculation limits\nPublic snapshot identity is policy-validated; exchange authenticity is not independently attested.\nCalculation over the available snapshot depth, at most 20 levels per side.\nHypothetical snapshot sweep; no fees, funding, net PnL, or execution guarantee.\nHashes establish integrity relative to the bundle, not exchange authenticity.\nThis sampled public book is not the exchange's complete order book or an execution guarantee.\n\nMEZO TESTNET ACCESS TERMS\n\nPrice\n0.01 test MUSD\nAtomic amount\n10000000000000000\nNetwork\nMezo Testnet \u00b7 eip155:31611\nToken\n0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503\nRecipient\n0xd7f52d1ddb5dc8678191f14e439fc5db67541535\nExpected payer\n0x1111111111111111111111111111111111111111\nQuote expires\nOct 13, 2026, 12:35:22 AM\nPaid report retention\nAt least 7 days\nUnpaid cleanup grace\nAt least 900 seconds\nLedger retention\nAt least 30 days\nConfirm Mezo Testnet payment in wallet",
+  "runtime_exceptions": 0,
+  "displayed_report": "HISTORICAL LIVE PUBLIC PREVIEW\n\nSealed Hyperliquid BTC perpetual report\nCaptured at\nOct 12, 2026, 10:38:07 PM\nReport ID\n3c02f1e7-e197-487b-bac7-bf8b73823a38\nReport SHA-256\n0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2\nBundle SHA-256\n3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0\nSnapshot calculation\nBUY 0.01 BTC \u00b7 VWAP 82574\n\nSealed historical capture; see its timestamp above. It is not fresh market data, an execution promise, or a new run. No payment transaction exists for this public preview.\n\nDownload evidence ZIP"
+}

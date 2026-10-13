@@ -1,12 +1,12 @@
-# Testnet demonstration script (operator draft)
+# Liqvera live demonstration
 
-This script is for a future authorized `live-public + mezo-testnet` run. Do not narrate an unperformed step as completed. Before recording, confirm A01–A30 evidence against the final clean commit, payment readiness, a dedicated funded test buyer, distinct merchant receiver, reviewed finality rule and safe environment configuration. Stop if any gate fails.
+Use the current Testnet deployment and the [demo runbook](../runbooks/testnet-demo.md). The owner has authorized a 0.01 test-MUSD purchase; a real wallet signature is still needed. Show only actions actually completed.
 
-1. Show the repository commit, provenance, architecture and the current acceptance result. State that the report is read-only analytics on a Hyperliquid BTC **linear perpetual** snapshot, not a spot purchase or executable trade.
-2. Select BUY or SELL and enter an exact BTC quantity. Show live public-source mode, snapshot timestamp, available-depth limitation, validation status and test MUSD access price. Do not call a fixture report live.
-3. Show the unpaid 402 response and its payment terms without revealing a capability or wallet signature. Connect the dedicated buyer wallet on Mezo Testnet, verify chain `31611`, MUSD token, amount `0.01` test MUSD (`10000000000000000` atomic units), and the approved merchant address. Explicitly confirm the limited testnet payment.
-4. After canonical confirmation, show the same immutable report, receipt, transaction hash, block and log index. Download the evidence bundle and run the offline verifier without network access. Explain that hash and recalculation checks establish reproducibility relative to the retained inputs, not an exchange signature or a trading guarantee.
-5. Reload and retrieve the same report and bundle. Show one settlement and no second payment. Demonstrate wallet cancel, wrong chain, wallet switch and recovery only if their corresponding A30 assertions have passed.
-6. End with the complete result's omissions and blockers. If live source, facilitator, RPC, funding or finality evidence is unavailable, stop and record `BLOCKED_EXTERNAL` for the affected cases. A failed local assertion is `FAIL`.
+1. Open [liqvera.site](https://liqvera.site). Show Mezo Testnet and the public, read-only Hyperliquid BTC perpetual instrument.
+2. Open the wallet-free preview. Show its October 12 capture timestamp, quantity, hashes and evidence ZIP. It is a sealed historical capture, not a new payment.
+3. Connect a wallet holding test MUSD, request a fresh BUY/SELL report and review the capture time, limitations, recipient and 0.01 test-MUSD price.
+4. Confirm the limited wallet authorization. Wait for canonical confirmation; if the outcome is uncertain, use Check status instead of signing again.
+5. Show the actual receipt and transaction hash. Download the paid report JSON and ZIP, then run the offline verifier against the receipt's report digest. Reload and retrieve the same entitlement without another payment.
+6. Close with the product's value: MUSD buys a portable analytical artifact that the recipient can independently check. Reports do not place trades or guarantee execution.
 
-The local `make mvp-web` fixture prototype may be shown separately as **SIMULATED — NO TRANSFER**. It does not satisfy the live payment demonstration or replace A13–A14.
+Hide wallet signatures, bearer capabilities and private account views. A public wallet address or unsigned 402 response is not proof of payment. If payment is not completed, stop that segment and retain its pending status. The separate local fixture demonstration transfers no tokens and cannot replace the paid run.

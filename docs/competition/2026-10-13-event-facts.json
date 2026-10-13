@@ -1,0 +1,39 @@
+{
+  "checked_at": "2026-10-13T00:35:31.975218+00:00",
+  "source": "https://api.akindo.io/public/wave-hacks/OVOO0gdrVU8379D10",
+  "event_url": "https://app.akindo.io/wave-hacks/OVOO0gdrVU8379D10",
+  "title": "Build with MUSD and MEZO : Bitcoin's Economic Layer",
+  "wave_1": {
+    "startedAt": "2026-10-15T15:00:00.000Z",
+    "submissionDeadline": "2026-10-26T15:00:00.000Z",
+    "judgementDeadline": "2026-11-01T15:00:00.000Z"
+  },
+  "criteria": [
+    {
+      "title": "Mezo Integration",
+      "weight": 30
+    },
+    {
+      "title": "Product & Business Viability",
+      "weight": 30
+    },
+    {
+      "title": "Technical Implementation",
+      "weight": 20
+    },
+    {
+      "title": "User Experience",
+      "weight": 10
+    },
+    {
+      "title": "Submission Materials Quality",
+      "weight": 10
+    }
+  ],
+  "reward_policy_source": "event description",
+  "reward_policy": "USD 7000 equivalent paid in MEZO; Wave 1 USD 2000, Wave 2 USD 5000; score-proportional allocation; recipient KYB required. API denomination metadata differs, so event prose is used for payout policy.",
+  "testnet_accepted": true,
+  "existing_project_requires_in_event_extension": true,
+  "baseline_commit": "607fa0d7578dfbcd406ca9a1e8b59fb1eaf3cb63",
+  "submission_performed": false
+}

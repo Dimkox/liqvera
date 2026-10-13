@@ -1,21 +1,39 @@
-# Liqvera — two-minute pitch script
+# Liqvera — two-minute pitch
 
-Recording draft, 2026-10-12. Use the seven-slide [deck](presentation.html). Approximately 280 spoken words; rehearse at 140 words per minute and trim pauses to fit two minutes. The timeline is a recording target, not an existing video.
+Captioned preparation cut, October 13, 2026. Eight 15-second scenes; 120 seconds total. The MP4 is silent with burned-in English narration captions. [Video](pitch.mp4), [editable frames](pitch.html), [captions](pitch.srt). Actual interface captures use the running demo through a local relay and a non-signing wallet stub. No wallet signature or new paid delivery is depicted.
 
-| Time | Visual | Narration |
-| --- | --- | --- |
-| 0:00–0:15 | Slide 1: identity | Liqvera makes market reports you can verify. We connect reproducible public-market evidence with MUSD payment integration on Mezo Testnet, giving a digital report a useful payment path and an independent way to check its results. |
-| 0:15–0:30 | Slide 2: problem | A headline price cannot tell you what a hypothetical order would fill at. Screenshots are difficult to reproduce. Analysts and developers need the underlying depth, clear assumptions, and calculations they can inspect after the report is delivered. |
-| 0:30–0:50 | Slide 3: flow | Liqvera captures a public Hyperliquid BTC order-book snapshot. It computes available depth, filled quantity, average execution price, and price impact with exact arithmetic. The report travels with an evidence ZIP. Our offline verifier checks the bundle and recomputes the results without contacting our server. |
-| 0:50–1:10 | Slide 4: MUSD | MUSD is the access-payment asset. Our x402 gateway binds delivery to exact report hashes and checks confirmed settlement on the selected Mezo network. The deployed configuration is Testnet; historical paid delivery was demonstrated on Testnet. Testnet wallet checkout is now enabled at 0.01 test MUSD. Fresh report generation and the payment challenge are verified; a new paid purchase on this deployment is still to be recorded. The public preview works without a wallet. |
-| 1:10–1:30 | Slide 5: demo | In the historical preview, inspect the capture timestamp, quantity, and depth results. Download the preserved evidence and use its matching verifier. This shows what can be independently checked. The report describes a snapshot; it does not trade, predict profits, or prove exchange authenticity. |
-| 1:30–1:45 | Slide 6: evidence | The complete product includes a browser, gateway, capture service, report builder, and offline verifier. Our documented local validation and independent vulnerability checks support the implementation. We distinguish those results from live acceptance and publish the remaining limitations. |
-| 1:45–2:00 | Slide 7: next steps | Liqvera enters as an existing project in Access and Distribution. During the buildathon, we propose improving the MUSD access flow, testing usability with prospective users, and showing measurable progress between waves. Explore the public source and historical demo at liqvera dot site. |
+## 0:00–0:15 — Market reports you can verify.
 
-## Recording checklist
+Liqvera makes market reports you can verify. We give test MUSD a concrete use: access to a public BTC market-depth report that you can download, inspect, and independently reproduce.
 
-- Show the real historical preview and its timestamp; do not present it as a new capture.
-- Use the verifier matching the historical artifact, or explicitly label a separate current local demonstration.
-- Never expose wallet signatures, bearer links, grants, credentials or private account views.
-- A payment needs the presenter’s wallet confirmation and 0.01 test MUSD. Do not claim confirmed Testnet delivery until its receipt and downloaded artifacts have been verified.
-- Before recording the final entry, update the narration to the then-current demonstrated state and actual in-event changes.
+## 0:15–0:30 — A headline price leaves out the depth.
+
+A headline price does not show the depth behind an order. Analysts and developers need the available liquidity, clear assumptions, and calculations they can check after a report leaves the original service.
+
+## 0:30–0:45 — Inspect before paying.
+
+Here is the real public preview. Its capture time, hypothetical order quantity, result, and hashes are visible. This is a sealed October 12 snapshot, clearly labelled, with an evidence ZIP available without payment.
+
+## 0:45–1:00 — Take the evidence with you.
+
+The downloaded bundle passes our offline verifier. It checks integrity and recomputes the depth results using exact arithmetic. This establishes reproducibility from the included inputs. It does not prove exchange authenticity or promise execution.
+
+## 1:00–1:15 — Review exact Testnet terms.
+
+For a fresh report, the service captures public Hyperliquid data and displays immutable terms. This actual browser check reached payment confirmation on Mezo Testnet. The wallet provider is a non-signing stub, so no purchase is claimed.
+
+## 1:15–1:30 — Pay once. Keep the report.
+
+Our x402 gateway binds payment and delivery to exact report hashes. Confirmed access supports repeat downloads without charging again. Historical Testnet purchases succeeded; a new signed purchase on the current deployment remains the acceptance step.
+
+## 1:30–1:45 — Complete services. Explicit evidence.
+
+The product includes the browser, gateway, public capture, report builder, PostgreSQL ledger, and offline verifier. Source-bound tests and exact-image security audits support the implementation. We publish their scope and preserve unresolved acceptance limits.
+
+## 1:45–2:00 — Make MUSD useful. Make results verifiable.
+
+Liqvera enters Track Two as an existing project. Our proposed next steps are better access, user testing, and measurable progress between waves. Explore the demo and source. Built by Dimkox. Market reports you can verify.
+
+## Before the final competition upload
+
+Replace the pending-payment segment with the actual signed purchase, receipt, delivered JSON/ZIP and offline verification once available. Record real in-event progress against the pre-event baseline. Do not relabel this preparation cut as a completed payment recording. Recheck the public video link and submission requirements.

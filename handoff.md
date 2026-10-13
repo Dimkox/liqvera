@@ -1,5 +1,11 @@
 # Liqvera handoff
 
+## 2026-10-13 — preserve the connected wallet after provider replacement
+
+Owner reports a grey Request a report button with “Connect an injected wallet to continue,” while Trust is visible. Public capabilities remain ready. Independent review reproduced an actual state defect: a pending event refresh from a previously selected provider can complete after replacement and erase the newly connected address. Real Chrome against deployed source a93605d reproduces the exact disabled-button message by delaying the previous provider’s response. This establishes a reproducible app defect, not proof of the precise sequence on the owner’s physical phone.
+
+The existing event binding now invalidates queued and in-flight callbacks on unbind, including failure callbacks. Account/network prerequisites and payment guards are unchanged. Three regression cases fail before the fix and pass afterward; all 40 browser tests and the Testnet build pass. Chrome against the candidate retains the Trust account and enabled request button after the same delayed response. Independent read-only review found no Critical/Important blocker for this scoped fix. Overlapping manual connection calls remain outside this change. Next: build/audit this source and perform a separate browser-only rollout with rollback retained.
+
 ## 2026-10-13 — Trust Wallet mobile connection
 
 Owner reports Connect wallet failing in ordinary mobile Chrome/Safari and confirms Trust Wallet is installed. The deployed browser at ad606e4 only looked for an injected provider; the actual no-provider browser reproduced an extension-install notice with no mobile route. Connect now offers Trust Wallet's official universal dApp link to the fixed public origin, with an explicit instruction to continue inside its browser. No session parameters, capabilities or payment data enter that link. The app also discovers window.trustwallet.ethereum when window.ethereum is absent and requests account access before switching chains.

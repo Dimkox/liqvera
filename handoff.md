@@ -1,5 +1,9 @@
 # Liqvera handoff
 
+## 2026-10-13 — README describes the product
+
+Owner requests a straightforward introduction to the Liqvera website and code, without project history, deployment logs, repair narratives, acceptance commentary or installer promotion. README now presents the product, capabilities, demo flow, code components and supporting documentation. Detailed verification evidence remains in its existing documents. No runtime or installer files were changed. Documentation links and whitespace checks pass.
+
 ## 2026-10-13 — wallet repair deployed and verified
 
 Clean source `ad606e47c1341dffc9d7104e783d000962020a92` produced browser `sha256:5599dca2ff4a6c7e51397f761768e771436bd9bcd9510dee3846fdcf8df5073f`; it is deployed at the canonical https://liqvera.site on Testnet. Only the browser was replaced. Its prior container and private manifest are retained for rollback; the gateway, ledgers and other services were untouched. The public origin serves `index-C4Yudbl2.js`.

@@ -38,9 +38,10 @@ app.innerHTML = `
             <label class="field-label" for="quantity">Quantity <span>BTC</span></label><input id="quantity" name="quantity" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0.15" aria-describedby="quantity-hint" /><p id="quantity-hint" class="field-hint">A positive decimal string, up to 8 places. The report shows a hypothetical sweep.</p>
             <div class="wallet-box"><div><span class="eyebrow">EXPECTED PAYER</span><strong id="wallet-label">No wallet connected</strong><span id="chain-label">Connect an EVM wallet on ${NETWORK_LABEL}.</span></div><div class="wallet-actions"><label for="wallet-provider" class="field-hint">Wallet provider</label><select id="wallet-provider" class="hidden" aria-label="Choose wallet provider"></select><button id="connect-button" type="button" class="text-button">Connect wallet</button><button id="switch-button" type="button" class="text-button hidden">Switch network</button></div></div>
             <div id="wallet-help" class="hidden">
-              <p class="supporting">Connect on your phone with Trust Wallet.</p>
+              <p class="supporting">Use your preferred EVM wallet that supports ${NETWORK_LABEL}. On your phone, open liqvera.site in your wallet’s browser, then tap Connect wallet.</p>
+              <p class="subtle">Optional shortcut for Trust Wallet users:</p>
               <a id="trust-wallet-link" class="secondary-button" href="https://link.trustwallet.com/open_url?coin_id=60&amp;url=https%3A%2F%2Fliqvera.site">Open in Trust Wallet</a>
-              <p class="subtle">Continue in Trust Wallet’s browser, then tap Connect wallet. On a computer, use a wallet browser extension.</p>
+              <p class="subtle">On a computer, enable your wallet browser extension. If several wallets are detected, choose one from the Wallet provider list.</p>
             </div>
             <details id="network-help" class="hidden">
               <summary>Set up ${NETWORK_LABEL} in your wallet</summary>
@@ -172,7 +173,7 @@ function updateControls(): void {
   el<HTMLElement>("#create-note").textContent = !cap ? "Checking service capabilities…" :
     !cap.payment_ready ? "Payment and new quotes are currently unavailable." :
     !x402Available() ? "The browser payment adapter awaits SDK verification; no payment can be submitted." :
-    !account ? "Connect an injected wallet to continue." :
+    !account ? "Connect your wallet to continue." :
     flow ? "This session already has a report. Check its status or start another after it finishes." :
     !onChain ? `You can prepare a report now. Switch to ${NETWORK_LABEL} to pay and unlock it.` :
     "The server will prepare the evidence before showing any payment terms.";
@@ -536,7 +537,7 @@ async function connectWallet(): Promise<void> {
   applyWalletState({account:null,onMezo:false});
   el<HTMLElement>("#wallet-help").classList.toggle("hidden", Boolean(provider));
   if (!provider) {
-    announcement("Open Liqvera in Trust Wallet to connect on your phone.", "warning");
+    announcement("Open liqvera.site in your EVM wallet’s browser, or enable a wallet extension, then connect.", "warning");
     return;
   }
   try {

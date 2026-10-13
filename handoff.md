@@ -1,5 +1,9 @@
 # Liqvera handoff
 
+## 2026-10-13 — wallet-neutral connection guidance
+
+Owner challenges the Trust-only mobile wording. Inspection confirms provider selection uses EIP-6963 with generic EIP-1193 RPC/signing; there is no Trust-specific payment path. The mobile prompt and README now describe the general extension or wallet-browser route, with the Trust deep link explicitly optional. Its namespace fallback remains for compatibility. This is a copy/documentation correction, not a new connector: WalletConnect sessions are not implemented, and the runbook states that limit. All 42 web tests, the production build, documentation links and whitespace checks pass. No dependencies or payment behavior changed. Next: build the browser from this source, verify a generic provider, audit and publish the browser update.
+
 ## 2026-10-13 — request preparation and wallet network selection
 
 The owner's screenshot establishes a connected account on a different network, with Request a report disabled. Public API quote preparation does not use wallet RPC or submit payment. Browser preparation now accepts the connected payer independently of the selected chain; payment still requires the configured Mezo network and revalidates account/network immediately before signing. Copy distinguishes preparation from payment and artifact access. Pinned manual network settings are available when the account is on another chain and expand if automatic switching fails.

@@ -1,0 +1,80 @@
+{
+  "deployment": {
+    "source_commit": "ad606e47c1341dffc9d7104e783d000962020a92",
+    "web_image": "sha256:5599dca2ff4a6c7e51397f761768e771436bd9bcd9510dee3846fdcf8df5073f",
+    "previous_web_image": "sha256:03d08123a9ee2afe50caa78269bf889057f76537f28eff400e77f539f7bd7971",
+    "network": "eip155:31611",
+    "public_asset": "index-C4Yudbl2.js",
+    "health": "healthy",
+    "rollback_container": "liqvera-live-web-live-1-before-wallet-ad606e4",
+    "manifest_backup": "/home/pall/.local/state/liqvera/recovery/2026-10-13-wallet-ad606e4/compose.before.json",
+    "other_services_changed": false,
+    "payment_submitted": false
+  },
+  "before": {
+    "signCalls": 0,
+    "amountType": null,
+    "notice": "Checking the payment already submitted. Do not pay again.",
+    "canRetry": false
+  },
+  "after": {
+    "signCalls": 1,
+    "amountType": "string",
+    "notice": "Wallet payment was canceled before submission. The quote remains unpaid.",
+    "canRetry": true
+  },
+  "browser_transport": "Real Chrome and deployed browser through a loopback relay to the public service, with canonical API Origin. The injected EIP-1193 provider rejects signing; no real wallet signature or payment.",
+  "verification": "Historical preview renders; a fresh real market report reaches payment confirmation; exact integer signing reaches provider; cancellation permits retry without submission.",
+  "public_health": {
+    "schema": "liqvera-evidence-health/v1",
+    "request_id": "c4107616-5c7a-4359-a6fc-2311a26d5944",
+    "status": "alive"
+  },
+  "public_readiness": {
+    "schema": "liqvera-evidence-readiness/v1",
+    "request_id": "2744507c-a020-4fdf-90a7-2a2de070fb25",
+    "ready": true,
+    "storage_ready": true,
+    "integration_ready": true,
+    "configuration_ready": true,
+    "payment_ready": true,
+    "blockers": []
+  },
+  "containers": [
+    {
+      "name": "liqvera-live-web-live-1",
+      "image": "sha256:5599dca2ff4a6c7e51397f761768e771436bd9bcd9510dee3846fdcf8df5073f",
+      "health": "healthy"
+    },
+    {
+      "name": "liqvera-live-gateway-live-1",
+      "image": "sha256:226733a2ee759d28fb610768bccfba6b3f49cb6b76edad9cc29d3aac92d62b6c",
+      "health": "healthy"
+    },
+    {
+      "name": "liqvera-live-postgres-live-1",
+      "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+      "health": "healthy"
+    },
+    {
+      "name": "liqvera-live-edge-live-1",
+      "image": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+      "health": "healthy"
+    },
+    {
+      "name": "liqvera-live-gateway-net-live-1",
+      "image": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4",
+      "health": "healthy"
+    },
+    {
+      "name": "liqvera-live-report-live-1",
+      "image": "sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15",
+      "health": "healthy"
+    },
+    {
+      "name": "liqvera-live-evidence-capture-live-1",
+      "image": "sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5",
+      "health": "healthy"
+    }
+  ]
+}

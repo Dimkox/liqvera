@@ -43,7 +43,7 @@ The service runs on **Mezo Testnet, chain 31611**, at **0.01 test MUSD per repor
 
 Public checks verify fresh live-report generation and the exact Testnet payment challenge. A new paid-delivery acceptance on this deployment still requires a buyer signature and verified downloads.
 
-All seven deployed containers passed health checks. The [deployment and security report](docs/security/2026-10-12-testnet.md) identifies their exact images and records dependency scans, fixes and the evidence behind remaining scanner matches.
+All seven deployed containers passed health checks. The [deployment and security report](docs/security/2026-10-12-testnet.md) identifies their images. The [October 13 wallet repair](docs/security/2026-10-13-wallet.md) records the updated browser, exact-image scans and verified signature cancellation.
 
 ## Run locally
 

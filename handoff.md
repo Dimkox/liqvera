@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-13 — wallet repair deployed and verified
+
+Clean source `ad606e47c1341dffc9d7104e783d000962020a92` produced browser `sha256:5599dca2ff4a6c7e51397f761768e771436bd9bcd9510dee3846fdcf8df5073f`; it is deployed at the canonical https://liqvera.site on Testnet. Only the browser was replaced. Its prior container and private manifest are retained for rollback; the gateway, ledgers and other services were untouched. The public origin serves `index-C4Yudbl2.js`.
+
+[Security and deployment evidence](docs/security/2026-10-13-wallet.md): npm and Trivy zero; Grype three known, binary-hash-verified BusyBox backport matches; no new untriaged finding. Both database refreshes succeeded and reported the latest available October 12 databases. All raw archive member hashes pass. Independent code and rollout reviews found no remaining blocker.
+
+Actual deployed Chrome now reaches the signing provider with exact decimal data; rejection displays cancellation and permits retry. Before repair the same check made zero signing calls and incorrectly entered payment recovery. Preview rendering and a fresh live quote also pass. This was a rejecting wallet stub, with no real signature or new payment. Owner-confirmed contest submission remains recorded; no duplicate entry or HTML work is needed.
+
 ## 2026-10-13 — wallet signing boundary repaired
 
 The actual deployed browser reproduced a checkout failure before any wallet request: the official SDK supplies BigInt permit fields, while the adapter called plain JSON.stringify. It incorrectly displayed confirm-only recovery despite zero signing calls. The adapter now uses the already locked viem serializer and explicitly supplies EIP712Domain fields for both Permit2 and MUSD signatures. viem 2.56.9 is declared directly; the installed dependency closure is unchanged.

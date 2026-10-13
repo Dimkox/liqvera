@@ -1,10 +1,18 @@
 # Liqvera handoff
 
+## 2026-10-13 — wallet signing boundary repaired
+
+The actual deployed browser reproduced a checkout failure before any wallet request: the official SDK supplies BigInt permit fields, while the adapter called plain JSON.stringify. It incorrectly displayed confirm-only recovery despite zero signing calls. The adapter now uses the already locked viem serializer and explicitly supplies EIP712Domain fields for both Permit2 and MUSD signatures. viem 2.56.9 is declared directly; the installed dependency closure is unchanged.
+
+An explicit wallet rejection (4001) inside either signing callback now returns the existing pre-submission cancellation state. Transport failures after submission remain confirm-only, including errors with the same code. Four real-adapter/official-SDK regressions failed before the fix and pass afterward; all 35 browser tests, Testnet production build and npm audit (zero advisories) pass. Independent read-only review resolved the domain/typecheck findings and reports no remaining Critical/Important issue.
+
+Owner requested skipping HTML work; no HTML/CSS or contest assets changed. Next: build and audit the browser from this commit, replace only its deployed container with rollback retained, and repeat the browser cancellation check. No payment has been signed or submitted by these checks.
+
 ## 2026-10-13 — owner confirms submission already completed
 
 Owner explicitly confirms that the Liqvera entry has already been submitted. Treat submission as owner-confirmed; this session did not access or submit through the AKINDO account. Do not request duplicate registration/submission or turn a repeat payment into an invented competition eligibility gate. Historical successful paid Testnet delivery remains valid historical evidence; a fresh post-update payment is a separate regression check.
 
-Owner supplied `liqvera.live` as the relevant address. Current local DNS and independent Google DNS return NXDOMAIN for that name; do not silently substitute a domain or change the deployed origin. The previously verified deployment is `liqvera.site`. Resolve the supplied-domain discrepancy before changing links or infrastructure.
+Owner corrected the address to `liqvera.site`; this is the canonical deployed origin. The earlier `.live` spelling is superseded. No DNS or domain migration is requested.
 
 ## 2026-10-13 — competition package and public author confirmed
 

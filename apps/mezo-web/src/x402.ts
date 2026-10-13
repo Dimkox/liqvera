@@ -3,6 +3,7 @@ import { MEZO, MUSD } from "./network.ts";
 import type { Delivery, Quote } from "./contracts";
 import type { Eip1193Provider } from "./wallet";
 import type { ClientEvmSigner } from "@x402/evm";
+import { getTypesForEIP712Domain, serializeTypedData } from "viem";
 import { validateDelivery } from "./api";
 import { boundedFetchJson } from "./x402-transport.mjs";
 // @ts-expect-error The pinned JS SDK bridge is exercised directly by x402-production.test.mjs.
@@ -54,7 +55,18 @@ class ProductionX402BrowserAdapter implements OfficialX402BrowserAdapter {
       input.quote.terms.network!==MEZO.caip2||input.quote.terms.asset.toLowerCase()!==MUSD.address.toLowerCase()||
       input.quote.terms.amount_atomic!=="10000000000000000")throw new Error("Payment terms changed. No payment was submitted.");
     const signer:ClientEvmSigner={address:input.payer as `0x${string}`,signTypedData:async message=>{
-      const signature=await input.provider.request({method:"eth_signTypedData_v4",params:[input.payer,JSON.stringify(message)]});
+      // Preserve uint precision and include the domain definition required by wallet RPC.
+      const typedData=serializeTypedData<Record<string,unknown>,string>({...message,types:{...message.types,
+        EIP712Domain:getTypesForEIP712Domain({domain:message.domain})}});
+      let signature:unknown;
+      try {
+        signature=await input.provider.request({method:"eth_signTypedData_v4",params:[input.payer,typedData]});
+      } catch(error) {
+        // This callback runs before the signed payment payload can be submitted.
+        if(typeof error==="object"&&error!==null&&"code" in error&&error.code===4001)
+          throw new X402CancelledBeforeSubmission("Wallet signature was cancelled before payment submission.");
+        throw error;
+      }
       if(typeof signature!=="string"||!/^0x[0-9a-fA-F]{130}$/.test(signature))throw new X402CancelledBeforeSubmission();
       return signature as `0x${string}`;
     }};

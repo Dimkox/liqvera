@@ -1,0 +1,939 @@
+{
+  "schema": "liqvera-tls-deployment-evidence-v1",
+  "recorded_at": "2026-10-21T12:49:15.145720+00:00",
+  "published_origin": "https://liqvera.site",
+  "source_commit": "1c020995adaa1a80fc8a97888aa838041d8e01d5",
+  "closed_tls_findings": [
+    "SR-01",
+    "SR-02",
+    "SR-03",
+    "SR-04"
+  ],
+  "security_review_verdict": "PASS for the frozen TLS successor; original negative audit preserved",
+  "deployment": {
+    "source_commit": "1c020995adaa1a80fc8a97888aa838041d8e01d5",
+    "inventory": {
+      "web": {
+        "id": "9dfd3c73dffba0caae67c0a765ba8eac3f7b997f20028b51edd97347268df9c0",
+        "image": "sha256:6b26f78a2856e7f2f5a07884249d2b45351a08b3160732ef50a5d04967e07a06",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": []
+      },
+      "edge": {
+        "id": "7752b25f0e643742ffe4d006a5169a8a5239c9a9617df2ac7c194593743c1dd4",
+        "image": "sha256:aa8f036c87fd1f83aec1618205864fac968ac645882c493c74bcb07d5f7a601c",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_caddy_config",
+          "liqvera-live_caddy_data"
+        ]
+      },
+      "gateway": {
+        "id": "b349f5dd36d5d4a158c12f3fc428025807ebe2d3ed1b9c20e9ce96383ba50988",
+        "image": "sha256:a341fae9c0c8a1feade5b11493b58dbeb1a4f22cad5e5b79ef4602dd5b7db901",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_artifacts"
+        ]
+      },
+      "gateway-net": {
+        "id": "1b05cbf2e538a82b5948a5cbecb188c0a8b3f3efb8749bdbc91131ae5150838f",
+        "image": "sha256:a341fae9c0c8a1feade5b11493b58dbeb1a4f22cad5e5b79ef4602dd5b7db901",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": []
+      },
+      "postgres": {
+        "id": "f5faf86c9c2c26261ba6340a851c8b470dfd917dcae879a1e99dfd16484a684d",
+        "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_postgres_data"
+        ]
+      },
+      "report": {
+        "id": "7d5ce4a4592f07a8e7684c7e4ba3c2203f028d37c1c674626f63175a7a117d99",
+        "image": "sha256:f938d4f3483af7453944ad98de648f9b7a1f6ac4ad3399434069194245d58901",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_artifacts",
+          "liqvera-live_captures"
+        ]
+      },
+      "evidence-capture": {
+        "id": "32c90fd9036aca131bf624987348699e1654b840246b8b2f5f6f4a8871c14497",
+        "image": "sha256:3edb015ec3aea7235b621303d1a1821eaa7c52b44f8ceb03b50fe51c4c97d5c1",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_captures"
+        ]
+      }
+    },
+    "previous_inventory": {
+      "web": {
+        "id": "f2a59d3d7d00ce0a6e7884cbf0e46a765ba02dae4b54b08cb434fbfbcfad218d",
+        "image": "sha256:e824dfe58616166fcabbe973b140be27857d7dbb3113fa501296488610527e0f",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": []
+      },
+      "edge": {
+        "id": "526fcf4ba5366d8213cf0cc8e84c2571a7fb591a0c5db54af32d4276276dc02d",
+        "image": "sha256:2758b18f013b58b60356355affe505e7b4e29182873cfa710dbbf6d03f720233",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_caddy_config",
+          "liqvera-live_caddy_data"
+        ]
+      },
+      "gateway": {
+        "id": "1e440eff8c7d7cbebf26717533c8bb92c47c0d00379c3ce99ce52c13e1ebd0eb",
+        "image": "sha256:226733a2ee759d28fb610768bccfba6b3f49cb6b76edad9cc29d3aac92d62b6c",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_artifacts"
+        ]
+      },
+      "gateway-net": {
+        "id": "1cd40f4d85953ea90bcb3cded71b428061b5b1910ac659805132cf3d3f12a58c",
+        "image": "sha256:cd2a0fa4e2de452367bcd2b08499e6443d17b31ba7da188ab4a54ad1a2c937d4",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": []
+      },
+      "postgres": {
+        "id": "f5faf86c9c2c26261ba6340a851c8b470dfd917dcae879a1e99dfd16484a684d",
+        "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_postgres_data"
+        ]
+      },
+      "report": {
+        "id": "b758fd6ef9687b9d7879196ae0a0c0f34ba9fcaca52d3c538e25e32fbb28829a",
+        "image": "sha256:317b8c5ae4f14a2ca9bc4ea529eb80a4e9ded790efd2863afeffa80b17e18d15",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_artifacts",
+          "liqvera-live_captures"
+        ]
+      },
+      "evidence-capture": {
+        "id": "a3e883cc55be7c7e86b26b60e40966813a4a93d539dd694eebb356d6f5bf1770",
+        "image": "sha256:0eeaac0d5071cdd628d8aa0ac8bce1e4c3bdff95231932ccad1566c482c3f6a5",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_captures"
+        ]
+      }
+    },
+    "public": {
+      "asset": "index-Cnfn94HM.js",
+      "network": "eip155:31611",
+      "payment_ready": true,
+      "preview_sha256": {
+        "report.json": "0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2",
+        "evidence.zip": "3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0"
+      },
+      "csp_matches_source": true
+    },
+    "ledger_before": [
+      "payment_attempts|CONFIRMED|3",
+      "payment_attempts|MANUAL_REVIEW|1",
+      "receipts|4",
+      "entitlements|4",
+      "001_ledger.sql|bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b",
+      "002_fix_immutable_ledger_identity.sql|981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb",
+      "003_live_grant_consumption.sql|bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0",
+      "004_receipt_confirmation_provenance.sql|96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a",
+      "005_receipt_confirmation_count.sql|e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11",
+      "006_signed_live_grant_authority.sql|92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a",
+      "007_network_identity.sql|377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6",
+      "008_merchant_nonce.sql|562504aa3b54efc7e8e5b5b3eed3a4918c85ec305da775bd33279899dab2e2fe"
+    ],
+    "ledger_after": [
+      "payment_attempts|CONFIRMED|3",
+      "payment_attempts|MANUAL_REVIEW|1",
+      "receipts|4",
+      "entitlements|4",
+      "001_ledger.sql|bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b",
+      "002_fix_immutable_ledger_identity.sql|981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb",
+      "003_live_grant_consumption.sql|bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0",
+      "004_receipt_confirmation_provenance.sql|96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a",
+      "005_receipt_confirmation_count.sql|e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11",
+      "006_signed_live_grant_authority.sql|92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a",
+      "007_network_identity.sql|377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6",
+      "008_merchant_nonce.sql|562504aa3b54efc7e8e5b5b3eed3a4918c85ec305da775bd33279899dab2e2fe"
+    ],
+    "rollback_containers": [
+      "liqvera-live-evidence-capture-live-1-before-tls-1c02099",
+      "liqvera-live-report-live-1-before-tls-1c02099",
+      "liqvera-live-web-live-1-before-tls-1c02099",
+      "liqvera-live-gateway-net-live-1-before-tls-1c02099",
+      "liqvera-live-gateway-live-1-before-tls-1c02099",
+      "liqvera-live-edge-live-1-before-tls-1c02099"
+    ],
+    "recovery_directory": "/home/pall/.local/state/liqvera/recovery/2026-10-21-tls-1c02099",
+    "duration_seconds": 96.86467826599255,
+    "walletconnect_preserved": true,
+    "postgres_replaced": false,
+    "payment_submitted": false,
+    "migrations_run": false
+  },
+  "preservation": {
+    "source_commit": "1c020995adaa1a80fc8a97888aa838041d8e01d5",
+    "services": {
+      "web": {
+        "image": "sha256:6b26f78a2856e7f2f5a07884249d2b45351a08b3160732ef50a5d04967e07a06",
+        "healthy": true,
+        "environment_preserved_except_declared_tls_provenance": true,
+        "host_config_and_mounts_preserved": true,
+        "restart_count": 0
+      },
+      "edge": {
+        "image": "sha256:aa8f036c87fd1f83aec1618205864fac968ac645882c493c74bcb07d5f7a601c",
+        "healthy": true,
+        "environment_preserved_except_declared_tls_provenance": true,
+        "host_config_and_mounts_preserved": true,
+        "restart_count": 0
+      },
+      "gateway": {
+        "image": "sha256:a341fae9c0c8a1feade5b11493b58dbeb1a4f22cad5e5b79ef4602dd5b7db901",
+        "healthy": true,
+        "environment_preserved_except_declared_tls_provenance": true,
+        "host_config_and_mounts_preserved": true,
+        "restart_count": 0
+      },
+      "gateway-net": {
+        "image": "sha256:a341fae9c0c8a1feade5b11493b58dbeb1a4f22cad5e5b79ef4602dd5b7db901",
+        "healthy": true,
+        "environment_preserved_except_declared_tls_provenance": true,
+        "host_config_and_mounts_preserved": true,
+        "restart_count": 0
+      },
+      "postgres": {
+        "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+        "healthy": true,
+        "environment_preserved_except_declared_tls_provenance": true,
+        "host_config_and_mounts_preserved": true,
+        "restart_count": 0
+      },
+      "report": {
+        "image": "sha256:f938d4f3483af7453944ad98de648f9b7a1f6ac4ad3399434069194245d58901",
+        "healthy": true,
+        "environment_preserved_except_declared_tls_provenance": true,
+        "host_config_and_mounts_preserved": true,
+        "restart_count": 0
+      },
+      "evidence-capture": {
+        "image": "sha256:3edb015ec3aea7235b621303d1a1821eaa7c52b44f8ceb03b50fe51c4c97d5c1",
+        "healthy": true,
+        "environment_preserved_except_declared_tls_provenance": true,
+        "host_config_and_mounts_preserved": true,
+        "restart_count": 0
+      }
+    },
+    "payment_submitted": false,
+    "ledger": [
+      "payment_attempts|CONFIRMED|3",
+      "payment_attempts|MANUAL_REVIEW|1",
+      "receipts|4",
+      "entitlements|4",
+      "001_ledger.sql|bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b",
+      "002_fix_immutable_ledger_identity.sql|981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb",
+      "003_live_grant_consumption.sql|bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0",
+      "004_receipt_confirmation_provenance.sql|96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a",
+      "005_receipt_confirmation_count.sql|e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11",
+      "006_signed_live_grant_authority.sql|92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a",
+      "007_network_identity.sql|377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6",
+      "008_merchant_nonce.sql|562504aa3b54efc7e8e5b5b3eed3a4918c85ec305da775bd33279899dab2e2fe"
+    ],
+    "ledger_and_migration_hashes_preserved": true,
+    "walletconnect_preserved": true,
+    "corrected_ca_public_checks": {
+      "/": {
+        "sha256": "9e1f6ac6c4fb8c471577bb3d732b30c322430bcd0757ef3151b5e2a2bd8b434a",
+        "bytes": 576
+      },
+      "/healthz": {
+        "sha256": "efbffad01ce3960c4dc711213bcce65d0a5a1cdf2ba25165097592d3585afd14",
+        "bytes": 108
+      },
+      "/readyz": {
+        "sha256": "bf4a34ee72632d53ad4bb3e36a2eb33a7e2aa88afd461a4470db1a9062d5d10b",
+        "bytes": 215
+      },
+      "/v1/capabilities": {
+        "sha256": "4434135d8162f86c4109c90680671620ac813e323e7c27c78d65304c9c662dc4",
+        "bytes": 619
+      },
+      "/demo/latest-live/report.json": {
+        "sha256": "0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2",
+        "bytes": 4913
+      },
+      "/demo/latest-live/evidence.zip": {
+        "sha256": "3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0",
+        "bytes": 38188
+      }
+    }
+  },
+  "backup_restore": {
+    "source_commit": "1c020995adaa1a80fc8a97888aa838041d8e01d5",
+    "postgres_image": "sha256:98e5cab850b96ff1acfaca92834c8590274e62ba9f64b6d882d27ec7f6e090d8",
+    "dump_sha256": "f16d3cff63d5e799fffae9cd69673c42782a0c4c80938ecfe1cea80bfd026e24",
+    "restored_ledger_matches": true,
+    "ledger": [
+      "payment_attempts|CONFIRMED|3",
+      "payment_attempts|MANUAL_REVIEW|1",
+      "receipts|4",
+      "entitlements|4",
+      "001_ledger.sql|bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b",
+      "002_fix_immutable_ledger_identity.sql|981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb",
+      "003_live_grant_consumption.sql|bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0",
+      "004_receipt_confirmation_provenance.sql|96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a",
+      "005_receipt_confirmation_count.sql|e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11",
+      "006_signed_live_grant_authority.sql|92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a",
+      "007_network_identity.sql|377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6",
+      "008_merchant_nonce.sql|562504aa3b54efc7e8e5b5b3eed3a4918c85ec305da775bd33279899dab2e2fe"
+    ],
+    "isolation": "internal network, tmpfs only, no production mount",
+    "cleanup": "owned container and network removed"
+  },
+  "coherent_backup": {
+    "sha256": {
+      "liqvera.pgdump": "f16d3cff63d5e799fffae9cd69673c42782a0c4c80938ecfe1cea80bfd026e24",
+      "artifacts.tar.gz": "6eed7e2366acd5b440d495f2184909d5050ad7876c5f11f6cf0516fc8efeffc9",
+      "captures.tar.gz": "30fbc0962c1f851b503386c56ca99213f04271ea23a046ec004ed43a0d77f588"
+    },
+    "duration_seconds": 8.044390678405762
+  },
+  "images": {
+    "source_commit": "1c020995adaa1a80fc8a97888aa838041d8e01d5",
+    "images": {
+      "capture": {
+        "tag": "liqvera-capture:tls-1c02099",
+        "image": "sha256:3edb015ec3aea7235b621303d1a1821eaa7c52b44f8ceb03b50fe51c4c97d5c1",
+        "returncode": 0
+      },
+      "report": {
+        "tag": "liqvera-report:tls-1c02099",
+        "image": "sha256:f938d4f3483af7453944ad98de648f9b7a1f6ac4ad3399434069194245d58901",
+        "returncode": 0
+      },
+      "gateway": {
+        "tag": "liqvera-gateway:tls-1c02099",
+        "image": "sha256:a341fae9c0c8a1feade5b11493b58dbeb1a4f22cad5e5b79ef4602dd5b7db901",
+        "returncode": 0
+      },
+      "edge": {
+        "tag": "liqvera-edge:tls-1c02099",
+        "image": "sha256:aa8f036c87fd1f83aec1618205864fac968ac645882c493c74bcb07d5f7a601c",
+        "returncode": 0
+      },
+      "web": {
+        "tag": "liqvera-web:tls-1c02099",
+        "image": "sha256:6b26f78a2856e7f2f5a07884249d2b45351a08b3160732ef50a5d04967e07a06",
+        "returncode": 0
+      },
+      "postgres": {
+        "tag": "liqvera-postgres:tls-1c02099",
+        "image": "sha256:98e5cab850b96ff1acfaca92834c8590274e62ba9f64b6d882d27ec7f6e090d8",
+        "returncode": 0
+      }
+    },
+    "security_untriaged_findings": 0,
+    "security_summary_sha256": "fc12e8e1d78d3761493fcb85e599271429c835befdb1667a8f5aaa262f1d25c0",
+    "draft": false,
+    "live_postgres_retained": true
+  },
+  "image_checks": {
+    "checks": {
+      "capture-tls": 0,
+      "capture-python": 0,
+      "capture-busybox": 0,
+      "report-tls": 0,
+      "report-python": 0,
+      "report-busybox": 0,
+      "gateway-tls": 0,
+      "edge-tls": 0,
+      "web-tls": 0,
+      "postgres-tls": 0
+    },
+    "candidate_v2_rootfs": {
+      "capture": {
+        "rootfs_equal": false,
+        "source_label": "1c020995adaa1a80fc8a97888aa838041d8e01d5"
+      },
+      "report": {
+        "rootfs_equal": false,
+        "source_label": "1c020995adaa1a80fc8a97888aa838041d8e01d5"
+      },
+      "gateway": {
+        "rootfs_equal": true,
+        "source_label": "1c020995adaa1a80fc8a97888aa838041d8e01d5"
+      },
+      "edge": {
+        "rootfs_equal": true,
+        "source_label": "1c020995adaa1a80fc8a97888aa838041d8e01d5"
+      },
+      "web": {
+        "rootfs_equal": true,
+        "source_label": "1c020995adaa1a80fc8a97888aa838041d8e01d5"
+      },
+      "postgres": {
+        "rootfs_equal": true,
+        "source_label": "1c020995adaa1a80fc8a97888aa838041d8e01d5"
+      }
+    }
+  },
+  "security_scans": {
+    "source_commit": "1c020995adaa1a80fc8a97888aa838041d8e01d5",
+    "images": {
+      "capture": {
+        "image": "sha256:3edb015ec3aea7235b621303d1a1821eaa7c52b44f8ceb03b50fe51c4c97d5c1",
+        "findings": [
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-15367",
+            "package": "python",
+            "version": "3.14.8"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox",
+            "version": "1.37.0-r30"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox-binsh",
+            "version": "1.37.0-r30"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "ssl_client",
+            "version": "1.37.0-r30"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2026-12345",
+            "package": "python",
+            "version": "3.14.8"
+          }
+        ],
+        "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642"
+      },
+      "report": {
+        "image": "sha256:f938d4f3483af7453944ad98de648f9b7a1f6ac4ad3399434069194245d58901",
+        "findings": [
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-15367",
+            "package": "python",
+            "version": "3.14.8"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox",
+            "version": "1.37.0-r30"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox-binsh",
+            "version": "1.37.0-r30"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "ssl_client",
+            "version": "1.37.0-r30"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2026-12345",
+            "package": "python",
+            "version": "3.14.8"
+          }
+        ],
+        "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642"
+      },
+      "gateway": {
+        "image": "sha256:a341fae9c0c8a1feade5b11493b58dbeb1a4f22cad5e5b79ef4602dd5b7db901",
+        "findings": [
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox",
+            "version": "1.37.0-r31"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox-binsh",
+            "version": "1.37.0-r31"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "ssl_client",
+            "version": "1.37.0-r31"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2024-9410",
+            "package": "ada-libs",
+            "version": "3.3.0-r0"
+          }
+        ],
+        "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642"
+      },
+      "edge": {
+        "image": "sha256:aa8f036c87fd1f83aec1618205864fac968ac645882c493c74bcb07d5f7a601c",
+        "findings": [
+          {
+            "scanner": "trivy",
+            "id": "GO-2026-5932",
+            "package": "golang.org/x/crypto",
+            "version": "v0.58.0"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox",
+            "version": "1.37.0-r30"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox-binsh",
+            "version": "1.37.0-r30"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "ssl_client",
+            "version": "1.37.0-r30"
+          }
+        ],
+        "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642"
+      },
+      "web": {
+        "image": "sha256:6b26f78a2856e7f2f5a07884249d2b45351a08b3160732ef50a5d04967e07a06",
+        "findings": [
+          {
+            "scanner": "grype",
+            "id": "CVE-2026-92392",
+            "package": "curl",
+            "version": "8.22.0-r0"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2026-93479",
+            "package": "nginx",
+            "version": "1.30.5-r1"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2026-15176",
+            "package": "nginx",
+            "version": "1.30.5-r1"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2026-97205",
+            "package": "nginx",
+            "version": "1.30.5-r1"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox",
+            "version": "1.37.0-r31"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox-binsh",
+            "version": "1.37.0-r31"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "ssl_client",
+            "version": "1.37.0-r31"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2026-95101",
+            "package": "nginx",
+            "version": "1.30.5-r1"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2026-97629",
+            "package": "nginx",
+            "version": "1.30.5-r1"
+          }
+        ],
+        "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642"
+      },
+      "postgres": {
+        "image": "sha256:98e5cab850b96ff1acfaca92834c8590274e62ba9f64b6d882d27ec7f6e090d8",
+        "findings": [
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox",
+            "version": "1.37.0-r31"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "busybox-binsh",
+            "version": "1.37.0-r31"
+          },
+          {
+            "scanner": "grype",
+            "id": "CVE-2025-60876",
+            "package": "ssl_client",
+            "version": "1.37.0-r31"
+          }
+        ],
+        "busybox_sha256": "4261945c0287000d3e73548d381a5afa4279eb07ed6e223ee6c5c51ba39f1642"
+      }
+    },
+    "all_busybox_binary_equal": true,
+    "nginx_config_entrypoint_equal_live": true,
+    "untriaged_findings": 0,
+    "dispositions": {
+      "CVE-2025-60876": "Upstream backport retained; eight regression cases pass for exact common binary.",
+      "CVE-2025-15367": "Exact Python POP3 backport/regression passes.",
+      "CVE-2026-12345": "Exact Python cleanup backport/regression passes.",
+      "CVE-2024-9410": "Unrelated Ada.cx Sentry advisory matched to ada-url C++ parser.",
+      "GO-2026-5932": "OpenPGP module present but affected code absent; exact-rootfs binary govulncheck zero symbols/packages.",
+      "web": "Same nginx binary/config/entrypoint; previous exact configuration-only nginx and inactive curl dispositions retained, no package patch claim."
+    },
+    "postgres_deployment": "Source/build verified only; existing internal-only live container retained."
+  },
+  "verification": {
+    "python_tests_passed": 955,
+    "python_subtests_passed": 85,
+    "web_tests_passed": 104,
+    "gateway_tests_passed": 71,
+    "gateway_postgres_tests_passed": 13,
+    "gateway_skipped": 0,
+    "web_network_builds": [
+      "testnet",
+      "mainnet"
+    ],
+    "npm_advisories": {
+      "web": 0,
+      "gateway": 0
+    },
+    "python_dependency_unique_versions": 52,
+    "python_dependency_lock_entries": 65,
+    "python_dependency_advisories": 0
+  },
+  "getzilla": {
+    "invocation": {
+      "command": [
+        "/home/pall/projects/liqvera/.getzilla/runtime/pr115-tls-liqvera/.venv/bin/python",
+        "/home/pall/projects/liqvera/.getzilla/runtime/pr115-tool/scripts/getzilla_verify.py",
+        "--mode",
+        "pr",
+        "--full-scope",
+        "--keep-going",
+        "--json"
+      ],
+      "cwd": "/home/pall/projects/liqvera/.getzilla/runtime/pr115-tls-liqvera",
+      "head": "b030ab142194bd5c50d2edb38238535567d98bda",
+      "tree": "d70205ee88e46e1d98280c989a6be758e5f7f591",
+      "reviewed_head": "bf569ce96039deeec69e025a3c3cdc9653584b0d",
+      "base": "f1d3bffc46fa1459908fdff865fcfbfc831b7f7f",
+      "tool_commit": "2bb417431f1e4b9494e4af71ebf27adb1d04d898",
+      "environment_names": [
+        "GETZILLA_NO_VENV",
+        "GETZILLA_OSV_DB",
+        "GETZILLA_OSV_ONLINE",
+        "HOME",
+        "HTTPS_PROXY",
+        "HTTP_PROXY",
+        "LANG",
+        "LC_ALL",
+        "NODE_OPTIONS",
+        "PATH",
+        "PYTEST_ADDOPTS",
+        "PYTHONDONTWRITEBYTECODE",
+        "PYTHONHTTPSVERIFY",
+        "RUFF_CACHE_DIR",
+        "SSL_CERT_DIR",
+        "SSL_CERT_FILE"
+      ],
+      "explicit_nonsecret_environment": {
+        "GETZILLA_NO_VENV": "1",
+        "GETZILLA_OSV_DB": "",
+        "GETZILLA_OSV_ONLINE": "1",
+        "PYTEST_ADDOPTS": "tests"
+      },
+      "python_scope": "Entire tests/ target, equivalent to make verify-packages; artifact guard recorded separately.",
+      "cpu_affinity": [
+        0,
+        1,
+        8,
+        9
+      ],
+      "cpu_policy": "Four CPUs, serialized pytest to avoid shared build-directory races; measured host capacity 26.",
+      "versions": {
+        "pytest": "9.1.1",
+        "ruff": "0.16.9",
+        "bandit": "1.9.4",
+        "coverage": "7.16.2",
+        "certifi": "2026.10.19",
+        "pip": "26.2.2"
+      },
+      "started_at": "2026-10-21T12:29:41.111413+00:00",
+      "returncode": 1,
+      "duration_seconds": 447.0816962560639,
+      "head_after": "b030ab142194bd5c50d2edb38238535567d98bda",
+      "tree_after": "d70205ee88e46e1d98280c989a6be758e5f7f591",
+      "git_status_after": ""
+    },
+    "route_id": "b54297afc340",
+    "raw_exit_code": 1,
+    "zero_gap_complete": false,
+    "checks": [
+      {
+        "name": "architecture-inputs",
+        "status": "skip",
+        "summary": "architecture authority inputs are absent; not executed"
+      },
+      {
+        "name": "git-diff-check",
+        "status": "fail",
+        "summary": "2/4 checks passed; bases=route:f1d3bffc46fa1459908fdff865fcfbfc831b7f7f,pr-target:1c020995adaa1a80fc8a97888aa838041d8e01d5"
+      },
+      {
+        "name": "docs-state-scope",
+        "status": "pass",
+        "summary": "profile=full-pr-suite; evidence=verification:full-pr-suite; reason=operator-override; paths=0; skipped=none"
+      },
+      {
+        "name": "change-spec",
+        "status": "pass",
+        "summary": "1 specs checked; exempt=False"
+      },
+      {
+        "name": "architecture",
+        "status": "skip",
+        "summary": "architecture is not configured"
+      },
+      {
+        "name": "governance",
+        "status": "skip",
+        "summary": "governance is not configured"
+      },
+      {
+        "name": "workflow-artifacts",
+        "status": "skip",
+        "summary": "workflow artifacts are not configured"
+      },
+      {
+        "name": "diff-risk",
+        "status": "pass",
+        "summary": "diff risk high (3 reasons, profile full); route risk high covers it"
+      },
+      {
+        "name": "cost-guard",
+        "status": "pass",
+        "summary": "no paid or unbounded operation in the prompt or the diff"
+      },
+      {
+        "name": "eu-ai-act",
+        "status": "skip",
+        "summary": "EU AI Act component not installed"
+      },
+      {
+        "name": "hook-health",
+        "status": "pass",
+        "summary": "no hook failed open during this route"
+      },
+      {
+        "name": "workflow-baseline",
+        "status": "skip",
+        "summary": "not an installed Getzilla project (no .getzilla/AGBP_SYNC.json): the baseline is checked where Getzilla was installed"
+      },
+      {
+        "name": "secret-scan",
+        "status": "fail",
+        "summary": "2 potential secrets"
+      },
+      {
+        "name": "contract-structure",
+        "status": "pass",
+        "summary": "0 contracts checked"
+      },
+      {
+        "name": "sql-safety",
+        "status": "pass",
+        "summary": "0 unsafe SQL findings"
+      },
+      {
+        "name": "known-vulnerabilities",
+        "status": "pass",
+        "summary": "no known vulnerabilities in 476 pinned dependencies (OSV API)"
+      },
+      {
+        "name": "opengrep",
+        "status": "pass",
+        "summary": "no taint findings from Getzilla OpenGrep rules"
+      },
+      {
+        "name": "ruff",
+        "status": "pass",
+        "summary": "exit=0"
+      },
+      {
+        "name": "bandit",
+        "status": "pass",
+        "summary": "exit=0"
+      },
+      {
+        "name": "pytest",
+        "status": "pass",
+        "summary": "exit=0"
+      },
+      {
+        "name": "coverage",
+        "status": "skip",
+        "summary": "pytest runner owns tests; measure unittest trees only"
+      },
+      {
+        "name": "source-stability",
+        "status": "pass",
+        "summary": "repository fingerprint remained stable"
+      },
+      {
+        "name": "quality-gate",
+        "status": "pass",
+        "summary": "QG-01 admission checks passed"
+      }
+    ],
+    "range_selection_note": "Primary route compares actual main; secondary local-clone pr-target compares product 1c02099. Range union covers all 77 changed paths.",
+    "raw_failure_dispositions": {
+      "git-diff-check": "Preserved historical evidence and unedited analysis/review formatting.",
+      "secret-scan": "Two public MUSD token-address constants, independently reviewed as non-secrets."
+    },
+    "passing_final_receipt_created": false
+  },
+  "review_sha256": {
+    "code-review.md": "0b3db5932d23cf9982fec86a0ef5a85ff8921ae9b4ac1dda456d094029d30af3",
+    "test-review.md": "35e605e9eaa1cd5d2e99b106309ad8b38115088bf84e7719025933a492b1b11d",
+    "security-review.md": "e0236e969a48cae46bd32c337685ff3705d5731e833e0af02e14f200fa6dc917",
+    "data-review.md": "44625e6e5dd918ec879ed719718fd1cbf14f4cc763820c8fa541b2d06245381a",
+    "release-review.md": "b95ec723d9b4631916c38782908245e73d62b623e2a402fc065ec2bfcb7cd5e6"
+  },
+  "published_browser": {
+    "asset": [
+      "https://liqvera.site/assets/index-Cnfn94HM.js"
+    ],
+    "funding_panel": {
+      "present": true,
+      "disabled": true,
+      "borrowDisabled": true,
+      "status": "Connect your wallet, then request an unpaid report to check MUSD funding."
+    },
+    "historical_preview": "PASS",
+    "exceptions": [],
+    "relay_handshake_statuses": [
+      101
+    ],
+    "relay_error_codes": [],
+    "new_quote_requests": 0,
+    "payment_requests": 0
+  },
+  "published_layout": {
+    "all_pass": true,
+    "widths": [
+      {
+        "width": 1440,
+        "ack_borrow_gap_px": 14,
+        "borrow_terms_gap_px": 14,
+        "horizontal_overflow": false,
+        "getzilla_footer": true
+      },
+      {
+        "width": 1280,
+        "ack_borrow_gap_px": 14,
+        "borrow_terms_gap_px": 14,
+        "horizontal_overflow": false,
+        "getzilla_footer": true
+      },
+      {
+        "width": 1024,
+        "ack_borrow_gap_px": 14,
+        "borrow_terms_gap_px": 14,
+        "horizontal_overflow": false,
+        "getzilla_footer": true
+      },
+      {
+        "width": 768,
+        "ack_borrow_gap_px": 14,
+        "borrow_terms_gap_px": 14,
+        "horizontal_overflow": false,
+        "getzilla_footer": true
+      },
+      {
+        "width": 390,
+        "ack_borrow_gap_px": 14,
+        "borrow_terms_gap_px": 14,
+        "horizontal_overflow": false,
+        "getzilla_footer": true
+      },
+      {
+        "width": 320,
+        "ack_borrow_gap_px": 14,
+        "borrow_terms_gap_px": 14,
+        "horizontal_overflow": false,
+        "getzilla_footer": true
+      }
+    ]
+  },
+  "physical_wallet_or_new_paid_acceptance": false,
+  "rollback": {
+    "command": "python3 /home/pall/.local/state/liqvera/recovery/2026-10-21-tls-1c02099/rollout.py rollback",
+    "script_sha256": "21211975c0679774958b5801e21e19e6e1f888fbad6c0554088bf85119f7dc4f",
+    "image_binding_sha256": "e1c966aa44fd760f5baa26d2108f063c043016c7eec76cd6b2a016b1291b7cf3",
+    "database_restore": false,
+    "fault_model_cases_passed": 69,
+    "disposable_docker_namespace_pair_passed": true,
+    "production_full_stack_rollback_rehearsed": false,
+    "retained_images_have_previous_tls_exposure": true
+  },
+  "preserved_historical_archives": {
+    "docs/security/2026-10-21-wave1-deployment-raw.tar.gz": "75cb10a985d99c3428273d6ed443bf6066e82c9c758ebf108add07695b8255d0",
+    "docs/security/2026-10-21-layout-deployment-raw.tar.gz": "f443a236c064eab7728b3061af84c645690626fe8bbc84a221c0705c3988606c",
+    "docs/security/2026-10-21-getzilla-initial-raw.tar.gz": "697661c1724bd7a532e1beab90b32ec782f84ddd0db6a6cd2de32b2e42ae3bf3"
+  },
+  "archive": {
+    "archive": "2026-10-21-tls-deployment-raw.tar.gz",
+    "sha256": "625cd5f517b19b80073530f9ffdba2bfab71f0461050d68d0051be57d0dc8b89",
+    "bytes": 2844066,
+    "verified_payloads": 354,
+    "contains_private_recovery_material": false
+  }
+}

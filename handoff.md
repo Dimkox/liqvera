@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-21 — TLS corrections verified and deployed
+
+Source `1c020995adaa1a80fc8a97888aa838041d8e01d5` is live on claw. Six application containers now use the corrected TLS images; the existing PostgreSQL container remains unchanged. All seven services are healthy with zero restarts. All four inherited TLS blockers are closed by independent security review. The complete successor run passes 955 Python tests plus 85 subtests; web passes 104, gateway passes all 71 including 13 real disposable-PostgreSQL tests. Exact-image scans retain 30 reviewed backport/configuration/package-identity occurrences and zero untriaged findings.
+
+The full external Getzilla PR 115 protocol was run against a frozen successor with four analyses and five complete read-only reviews. Its native final gate still exits 1 for preserved evidence formatting and two public MUSD-address heuristic matches; do not claim Getzilla zero-gap completion or replace the original negative audit. [Final TLS evidence](docs/security/2026-10-21-tls-deployment.md) records exact candidate identities, the raw gate, complete reports and 354 verified archive payloads.
+
+The coherent backup was restored successfully into a disposable database. Post-rollout checks preserve WalletConnect bytes, mounts, three CONFIRMED/one MANUAL_REVIEW attempts, four receipts/entitlements, migration hashes and the historical report/ZIP. Published Chrome confirms the corrected funding layout at six widths, the Getzilla footer, QR and relay connection. No new quote, payment, loan or grant was created; physical pairing and new paid acceptance remain untested. Current rollback is `/home/pall/.local/state/liqvera/recovery/2026-10-21-tls-1c02099/rollout.py rollback`; it restores retained application containers without restoring a database. Older recovery generations remain available. Source implementation and deployment evidence are separate commits.
+
 ## 2026-10-21 — inherited TLS findings remediated in source
 
 The owner requested fixing the four blockers found by the complete external Getzilla PR 115 audit. Both Python locks now pin certifi 2026.10.19; pip 26.2.2 is bootstrapped offline from a checksum-bound wheel. Docker CA packages pin 20261020-r0, Node selects corrected OpenSSL trust in parent/child processes, and Caddy 2.11.7 builds with Go 1.27.3. CI constrains both CA lookup paths before dependency downloads. Independent review exposed and helped resolve additive pip trust and lazy CA-directory probe gaps. All application/payment logic, migrations and historical proof bytes remain unchanged.

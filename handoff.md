@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-21 — Liqvera audit passes; tool self-check remains failed
+
+Liqvera's full frozen native gate at `328dfa8f0523310e80693db606a0e737c24b2ee5` passes with exit 0 and zero evidence gaps. All five selected independent reviews and six passing receipts are retained in the [current successor evidence](docs/security/2026-10-21-getzilla-successor.md). Exactly three hash-bound public/historical findings retain raw severity and are dispositioned; new or stale findings remain failures. Earlier negative reports, failed review waves and full gates remain unchanged.
+
+The locally modified Getzilla tool `45be42f74b5a8ee6f079f8ac55206e475936fdc6` is not fully qualified or delivered as a Getzilla release. Its second self-check exits 1 for a huge-command timing test, with five evidence gaps retained. Isolated unchanged-coverage replays exceed eight seconds while correctly denying the protected command. Do not call this self-check passing or reuse Liqvera's receipts for the tool. Further tool repair is outside this Liqvera completion scope; the complete source bundle and failure evidence remain available.
+
+The application stays on deployed TLS source `1c020995adaa1a80fc8a97888aa838041d8e01d5`; layout, checkbox guidance and the Getzilla footer are live. This step changes audit/dependency metadata and evidence only. WalletConnect, databases, payment outcomes and historical bundles remain preserved; no quote, payment, loan or grant was created. Existing rollback remains `/home/pall/.local/state/liqvera/recovery/2026-10-21-tls-1c02099/rollout.py rollback`. Read the current report for exact native skips, unrelated tool limitations and the distinction between fresh audit checks and historical deployment acceptance.
+
 ## 2026-10-21 — exact optional audit dispositions
 
 The successor external audit retains three raw findings but can classify only the two exact public Testnet MUSD occurrences and the final blank line in immutable Wave 1 evidence. [The explanation](docs/security/2026-10-21-verification-dispositions.md) and `engineering/verification-dispositions.json` bind target bytes, occurrence identity and rationale. They do not install a delivery framework or affect product runtime. Changed files require renewed review. The unmodified PR #115 result remains negative; the reviewed successor tool, independent reviews and final zero-gap gate are still required before claiming completion. No live operation accompanies this audit metadata.

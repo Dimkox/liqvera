@@ -65,7 +65,7 @@ app.innerHTML = `
       </div>
       <section class="boundary-strip" aria-label="Important context"><div><span>NOTE 1</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>NOTE 2</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>NOTE 3</span><p><strong>No execution authority.</strong> No orders, custody, live trading, or guaranteed fills.</p></div></section>
     </main>
-    <footer><span>Liqvera v0.0.5 · Market reports you can verify.</span><span>Built for MEZO ₿ · ${NETWORK_LABEL} · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a></span></footer>
+    <footer><span>Liqvera v0.0.5 · Market reports you can verify.</span><span>Built for MEZO ₿ · ${NETWORK_LABEL} · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a> · <a href="https://github.com/Dimkox/Getzilla" target="_blank" rel="noopener noreferrer" aria-label="Getzilla project repository on GitHub">Getzilla ↗</a></span></footer>
   </div>`;
 
 function el<T extends HTMLElement>(selector: string): T {

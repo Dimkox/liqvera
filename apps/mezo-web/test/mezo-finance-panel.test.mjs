@@ -38,11 +38,25 @@ if (mountMezoFinance) {
   test('mounting and updating never request accounts, sign or pay', () => {
     const s=setup(); try { s.panel.update(); assert.deepEqual(s.calls, []); } finally {s.panel.dispose();}
   });
+  test('an initial preview explains how to unlock funding without implying an existing payment', () => {
+    const s=setup();
+    try {
+      Object.assign(s.context, {provider:null,account:null,quote:null,paymentGuard:'unavailable',onMezo:false});
+      s.panel.update();
+      assert.match(s.find('mezo-balance-status').textContent, /Connect your wallet.*unpaid report/);
+      assert.doesNotMatch(s.find('mezo-balance-status').textContent, /existing payment outcome/);
+      assert.equal(s.find('mezo-borrow-ack').disabled, true);
+      assert.match(s.find('mezo-borrow-help').textContent, /shortfall/);
+      assert.equal(s.find('mezo-borrow-link').href, undefined);
+      assert.deepEqual(s.calls, []);
+    } finally { s.panel.dispose(); }
+  });
   test('borrow is gated by a fresh read and separate acknowledgement', async () => {
     const s=setup(); try {
       assert.equal(s.find('mezo-borrow-link').href, undefined);
       await s.find('mezo-balance-check').emit('click');
       assert.match(s.find('mezo-balance-status').textContent,/Shortfall: 0\.01/);
+      assert.equal(s.find('mezo-borrow-ack').disabled, false);
       assert.equal(s.find('mezo-borrow-link').href, undefined);
       s.find('mezo-borrow-ack').checked=true; await s.find('mezo-borrow-ack').emit('change');
       assert.equal(s.find('mezo-borrow-link').href,'https://testnet.mezo.org/feature/borrow');

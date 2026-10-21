@@ -41,6 +41,11 @@ export function fundingEligibility(context, now = Date.now()) {
   try {
     validateNetwork(context.network);
     if (context.busy) return blocked('Wait for the current checkout action.');
+    if (context.paymentGuard === 'unavailable' && !context.quote) {
+      return blocked(!address(context.account)
+        ? 'Connect your wallet, then request an unpaid report to check MUSD funding.'
+        : 'Request an unpaid report to check MUSD funding.');
+    }
     if (context.paymentGuard !== 'clear') return blocked('Check the existing payment outcome before funding or retrying.');
     if (!address(context.account)) return blocked('Connect the expected payer wallet.');
     if (!context.onMezo) return blocked('Select the configured Mezo network, then check the balance again.');

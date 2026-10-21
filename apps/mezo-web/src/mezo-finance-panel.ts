@@ -29,7 +29,7 @@ export function mountMezoFinance(options: Options): { update(): void; dispose():
     return result;
   }
   const root = element('details');
-  root.className = 'status-card';
+  root.className = 'status-card funding-panel';
   root.append(element('summary', 'MUSD funding for this report'));
   const borrow = element('section');
   borrow.append(element('h3', 'Borrow before payment'));
@@ -46,11 +46,15 @@ export function mountMezoFinance(options: Options): { update(): void; dispose():
   download.download = 'liqvera-musd-funding-check.json';
   const risk = element('p', 'Mezo documents a minimum new borrowed debt of 1,800 MUSD plus a 200 MUSD gas deposit, before other applicable fees. Review current terms. Loans carry interest and BTC liquidation risk. Funding an individual report does not require opening a loan.');
   const label = element('label');
+  label.className = 'funding-acknowledgement';
   const ack = element('input', '', 'mezo-borrow-ack'); ack.type = 'checkbox';
+  ack.setAttribute('aria-describedby', 'mezo-borrow-help mezo-balance-status');
   label.append(ack, element('span', ' I understand this opens a separate loan application, not a report payment.'));
+  const help = element('p', 'First prepare an unpaid report and check its MUSD balance. This checkbox unlocks only if there is a shortfall.', 'mezo-borrow-help');
+  help.className = 'subtle';
   const link = external('Open official Mezo borrowing app ↗', links.borrow, 'mezo-borrow-link');
   link.className = 'secondary-button';
-  borrow.append(status, blockStatus, check, element('br'), download, risk, label, element('br'), link, element('br'), external('Read Mezo borrowing terms ↗', links.borrowDocs));
+  borrow.append(status, blockStatus, check, download, risk, help, label, link, external('Read Mezo borrowing terms ↗', links.borrowDocs));
   borrow.append(element('p', 'Returning does not trigger payment. Check the balance again, refresh the quote if it expired, and confirm the existing report payment separately.'));
   root.append(borrow);
 

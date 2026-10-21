@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-21 — funding layout and prerequisite guidance repaired
+
+The owner supplied desktop and mobile screenshots showing the Borrow link overlapping its acknowledgment and terms link. The padded inline anchor did not increase line-box height; the published page reproduced overlaps of 9 and 12 pixels at every tested width. The funding section now uses explicit grid rows and 14-pixel gaps, with a wrapping checkbox label and scoped button layout. The owner also requested a Getzilla footer link; it points to the canonical GitHub repository.
+
+The checkbox remains disabled until a fresh balance observation establishes a shortfall for a valid unpaid quote. New guidance explains that prerequisite. The initial no-quote/unavailable state now asks the user to connect a wallet and request an unpaid report, instead of incorrectly suggesting an existing payment outcome. Unknown and uncertain payment guards remain unchanged. Two regression tests failed before the guidance change and pass afterward; all 104 web tests and the Testnet build pass. Actual Chrome geometry checks pass at 320, 390, 768, 1024, 1280 and 1440 pixels with no overflow or exceptions, and verify the footer link. No new live quote, payment or borrowing operation was created.
+
+Source and rollout remain separate. The external Getzilla audit continues on this successor after its source is frozen. Its fresh supplemental OSV scan has already identified the existing certifi 2026.7.22 exposure in both Python lockfiles; a normal Getzilla scan omits these .lock filenames. Do not claim a clean overall security audit from the passing web checks.
+
 ## 2026-10-21 — Wave 1 deployed on claw with recovery retained
 
 The owner authorized rollout from PR #14 at exact application source `9ca9ceda79fbce07b9b9bfb1dcc174d4c300b863`. The new browser is published at https://liqvera.site as `sha256:de0e5216443ac6a51c5e0c63e5ee45b416f57ced9590943161f8addcbc7ecbcd`, entry `index-Dd1iIief.js`. All seven containers are healthy. The other six containers, owner WalletConnect configuration, Caddy policy, Testnet/Mainnet volumes and migration hashes are preserved. The ledger remains three CONFIRMED attempts, one MANUAL_REVIEW attempt, four receipts and four entitlements. No new quote, payment, loan or grant was created.

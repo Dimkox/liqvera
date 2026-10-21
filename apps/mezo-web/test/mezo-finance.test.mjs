@@ -27,6 +27,17 @@ if (finance) {
   test('eligible quote uses exact atomic price', () => {
     assert.deepEqual(finance.fundingEligibility(context(), now), { allowed: true, reason: '', requiredAtomic: 10000000000000000n });
   });
+  test('missing initial quote has actionable guidance while unknown outcomes retain recovery guidance', () => {
+    const c = {...context(),quote:null,paymentGuard:'unavailable',account:null};
+    const initial = finance.fundingEligibility(c, now);
+    assert.equal(initial.allowed, false);
+    assert.match(initial.reason, /Connect your wallet.*unpaid report/);
+    c.account = payer;
+    assert.match(finance.fundingEligibility(c, now).reason, /Request an unpaid report/);
+    c.paymentGuard = 'unknown';
+    assert.match(finance.fundingEligibility(c, now).reason, /existing payment outcome/);
+    assert.equal(finance.fundingEligibility(c, now).allowed, false);
+  });
   for (const [label, change] of [
     ['wrong wallet network', c => { c.onMezo = false; }],
     ['missing payer', c => { c.account = null; }],

@@ -7,6 +7,7 @@ trusted outside a temporary offline test process.
 import os
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 import certifi
@@ -15,6 +16,18 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "deploy/security/check-tls-trust.py"
 INCIDENT = ROOT / "deploy/security/fixtures/emsign-ecc-root-ca-g3.pem"
+
+
+def test_development_install_preserves_the_audited_pip_bootstrap():
+    """Installing the dev extra must not downgrade the corrected pip trust store."""
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text())
+    development = project["project"]["optional-dependencies"]["dev"]
+    audited_pip = next(
+        line for line in (ROOT / "requirements-dev.lock").read_text().splitlines()
+        if line.startswith("pip==")
+    )
+    declared_pip = [requirement for requirement in development if requirement.split("==")[0] == "pip"]
+    assert declared_pip == [audited_pip], "The dev extra must retain the audited pip TLS bootstrap"
 
 
 @pytest.mark.parametrize("location", ["clean", "file", "directory", "directory-list"])

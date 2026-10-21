@@ -1,0 +1,551 @@
+{
+  "schema": "liqvera-getzilla-successor-v2",
+  "status": "pass",
+  "status_scope": "Liqvera full native audit and its five selected independent reviews only; not Getzilla tool qualification or a new live payment acceptance.",
+  "tool_self_qualification": "fail",
+  "date": "2026-10-21",
+  "product_commit": "17a70595e98aa183afac115e5b99488830fba712",
+  "deployed_application_commit": "1c020995adaa1a80fc8a97888aa838041d8e01d5",
+  "original_pr115_commit": "2bb417431f1e4b9494e4af71ebf27adb1d04d898",
+  "gates": {
+    "getzilla": {
+      "commit": "45be42f74b5a8ee6f079f8ac55206e475936fdc6",
+      "tree": "bcdd090531e657ee1d3cd20c340205df86fc8900",
+      "reviewed_commit": "3968ae4445836eda9cf377035b1d1f64fe9659b0",
+      "comparison_base": "e158ddc7263a55f5308944c5a426eb1e9f1a4327",
+      "bundle_prerequisite": "e158ddc7263a55f5308944c5a426eb1e9f1a4327",
+      "duration_seconds": 1225.840075463988,
+      "returncode": 1,
+      "attempt": 2,
+      "status": "fail",
+      "evidence_gaps": [
+        "verification: status=fail",
+        "code_review: missing receipt",
+        "test_review: missing receipt",
+        "security_review: missing receipt",
+        "release_review: missing receipt"
+      ],
+      "package_incomplete": [],
+      "receipt_files": [
+        "verification.json"
+      ],
+      "checks": [
+        {
+          "name": "architecture-inputs",
+          "status": "pass",
+          "summary": "bounded model and referenced-input preflight executed"
+        },
+        {
+          "name": "git-diff-check",
+          "status": "pass",
+          "summary": "4/4 commands clean; 0 findings disposed; 0 unresolved; bases=route:e158ddc7263a55f5308944c5a426eb1e9f1a4327,pr-target:f9f02dd53ba9f6e69d51ae5322df0c96e3d41b02"
+        },
+        {
+          "name": "docs-state-scope",
+          "status": "pass",
+          "summary": "profile=full-pr-suite; evidence=verification:full-pr-suite; reason=operator-override; paths=0; skipped=none"
+        },
+        {
+          "name": "change-spec",
+          "status": "pass",
+          "summary": "1 specs checked; exempt=False"
+        },
+        {
+          "name": "architecture",
+          "status": "pass",
+          "summary": "drift=pass; fitness=pass; diagrams=pass"
+        },
+        {
+          "name": "governance",
+          "status": "pass",
+          "summary": "governance registries and evidence are current"
+        },
+        {
+          "name": "workflow-artifacts",
+          "status": "skip",
+          "summary": "workflow artifacts are not configured"
+        },
+        {
+          "name": "diff-risk",
+          "status": "pass",
+          "summary": "diff risk high (23 reasons, profile full); route risk high covers it"
+        },
+        {
+          "name": "cost-guard",
+          "status": "pass",
+          "summary": "no paid or unbounded operation in the prompt or the diff"
+        },
+        {
+          "name": "eu-ai-act",
+          "status": "skip",
+          "summary": "EU AI Act component not installed"
+        },
+        {
+          "name": "hook-health",
+          "status": "pass",
+          "summary": "no hook failed open during this route"
+        },
+        {
+          "name": "workflow-baseline",
+          "status": "skip",
+          "summary": "not an installed Getzilla project (no .getzilla/AGBP_SYNC.json): the baseline is checked where Getzilla was installed"
+        },
+        {
+          "name": "secret-scan",
+          "status": "pass",
+          "summary": "0 potential secrets; 0 disposed; 0 unresolved"
+        },
+        {
+          "name": "contract-structure",
+          "status": "pass",
+          "summary": "0 contracts checked"
+        },
+        {
+          "name": "sql-safety",
+          "status": "pass",
+          "summary": "0 unsafe SQL findings"
+        },
+        {
+          "name": "stack:powershell",
+          "status": "skip",
+          "summary": "no changed files of this stack"
+        },
+        {
+          "name": "known-vulnerabilities",
+          "status": "pass",
+          "summary": "no known vulnerabilities in 83 pinned dependencies (OSV API)"
+        },
+        {
+          "name": "opengrep",
+          "status": "pass",
+          "summary": "no taint findings from Getzilla OpenGrep rules"
+        },
+        {
+          "name": "ruff",
+          "status": "pass",
+          "summary": "exit=0"
+        },
+        {
+          "name": "bandit",
+          "status": "pass",
+          "summary": "exit=0"
+        },
+        {
+          "name": "pilot-unittest",
+          "status": "pass",
+          "summary": "exit=0"
+        },
+        {
+          "name": "python-unittest",
+          "status": "fail",
+          "summary": "pytest-xdist workers=16 exit=1 seconds=529.683"
+        },
+        {
+          "name": "coverage",
+          "status": "fail",
+          "summary": "pytest-xdist workers=16 exit=1 seconds=3.281"
+        },
+        {
+          "name": "factory-unit",
+          "status": "pass",
+          "summary": "exit=0"
+        },
+        {
+          "name": "factory-postgres-exit",
+          "status": "pass",
+          "summary": "exit=0"
+        },
+        {
+          "name": "source-stability",
+          "status": "pass",
+          "summary": "repository fingerprint remained stable"
+        },
+        {
+          "name": "quality-gate",
+          "status": "pass",
+          "summary": "QG-01 admission checks passed"
+        }
+      ],
+      "started_at": "2026-10-21T15:57:16.988393+00:00",
+      "finished_at": "2026-10-21T16:17:42.895346+00:00",
+      "tests": [
+        {
+          "check": "python-unittest",
+          "status": "fail",
+          "summary": "pytest-xdist workers=16 exit=1 seconds=529.683",
+          "observed_summary_lines": [
+            "SKIPPED [1] tests/test_stack_go_java.py:99: downloads Go from go.dev",
+            "SKIPPED [1] tests/test_stack_go_java.py:159: downloads Temurin JDK 21 from GitHub",
+            "SKIPPED [1] tests/test_stack_node.py:175: downloads Node from nodejs.org",
+            "SKIPPED [1] tests/test_stack_runners.py:152: downloads rustup and a Rust toolchain from static.rust-lang.org",
+            "SKIPPED [1] tests/test_stack_runners.py:216: downloads the .NET SDK from builds.dotnet.microsoft.com",
+            "SKIPPED [1] tests/test_stack_runners.py:293: downloads PSScriptAnalyzer and Pester from the PowerShell Gallery",
+            "SKIPPED [1] tests/test_python_test_runner.py:634: Windows Job Object",
+            "SKIPPED [1] tests/test_python_test_runner.py:607: Windows Job Object",
+            "SKIPPED [1] tests/test_python_test_runner.py:596: Windows Job Object capability",
+            "SKIPPED [1] tests/test_fsx.py:85: POSIX dir_fd calls already resolve names relative to the descriptor",
+            "SKIPPED [1] tests/test_fsx.py:92: Windows-only primitives",
+            "SKIPPED [1] tests/test_manifest_package.py:287: the refusal is for hosts without POSIX ownership and umask",
+            "SKIPPED [1] tests/test_install_scripts.py:478: downloads the OSV database, OpenGrep, the pinned workflow sources and PyPI tools",
+            "SKIPPED [1] tests/test_zero_git_platform.py:105: native Windows filesystem cases",
+            "SKIPPED [1] tests/test_zero_git_platform.py:71: native Windows filesystem cases",
+            "SKIPPED [1] tests/test_zero_git_platform.py:93: native Windows filesystem cases",
+            "SKIPPED [1] tests/test_zero_git_platform.py:79: native Windows filesystem cases",
+            "FAILED tests/test_policy_hardening.py::Review2PosixTests::test_secret_scan_is_bounded_and_fails_closed_on_a_huge_argv",
+            "1 failed, 2277 passed, 17 skipped, 2 warnings, 3961 subtests passed in 528.96s (0:08:48)"
+          ]
+        },
+        {
+          "check": "factory-unit",
+          "status": "pass",
+          "summary": "exit=0",
+          "observed_summary_lines": []
+        },
+        {
+          "check": "factory-postgres-exit",
+          "status": "pass",
+          "summary": "exit=0",
+          "observed_summary_lines": []
+        }
+      ],
+      "skipped_checks": [
+        {
+          "name": "workflow-artifacts",
+          "reason": "workflow artifacts are not configured"
+        },
+        {
+          "name": "eu-ai-act",
+          "reason": "EU AI Act component not installed"
+        },
+        {
+          "name": "workflow-baseline",
+          "reason": "not an installed Getzilla project (no .getzilla/AGBP_SYNC.json): the baseline is checked where Getzilla was installed"
+        },
+        {
+          "name": "stack:powershell",
+          "reason": "no changed files of this stack"
+        }
+      ],
+      "invocation_sha256": "cfba9278aa5479ae713397b4b958582b0225a3e0e2b61502e9f2588a933ec156",
+      "native_result_sha256": "946a492e64f5382c41523bb04c76a559364582eef5e2a34cf11684c1d8a8da7b"
+    },
+    "liqvera": {
+      "commit": "328dfa8f0523310e80693db606a0e737c24b2ee5",
+      "tree": "1270bc6ef9d1a3b1a157481c2d78a4c51758c8c7",
+      "reviewed_commit": "1b90f54c7ab26a7689cb892687175ac12cb7e3a4",
+      "comparison_base": "f1d3bffc46fa1459908fdff865fcfbfc831b7f7f",
+      "bundle_prerequisite": "3cfc69b42a0996ccbe6dbdc9bea6e63001e721bd",
+      "duration_seconds": 411.7568480372429,
+      "returncode": 0,
+      "attempt": 2,
+      "status": "pass",
+      "evidence_gaps": [],
+      "package_incomplete": [],
+      "receipt_files": [
+        "code_review.json",
+        "data_review.json",
+        "release_review.json",
+        "security_review.json",
+        "test_review.json",
+        "verification.json"
+      ],
+      "checks": [
+        {
+          "name": "architecture-inputs",
+          "status": "skip",
+          "summary": "architecture authority inputs are absent; not executed"
+        },
+        {
+          "name": "git-diff-check",
+          "status": "pass",
+          "summary": "3/4 commands clean; 1 findings disposed; 0 unresolved; bases=route:f1d3bffc46fa1459908fdff865fcfbfc831b7f7f,pr-target:3cfc69b42a0996ccbe6dbdc9bea6e63001e721bd"
+        },
+        {
+          "name": "docs-state-scope",
+          "status": "pass",
+          "summary": "profile=full-pr-suite; evidence=verification:full-pr-suite; reason=operator-override; paths=0; skipped=none"
+        },
+        {
+          "name": "change-spec",
+          "status": "pass",
+          "summary": "1 specs checked; exempt=False"
+        },
+        {
+          "name": "architecture",
+          "status": "skip",
+          "summary": "architecture is not configured"
+        },
+        {
+          "name": "governance",
+          "status": "skip",
+          "summary": "governance is not configured"
+        },
+        {
+          "name": "workflow-artifacts",
+          "status": "skip",
+          "summary": "workflow artifacts are not configured"
+        },
+        {
+          "name": "diff-risk",
+          "status": "pass",
+          "summary": "diff risk high (3 reasons, profile full); route risk high covers it"
+        },
+        {
+          "name": "cost-guard",
+          "status": "pass",
+          "summary": "no paid or unbounded operation in the prompt or the diff"
+        },
+        {
+          "name": "eu-ai-act",
+          "status": "skip",
+          "summary": "EU AI Act component not installed"
+        },
+        {
+          "name": "hook-health",
+          "status": "pass",
+          "summary": "no hook failed open during this route"
+        },
+        {
+          "name": "workflow-baseline",
+          "status": "skip",
+          "summary": "not an installed Getzilla project (no .getzilla/AGBP_SYNC.json): the baseline is checked where Getzilla was installed"
+        },
+        {
+          "name": "secret-scan",
+          "status": "pass",
+          "summary": "2 potential secrets; 2 disposed; 0 unresolved"
+        },
+        {
+          "name": "contract-structure",
+          "status": "pass",
+          "summary": "0 contracts checked"
+        },
+        {
+          "name": "sql-safety",
+          "status": "pass",
+          "summary": "0 unsafe SQL findings"
+        },
+        {
+          "name": "known-vulnerabilities",
+          "status": "pass",
+          "summary": "no known vulnerabilities in 476 pinned dependencies (OSV API)"
+        },
+        {
+          "name": "opengrep",
+          "status": "pass",
+          "summary": "no taint findings from Getzilla OpenGrep rules"
+        },
+        {
+          "name": "ruff",
+          "status": "pass",
+          "summary": "exit=0"
+        },
+        {
+          "name": "bandit",
+          "status": "pass",
+          "summary": "exit=0"
+        },
+        {
+          "name": "pytest",
+          "status": "pass",
+          "summary": "exit=0"
+        },
+        {
+          "name": "coverage",
+          "status": "skip",
+          "summary": "pytest runner owns tests; measure unittest trees only"
+        },
+        {
+          "name": "source-stability",
+          "status": "pass",
+          "summary": "repository fingerprint remained stable"
+        },
+        {
+          "name": "quality-gate",
+          "status": "pass",
+          "summary": "QG-01 admission checks passed"
+        }
+      ],
+      "started_at": "2026-10-21T16:08:14.833223+00:00",
+      "finished_at": "2026-10-21T16:15:06.607841+00:00",
+      "tests": [
+        {
+          "check": "pytest",
+          "status": "pass",
+          "summary": "exit=0",
+          "observed_summary_lines": [
+            "956 passed, 85 subtests passed in 389.66s (0:06:29)"
+          ]
+        }
+      ],
+      "skipped_checks": [
+        {
+          "name": "architecture-inputs",
+          "reason": "architecture authority inputs are absent; not executed"
+        },
+        {
+          "name": "architecture",
+          "reason": "architecture is not configured"
+        },
+        {
+          "name": "governance",
+          "reason": "governance is not configured"
+        },
+        {
+          "name": "workflow-artifacts",
+          "reason": "workflow artifacts are not configured"
+        },
+        {
+          "name": "eu-ai-act",
+          "reason": "EU AI Act component not installed"
+        },
+        {
+          "name": "workflow-baseline",
+          "reason": "not an installed Getzilla project (no .getzilla/AGBP_SYNC.json): the baseline is checked where Getzilla was installed"
+        },
+        {
+          "name": "coverage",
+          "reason": "pytest runner owns tests; measure unittest trees only"
+        }
+      ],
+      "invocation_sha256": "5128a837890ce2d32b6ba1acd8919ae337dd393c26d97c4168b387461c428884",
+      "native_result_sha256": "2d16d4bcc91dbe9ebff2afa74062c5bf7b3ff0122ef8ea5bb5f2856282ebef08"
+    }
+  },
+  "getzilla_publication_status": {
+    "observed_at": "2026-10-21T16:29:37.713886+00:00",
+    "repository": "Dimkox/Getzilla",
+    "candidate_commit": "45be42f74b5a8ee6f079f8ac55206e475936fdc6",
+    "candidate_tree": "bcdd090531e657ee1d3cd20c340205df86fc8900",
+    "branch": "fix/audit-gate-completion-20261021",
+    "remote_branch_exists": false,
+    "candidate_published_by_this_completion": false,
+    "candidate_merged_by_this_completion": false,
+    "external_acceptance_claimed": false,
+    "self_qualification": "fail",
+    "passing_verification_receipt": false,
+    "reason": "The full tool self-check failed. Preserve the candidate and failure evidence for reproducibility; deliver the separately passing Liqvera audit only. No new Getzilla PR, merge or release is part of this completion."
+  },
+  "tool_source_rollback_commits": {
+    "queue_capacity_integrated": "4c47e7ca5cf40ed6bc3f91aa24532ad457e19cdd",
+    "hook_precedence_integrated": "de0ed1d9f98b21d2636deb977f0eef403529d23a",
+    "wheel_inventory_integrated": "9da43eb1e808aeafa3dbba18104ce1cfe9ba6440",
+    "hook_ownership_integrated": "9e8b444400066a82fe252da48c46237292f5c811",
+    "note": "R5 release review verifies patch equivalence to isolated queue/hook predecessor commits; use these integrated ancestors in delivered clones. Source rollback requires a separately verified PR and fresh consumer audit."
+  },
+  "public_readback": {
+    "observed_at": "2026-10-21T16:14:19.614008+00:00",
+    "scope": "Unauthenticated HTTPS GET only; no browser session, quote or payment operation. This does not inspect database/container/WC private state.",
+    "tls_verification": true,
+    "user_agent": "Liqvera-ReadOnly-Verification/1.0",
+    "previous_observation": {
+      "file": "public-readback-before-final.json",
+      "sha256": "30a513c45715bfea4a7d6f7524742cb778ff630c9e9ca7ae882975920ef6be6a"
+    },
+    "checks": {
+      "/": {
+        "status": 200,
+        "bytes": 576,
+        "sha256": "9e1f6ac6c4fb8c471577bb3d732b30c322430bcd0757ef3151b5e2a2bd8b434a",
+        "final_url": "https://liqvera.site/"
+      },
+      "/healthz": {
+        "status": 200,
+        "bytes": 108,
+        "sha256": "3a8de77054acae34182edc539817e3be26eb21fca00f82041a6233fcff64a9c7",
+        "final_url": "https://liqvera.site/healthz",
+        "public_response": {
+          "schema": "liqvera-evidence-health/v1",
+          "request_id": "84dd09de-1d5e-4854-afae-3577fb0b2400",
+          "status": "alive"
+        }
+      },
+      "/readyz": {
+        "status": 200,
+        "bytes": 215,
+        "sha256": "3b7938eddc81361da6e5b5e9a9f6bb59a296bf5e480eb1741647a44c9ede18cc",
+        "final_url": "https://liqvera.site/readyz",
+        "public_response": {
+          "schema": "liqvera-evidence-readiness/v1",
+          "request_id": "8ae01e0c-df18-4feb-88a6-091d8b213d45",
+          "ready": true,
+          "storage_ready": true,
+          "integration_ready": true,
+          "configuration_ready": true,
+          "payment_ready": true,
+          "blockers": []
+        }
+      },
+      "/v1/capabilities": {
+        "status": 200,
+        "bytes": 619,
+        "sha256": "1cd9f0300fa3f377758e14fa1c7f92cfdfd88546a33c8faeae5b463eb47ba3e3",
+        "final_url": "https://liqvera.site/v1/capabilities",
+        "public_response": {
+          "schema": "liqvera-evidence-capabilities/v1",
+          "request_id": "0d290815-c0b2-4399-a15f-7cb7c4480bc1",
+          "instrument_id": "hyperliquid:BTC:perpetual",
+          "instrument_label": "Hyperliquid BTC linear perpetual",
+          "network": "eip155:31611",
+          "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+          "decimals": 18,
+          "price_musd": "0.01",
+          "amount_atomic": "10000000000000000",
+          "source_mode": "live-public",
+          "limitations": [
+            "Testnet only. Read-only analytics.",
+            "Calculation over the available snapshot depth; this is not a complete exchange book or guaranteed execution.",
+            "Fees, funding, and net P&L are not calculated."
+          ],
+          "payment_ready": true,
+          "blockers": []
+        }
+      },
+      "/demo/latest-live/report.json": {
+        "status": 200,
+        "bytes": 4913,
+        "sha256": "0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2",
+        "final_url": "https://liqvera.site/demo/latest-live/report.json",
+        "historical_bytes_match": true
+      },
+      "/demo/latest-live/evidence.zip": {
+        "status": 200,
+        "bytes": 38188,
+        "sha256": "3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0",
+        "final_url": "https://liqvera.site/demo/latest-live/evidence.zip",
+        "historical_bytes_match": true
+      }
+    }
+  },
+  "archive": {
+    "file": "2026-10-21-getzilla-successor-raw.tar.gz",
+    "sha256": "355a2eed0bd4c12f2dcad232a3101c8981fa2c7126ad04e5759d497b0c3d9f3e",
+    "bytes": 4994694,
+    "verified_payloads": 1004
+  },
+  "dispositions": {
+    "raw_findings": 3,
+    "disposed": 3,
+    "unresolved": 0,
+    "policy_sha256": "e0395a8b681958936fa97f552f517d77cecb49744eb33b902a3ee5c6569ef141"
+  },
+  "preservation": {
+    "historical_reports_unchanged": true,
+    "new_deployment": false,
+    "new_quote_payment_loan_or_grant": false,
+    "production_rollback": "/home/pall/.local/state/liqvera/recovery/2026-10-21-tls-1c02099/rollout.py rollback",
+    "historical_report_sha256": "0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2",
+    "historical_zip_sha256": "3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0"
+  },
+  "limits": [
+    "The locally modified Getzilla tool is not fully qualified: its second full self-check exits 1. Its failed gate and five evidence gaps are retained; the candidate has not been published or merged as a qualified tool release.",
+    "The original huge-argv failure traceback was truncated. Two exact-source isolated coverage replays reproduce only its 8-second elapsed assertion at 8.487197 and 8.3206 seconds, while the protected command is correctly denied. No timeout/assertion was relaxed or failure relabelled.",
+    "This is exact-source verification at the recorded time, not a promise that future dependencies or changes remain safe.",
+    "Historical deployment, Docker/PostgreSQL, browser and supplemental lock-scan evidence keeps its original source and scope; it is not a new live acceptance run.",
+    "Native optional or unconfigured check skips are listed exactly and are not passes.",
+    "Getzilla retains disclosed pre-existing PDF parser skips, an import-effect analysis gap and seven supplementary all-tracked baseline heuristic matches; its native changed-file scan has a different scope.",
+    "The incompatible PDF-profile prototype is excluded and its failed compatibility result is preserved.",
+    "The first Liqvera test review retains a nonblocking request for a committed 29,999/30,000 ms funding-age boundary regression; its independent oracle verifies the unchanged correct behavior, without claiming that native test coverage.",
+    "Physical wallet pairing, borrowing and a new signed paid delivery were not exercised."
+  ]
+}

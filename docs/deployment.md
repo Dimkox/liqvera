@@ -20,6 +20,8 @@ Merchant rollout backups are under `/home/pall/.local/state/liqvera/recovery/202
 
 ## Wallet connection
 
+The [current Liqvera audit](security/2026-10-21-getzilla-successor.md) passes with zero evidence gaps. The optional tool self-check remains failed and is disclosed separately; earlier negative reports retain their historical results. This audit did not redeploy services or change payment state.
+
 The current application source is `1c020995adaa1a80fc8a97888aa838041d8e01d5`, deployed on claw on 2026-10-21 with corrected Python, Node and Caddy TLS trust. The browser includes the funding-layout repair and Getzilla footer link. Web image: `sha256:6b26f78a2856e7f2f5a07884249d2b45351a08b3160732ef50a5d04967e07a06`; entry: `index-Cnfn94HM.js`. All seven containers are healthy. Six application containers were replaced; the existing PostgreSQL container, WalletConnect configuration, Caddy policy, databases and historical evidence remain preserved. See [current TLS deployment evidence](security/2026-10-21-tls-deployment.md), the preceding [layout record](security/2026-10-21-layout-deployment.md) and immutable [Wave 1 deployment](security/2026-10-21-wave1-deployment.md).
 
 Current recovery material is private under `/home/pall/.local/state/liqvera/recovery/2026-10-21-tls-1c02099/`. The six retained previous application containers have suffix `-before-tls-1c02099`. To roll back this TLS deployment:

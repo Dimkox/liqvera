@@ -1,5 +1,9 @@
 # Liqvera handoff
 
+## 2026-10-21 — preserve corrected pip after the dependency merge
+
+PR #14 was merged into main at `3cfc69b42a0996ccbe6dbdc9bea6e63001e721bd`. The merge combined a dependency update with the TLS work and restored `pip==26.2.1` in the development extra while the audited lock and CI bootstrap retained 26.2.2. The extra now keeps the corrected 26.2.2 pin and the incoming Ruff update. A regression failed on the merged metadata and passes after the correction; all five effective-trust/metadata checks pass. Production remains on the previously verified TLS images; no rollout or payment operation is part of this metadata correction. A fresh external audit with precise reviewed dispositions follows separately and must preserve the preceding failed audit and every historical evidence byte.
+
 ## 2026-10-21 — TLS corrections verified and deployed
 
 Source `1c020995adaa1a80fc8a97888aa838041d8e01d5` is live on claw. Six application containers now use the corrected TLS images; the existing PostgreSQL container remains unchanged. All seven services are healthy with zero restarts. All four inherited TLS blockers are closed by independent security review. The complete successor run passes 955 Python tests plus 85 subtests; web passes 104, gateway passes all 71 including 13 real disposable-PostgreSQL tests. Exact-image scans retain 30 reviewed backport/configuration/package-identity occurrences and zero untriaged findings.

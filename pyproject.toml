@@ -11,7 +11,7 @@ authors = [
 dependencies = ["httpx==0.28.1", "websockets==17.2", "jsonschema==4.26.0", "referencing==0.37.0"]
 
 [project.optional-dependencies]
-dev = ["pip==26.2.1", "hatchling==1.32.4", "editables==0.6", "PyYAML==6.0.3", "pytest==9.1.1", "pytest-asyncio==1.4.0", "pytest-cov==7.1.0", "ruff==0.17.1"]
+dev = ["pip==26.2.2", "hatchling==1.32.4", "editables==0.6", "PyYAML==6.0.3", "pytest==9.1.1", "pytest-asyncio==1.4.0", "pytest-cov==7.1.0", "ruff==0.17.1"]
 audit = ["pip-audit==2.10.1"]
 
 [build-system]

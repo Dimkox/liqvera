@@ -1,5 +1,11 @@
 # Liqvera handoff
 
+## 2026-10-21 — layout repair deployed, preceding browser retained
+
+Source `57660040b36300de62cd45cb663bd2124167fe45` is published on claw as browser image `sha256:e824dfe58616166fcabbe973b140be27857d7dbb3113fa501296488610527e0f`, entry `index-Cnfn94HM.js`. Public Chrome checks at 320–1440 px show 14-pixel separation around the acknowledgment, borrow button and terms link, no horizontal overflow and the Getzilla footer link. Mobile AppKit QR/relay checks pass with no exceptions or CSP violations; no live quote or payment was created. The checkbox remains safely disabled until a fresh unpaid-quote shortfall is established, with explicit prerequisite guidance.
+
+All seven containers are healthy; only the web container was replaced. A fresh coherent backup was validated, and the same gateway/report/capture containers resumed after 7.76 seconds. WalletConnect bytes, migrations and ledger counts remain unchanged (three CONFIRMED, one MANUAL_REVIEW, four receipts, four entitlements). The original Wave 1 browser and older predecessor are retained. [Current evidence and exact rollback](docs/security/2026-10-21-layout-deployment.md) are separate from immutable original deployment records. Exact-image Trivy has zero findings; Grype retains the same nine reviewed configuration/backport dispositions with unchanged runtime binaries/configuration. This is web acceptance, not a passing whole-product Getzilla security audit.
+
 ## 2026-10-21 — funding layout and prerequisite guidance repaired
 
 The owner supplied desktop and mobile screenshots showing the Borrow link overlapping its acknowledgment and terms link. The padded inline anchor did not increase line-box height; the published page reproduced overlaps of 9 and 12 pixels at every tested width. The funding section now uses explicit grid rows and 14-pixel gaps, with a wrapping checkbox label and scoped button layout. The owner also requested a Getzilla footer link; it points to the canonical GitHub repository.

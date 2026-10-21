@@ -1,0 +1,59 @@
+{
+  "source_commit": "57660040b36300de62cd45cb663bd2124167fe45",
+  "source_tree": "7f70be70d1e53624ded7efcbba1c80eda5048437",
+  "image_id": "sha256:e824dfe58616166fcabbe973b140be27857d7dbb3113fa501296488610527e0f",
+  "entry_asset": "index-Cnfn94HM.js",
+  "archive_sha256": "f443a236c064eab7728b3061af84c645690626fe8bbc84a221c0705c3988606c",
+  "archive_size": 232536,
+  "payload_sha256": {
+    "rollout.py": "fb3bcb5d8811b197ed86d00b27f2a8939bfaec026fa39157b4a571037a5b2106",
+    "layout-probe.py": "5c8419879b5fcb8148d2b51c42d95ee7577430a912dc292f09cd75baf2af38eb",
+    "public-browser.py": "6051a3b3a0e7654024b3b0cdbb79e19be3183b4260734c71c7c58babb74322f9",
+    "independent-ui-review.md": "e4dce4839014dcff2e2b52a5677ec9f21154c75df3fbf0b44f1afe164e555406",
+    "deployment.json": "770fca6797a2a96c0da14c8b967289647462e5395427baaf312fe9f36f80b0ca",
+    "security-summary.json": "698d2a969b849b916d30812b298644729374a0076b945c57002e424b6f7d96f8",
+    "runtime-comparison.txt": "d3d1495fd6c263c5fb37d5a578cbb557a01734e134414f5222653b74507f1778",
+    "web-trivy.json": "04f8acc4ecfd8105d799b764157d5ba5bf7f1c3f0c5c4ca0dc4d927b0e886f3f",
+    "web-grype.json": "145a0b21b33da97a9034c726b3a1028d22859d46787ca771a38582919ef6e0da",
+    "web-tests.log": "10d735037db8469669abc8ee33aaf6ee9fd5790ce6c705cb623493e2ecc896c9",
+    "web-build.log": "1a8305daf15c30d65900daaddb9f46dc233fccd3fa76f808c7d36f08a1bb5186",
+    "unit-red.log": "49d53ff25aa1588f285d1da9939a2fdb47e3bedae78279d1c4b89486fb24e651",
+    "web-image-id.txt": "7c6b3db180e96d8702d0c0c051494eaf344dbc9971eff3ed492d35fc19842a6f",
+    "public-browser.json": "52b6ed1658eae33639fb2ec4c11b41f8463179225611f66b1b4557a363a20f52",
+    "before/layout.json": "970ccc55da0d0f563fba74adae93f23b5b27d538b0fbd6664470c708a6526b87",
+    "after/layout.json": "6e54c8ce6301de9039d588f271914aeaf867e3e9ac9c538fff4f3bd859b2cefe",
+    "live/layout.json": "d808e711bdb13363f9ba50768b53bceb40c550eea43b15504f2bc30b947af1c1",
+    "live/panel-1440.png": "b70d912abe0d5b45255c4466012c3d8fc16eccba6761834db65b7e5b1ca7fb6e",
+    "live/panel-390.png": "d3106b5b3b02445015041eb286f5c1121dfd455958767f9d1f50627c90aa0013"
+  },
+  "web_tests": {
+    "passed": 104,
+    "failed": 0
+  },
+  "published_layout_widths": [
+    320,
+    390,
+    768,
+    1024,
+    1280,
+    1440
+  ],
+  "public_walletconnect": {
+    "qr": true,
+    "relay_status": 101,
+    "exceptions": 0,
+    "csp_violations": 0,
+    "new_quotes": 0,
+    "payment_requests": 0
+  },
+  "preserved": {
+    "walletconnect": true,
+    "other_six_container_ids": true,
+    "database_volumes": true,
+    "migration_hashes": true,
+    "ledger_aggregates": true,
+    "historical_preview_hashes": true
+  },
+  "backup_seconds": 7.756561517715454,
+  "rollback_command": "python3 /home/pall/.local/state/liqvera/recovery/2026-10-21-layout-5766004/rollout.py rollback"
+}

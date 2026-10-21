@@ -21,6 +21,10 @@ Built for analysts, researchers and developers, each report combines public Hype
 | Offline verification | Check the evidence and reproduce the calculations locally |
 | MUSD payments through x402 | Purchase access to an individual report with your wallet |
 
+## MUSD funding in this source version
+
+After preparing a report, check the selected wallet’s MUSD balance, exact shortfall and estimated purchase budget. Download a block-bound funding check or open the official Mezo Borrow application after reviewing its separate loan risks. Return to the same quote and check again before confirming payment. This source extension has not yet been deployed by the October 21 verification session. See [Wave 1 changes and evidence](docs/competition/wave1-musd-funding.md).
+
 ## Try Liqvera
 
 **[Explore the public demo →](https://liqvera.site)**

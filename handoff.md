@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-21 — Wave 1 MUSD funding extension
+
+Added the existing checkout funding panel using the recovered October 13 Assisted Borrow preparation, with provenance disclosed. New Wave 1 work binds MUSD balance reads to a canonical block, adds exact purchase-budget/export data, integrates selected wallet/quote/payment guards and invalidates stale observations. Treasury is excluded. Source baseline is f1d3bffc; branch feat/wave1-musd-access-20261021. No gateway, ledger or payment-authority change.
+
+Validation: 102 web tests, both network builds and a synthetic full-entrypoint DOM check pass. Independent code/security review approved the final code with no remaining findings after the shared deadline fix (53 focused tests and TypeScript). Gateway: 58 pass, 13 database cases skipped. Python: 947 pass plus 85 subtests; four Compose tests fail because Docker is unavailable, so full make verify is not PASS. Both npm audits report zero advisories. See [delta, reproducible evidence and limitations](docs/competition/wave1-musd-funding.md).
+
+Source publication is separate from rollout. This session has no reachable operator deployment or signed-in AKINDO editor and has not signed a loan/payment or verified a new paid delivery. The existing product and October 15 submission comment are public; no duplicate entry is needed. [Prepared updates](docs/competition/wave1-akindo-update.md) state the pending deployment and disclosed reuse.
+
 ## 2026-10-13 — product README and GitHub presentation
 
 Owner requests a clean commercial README and direct version-history links for competition reviewers and automated checks. README now leads with product value, report deliverables, the wallet purchase flow, current Testnet price, source components and operating guides. Dedicated commit-history, releases, tags and comparison links make development evidence accessible without a project-origin narrative. GitHub About now describes verifiable BTC market-depth reports and Testnet MUSD payments; the homepage remains https://liqvera.site and relevant product topics are set. All 54-document local link checks and whitespace checks pass; the live demo and four GitHub history/version links each return HTTP 200. Documentation and repository presentation only; no runtime, dependency or deployment change, so application tests were not rerun.

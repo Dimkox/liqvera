@@ -1,5 +1,15 @@
 # Liqvera handoff
 
+## 2026-10-21 — Wave 1 deployed on claw with recovery retained
+
+The owner authorized rollout from PR #14 at exact application source `9ca9ceda79fbce07b9b9bfb1dcc174d4c300b863`. The new browser is published at https://liqvera.site as `sha256:de0e5216443ac6a51c5e0c63e5ee45b416f57ced9590943161f8addcbc7ecbcd`, entry `index-Dd1iIief.js`. All seven containers are healthy. The other six containers, owner WalletConnect configuration, Caddy policy, Testnet/Mainnet volumes and migration hashes are preserved. The ledger remains three CONFIRMED attempts, one MANUAL_REVIEW attempt, four receipts and four entitlements. No new quote, payment, loan or grant was created.
+
+Full verification on claw passes: Python 951 tests plus 85 subtests; web 102; gateway 71 including all 13 real disposable-PostgreSQL tests; both web network builds; Docker configuration and artifact checks. Earlier A07 build-timeout runs are retained as failures/interrupted diagnostics; the subsequent complete run passed. npm and exact-browser Trivy report zero; refreshed Grype reports nine matches with reviewed configuration/backport dispositions and no untriaged findings. This is not a claim that nginx/curl packages are patched or that all unchanged runtime images were rescanned.
+
+Writers were briefly drained/frozen for a coherent PostgreSQL/artifact/capture backup, then resumed. The dump was restored into a disposable database and its aggregate ledger/migrations matched. Browser replacement/rollback was rehearsed on disposable containers, and five recovery fault tests pass. The previous live browser and private recovery material remain available; see [rollout evidence and rollback](docs/security/2026-10-21-wave1-deployment.md). Independent read-only source, recovery and security review found no remaining blocker.
+
+Published mobile-viewport Chrome verifies the new funding panel, historical preview, AppKit QR and WalletConnect relay WebSocket upgrade without observed exceptions or CSP violations. These GET-only checks do not establish physical wallet pairing, a live funding observation, borrowing or a new paid delivery. Historical proof bundles remain unchanged and the published preview reproduces offline. The owner subsequently requested a full external Getzilla audit using its merged PR #115; that separate audit is pending, not claimed by this rollout record.
+
 ## 2026-10-21 — Wave 1 MUSD funding extension
 
 Added the existing checkout funding panel using the recovered October 13 Assisted Borrow preparation, with provenance disclosed. New Wave 1 work binds MUSD balance reads to a canonical block, adds exact purchase-budget/export data, integrates selected wallet/quote/payment guards and invalidates stale observations. Treasury is excluded. Source baseline is f1d3bffc; branch feat/wave1-musd-access-20261021. No gateway, ledger or payment-authority change.

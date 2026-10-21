@@ -21,9 +21,9 @@ Built for analysts, researchers and developers, each report combines public Hype
 | Offline verification | Check the evidence and reproduce the calculations locally |
 | MUSD payments through x402 | Purchase access to an individual report with your wallet |
 
-## MUSD funding in this source version
+## MUSD funding
 
-After preparing a report, check the selected wallet’s MUSD balance, exact shortfall and estimated purchase budget. Download a block-bound funding check or open the official Mezo Borrow application after reviewing its separate loan risks. Return to the same quote and check again before confirming payment. This source extension has not yet been deployed by the October 21 verification session. See [Wave 1 changes and evidence](docs/competition/wave1-musd-funding.md).
+After preparing a report, check the selected wallet’s MUSD balance, exact shortfall and estimated purchase budget. Download a block-bound funding check or open the official Mezo Borrow application after reviewing its separate loan risks. Return to the same quote and check again before confirming payment. This extension is available on the public Testnet demo. See [Wave 1 changes and evidence](docs/competition/wave1-musd-funding.md).
 
 ## Try Liqvera
 
@@ -64,7 +64,7 @@ Development is tracked publicly in Git. Use the links below to inspect changes, 
 - **[Releases](https://github.com/Dimkox/liqvera/releases)** — published release notes and assets.
 - **[Version tags](https://github.com/Dimkox/liqvera/tags)** — named source versions.
 - **[Compare revisions](https://github.com/Dimkox/liqvera/compare)** — review differences between commits, branches or tags.
-- **[Validation evidence](docs/security/2026-10-13-walletconnect.md)** — deployed version, security checks and the scope of functional verification.
+- **[Validation evidence](docs/security/2026-10-21-wave1-deployment.md)** — deployed version, security checks and the scope of functional verification.
 
 [Product specification](docs/specification.md) · [Architecture](docs/architecture.md) · [Security policy](SECURITY.md) · [Buildathon presentation](docs/competition/README.md)
 

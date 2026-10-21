@@ -20,6 +20,16 @@ Merchant rollout backups are under `/home/pall/.local/state/liqvera/recovery/202
 
 ## Wallet connection
 
+The Wave 1 browser from source `9ca9ceda79fbce07b9b9bfb1dcc174d4c300b863` was deployed on claw on 2026-10-21. The other six service containers, WalletConnect configuration, Caddy policy and database volumes are preserved. All seven containers passed health checks. [Deployment evidence](security/2026-10-21-wave1-deployment.md) records the exact image, restored-backup check, browser checks and security dispositions.
+
+Recovery material is private under `/home/pall/.local/state/liqvera/recovery/2026-10-21-wave1-9ca9ced/`. The stopped previous browser is `liqvera-live-web-live-1-before-wave1-9ca9ced`. The retained, reviewed rollback command is:
+
+```bash
+python3 /home/pall/.local/state/liqvera/recovery/2026-10-21-wave1-9ca9ced/rollout.py rollback
+```
+
+It restores the previous browser and operational manifest. It does not restore a database or run migrations. Preserve the rollback container and both images until the recovery window is closed explicitly.
+
 Create an owner-controlled Liqvera project in the [Reown dashboard](https://dashboard.reown.com) and allow the canonical origin `https://liqvera.site`. Set `LIQVERA_WALLETCONNECT_PROJECT_ID` to its public 32-character project ID before building the web image. Compose passes this value as a Docker build argument; local Vite builds use the same environment variable. It is public browser configuration, not a password or wallet key. Changing it requires rebuilding the static browser. Do not use an ID copied from another application or the SDK's localhost example for a public deployment.
 
 Configured builds use a single AppKit modal for injected wallets and WalletConnect, with account management and disconnect. Builds without the variable retain injected-wallet support, but cannot pair a wallet from ordinary mobile Chrome/Safari. The default network remains Mezo Testnet; project configuration does not enable Mainnet or authorize a payment.

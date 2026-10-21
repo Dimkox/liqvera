@@ -2,6 +2,8 @@
 
 Implementation date: 2026-10-21. Comparison baseline: `f1d3bffc46fa1459908fdff865fcfbfc831b7f7f` (main, 2026-10-14). Track 2: Access and Distribution for MUSD/MEZO.
 
+Deployment update, 2026-10-21: source `9ca9ceda79fbce07b9b9bfb1dcc174d4c300b863` is now published at https://liqvera.site. On claw, the complete Python run passed 951 tests and 85 subtests, and all 71 gateway tests passed, including the 13 disposable-PostgreSQL cases. Web tests and both network builds passed. The [separate rollout record](../security/2026-10-21-wave1-deployment.md) includes rollback, backup restoration, exact-image scans and the published browser check. No new loan, quote or payment was submitted. The implementation-session evidence below remains historical and unchanged.
+
 ## User-visible change
 
 A prepared, unpaid report now has a **MUSD funding for this report** panel in the same checkout. The selected payer can check their MUSD balance, see the exact shortfall and estimated number of purchases at the quoted price, and download a block-bound funding observation. When the balance is insufficient, a separate acknowledgment enables the official borrowing application for the selected Mezo network. The user returns to the same saved quote and explicitly checks again. An adequate balance removes the borrowing action. Returning or reading never starts payment.
@@ -47,7 +49,7 @@ make verify PYTHON=.venv/bin/python
 
 Raw local results and source hashes are under [the October 21 evidence directory](2026-10-21-funding/verification.json). Tests use synthetic balances and API responses. The exported observations in test evidence are synthetic and must not be used as chain/payment evidence.
 
-### Recorded results
+### Original implementation-session results
 
 - Web: 102 passed; Testnet and Mainnet production builds passed.
 - Gateway: 58 passed, 13 PostgreSQL cases skipped because no disposable database was available.
@@ -61,7 +63,7 @@ No gateway, SQL migration, authorization, nonce, settlement/finality or entitlem
 
 The independent read-only code/security reviewer approved the final code after the shared deadline fix, with 53 targeted tests and TypeScript passing. Live wallet/RPC interoperability, physical mobile handoff, external loan behavior, deployment and paid delivery were explicitly outside that review. Package audits do not constitute a complete deployment-image audit.
 
-## Publication and live acceptance
+## Original implementation-session publication and live acceptance
 
 The existing AKINDO product is [Liqvera](https://app.akindo.io/communities/GLX6zWqv4hW7EP41/products/Drk1AoWNguaZnWMB), submitted to Wave 1. Its existing submission comment was observed dated October 15; no duplicate entry is required or created.
 

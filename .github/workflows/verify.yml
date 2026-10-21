@@ -28,30 +28,54 @@ jobs:
             --tmpfs /tmp:rw,nosuid,nodev \
             -v "$PWD/deploy/security/busybox/check-regression.py:/check.py:ro" \
             --entrypoint python liqvera-python:ci /check.py /bin/busybox
+          docker run --rm --network none --read-only --cap-drop ALL \
+            -v "$PWD/deploy/security/check-tls-trust.py:/check.py:ro" \
+            --entrypoint python liqvera-python:ci /check.py --certifi --without-pip
   product:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    env:
+      NODE_OPTIONS: --use-openssl-ca
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        with:
-          node-version: "22"
       - name: Prepare Python
         run: |
           python3 -m venv .venv
+          curl --fail --silent --show-error --location \
+            https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl \
+            --output "$RUNNER_TEMP/pip-26.2.2-py3-none-any.whl"
+          printf '%s  %s\n' fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70 \
+            "$RUNNER_TEMP/pip-26.2.2-py3-none-any.whl" | sha256sum --check
+          .venv/bin/python -m pip install --no-index --no-deps "$RUNNER_TEMP/pip-26.2.2-py3-none-any.whl"
+          PIP_CA=$(.venv/bin/python -c 'from pip._vendor import certifi; print(certifi.where())')
+          export SSL_CERT_FILE="$PIP_CA"
+          export SSL_CERT_DIR="$(mktemp -d "$RUNNER_TEMP/liqvera-ca.XXXXXX")"
+          # Modern pip merges system roots; constrain both OpenSSL lookup paths.
+          printf '%s\n' "SSL_CERT_FILE=$SSL_CERT_FILE" "SSL_CERT_DIR=$SSL_CERT_DIR" >> "$GITHUB_ENV"
+          .venv/bin/python deploy/security/check-tls-trust.py --pip
           .venv/bin/pip install -r requirements-dev.lock
           .venv/bin/pip install --no-deps --no-build-isolation -e .
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "22"
       - name: Verify Python and documentation
         run: |
           make verify PYTHON=.venv/bin/python
           .venv/bin/python scripts/check-docs.py
       - name: Build and test gateway and browser
         run: |
+          node deploy/security/check-node-tls-trust.cjs
           make liqvera-gateway liqvera-web
           npm test --prefix apps/mezo-gateway
           npm test --prefix apps/mezo-web
+      - name: Verify gateway runtime TLS trust
+        run: |
+          docker build -f deploy/mezo-evidence/Dockerfile.gateway -t liqvera-gateway:ci .
+          docker run --rm --network none --read-only --cap-drop ALL \
+            -v "$PWD/deploy/security/check-node-tls-trust.cjs:/check.cjs:ro" \
+            --entrypoint node liqvera-gateway:ci /check.cjs
       - name: Audit dependency closures
         run: |
           .venv/bin/pip-audit -r requirements.lock

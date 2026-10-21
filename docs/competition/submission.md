@@ -2,6 +2,10 @@
 
 Prepared 2026-10-13. Existing project; pre-event baseline `607fa0d`. The owner confirms that the Liqvera entry has already been submitted to AKINDO. This session has not accessed the account or verified which attachment versions were submitted. These files remain supporting preparation materials; do not submit a duplicate.
 
+## October 21 Wave 1 source extension
+
+The [MUSD funding extension](wave1-musd-funding.md) adds block-bound wallet balance checks, exact report budgets, JSON observations and an assisted official Borrow handoff inside the existing checkout. October 13 preparation is explicitly identified as reused. This source update has not been deployed or applied to AKINDO in this session; no new paid acceptance is claimed. See [prepared AKINDO updates](wave1-akindo-update.md) and the [verification record](2026-10-21-funding/verification.json). The historical October 13 fields below retain their dated scope.
+
 ## Ready-to-paste project fields
 
 **Project name:** Liqvera

@@ -1,5 +1,6 @@
 import "./style.css";
-import { MEZO, NETWORK_LABEL, TOKEN_LABEL } from "./network.ts";
+import { MEZO, MUSD, NETWORK_CONFIG, NETWORK_LABEL, TOKEN_LABEL } from "./network.ts";
+import { mountMezoFinance } from "./mezo-finance-panel";
 import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest } from "./api";
 import { canPay, paymentNotice, walletStatus } from "./browser-flow";
 import { executePaymentAttempt, executeRecovery } from "./browser-orchestration";
@@ -64,7 +65,7 @@ app.innerHTML = `
       </div>
       <section class="boundary-strip" aria-label="Important context"><div><span>NOTE 1</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>NOTE 2</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>NOTE 3</span><p><strong>No execution authority.</strong> No orders, custody, live trading, or guaranteed fills.</p></div></section>
     </main>
-    <footer><span>Liqvera v0.0.5 · Market reports you can verify.</span><span>Built for MEZO ₿ · ${NETWORK_LABEL} · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a></span></footer>
+    <footer><span>Liqvera v0.0.5 · Market reports you can verify.</span><span>Built for MEZO ₿ · ${NETWORK_LABEL} · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a> · <a href="https://github.com/Dimkox/Getzilla" target="_blank" rel="noopener noreferrer" aria-label="Getzilla project repository on GitHub">Getzilla ↗</a></span></footer>
   </div>`;
 
 function el<T extends HTMLElement>(selector: string): T {
@@ -165,12 +166,20 @@ const walletModal = walletProjectId ? createWalletModal(
   },
 ) : null;
 
+const fundingPanel = mountMezoFinance({
+  host: el<HTMLElement>("#result-content"),
+  network: { name: NETWORK_CONFIG.name, chainId: MEZO.chainId, asset: MUSD.address, decimals: MUSD.decimals },
+  getContext: () => ({ provider, account, quote, paymentGuard: flow?.paymentGuard ?? "unavailable", busy: busy || polling, onMezo: onChain }),
+});
+window.addEventListener("pagehide", event => { if (!event.persisted) fundingPanel.dispose(); });
+
 function setBusy(value: boolean): void {
   busy = value;
   updateControls();
 }
 
 function updateControls(): void {
+  fundingPanel.update();
   const ready = Boolean(cap?.payment_ready && cap.source_mode === "live-public");
   const canCreate = ready && x402Available() && Boolean(bearer && account && !flow) && !busy;
   el<HTMLButtonElement>("#create-button").disabled = !canCreate;
@@ -217,6 +226,7 @@ function renderRequest(status: RequestStatus): void {
 }
 
 function renderQuote(): void {
+  fundingPanel.update();
   const target = el<HTMLDivElement>("#result-content");
   target.replaceChildren();
   if (!quote) return;

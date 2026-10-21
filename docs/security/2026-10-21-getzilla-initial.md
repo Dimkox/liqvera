@@ -1,0 +1,15 @@
+# Initial Getzilla PR 115 audit — superseded by TLS remediation
+
+This historical negative result is preserved unchanged. The owner subsequently requested remediation; see [TLS remediation](2026-10-21-tls-remediation.md). It must not be presented as the current source security verdict.
+
+The local Getzilla checkout and GitHub PR 115 agree on merged commit `2bb417431f1e4b9494e4af71ebf27adb1d04d898`. PR 115 changes its Factory certifi pin from 2026.7.22 to 2026.10.19; it does not install repository policy into Liqvera. The external tool ran from an isolated pinned checkout. Liqvera application source was `57660040b36300de62cd45cb663bd2124167fe45`, compared with actual PR base `f1d3bffc46fa1459908fdff865fcfbfc831b7f7f`.
+
+The selected high-risk route completed four analyses and five independent reviews. Reviewed audit commit: `84851abfddbc46ad3f097ba17ef9cfadc9c3296d`; final candidate: `80fd12092b5ef764b927891597300aa3cdb490a0`. Their only delta is the five full review reports. Product files equal the stated source; external metadata stays outside the product repository.
+
+The single qualifying command was `getzilla_verify.py --mode pr --full-scope --keep-going --json`, with online OSV explicitly selected and the offline DB unset. It completed in 443.74 seconds with exit 1. Python passed 951 tests plus 85 subtests. Ruff, Bandit, OpenGrep, contract/SQL checks, change-spec, risk/cost, hook health, quality admission and source stability passed. Known-vulnerability checking passed 476 pins but omitted the Python `.lock` filenames; a separate fresh scan found the certifi advisory. Several optional framework/architecture/governance checks were skipped and are recorded as such. No passing review receipts were fabricated.
+
+Two native gate failures were unrelated to secrets or TLS: a trailing blank line in immutable historical deployment evidence, and two public MUSD token constants matched by the generic secret heuristic. Historical bytes were not edited to make the gate green. Independent source/dependency/runtime review found four real blockers: certifi 2026.7.22, Node's effective compromised-root trust, Caddy's Go 1.27.2 verifier, and pip 26.2.1's vendored CA bundle. These findings prompted the successor fix.
+
+Supplemental checks passed: web 104 tests, gateway 71 including all 13 disposable PostgreSQL cases, both network builds, artifact/document checks and npm audits. Fresh unsuppressed Trivy/Grype scans covered the deployed stack. Existing Python/BusyBox backports and narrow nginx/curl/Ada/OpenPGP dispositions remained separate from the new TLS findings. No live quote, loan, payment, grant renewal or database migration was performed by the audit.
+
+The [raw archive](2026-10-21-getzilla-initial-raw.tar.gz) preserves full reviews, analyses, gate invocation/output, source bindings, supplemental logs and scanner results. Its `manifest.sha256.json` records and verifies every payload. It excludes private operational configuration, browser profiles, database backups and scanner caches. The included audit Git bundle depends on the product source commit above.

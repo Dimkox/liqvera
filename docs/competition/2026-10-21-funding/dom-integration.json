@@ -1,0 +1,49 @@
+{
+  "schema": "liqvera-dom-integration-check/v1",
+  "checked_at": "2026-10-21T10:00:55.851Z",
+  "environment": "JSDOM, synthetic API and read-only wallet; no browser or live chain acceptance",
+  "result": "PASS",
+  "cases": [
+    "actual main.ts mounts funding panel",
+    "same checkout creates one quote",
+    "zero balance and exact shortfall",
+    "official Testnet handoff after acknowledgment",
+    "refresh after synthetic funding",
+    "exact budget and export",
+    "saved quote unchanged",
+    "no signing or paid-report request"
+  ],
+  "observation": {
+    "schema": "liqvera-musd-funding-observation/v1",
+    "network": "eip155:31611",
+    "chain_id": 31611,
+    "asset": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+    "decimals": 18,
+    "account": "0x1111111111111111111111111111111111111111",
+    "block_number": "291",
+    "block_hash": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "balance_atomic": "1000000000000000001",
+    "required_atomic": "10000000000000000",
+    "shortfall_atomic": "0",
+    "report_budget": "100",
+    "observed_at": "2026-10-21T10:00:55.844Z",
+    "payment_submitted": false,
+    "quote_id": "11111111-1111-4111-8111-111111111111"
+  },
+  "rpc_methods": [
+    "eth_accounts",
+    "eth_chainId",
+    "eth_getBlockByNumber",
+    "eth_call"
+  ],
+  "http": [
+    {
+      "path": "/v1/capabilities",
+      "method": "GET"
+    },
+    {
+      "path": "/v1/report-quotes",
+      "method": "POST"
+    }
+  ]
+}

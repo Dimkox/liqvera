@@ -1,0 +1,154 @@
+{
+  "schema": "liqvera-wave1-source-verification/v1",
+  "checked_at": "2026-10-21T10:04:34.621646+00:00",
+  "baseline": "f1d3bffc46fa1459908fdff865fcfbfc831b7f7f",
+  "branch": "feat/wave1-musd-access-20261021",
+  "node": "v24.19.0",
+  "reused_archive": {
+    "name": "liqvera-mezo-finance.zip",
+    "date": "2026-10-13",
+    "sha256": "c2ddf7d5e8617a4c4c80dee8234299bc62506434b64f0a185610675477d495a3",
+    "scope": "Prepared Assisted Borrow code reused; treasury excluded. Not claimed as new Wave 1 work."
+  },
+  "remote_inventory": [
+    {
+      "branch": "origin/chore/repository-cleanup",
+      "sha": "05624da6512def115c35de250fb0159ebeea0a6f",
+      "committer_date": "2026-09-28T22:23:07Z",
+      "ancestor_of_main": true
+    },
+    {
+      "branch": "origin/dependabot/pip/python-dependencies-2e7b3bee18",
+      "sha": "311d1392d9dfb94a783f6c3f509b849646957c7d",
+      "committer_date": "2026-10-19T03:14:16Z",
+      "ancestor_of_main": false
+    },
+    {
+      "branch": "origin/feat/f3-f7-verification",
+      "sha": "de083f4093a3d8b0271b340ba4f4e95443f8fc57",
+      "committer_date": "2026-09-30T22:29:51Z",
+      "ancestor_of_main": true
+    },
+    {
+      "branch": "origin/feat/mezo-borrow-treasury-20261013",
+      "sha": "7130bb55014815df26f6d565cc9c189f8d37da76",
+      "committer_date": "2026-10-13T10:44:45Z",
+      "ancestor_of_main": true
+    },
+    {
+      "branch": "origin/feat/mezo-evidence-f1-impl",
+      "sha": "d2d7923bd11e03f868a6ac55d6f73c962ee5e2c7",
+      "committer_date": "2026-09-24T18:38:28Z",
+      "ancestor_of_main": true
+    },
+    {
+      "branch": "origin/feat/mezo-evidence-f3-report",
+      "sha": "ed872ee45f33d0650c18a34a8373d80b5b19f253",
+      "committer_date": "2026-09-24T23:39:17Z",
+      "ancestor_of_main": true
+    },
+    {
+      "branch": "origin/main",
+      "sha": "f1d3bffc46fa1459908fdff865fcfbfc831b7f7f",
+      "committer_date": "2026-10-14T15:22:14+03:00",
+      "ancestor_of_main": true
+    }
+  ],
+  "workspaces": {
+    "audit_snapshot": "Clean at 8469ac90; no Borrow implementation.",
+    "legacy_checkout": "97484401 with deletions of retired tooling; preserved. No newer application changes found.",
+    "operator_deployment": "Not mounted; prior operator hostname does not resolve here."
+  },
+  "checks": {
+    "web": {
+      "passed": 102,
+      "failed": 0,
+      "skipped": 0
+    },
+    "focused_finance": {
+      "passed": 53,
+      "failed": 0
+    },
+    "testnet_build": "PASS",
+    "mainnet_build": "PASS",
+    "gateway": {
+      "passed": 58,
+      "failed": 0,
+      "skipped": 13,
+      "reason": "PostgreSQL tests require a disposable database; unavailable here."
+    },
+    "python": {
+      "passed": 947,
+      "failed": 4,
+      "subtests_passed": 85,
+      "reason": "All four failures invoke unavailable Docker CLI/Compose. Full make verify is not PASS.",
+      "failed_tests": [
+        "tests/operations/test_f6_static.py::test_fixture_profile_has_no_external_egress_and_live_keeps_required_egress",
+        "tests/operations/test_f6_static.py::test_live_disabled_override_removes_grant_and_context_as_one_unit",
+        "tests/operations/test_f6_static.py::test_fixture_publication_resource_security_health_and_secret_boundaries",
+        "tests/operations/test_f6_static.py::test_exact_users_tmpfs_mount_modes_resources_and_profile_secrets"
+      ]
+    },
+    "artifact_scanner": "PASS",
+    "npm_audit": {
+      "web": 0,
+      "gateway": 0,
+      "scope": "Current package closures only; no deployment-image scan."
+    },
+    "dom_integration": "PASS, JSDOM with synthetic wallet/API; not a real browser or payment.",
+    "independent_review": {
+      "result": "APPROVED_CODE_ONLY",
+      "remaining_findings": 0,
+      "verification": "53 focused tests and TypeScript passed; shared deadline finding fixed."
+    }
+  },
+  "live_acceptance": {
+    "status": "NOT_RUN",
+    "new_loan": false,
+    "new_payment": false,
+    "new_paid_delivery": false,
+    "reason": "No authorized wallet signing interface or deployment access available."
+  },
+  "publication": {
+    "github": "Local validated source; branch/PR publication recorded separately after commit.",
+    "deployment": "UNCHANGED",
+    "akindo": "NOT_UPDATED: signed out. Existing product and October 15 comment observed; no duplicate."
+  },
+  "source_sha256": {
+    "apps/mezo-web/src/main.ts": "a4c71c28d6ed351d80b4146d83f98ff51f2ef4a68741bef697aab7a2eeca1f20",
+    "apps/mezo-web/src/mezo-finance.mjs": "edaa378085114cb974a5edb2ece3f20079c4aec8587bda9cb8fba82c79c4176b",
+    "apps/mezo-web/src/mezo-finance.d.mts": "ffdef857574d331ebd7126d5515a535a4b2a0929236cdefc98601aa94d0cb7bc",
+    "apps/mezo-web/src/mezo-finance-panel.ts": "04b5a5465def1200a1b35133774d73b6ffc0892f0a858df76575a97fc5e2730f",
+    "apps/mezo-web/test/mezo-finance.test.mjs": "489cf94e375007ac612f8e5a0da1bbba7987504446319829107d57404b59ad90",
+    "apps/mezo-web/test/mezo-finance-panel.test.mjs": "6a4190715c92b66f433e7ecbfeb82c1508b2ea0d99425b4ee35dc0f3a12e9b33",
+    "apps/mezo-web/test/musd-observation.test.mjs": "c90b758ebf597f1c94d142ba2e3f40c91c94c0014af62339516f71b34501ccd7"
+  },
+  "evidence_sha256": {
+    "web-audit.json": "0f78b4b77396f2fe7a5a1a076ad5343851d5affb294c860cca5a9d36f8a63784",
+    "gateway-audit.json": "43c83c39f94ea68e0f6eb81de355f5df1a6e2986f050220934809aa318f3b5f5",
+    "dom-integration.json": "7dc06cb22d514676a6e6deebcf3670b0c699e6d26af3b6ca198d07f7e2920e9b",
+    "deadline-red.log.gz": "85d3d6f22ad2ec20f0b6f51ae9743884eb3ff36e95ca5023042a88cd48db5fcd",
+    "gateway-build.log.gz": "1488190de51fbbd85f673d386b7960c0bf9bd3d096648cb9edd62c1d19c5619f",
+    "gateway-tests.log.gz": "e4752a5ed558b93375e8ccff4463834522f3baa7ec11d0c78be22c3ccc53f91e",
+    "network-red.log.gz": "58d06775582cb58fb4c414d58f7d8e8da2e7404742c744d0621bd31ef01101be",
+    "observation-red.log.gz": "37225e137e1b5639f6e2a45c0753760abdfd5a0ab53f1b01178ff2394129955f",
+    "panel-red.log.gz": "b4a7034f95d159d2b66169861beddd25d04e5ea8e3913617a879375b9fcb77b5",
+    "python-tests.log.gz": "bce86cbe1ca5b900e93918cec7136b1be76e12387bdb803dc555e21f056c42e8",
+    "web-mainnet-build.log.gz": "9e09b8fb5412ea63123a0f2dd5f031ff2de8eeb6717fbe12dc8d1d6bbbe3e119",
+    "web-testnet-build.log.gz": "cecd5f1ae3ec2cff0453e84d60d86ffeec8a1c91648ba9758f681356fd6fbdd6",
+    "web-tests.log.gz": "941d63e1f6d66bdf7cc77177058d32609bfc3e1207ea3ae00fa2b3bfa4367433"
+  },
+  "uncompressed_log_sha256": {
+    "deadline-red.log.gz": "1e4853833140683bdeeea7d20e47c50aaee90a1f55496326fd2b5d97d7c07057",
+    "gateway-build.log.gz": "b0e29bf2ce299877a60252212710adddc467c995b7fc5c27839334942a1de265",
+    "gateway-tests.log.gz": "2810771c4d903382a7dd3cf5f8acb70ce707548ac450fd2ffb8a045492ab3caf",
+    "network-red.log.gz": "04216a86b20b08532a5e7a8a63d277da225880dd82ef1f09a74d461de2e60f88",
+    "observation-red.log.gz": "6c78fe3fea8e666a73d8f508a431abca01e822ccdb703015ce9b058083b8dd8a",
+    "panel-red.log.gz": "56171d93d7488837b89e16806b346f31c61a04a7e9277403c7342c34ddd7328d",
+    "python-tests.log.gz": "a9554bd3159b05f87765ffee6578ccaca251cf0eb5a2bf92b1a7b20522fd6ae4",
+    "web-mainnet-build.log.gz": "d002b5d81b52d0885365107d0b66f5356153df9acff377e6f499c6291d830d3d",
+    "web-testnet-build.log.gz": "d2199ed9ded3da0301a859fd920ec20fc39eb714fdb0b94c5beebabd4a8e1cd6",
+    "web-tests.log.gz": "a77d9ba0e735bb75023353d2bc7344d52aac449d13bec5d8d6591c78e89b9dc4"
+  },
+  "log_compression": "gzip, mtime=0; decompressed bytes are unchanged raw command output."
+}

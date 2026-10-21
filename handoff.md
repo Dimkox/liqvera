@@ -1,5 +1,11 @@
 # Liqvera handoff
 
+## 2026-10-21 — inherited TLS findings remediated in source
+
+The owner requested fixing the four blockers found by the complete external Getzilla PR 115 audit. Both Python locks now pin certifi 2026.10.19; pip 26.2.2 is bootstrapped offline from a checksum-bound wheel. Docker CA packages pin 20261020-r0, Node selects corrected OpenSSL trust in parent/child processes, and Caddy 2.11.7 builds with Go 1.27.3. CI constrains both CA lookup paths before dependency downloads. Independent review exposed and helped resolve additive pip trust and lazy CA-directory probe gaps. All application/payment logic, migrations and historical proof bytes remain unchanged.
+
+Six candidate builds and bounded TLS/security regressions pass; the new gateway/PostgreSQL images pass all 71 gateway tests with zero skips in an isolated disposable database. Fresh OSV/PyPI checks find zero advisories across 52 unique locked versions. [Source remediation details](docs/security/2026-10-21-tls-remediation.md) preserve exact scope and [the initial negative audit](docs/security/2026-10-21-getzilla-initial.md). Source freeze, complete successor verification and production replacement follow separately. Keep the current live PostgreSQL container and all durable state; replace affected application services with retained-container rollback, never restore old dumps over later payments.
+
 ## 2026-10-21 — layout repair deployed, preceding browser retained
 
 Source `57660040b36300de62cd45cb663bd2124167fe45` is published on claw as browser image `sha256:e824dfe58616166fcabbe973b140be27857d7dbb3113fa501296488610527e0f`, entry `index-Cnfn94HM.js`. Public Chrome checks at 320–1440 px show 14-pixel separation around the acknowledgment, borrow button and terms link, no horizontal overflow and the Getzilla footer link. Mobile AppKit QR/relay checks pass with no exceptions or CSP violations; no live quote or payment was created. The checkbox remains safely disabled until a fresh unpaid-quote shortfall is established, with explicit prerequisite guidance.

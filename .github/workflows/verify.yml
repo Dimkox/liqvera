@@ -60,16 +60,17 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "22"
-      - name: Verify Python and documentation
-        run: |
-          make verify PYTHON=.venv/bin/python
-          .venv/bin/python scripts/check-docs.py
+      # Python acceptance tests invoke the built Node gateway and protocol package.
       - name: Build and test gateway and browser
         run: |
           node deploy/security/check-node-tls-trust.cjs
           make liqvera-gateway liqvera-web
           npm test --prefix apps/mezo-gateway
           npm test --prefix apps/mezo-web
+      - name: Verify Python and documentation
+        run: |
+          make verify PYTHON=.venv/bin/python
+          .venv/bin/python scripts/check-docs.py
       - name: Verify gateway runtime TLS trust
         run: |
           docker build -f deploy/mezo-evidence/Dockerfile.gateway -t liqvera-gateway:ci .

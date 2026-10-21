@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-21 — restore hosted CI and build acceptance prerequisites first
+
+Repository Actions were enabled with the owner's authorization at 16:52 UTC. Workflow permissions remain read-only, with pull-request approval by workflows disabled. The [first fresh main run](https://github.com/Dimkox/liqvera/actions/runs/39638640285) passed both Python runtime-image jobs and the Caddy job. Its product job failed two Python acceptance tests because the clean runner had not installed and built the Node gateway/protocol yet: 954 tests and 85 subtests passed, two failed. This failure remains part of the verification record.
+
+The workflow now runs its existing Node build/test step before Python acceptance. Commands, TLS guards, dependency audits and test assertions are unchanged. A fresh local worktree reproduced both failures before bootstrap and passed both after `make liqvera-gateway liqvera-web`. Both application builds passed; gateway tests passed 58 cases and skipped the 13 explicitly database-dependent cases without a disposable database, while browser tests passed all 104 cases. These local checks do not establish hosted CI success; the corrected pull request must pass the complete GitHub workflow before merge.
+
+Fresh read-only checks on claw found all seven containers healthy and the existing WalletConnect configuration, PostgreSQL container, ledger, migration hashes and historical evidence preserved. Application/runtime source in main matches deployed `1c020995adaa1a80fc8a97888aa838041d8e01d5`; this workflow-only repair needs no application replacement. The TLS deployment rollback documented below remains available. No quote, payment, loan or grant was created, and no database restore or migration was run.
+
 ## 2026-10-21 — Liqvera audit passes; tool self-check remains failed
 
 Liqvera's full frozen native gate at `328dfa8f0523310e80693db606a0e737c24b2ee5` passes with exit 0 and zero evidence gaps. All five selected independent reviews and six passing receipts are retained in the [current successor evidence](docs/security/2026-10-21-getzilla-successor.md). Exactly three hash-bound public/historical findings retain raw severity and are dispositioned; new or stale findings remain failures. Earlier negative reports, failed review waves and full gates remain unchanged.

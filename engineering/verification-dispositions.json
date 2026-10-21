@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "dispositions": [
+    {
+      "id": "liqvera-public-testnet-musd-1",
+      "check": "secret-scan",
+      "kind": "public-token-address",
+      "rule": "generic-secret",
+      "path": "apps/mezo-web/test/mezo-finance.test.mjs",
+      "sha256": "61c64095503eaca71d387d610c118d25f3ea2c8f7a8dd1c11f045d5fde34e3e2",
+      "line": 10,
+      "column": 7,
+      "match_sha256": "05e2960a431f5166660c9f4399d2920dd2fa3635e77e23a75b2a918647aaaf19",
+      "reason": "Independently reviewable public Testnet MUSD contract identifier from the canonical network definition; no credential or signing authority.",
+      "evidence": {
+        "path": "docs/security/2026-10-21-verification-dispositions.md",
+        "sha256": "d2a11a5029a4fe3b8a05201ba3ed9cc58e55ee32dc79a4e95d442bc5885b15c1"
+      }
+    },
+    {
+      "id": "liqvera-public-testnet-musd-2",
+      "check": "secret-scan",
+      "kind": "public-token-address",
+      "rule": "generic-secret",
+      "path": "docs/competition/2026-10-21-funding/dom-smoke.mjs",
+      "sha256": "4a99ffe47e5620a97fb1ef567b43918ea4d79b89d33208c4ff1b961a69d55325",
+      "line": 9,
+      "column": 73,
+      "match_sha256": "0ccf1a411cfbb57f5794fcc989b1f4ece9fda101e3e23e06240745e2a1caa5ab",
+      "reason": "Independently reviewable public Testnet MUSD contract identifier from the canonical network definition; no credential or signing authority.",
+      "evidence": {
+        "path": "docs/security/2026-10-21-verification-dispositions.md",
+        "sha256": "d2a11a5029a4fe3b8a05201ba3ed9cc58e55ee32dc79a4e95d442bc5885b15c1"
+      }
+    },
+    {
+      "id": "liqvera-immutable-wave1-blank-eof",
+      "check": "git-diff-check",
+      "kind": "immutable-markdown-whitespace",
+      "rule": "new-blank-line-at-eof",
+      "path": "docs/security/2026-10-21-wave1-deployment.md",
+      "sha256": "2fc820a62bd6c8d453256d856f923ee2bdf812875c24fab684265883022335ba",
+      "line": 51,
+      "reason": "Preserve the exact published historical Wave 1 deployment report as explicitly required by the owner; only its recorded final blank line is classified.",
+      "evidence": {
+        "path": "docs/security/2026-10-21-verification-dispositions.md",
+        "sha256": "d2a11a5029a4fe3b8a05201ba3ed9cc58e55ee32dc79a4e95d442bc5885b15c1"
+      }
+    }
+  ]
+}

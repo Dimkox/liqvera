@@ -1,5 +1,9 @@
 # Liqvera handoff
 
+## 2026-10-21 — exact optional audit dispositions
+
+The successor external audit retains three raw findings but can classify only the two exact public Testnet MUSD occurrences and the final blank line in immutable Wave 1 evidence. [The explanation](docs/security/2026-10-21-verification-dispositions.md) and `engineering/verification-dispositions.json` bind target bytes, occurrence identity and rationale. They do not install a delivery framework or affect product runtime. Changed files require renewed review. The unmodified PR #115 result remains negative; the reviewed successor tool, independent reviews and final zero-gap gate are still required before claiming completion. No live operation accompanies this audit metadata.
+
 ## 2026-10-21 — preserve corrected pip after the dependency merge
 
 PR #14 was merged into main at `3cfc69b42a0996ccbe6dbdc9bea6e63001e721bd`. The merge combined a dependency update with the TLS work and restored `pip==26.2.1` in the development extra while the audited lock and CI bootstrap retained 26.2.2. The extra now keeps the corrected 26.2.2 pin and the incoming Ruff update. A regression failed on the merged metadata and passes after the correction; all five effective-trust/metadata checks pass. Production remains on the previously verified TLS images; no rollout or payment operation is part of this metadata correction. A fresh external audit with precise reviewed dispositions follows separately and must preserve the preceding failed audit and every historical evidence byte.

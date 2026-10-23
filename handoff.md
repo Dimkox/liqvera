@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-23 — Mezo integration protocol discovery (source only)
+
+Started from fresh origin/main `d6c0f6f7b01ba8562bc2c1f53ea1dda0113f1411` in isolated branch `feat/mezo-integration-20261023`; the original checkout and all inventoried worktrees remain intact. External optional Getzilla checkout was updated to `e86027f5962401b62a750f4a0d804029b52ae397`; its read-only routing is advisory and does not install repository policy or authorize external writes.
+
+Verified explorer API is on `api.explorer.test.mezo.org`. Full Testnet Pool, Router, Factory and three proxy/implementation ABI pairs are vendored with SHA-256/URL/time provenance; historical MUSD evidence is unchanged. The fixed-block protocol probe records BTC decimals 18, fee **4 bps** (not the proposed 30), matching Pool/Router sell quotes, view `fetchPrice()` and reverting `lastGoodPrice()`, MCR 110%, CCR 150%, and SortedTroves size 298. Proxy metadata is an observation, not historical implementation proof. The owner specification and phased implementation checks are recorded in the Mezo integration plan.
+
+Protocol checks passed: 134 compatibility tests, TypeScript protocol compilation, 65-document link checks and whitespace checks. Independent read-only protocol review found no blocking issue after source/metadata retention and ABI/address test improvements. This is protocol groundwork only. DEX capture/report/ZIP/UI integration, Trove product, competition documentation and final full-product checks remain outstanding. No deployment, payment, grant, database or published asset was changed.
+
 ## 2026-10-21 — restore hosted CI and build acceptance prerequisites first
 
 Repository Actions were enabled with the owner's authorization at 16:52 UTC. Workflow permissions remain read-only, with pull-request approval by workflows disabled. The [first fresh main run](https://github.com/Dimkox/liqvera/actions/runs/39638640285) passed both Python runtime-image jobs and the Caddy job. Its product job failed two Python acceptance tests because the clean runner had not installed and built the Node gateway/protocol yet: 954 tests and 85 subtests passed, two failed. This failure remains part of the verification record.

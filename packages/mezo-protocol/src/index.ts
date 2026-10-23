@@ -198,3 +198,180 @@ export function assertMezoTestnetChainId(
     throw new Error(`Expected Mezo Testnet chain ID ${MEZO_TESTNET.chainId}`);
   }
 }
+
+/** Testnet basic pools: https://mezo.org/docs/developers/features/mezo-pools/#testnet--basic-pool-contracts
+ * ABI provenance and proxy implementation observations: ../source-lock.json.
+ * These addresses authorize read-only analytics only.
+ */
+export const MEZO_TESTNET_DEX = {
+  router: "0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9",
+  poolFactory: "0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A",
+  musdBtcPool: "0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9",
+  // Observed token1() on the sourced pool; see fixed-block protocol probe.
+  btcToken: "0x7b7C000000000000000000000000000000000000",
+} as const;
+
+export const MEZO_TESTNET_POOL_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "tokenIn",
+        "type": "address"
+      }
+    ],
+    "name": "getAmountOut",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getReserves",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "_reserve0",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_reserve1",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_blockTimestampLast",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stable",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "token0",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "token1",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;
+
+export const MEZO_TESTNET_ROUTER_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "stable",
+            "type": "bool"
+          },
+          {
+            "internalType": "address",
+            "name": "factory",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct IRouter.Route[]",
+        "name": "routes",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "getAmountsOut",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;
+
+export const MEZO_TESTNET_POOL_FACTORY_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pool",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "_stable",
+        "type": "bool"
+      }
+    ],
+    "name": "getFee",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;

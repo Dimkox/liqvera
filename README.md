@@ -40,6 +40,8 @@ The public demo runs on **Mezo Testnet (31611)**. Each report costs **0.01 test 
 
 Reports describe a hypothetical sweep of the captured order book. Liqvera is a read-only analytics product: calculations cover the available snapshot depth and exclude fees and funding.
 
+The Mezo Testnet analytics extension is in development. Its [protocol provenance](packages/mezo-protocol/README.md#testnet-analytics-provenance-2026-10-23) records verified ABIs and fixed-block read-only observations; the public demo described above retains its deployed report behavior.
+
 ## Built for verifiable delivery
 
 Liqvera connects market capture, report generation and MUSD payment in one web application. Payment access is bound to the exact report and evidence hashes. The offline verifier checks bundle integrity and recomputes results from the included inputs.

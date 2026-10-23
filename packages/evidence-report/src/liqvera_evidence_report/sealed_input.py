@@ -70,6 +70,10 @@ def _inspect(members: dict[str, bytes]) -> InspectedInput:
     validate("capture-evidence.schema.json", capture)
     mode = capture["source_mode"]
     expected = BASE_MEMBERS | {"source/mapping-evidence.json"}
+    if "source/mezo-dex.json" in members:
+        expected = expected | {"source/mezo-dex.json"}
+        from liqvera_public_capture.public_adapters.mezo_dex import verify_capture
+        verify_capture(strict_json(members["source/mezo-dex.json"]))
     if set(members) != expected:
         raise EvidenceRejected("INVALID_DATASET")
     manifest = object_keys(strict_json(members["manifest.json"]), {

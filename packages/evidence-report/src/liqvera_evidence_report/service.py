@@ -24,11 +24,19 @@ from liqvera_evidence_report.evidence_bundle import (
 from liqvera_evidence_report.evidence_io import EvidenceRejected, identifier, strict_json
 from liqvera_evidence_report.report import build_report, parse_request
 
-PUBLIC_CODES = {"INVALID_INPUT", "INVALID_DATASET", "SOURCE_UNAVAILABLE", "STALE_SOURCE",
+PUBLIC_CODES = {"MEZO_SOURCE_UNAVAILABLE", "MEZO_DEX_INVALID_EVIDENCE", "INVALID_INPUT", "INVALID_DATASET", "SOURCE_UNAVAILABLE", "STALE_SOURCE",
                 "CLOCK_SKEW", "IDENTITY_UNVERIFIED", "IDENTITY_MISMATCH", "CROSSED_BOOK",
                 "DEPTH_INSUFFICIENT", "UNSUPPORTED_INSTRUMENT", "ARTIFACT_INTEGRITY_FAILED",
                 "STORAGE_UNAVAILABLE", "REPORT_ALREADY_EXISTS"}
 
+
+
+def require_mezo_source(built) -> None:
+    """Fresh enabled builds cannot silently return Hyperliquid-only evidence."""
+    if ("source/mezo-dex.json" not in built.input_members
+            or "mezo-dex/capture.json" not in built.extra_members
+            or "mezo_dex" not in built.document):
+        raise EvidenceRejected("MEZO_SOURCE_UNAVAILABLE")
 
 def _internal_token(path: str) -> str:
     """Load one narrowly scoped internal credential without logging its value."""
@@ -50,7 +58,7 @@ def _internal_token(path: str) -> str:
         raise ValueError("invalid internal authentication configuration") from None
 
 
-def _capture(origin: str, capture_id: str, timeout: float) -> dict:
+def _capture(origin: str, capture_id: str, timeout: float, *, mezo_request: dict | None = None) -> dict:
     url = urlsplit(origin)
     if (url.scheme != "http" or url.hostname not in {"evidence-capture", "127.0.0.1", "localhost"}
             or url.path not in {"", "/"} or url.query or url.fragment or url.username or url.password
@@ -58,11 +66,15 @@ def _capture(origin: str, capture_id: str, timeout: float) -> dict:
         raise EvidenceRejected("SOURCE_UNAVAILABLE")
     client = http.client.HTTPConnection(url.hostname, url.port or 8081, timeout=timeout)
     try:
-        client.request("POST", "/internal/v1/captures", body=canonical_json_bytes({"capture_id": capture_id}),
+        client.request("POST", "/internal/v1/captures", body=canonical_json_bytes({"capture_id": capture_id, **({"mezo_dex": mezo_request} if mezo_request is not None else {})}),
                        headers={"Content-Type": "application/json", "Connection": "close"})
         response = client.getresponse()
         raw = response.read(16385)
         if len(raw) > 16384 or response.status != 201:
+            if len(raw) <= 16384:
+                failure = strict_json(raw)
+                if type(failure) is dict and failure.get("code") == "MEZO_SOURCE_UNAVAILABLE":
+                    raise EvidenceRejected("MEZO_SOURCE_UNAVAILABLE")
             raise EvidenceRejected("SOURCE_UNAVAILABLE")
         value = strict_json(raw)
         if (type(value) is not dict or set(value) != {"capture_id", "source_mode", "identity_status"}
@@ -91,6 +103,9 @@ def main() -> int:
             or any(not path.is_absolute() or path.is_symlink() for path in (capture_root, artifact_root))):
         raise ValueError("invalid report service configuration")
     artifact_root.mkdir(parents=True, exist_ok=True)
+    dex_enabled = os.environ.get("LIQVERA_MEZO_DEX_ENABLED", "false")
+    if dex_enabled not in {"true", "false"} or (dex_enabled == "true" and mode != "live-public"):
+        raise ValueError("invalid Mezo DEX source configuration")
     active: set[str] = set()
     active_lock = threading.Lock()
 
@@ -186,6 +201,8 @@ def main() -> int:
                     active.add(report_id)
                     acquired = True
                 deadline = time.monotonic() + 15
+                # Existing report IDs retain immutable historical bytes, including
+                # pre-extension reports. The requirement applies to fresh builds.
                 if os.path.lexists(artifact_root / report_id):
                     built, artifact = read_published(artifact_root, report_id)
                     if built.document["request"] != {"side": request.side.value,
@@ -195,10 +212,18 @@ def main() -> int:
                         raise EvidenceRejected("INVALID_DATASET")
                 else:
                     capture_id = str(uuid4())
-                    capture = _capture(capture_url, capture_id, 12.5)
+                    if dex_enabled == "true":
+                        from fractions import Fraction
+                        quantity = Fraction(str(request.quantity_base)) * 10**18
+                        capture = _capture(capture_url, capture_id, 12.5, mezo_request={
+                            "side": request.side.value, "quantity_wei": str(quantity.numerator)})
+                    else:
+                        capture = _capture(capture_url, capture_id, 12.5)
                     if capture["source_mode"] != mode:
                         raise EvidenceRejected("INVALID_DATASET")
                     built = build_report(capture_root / capture_id, request)
+                    if dex_enabled == "true":
+                        require_mezo_source(built)
                     if built.document["source"]["source_mode"] != mode:
                         raise EvidenceRejected("INVALID_DATASET")
                     if time.monotonic() >= deadline:
@@ -214,7 +239,7 @@ def main() -> int:
                     "limitations": built.document["quality"]["limitations"]})
             except EvidenceRejected as error:
                 code = error.code if error.code in PUBLIC_CODES else "INVALID_DATASET"
-                status = 503 if code in {"SOURCE_UNAVAILABLE", "STORAGE_UNAVAILABLE", "ARTIFACT_INTEGRITY_FAILED"} else 422
+                status = 503 if code in {"MEZO_SOURCE_UNAVAILABLE", "SOURCE_UNAVAILABLE", "STORAGE_UNAVAILABLE", "ARTIFACT_INTEGRITY_FAILED"} else 422
                 self.reply(status, {"code": code, "retryable": False})
             except FileExistsError:
                 self.reply(409, {"code": "REPORT_ALREADY_EXISTS", "retryable": False})

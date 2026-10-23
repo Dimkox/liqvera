@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/mezo-dex.schema.json",
+  "$defs": {
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "side",
+        "quantity_btc",
+        "amount_in",
+        "amount_out",
+        "avg_price_musd",
+        "price_impact_bps",
+        "mid_price_musd",
+        "fee_bps",
+        "router_amount_out",
+        "formula_amount_out",
+        "match",
+        "depth_ladder",
+        "block_number",
+        "block_hash",
+        "explorer_links",
+        "caveats"
+      ],
+      "properties": {
+        "side": {
+          "enum": [
+            "BUY",
+            "SELL"
+          ]
+        },
+        "quantity_btc": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+        },
+        "amount_in": {
+          "type": "string",
+          "maxLength": 78,
+          "pattern": "^[0-9]+(?![\\s\\S])"
+        },
+        "amount_out": {
+          "type": "string",
+          "maxLength": 78,
+          "pattern": "^[0-9]+(?![\\s\\S])"
+        },
+        "avg_price_musd": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+        },
+        "price_impact_bps": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+        },
+        "mid_price_musd": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+        },
+        "fee_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9999
+        },
+        "router_amount_out": {
+          "type": "string",
+          "maxLength": 78,
+          "pattern": "^[0-9]+(?![\\s\\S])"
+        },
+        "formula_amount_out": {
+          "type": "string",
+          "maxLength": 78,
+          "pattern": "^[0-9]+(?![\\s\\S])"
+        },
+        "match": {
+          "const": true
+        },
+        "depth_ladder": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "quantity_btc",
+                  "amount_in",
+                  "amount_out",
+                  "avg_price_musd",
+                  "price_impact_bps"
+                ],
+                "properties": {
+                  "quantity_btc": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+                  },
+                  "amount_in": {
+                    "type": "string",
+                    "maxLength": 78,
+                    "pattern": "^[0-9]+(?![\\s\\S])"
+                  },
+                  "amount_out": {
+                    "type": "string",
+                    "maxLength": 78,
+                    "pattern": "^[0-9]+(?![\\s\\S])"
+                  },
+                  "avg_price_musd": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+                  },
+                  "price_impact_bps": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "quantity_btc",
+                  "status"
+                ],
+                "properties": {
+                  "quantity_btc": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+                  },
+                  "status": {
+                    "const": "INSUFFICIENT_LIQUIDITY"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "block_number": {
+          "type": "string",
+          "maxLength": 78,
+          "pattern": "^[0-9]+(?![\\s\\S])"
+        },
+        "block_hash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}(?![\\s\\S])"
+        },
+        "explorer_links": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "pool",
+            "router",
+            "block"
+          ],
+          "properties": {
+            "pool": {
+              "type": "string",
+              "pattern": "^https://explorer[.]test[.]mezo[.]org/address/[0-9a-zA-Z]+(?![\\s\\S])"
+            },
+            "router": {
+              "type": "string",
+              "pattern": "^https://explorer[.]test[.]mezo[.]org/address/[0-9a-zA-Z]+(?![\\s\\S])"
+            },
+            "block": {
+              "type": "string",
+              "pattern": "^https://explorer[.]test[.]mezo[.]org/block/[0-9a-zA-Z]+(?![\\s\\S])"
+            }
+          }
+        },
+        "caveats": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hyperliquid_avg_price",
+        "mezo_avg_price",
+        "spread_bps",
+        "better_venue",
+        "caveats"
+      ],
+      "properties": {
+        "hyperliquid_avg_price": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+        },
+        "mezo_avg_price": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+        },
+        "spread_bps": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^-?[0-9]+([.][0-9]+)?(?![\\s\\S])"
+        },
+        "better_venue": {
+          "enum": [
+            "hyperliquid",
+            "mezo",
+            "equal"
+          ]
+        },
+        "caveats": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        }
+      }
+    }
+  }
+}

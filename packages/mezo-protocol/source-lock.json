@@ -37,6 +37,194 @@
         "src/content/docs/docs/developers/getting-started/musd-payments-x402/x402-quickstart.mdx",
         "src/content/docs/docs/users/resources/contracts-reference.md"
       ]
+    },
+    "testnet_explorer": {
+      "api": "https://api.explorer.test.mezo.org/api",
+      "contracts": [
+        {
+          "name": "Pool",
+          "address": "0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9",
+          "retrieved_at": "2026-10-23T13:50:34.155623+00:00",
+          "local_path": "vendor/Pool.testnet.json",
+          "sha256": "5d19779aa66ff0e0fcabec2a22ba9fd0e899f21cdcc3d6c026fbf25012a679f4",
+          "contract_name": "Pool",
+          "source_sha256": "9c1cadf7a7e2fe69f88a9f9f16bac30c268c2d5c7d012d1f8329b5a6b5311653",
+          "source_response": {
+            "local_path": "vendor/explorer/Pool.source.testnet.json",
+            "sha256": "42cdbc991381b55e3cecebca6eba8c0f3fb686058396e02e48e849408ee7ca71",
+            "retrieved_at": "2026-10-23T13:55:36.616204+00:00"
+          },
+          "explorer_is_proxy": "false",
+          "compiler_version": "v0.8.24+commit.e11b9ed9"
+        },
+        {
+          "name": "Router",
+          "address": "0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9",
+          "retrieved_at": "2026-10-23T13:50:35.162071+00:00",
+          "local_path": "vendor/Router.testnet.json",
+          "sha256": "40ad65786ea45c26919db3c8bd2edd3919ea740f69ef39d1b00209c4b1dfae77",
+          "contract_name": "Router",
+          "source_sha256": "70834850307ebbccdfac9386af82c73857c4c98472b662aeb3ec40ed58781ae4",
+          "source_response": {
+            "local_path": "vendor/explorer/Router.source.testnet.json",
+            "sha256": "16020de39f4d53d41a9b60f8b25c2bc6e85f5167fdd10e43d2c057777b987b9e",
+            "retrieved_at": "2026-10-23T13:55:37.461786+00:00"
+          },
+          "explorer_is_proxy": "false",
+          "compiler_version": "v0.8.24+commit.e11b9ed9"
+        },
+        {
+          "name": "PoolFactory",
+          "address": "0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A",
+          "retrieved_at": "2026-10-23T13:50:36.087394+00:00",
+          "local_path": "vendor/PoolFactory.testnet.json",
+          "sha256": "f32d9cee02b44ec9b173b8c1c2a2307774cdd0f1b6d4552d706f414ec612acf4",
+          "contract_name": "PoolFactory",
+          "source_sha256": "f79b3274a09b74c86be1246a73f096333ecfc8d70ea977512335710c83b70770",
+          "source_response": {
+            "local_path": "vendor/explorer/PoolFactory.source.testnet.json",
+            "sha256": "02cfd73d4834b23aaae728822b159773aa0ee2a58e0234c2061cf4f997d3c448",
+            "retrieved_at": "2026-10-23T13:55:38.291370+00:00"
+          },
+          "explorer_is_proxy": "true",
+          "compiler_version": "v0.8.24+commit.e11b9ed9"
+        },
+        {
+          "name": "TroveManager",
+          "address": "0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0",
+          "retrieved_at": "2026-10-23T13:50:36.757287+00:00",
+          "local_path": "vendor/TroveManager.testnet.json",
+          "sha256": "1605e52e7d439f50d28fa95ae63171875c35e5901a28f1f848a1644249ff8776",
+          "contract_name": "TransparentUpgradeableProxy",
+          "source_sha256": "eca2efb275f85f4440db6d4dd2086be0700082e6caea8f5995b7da0446a622f6",
+          "implementation_metadata_url": "https://api.explorer.test.mezo.org/api/v2/smart-contracts/0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0",
+          "implementation_address": "0x9aAB567966983e95536FC460C12266FB0Cc10B07",
+          "source_response": {
+            "local_path": "vendor/explorer/TroveManager.source.testnet.json",
+            "sha256": "88818f475eb085e18b6d6c296b3c615705f5f390cbec9b67ff8dcf64be45b99a",
+            "retrieved_at": "2026-10-23T13:55:38.977512+00:00"
+          },
+          "explorer_is_proxy": "true",
+          "compiler_version": "v0.8.20+commit.a1b79de6",
+          "implementation_metadata": {
+            "local_path": "vendor/explorer/TroveManager.proxy-metadata.testnet.json",
+            "sha256": "a63c3b0737f94aea3820d00fbe42b2540056e7b734563ace0324c82e2587903e",
+            "retrieved_at": "2026-10-23T13:55:39.562554+00:00"
+          }
+        },
+        {
+          "name": "SortedTroves",
+          "address": "0x722E4D24FD6Ff8b0AC679450F3D91294607268fA",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0x722E4D24FD6Ff8b0AC679450F3D91294607268fA",
+          "retrieved_at": "2026-10-23T13:50:37.479340+00:00",
+          "local_path": "vendor/SortedTroves.testnet.json",
+          "sha256": "1605e52e7d439f50d28fa95ae63171875c35e5901a28f1f848a1644249ff8776",
+          "contract_name": "TransparentUpgradeableProxy",
+          "source_sha256": "eca2efb275f85f4440db6d4dd2086be0700082e6caea8f5995b7da0446a622f6",
+          "implementation_metadata_url": "https://api.explorer.test.mezo.org/api/v2/smart-contracts/0x722E4D24FD6Ff8b0AC679450F3D91294607268fA",
+          "implementation_address": "0x9177DF58A9614b84C8c2F68dF27506AB9a5d0323",
+          "source_response": {
+            "local_path": "vendor/explorer/SortedTroves.source.testnet.json",
+            "sha256": "42ad40ae8c99efc544c46e4925f921bb464e5f4a00ee962aa11060cb0e6a04ee",
+            "retrieved_at": "2026-10-23T13:55:40.286244+00:00"
+          },
+          "explorer_is_proxy": "true",
+          "compiler_version": "v0.8.20+commit.a1b79de6",
+          "implementation_metadata": {
+            "local_path": "vendor/explorer/SortedTroves.proxy-metadata.testnet.json",
+            "sha256": "eae77f54e5d343bc2ff805e49b70f2c2d70051cb8fad33aae61fa06d1928a2d4",
+            "retrieved_at": "2026-10-23T13:55:40.958901+00:00"
+          }
+        },
+        {
+          "name": "PriceFeed",
+          "address": "0x86bCF0841622a5dAC14A313a15f96A95421b9366",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0x86bCF0841622a5dAC14A313a15f96A95421b9366",
+          "retrieved_at": "2026-10-23T13:50:38.164309+00:00",
+          "local_path": "vendor/PriceFeed.testnet.json",
+          "sha256": "1605e52e7d439f50d28fa95ae63171875c35e5901a28f1f848a1644249ff8776",
+          "contract_name": "TransparentUpgradeableProxy",
+          "source_sha256": "eca2efb275f85f4440db6d4dd2086be0700082e6caea8f5995b7da0446a622f6",
+          "implementation_metadata_url": "https://api.explorer.test.mezo.org/api/v2/smart-contracts/0x86bCF0841622a5dAC14A313a15f96A95421b9366",
+          "implementation_address": "0xec42B37C12b8D73d320f4075A1BCd58B306629c1",
+          "source_response": {
+            "local_path": "vendor/explorer/PriceFeed.source.testnet.json",
+            "sha256": "7f7caf86a93b4ec31dcad02bf951896c12d5aef586e4ea530753c2470edbbcb0",
+            "retrieved_at": "2026-10-23T13:55:41.742823+00:00"
+          },
+          "explorer_is_proxy": "true",
+          "compiler_version": "v0.8.20+commit.a1b79de6",
+          "implementation_metadata": {
+            "local_path": "vendor/explorer/PriceFeed.proxy-metadata.testnet.json",
+            "sha256": "e39bd1740598a8081e83e11847e5882e4f687186acf4158432032d17d3f423b4",
+            "retrieved_at": "2026-10-23T13:55:42.420637+00:00"
+          }
+        },
+        {
+          "name": "TroveManagerImplementation",
+          "address": "0x9aAB567966983e95536FC460C12266FB0Cc10B07",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0x9aAB567966983e95536FC460C12266FB0Cc10B07",
+          "retrieved_at": "2026-10-23T13:51:50.958757+00:00",
+          "local_path": "vendor/TroveManager.implementation.testnet.json",
+          "sha256": "d5ab4abbc51cb2223354d34ac6c919c4ce5d9d1a523f6ce443c81a6b6e30cc7c",
+          "contract_name": "TroveManager",
+          "source_sha256": "cb7859356c871cb309d384f3c68553d774f11fab104bedaabfe6bad154ebe7f1",
+          "source_response": {
+            "local_path": "vendor/explorer/TroveManagerImplementation.source.testnet.json",
+            "sha256": "749a437cf6a31b9eb315728b6b7a13338866e76511a1b7427cb314aeca88b20e",
+            "retrieved_at": "2026-10-23T13:55:43.239638+00:00"
+          },
+          "explorer_is_proxy": "false",
+          "compiler_version": "v0.8.24+commit.e11b9ed9"
+        },
+        {
+          "name": "SortedTrovesImplementation",
+          "address": "0x9177DF58A9614b84C8c2F68dF27506AB9a5d0323",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0x9177DF58A9614b84C8c2F68dF27506AB9a5d0323",
+          "retrieved_at": "2026-10-23T13:51:51.750274+00:00",
+          "local_path": "vendor/SortedTroves.implementation.testnet.json",
+          "sha256": "f297d7c5b5026f510b69105bc3dbb77930f39d5605dc3be820f70f0237c20f56",
+          "contract_name": "SortedTroves",
+          "source_sha256": "62eb55fbf7d3a0c773678f9dd48a8dde6f08ca6062019f644ebae357861b2444",
+          "source_response": {
+            "local_path": "vendor/explorer/SortedTrovesImplementation.source.testnet.json",
+            "sha256": "3c8e87c5785685065e9c3056835476be2a1f993643c48ccb8f0f0121b802de96",
+            "retrieved_at": "2026-10-23T13:55:44.000550+00:00"
+          },
+          "explorer_is_proxy": "false",
+          "compiler_version": "v0.8.24+commit.e11b9ed9"
+        },
+        {
+          "name": "PriceFeedImplementation",
+          "address": "0xec42B37C12b8D73d320f4075A1BCd58B306629c1",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0xec42B37C12b8D73d320f4075A1BCd58B306629c1",
+          "retrieved_at": "2026-10-23T13:51:52.499945+00:00",
+          "local_path": "vendor/PriceFeed.implementation.testnet.json",
+          "sha256": "b939c9a63cfb21e9b051656f7f2c0fd852f7391dcc2f7c3ebca626395db0f29b",
+          "contract_name": "PriceFeed",
+          "source_sha256": "2f0f66748674251b2ecb76ab56cd0268f48fa48fefd421469bc4b0b9d35af923",
+          "source_response": {
+            "local_path": "vendor/explorer/PriceFeedImplementation.source.testnet.json",
+            "sha256": "9ca9d77d5b7245d3c877dce9b5a718613ac403ea4c5db6f2a13557cebc2a28e8",
+            "retrieved_at": "2026-10-23T13:55:44.744754+00:00"
+          },
+          "explorer_is_proxy": "false",
+          "compiler_version": "v0.8.24+commit.e11b9ed9"
+        }
+      ]
     }
   }
 }

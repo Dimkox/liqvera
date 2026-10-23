@@ -15,7 +15,9 @@
     "calculation": {"$ref": "#/$defs/calculation"},
     "quality": {"$ref": "#/$defs/quality"},
     "reproducibility": {"$ref": "#/$defs/reproducibility"},
-    "boundaries": {"$ref": "#/$defs/boundaries"}
+    "boundaries": {"$ref": "#/$defs/boundaries"},
+    "mezo_dex": {"$ref": "mezo-dex.schema.json#/$defs/report"},
+    "venue_comparison": {"$ref": "mezo-dex.schema.json#/$defs/comparison"}
   },
   "$defs": {
     "snapshot_status": {"type": "string", "enum": ["VALID_FOR_SNAPSHOT_CALCULATION", "REJECTED", "SIMULATED"]},

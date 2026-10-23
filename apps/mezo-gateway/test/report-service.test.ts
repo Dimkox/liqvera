@@ -100,3 +100,17 @@ test('cleanup rejects when its internal deadline or caller abort expires', async
     });
   });
 });
+
+test('Mezo source failure is preserved as a failed build without an artifact', async () => {
+  await withServer((_request,response) => {
+    response.writeHead(503, {'content-type':'application/json'});
+    response.end(JSON.stringify({code:'MEZO_SOURCE_UNAVAILABLE',retryable:false}));
+  }, async base => {
+    const service = new HttpReportService(base);
+    await assert.rejects(service.build(REPORT_ID, {
+      instrument_id:'hyperliquid:BTC:perpetual', side:'SELL', quantity_base:'1',
+      expected_payer:'0x1111111111111111111111111111111111111111',
+    }, AbortSignal.timeout(1000)), (error:unknown) =>
+      typeof error === 'object' && error !== null && 'code' in error && error.code === 'MEZO_SOURCE_UNAVAILABLE');
+  });
+});

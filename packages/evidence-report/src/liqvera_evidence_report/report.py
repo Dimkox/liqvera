@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from importlib.resources import files
 from pathlib import Path
 from uuid import UUID
@@ -54,6 +54,7 @@ class BuiltReport:
     input_members: dict[str, bytes]
     algorithm_bytes: bytes
     dependency_bytes: bytes
+    extra_members: dict[str, bytes] = field(default_factory=dict)
 
 
 def parse_request(body: object, *, engine_commit: str) -> ReportRequest:
@@ -83,11 +84,11 @@ def algorithm_document(engine_commit: str, dependencies: bytes, live_identity_ap
     }
 
 
-def build_report(package_root: Path, request: ReportRequest) -> BuiltReport:
-    return build_inspected_report(inspect_package(package_root), request)
+def build_report(package_root: Path, request: ReportRequest, *, mezo_capture: dict | None = None) -> BuiltReport:
+    return build_inspected_report(inspect_package(package_root), request, mezo_capture=mezo_capture)
 
 
-def build_inspected_report(evidence: InspectedInput, request: ReportRequest) -> BuiltReport:
+def build_inspected_report(evidence: InspectedInput, request: ReportRequest, *, mezo_capture: dict | None = None) -> BuiltReport:
     if type(request) is not ReportRequest or type(evidence) is not InspectedInput:
         raise EvidenceRejected("INVALID_INPUT")
     book = evidence.book
@@ -173,6 +174,26 @@ def build_inspected_report(evidence: InspectedInput, request: ReportRequest) -> 
             "calculation_label": "hypothetical snapshot sweep",
         },
     }
+    if "source/mezo-dex.json" in evidence.members:
+        from liqvera_evidence_report.evidence_io import strict_json
+        sealed_mezo = strict_json(evidence.members["source/mezo-dex.json"])
+        if mezo_capture is not None and mezo_capture != sealed_mezo:
+            raise EvidenceRejected("MEZO_DEX_INVALID_EVIDENCE")
+        mezo_capture = sealed_mezo
+    extras = {}
+    if mezo_capture is not None:
+        from liqvera_evidence_report.mezo_dex import build_dex_report, dex_members, venue_comparison
+        try:
+            dex = build_dex_report(mezo_capture, side=request.side.value,
+                                   quantity_btc=str(request.quantity_base))
+            extras = dex_members(mezo_capture)
+        except ValueError as error:
+            raise EvidenceRejected("MEZO_DEX_INVALID_EVIDENCE") from error
+        document["mezo_dex"] = dex
+        document["venue_comparison"] = venue_comparison(dex, fill.vwap, side=request.side.value)
+        inputs.update(extras)
+        document["reproducibility"]["input_files"] = [
+            {"path": name, "sha256": digest(raw)} for name, raw in sorted(inputs.items())]
     validate("report.schema.json", document)
     raw = canonical_json_bytes(document)
-    return BuiltReport(document, raw, digest(raw), dict(evidence.members), algorithm_bytes, dependencies)
+    return BuiltReport(document, raw, digest(raw), dict(evidence.members), algorithm_bytes, dependencies, extras)

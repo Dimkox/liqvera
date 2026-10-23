@@ -8,6 +8,13 @@
 !packages/readonly-analyzer/**
 !packages/evidence-report/
 !packages/evidence-report/**
+!packages/mezo-protocol/
+packages/mezo-protocol/**
+!packages/mezo-protocol/vendor/
+packages/mezo-protocol/vendor/**
+!packages/mezo-protocol/vendor/Pool.testnet.json
+!packages/mezo-protocol/vendor/Router.testnet.json
+!packages/mezo-protocol/vendor/PoolFactory.testnet.json
 !schemas/
 !schemas/mezo-evidence/
 !schemas/mezo-evidence/v1/

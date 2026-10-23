@@ -1,5 +1,8 @@
 # Liqvera — Market reports you can verify
 
+October 23 source update: the Mezo DEX extension adds captured reserves and fees, Pool/Router quote agreement, exact comparison with Hyperliquid, and offline-reproducible ZIP evidence. It is pending publication/deployment; historical payments and the deployed preview retain their original scope. [Implementation and verification instructions](../mezo-integration.md). The [rechecked official deadline](2026-10-23-event-facts.json) is October 26 at **15:00 UTC**; internal target 11:00 UTC, code freeze 08:00 UTC.
+
+
 Liqvera turns public Hyperliquid BTC perpetual order-book snapshots into exact market-depth reports. Inspect a hypothetical buy or sell, including filled quantity, VWAP and price impact, then download the JSON and portable evidence ZIP. The offline verifier checks integrity and reproduces the calculations.
 
 The public demo at https://liqvera.site uses Mezo Testnet. Connect a browser wallet or use WalletConnect on your phone, request a fresh report and confirm access for 0.01 test MUSD through x402. Payment is bound to the report's exact hashes; confirmed delivery can be retrieved without paying again. A timestamped public preview is available without a wallet.

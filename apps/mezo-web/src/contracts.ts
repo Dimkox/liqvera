@@ -105,7 +105,17 @@ export interface Receipt {
   transfer_identity: string;
 }
 
+export interface MezoDexReport {
+  side: Side; quantity_btc: string; mid_price_musd: string; avg_price_musd: string;
+  amount_in: string; amount_out: string; price_impact_bps: string; fee_bps: number;
+  router_amount_out: string; formula_amount_out: string; match: boolean;
+  block_number: string; block_hash: string; caveats: string[];
+  depth_ladder: {quantity_btc:string; price_impact_bps?:string; status?:string}[];
+}
 export interface Report {
+  mezo_dex?: MezoDexReport;
+  venue_comparison?: {hyperliquid_avg_price:string; mezo_avg_price:string; spread_bps:string;
+                     better_venue:string; caveats:string[]};
   schema: "liqvera-evidence-report/v1";
   report_id: string;
   identity: { venue: string; instrument_id: string; product_kind: string; payoff_kind: string; quantity_unit: string };

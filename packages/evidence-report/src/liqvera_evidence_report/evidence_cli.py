@@ -23,7 +23,19 @@ def verify_main(argv: list[str] | None = None) -> int:
     except (EvidenceRejected, OSError, ValueError) as error:
         print(json.dumps({"status": "REJECTED", "code": getattr(error, "code", "INVALID_DATASET")}), file=sys.stderr)
         return 2
-    print(json.dumps({"status": "INTEGRITY_REPRODUCED", "report_sha256": built.report_sha256,
+    recheck = {}
+    if built.extra_members:
+        from liqvera_public_capture.public_adapters.mezo_dex import POOL
+        block = hex(int(built.document["mezo_dex"]["block_number"]))
+        payload = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_call",
+                              "params": [{"to": POOL, "data": "0x0902f1ac"}, block]},
+                             separators=(",", ":"))
+        import shlex
+        recheck = {"mezo_block_number": built.document["mezo_dex"]["block_number"],
+                   "online_recheck_command": "curl --fail --silent --show-error -H 'Content-Type: application/json' --data "
+                                             + shlex.quote(payload) + " https://rpc.test.mezo.org",
+                   "online_recheck_executed": False}
+    print(json.dumps({**recheck, "status": "INTEGRITY_REPRODUCED", "report_sha256": built.report_sha256,
                       "snapshot_status": built.document["quality"]["snapshot_status"],
                       "exchange_authenticity_verified": False, "execution_authority": "NONE"}))
     return 0

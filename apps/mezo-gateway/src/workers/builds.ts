@@ -1,7 +1,7 @@
 import { INSTRUMENT, PublicError, type Reason } from '../domain/model.js';
 import { Gateway } from '../application/gateway.js';
 import { metrics } from '../security/observability.js';
-const rejectedReasons:Reason[]=['INVALID_INPUT','INVALID_DATASET','STALE_SOURCE','CLOCK_SKEW','IDENTITY_UNVERIFIED',
+const rejectedReasons:Reason[]=['MEZO_DEX_INVALID_EVIDENCE','INVALID_INPUT','INVALID_DATASET','STALE_SOURCE','CLOCK_SKEW','IDENTITY_UNVERIFIED',
   'IDENTITY_MISMATCH','CROSSED_BOOK','DEPTH_INSUFFICIENT','UNSUPPORTED_INSTRUMENT','SIMULATED_SOURCE'];
 export const MAX_SALE_AGE_MS=30_000;
 export function assertSaleFresh(snapshotAt:string,now=Date.now()):void {
@@ -41,7 +41,7 @@ export async function buildOne(gateway:Gateway):Promise<boolean> {
     metrics.increment('build_complete');
   } catch(error) {
     const reason=error instanceof PublicError?error.code:'SOURCE_UNAVAILABLE';const rejected=rejectedReasons.includes(reason);
-    await gateway.ledger.rejectBuild(request.id,rejected?reason:['STORAGE_UNAVAILABLE','ARTIFACT_INTEGRITY_FAILURE'].includes(reason)?reason:'SOURCE_UNAVAILABLE',rejected);
+    await gateway.ledger.rejectBuild(request.id,rejected?reason:['MEZO_SOURCE_UNAVAILABLE','STORAGE_UNAVAILABLE','ARTIFACT_INTEGRITY_FAILURE'].includes(reason)?reason:'SOURCE_UNAVAILABLE',rejected);
     metrics.increment('build_rejected');
   } finally {metrics.observe('build',(performance.now()-started)/1000);}
   return true;

@@ -1,21 +1,13 @@
 import { MEZO, NETWORK_LABEL } from "./network.ts";
-export interface BrowserFlowState {
-  readonly version: 1;
-  readonly side: "BUY" | "SELL";
-  readonly quantity: string;
-  readonly payer: string;
-  readonly idempotencyKey: string;
-  readonly requestId?: string;
-  readonly quoteId?: string;
-  readonly paymentGuard: "clear" | "started" | "uncertain";
-}
+import type { BrowserFlowState, CreateInput } from "./flow-types.ts";
+export type { BrowserFlowState } from "./flow-types.ts";
 
 export interface BrowserProvider {
   request(input: { method: string; params?: unknown[] }): Promise<unknown>;
 }
 
 export type RecoveryRequest =
-  | { kind: "create"; method: "POST"; path: "/v1/report-quotes"; idempotencyKey: string; body: { side: "BUY" | "SELL"; quantity: string; payer: string } }
+  | { kind: "create"; method: "POST"; path: "/v1/report-quotes"; idempotencyKey: string; body: Omit<CreateInput, "idempotencyKey"> }
   | { kind: "request"; method: "GET"; path: string }
   | { kind: "quote"; method: "GET"; path: string };
 
@@ -39,7 +31,8 @@ export function recoveryRequest(flow: BrowserFlowState): RecoveryRequest {
   if (flow.quoteId) return { kind: "quote", method: "GET", path: `/v1/report-quotes/${flow.quoteId}` };
   if (flow.requestId) return { kind: "request", method: "GET", path: `/v1/report-requests/${flow.requestId}` };
   return { kind: "create", method: "POST", path: "/v1/report-quotes", idempotencyKey: flow.idempotencyKey,
-    body: { side: flow.side, quantity: flow.quantity, payer: flow.payer } };
+    body: flow.version === 2 ? { product_id: flow.product_id, borrower: flow.borrower, payer: flow.payer } :
+      { side: flow.side, quantity: flow.quantity, payer: flow.payer } };
 }
 
 export function canPay(input: {

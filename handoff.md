@@ -351,3 +351,21 @@ request replays and artifacts. Legacy four-field request serialization and marke
 report shapes remain unchanged. No database migration, payment or deployment.
 Historical verified payment evidence remains the owner's selected submission proof.
 Validation: gateway build/typecheck and 97 Node cases completed (84 passed, 13 explicitly skipped without a disposable PostgreSQL database). Thirty focused Trove package/request/service/bundle tests passed, including historical native replay and precise clock-skew rejection; 142 resource/OpenAPI regressions passed. Independent read-only review passed the backend diff, 32 Python cases and 22 Trove gateway cases. A separate stub-finality delivery regression confirms exact historical bytes and no recapture/resettlement with creation disabled; it is not a native payment test. Ruff, 71-document link validation and whitespace checks pass. Full combined-product and real disposable-ledger gates follow browser integration.
+
+## 2026-10-23 — Trove browser source phase
+
+Added the Trove tab, checksummed borrower input, exact-string risk panel and pinned
+Testnet explorer links. Version 2 sessions bind product/borrower without changing
+legacy version 1 bodies. Both paid recovery paths compare delivered product and
+borrower with the quoted subject before clearing guards. Capability product lists
+are strictly validated; Trove delivery validation is Testnet-only. A wallet-free
+sealed example copies the retained native report/ZIP byte-for-byte to immutable
+hash paths and verifies both hashes before rendering. No fresh payment is claimed.
+
+All 130 browser tests pass, including after the preview busy guard; typecheck and
+production build pass. Independent read-only review passed the product/recovery
+changes and separately verified the native preview hashes and three preview tests.
+The preview busy guard prevents concurrent form submission or another preview. Local built Chrome at 320 and
+1280 pixels showed the native block, four pinned links, no horizontal overflow and
+no runtime exceptions, using stubbed capabilities; this is not deployment or paid
+acceptance. Full combined verification and disposable-ledger checks are in progress.

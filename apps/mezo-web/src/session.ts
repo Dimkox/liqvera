@@ -1,19 +1,12 @@
-import { CHAIN_ID, isAddress, isUuid, type Side } from "./contracts.ts";
+import { CHAIN_ID, isAddress, isUuid } from "./contracts.ts";
 
 const PREFIX = CHAIN_ID === 31611 ? "liqvera:v1" : `liqvera:${CHAIN_ID}:v1`;
 const CAPABILITY_KEY = `${PREFIX}:capability`;
 const FLOW_KEY = `${PREFIX}:flow`;
 
-export interface SavedFlow {
-  version: 1;
-  side: Side;
-  quantity: string;
-  payer: string;
-  idempotencyKey: string;
-  requestId?: string;
-  quoteId?: string;
-  paymentGuard: "clear" | "started" | "uncertain";
-}
+import type { BrowserFlowState } from "./flow-types.ts";
+type Mutable<T> = {-readonly [K in keyof T]: T[K]};
+export type SavedFlow = Mutable<BrowserFlowState>;
 
 function storage(): Storage {
   try {
@@ -45,8 +38,11 @@ export function loadFlow(): SavedFlow | null {
     const data: unknown = JSON.parse(raw);
     if (!data || typeof data !== "object") return null;
     const flow = data as SavedFlow;
-    if (flow.version !== 1 || !["BUY", "SELL"].includes(flow.side) ||
-        !/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,8})?$/.test(flow.quantity) ||
+    const productValid = flow.version === 1 ? flow.product_id === undefined && flow.borrower === undefined &&
+      ["BUY", "SELL"].includes(flow.side) && /^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,8})?$/.test(flow.quantity) :
+      flow.version === 2 && flow.product_id === "trove_risk" && isAddress(flow.borrower) &&
+      flow.side === undefined && flow.quantity === undefined;
+    if (!productValid ||
         !isAddress(flow.payer) || !isUuid(flow.idempotencyKey) ||
         (flow.requestId !== undefined && !isUuid(flow.requestId)) ||
         (flow.quoteId !== undefined && !isUuid(flow.quoteId)) ||

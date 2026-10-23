@@ -1,3 +1,6 @@
+import {TROVE_PREVIEW,verifyTrovePreview} from "./trove-preview";
+import {getAddress} from "viem";
+import {mountTroveRisk} from "./trove-panel";
 import "./style.css";
 import { mountMezoDex } from "./mezo-dex-panel";
 import { MEZO, MUSD, NETWORK_CONFIG, NETWORK_LABEL, TOKEN_LABEL } from "./network.ts";
@@ -5,7 +8,7 @@ import { mountMezoFinance } from "./mezo-finance-panel";
 import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest } from "./api";
 import { canPay, paymentNotice, walletStatus } from "./browser-flow";
 import { executePaymentAttempt, executeRecovery } from "./browser-orchestration";
-import { quoteIsPayable, receiptMatchesQuote, type Capabilities, type Delivery, type Quote, type RequestStatus, type Side } from "./contracts";
+import { quoteIsPayable, receiptMatchesQuote, reportMatchesQuote, type Capabilities, type Delivery, type Quote, type RequestStatus, type Side } from "./contracts";
 import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./session";
 import { injectedWallet, switchToMezo, walletAccount, walletError, walletOnMezo, type Eip1193Provider } from "./wallet";
 import { createWalletListenerOwner, type WalletState } from "./wallet-events";
@@ -35,10 +38,21 @@ app.innerHTML = `
         <section class="panel request-panel" aria-labelledby="request-title">
           <div class="panel-heading"><span class="step">STEP 1</span><div><p class="eyebrow">BUILD A REPORT</p><h2 id="request-title">Set your snapshot question</h2></div></div>
           <p class="supporting">This is a calculation over the available snapshot depth, not a complete exchange book or guaranteed execution.</p>
-          <div class="instrument"><span class="instrument-icon" aria-hidden="true">₿</span><span><strong>BTC linear perpetual</strong><small>Hyperliquid public order book</small></span><span class="readonly-tag">READ ONLY</span></div>
+          <div class="segment product-selector" role="group" aria-label="Report product">
+            <button id="market-tab" type="button" class="secondary-button" aria-pressed="true">Market depth</button>
+            <button id="trove-tab" type="button" class="secondary-button" aria-pressed="false">Trove risk</button>
+          </div>
+          <p id="trove-availability" class="field-hint hidden">Trove creation is currently unavailable. Existing reports can still be recovered.</p>
+          <div id="market-instrument" class="instrument"><span class="instrument-icon" aria-hidden="true">₿</span><span><strong>BTC linear perpetual</strong><small>Hyperliquid public order book</small></span><span class="readonly-tag">READ ONLY</span></div>
           <form id="report-form" novalidate>
-            <fieldset><legend>Hypothetical side</legend><div class="segment"><label><input type="radio" name="side" value="BUY" checked /><span>BUY</span></label><label><input type="radio" name="side" value="SELL" /><span>SELL</span></label></div></fieldset>
-            <label class="field-label" for="quantity">Quantity <span>BTC</span></label><input id="quantity" name="quantity" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0.15" aria-describedby="quantity-hint" /><p id="quantity-hint" class="field-hint">A positive decimal string, up to 8 places. The report shows a hypothetical sweep.</p>
+            <div id="market-fields"><fieldset><legend>Hypothetical side</legend><div class="segment"><label><input type="radio" name="side" value="BUY" checked /><span>BUY</span></label><label><input type="radio" name="side" value="SELL" /><span>SELL</span></label></div></fieldset>
+            <label class="field-label" for="quantity">Quantity <span>BTC</span></label><input id="quantity" name="quantity" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0.15" aria-describedby="quantity-hint" /><p id="quantity-hint" class="field-hint">A positive decimal string, up to 8 places. The report shows a hypothetical sweep.</p></div>
+            <div id="trove-fields" class="hidden">
+              <label class="field-label" for="borrower">Borrower address</label>
+              <input id="borrower" type="text" autocomplete="off" spellcheck="false" placeholder="0x…" aria-describedby="trove-hint" />
+              <p id="trove-hint" class="field-hint">Mezo Testnet debt, collateral and redemption queue at one block. Read only. Not financial advice.</p>
+              <button id="trove-preview-button" type="button" class="secondary-button">Show sealed Trove example</button>
+            </div>
             <div class="wallet-box"><div><span class="eyebrow">EXPECTED PAYER</span><strong id="wallet-label">No wallet connected</strong><span id="chain-label">Connect an EVM wallet on ${NETWORK_LABEL}.</span></div><div class="wallet-actions"><label for="wallet-provider" class="field-hint">Wallet provider</label><select id="wallet-provider" class="hidden" aria-label="Choose wallet provider"></select><button id="connect-button" type="button" class="text-button">Connect wallet</button><button id="switch-button" type="button" class="text-button hidden">Switch network</button></div></div>
             <div id="wallet-help" class="hidden">
               <p class="supporting">Use your preferred EVM wallet that supports ${NETWORK_LABEL}. On your phone, open liqvera.site in your wallet’s browser, then tap Connect wallet.</p>
@@ -150,6 +164,32 @@ let choices:WalletChoice[]=[];
 let account: string | null = null;
 let onChain = false;
 let flow: SavedFlow | null = null;
+async function showTrovePreview():Promise<void> {
+  if(flow || busy || polling) {announcement("Recover the saved report before opening another example.","warning");return;}
+  setBusy(true);
+  const target=el<HTMLDivElement>("#result-content");
+  target.replaceChildren(node("p","status-card","Loading sealed Trove evidence…"));
+  try {
+    const [rr,br]=await Promise.all([fetch(TROVE_PREVIEW.reportUrl,{credentials:"omit",redirect:"error"}),
+      fetch(TROVE_PREVIEW.bundleUrl,{credentials:"omit",redirect:"error"})]);
+    if(!rr.ok||!br.ok)throw new Error("Trove preview could not be loaded.");
+    const reportBytes=new Uint8Array(await rr.arrayBuffer()),bundleBytes=new Uint8Array(await br.arrayBuffer());
+    const report=await verifyTrovePreview(reportBytes,bundleBytes);
+    const card=node("div","status-card");
+    card.append(node("p","eyebrow","SEALED HISTORICAL TROVE EXAMPLE"),node("p","safety-note",
+      `Captured ${formatHistoricalDate(report.source.source_at)}. This retained snapshot is not current risk data. No payment was made for this public example.`));
+    mountTroveRisk(card,report);
+    for(const [label,url] of [["Download report JSON",TROVE_PREVIEW.reportUrl],["Download evidence ZIP",TROVE_PREVIEW.bundleUrl]] as const) {
+      const link=node("a","secondary-button",label);link.href=url;link.download="";card.append(link);
+    }
+    appendField(card,"Report SHA-256",TROVE_PREVIEW.reportSha256,"breakable");
+    appendField(card,"Evidence SHA-256",TROVE_PREVIEW.bundleSha256,"breakable");
+    target.replaceChildren(card);announcement("Sealed Trove example verified. No wallet or payment required.");
+  } catch(error) {target.replaceChildren(node("p","safety-note",readableError(error)));announcement("Trove preview withheld: evidence could not be verified.","error");}
+  finally {setBusy(false);}
+}
+
+let product: "market_depth" | "trove_risk" = "market_depth";
 let quote: Quote | null = null;
 let delivery: Delivery | null = null;
 let busy = false;
@@ -183,8 +223,18 @@ function setBusy(value: boolean): void {
 function updateControls(): void {
   fundingPanel.update();
   const ready = Boolean(cap?.payment_ready && cap.source_mode === "live-public");
-  const canCreate = ready && x402Available() && Boolean(bearer && account && !flow) && !busy;
+  const productReady = product === "market_depth" || Boolean(cap?.products?.includes("trove_risk"));
+  const canCreate = productReady && ready && x402Available() && Boolean(bearer && account && !flow) && !busy;
   el<HTMLButtonElement>("#create-button").disabled = !canCreate;
+  el<HTMLButtonElement>("#trove-preview-button").disabled = Boolean(flow) || busy || polling;
+  el<HTMLElement>("#market-fields").classList.toggle("hidden", product !== "market_depth");
+  el<HTMLElement>("#market-instrument").classList.toggle("hidden", product !== "market_depth");
+  el<HTMLElement>("#trove-fields").classList.toggle("hidden", product !== "trove_risk");
+  el<HTMLElement>("#trove-availability").classList.toggle("hidden", product !== "trove_risk" || productReady);
+  for(const [id,active] of [["market-tab",product === "market_depth"],["trove-tab",product === "trove_risk"]] as const) {
+    el<HTMLButtonElement>(`#${id}`).setAttribute("aria-pressed",String(active));
+    el<HTMLButtonElement>(`#${id}`).disabled = Boolean(flow) || busy || polling;
+  }
   el<HTMLButtonElement>("#connect-button").textContent = walletModal && account ? "Manage wallet" : "Connect wallet";
   el<HTMLButtonElement>("#refresh-button").classList.toggle("hidden", !flow);
   el<HTMLButtonElement>("#refresh-button").disabled = busy || polling;
@@ -196,6 +246,7 @@ function updateControls(): void {
   el<HTMLElement>("#wallet-label").textContent = account ? `${account.slice(0, 8)}…${account.slice(-6)}` : "No wallet connected";
   el<HTMLElement>("#chain-label").textContent = walletStatus(Boolean(provider), onChain);
   el<HTMLElement>("#create-note").textContent = !cap ? "Checking service capabilities…" :
+    !productReady ? "Trove creation is currently unavailable; saved reports remain recoverable." :
     !cap.payment_ready ? "Payment and new quotes are currently unavailable." :
     !x402Available() ? "The browser payment adapter awaits SDK verification; no payment can be submitted." :
     !account ? "Connect your wallet to continue." :
@@ -239,9 +290,15 @@ function renderQuote(): void {
   const headline = node("h3", "result-heading", q.state === "READY" ? "Review before access" : q.state === "PAID" ? "Access confirmed" : "Payment recovery in progress");
   target.append(headline);
   const grid = node("div", "data-grid");
-  appendField(grid, "Instrument", "Hyperliquid BTC linear perpetual", "span-all");
-  appendField(grid, "Hypothetical side", q.preview.side);
-  appendField(grid, "Quantity", `${q.preview.quantity_base} BTC`);
+  if(q.preview.product_id === "trove_risk") {
+    appendField(grid,"Product","Mezo Trove risk","span-all");
+    appendField(grid,"Borrower",q.preview.borrower,"breakable span-all");
+    appendField(grid,"Trove status",q.preview.trove_status);
+  } else {
+    appendField(grid, "Instrument", "Hyperliquid BTC linear perpetual", "span-all");
+    appendField(grid, "Hypothetical side", q.preview.side);
+    appendField(grid, "Quantity", `${q.preview.quantity_base} BTC`);
+  }
   appendField(grid, "Snapshot time", formatHistoricalDate(q.preview.snapshot_at), "span-all");
   appendField(grid, "Age now", snapshotAge(q.preview.snapshot_at));
   appendField(grid, "Snapshot quality", "Valid for snapshot calculation");
@@ -297,20 +354,23 @@ function renderDelivery(): void {
   const receipt = paid.receipt;
   target.append(node("div", "status-pill status-ready", "ENTITLED · RECEIPT CONFIRMED"));
   target.append(node("h3", "result-heading", "Your snapshot report"));
-  target.append(node("p", "supporting", "Hypothetical snapshot sweep over the available public order-book depth. No exchange trade occurred."));
-  const grid = node("div", "data-grid report-grid");
-  appendField(grid, "Side & size", `${report.request.side} ${report.request.quantity_base} BTC`);
-  appendField(grid, "Snapshot time", formatHistoricalDate(report.source.source_at));
-  appendField(grid, "Snapshot age now", snapshotAge(report.source.source_at));
-  appendField(grid, "Sampled levels", `${report.source.available_bid_levels} bid / ${report.source.available_ask_levels} ask`);
-  appendField(grid, "VWAP (display)", report.calculation.display.vwap);
-  appendField(grid, "Worst price (display)", report.calculation.display.worst_price);
-  appendField(grid, "Consumed levels", String(report.calculation.consumed_levels));
-  appendField(grid, "Price impact (display)", `${report.calculation.display.price_impact_bps} bps`);
-  appendField(grid, "Hypothetical notional", report.calculation.display.notional_quote);
-  appendField(grid, "Execution authority", report.boundaries.execution_authority);
-  target.append(grid);
-  mountMezoDex(target, report);
+  if(report.schema === "liqvera-trove-risk-report/v1") mountTroveRisk(target,report);
+  else {
+    target.append(node("p", "supporting", "Hypothetical snapshot sweep over the available public order-book depth. No exchange trade occurred."));
+    const grid = node("div", "data-grid report-grid");
+    appendField(grid, "Side & size", `${report.request.side} ${report.request.quantity_base} BTC`);
+    appendField(grid, "Snapshot time", formatHistoricalDate(report.source.source_at));
+    appendField(grid, "Snapshot age now", snapshotAge(report.source.source_at));
+    appendField(grid, "Sampled levels", `${report.source.available_bid_levels} bid / ${report.source.available_ask_levels} ask`);
+    appendField(grid, "VWAP (display)", report.calculation.display.vwap);
+    appendField(grid, "Worst price (display)", report.calculation.display.worst_price);
+    appendField(grid, "Consumed levels", String(report.calculation.consumed_levels));
+    appendField(grid, "Price impact (display)", `${report.calculation.display.price_impact_bps} bps`);
+    appendField(grid, "Hypothetical notional", report.calculation.display.notional_quote);
+    appendField(grid, "Execution authority", report.boundaries.execution_authority);
+    target.append(grid);
+    mountMezoDex(target, report);
+  }
   const limitations = node("div", "limitations");
   limitations.append(node("strong", "", "Evidence and limits"));
   const list = node("ul");
@@ -387,7 +447,9 @@ function rememberQuote(next: Quote): void {
     const normalizedFraction = fraction.replace(/0+$/, "");
     return normalizedFraction ? `${normalizedWhole}.${normalizedFraction}` : normalizedWhole;
   };
-  if (next.preview.side !== flow.side || canonicalQuantity(next.preview.quantity_base) !== canonicalQuantity(flow.quantity)) {
+  const subjectMatches = flow.version === 2 ? next.preview.product_id === "trove_risk" && next.preview.borrower === flow.borrower :
+    next.preview.product_id === undefined && next.preview.side === flow.side && canonicalQuantity(next.preview.quantity_base) === canonicalQuantity(flow.quantity);
+  if (!subjectMatches) {
     throw new Error("Quote subject differs from the saved request. Payment remains disabled.");
   }
   if (flow.quoteId && flow.quoteId !== next.quote_id) throw new Error("Quote identity changed. Payment remains disabled.");
@@ -410,7 +472,7 @@ async function recoverDelivery(): Promise<"delivered" | "recovering" | "withheld
     if (quote.state === "PAID") announcement("Entitlement is temporarily unavailable. Check status; do not pay again.", "warning");
     return "withheld";
   }
-  if (!receiptMatchesQuote(result.receipt, quote) || result.report.report_id !== quote.report_id) {
+  if (!receiptMatchesQuote(result.receipt, quote) || !reportMatchesQuote(result.report, quote) || result.report.report_id !== quote.report_id) {
     throw new Error("Receipt does not match the quoted report. Delivery is withheld.");
   }
   delivery = result;
@@ -506,7 +568,7 @@ async function resumeFlow(): Promise<void> {
         renderRequest(status);
       },
       onDelivery: paid => {
-        if (!quote || !receiptMatchesQuote(paid.receipt, quote) || paid.report.report_id !== quote.report_id) {
+        if (!quote || !receiptMatchesQuote(paid.receipt, quote) || !reportMatchesQuote(paid.report, quote) || paid.report.report_id !== quote.report_id) {
           throw new Error("Receipt does not match the quoted report. Delivery is withheld.");
         }
         delivery = paid;
@@ -601,6 +663,7 @@ async function refreshWallet(): Promise<void> {
 
 function applyWalletState(state: WalletState): void {
   account = state.account; onChain = state.onMezo;
+  if(account && !el<HTMLInputElement>("#borrower").value) el<HTMLInputElement>("#borrower").value=getAddress(account.toLowerCase());
   if (flow && account && account.toLowerCase() !== flow.payer.toLowerCase()) announcement("Wallet changed. The saved quote remains bound to its original payer.", "warning");
   updateControls();
   if (quote) renderQuote();
@@ -621,7 +684,11 @@ el<HTMLButtonElement>("#switch-button").addEventListener("click", async () => {
     announcement(`${walletError(error)} Select ${NETWORK_LABEL} in your wallet using the network settings in the report form.`, "warning");
   }
 });
+for(const [id,next] of [["market-tab","market_depth"],["trove-tab","trove_risk"]] as const) {
+  el<HTMLButtonElement>(`#${id}`).addEventListener("click",()=>{if(flow||busy||polling)return;product=next;updateControls();});
+}
 el<HTMLButtonElement>("#refresh-button").addEventListener("click", () => { void resumeFlow(); });
+el<HTMLButtonElement>("#trove-preview-button").addEventListener("click",()=>{void showTrovePreview();});
 el<HTMLButtonElement>("#historical-button").addEventListener("click", () => { void showHistoricalReport(); });
 el<HTMLButtonElement>("#new-button").addEventListener("click", () => {
   if (!flow || flow.paymentGuard !== "clear" || busy || polling ||
@@ -637,14 +704,23 @@ el<HTMLButtonElement>("#new-button").addEventListener("click", () => {
 el<HTMLFormElement>("#report-form").addEventListener("submit", async event => {
   event.preventDefault();
   if (!cap?.payment_ready || cap.source_mode !== "live-public" || !bearer || !account || flow || busy) return;
-  const quantity = el<HTMLInputElement>("#quantity").value.trim();
-  if (!/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,8})?$/.test(quantity) || !/[1-9]/.test(quantity)) {
-    announcement("Enter a positive BTC quantity with no more than eight decimal places.", "error");
-    el<HTMLInputElement>("#quantity").focus();
-    return;
+  if(product === "trove_risk") {
+    if(!cap.products?.includes("trove_risk")) return;
+    try {
+      const borrower=getAddress(el<HTMLInputElement>("#borrower").value.trim());
+      if(/^0x0{40}$/.test(borrower)) throw new Error("Zero address");
+      flow={version:2,product_id:"trove_risk",borrower,payer:account,idempotencyKey:crypto.randomUUID(),paymentGuard:"clear"};
+    } catch {announcement("Enter a valid nonzero borrower address.","error");el<HTMLInputElement>("#borrower").focus();return;}
+  } else {
+    const quantity = el<HTMLInputElement>("#quantity").value.trim();
+    if (!/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,8})?$/.test(quantity) || !/[1-9]/.test(quantity)) {
+      announcement("Enter a positive BTC quantity with no more than eight decimal places.", "error");
+      el<HTMLInputElement>("#quantity").focus();
+      return;
+    }
+    const side = el<HTMLInputElement>('input[name="side"]:checked').value as Side;
+    flow = { version: 1, side, quantity, payer: account, idempotencyKey: crypto.randomUUID(), paymentGuard: "clear" };
   }
-  const side = el<HTMLInputElement>('input[name="side"]:checked').value as Side;
-  flow = { version: 1, side, quantity, payer: account, idempotencyKey: crypto.randomUUID(), paymentGuard: "clear" };
   saveFlow(flow);
   announcement("Request saved in this browser session. Preparing report…");
   updateControls();
@@ -654,7 +730,9 @@ el<HTMLFormElement>("#report-form").addEventListener("submit", async event => {
 async function boot(): Promise<void> {
   try { bearer = capability(); flow = loadFlow(); }
   catch (error) { announcement(readableError(error), "error"); return; }
-  if (flow) {
+  if(flow?.version === 2) {
+    product="trove_risk";el<HTMLInputElement>("#borrower").value=flow.borrower;
+  } else if (flow) {
     el<HTMLInputElement>("#quantity").value = flow.quantity;
     el<HTMLInputElement>(`input[name="side"][value="${flow.side}"]`).checked = true;
   }

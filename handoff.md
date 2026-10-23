@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-23 — available musl/nginx security fixes before DEX rollout
+
+Demo PR 19 merged into main as `d2b88d91e6e4c7238ca98d5a341ac79fca10d4e0` after its exact-head CI passed. Fresh pre-deployment Trivy/Grype databases exposed the newly indexed musl advisory. Runtime recipes now pin the fixed musl packages and nginx 1.30.6, with the existing security backports retained. [Incremental package record](docs/security/2026-10-23-runtime-package-refresh.md) states the exact scope and primary sources.
+
+All four candidate Docker builds passed; Python/BusyBox/TLS regressions and offline ZIP reproduction passed. The upgraded non-root nginx passed configuration validation and served both new and archived preview bytes over HTTP. Nine artifact/operations tests passed. The first nginx upgrade attempt failed because old unused modules pinned its previous version; removing those modules first resolved the build. Production remains unchanged in this source step.
+
+Independent deployment review found that old readers cannot serve new DEX artifacts after public exposure. The rollout is being revised to preserve the new gateway/report readers during compatible recovery, disable DEX capture and retain all data, instead of restoring old readers over new paid entitlements. No deployment, payment, migration, grant renewal or database restore has occurred.
+
 ## 2026-10-23 — publishable DEX preview with preserved historical bytes
 
 [PR 17](https://github.com/Dimkox/liqvera/pull/17) is merged as `65ee000377028e3909a72402a5341ff4ddd56c1a`; its exact-head and main verification runs passed. A fresh real SELL 1 BTC capture uses that exact engine commit and Mezo block 16321216. The new wallet-free preview pins its report/ZIP digests before rendering the Mezo comparison. The prior October 12 pair is preserved byte-for-byte in the public demo archive and remains offline-verifiable. README and competition script distinguish published source, deployment and paid acceptance.

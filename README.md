@@ -98,6 +98,7 @@ Development is tracked publicly in Git. Use the links below to inspect changes, 
 - **[Releases](https://github.com/Dimkox/liqvera/releases)** — published release notes and assets.
 - **[Version tags](https://github.com/Dimkox/liqvera/tags)** — named source versions.
 - **[Compare revisions](https://github.com/Dimkox/liqvera/compare)** — review differences between commits, branches or tags.
+- **[DEX deployment package refresh](docs/security/2026-10-23-runtime-package-refresh.md)** — pinned musl/nginx fixes and candidate validation.
 - **[Current validation evidence](docs/security/2026-10-21-getzilla-successor.md)** — passing Liqvera audit, failed tool self-check, exact deployment evidence and verification limits.
 
 [Product specification](docs/specification.md) · [Architecture](docs/architecture.md) · [Security policy](SECURITY.md) · [Buildathon presentation](docs/competition/README.md)

@@ -535,7 +535,7 @@ business-model line: 0.01 MUSD/report, X MUSD/day monitoring and B2B API for age
 and protocols, aimed at MUSD borrowers and bots. Product/spec docs explicitly state
 that these source changes are not deployed or live-wallet accepted.
 
-Final verification: browser `npm test` passed 145 tests; `npm run build` passed;
-Mezo protocol TypeScript build passed; `scripts/check-docs.py` passed for 76 documents;
+Final verification: browser `npm test` passed 146 tests; `npm run build` passed;
+Mezo protocol TypeScript build passed; `scripts/check-docs.py` passed for 72 documents;
 `git diff --check` passed. All transaction preparation tests use in-memory providers;
 no approval, swap, Trove update, payment or deployment was sent.

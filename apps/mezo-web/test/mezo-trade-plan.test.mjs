@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 import {Interface} from 'ethers';
 import * as protocol from '@liqvera/mezo-protocol';
@@ -19,4 +21,9 @@ test('planner rejects bad pool and invalid tolerance while retaining tiny execut
  assert.equal(planBtcSale(10n,{...state,reserveBtc:0n}).executable,false);
  assert.equal(planBtcSale(1n,state,100,5001).executable,false);
  assert.equal(planBtcSale(1n,state).executable,true); assert.equal(planBtcSale(0n,state).executable,false);
+});
+
+const sourceLock=JSON.parse(await readFile(new URL('../../../packages/mezo-protocol/source-lock.json',import.meta.url),'utf8'));
+test('Router and pool ABIs retain their pinned explorer source hashes',async()=>{
+ for(const name of ['Router','Pool']){const record=sourceLock.sources.testnet_explorer.contracts.find(item=>item.name===name);assert.ok(record);for(const [path,hash] of [[record.local_path,record.sha256],[record.source_response.local_path,record.source_response.sha256]]){const bytes=await readFile(new URL(`../../../packages/mezo-protocol/${path}`,import.meta.url));assert.equal(createHash('sha256').update(bytes).digest('hex'),hash);}}
 });

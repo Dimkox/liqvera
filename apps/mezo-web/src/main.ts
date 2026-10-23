@@ -1,8 +1,10 @@
 import {TROVE_PREVIEW,verifyTrovePreview} from "./trove-preview";
 import {getAddress} from "viem";
 import {mountTroveRisk} from "./trove-panel";
+import {mountTroveProtection} from "./trove-protection-panel";
 import "./style.css";
 import { mountMezoDex } from "./mezo-dex-panel";
+import {mountMezoSalePlanner} from "./mezo-sale-panel";
 import { MEZO, MUSD, NETWORK_CONFIG, NETWORK_LABEL, TOKEN_LABEL } from "./network.ts";
 import { mountMezoFinance } from "./mezo-finance-panel";
 import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest } from "./api";
@@ -32,7 +34,7 @@ app.innerHTML = `
     <main id="workspace">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy"><p class="eyebrow">PUBLIC MARKET DATA · PRIVATE ACCESS</p><h1 id="hero-title">A clearer view of the <em>available</em> book.</h1><p class="lead">Explore a hypothetical sweep of a public Hyperliquid BTC perpetual snapshot. Review the evidence before trusting the calculation.</p></div>
-        <div class="hero-aside" aria-label="Product boundaries"><div class="aside-label">REPORT BOUNDARIES</div><p>Read-only analytics</p><p>No exchange order or execution</p><p>${NETWORK_LABEL} payments</p></div>
+        <div class="hero-aside" aria-label="Product boundaries"><div class="aside-label">REPORT BOUNDARIES</div><p>Public market data</p><p>User-signed Mezo spot and Trove actions</p><p>${NETWORK_LABEL} payments</p></div>
       </section>
       <div class="workspace-grid">
         <section class="panel request-panel" aria-labelledby="request-title">
@@ -78,7 +80,7 @@ app.innerHTML = `
           <div class="result-actions"><button id="refresh-button" class="secondary-button hidden" type="button">Check status</button><button id="new-button" class="text-button hidden" type="button">Start another report</button></div>
         </section>
       </div>
-      <section class="boundary-strip" aria-label="Important context"><div><span>NOTE 1</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>NOTE 2</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>NOTE 3</span><p><strong>No execution authority.</strong> No orders, custody, live trading, or guaranteed fills.</p></div></section>
+      <section class="boundary-strip" aria-label="Important context"><div><span>NOTE 1</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>NOTE 2</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>NOTE 3</span><p><strong>User signed actions.</strong> Mezo spot swaps and Trove updates require your wallet; no perpetual orders or custody.</p></div></section>
     </main>
     <footer><span>Liqvera v0.0.5 · Market reports you can verify.</span><span>Built for MEZO ₿ · ${NETWORK_LABEL} · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a> · <a href="https://github.com/Dimkox/Getzilla" target="_blank" rel="noopener noreferrer" aria-label="Getzilla project repository on GitHub">Getzilla ↗</a></span></footer>
   </div>`;
@@ -354,7 +356,9 @@ function renderDelivery(): void {
   const receipt = paid.receipt;
   target.append(node("div", "status-pill status-ready", "ENTITLED · RECEIPT CONFIRMED"));
   target.append(node("h3", "result-heading", "Your snapshot report"));
-  if(report.schema === "liqvera-trove-risk-report/v1") mountTroveRisk(target,report);
+  const renderedProvider=provider,renderedAccount=account;
+  const walletContextCurrent=()=>provider===renderedProvider&&account?.toLowerCase()===renderedAccount?.toLowerCase()&&onChain;
+  if(report.schema === "liqvera-trove-risk-report/v1") { mountTroveRisk(target,report); mountTroveProtection(target,report,provider,account,walletContextCurrent); }
   else {
     target.append(node("p", "supporting", "Hypothetical snapshot sweep over the available public order-book depth. No exchange trade occurred."));
     const grid = node("div", "data-grid report-grid");
@@ -367,9 +371,10 @@ function renderDelivery(): void {
     appendField(grid, "Consumed levels", String(report.calculation.consumed_levels));
     appendField(grid, "Price impact (display)", `${report.calculation.display.price_impact_bps} bps`);
     appendField(grid, "Hypothetical notional", report.calculation.display.notional_quote);
-    appendField(grid, "Execution authority", report.boundaries.execution_authority);
+    appendField(grid, "Snapshot execution authority", report.boundaries.execution_authority);
     target.append(grid);
     mountMezoDex(target, report);
+    mountMezoSalePlanner(target,report,provider,account,walletContextCurrent);
   }
   const limitations = node("div", "limitations");
   limitations.append(node("strong", "", "Evidence and limits"));
@@ -644,6 +649,7 @@ async function connectWallet(): Promise<void> {
   } catch (error) { await refreshWallet(); announcement(walletError(error), "warning"); }
   updateControls();
   if (quote) renderQuote();
+  if (delivery) renderDelivery();
 }
 
 function renderProviderChoices():void {
@@ -667,6 +673,7 @@ function applyWalletState(state: WalletState): void {
   if (flow && account && account.toLowerCase() !== flow.payer.toLowerCase()) announcement("Wallet changed. The saved quote remains bound to its original payer.", "warning");
   updateControls();
   if (quote) renderQuote();
+  if (delivery) renderDelivery();
 }
 
 el<HTMLButtonElement>("#connect-button").addEventListener("click", () => { void connectWallet(); });

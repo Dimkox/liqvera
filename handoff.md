@@ -454,3 +454,120 @@ port and did not start services; isolated installed-image HTTP validation remain
 part of candidate validation. No working database or unknown payment state changed.
 Hosted CI, exact image checks and publication are next; historical verified payment
 transactions remain the owner's chosen proof.
+
+
+## 2026-10-23 — Trove protection transaction metadata
+
+Pinned public Mezo Testnet proxy and verified implementation artifacts for
+BorrowerOperations (`0xCdF7028ceAB81fA0C6971208e83fa7872994beE5`) and HintHelpers
+(`0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6`). Source lock records both layers,
+explorer source responses, implementation observations and SHA-256 hashes. Narrow
+exports expose `addColl`, `repayMUSD`, `computeNominalCR`, `getApproxHint`, and
+SortedTroves `findInsertPosition`; existing TroveManager debt/status reads remain.
+
+Validation: `../../apps/mezo-web/node_modules/.bin/tsc -p tsconfig.json` from
+`packages/mezo-protocol` and `node --test test/trove-transactions.test.mjs` from
+`apps/mezo-web` passed (3 tests). Tests validate metadata and source hashes only;
+no wallet transaction was signed or sent.
+
+## 2026-10-23 — self-custody Trove action preparation
+
+Added browser-only Trove action preparation for active Testnet borrowers. It reads
+current status, full debt/collateral and wallet balances, computes new nominal CR,
+fetches a fresh approximate hint and exact SortedTroves neighbors, then simulates
+BorrowerOperations with the borrower as `from`. BTC deposit uses native value;
+MUSD repayment checks the live minimum net debt and gas compensation. Submission
+rechecks chain/account and calls only the connected provider's
+`eth_sendTransaction`; there is no key handling or retry path. The paid report now
+shows deposit and dynamic repayment controls only for its active connected borrower.
+
+Validation: Mezo protocol TypeScript build, browser `npm run typecheck`, 11 focused
+browser report/transaction tests, and `git diff --check` passed. Tests did not sign or
+send any live transaction. Real wallet confirmation and chain inclusion remain
+unverified.
+
+## 2026-10-23 — pinned Mezo Router swap metadata
+
+Extended the narrow Router ABI with the verified Testnet
+`swapExactTokensForTokens` and directional `getReserves` fragments, plus a limited
+ERC-20 allowance/approval/balance ABI for the BTC sale flow. The original full
+Router artifact and explorer source-lock remain the provenance records; no contract
+or source artifact was replaced.
+
+Validation: Mezo protocol TypeScript build and Router signature assertion passed.
+No approval or swap was submitted.
+
+## 2026-10-23 — bounded BTC sale planner
+
+Added exact BigInt BTC-to-MUSD quotes with the captured pool fee truncation, sequential
+reserve updates and automatic part sizing under an editable 1% default price-impact
+cap. Each part's impact is shown separately from editable 1% default `minOut` slippage;
+the plan also reports aggregate impact and does not promise that splitting improves it.
+Invalid pool state, zero output, invalid tolerances and excessive part counts fail
+closed.
+
+Validation: `node --test test/mezo-trade-plan.test.mjs` in `apps/mezo-web` passed 5
+cases for exact parsing, fee arithmetic, default/editable splitting, independent
+slippage minimum, and edge boundaries. No live pool mutation occurred.
+
+## 2026-10-23 — wallet execution for individual sale parts
+
+Added fresh per-part Router and pool quotes, directional reserves, fee and BTC token
+balance checks, route identity validation, exact allowance inspection, exact-input
+approval, `minOut` calculation and call simulation. `approve` and each swap submit
+through separate explicit wallet interactions; successful receipt is required before
+that part advances. An uncertain pending receipt locks that action to prevent an
+unintentional duplicate retry.
+
+Validation: `node --test test/mezo-trade-execution.test.mjs` and the Trove wallet
+submission guards passed. Tests verify quote agreement, route encoding, exact
+approval size, slippage bound and network guard with an in-memory EIP-1193 provider;
+no transaction was sent to Mezo.
+
+## 2026-10-23 — report actions, business model and source status
+
+Mounted Trove protection controls in paid Trove reports and the split planner in
+matching Mezo DEX reports. Wallet state changes rerender the controls; removed or
+changed wallet contexts cannot submit, and accepted Trove submissions disable both
+actions until the report is refreshed. Sale settings are visibly labeled separately
+for the per-part impact cap and minOut tolerance. Added the competition application's
+business-model line: 0.01 MUSD/report, X MUSD/day monitoring and B2B API for agents
+and protocols, aimed at MUSD borrowers and bots. Product/spec docs explicitly state
+that these source changes are not deployed or live-wallet accepted.
+
+Final verification: browser `npm test` passed 148 tests; `npm run build` passed;
+Mezo protocol TypeScript build passed; `scripts/check-docs.py` passed for 72 documents;
+`git diff --check` passed. All transaction preparation tests use in-memory providers;
+no approval, swap, Trove update, payment or deployment was sent.
+
+
+## 2026-10-23 — independent review corrections
+
+Resolved the read-only review findings. An approved BTC transaction leaves the same
+part control enabled for a separate swap click. EIP-1193 submission errors without a
+valid transaction hash now become confirm-only and lock the affected action; explicit
+wallet rejection remains retryable. Current UI provider/account/network identity is
+checked after asynchronous wallet reads and immediately before opening the signing
+prompt. Trove state uses the first three aggregate return values from
+`getEntireDebtAndColl` without adding its pending breakdown a second time; insertion
+NICR uses post-action principal, including the protocol's interest-first repayment
+adjustment. The minimum net-debt guard compares aggregate debt after repayment to
+minimum net debt plus the reserved gas compensation. Competition copy leaves B2B API
+pricing TBD.
+
+Post-review verification: full browser suite passed 148 tests; browser production
+build and Mezo protocol TypeScript build passed; docs links passed for 72 documents;
+whitespace validation passed. Build retains the existing bundler annotation notices
+and reports the app bundle slightly over 500 kB. All wallet outcomes were mocked; no
+transaction was signed or sent.
+
+
+The second independent review also requested fee visibility. The sale plan now exposes
+the live fee rate and exact truncated BTC fee per slice and in aggregate, separately
+from price impact; each approval/swap refresh shows its current fee before wallet
+submission.
+
+Final fee-disclosure verification: browser suite again passed 148 tests, the browser
+production build and protocol TypeScript build passed, documentation validation
+passed for 72 documents, and `git diff --check` passed. The app bundle remains
+500.89 kB minified; Vite reports its configured >500 kB chunk notice.

@@ -21,3 +21,12 @@
 .trove-risk { overflow-wrap: anywhere; }
 .trove-risk .data-field { display: grid; gap: .3rem; }
 .trove-risk .field-name { font-size: .8rem; opacity: .7; }
+
+.trove-actions{margin-top:1.25rem;padding:1rem;border:1px solid var(--border,#35414b);border-radius:12px}
+.trove-action-form{display:flex;gap:.65rem;align-items:center;margin:.7rem 0}
+.trove-action-form input{min-width:0;flex:1}
+
+.mezo-sale-planner{margin-top:1.25rem;padding:1rem;border:1px solid var(--border,#35414b);border-radius:12px}
+.sale-plan-form,.sale-plan-part{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:.7rem 0}
+.sale-plan-field{display:grid;gap:.35rem;min-width:140px;flex:1;font-size:.85rem}.sale-plan-field input{min-width:90px;width:100%}
+.sale-plan-part{justify-content:space-between;padding:.6rem 0;border-top:1px solid var(--border,#35414b)}

@@ -109,3 +109,18 @@ new browser**; disabling creation must preserve existing report and payment reco
 Public native preparation, scope/input boundaries and the unpaid x402 402 response
 are verified. Historical verified transfers remain the selected payment proof. [Deployment evidence](security/2026-10-23-mezo-trove-deployment.md)
 separates the native blocks, timing observations, image checks and operational limits.
+
+## Wallet-signed protection actions (source branch)
+
+For an active Trove with the connected borrower wallet, the risk report offers
+**Deposit BTC** and **Repay X MUSD**. The browser pins current Trove reads to one block, obtains a new HintHelpers
+approximate node and exact SortedTroves neighbors, checks wallet balances and the
+live minimum net debt and gas reserve, and simulates the exact
+BorrowerOperations call. The connected wallet receives the final call to sign; Liqvera
+never accesses signing keys. A wallet/account/network change blocks the submission.
+
+The report's liquidation price remains a captured snapshot. It can change with
+price, interest and protocol state, and does not guarantee safety or prevent
+liquidation. These controls are Testnet source changes and are not part of the
+currently linked deployment. No live transaction has been signed or verified for
+this implementation.

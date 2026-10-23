@@ -346,7 +346,113 @@ export const MEZO_TESTNET_ROUTER_ABI = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "tokenA",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "tokenB",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "stable",
+        "type": "bool"
+      },
+      {
+        "internalType": "address",
+        "name": "_factory",
+        "type": "address"
+      }
+    ],
+    "name": "getReserves",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "reserveA",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reserveB",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOutMin",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "stable",
+            "type": "bool"
+          },
+          {
+            "internalType": "address",
+            "name": "factory",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct IRouter.Route[]",
+        "name": "routes",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "swapExactTokensForTokens",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
+] as const;
+
+export const MEZO_TESTNET_ERC20_TRADE_ABI = [
+  {"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+  {"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+  {"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
 ] as const;
 
 export const MEZO_TESTNET_POOL_FACTORY_ABI = [
@@ -382,9 +488,128 @@ export const MEZO_TESTNET_POOL_FACTORY_ABI = [
  */
 export const MEZO_TESTNET_TROVES = {
   troveManager: "0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0",
+  borrowerOperations: "0xCdF7028ceAB81fA0C6971208e83fa7872994beE5",
+  hintHelpers: "0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6",
   sortedTroves: "0x722E4D24FD6Ff8b0AC679450F3D91294607268fA",
   priceFeed: "0x86bCF0841622a5dAC14A313a15f96A95421b9366",
 } as const;
+
+export const MEZO_TESTNET_BORROWER_OPERATIONS_ABI = [
+  {
+    "inputs": [],
+    "name": "minNetDebt",
+    "outputs": [{"internalType":"uint256","name":"","type":"uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_upperHint",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_lowerHint",
+        "type": "address"
+      }
+    ],
+    "name": "addColl",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_upperHint",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_lowerHint",
+        "type": "address"
+      }
+    ],
+    "name": "repayMUSD",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+] as const;
+
+export const MEZO_TESTNET_HINT_HELPERS_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_coll",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_debt",
+        "type": "uint256"
+      }
+    ],
+    "name": "computeNominalCR",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_CR",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_numTrials",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_inputRandomSeed",
+        "type": "uint256"
+      }
+    ],
+    "name": "getApproxHint",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "hintAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "diff",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "latestRandomSeed",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;
 
 export const MEZO_TESTNET_TROVE_MANAGER_ABI = [
   {
@@ -697,6 +922,40 @@ export const MEZO_TESTNET_SORTED_TROVES_ABI = [
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_NICR",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_prevId",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_nextId",
+        "type": "address"
+      }
+    ],
+    "name": "findInsertPosition",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",

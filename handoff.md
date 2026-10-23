@@ -610,3 +610,9 @@ The matching gateway audit found the same Zod advisory plus fixable `body-parser
 `fast-uri` ranges. Updated its lock and root Zod override. Both npm audits and both
 Python lock audits report zero known vulnerabilities. Gateway `npm ci`, typecheck and
 tests pass locally (84 passed, 14 PostgreSQL cases skipped without a local test DB).
+
+The first updated web image build caught a lockfile-version mismatch: local npm 12 had
+removed optional peer entries required by the pinned Node 22/npm 10 image. Regenerated
+both JavaScript locks with that exact pinned image. A fresh production web build now
+passes `npm ci`, protocol typecheck and Vite build; its image-bound scans remain Trivy
+0 and Grype 4, unchanged from the current deployed web image.

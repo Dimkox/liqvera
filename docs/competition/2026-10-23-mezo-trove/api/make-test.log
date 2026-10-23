@@ -1,0 +1,321 @@
+.venv/bin/python scripts/test-offline.py
+
+> liqvera-mezo-gateway@0.2.0 test
+> npm run build && tsc -p tsconfig.test.json && node scripts/copy-resources.mjs --test && node --test test-dist/test/*.test.js test/*.test.mjs
+
+
+> liqvera-mezo-gateway@0.2.0 build
+> tsc && node scripts/copy-resources.mjs
+
+✔ facilitator broadcast and zero buyer native gas produce exact receipt (5.577082ms)
+✔ missing snapshot identity or snapshot after receipt block fails closed (2.291818ms)
+✔ buyer broadcast, buyer balance delta, or missing balance proof fails closed (1.076863ms)
+✔ buyer broadcast with native gas delta above approved cap fails closed (0.699298ms)
+✔ wrong token, payee, or value cannot bind the payment (1.424757ms)
+✔ durable grant consume admits one concurrent attempt and survives adapter restart (2.545437ms)
+{"time":"2026-10-23T19:03:47.846Z","event":"HTTP_RESPONSE","request_id":"f3205a34-ca5e-4a62-8c31-e37b6f04e768","status":200,"duration_ms":18}
+✔ public request polling preserves MEZO_SOURCE_UNAVAILABLE (131.629664ms)
+{"time":"2026-10-23T19:03:47.913Z","event":"HTTP_RESPONSE","request_id":"b36a9dee-c6d7-4692-8e3a-5be5a77f2d18","status":200,"duration_ms":9}
+✔ public request polling preserves MEZO_DEX_INVALID_EVIDENCE (57.158512ms)
+✔ migration ledger accepts only exact prefixes and retries forward (4.888343ms)
+✔ migration lock is nonblocking and bounded (1.910282ms)
+✔ migration lock destroys a stalled query at the total deadline (12.629452ms)
+✔ migration lock rejects an acquired result returned after its deadline (3.080248ms)
+✔ verified manifest is sole authority for exact embedded migration inventory (2.853182ms)
+✔ sale publication permits bounded packaging latency without weakening capture freshness (2.166209ms)
+✔ grantless live runtime starts payment-not-ready (1.418057ms)
+✔ authorization identity binds exact Permit2 plus EIP-2612 sponsorship without raw signatures (7.583776ms)
+✔ uppercase wire signatures retain the same decoded settlement identity (2.173192ms)
+✔ official SDK Permit2 and merged EIP-2612 payload passes gateway policy (3.702473ms)
+✔ authorization identity rejects changed amount and expired validity (0.746703ms)
+✔ settlement_pending transaction is spent confirm-only and other failures are not transaction hints (0.283246ms)
+✔ facilitator capability must be exact Permit2 with EIP-2612 gas sponsorship (0.617925ms)
+✔ finality requires twelve canonical confirmations and rejects reorg (0.582593ms)
+✔ live grant binds exact facilitator-sponsored settlement and buyer gas authority (3.375853ms)
+✔ expired consumed grant is confirm-only while expired unconsumed grant cannot settle (1.313746ms)
+✔ reconciliation parser does not weaken first-settlement maximum grant lifetime (0.633467ms)
+✔ operator database identity accepts only resolved loopback and binds port/database (7.840427ms)
+✔ production composition is grantless by default and rejects malformed harness authority (0.409005ms)
+✔ valid exact grant activates facilitator-sponsored composition without network I/O (1.000264ms)
+✔ signed v2 authority permits any quote payer while v1 remains buyer bound (4.591411ms)
+✔ signed v2 rejects unapproved issuers and tampered approved signatures (4.704157ms)
+✔ full signed v2 verification binds the quote payer (2.919259ms)
+✔ live grant expiry becomes a readiness blocker after startup (0.592535ms)
+✔ private grant reader accepts only one stable bounded private regular file (18.963916ms)
+✔ startup can keep the API alive with invalid authority while all payment paths stay closed (1.002584ms)
+✔ startup payment fallback handles expiry but never masks unexpected programming errors (0.6519ms)
+✔ fresh migration applies 001 through 008 once, reruns by checksum, and keeps audit rows append-only (368.178075ms)
+✔ an existing empty-receipt 001 ledger upgrades through 004 without replacing state (441.491466ms)
+✔ twenty concurrent identical creates converge and preserve scope conflict boundaries (71.673507ms)
+✔ twenty pools consume one grant once; restart loses and rollback preserves VERIFIED (169.626917ms)
+✔ signed v2 authority reserves atomically, exhausts budget, survives restart, and is append-only (189.070023ms)
+✔ unimplemented artifact recovery stays fail closed in RECOVERY (15.867817ms)
+✔ lost cleanup response retries already-absent result and updates the ledger once (87.078229ms)
+✔ real startup survives invalid grant and keeps new payments disabled (842.201617ms)
+✔ Mainnet ledger has a distinct immutable network identity and rejects Testnet startup (1041.946049ms)
+✔ merchant ledger allows repeat buyers with fresh nonces and submits each attempt once (1141.063202ms)
+✔ merchant nonce cannot be replayed across different quotes (321.094536ms)
+✔ merchant mode cannot submit grant attempts or expired wallet authorizations (346.471472ms)
+✔ merchant startup refuses absent nonce index or absent migration receipt (307.825722ms)
+✔ Trove borrower and product stay bound across restart and idempotent ledger replay (19.086209ms)
+✔ cleanup accepts both exact HTTP 200 absence outcomes (68.444395ms)
+✔ cleanup rejects structurally invalid or mismatched HTTP 200 bodies (19.81217ms)
+✔ cleanup rejects malformed JSON and non-200 responses (7.895817ms)
+▶ cleanup rejects when its internal deadline or caller abort expires
+  ✔ internal cleanup deadline (25.840926ms)
+  ✔ caller abort (22.424018ms)
+✔ cleanup rejects when its internal deadline or caller abort expires (49.412911ms)
+✔ Mezo source failure is preserved as a failed build without an artifact (11.288047ms)
+✔ direct receipt-binding rejection immediately enters manual review without entitlement or delivery (181.498679ms)
+✔ consumed grant blocks readiness, 402 requirements, and external verify (58.235986ms)
+✔ grant payer mismatch is rejected before request persistence (53.328452ms)
+✔ reconciliation receipt-binding rejection immediately enters manual review and never settles (60.611821ms)
+✔ null confirmation stays uncertain below the bound and enters manual review at returned count ten (36.410515ms)
+✔ successful confirm-only reconciliation publishes one entitlement and is not leased twice (40.513517ms)
+✔ packaged frozen state machine accepts scoped guards and rejects one unmet guard (30.347555ms)
+✔ post-submit lost response stays unknown and replay cannot resettle (28.288749ms)
+✔ canonical authorization identity cannot be reused by another quote (37.629086ms)
+✔ stale verified attempt is definitively rejected and quote reopened without settlement (34.895616ms)
+✔ confirmed entitlement is reused, then reorg withholds delivery without resettlement (39.171699ms)
+✔ transient paid revalidation preserves entitlement and never resettles (38.519503ms)
+✔ Trove worker publishes borrower and active status through the existing quote path (272.855735ms)
+✔ Trove worker rejects a substituted borrower before sale (140.534975ms)
+✔ Trove evidence cannot fulfill a market quote (85.828939ms)
+✔ contracts accept closed Trove preview and reject mixed legacy fields (169.693461ms)
+✔ generic report contract recognizes the independently reproducible Trove schema (155.718957ms)
+✔ capabilities advertise Trove only when enabled without changing legacy capability shape (71.432898ms)
+✔ paid historical Trove delivery preserves bytes with creation disabled and never rebuilds or resettles (238.823444ms)
+✔ new Trove creation is disabled by default before any ledger write (2.319464ms)
+✔ enabled Trove requests use the existing request preparation path (0.652944ms)
+✔ a disabled product keeps existing hash-bound request replays readable (0.283243ms)
+✔ Trove enable flag is strict and cannot enable a fixture payment product (0.911204ms)
+✔ Trove request is a closed checksum-address product and preserves borrower binding (5.99194ms)
+✔ legacy market request keeps its exact four-field canonical representation (0.531335ms)
+✔ invalid or noncanonical Trove borrower returns API400 before capture: 0xda04759e54728b6636fe48f7c9795c7b609baaaa (0.988594ms)
+✔ invalid or noncanonical Trove borrower returns API400 before capture: 0XDA04759E54728B6636FE48F7C9795C7B609BAAAA (0.225053ms)
+✔ invalid or noncanonical Trove borrower returns API400 before capture: 0x0000000000000000000000000000000000000000 (0.203788ms)
+✔ invalid or noncanonical Trove borrower returns API400 before capture: invalid (0.211718ms)
+✔ invalid or noncanonical Trove borrower returns API400 before capture: null (0.193221ms)
+✔ mixed Trove/market request fields are rejected: side (0.258978ms)
+✔ mixed Trove/market request fields are rejected: instrument_id (0.270366ms)
+✔ mixed Trove/market request fields are rejected: quantity_base (0.54841ms)
+✔ mixed Trove/market request fields are rejected: extra (0.391851ms)
+✔ duplicate Trove JSON field names cannot change the hash-bound borrower (0.30143ms)
+✔ merchant payments require explicit mode and reject ambiguous or fixture configuration (6.587005ms)
+✔ merchant SDK handshake verifies each wallet authorization without operator grant (74.662283ms)
+✔ explicit Mainnet config selects the real network, token and RPC together (123.348175ms)
+✔ unknown network configuration fails closed (49.967284ms)
+✔ Mainnet grant rejects Testnet network, token and RPC independently (68.059912ms)
+✔ telemetry exposes only GET /metrics and never health/readiness routes (1.931494ms)
+✔ metrics have the exact bounded label-free grammar (2.042098ms)
+ℹ tests 98
+ℹ suites 0
+ℹ pass 98
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5877.305701
+
+> @liqvera/mezo-web@0.2.0 build
+> tsc --noEmit && vite build
+
+vite v7.3.7 building client environment for production...
+transforming...
+node_modules/ox/_esm/core/Address.js (6:21): A comment
+
+"/*#__PURE__*/"
+
+in "node_modules/ox/_esm/core/Address.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+node_modules/ox/_esm/core/Base64.js (6:27): A comment
+
+"/*#__PURE__*/"
+
+in "node_modules/ox/_esm/core/Base64.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+node_modules/@walletconnect/utils/node_modules/ox/_esm/core/Base64.js (6:27): A comment
+
+"/*#__PURE__*/"
+
+in "node_modules/@walletconnect/utils/node_modules/ox/_esm/core/Base64.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+node_modules/ox/_esm/core/internal/cursor.js (2:21): A comment
+
+"/*#__PURE__*/"
+
+in "node_modules/ox/_esm/core/internal/cursor.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+✓ 3908 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.58 kB │ gzip:   0.34 kB
+dist/assets/index-gfn953Vm.css   11.54 kB │ gzip:   3.44 kB
+dist/assets/ccip-b9R2xR8F.js      2.89 kB │ gzip:   1.33 kB
+dist/assets/index-BMc2P0yT.js   408.94 kB │ gzip: 123.42 kB
+✓ built in 9.79s
+
+> @liqvera/mezo-web@0.2.0 test
+> node --test test/*.test.mjs
+
+✔ wrong network is explicit and switching never submits payment (4.740408ms)
+✔ account and chain changes preserve the payer and disable the old quote (0.429449ms)
+✔ typed pre-submit cancellation clears only with a fresh READY quote (0.64243ms)
+✔ reload recovery uses only the saved identity and exact create replay (0.879151ms)
+✔ pending, uncertain, manual review, paid reuse, and fixture mode cannot resettle (0.777335ms)
+✔ one guarded invocation is the maximum across ambiguous outcome and reload (0.40011ms)
+✔ production recovery orchestration performs GET-only reload and paid reuse (4.663104ms)
+✔ lost create response replays exact body and idempotency key (3.833689ms)
+✔ recovering adapter outcome persists uncertain before visible notice and cannot clear (1.294845ms)
+✔ typed cancel clears only after authoritative READY refresh (1.042095ms)
+✔ wallet revalidation failure is visible and remains definitely pre-submit (0.760229ms)
+✔ production wallet event boundary writes state only and has no payment dependency (15.022811ms)
+✔ wallet event failure clears state, does not poison the queue, and next event recovers (3.348775ms)
+✔ main composes wallet events directly with the state-only sink (6.542652ms)
+✔ late selected provider owns listeners and replaces the prior binding (2.193661ms)
+✔ historical live report validates exact immutable identity (57.443722ms)
+✔ historical preview UI exposes loading error and accessible mobile-safe controls (2.985353ms)
+✔ fresh quote render uses the standards-safe shared UTC formatter (3.059033ms)
+✔ preview URLs identify an immutable report and coupled bundle across CDN caches (5.251573ms)
+✔ Mainnet wallet switching uses 31612 and rejects a Testnet wallet (4.184593ms)
+✔ Mainnet wallet events use the configured network (2.339766ms)
+✔ Mainnet never reuses the old Testnet capability or pending flow (9.542658ms)
+✔ Mainnet quote payment rejects Testnet terms and mismatched token (1.01618ms)
+✔ old reports show an explicit missing Mezo evidence message (2.110522ms)
+✔ comparison renders captured block, exact prices and caveats without network (0.646397ms)
+✔ the existing checkout has a mountable finance panel (2.506133ms)
+✔ mounting and updating never request accounts, sign or pay (5.056716ms)
+✔ an initial preview explains how to unlock funding without implying an existing payment (1.564271ms)
+✔ borrow is gated by a fresh read and separate acknowledgement (12.989422ms)
+✔ expired or uncertain checkout disables a previously ready link (6.872149ms)
+✔ a replaced provider cannot publish a stale balance or error (12.537353ms)
+✔ having enough MUSD does not encourage a new loan (5.510661ms)
+✔ funding panel shows exact budget and a downloadable block-bound observation (55.756163ms)
+✔ failed funding reads never expose an observation download or borrow action (0.956911ms)
+✔ finance module exists (2.421757ms)
+✔ network URLs never fall back across environments (0.805751ms)
+✔ eligible quote uses exact atomic price (2.040432ms)
+✔ missing initial quote has actionable guidance while unknown outcomes retain recovery guidance (0.568933ms)
+✔ blocks wrong wallet network (0.306051ms)
+✔ blocks missing payer (0.242882ms)
+✔ blocks different payer (1.316054ms)
+✔ blocks wrong quote chain (0.259881ms)
+✔ blocks wrong asset (0.285272ms)
+✔ blocks wrong decimals (0.373872ms)
+✔ blocks wrong CAIP network (1.272012ms)
+✔ blocks expired quote (0.216111ms)
+✔ blocks invalid expiry (0.305787ms)
+✔ blocks uncertain payment (2.211735ms)
+✔ blocks pending guard (0.169231ms)
+✔ blocks busy checkout (1.172883ms)
+✔ blocks zero amount (0.264308ms)
+✔ blocks numeric amount (0.163028ms)
+✔ blocks exponent amount (0.162788ms)
+✔ blocks oversized amount (0.163269ms)
+✔ integer formatting does not round monetary values (0.350674ms)
+✔ balance lookup is read-only and encodes the current payer (1.755934ms)
+✔ wrong wallet chain fails before token read (0.780085ms)
+✔ chain change during balance call invalidates result (0.839948ms)
+✔ account change during balance call invalidates result (0.550429ms)
+✔ rejects malformed balance 0x (1.14496ms)
+✔ rejects malformed balance 0x1 (0.439624ms)
+✔ rejects malformed balance 0xzz (0.249423ms)
+✔ rejects malformed balance 123 (1.12447ms)
+✔ rejects malformed balance null (0.408457ms)
+✔ rejects malformed balance 0x000000000000 (0.295471ms)
+✔ RPC timeout is bounded (30.633215ms)
+✔ funding observation pins the token read to a block and exports exact budget (15.77638ms)
+✔ one-wei shortfall is retained without decimal rounding (5.791433ms)
+✔ changed block hash rejects the observation (1.883869ms)
+✔ rejects invalid block metadata null (7.82689ms)
+✔ rejects invalid block metadata {} (0.720563ms)
+✔ rejects invalid block metadata {"number":"0x0123","hash":"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"} (3.730094ms)
+✔ rejects invalid block metadata {"number":"0x123","hash":"0x"} (0.383337ms)
+✔ rejects invalid block metadata {"number":"latest","hash":"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"} (0.352934ms)
+✔ wrong chain prevents the first block lookup (2.112253ms)
+✔ account change during final block read rejects the observation (1.091973ms)
+✔ invalid price is rejected before any wallet call (0.505424ms)
+✔ block lookup timeout is bounded and cannot become a zero-balance result (6.953709ms)
+✔ all observation calls share one timeout budget (1.154863ms)
+✔ Mainnet reads its own token and retains Mainnet in the observation (0.723644ms)
+✔ browser sends a closed Trove body while legacy body bytes remain unchanged (46.992685ms)
+✔ browser recognizes a borrower-bound Trove quote without allowing mixed market fields (3.946816ms)
+✔ delivery subject must match the paid quote product and borrower (0.510122ms)
+✔ capability product declaration fails closed: "trove_risk" (1.244977ms)
+✔ capability product declaration fails closed: {} (0.734539ms)
+✔ capability product declaration fails closed: ["unknown"] (4.314078ms)
+✔ capability product declaration fails closed: ["trove_risk","trove_risk"] (1.155912ms)
+✔ paid Trove parser retains full receipt finality and sponsored-gas guards (15.976772ms)
+✔ Trove recovery preserves product and borrower in an unacknowledged request (3.51084ms)
+✔ Trove uncertain recovery performs GET only and recovers paid delivery (0.62721ms)
+✔ Trove session survives reload while legacy sessions keep their original representation (3.621617ms)
+✔ Trove ambiguous wallet outcome retains the same borrower and blocks another submission (0.77285ms)
+✔ Trove panel renders exact captured risk and pinned explorer links without RPC (2.733018ms)
+✔ inactive Trove is explicit with unavailable ratio rather than a healthy claim (2.674368ms)
+✔ public Trove preview pins the actual native report and bundle before rendering (22.145361ms)
+✔ Trove preview rejects changed report bytes (1.592063ms)
+✔ Trove preview rejects changed bundle bytes (9.904845ms)
+✔ native Trove report is recognized without wallet or network access (2.116919ms)
+✔ Trove report rejects altered borrower (0.700925ms)
+✔ Trove report rejects altered block (0.34112ms)
+✔ Trove report rejects altered number (2.172301ms)
+✔ Trove report rejects altered status (0.317743ms)
+✔ Trove report rejects altered flags (0.33427ms)
+✔ EIP-6963 providers are deterministic and legacy is only fallback (32.007314ms)
+✔ connect-time discovery explicitly requests late EIP-6963 providers (0.735451ms)
+✔ switch flow uses exact pinned Mezo parameters and fails closed (11.87462ms)
+✔ a newly added chain is explicitly selected when the wallet does not select it (0.812326ms)
+✔ rejecting the switch after adding a chain remains a rejection (0.617955ms)
+✔ replaced wallet cannot erase the active account with a delayed response (9.014611ms)
+✔ replaced wallet cannot erase the active account with a delayed error (1.37972ms)
+✔ unbinding discards queued wallet refreshes before they call the provider (1.020766ms)
+✔ manual refresh from a retired provider cannot overwrite its replacement (0.742284ms)
+✔ disconnect immediately clears readiness and invalidates pending event refresh (1.360011ms)
+✔ disconnect also discards an event refresh still waiting in the queue (0.798146ms)
+✔ modal restores a provider, follows replacement and clears disconnected sessions without signing (4.229815ms)
+✔ a failed SDK load can be retried without losing the saved report (1.557201ms)
+✔ network selection uses the same initialized SDK session and propagates refusal (0.820773ms)
+✔ Trust Wallet in-app provider is discovered without window.ethereum (2.242425ms)
+✔ ordinary browsers have no provider; existing injected wallets remain supported (0.556862ms)
+✔ production official SDK round-trip creates Permit2 plus merged EIP-2612 payload (8.692832ms)
+✔ production guards reject API drift before submission (0.805446ms)
+✔ Mainnet SDK signs both authorization domains for 31612 and mainnet MUSD (1.227723ms)
+✔ payment fetch enforces timeout and supplies no ambient credentials or redirects (72.939183ms)
+✔ payment fetch rejects a redirect even if a transport returns it (1.923756ms)
+✔ payment decoder rejects declared and streamed responses over the cap (4.230566ms)
+✔ payment deadline remains active while the response body is stalled (7.994411ms)
+✔ production adapter sends exact SDK integer values to the wallet before submission (56.586545ms)
+✔ wallet rejection at signature 1 is a proven pre-submit cancellation (1.413887ms)
+✔ wallet rejection at signature 2 is a proven pre-submit cancellation (2.901014ms)
+✔ a transport error after signature submission remains confirm-only (3.248765ms)
+ℹ tests 130
+ℹ suites 0
+ℹ pass 130
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 852.959434
+make[1]: Entering directory '/home/pall/projects/liqvera/.getzilla/runtime/mezo-trove-product'
+/home/pall/projects/liqvera/.getzilla/runtime/mezo-trove-product/.venv/bin/python -B scripts/check-python-artifacts.py --forbid-path 'cmd/**' 'internal/**' 'go.mod' 'go.sum' --forbid-binary engine
+Liqvera artifacts contain no Go inputs
+/home/pall/projects/liqvera/.getzilla/runtime/mezo-trove-product/.venv/bin/python -B -m pytest tests -q
+........................................................................ [  6%]
+........................................................................ [ 13%]
+........................................................................ [ 19%]
+...................................................................... [ 25%]
+.............................................................. [ 31%]
+........................................................................ [ 38%]
+........................................................................ [ 44%]
+........................................................................ [ 51%]
+........................................................................ [ 57%]
+........................................................................ [ 64%]
+................................................ [ 68%]
+....................... [ 70%]
+........................................................................ [ 77%]
+........................................................................ [ 83%]
+........................................................................ [ 90%]
+........................................................................ [ 96%]
+..................................                                       [100%]
+1101 passed, 2 deselected, 85 subtests passed in 441.54s (0:07:21)
+Liqvera local Python verification passed
+make[1]: Leaving directory '/home/pall/projects/liqvera/.getzilla/runtime/mezo-trove-product'
+All checks passed!
+documentation links passed (71 documents)
+Completed offline test counts: {"gateway": 98, "python": 1101, "python_subtests": 85, "web": 130}

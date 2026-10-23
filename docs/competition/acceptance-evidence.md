@@ -42,3 +42,12 @@ fresh paid purchase, production deployment or overall live acceptance.
 Keep the adjacent `result.json.evidence` directory with the JSON. Verification checks
 its exact member set, pinned native bundle/report digests, raw-call reconstruction,
 block identity, call count and source engine. Existing core commands remain unchanged.
+
+The [October 23 source gate](2026-10-23-mezo-trove/api/verification.json) records a
+successful complete offline run and independent source review. Its adjacent
+[acceptance result](2026-10-23-mezo-trove/api/acceptance.json) pins A31/A32 and includes
+both native ZIPs. Its source is `268078c8ad86a4891ad13e7532287a1d629841ee`; use
+`--allow-detached-subject` when verifying that historical result from a later commit.
+The independent [native smoke](../../evidence/mezo-testnet/2026-10-23-live-smoke/result.json)
+records fresh Testnet raw-call observations at blocks 16324346 and 16324347. It is
+separate from the retained preview blocks and does not assert a paid purchase.

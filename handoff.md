@@ -397,3 +397,23 @@ passes. The gate enforces the 85-subtest count as well as all primary totals. So
 collection confirms 1101 runnable Python tests (two live exclusions). Documentation
 links and whitespace checks pass. Native smoke, final full gate and hosted CI remain
 separate from these focused results.
+
+## 2026-10-23 — complete Trove product source gate passed
+
+At clean source `268078c8ad86a4891ad13e7532287a1d629841ee`, `make test` exited zero:
+1101 Python tests, 85 subtests, two explicitly excluded live tests, all 98 gateway
+cases with a new disposable PostgreSQL ledger, and all 130 browser cases. Full Ruff,
+both TypeScript builds and documentation validation passed. The runner's captured
+counts match README. The host test step uses prepared offline inputs, not network
+namespace isolation. [Raw log, hashes and review scope](docs/competition/2026-10-23-mezo-trove/api/verification.json)
+retain the evidence. Fresh local Chrome checks again passed at 320/1280 widths.
+
+A31/A32 result digest is `0ed176a344028f7f80b6753200fe61c4158aed76d0c92bfb526603f21a378d74`;
+independent sealed verification passed. A separate native read-only smoke captured
+DEX block 16324346 (8 calls) and Trove block 16324347 (1818 calls), replayed both, and
+retained raw evidence without fixtures, signatures or payment. Its elapsed value is
+only a local observation. A host-only private HTTP check could not bind an occupied
+port and did not start services; isolated installed-image HTTP validation remains
+part of candidate validation. No working database or unknown payment state changed.
+Hosted CI, exact image checks and publication are next; historical verified payment
+transactions remain the owner's chosen proof.

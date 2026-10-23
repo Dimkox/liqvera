@@ -1,0 +1,26 @@
+{
+  "source_commit": "268078c8ad86a4891ad13e7532287a1d629841ee",
+  "source_gate": "PASS",
+  "independent_readonly_review": "PASS",
+  "counts": {
+    "python": 1101,
+    "python_subtests": 85,
+    "gateway": 98,
+    "web": 130
+  },
+  "files_sha256": {
+    "docs/competition/2026-10-23-mezo-trove/api/browser-preview-320.png": "1c59fe1512403e36315aec9db5c703b32817d6c986490cbe39e7a8756b30ba58",
+    "docs/competition/2026-10-23-mezo-trove/api/browser-preview-1280.png": "819d2d72fb1965dd9442d81352c21dd085b04e674e8ab1fe9c9cd761cb0065f5",
+    "docs/competition/2026-10-23-mezo-trove/api/acceptance.json": "0ed176a344028f7f80b6753200fe61c4158aed76d0c92bfb526603f21a378d74",
+    "docs/competition/2026-10-23-mezo-trove/api/test-counts.json": "3a07a6762dda382179f2bf7262deb24cad031734d61c1ef4a390b57706098db4",
+    "docs/competition/2026-10-23-mezo-trove/api/make-test.log": "e402dea5a84804816850b771da7b3309568ebae4a58d2f07893defc0511aec81",
+    "docs/competition/2026-10-23-mezo-trove/api/browser-result.json": "b385c9e6630b5d25a4cb27a1d27109625c4ab60d04b1a0d167855befc4c50ea5",
+    "docs/competition/2026-10-23-mezo-trove/api/acceptance.json.evidence/A31.zip": "0c20f41f845bd39c88286b52a64d1dad53713fd215507f611fab51d29896f51f",
+    "docs/competition/2026-10-23-mezo-trove/api/acceptance.json.evidence/A32.zip": "94c0a93520eb91382c45f4690f176e655ccc372e67b9594653ef651cfd419b10",
+    "evidence/mezo-testnet/2026-10-23-live-smoke/mezo-dex.json": "91f90ae46167aab5273439cb7c104a47a618a60c7144ed760d4070b10a4c6fd3",
+    "evidence/mezo-testnet/2026-10-23-live-smoke/result.json": "aa98fc093070187b04cdb15bd5ae2a02b44f154c47b5bb916018ede488f79909",
+    "evidence/mezo-testnet/2026-10-23-live-smoke/source.json": "cd151b25cc940a0130e1cc0312654edd6b54351f47af1fbaa8428a2c5924b0e0",
+    "evidence/mezo-testnet/2026-10-23-live-smoke/mezo-troves.json": "5879d52ad53b4bc7d70eea6f581c974ae82a0dd4d2ae7fa6834179721a067aff"
+  },
+  "scope": "Source checks; local browser with stub capabilities; retained A31/A32 proofs and separate native raw-call smoke. Not paid end-to-end or production deployment acceptance."
+}

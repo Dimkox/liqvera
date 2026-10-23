@@ -21,6 +21,9 @@ Understand BTC market depth before you act. Liqvera turns public order-book snap
 | PoolFactory | [0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A](https://explorer.test.mezo.org/address/0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A) | Read: captured pool fee |
 | MUSD/BTC pool | [0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9](https://explorer.test.mezo.org/address/0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9) | Read: reserves and quote cross-check |
 | BTC token | [0x7b7C000000000000000000000000000000000000](https://explorer.test.mezo.org/address/0x7b7C000000000000000000000000000000000000) | Read: pool identity and decimals |
+| TroveManager | [0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0](https://explorer.test.mezo.org/address/0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0) | Read: borrower debt, collateral and ratios |
+| SortedTroves | [0x722E4D24FD6Ff8b0AC679450F3D91294607268fA](https://explorer.test.mezo.org/address/0x722E4D24FD6Ff8b0AC679450F3D91294607268fA) | Read: proven redemption ordering |
+| PriceFeed | [0x86bCF0841622a5dAC14A313a15f96A95421b9366](https://explorer.test.mezo.org/address/0x86bCF0841622a5dAC14A313a15f96A95421b9366) | Read: fixed-block BTC price |
 
 Payment: browser → Permit2/EIP-2612 signature → facilitator → exact proxy → MUSD Transfer to the configured merchant → gateway checks canonical receipt and confirmations → report delivery. See the [browser](apps/mezo-web/src/x402.ts) and [gateway](apps/mezo-gateway/src/adapters/x402.ts) adapters. The public merchant is [0xd7F52d1Ddb5dC8678191f14E439Fc5DB67541535](https://explorer.test.mezo.org/address/0xd7F52d1Ddb5dC8678191f14E439Fc5DB67541535), supplied through `LIQVERA_PAY_TO`, with no built-in payment default.
 
@@ -89,6 +92,20 @@ Liqvera connects market capture, report generation and MUSD payment in one web a
 | API contract | [OpenAPI specification](schemas/mezo-evidence/v1/openapi.json) |
 
 To run the project, clone the repository and follow the [startup guide](docs/runbooks/startup-shutdown.md). The [Testnet guide](docs/runbooks/testnet-demo.md) covers wallet checkout and deployment; the [validation guide](docs/validation.md) provides build and test commands.
+
+## Run the offline checks
+
+Prepare dependencies as described in [validation](docs/validation.md), then:
+
+```sh
+make test
+```
+
+**1101 Python tests + 85 subtests, 98 gateway tests and 130 browser tests.**
+The command checks these totals against its completed results, including a new
+disposable PostgreSQL ledger. Native RPC tests remain opt-in; no wallet payment is
+part of this gate.
+<!-- liqvera-test-counts: {"python":1101,"python_subtests":85,"gateway":98,"web":130} -->
 
 ## Source, history and versions
 

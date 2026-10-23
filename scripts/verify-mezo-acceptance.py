@@ -26,12 +26,19 @@ from tools.mezo_acceptance.runner import verify_sealed_result
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("result", type=Path)
+    parser.add_argument("--suite", choices=["core", "mezo-readonly"], default="core")
     parser.add_argument("--sha256", required=True)
     parser.add_argument("--allow-detached-subject", action="store_true",
                         help="verify content bindings without requiring the current checkout identity")
     args = parser.parse_args()
-    result = verify_sealed_result(
-        args.result.resolve(), args.sha256,
+    verifier = verify_sealed_result
+    if args.suite == "mezo-readonly":
+        for package in ("contracts", "public-capture", "readonly-analyzer", "evidence-report"):
+            sys.path.insert(0, str(ROOT / "packages" / package / "src"))
+        from tools.mezo_acceptance.readonly_cases import verify_result
+        verifier = verify_result
+    result = verifier(
+        args.result.absolute() if args.suite == "mezo-readonly" else args.result.resolve(), args.sha256,
         require_current_repository=not args.allow_detached_subject,
     )
     print(f"VERIFIED: {result['overall_status']} {args.result.resolve()}")

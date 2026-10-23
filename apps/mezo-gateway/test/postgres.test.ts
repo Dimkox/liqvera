@@ -450,3 +450,19 @@ test('merchant startup refuses absent nonce index or absent migration receipt', 
  finally { await pool.query('INSERT INTO gateway_migrations(name,sha256,applied_at) VALUES($1,$2,$3)',[receipt.name,receipt.sha256,receipt.applied_at]); }
  await ledger.assertNetwork();
 });
+
+test('Trove borrower and product stay bound across restart and idempotent ledger replay', {skip:skipReason},async()=>{
+ const {quoteInput}=await import('../src/security/input.js');
+ const body=quoteInput({product_id:'trove_risk',borrower:'0xDA04759E54728B6636Fe48F7c9795c7B609bAaAa',expected_payer:BODY.expected_payer});
+ assert.ok(body.product_id==='trove_risk');
+ const scope='5'.repeat(64),key='trove-bound-request';
+ const ledger=new Ledger(pool);
+ const first=await ledger.createRequest(scope,key,body);
+ assert.deepEqual(first.canonical_body,body);
+ const restart=new Ledger(pool);
+ assert.equal((await restart.createRequest(scope,key,body)).id,first.id);
+ for(const different of [BODY,{...body,borrower:'0x1111111111111111111111111111111111111111'}])
+  await assert.rejects(restart.createRequest(scope,key,different),
+   (error:unknown)=>error instanceof PublicError&&error.code==='IDEMPOTENCY_CONFLICT');
+ assert.equal((await pool.query('SELECT count(*)::int AS count FROM report_requests WHERE scope_hash=$1 AND idempotency_key=$2',[scope,key])).rows[0]!.count,1);
+});

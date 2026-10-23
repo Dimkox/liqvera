@@ -24,3 +24,21 @@ dedicated payment operator and human-held wallet remain separately gated.
 
 The result shape is [`acceptance-result.schema.json`](../../schemas/mezo-evidence/v1/acceptance-result.schema.json). It records all thirty cases, command and environment names, start/end times, exit codes, explicit omissions, evidence digests, commit SHA and Git tree. A result with any omitted case is `INCOMPLETE`; no partial result should be described as F7 acceptance. Do not edit results to change statuses. Repeat the run after code changes and retain the prior result as historical evidence.
 
+
+## Retained native Mezo extension: A31/A32
+
+The optional `mezo-readonly` suite is separate from the immutable A01–A30 contract.
+A31 reproduces the native DEX comparison and A32 reproduces the native Trove report
+from their retained ZIPs. Both are offline snapshot checks; PASS does not claim a
+fresh paid purchase, production deployment or overall live acceptance.
+
+```sh
+.venv/bin/python scripts/run-mezo-acceptance.py --suite mezo-readonly \
+  --mode offline --plan acceptance/mezo-readonly-plan.json --output /absolute/new/result.json
+.venv/bin/python scripts/verify-mezo-acceptance.py --suite mezo-readonly \
+  /absolute/new/result.json --sha256 <independently-recorded-result-digest>
+```
+
+Keep the adjacent `result.json.evidence` directory with the JSON. Verification checks
+its exact member set, pinned native bundle/report digests, raw-call reconstruction,
+block identity, call count and source engine. Existing core commands remain unchanged.

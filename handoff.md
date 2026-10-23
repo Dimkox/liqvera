@@ -369,3 +369,31 @@ The preview busy guard prevents concurrent form submission or another preview. L
 1280 pixels showed the native block, four pinned links, no horizontal overflow and
 no runtime exceptions, using stubbed capabilities; this is not deployment or paid
 acceptance. Full combined verification and disposable-ledger checks are in progress.
+
+## 2026-10-23 — unified offline and retained-proof acceptance source gate
+
+The pre-extension full Python run passed 1087 tests and 85 subtests with two live
+deselections. The disposable PostgreSQL run passed all 98 gateway tests without
+skips; browser suite passed 130. Added `make test-prepare` for explicit online input
+preparation and one `make test` gate using no-index local wheels and a cached pinned
+test database. Only the returned ID of its newly created loopback container can be
+removed. Four runner/count safety tests pass; documented counts are checked against
+completed output. CI now uses the same command and includes real database tests.
+
+A31/A32 use an explicitly separate retained-proof suite and sidecar evidence, leaving
+A01–A30 contracts intact. Formal vectors add optional native calldata/results and
+report-fragment digests; all 72 focused vector/extension cases passed before the
+last symlink regression. The verifier rejects symlinked result inputs without
+resolving them first. A native read-only smoke entrypoint retains decoded raw DEX
+and Trove captures without wallet/payment authority. The Testnet overlay enables
+both Trove creation flags; deployment remains separate. Final `make test` and
+independent extension review follow this coherent source checkpoint.
+
+Final source checkpoint: independent read-only extension/runner review passed all
+14 focused safety/acceptance/smoke tests without a blocker. The result-file CLI keeps
+its no-follow boundary; the README address checker now also verifies the three
+Trove proxy constants. Root Ruff includes the new runners and artifact tests, and
+passes. The gate enforces the 85-subtest count as well as all primary totals. Source
+collection confirms 1101 runnable Python tests (two live exclusions). Documentation
+links and whitespace checks pass. Native smoke, final full gate and hosted CI remain
+separate from these focused results.

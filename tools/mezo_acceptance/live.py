@@ -282,3 +282,43 @@ def validate_p3_bundle(raw, *, subject_commit, subject_tree, now):
     if grants["A13"].value != grants["A14"].value:
         raise LiveAuthorityError("LIVE_PAYMENT_LINK_MISMATCH")
     return P3Authority(plan, expiry, grants)
+
+
+def mezo_testnet_readonly_smoke(borrower, output):
+    """Capture native Testnet proofs only. Never signs, settles or loads a grant."""
+    import time
+    from pathlib import Path
+
+    from liqvera_evidence_report.canonical import canonical_json_bytes
+    from liqvera_evidence_report.evidence_io import digest
+    from liqvera_public_capture.public_adapters.mezo_dex import capture_live_dex, verify_capture
+    from liqvera_public_capture.public_adapters.mezo_troves import (
+        capture_live_trove,
+        verify_trove_capture,
+    )
+
+    if type(borrower) is not str or re.fullmatch(r"0x[0-9a-fA-F]{40}", borrower) is None or int(borrower, 16) == 0:
+        raise ValueError("INVALID_INPUT")
+    root = Path(output)
+    root.mkdir(mode=0o755)  # Existing results must never be overwritten.
+    started = time.monotonic_ns()
+    entries = []
+    try:
+        for name, capture, verify in (
+            ('mezo-dex', lambda: capture_live_dex('SELL', 10**18), verify_capture),
+            ('mezo-troves', lambda: capture_live_trove(borrower), verify_trove_capture),
+        ):
+            raw_capture = capture()
+            decoded = verify(raw_capture)
+            payload = canonical_json_bytes(raw_capture)
+            (root / (name + '.json')).write_bytes(payload)
+            entries.append({'source': name, 'sha256': digest(payload),
+                            'raw_call_count': len(raw_capture['probe']['calls'] if name == 'mezo-dex' else raw_capture['calls']),
+                            'block_number': str(decoded['block_number'])})
+        result = {'status': 'PASS', 'scope': 'Native Testnet read-only captures; no wallet or payment.',
+                  'sources': entries, 'elapsed_ms': (time.monotonic_ns()-started)//1_000_000}
+    except (ValueError, OSError, TypeError, KeyError):
+        result = {'status': 'FAIL', 'code': 'MEZO_SOURCE_UNAVAILABLE', 'sources': entries,
+                  'elapsed_ms': (time.monotonic_ns()-started)//1_000_000}
+    (root / 'result.json').write_bytes(canonical_json_bytes(result))
+    return result

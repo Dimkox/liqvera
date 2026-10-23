@@ -32,3 +32,18 @@ Docker Compose runs the web, gateway, capture, report, PostgreSQL and edge servi
 ## Acceptance status
 
 The source release v0.0.5 contains the full application and historical paid-delivery evidence. The historical aggregate is 9 PASS and 21 NOT_RUN; no overall acceptance PASS is claimed. Current local evidence and known CVEs are recorded in [handoff](../handoff.md) and [security audit](security/2026-10-12-baseline.md). Release/deployment requires new exact-source, image, migration, recovery and payment-mode review.
+
+## Mezo Testnet evidence products
+
+The additive API 1.1 Testnet extension includes fixed-block MUSD/BTC DEX depth and
+borrower Trove risk. All contract calls use an explicit block; report arithmetic and
+queue links are reproduced from raw evidence offline. DEX reserves, fee, token
+decimals and router results are captured rather than assumed. Trove debt includes
+principal and interest without double-counting pending rewards. Inactive positions
+and unknown queue ranks remain explicit. Read-only risk output is not financial advice.
+
+The `trove_risk` product binds a nonzero EIP-55 borrower and the payer in a closed
+request. Both services gate new creation; disabling it keeps existing delivery and
+payment recovery. The 0.01 MUSD settlement guards remain shared. Historical examples
+are pinned by full report and ZIP hashes. Source readiness, hosted CI, paid acceptance
+and deployment are separate claims. No new Mainnet behavior is part of this extension.

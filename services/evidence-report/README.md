@@ -111,3 +111,10 @@ described above; no automatic schedule or overwrite is implemented here. Retain
 inputs and follow the gateway entitlement/unknown-payment retention policy.
 Published directories use mode 0750 and files 0640. The report and gateway
 containers need the same artifact-reader group; the gateway mount is read-only.
+
+The additive Trove request is `{report_id, product_id: "trove_risk", borrower}`.
+New creation requires `LIQVERA_MEZO_TROVES_ENABLED=true` in live-public mode; the
+Testnet gateway has a separate matching flag. Both default off. The service reads
+the separate capture package, binds the borrower, recalculates raw calls and rejects
+stale evidence before offering a quote. Existing report IDs retain their original
+bytes even when new creation is disabled. See [Trove risk](../../docs/mezo-trove-risk.md).

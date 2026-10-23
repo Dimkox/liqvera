@@ -52,3 +52,12 @@ liqvera-acceptance-verify:
 
 liqvera-product: liqvera-python liqvera-gateway liqvera-web liqvera-images liqvera-compose
 	@echo "Liqvera product artifacts built; acceptance remains a separate explicit target"
+
+# Install application dependencies first; preparation is the explicit online step.
+.PHONY: test test-prepare
+TEST_PYTHON ?= .venv/bin/python
+test-prepare:
+	$(TEST_PYTHON) scripts/test-offline.py --prepare
+
+test:
+	$(TEST_PYTHON) scripts/test-offline.py

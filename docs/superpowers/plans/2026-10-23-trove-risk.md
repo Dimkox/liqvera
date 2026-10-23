@@ -40,3 +40,12 @@
 - [ ] Extend request parsing, gateway presentation and source service product dispatch without touching settlement logic. Borrower API input must equal viem's EIP-55 canonical result; invalid borrower returns 400.
 - [ ] Add browser product tab, wallet-address prefill, clear read-only/not-financial-advice copy and retained report rendering.
 - [ ] Add integration/negative tests, independent actual-diff review, docs/handoff and a separate dependent PR. Hosted CI and deployment claims remain separate.
+
+## Final verification extension
+
+The private product dispatch and browser source steps are implemented and reviewed.
+The full gate now prepares locked wheels and a digest-pinned disposable database in
+an explicit online step, then runs one `make test` command without dependency fetches.
+A31/A32 use a separate `mezo-readonly` acceptance suite so immutable A01–A30 schemas
+and historical evidence are preserved. Their PASS scope is retained native proof
+replay, not paid live acceptance. Final source/CI and deployment evidence stay separate.

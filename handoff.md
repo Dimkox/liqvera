@@ -535,7 +535,28 @@ business-model line: 0.01 MUSD/report, X MUSD/day monitoring and B2B API for age
 and protocols, aimed at MUSD borrowers and bots. Product/spec docs explicitly state
 that these source changes are not deployed or live-wallet accepted.
 
-Final verification: browser `npm test` passed 146 tests; `npm run build` passed;
+Final verification: browser `npm test` passed 148 tests; `npm run build` passed;
 Mezo protocol TypeScript build passed; `scripts/check-docs.py` passed for 72 documents;
 `git diff --check` passed. All transaction preparation tests use in-memory providers;
 no approval, swap, Trove update, payment or deployment was sent.
+
+
+## 2026-10-23 — independent review corrections
+
+Resolved the read-only review findings. An approved BTC transaction leaves the same
+part control enabled for a separate swap click. EIP-1193 submission errors without a
+valid transaction hash now become confirm-only and lock the affected action; explicit
+wallet rejection remains retryable. Current UI provider/account/network identity is
+checked after asynchronous wallet reads and immediately before opening the signing
+prompt. Trove state uses the first three aggregate return values from
+`getEntireDebtAndColl` without adding its pending breakdown a second time; insertion
+NICR uses post-action principal, including the protocol's interest-first repayment
+adjustment. The minimum net-debt guard compares aggregate debt after repayment to
+minimum net debt plus the reserved gas compensation. Competition copy leaves B2B API
+pricing TBD.
+
+Post-review verification: full browser suite passed 148 tests; browser production
+build and Mezo protocol TypeScript build passed; docs links passed for 72 documents;
+whitespace validation passed. Build retains the existing bundler annotation notices
+and reports the app bundle slightly over 500 kB. All wallet outcomes were mocked; no
+transaction was signed or sent.

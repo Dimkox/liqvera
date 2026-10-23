@@ -9,7 +9,7 @@ The public demo at https://liqvera.site uses Mezo Testnet. Connect a browser wal
 
 TypeScript powers the browser and gateway, Python handles capture and verification, and PostgreSQL preserves payment and delivery state. Market data access is public and read-only. The submitted source branch adds optional Mezo spot swaps and Trove updates prepared for explicit user wallet signatures; these actions are not part of the linked deployment. Liqvera does not place perpetual orders or promise execution.
 
-**Business model:** 0.01 MUSD per report; X MUSD per day for monitoring; B2B API subscriptions for agents and protocols. Target users are MUSD borrowers and trading bots.
+**Business model:** 0.01 MUSD per report; X MUSD per day for monitoring; B2B API for agents and protocols (pricing TBD). Target users are MUSD borrowers and trading bots.
 
 The current deployed preview passes public Chrome checks and network-disabled ZIP reproduction. Historical MUSD payments provide payment evidence at the owner’s request; no new signed purchase is claimed. See the [current deployment record](../security/2026-10-23-mezo-trove-deployment.md) for exact images, inherited verification and acceptance scope.
 

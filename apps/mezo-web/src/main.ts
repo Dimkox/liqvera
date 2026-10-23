@@ -356,7 +356,9 @@ function renderDelivery(): void {
   const receipt = paid.receipt;
   target.append(node("div", "status-pill status-ready", "ENTITLED · RECEIPT CONFIRMED"));
   target.append(node("h3", "result-heading", "Your snapshot report"));
-  if(report.schema === "liqvera-trove-risk-report/v1") { mountTroveRisk(target,report); mountTroveProtection(target,report,provider,account); }
+  const renderedProvider=provider,renderedAccount=account;
+  const walletContextCurrent=()=>provider===renderedProvider&&account?.toLowerCase()===renderedAccount?.toLowerCase()&&onChain;
+  if(report.schema === "liqvera-trove-risk-report/v1") { mountTroveRisk(target,report); mountTroveProtection(target,report,provider,account,walletContextCurrent); }
   else {
     target.append(node("p", "supporting", "Hypothetical snapshot sweep over the available public order-book depth. No exchange trade occurred."));
     const grid = node("div", "data-grid report-grid");
@@ -372,7 +374,7 @@ function renderDelivery(): void {
     appendField(grid, "Snapshot execution authority", report.boundaries.execution_authority);
     target.append(grid);
     mountMezoDex(target, report);
-    mountMezoSalePlanner(target,report,provider,account);
+    mountMezoSalePlanner(target,report,provider,account,walletContextCurrent);
   }
   const limitations = node("div", "limitations");
   limitations.append(node("strong", "", "Evidence and limits"));

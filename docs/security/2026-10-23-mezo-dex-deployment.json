@@ -1,0 +1,220 @@
+{
+  "source_commit": "e80474ea5121532cde2c470a4db399d4e1427baf",
+  "main_merge_commit": "1ee03e736952a917f87495672077a050741c8e4a",
+  "ci_run_id": 39986859564,
+  "deployment": {
+    "source_commit": "e80474ea5121532cde2c470a4db399d4e1427baf",
+    "inventory": {
+      "web": {
+        "id": "b9d0c676385be79a733a704f47d43bac81a4ae77b633a4adb7a9bc85fb446bdb",
+        "image": "sha256:b4156c28fa5abb10c846869d3819105bc382a7da703b00653ad6c3afe03e1cc8",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": []
+      },
+      "edge": {
+        "id": "7752b25f0e643742ffe4d006a5169a8a5239c9a9617df2ac7c194593743c1dd4",
+        "image": "sha256:aa8f036c87fd1f83aec1618205864fac968ac645882c493c74bcb07d5f7a601c",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_caddy_config",
+          "liqvera-live_caddy_data"
+        ]
+      },
+      "gateway": {
+        "id": "73071a6cc3cd9aef3ad880c14843db3feccebdb2ec61a53d68abd33548c05d64",
+        "image": "sha256:5248627d05a881606e27f9dca701ecbb794badcf9723025f36de0a5fe73c0b0c",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_artifacts"
+        ]
+      },
+      "gateway-net": {
+        "id": "1b05cbf2e538a82b5948a5cbecb188c0a8b3f3efb8749bdbc91131ae5150838f",
+        "image": "sha256:a341fae9c0c8a1feade5b11493b58dbeb1a4f22cad5e5b79ef4602dd5b7db901",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": []
+      },
+      "postgres": {
+        "id": "f5faf86c9c2c26261ba6340a851c8b470dfd917dcae879a1e99dfd16484a684d",
+        "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_postgres_data"
+        ]
+      },
+      "report": {
+        "id": "b40e2936fe91b7869045f43ebd85523399eca8b602ca1a6f5d0208fc2ea2546e",
+        "image": "sha256:02839715795594d45af915ee9b19ea8263bad0936967f6c0738f75dcd3140339",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_artifacts",
+          "liqvera-live_captures"
+        ]
+      },
+      "evidence-capture": {
+        "id": "2c87a8ad035cffd9d76572f42b4434f0da003db263ce06702688f8ab5970b83f",
+        "image": "sha256:45c2f9324c090db3c206d16e5fe586492af234b3fdec19866eb20a9181982d15",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_captures"
+        ]
+      }
+    },
+    "previous_inventory": {
+      "web": {
+        "id": "9dfd3c73dffba0caae67c0a765ba8eac3f7b997f20028b51edd97347268df9c0",
+        "image": "sha256:6b26f78a2856e7f2f5a07884249d2b45351a08b3160732ef50a5d04967e07a06",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": []
+      },
+      "edge": {
+        "id": "7752b25f0e643742ffe4d006a5169a8a5239c9a9617df2ac7c194593743c1dd4",
+        "image": "sha256:aa8f036c87fd1f83aec1618205864fac968ac645882c493c74bcb07d5f7a601c",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_caddy_config",
+          "liqvera-live_caddy_data"
+        ]
+      },
+      "gateway": {
+        "id": "ef25e44aae96cfa684fbb46ecaa6d94b36a587de309da84c08f84f9d2565d037",
+        "image": "sha256:5c9ad54dce9370b854858434b3d17b759453d8fbc3df0bd549f4a5ea6e01fb0d",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_artifacts"
+        ]
+      },
+      "gateway-net": {
+        "id": "1b05cbf2e538a82b5948a5cbecb188c0a8b3f3efb8749bdbc91131ae5150838f",
+        "image": "sha256:a341fae9c0c8a1feade5b11493b58dbeb1a4f22cad5e5b79ef4602dd5b7db901",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": []
+      },
+      "postgres": {
+        "id": "f5faf86c9c2c26261ba6340a851c8b470dfd917dcae879a1e99dfd16484a684d",
+        "image": "sha256:ac94c2b07e35f5f12172a07ba198a7bcd221a90d149122bc9900771d467733ec",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_postgres_data"
+        ]
+      },
+      "report": {
+        "id": "6718c247188dea056e9c918bd96f2d08f3d2a1406f0f036adb2a796985eb5b7c",
+        "image": "sha256:df8932cbf8c3ce9af5d9f406ba9ee821154164502e0541a918ffc0ae2fbd0d99",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_artifacts",
+          "liqvera-live_captures"
+        ]
+      },
+      "evidence-capture": {
+        "id": "32c90fd9036aca131bf624987348699e1654b840246b8b2f5f6f4a8871c14497",
+        "image": "sha256:3edb015ec3aea7235b621303d1a1821eaa7c52b44f8ceb03b50fe51c4c97d5c1",
+        "health": "healthy",
+        "restart_count": 0,
+        "volumes": [
+          "liqvera-live_captures"
+        ]
+      }
+    },
+    "public": {
+      "asset": "index-BRI_6ZA8.js",
+      "network": "eip155:31611",
+      "payment_ready": true,
+      "preview_sha256": {
+        "report.json": "d58728bd3df4b79c43bb2e742225e5b8f879eb0ec292213ffd3941f0f8778753",
+        "evidence.zip": "0c20f41f845bd39c88286b52a64d1dad53713fd215507f611fab51d29896f51f"
+      },
+      "csp_matches_source": true
+    },
+    "ledger_before": [
+      "payment_attempts|CONFIRMED|3",
+      "payment_attempts|MANUAL_REVIEW|1",
+      "receipts|4",
+      "entitlements|4",
+      "001_ledger.sql|bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b",
+      "002_fix_immutable_ledger_identity.sql|981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb",
+      "003_live_grant_consumption.sql|bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0",
+      "004_receipt_confirmation_provenance.sql|96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a",
+      "005_receipt_confirmation_count.sql|e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11",
+      "006_signed_live_grant_authority.sql|92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a",
+      "007_network_identity.sql|377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6",
+      "008_merchant_nonce.sql|562504aa3b54efc7e8e5b5b3eed3a4918c85ec305da775bd33279899dab2e2fe"
+    ],
+    "ledger_after": [
+      "payment_attempts|CONFIRMED|3",
+      "payment_attempts|MANUAL_REVIEW|1",
+      "receipts|4",
+      "entitlements|4",
+      "001_ledger.sql|bc127e55c876961112f33ca2abdfac01827769d6156ddba2f42856d070c75b3b",
+      "002_fix_immutable_ledger_identity.sql|981f48215e64fdd0fb72be5a6df78238cf8050de722adb454b4e28b1940ccbcb",
+      "003_live_grant_consumption.sql|bbedff6137a648166b77233c56a466e46247480b404b8829b64f29123109bcf0",
+      "004_receipt_confirmation_provenance.sql|96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a",
+      "005_receipt_confirmation_count.sql|e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11",
+      "006_signed_live_grant_authority.sql|92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a",
+      "007_network_identity.sql|377120dd211d6a455f55f264dd188fdf40652be4da512c8d91652c1562f3afa6",
+      "008_merchant_nonce.sql|562504aa3b54efc7e8e5b5b3eed3a4918c85ec305da775bd33279899dab2e2fe"
+    ],
+    "rollback_containers": [
+      "liqvera-live-evidence-capture-live-1-before-mezo-dex-e80474e",
+      "liqvera-live-report-live-1-before-mezo-dex-e80474e",
+      "liqvera-live-web-live-1-before-mezo-dex-e80474e",
+      "liqvera-live-gateway-live-1-before-mezo-dex-e80474e"
+    ],
+    "recovery_directory": "/home/pall/.local/state/liqvera/recovery/2026-10-23-mezo-dex-e80474e",
+    "duration_seconds": 31.227145804092288,
+    "walletconnect_preserved": true,
+    "postgres_replaced": false,
+    "payment_submitted": false,
+    "migrations_run": false
+  },
+  "published_browser": {
+    "status": "PASS",
+    "scope": "Published HTTPS site; real sealed public-data preview, GET-only application requests, no wallet or payment",
+    "views": [
+      {
+        "width": 320,
+        "clientWidth": 320,
+        "scrollWidth": 320,
+        "heading": "Mezo DEX vs Hyperliquid",
+        "links": [
+          "https://explorer.test.mezo.org/address/0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9",
+          "https://explorer.test.mezo.org/address/0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9",
+          "https://explorer.test.mezo.org/block/16321216"
+        ]
+      },
+      {
+        "width": 1280,
+        "clientWidth": 1265,
+        "scrollWidth": 1265,
+        "heading": "Mezo DEX vs Hyperliquid",
+        "links": [
+          "https://explorer.test.mezo.org/address/0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9",
+          "https://explorer.test.mezo.org/address/0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9",
+          "https://explorer.test.mezo.org/block/16321216"
+        ]
+      }
+    ],
+    "runtime_exceptions": []
+  },
+  "archive": {
+    "archive_sha256": "1a55f2290f8d8ab80afeaa1905db8d498d68463fe409d83d70198e1fc32d1df3",
+    "payload_members": 40,
+    "verified_all_payloads": true
+  },
+  "payment_evidence": "Three previously verified historical MUSD transfers; fresh signed payment deferred by owner.",
+  "scope": "Four application images replaced; edge, PostgreSQL and namespace carrier retained. No overall A01-A32 acceptance claim."
+}

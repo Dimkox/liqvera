@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liqvera — Mezo Buildathon</title>
+<style>
+:root{color-scheme:dark;--ink:#e9f2ed;--muted:#afc2b8;--bg:#0b1714;--card:#10241e;--mint:#9df4ba;--line:#315146}
+*{box-sizing:border-box}body{margin:0;background:#07110e;color:var(--ink);font:20px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1280px;margin:auto}.slide{position:relative;min-height:720px;aspect-ratio:16/9;padding:64px 72px;background:var(--bg);border-bottom:1px solid var(--line);overflow:hidden}
+.kicker{color:var(--mint);text-transform:uppercase;letter-spacing:.13em;font-size:15px;font-weight:650;margin:0 0 30px}h1{font-size:88px;letter-spacing:-.06em;line-height:1;margin:26px 0}h2{font-size:48px;letter-spacing:-.035em;line-height:1.1;max-width:1000px;margin:0 0 28px}h3{font-size:24px;color:var(--mint);margin:0 0 12px}p{max-width:970px;margin:0 0 20px}.lead{font-size:32px;max-width:870px;line-height:1.25}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:32px 0}.two{grid-template-columns:repeat(2,1fr)}.card{padding:24px;background:var(--card);border:1px solid var(--line);border-radius:14px}.card p{font-size:19px;margin:0}.note{font-size:16px;color:var(--muted);max-width:1000px}.badge{display:inline-block;border:1px solid var(--mint);border-radius:24px;padding:7px 16px;font-size:15px;color:var(--mint);margin:8px 10px 18px 0}.footer{position:absolute;left:72px;right:72px;bottom:28px;display:flex;justify-content:space-between;color:var(--muted);font-size:14px}a{color:var(--mint);text-decoration:none}ol{padding-left:28px}li{margin:14px 0}.accent{color:var(--mint)}.metric{font-size:42px;font-weight:700;color:var(--mint);display:block}.flow{font-size:25px;line-height:1.6;color:var(--mint);padding:22px 0}
+@media screen and (max-width:760px){body{font-size:18px}.slide{aspect-ratio:auto;min-height:760px;padding:40px 28px 90px}h1{font-size:65px}h2{font-size:36px}.lead{font-size:26px}.grid{grid-template-columns:1fr;gap:12px}.card{padding:16px}.footer{left:28px;right:28px}.metric{font-size:30px}}
+@page{size:13.333in 7.5in;margin:0}@media print{html,body{width:13.333in;background:var(--bg);print-color-adjust:exact;-webkit-print-color-adjust:exact}main{max-width:none}.slide{width:13.333in;height:7.5in;min-height:0;aspect-ratio:auto;break-after:page;page-break-after:always;border:0}.slide:last-child{break-after:auto;page-break-after:auto}a{text-decoration:none}}
+</style>
+</head>
+<body><main>
+<section class="slide" aria-label="Slide 1: Liqvera">
+<p class="kicker">The Mezo Buildathon · Access and Distribution</p>
+<h1>Liqvera<span class="accent">.</span></h1>
+<p class="lead">Market reports<br>you can verify.</p>
+<p class="muted">Public BTC market evidence. Exact calculations.<br>MUSD payment integration on Mezo Testnet.</p>
+<span class="badge">Existing project · pre-event baseline</span><span class="badge">Mezo Testnet · 31611</span>
+<p><a href="https://liqvera.site">liqvera.site</a> &nbsp;·&nbsp; <a href="https://github.com/Dimkox/liqvera">github.com/Dimkox/liqvera</a></p>
+<div class="footer"><span>Dimkox · Preparation · October 13, 2026</span><span>01 / 07</span></div>
+</section>
+<section class="slide" aria-label="Slide 2: Problem">
+<p class="kicker">The problem</p><h2>A price is not the depth<br>behind an order.</h2>
+<div class="grid"><div class="card"><h3>Missing context</h3><p>A headline price omits available liquidity and the effect of order size.</p></div><div class="card"><h3>Fragile evidence</h3><p>A screenshot does not carry the inputs needed to reproduce its calculations.</p></div><div class="card"><h3>Unclear assumptions</h3><p>Users need capture time, requested quantity, quality checks and explicit limits.</p></div></div>
+<p class="lead">Keep the report and its evidence together.</p>
+<p class="note">Initial audience hypothesis: analysts, developers and technically experienced report users. Demand and willingness to pay still need validation.</p>
+<div class="footer"><span>Liqvera · Market reports you can verify.</span><span>02 / 07</span></div>
+</section>
+<section class="slide" aria-label="Slide 3: Product flow">
+<p class="kicker">How it works</p><h2>Capture once.<br>Check independently.</h2>
+<p class="flow">Public snapshot → Exact calculation → JSON + evidence ZIP → Offline verification</p>
+<div class="grid"><div class="card"><h3>Observe</h3><p>Public Hyperliquid BTC perpetual order-book data, captured with source metadata.</p></div><div class="card"><h3>Calculate</h3><p>Filled quantity, notional, VWAP, worst price and price impact for a hypothetical sweep.</p></div><div class="card"><h3>Reproduce</h3><p>Validate bundle integrity and recompute results without contacting the service.</p></div></div>
+<p class="note">No exchange trading. No fees, funding or net P&amp;L calculation. Integrity checks do not independently authenticate the exchange.</p>
+<div class="footer"><span>Python evidence engine · TypeScript interface</span><span>03 / 07</span></div>
+</section>
+<section class="slide" aria-label="Slide 4: Mezo integration">
+<p class="kicker">Why MUSD</p><h2>Access payments for<br>verifiable information.</h2>
+<div class="grid two"><div class="card"><h3>Payment and delivery</h3><p>x402 MUSD payment integration configured for Mezo Testnet. Settlement and entitlement bind to exact report and bundle hashes.</p></div><div class="card"><h3>Useful integration</h3><p>A concrete digital service that accepts MUSD, with evidence recipients can retain and inspect after delivery.</p></div></div>
+<p class="lead">Historical paid delivery demonstrated.</p>
+<p class="note">Current status: Testnet wallet checkout is enabled at 0.01 test MUSD. Fresh report generation and payment challenge are verified. A new confirmed purchase on this deployment is still to be recorded.</p>
+<div class="footer"><span>Track 2 · Access and Distribution for MUSD/MEZO</span><span>04 / 07</span></div>
+</section>
+<section class="slide" aria-label="Slide 5: Demonstration">
+<p class="kicker">What to inspect today</p><h2>A report you can take<br>away and check.</h2>
+<ol><li>Open the wallet-free historical preview at <a href="https://liqvera.site">liqvera.site</a>.</li><li>Inspect its capture timestamp, order quantity and depth results.</li><li>Download the preserved report and evidence ZIP.</li><li>Run the verifier matching that artifact's version.</li></ol>
+<p class="note">The preview is the sealed October 12 public capture, with its timestamp and hashes displayed. Its downloaded ZIP reproduces with the current offline verifier.</p>
+<div class="footer"><span>Independent inspection · Explicit limitations</span><span>05 / 07</span></div>
+</section>
+<section class="slide" aria-label="Slide 6: Implementation evidence">
+<p class="kicker">Built and checked</p><h2>A complete product,<br>with scoped evidence.</h2>
+<div class="grid"><div class="card"><span class="metric">1,167</span><h3>Python tests passed</h3><p>Plus 85 subtests in the recorded full local run.</p></div><div class="card"><span class="metric">8</span><h3>Images audited</h3><p>Independent advisory sources and explicit dispositions for remaining raw matches.</p></div><div class="card"><span class="metric">71 + 31</span><h3>Gateway + browser tests</h3><p>Merchant checkout verified with disposable PostgreSQL and browser tests.</p></div></div>
+<p class="note">Full Python suite: 76b63ec. Merchant tests: 5f87329. Exact deployed-image audits are linked in the repository. All seven services are healthy. Checkout is enabled; a new confirmed paid-delivery run remains unrecorded. Local tests and a payment challenge are not a completed purchase.</p>
+<div class="footer"><span>Public code · Documented security evidence · No blanket “zero CVEs” claim</span><span>06 / 07</span></div>
+</section>
+<section class="slide" aria-label="Slide 7: Proposed next steps">
+<p class="kicker">The buildathon plan · proposals</p><h2>Make MUSD access useful.<br>Make the evidence portable.</h2>
+<div class="grid"><div class="card"><h3>Wave 1 · Oct 26</h3><p>Ship a scoped MUSD-access improvement and demonstrate the working supported-network flow.</p></div><div class="card"><h3>Wave 2 · Nov 15</h3><p>Use feedback to improve discovery and recovery; show meaningful additional progress.</p></div><div class="card"><h3>After the event</h3><p>Pilot with prospective users, measure repeat usage and validate willingness to pay.</p></div></div>
+<p class="lead">Liqvera — Market reports you can verify.</p>
+<p><a href="https://liqvera.site">liqvera.site</a> &nbsp;·&nbsp; <a href="https://github.com/Dimkox/liqvera">Public source</a></p>
+<p class="note">Existing project before Wave 1. Proposed milestones require owner confirmation; this deck does not claim they are complete or that an entry has been submitted.</p>
+<div class="footer"><span>Mezo Testnet · Track 2</span><span>07 / 07</span></div>
+</section>
+</main></body></html>

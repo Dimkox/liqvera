@@ -7,7 +7,7 @@ export function mountTroveRisk(host:HTMLElement,report:TroveReport):void {
  const section=document.createElement('section');section.className='trove-risk limitations';
  const paragraph=(text:string)=>{const p=document.createElement('p');p.textContent=text;section.append(p);};
  const heading=document.createElement('h3');heading.textContent='Mezo Trove risk';section.append(heading);
- paragraph('Mezo Testnet · Read only · Not financial advice. No loan or redemption transaction is submitted.');
+ paragraph('Mezo Testnet · Snapshot risk information, not financial advice. Actions in this report use your wallet to sign BTC deposits or MUSD repayments.');
  paragraph(`Borrower: ${risk.borrower} · Status: ${risk.status}`);
  const grid=document.createElement('div');grid.className='data-grid report-grid';
  for(const [label,value] of [

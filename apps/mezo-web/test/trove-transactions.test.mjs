@@ -55,3 +55,19 @@ test('BorrowerOperations and HintHelpers ABIs remain bound to verified Testnet p
   assert.ok(implementations[name]);
  }
 });
+
+import {prepareTroveAction,submitTroveAction} from '../src/trove-transactions.ts';
+const wallet=(responses)=>({request:async({method,params})=>{
+ const value=responses[method];if(typeof value==='function')return value(params);if(value instanceof Error)throw value;return value;
+}});
+test('Trove preparation rejects wrong chain and malformed or zero amounts before simulation',async()=>{
+ const p=wallet({'eth_chainId':'0x1'});
+ await assert.rejects(()=>prepareTroveAction(p,'0x1111111111111111111111111111111111111111',{kind:'deposit',amount:'0.1'}),/Mezo Testnet/);
+ const correct=wallet({'eth_chainId':'0x7b7b'});
+ for(const amount of ['0','1.0000000000000000001','-1','1e2']) await assert.rejects(()=>prepareTroveAction(correct,'0x1111111111111111111111111111111111111111',{kind:'deposit',amount}),/amount|greater than zero/i);
+});
+test('Trove submission rechecks chain and account before asking wallet to sign',async()=>{
+ let sent=false;const p=wallet({'eth_chainId':'0x7b7b','eth_accounts':['0x2222222222222222222222222222222222222222'],'eth_sendTransaction':()=>{sent=true;return '0xabc'}});
+ const prepared={kind:'deposit',account:'0x1111111111111111111111111111111111111111',chainId:31611,to:'0xCdF7028ceAB81fA0C6971208e83fa7872994beE5',data:'0x',value:'0x1',summary:'deposit'};
+ await assert.rejects(()=>submitTroveAction(p,prepared),/account changed/i);assert.equal(sent,false);
+});

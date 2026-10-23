@@ -469,3 +469,19 @@ Validation: `../../apps/mezo-web/node_modules/.bin/tsc -p tsconfig.json` from
 `packages/mezo-protocol` and `node --test test/trove-transactions.test.mjs` from
 `apps/mezo-web` passed (3 tests). Tests validate metadata and source hashes only;
 no wallet transaction was signed or sent.
+
+## 2026-10-23 — self-custody Trove action preparation
+
+Added browser-only Trove action preparation for active Testnet borrowers. It reads
+current status, full debt/collateral and wallet balances, computes new nominal CR,
+fetches a fresh approximate hint and exact SortedTroves neighbors, then simulates
+BorrowerOperations with the borrower as `from`. BTC deposit uses native value;
+MUSD repayment checks the live minimum net debt and gas compensation. Submission
+rechecks chain/account and calls only the connected provider's
+`eth_sendTransaction`; there is no key handling or retry path. The paid report now
+shows deposit and dynamic repayment controls only for its active connected borrower.
+
+Validation: Mezo protocol TypeScript build, browser `npm run typecheck`, 11 focused
+browser report/transaction tests, and `git diff --check` passed. Tests did not sign or
+send any live transaction. Real wallet confirmation and chain inclusion remain
+unverified.

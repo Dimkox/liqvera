@@ -390,6 +390,13 @@ export const MEZO_TESTNET_TROVES = {
 
 export const MEZO_TESTNET_BORROWER_OPERATIONS_ABI = [
   {
+    "inputs": [],
+    "name": "minNetDebt",
+    "outputs": [{"internalType":"uint256","name":"","type":"uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",

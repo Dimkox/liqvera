@@ -21,3 +21,7 @@
 .trove-risk { overflow-wrap: anywhere; }
 .trove-risk .data-field { display: grid; gap: .3rem; }
 .trove-risk .field-name { font-size: .8rem; opacity: .7; }
+
+.trove-actions{margin-top:1.25rem;padding:1rem;border:1px solid var(--border,#35414b);border-radius:12px}
+.trove-action-form{display:flex;gap:.65rem;align-items:center;margin:.7rem 0}
+.trove-action-form input{min-width:0;flex:1}

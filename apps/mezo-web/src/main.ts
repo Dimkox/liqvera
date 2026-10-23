@@ -1,6 +1,7 @@
 import {TROVE_PREVIEW,verifyTrovePreview} from "./trove-preview";
 import {getAddress} from "viem";
 import {mountTroveRisk} from "./trove-panel";
+import {mountTroveProtection} from "./trove-protection-panel";
 import "./style.css";
 import { mountMezoDex } from "./mezo-dex-panel";
 import { MEZO, MUSD, NETWORK_CONFIG, NETWORK_LABEL, TOKEN_LABEL } from "./network.ts";
@@ -354,7 +355,7 @@ function renderDelivery(): void {
   const receipt = paid.receipt;
   target.append(node("div", "status-pill status-ready", "ENTITLED · RECEIPT CONFIRMED"));
   target.append(node("h3", "result-heading", "Your snapshot report"));
-  if(report.schema === "liqvera-trove-risk-report/v1") mountTroveRisk(target,report);
+  if(report.schema === "liqvera-trove-risk-report/v1") { mountTroveRisk(target,report); mountTroveProtection(target,report,provider,account); }
   else {
     target.append(node("p", "supporting", "Hypothetical snapshot sweep over the available public order-book depth. No exchange trade occurred."));
     const grid = node("div", "data-grid report-grid");
@@ -644,6 +645,7 @@ async function connectWallet(): Promise<void> {
   } catch (error) { await refreshWallet(); announcement(walletError(error), "warning"); }
   updateControls();
   if (quote) renderQuote();
+  if (delivery) renderDelivery();
 }
 
 function renderProviderChoices():void {
@@ -667,6 +669,7 @@ function applyWalletState(state: WalletState): void {
   if (flow && account && account.toLowerCase() !== flow.payer.toLowerCase()) announcement("Wallet changed. The saved quote remains bound to its original payer.", "warning");
   updateControls();
   if (quote) renderQuote();
+  if (delivery) renderDelivery();
 }
 
 el<HTMLButtonElement>("#connect-button").addEventListener("click", () => { void connectWallet(); });

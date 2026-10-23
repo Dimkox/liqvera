@@ -1,5 +1,21 @@
 # Liqvera handoff
 
+## 2026-10-23 — DEX comparison published and verified on the live Testnet site
+
+Source `e80474ea5121532cde2c470a4db399d4e1427baf` is deployed after exact-head CI and independent binding review passed. Four application images were replaced; PostgreSQL, edge and namespace carrier remain the same. The fresh coherent backup, previous containers, ledger states, migrations, sealed evidence and WalletConnect configuration are retained. No payment, grant renewal, database restore or migration was performed.
+
+Published Chrome checks at mobile 320 and desktop 1280 show the Mezo comparison and block 16321216 without overflow or runtime exceptions. Both immutable public asset hashes pass; the downloaded ZIP reproduces with network disabled in the deployed report image. The earlier Cloudflare mixed-pair failure and compatible recovery remain in the [deployment evidence](docs/security/2026-10-23-mezo-dex-deployment.md), alongside the successful retry. Source-labelled scans retain all raw findings and explicit dispositions; inherited runtime checks are hash-bound and not represented as rerun.
+
+The owner explicitly chose verified historical transactions instead of a fresh signed purchase. README, competition documents and the Mezo integration slide now reflect the deployed DEX scope and that payment limit. The previous presentation HTML/PDF is preserved byte-for-byte in the dated archive; the current seven-page PDF was regenerated. Trove core remains separate work, with report/ZIP integration in progress; no paid Trove UI/API or registry deployment is claimed.
+
+## 2026-10-23 — prevent mixed CDN preview assets after a safely recovered rollout
+
+The first DEX rollout failed its public ZIP digest check and invoked the reviewed compatible recovery. All seven services returned healthy: the new gateway/report readers remain active, DEX capture is disabled, and original capture/web serve the preceding preview. PostgreSQL, edge, network carrier, ledger/evidence volumes and unknown payment states were retained; no database restore, migration, payment or grant renewal occurred. The validated coherent backup and all old/new containers remain private for recovery.
+
+Saved diagnostics establish the cause: the new report JSON was DYNAMIC while Cloudflare returned the exact old ZIP with HIT and a four-hour cache lifetime. Direct origin JSON and ZIP match the intended new digests. The failed direct external ZIP diagnostic timed out with a partial download and is not a successful verification. A reversible web-only diagnostic restored the original web afterward.
+
+Both browser preview URLs now identify an immutable directory by the report SHA-256. The new pair is copied byte-for-byte there; current and archived aliases remain intact. A regression first failed on the mutable URL, then checks the coupled hashes and equality with source assets. All 107 browser tests and the production build passed; nine canonical/offline Python tests and documentation links passed. Independent read-only review found no source or operations-delta blocker. This source fix does not yet claim a successful public rollout; the next attempt must verify the versioned public paths.
+
 ## 2026-10-23 — available musl/nginx security fixes before DEX rollout
 
 Demo PR 19 merged into main as `d2b88d91e6e4c7238ca98d5a341ac79fca10d4e0` after its exact-head CI passed. Fresh pre-deployment Trivy/Grype databases exposed the newly indexed musl advisory. Runtime recipes now pin the fixed musl packages and nginx 1.30.6, with the existing security backports retained. [Incremental package record](docs/security/2026-10-23-runtime-package-refresh.md) states the exact scope and primary sources.

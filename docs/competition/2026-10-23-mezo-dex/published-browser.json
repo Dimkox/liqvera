@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "scope": "Published HTTPS site; real sealed public-data preview, GET-only application requests, no wallet or payment",
+  "views": [
+    {
+      "width": 320,
+      "clientWidth": 320,
+      "scrollWidth": 320,
+      "heading": "Mezo DEX vs Hyperliquid",
+      "links": [
+        "https://explorer.test.mezo.org/address/0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9",
+        "https://explorer.test.mezo.org/address/0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9",
+        "https://explorer.test.mezo.org/block/16321216"
+      ]
+    },
+    {
+      "width": 1280,
+      "clientWidth": 1265,
+      "scrollWidth": 1265,
+      "heading": "Mezo DEX vs Hyperliquid",
+      "links": [
+        "https://explorer.test.mezo.org/address/0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9",
+        "https://explorer.test.mezo.org/address/0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9",
+        "https://explorer.test.mezo.org/block/16321216"
+      ]
+    }
+  ],
+  "runtime_exceptions": []
+}

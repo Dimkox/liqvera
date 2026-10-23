@@ -45,3 +45,15 @@ test("fresh quote render uses the standards-safe shared UTC formatter", async ()
   assert.match(source,/"Snapshot time", formatHistoricalDate\(q\.preview\.snapshot_at\)/);
   assert.match(source,/"Quote expires", formatHistoricalDate\(q\.terms\.expires_at\)/);
 });
+
+test("preview URLs identify an immutable report and coupled bundle across CDN caches", async () => {
+  const prefix=`/demo/snapshots/${HISTORICAL_DEMO.reportSha256}/`;
+  assert.equal(HISTORICAL_DEMO.reportUrl,`${prefix}report.json`);
+  assert.equal(HISTORICAL_DEMO.bundleUrl,`${prefix}evidence.zip`);
+  const publicRoot=new URL("../public/",import.meta.url);
+  const report=await readFile(new URL(HISTORICAL_DEMO.reportUrl.slice(1),publicRoot));
+  const bundle=await readFile(new URL(HISTORICAL_DEMO.bundleUrl.slice(1),publicRoot));
+  assert.equal((await verifyHistoricalAssets(report,bundle)).report_id,HISTORICAL_DEMO.reportId);
+  assert.deepEqual(report,await readFile(new URL("demo/latest-live/report.json",publicRoot)));
+  assert.deepEqual(bundle,await readFile(new URL("demo/latest-live/evidence.zip",publicRoot)));
+});

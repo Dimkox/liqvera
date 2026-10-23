@@ -1,7 +1,8 @@
 # Mezo Testnet integration
 
-Liqvera keeps one web/API product. MUSD x402 purchases are deployed; the DEX
-extension described here is merged into main in PR 17; deployment is pending.
+Liqvera keeps one web/API product. MUSD x402 purchases and the DEX extension are deployed on liqvera.site.
+The [October 23 deployment record](security/2026-10-23-mezo-dex-deployment.md)
+binds source, images, immutable preview URLs and verification scope.
 All new chain calls target Testnet 31611 at a captured block number. No swap,
 borrow, redemption or new payment is submitted by capture or verification.
 
@@ -79,7 +80,7 @@ reverts. The redemption walk starts at `getLast()` and follows `getPrev()`,
 skipping ICR below MCR. A list index alone is not a proven redemption position.
 Trove report delivery remains a subsequent implementation step.
 
-## Public preview candidate (October 23)
+## Published public preview (October 23)
 
 The source preview contains a real SELL 1 BTC comparison captured on October 23,
 with Mezo block 16321216 and engine commit
@@ -89,4 +90,10 @@ its ZIP SHA-256 is
 `0c20f41f845bd39c88286b52a64d1dad53713fd215507f611fab51d29896f51f`.
 These digests are pinned by the browser before rendering. The previous preview
 remains byte-for-byte in `apps/mezo-web/public/demo/archive/0ebf36b89bda183b/`.
-This source candidate does not establish deployment or a fresh paid purchase.
+The published pair reproduces offline. Historical payments are used for this
+update at the owner's request; no fresh paid purchase is claimed.
+
+The browser requests both preview assets from `/demo/snapshots/<report-sha256>/`,
+so a CDN cannot combine a newly deployed JSON with a cached ZIP from an older
+release. The mutable `latest-live` directory remains a compatibility alias;
+verification and download links use the immutable snapshot path.

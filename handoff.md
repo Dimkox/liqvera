@@ -1,5 +1,11 @@
 # Liqvera handoff
 
+## 2026-10-23 — Trove capture and arithmetic core verified
+
+The separate Trove branch now pins narrow read-only proxy/implementation ABI surfaces and implements exact risk/scenario arithmetic plus bounded fixed-block batched capture. Offline verification checks every consumed raw call, actual six-value return ordering, pending totals, ICR/TCR agreement, uint256 bounds, full owner/list completeness, reciprocal links, eligibility skips and liquidation-reserve subtraction. Over-limit queues report an explicit unknown position; no unproven rank is fabricated. Borrower spelling is preserved for future checksummed request binding.
+
+Thirty-one focused tests and protocol TypeScript compilation pass; new files pass Ruff. Independent read-only review recomputed all selectors against the vendored ABI and found no blocker after strict unused-call/endpoints regressions were fixed. A first native attempt failed ConnectTimeout; one bounded transient retry is now tested without changing the payload/block. A native capture at block 16320987 took 4,988 ms with 1,812 calls and 300 owners and reproduces exact contract ICR and redemption position1 offline. [Core scope and limitations](docs/mezo-trove-risk.md) distinguish this from the still-unimplemented paid API/UI/ZIP product. No deployment, payment or grant was changed.
+
 ## 2026-10-23 — separate Trove product implementation started
 
 The DEX source is isolated in draft PR 17. Trove work starts from its `322b34c` successor in a separate worktree/branch and follows the [bounded capture and product integration plan](docs/superpowers/plans/2026-10-23-trove-risk.md). The verified ABI/source fixes the draft's debt/collateral tuple ordering, view price getter and redemption skip rules. Owner enumeration plus bounded batched reads is proposed to meet the latency target without claiming owner-array order as redemption order. Lists above the bound must report an honest unknown/limit rather than an unproven rank. No Trove implementation, paid acceptance or deployment is claimed by this planning step. Documentation links passed for 68 documents.

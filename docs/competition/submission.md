@@ -7,7 +7,7 @@ Prepared 2026-10-13. Existing project; pre-event baseline `607fa0d`. The owner c
 
 ## October 21 Wave 1 source extension
 
-The [MUSD funding extension](wave1-musd-funding.md) adds block-bound wallet balance checks, exact report budgets, JSON observations and an assisted official Borrow handoff inside the existing checkout. October 13 preparation is explicitly identified as reused. This source update has not been deployed or applied to AKINDO in this session; no new paid acceptance is claimed. See [prepared AKINDO updates](wave1-akindo-update.md) and the [verification record](2026-10-21-funding/verification.json). The historical October 13 fields below retain their dated scope.
+The [MUSD funding extension](wave1-musd-funding.md) adds block-bound wallet balance checks, exact report budgets, JSON observations and an assisted official Borrow handoff inside the existing checkout. October 13 preparation is explicitly identified as reused. At that October 21 funding checkpoint, this was a source-only update. The current October 23 deployment is documented above; no new Akindo account submission or signed paid acceptance is claimed. See [prepared AKINDO updates](wave1-akindo-update.md) and the [verification record](2026-10-21-funding/verification.json). The historical October 13 fields below retain their dated scope.
 
 ## Ready-to-paste project fields
 

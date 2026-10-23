@@ -30,6 +30,7 @@ recovery command is `python3 /home/pall/.local/state/liqvera/recovery/2026-10-23
 No private config, grant, backup or browser profile is published.
 
 README, submission, description and demo script now describe the deployed product.
+The earlier October 21 funding paragraph explicitly identifies its source-only checkpoint.
 The new deck adds Trove risk; the preceding DEX deck is preserved byte-for-byte under
 `docs/competition/archive/2026-10-23-dex/`. The October 13 preparation video stays
 explicitly dated. Historical verified payments remain the owner's selected proof.

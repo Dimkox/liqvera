@@ -21,47 +21,54 @@ main{max-width:1280px;margin:auto}.slide{position:relative;min-height:720px;aspe
 <p class="muted">BTC market evidence from Hyperliquid and Mezo.<br>Exact calculations. MUSD payments on Testnet.</p>
 <span class="badge">Existing project · October 23 update</span><span class="badge">Mezo Testnet · 31611</span>
 <p><a href="https://liqvera.site">liqvera.site</a> &nbsp;·&nbsp; <a href="https://github.com/Dimkox/liqvera">github.com/Dimkox/liqvera</a></p>
-<div class="footer"><span>Dimkox · Wave 1 update · October 23, 2026</span><span>01 / 07</span></div>
+<div class="footer"><span>Dimkox · Wave 1 update · October 23, 2026</span><span>01 / 08</span></div>
 </section>
 <section class="slide" aria-label="Slide 2: Problem">
 <p class="kicker">The problem</p><h2>A price is not the depth<br>behind an order.</h2>
 <div class="grid"><div class="card"><h3>Missing context</h3><p>A headline price omits available liquidity and the effect of order size.</p></div><div class="card"><h3>Fragile evidence</h3><p>A screenshot does not carry the inputs needed to reproduce its calculations.</p></div><div class="card"><h3>Unclear assumptions</h3><p>Users need capture time, requested quantity, quality checks and explicit limits.</p></div></div>
 <p class="lead">Keep the report and its evidence together.</p>
 <p class="note">Initial audience hypothesis: analysts, developers and technically experienced report users. Demand and willingness to pay still need validation.</p>
-<div class="footer"><span>Liqvera · Market reports you can verify.</span><span>02 / 07</span></div>
+<div class="footer"><span>Liqvera · Market reports you can verify.</span><span>02 / 08</span></div>
 </section>
 <section class="slide" aria-label="Slide 3: Product flow">
 <p class="kicker">How it works</p><h2>Capture once.<br>Check independently.</h2>
 <p class="flow">Public snapshot → Exact calculation → JSON + evidence ZIP → Offline verification</p>
 <div class="grid"><div class="card"><h3>Observe</h3><p>Public Hyperliquid BTC perpetual depth and fixed-block Mezo MUSD/BTC pool state.</p></div><div class="card"><h3>Calculate</h3><p>Filled quantity, notional, VWAP, worst price and price impact for a hypothetical sweep.</p></div><div class="card"><h3>Reproduce</h3><p>Validate bundle integrity and recompute results without contacting the service.</p></div></div>
 <p class="note">Read-only analysis. Mezo pool fee included; gas, Hyperliquid fees and funding excluded. Integrity checks do not prove exchange or chain authenticity.</p>
-<div class="footer"><span>Python evidence engine · TypeScript interface</span><span>03 / 07</span></div>
+<div class="footer"><span>Python evidence engine · TypeScript interface</span><span>03 / 08</span></div>
 </section>
 <section class="slide" aria-label="Slide 4: Mezo integration">
 <p class="kicker">Mezo Testnet · deployed October 23</p><h2>Mezo data.<br>MUSD access.</h2>
 <div class="grid two"><div class="card"><h3>DEX evidence</h3><p>MUSD/BTC reserves and the actual pool fee, read at one fixed block. Pool and Router quotes agree with exact offline arithmetic.</p></div><div class="card"><h3>Payment and delivery</h3><p>0.01 test MUSD through x402. Existing payment guards bind access to report and bundle hashes; verified historical transfers remain linked.</p></div></div>
 <p class="lead">Mezo DEX vs Hyperliquid · block 16321216</p>
 <p class="note">Portable raw calls and verified ABIs. Mezo spot MUSD and Hyperliquid perpetual USD differ; comparison excludes gas, Hyperliquid fees and funding. No own registry contract or new signed-payment acceptance is claimed.</p>
-<div class="footer"><span>Testnet only · Read-only market analysis</span><span>04 / 07</span></div>
+<div class="footer"><span>Testnet only · Read-only market analysis</span><span>04 / 08</span></div>
 </section>
-<section class="slide" aria-label="Slide 5: Demonstration">
+<section class="slide" aria-label="Slide 5: Trove risk">
+<p class="kicker">Native Mezo borrower data · deployed</p><h2>Debt, collateral and<br>the redemption queue.</h2>
+<div class="grid"><div class="card"><h3>Borrower risk</h3><p>Exact ICR, theoretical MCR crossing and price scenarios from protocol debt, collateral and oracle calls.</p></div><div class="card"><h3>Proven ordering</h3><p>Fixed-block SortedTroves links, eligibility checks and portable raw calls make the reported position reproducible.</p></div><div class="card"><h3>One product</h3><p>Wallet-prefilled address, existing 0.01 MUSD x402 flow and preserved payment recovery.</p></div></div>
+<p class="lead">Wallet-free Trove example · block 16323457</p>
+<p class="note">Fresh public preparation verified at block 16324977, through READY and the unpaid 402 boundary. No fresh signed payment. Testnet, read only, not financial advice. Historical transfers remain linked.</p>
+<div class="footer"><span>Exact arithmetic · Offline verification · No loan transaction</span><span>05 / 08</span></div>
+</section>
+<section class="slide" aria-label="Slide 6: Demonstration">
 <p class="kicker">What to inspect today</p><h2>A report you can take<br>away and check.</h2>
 <ol><li>Open the wallet-free historical preview at <a href="https://liqvera.site">liqvera.site</a>.</li><li>Inspect its capture timestamp, order quantity and depth results.</li><li>Download the preserved report and evidence ZIP.</li><li>Run the verifier matching that artifact's version.</li></ol>
-<p class="note">The October 23 SELL 1 BTC preview contains Mezo block 16321216 and an exact Pool/Router comparison. Both immutable asset URLs match their pins; the downloaded ZIP reproduces without networking.</p>
-<div class="footer"><span>Independent inspection · Explicit limitations</span><span>05 / 07</span></div>
+<p class="note">The DEX preview contains block 16321216; the Trove example contains block 16323457. Both pairs use immutable hash paths and reproduce offline. Open the Trove tab for borrower metrics and queue evidence.</p>
+<div class="footer"><span>Independent inspection · Explicit limitations</span><span>06 / 08</span></div>
 </section>
-<section class="slide" aria-label="Slide 6: Implementation evidence">
+<section class="slide" aria-label="Slide 7: Implementation evidence">
 <p class="kicker">Built and checked</p><h2>A complete product,<br>with scoped evidence.</h2>
-<div class="grid"><div class="card"><span class="metric">1,021</span><h3>Python tests passed</h3><p>Plus 85 subtests in the recorded full local run.</p></div><div class="card"><span class="metric">4</span><h3>Runtime images deployed</h3><p>Fresh image-bound scans; inherited runtime checks explicitly hash-bound.</p></div><div class="card"><span class="metric">74 + 107</span><h3>Gateway + browser tests</h3><p>Merchant checkout verified with disposable PostgreSQL and browser tests.</p></div></div>
-<p class="note">Exact-head CI e80474e passed 1,021 Python tests and 85 subtests; two live tests were deselected. Gateway: 74 local passes with disposable PostgreSQL; hosted CI skipped 13 database cases. Browser: 107 passes. Seven services healthy. Historical payments used; fresh signed acceptance deferred by the owner.</p>
-<div class="footer"><span>Public code · Documented security evidence · No blanket “zero CVEs” claim</span><span>06 / 07</span></div>
+<div class="grid"><div class="card"><span class="metric">1,101</span><h3>Python tests passed</h3><p>Plus 85 subtests in the recorded full local run.</p></div><div class="card"><span class="metric">4</span><h3>Runtime images deployed</h3><p>Fresh image-bound scans; inherited runtime checks explicitly hash-bound.</p></div><div class="card"><span class="metric">98 + 130</span><h3>Gateway + browser tests</h3><p>Merchant checkout verified with disposable PostgreSQL and browser tests.</p></div></div>
+<p class="note">CI on main passed 1,101 Python tests and 85 subtests; two live tests are explicit opt-ins. Gateway: 98 passes with disposable PostgreSQL and no skips. Browser: 130 passes. Seven services healthy. Historical payments used; no fresh signed-purchase acceptance claimed.</p>
+<div class="footer"><span>Public code · Documented security evidence · No blanket “zero CVEs” claim</span><span>07 / 08</span></div>
 </section>
-<section class="slide" aria-label="Slide 7: Proposed next steps">
+<section class="slide" aria-label="Slide 8: Proposed next steps">
 <p class="kicker">The buildathon plan · proposals</p><h2>Make MUSD access useful.<br>Make the evidence portable.</h2>
 <div class="grid"><div class="card"><h3>Wave 1 · Oct 26</h3><p>Ship a scoped MUSD-access improvement and demonstrate the working supported-network flow.</p></div><div class="card"><h3>Wave 2 · Nov 15</h3><p>Use feedback to improve discovery and recovery; show meaningful additional progress.</p></div><div class="card"><h3>After the event</h3><p>Pilot with prospective users, measure repeat usage and validate willingness to pay.</p></div></div>
 <p class="lead">Liqvera — Market reports you can verify.</p>
 <p><a href="https://liqvera.site">liqvera.site</a> &nbsp;·&nbsp; <a href="https://github.com/Dimkox/liqvera">Public source</a></p>
 <p class="note">Existing project before Wave 1. Proposed milestones require owner confirmation; this deck does not claim they are complete or that an entry has been submitted.</p>
-<div class="footer"><span>Mezo Testnet · Track 2</span><span>07 / 07</span></div>
+<div class="footer"><span>Mezo Testnet · Track 2</span><span>08 / 08</span></div>
 </section>
 </main></body></html>

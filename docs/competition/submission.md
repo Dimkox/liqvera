@@ -1,13 +1,13 @@
 # Liqvera — submission draft
 
-October 23 deployed update: the Mezo DEX extension adds captured reserves and fees, Pool/Router quote agreement, exact comparison with Hyperliquid, and offline-reproducible ZIP evidence. The comparison is deployed with immutable JSON/ZIP URLs and verified in published Chrome checks. Historical payments are retained as payment evidence; the owner deferred a fresh signed purchase. [Deployment record](../security/2026-10-23-mezo-dex-deployment.md). [Implementation and verification instructions](../mezo-integration.md). The [rechecked official deadline](2026-10-23-event-facts.json) is October 26 at **15:00 UTC**; internal target 11:00 UTC, code freeze 08:00 UTC.
+October 23 deployed update: the same Testnet product now includes Mezo DEX comparison and borrower Trove risk, with fixed-block raw calls and offline-reproducible ZIPs. Public native preparation and the unpaid x402 boundary are verified; historical MUSD transfers remain the payment proof. [Deployment record](../security/2026-10-23-mezo-trove-deployment.md), [DEX evidence](../mezo-integration.md) and [Trove verification](../mezo-trove-risk.md). The [rechecked official deadline](2026-10-23-event-facts.json) is October 26 at **15:00 UTC**; internal target 11:00 UTC, code freeze 08:00 UTC.
 
 
 Prepared 2026-10-13. Existing project; pre-event baseline `607fa0d`. The owner confirms that the Liqvera entry has already been submitted to AKINDO. This session has not accessed the account or verified which attachment versions were submitted. These files remain supporting preparation materials; do not submit a duplicate.
 
 ## October 21 Wave 1 source extension
 
-The [MUSD funding extension](wave1-musd-funding.md) adds block-bound wallet balance checks, exact report budgets, JSON observations and an assisted official Borrow handoff inside the existing checkout. October 13 preparation is explicitly identified as reused. This source update has not been deployed or applied to AKINDO in this session; no new paid acceptance is claimed. See [prepared AKINDO updates](wave1-akindo-update.md) and the [verification record](2026-10-21-funding/verification.json). The historical October 13 fields below retain their dated scope.
+The [MUSD funding extension](wave1-musd-funding.md) adds block-bound wallet balance checks, exact report budgets, JSON observations and an assisted official Borrow handoff inside the existing checkout. October 13 preparation is explicitly identified as reused. At that October 21 funding checkpoint, this was a source-only update. The current October 23 deployment is documented above; no new Akindo account submission or signed paid acceptance is claimed. See [prepared AKINDO updates](wave1-akindo-update.md) and the [verification record](2026-10-21-funding/verification.json). The historical October 13 fields below retain their dated scope.
 
 ## Ready-to-paste project fields
 
@@ -45,12 +45,12 @@ The [MUSD funding extension](wave1-musd-funding.md) adds block-bound wallet bala
 
 - Project: <https://liqvera.site>
 - Public source: <https://github.com/Dimkox/liqvera>
-- Current deployed source: [e80474e](https://github.com/Dimkox/liqvera/commit/e80474ea5121532cde2c470a4db399d4e1427baf). The October 23 preview contains Mezo block 16321216 and a coupled immutable JSON/ZIP pair; downloaded evidence reproduces offline. [Published browser checks](2026-10-23-mezo-dex/published-browser.json).
-- Deck: [presentation.pdf](presentation.pdf), seven slides; editable source: [presentation.html](presentation.html).
+- Current deployed source: [d63860d](https://github.com/Dimkox/liqvera/commit/d63860d7af70b5ad12145b039131ac11f0d4e729). The DEX example contains block 16321216 and the Trove example block 16323457; both coupled immutable pairs reproduce offline. [Current deployment](../security/2026-10-23-mezo-trove-deployment.md) and [published browser checks](2026-10-23-mezo-trove/published/result.json).
+- Deck: [presentation.pdf](presentation.pdf), eight slides; editable source: [presentation.html](presentation.html).
 - Video: [two-minute captioned preparation cut](pitch.mp4), [public download](https://raw.githubusercontent.com/Dimkox/liqvera/main/docs/competition/pitch.mp4), [editable frames](pitch.html), and [script](pitch-script.md). Silent English captions; real interface captures; no new paid transaction is depicted. This dated preparation cut does not show the October 23 DEX update; current screenshots and the updated deck are linked separately. No fresh signed-payment acceptance is claimed.
 - Architecture and boundaries: [specification](../specification.md).
-- Local validation: [remediation report](../security/2026-10-12-remediation.md). Current deployed image IDs, scoped scans and published checks: [October 23 deployment](../security/2026-10-23-mezo-dex-deployment.md). The [October 13 WalletConnect audit](../security/2026-10-13-walletconnect.md) remains historical evidence.
-- Merchant verification: 71 gateway tests against disposable PostgreSQL and 31 browser tests at source `5f87329`. [October 13 browser evidence](2026-10-13-browser-results.json) confirms a fresh unsigned quote; [download verification](2026-10-13-verification.json) reproduces the preview ZIP. Latest wallet integration: 49 browser tests; published QR/relay and Android handoff checks pass within their documented scope. See the [entry checklist](entry-checklist.md).
+- Local validation: [remediation report](../security/2026-10-12-remediation.md). Current deployed image IDs, scoped scans and published checks: [October 23 deployment](../security/2026-10-23-mezo-trove-deployment.md). The [October 13 WalletConnect audit](../security/2026-10-13-walletconnect.md) remains historical evidence.
+- Merchant verification: 71 gateway tests against disposable PostgreSQL and 31 browser tests at source `5f87329`. [October 13 browser evidence](2026-10-13-browser-results.json) confirms a fresh unsigned quote; [download verification](2026-10-13-verification.json) reproduces the preview ZIP. Historical October 13 wallet integration: 49 browser tests; published QR/relay and Android handoff checks pass within their documented scope. See the [entry checklist](entry-checklist.md).
 
 ## Official requirements and dates
 
@@ -70,3 +70,24 @@ Checked 2026-10-13 against the [AKINDO event](https://app.akindo.io/wave-hacks/O
 For a subsequent update, document actual in-event progress and recheck links. A fresh signed payment is a recommended post-update regression check, not a separately stated competition eligibility requirement. Use the owner-confirmed public attribution above; do not copy private registration details into this repository. A historical preview alone does not establish the complete current payment flow.
 
 Registration asks for full name, email, Telegram, Discord, GitHub, experience, focus, existing-product status, country and continuation intent. The owner must review the displayed eligibility and terms; recipients must complete KYB for prizes. The official event description and required registration checkbox currently link different terms documents. Inspect the actual registration terms before accepting; this draft accepts neither.
+
+## October 23 Trove product update
+
+The same [Testnet application](https://liqvera.site) now includes **Trove risk**:
+borrower debt/collateral, exact ICR, theoretical MCR crossing, price scenarios and a
+proven redemption position. The borrower defaults to the connected wallet address.
+Open **Trove risk → Show sealed Trove example** for a wallet-free historical native
+snapshot, or prepare a fresh borrower report through the existing 0.01 MUSD x402 flow.
+
+A public native request reached READY at block 16324977; unchanged replay, input and
+access boundaries, and the unpaid 402 response were verified. Its own operator-exported
+ZIP reproduces offline. No fresh wallet signature or paid Trove settlement is claimed.
+The owner selected the three already verified historical payment transactions.
+
+[Deployment and scoped evidence](../security/2026-10-23-mezo-trove-deployment.md) records
+main CI with 1101 Python tests + 85 subtests, 98 gateway tests without database skips
+and 130 browser tests. [Published mobile/desktop views](2026-10-23-mezo-trove/published/result.json)
+show the new panel without overflow. Mainnet, borrowing/redemption and a registry
+contract are outside this update. The October 13 video remains a dated preparation
+cut; the current screenshots and deck document the new features. This update does
+not assert a new Akindo account submission.

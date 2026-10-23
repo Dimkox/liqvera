@@ -1,0 +1,86 @@
+{
+  "schema": "liqvera-mezo-trove-deployment/v1",
+  "source_commit": "d63860d7af70b5ad12145b039131ac11f0d4e729",
+  "main_commit": "7a5ccbfbb22804fee87c2a63eddb3a97afb0a00c",
+  "images": {
+    "capture": {
+      "tag": "liqvera-mezo-capture:trove-d63860d7af70",
+      "image": "sha256:3228ea9023b1e310fc6453866917f46645f7293a5f2f5dda2eb20e5b4c4bb9f6",
+      "source_commit": "d63860d7af70b5ad12145b039131ac11f0d4e729"
+    },
+    "report": {
+      "tag": "liqvera-mezo-report:trove-d63860d7af70",
+      "image": "sha256:ab7d9c3fb23a57fba1ef1bc19d718df49103b2ef0830370aaead33f6345ca39d",
+      "source_commit": "d63860d7af70b5ad12145b039131ac11f0d4e729"
+    },
+    "gateway": {
+      "tag": "liqvera-mezo-gateway:trove-d63860d7af70",
+      "image": "sha256:f7523c2b3ee3caa093db27c32a7fe85a09f8b4380ea16be7d7a7bc244f66a79b",
+      "source_commit": "d63860d7af70b5ad12145b039131ac11f0d4e729"
+    },
+    "web": {
+      "tag": "liqvera-mezo-web:trove-d63860d7af70",
+      "image": "sha256:b0187e736edb7f09c9135b1fe8b73df90f8ae29e41e54b4ace2aaa2abd950b19",
+      "source_commit": "d63860d7af70b5ad12145b039131ac11f0d4e729"
+    }
+  },
+  "public_origin": "https://liqvera.site",
+  "public_browser_asset": "index-CH7o6gkm.js",
+  "services_healthy": 7,
+  "retained_services": [
+    "postgres",
+    "edge",
+    "gateway-net"
+  ],
+  "ledger_unchanged": true,
+  "payment_submitted": false,
+  "migrations_run": false,
+  "postgres_replaced": false,
+  "ci": {
+    "pull_request": 23,
+    "source_commit": "d63860d7af70b5ad12145b039131ac11f0d4e729",
+    "pull_request_run": 40009751538,
+    "main_run": 40010846187,
+    "main_commit": "7a5ccbfbb22804fee87c2a63eddb3a97afb0a00c",
+    "status": "PASS"
+  },
+  "test_counts": {
+    "python": 1101,
+    "python_subtests": 85,
+    "gateway": 98,
+    "web": 130
+  },
+  "public_api_smoke": {
+    "status": "PASS",
+    "initial_status": 202,
+    "quote_id": "0f82183b-9b6d-4603-8ef8-40f3879b9d50",
+    "report_id": "32dd15dd-e9a7-4b80-b42d-83f5c6b81968",
+    "report_sha256": "233c90cf148ddc299665a10ebe32c9374e35bc8fb8119fcfc32a724d3a58d497",
+    "bundle_sha256": "44818adbc64b039eddc6a09a4fe8fd8dc54520615c7b1ef3021ea48bed4a8291",
+    "started_monotonic_ns": 2912529613072356,
+    "ended_monotonic_ns": 2912539039673960,
+    "elapsed_to_ready_ms": 9426,
+    "idempotent_replay_status": 201,
+    "changed_body_status": 409,
+    "invalid_checksum_status": 400,
+    "other_scope_status": 404,
+    "unpaid_delivery_status": 402,
+    "payment_submitted": false,
+    "scope": "Public native Trove preparation through READY and x402 402 only. The public SortedTroves borrower was used as an expected-payer test address; no ownership or wallet authorization is claimed."
+  },
+  "public_native_block": "16324977",
+  "offline_public_request_artifact": "INTEGRITY_REPRODUCED",
+  "security": {
+    "trivy_findings": 0,
+    "grype_raw_occurrences": 18,
+    "untriaged_findings": 0,
+    "curl_disposition": "Known installed curl issue remains an inactive-runtime configuration exception, not a patch."
+  },
+  "archive": {
+    "archive": "2026-10-23-mezo-trove-deployment-raw.tar.gz",
+    "sha256": "2efaf79d68401394bbf9482069c3c7cd1a1d5b3d852c1c64eb61a6a798e4c783",
+    "payload_members": 62,
+    "status": "PASS"
+  },
+  "scope": "Deployed Testnet DEX/Trove product, public native preparation and x402 paywall. No new signed payment or paid Trove settlement acceptance. Historical verified transfers remain the chosen payment proof."
+}

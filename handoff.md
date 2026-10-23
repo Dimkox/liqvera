@@ -1,5 +1,42 @@
 # Liqvera handoff
 
+## 2026-10-23 — Trove risk published; current state
+
+The public Testnet site now runs source `d63860d7af70b5ad12145b039131ac11f0d4e729`,
+merged through PR #23 into main `7a5ccbfbb22804fee87c2a63eddb3a97afb0a00c`.
+Both PR and main CI passed the same 1101 Python tests + 85 subtests, 98 gateway tests
+with disposable PostgreSQL and 130 browser tests; root lint, typechecks and docs
+passed. Four exact images were independently reviewed and deployed. All seven
+services remain healthy, PostgreSQL/edge/network carrier are unchanged, and payment
+states (3 CONFIRMED, 1 MANUAL_REVIEW), receipts and entitlements match baseline.
+No migration, database restore, new signature or payment occurred.
+
+Public Chrome at 320/1280 shows the sealed Trove example without overflow or runtime
+exceptions. A fresh public Trove request reached READY in 9426 ms at block 16324977;
+replay/scope/input checks and the unsigned 402 boundary passed. Its own test artifact
+was exported through operator access and reproduced in the exact network-disabled
+image; no unpaid 200 delivery or wallet ownership is claimed. The first probe lost a
+poll response, and four database statement timeouts occurred in that initial window;
+the request reached READY. The second probe passed and the retained follow-up window
+had no later worker failures. No application code or timeout budgets were changed.
+
+[Deployment record and allowlisted raw evidence](docs/security/2026-10-23-mezo-trove-deployment.md)
+bind source, images, CI, 18 fully dispositioned Grype occurrences, Trivy zero, 11
+isolated recovery tests and exact runtime proof scope. The known installed curl issue
+is a configuration exception, not a claimed patch. After exposure, recovery retains
+new gateway/report/web readers and disables Trove creation in both services; only old
+capture returns, DEX remains enabled, and data is never restored. The reviewed private
+recovery command is `python3 /home/pall/.local/state/liqvera/recovery/2026-10-23-mezo-trove-d63860d/rollout.py rollback`.
+No private config, grant, backup or browser profile is published.
+
+README, submission, description and demo script now describe the deployed product.
+The earlier October 21 funding paragraph explicitly identifies its source-only checkpoint.
+The new deck adds Trove risk; the preceding DEX deck is preserved byte-for-byte under
+`docs/competition/archive/2026-10-23-dex/`. The October 13 preparation video stays
+explicitly dated. Historical verified payments remain the owner's selected proof.
+No registry contract, Mainnet change or Akindo account submission was performed.
+
+
 ## 2026-10-23 — native Trove CLI preview and replay vector retained
 
 The clean-code repository wrapper at `ab15182dd14641ea613a47bab4d295e91046d67d` captured Testnet block 16323457 and published a free Trove risk report/ZIP in 11,242 ms. The original source-to-creation age was 14.883 seconds, within the recorded 30-second freshness policy; the proven redemption position was 1. Host and non-root network-disabled image verification reproduce the exact report and bundle. [Retained verification and timing](evidence/mezo-testnet/2026-10-23-trove-risk-preview/verification.json) binds the observed source revision and digests. Timing is a local observation, not authenticated chain evidence or a general performance guarantee.

@@ -2,7 +2,7 @@
 
 **Market reports you can verify.**
 
-Understand BTC market depth before you act. Liqvera turns public order-book snapshots into clear, downloadable reports with the evidence behind every calculation.
+Understand BTC liquidity and Mezo MUSD borrower risk. Liqvera turns public market and protocol snapshots into downloadable reports with the evidence behind every calculation.
 
 [Open the demo](https://liqvera.site) · [Watch the demo](docs/competition/pitch.mp4) · [Documentation](docs/README.md) · [Commit history](https://github.com/Dimkox/liqvera/commits/main/)
 
@@ -10,7 +10,7 @@ Understand BTC market depth before you act. Liqvera turns public order-book snap
 
 [![Verify Liqvera](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml/badge.svg)](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml)
 
-**Mezo Testnet · chain 31611.** MUSD purchases and the DEX comparison are deployed on [liqvera.site](https://liqvera.site). The October 23 wallet-free preview includes Mezo block 16321216, raw calls and offline-reproducible evidence. [Deployment and verification](docs/security/2026-10-23-mezo-dex-deployment.md).
+**Mezo Testnet · chain 31611.** MUSD access, the DEX comparison and Trove risk are deployed on [liqvera.site](https://liqvera.site). Wallet-free examples include fixed-block native calls and offline-reproducible evidence. [Current deployment and verification](docs/security/2026-10-23-mezo-trove-deployment.md).
 
 | Contract | Testnet address | Use |
 | --- | --- | --- |
@@ -36,10 +36,10 @@ Payment: browser → Permit2/EIP-2612 signature → facilitator → exact proxy 
 **One-minute inspection:**
 
 1. Open [liqvera.site](https://liqvera.site) and its wallet-free preview.
-2. Inspect a [retained Mezo SELL capture](evidence/mezo-testnet/2026-10-23-dex-sell-native.json); its raw calls identify the exact block. The browser comparison appears on reports built with the extension enabled.
+2. Open the DEX comparison, then the **Trove risk** tab → **Show sealed Trove example**. Follow the captured block and contract links in the explorer.
 3. Open a payment above and inspect the MUSD Transfer: `10000000000000000` atomic units, or 0.01 MUSD.
 4. Download the [preview evidence ZIP](https://liqvera.site/demo/snapshots/d58728bd3df4b79c43bb2e742225e5b8f879eb0ec292213ffd3941f0f8778753/evidence.zip), [install the local packages](docs/mezo-integration.md#reproduce-from-source), then run `liqvera-evidence-verify evidence.zip` → `INTEGRITY_REPRODUCED`.
-5. Check the [protocol evidence and limitations](docs/mezo-integration.md). The [Trove risk CLI preview](docs/mezo-trove-risk.md) adds borrower reports and offline ZIP verification in this branch; the gated API and browser are implemented in source, including a sealed native example; deployment and paid end-to-end acceptance remain separate. No registry contract is deployed.
+5. Inspect the [Trove risk report and free CLI](docs/mezo-trove-risk.md): borrower debt, collateral, ICR, MCR crossing and proven redemption position. Fresh web preparation and the x402 paywall are verified; historical transfers remain the payment proof. No registry contract is deployed.
 
 Mezo quotes use exact arithmetic, the captured on-chain fee and no gas. Hyperliquid is a perpetual market; Mezo is spot. Testnet liquidity is not representative of executable Mainnet prices. [ABI and source provenance](packages/mezo-protocol/README.md#testnet-analytics-provenance-2026-10-23).
 
@@ -75,7 +75,7 @@ View the timestamped sample report without connecting a wallet. To request your 
 
 The public demo runs on **Mezo Testnet (31611)**. Each report costs **0.01 test MUSD**. WalletConnect supports mobile pairing and QR connections; you can manage or disconnect your session from the app.
 
-Reports describe a hypothetical sweep of the captured order book. Liqvera is a read-only analytics product: calculations cover the available snapshot depth and exclude fees and funding.
+Market reports describe a hypothetical sweep of available depth. Mezo pool fees are captured and applied; Hyperliquid fees, funding and gas are excluded. Trove reports read protocol debt, collateral and queue state. Liqvera submits no trade, loan or redemption; risk output is not financial advice.
 
 ## Built for verifiable delivery
 
@@ -107,6 +107,8 @@ disposable PostgreSQL ledger. Native RPC tests remain opt-in; no wallet payment 
 part of this gate.
 <!-- liqvera-test-counts: {"python":1101,"python_subtests":85,"gateway":98,"web":130} -->
 
+[Published Trove verification](docs/security/2026-10-23-mezo-trove-deployment.md) includes native preparation, the unpaid x402 boundary, independent review and exact image/CI bindings.
+
 ## Source, history and versions
 
 Development is tracked publicly in Git. Use the links below to inspect changes, identify a version or review the evidence behind a build.
@@ -115,7 +117,7 @@ Development is tracked publicly in Git. Use the links below to inspect changes, 
 - **[Releases](https://github.com/Dimkox/liqvera/releases)** — published release notes and assets.
 - **[Version tags](https://github.com/Dimkox/liqvera/tags)** — named source versions.
 - **[Compare revisions](https://github.com/Dimkox/liqvera/compare)** — review differences between commits, branches or tags.
-- **[Published DEX verification](docs/security/2026-10-23-mezo-dex-deployment.md)** — deployed source e80474e: 1021 Python tests + 85 subtests, 107 browser tests; gateway 74 local passes (13 database tests skipped in hosted CI).
+- **[Earlier DEX deployment](docs/security/2026-10-23-mezo-dex-deployment.md)** — source e80474e: 1021 Python tests + 85 subtests, 107 browser tests; gateway 74 local passes (13 database tests skipped in hosted CI).
 - **[DEX deployment package refresh](docs/security/2026-10-23-runtime-package-refresh.md)** — pinned musl/nginx fixes and candidate validation.
 - **[Current validation evidence](docs/security/2026-10-21-getzilla-successor.md)** — passing Liqvera audit, failed tool self-check, exact deployment evidence and verification limits.
 

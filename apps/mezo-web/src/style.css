@@ -11,3 +11,6 @@
 .funding-acknowledgement span{min-width:0}
 .funding-panel .breakable{overflow-wrap:anywhere}
 .funding-panel #mezo-balance-block:empty{display:none}
+
+.mezo-dex-comparison{overflow-wrap:anywhere}
+.mezo-dex-comparison a{display:inline-block;margin-inline-end:12px}

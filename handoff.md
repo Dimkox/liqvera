@@ -1,5 +1,11 @@
 # Liqvera handoff
 
+## 2026-10-23 — publishable DEX preview with preserved historical bytes
+
+[PR 17](https://github.com/Dimkox/liqvera/pull/17) is merged as `65ee000377028e3909a72402a5341ff4ddd56c1a`; its exact-head and main verification runs passed. A fresh real SELL 1 BTC capture uses that exact engine commit and Mezo block 16321216. The new wallet-free preview pins its report/ZIP digests before rendering the Mezo comparison. The prior October 12 pair is preserved byte-for-byte in the public demo archive and remains offline-verifiable. README and competition script distinguish published source, deployment and paid acceptance.
+
+Verification: full `make verify PYTHON=.venv/bin/python` passed **1021 tests, two live deselections and 85 subtests** in 394.64 seconds; browser tests passed 106; documentation links passed 67 documents. The report runtime image reproduced the new ZIP with networking disabled, a read-only filesystem and a temporary scratch mount. Actual Chrome checks at mobile 320 and desktop 1280 widths found the comparison, block and three pinned explorer links, no horizontal overflow and no runtime exceptions. Independent read-only review approved the application/demo diff. Deployment preparation is separate; this commit submits no payment and changes no production container, database, grant or migration. Trove core remains draft PR 18, without paid API/UI integration.
+
 ## 2026-10-23 — preserve Mezo failure reasons through public polling
 
 Independent Trove integration planning exposed a DEX contract gap before deployment: the closed request-status resource branches did not yet include the two new Mezo reasons. Real HTTP regressions reproduced both outcomes becoming HTTP 503 during output validation instead of returning the recorded request failure. The schema now permits `MEZO_SOURCE_UNAVAILABLE` only in BUILD_FAILED and `MEZO_DEX_INVALID_EVIDENCE` only in REJECTED. Both public polling tests pass without weakening the resource shape. Gateway passes 61 tests with the 13 database cases explicitly skipped in this delta run; 222 request/resource contract tests pass. No application, migration, payment or runtime change accompanies this schema correction.

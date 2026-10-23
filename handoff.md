@@ -595,3 +595,8 @@ The hosted full product gate then exposed stale README test counts after the
 wallet-action suite expanded. Updated the machine-checked gate totals to 1,111 Python
 tests plus 85 subtests, 98 gateway tests and 148 browser tests. No deployment has
 occurred; the site remains on its previous web image pending a green rerun.
+
+The next hosted advisory refresh found six new vulnerabilities on the locked dev
+closure's `filelock==4.1.1`; the 4.2.x line fixes them. Updated the dev lock to
+`filelock==4.2.4`, the latest available release, and will rerun the complete audit and
+product gate before rollout.

@@ -74,12 +74,12 @@ def main() -> int:
                 if len(raw) != int(lengths[0]):
                     raise CaptureRejected("INVALID_INPUT")
                 body = strict_json(raw)
-                if type(body) is not dict or set(body) != {"capture_id"} or type(body["capture_id"]) is not str:
+                if type(body) is not dict or set(body) not in ({"capture_id"}, {"capture_id", "mezo_dex"}) or type(body["capture_id"]) is not str:
                     raise CaptureRejected("INVALID_INPUT")
                 capture_id = UUID(body["capture_id"])
                 if str(capture_id) != body["capture_id"]:
                     raise CaptureRejected("INVALID_INPUT")
-                capture_package(root, capture_id, source_mode=mode)
+                capture_package(root, capture_id, source_mode=mode, mezo_request=body.get("mezo_dex"))
                 self.reply(201, {"capture_id": str(capture_id), "source_mode": mode,
                                  "identity_status": "SIMULATED" if mode == "fixture" else "UNVERIFIED"})
             except FileExistsError:

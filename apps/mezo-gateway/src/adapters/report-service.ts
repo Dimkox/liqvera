@@ -17,7 +17,7 @@ export class HttpReportService implements ReportService {
       body:JSON.stringify({report_id:reportId,instrument_id:INSTRUMENT,side:input.side,quantity_base:input.quantity_base})},65536,15000,[422,503]);
     if (!value || typeof value !== 'object') throw new PublicError('INVALID_DATASET',422);
     const raw=value as Record<string,unknown>;
-    if (isReason(raw.code)) throw new PublicError(raw.code,422);
+    if (isReason(raw.code)) throw new PublicError(raw.code,raw.code==='MEZO_SOURCE_UNAVAILABLE'?503:422);
     if (raw.report_id!==reportId || typeof raw.report_sha256!=='string' || !shaPattern.test(raw.report_sha256) ||
       typeof raw.bundle_sha256!=='string' || !shaPattern.test(raw.bundle_sha256) || typeof raw.snapshot_at!=='string' ||
       !Number.isFinite(Date.parse(raw.snapshot_at)) || typeof raw.snapshot_status!=='string' ||

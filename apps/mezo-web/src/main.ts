@@ -1,4 +1,5 @@
 import "./style.css";
+import { mountMezoDex } from "./mezo-dex-panel";
 import { MEZO, MUSD, NETWORK_CONFIG, NETWORK_LABEL, TOKEN_LABEL } from "./network.ts";
 import { mountMezoFinance } from "./mezo-finance-panel";
 import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest } from "./api";
@@ -308,6 +309,7 @@ function renderDelivery(): void {
   appendField(grid, "Hypothetical notional", report.calculation.display.notional_quote);
   appendField(grid, "Execution authority", report.boundaries.execution_authority);
   target.append(grid);
+  mountMezoDex(target, report);
   const limitations = node("div", "limitations");
   limitations.append(node("strong", "", "Evidence and limits"));
   const list = node("ul");

@@ -36,8 +36,10 @@ from liqvera_evidence_report.sealed_input import BASE_MEMBERS, inspect_members
 STAMP = (1980, 1, 1, 0, 0, 0)
 MODE = (stat.S_IFREG | 0o644) << 16
 OUTER_NAMES = {"manifest.json", "report.json", "algorithm.json", "runtime-dependencies.txt"}
-ALLOWED_NAMES = OUTER_NAMES | {f"sealed-input/{name}" for name in BASE_MEMBERS} | {
-    "sealed-input/source/mapping-evidence.json"}
+DEX_NAMES = {"mezo-dex/capture.json", "mezo-dex/calls.json", "mezo-dex/Pool.testnet.json",
+             "mezo-dex/Router.testnet.json", "mezo-dex/PoolFactory.testnet.json"}
+ALLOWED_NAMES = DEX_NAMES | OUTER_NAMES | {f"sealed-input/{name}" for name in BASE_MEMBERS} | {
+    "sealed-input/source/mapping-evidence.json", "sealed-input/source/mezo-dex.json"}
 
 
 def _zip(members: dict[str, bytes]) -> bytes:
@@ -65,6 +67,7 @@ def build_bundle(built: BuiltReport) -> bytes:
     members = {f"sealed-input/{name}": raw for name, raw in built.input_members.items()}
     members.update({"report.json": built.report_bytes, "algorithm.json": built.algorithm_bytes,
                     "runtime-dependencies.txt": built.dependency_bytes})
+    members.update(built.extra_members)
     manifest = {
         "schema": "liqvera-evidence-bundle-manifest/v1", "serialization_version": "canonical-json/v1",
         "report_sha256": built.report_sha256,
@@ -164,7 +167,11 @@ def verify_bundle_bytes(raw: bytes, *, expected_report_sha256: str | None = None
             ExactDecimal.parse(report["request"]["quantity_base"]),
             report["reproducibility"]["engine_commit"], timestamp_ms(report["source"]["created_at"]),
         )
-        rebuilt = build_inspected_report(inspected, request)
+        extras = {name: content for name, content in members.items() if name in DEX_NAMES}
+        if extras and set(extras) != DEX_NAMES:
+            raise EvidenceRejected("MEZO_DEX_INVALID_EVIDENCE")
+        mezo_capture = strict_json(extras["mezo-dex/capture.json"]) if extras else None
+        rebuilt = build_inspected_report(inspected, request, mezo_capture=mezo_capture)
         if (rebuilt.report_bytes != members["report.json"]
                 or rebuilt.algorithm_bytes != members["algorithm.json"]
                 or rebuilt.dependency_bytes != members["runtime-dependencies.txt"]

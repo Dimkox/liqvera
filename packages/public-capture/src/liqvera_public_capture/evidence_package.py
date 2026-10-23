@@ -65,7 +65,8 @@ def fixture_mapping() -> dict[str, object]:
 
 
 def capture_members(capture_id: UUID, source_mode: str,
-                    responses: tuple[CapturedResponse, CapturedResponse]) -> dict[str, bytes]:
+                    responses: tuple[CapturedResponse, CapturedResponse], *,
+                    mezo_capture: dict | None = None) -> dict[str, bytes]:
     if type(capture_id) is not UUID or source_mode not in {"fixture", "live-public"}:
         raise ValueError("INVALID_INPUT")
     metadata, book = responses
@@ -113,6 +114,10 @@ def capture_members(capture_id: UUID, source_mode: str,
             "responses": [item.evidence(source_mode) for item in responses]}),
     }
     members["source/mapping-evidence.json"] = canonical_json_bytes(identity_evidence)
+    if mezo_capture is not None:
+        from liqvera_public_capture.public_adapters.mezo_dex import verify_capture
+        verify_capture(mezo_capture)
+        members["source/mezo-dex.json"] = canonical_json_bytes(mezo_capture)
     manifest = {
         "schema": PACKAGE_SCHEMA, "capture_run_id": str(capture_id),
         "started_at_ms": metadata.started_at_ms, "venue_set": ["hyperliquid"],
@@ -124,7 +129,8 @@ def capture_members(capture_id: UUID, source_mode: str,
     return members
 
 
-def capture_package(root: Path, capture_id: UUID, *, source_mode: str = "fixture") -> Path:
+def capture_package(root: Path, capture_id: UUID, *, source_mode: str = "fixture",
+                    mezo_request: dict | None = None) -> Path:
     """Publish only a new server-generated capture directory under an owned root."""
     root = Path(root)
     if not root.is_absolute() or root.is_symlink() or not root.is_dir():
@@ -138,7 +144,20 @@ def capture_package(root: Path, capture_id: UUID, *, source_mode: str = "fixture
     try:
         if os.path.lexists(target):
             raise FileExistsError("capture already exists")
-        members = capture_members(capture_id, source_mode, capture_responses(source_mode))
+        mezo_capture = None
+        if mezo_request is not None:
+            from liqvera_public_capture.evidence_capture import CaptureRejected
+            from liqvera_public_capture.public_adapters.mezo_dex import capture_live_dex
+            if (source_mode != "live-public" or type(mezo_request) is not dict
+                    or set(mezo_request) != {"side", "quantity_wei"}):
+                raise CaptureRejected("INVALID_INPUT")
+            try:
+                mezo_capture = capture_live_dex(mezo_request["side"], int(mezo_request["quantity_wei"]))
+            except (ValueError, TypeError) as error:
+                raise CaptureRejected("MEZO_SOURCE_UNAVAILABLE") from error
+        # Capture Mezo first to keep the Hyperliquid snapshot fresh at report build.
+        members = capture_members(capture_id, source_mode, capture_responses(source_mode),
+                                  mezo_capture=mezo_capture)
         staging = Path(tempfile.mkdtemp(prefix=f".{capture_id}.", dir=root))
         staging.chmod(0o750)
         for name, raw in members.items():

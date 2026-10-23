@@ -12,6 +12,8 @@ export function requestResource(request: ReportRequest,requestId: string) {
   return base;
 }
 const messages: Partial<Record<Reason,string>>={
+  MEZO_SOURCE_UNAVAILABLE:'Mezo Testnet data is unavailable. No fallback report was issued.',
+  MEZO_DEX_INVALID_EVIDENCE:'Mezo evidence failed validation.',
   UNAUTHORIZED:'Authorization required.',NOT_FOUND:'Resource not found.',PAYMENT_REQUIRED:'Payment required for this report.',
   PAYMENT_UNCERTAIN:'Checking the payment already submitted.',MANUAL_REVIEW:'The existing payment requires operator review.',
   QUOTE_EXPIRED:'This unpaid quote has expired.',IDEMPOTENCY_CONFLICT:'This idempotency key is bound to a different request.',

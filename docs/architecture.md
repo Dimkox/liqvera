@@ -29,3 +29,7 @@ Four independently installable Python packages, two Node applications and the pr
 There is no Go application or module in this repository. The edge Dockerfile compiles the upstream Caddy proxy with patched dependencies. Runtime images carry reviewed CPython and BusyBox security backports under `deploy/security`; those are third-party fixes with regression tests, source provenance and retirement instructions. Gateway's Alpine Node LTS uses the patched system OpenSSL rather than an embedded older copy.
 
 See [the specification](specification.md), [security](../SECURITY.md) and [validation](validation.md) for current proof and limitations.
+
+## Optional fixed-block Mezo evidence
+
+The Testnet DEX extension keeps RPC reads in public capture. A request-bound optional sidecar seals chain metadata and raw calls in the capture manifest. The report process validates and recalculates it offline, includes ABI/call bytes in the bounded ZIP and adds optional Mezo/venue-comparison fields. Gateway delivery serves the hash-bound complete report; the browser uses text nodes and pinned Testnet explorer links. Existing reports and SQL migrations remain unchanged. The report setting `LIQVERA_MEZO_DEX_ENABLED=true` requires Mezo evidence on fresh live builds; missing data fails closed. See [Mezo integration](mezo-integration.md).

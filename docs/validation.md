@@ -24,3 +24,7 @@ Run the non-root CPython and BusyBox regressions in `deploy/security` on the res
 ## Acceptance
 
 `make liqvera-acceptance ACCEPTANCE_OUTPUT=/absolute/new/result.json` executes the checked-in offline plan and writes bounded source-bound evidence. Its verifier requires the independently obtained result digest. Most external cases are deliberately NOT_RUN; partial local evidence is not overall PASS. Live payment and deployment validation require their own scoped execution and evidence.
+
+## Mezo DEX extension
+
+Default tests remain offline. Run `.venv/bin/python -m pytest tests/public_capture/test_mezo_dex.py tests/evidence_report/test_mezo_amm.py tests/evidence_report/test_mezo_bundle.py -q` for raw-call, rounding, overflow, reorg and tamper checks. Explicit `-m live` on the capture test file performs native read-only Testnet BUY/SELL captures. A timeout is a failed live run, not fixture fallback or offline success. [Protocol captures and exact scope](mezo-integration.md) distinguish retained successful observations from deployment and paid acceptance.

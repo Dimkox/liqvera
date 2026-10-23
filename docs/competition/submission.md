@@ -1,5 +1,8 @@
 # Liqvera — submission draft
 
+October 23 source update: the Mezo DEX extension adds captured reserves and fees, Pool/Router quote agreement, exact comparison with Hyperliquid, and offline-reproducible ZIP evidence. It is pending publication/deployment; historical payments and the deployed preview retain their original scope. [Implementation and verification instructions](../mezo-integration.md). The [rechecked official deadline](2026-10-23-event-facts.json) is October 26 at **15:00 UTC**; internal target 11:00 UTC, code freeze 08:00 UTC.
+
+
 Prepared 2026-10-13. Existing project; pre-event baseline `607fa0d`. The owner confirms that the Liqvera entry has already been submitted to AKINDO. This session has not accessed the account or verified which attachment versions were submitted. These files remain supporting preparation materials; do not submit a duplicate.
 
 ## October 21 Wave 1 source extension

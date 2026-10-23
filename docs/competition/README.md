@@ -1,5 +1,8 @@
 # Liqvera at the Mezo Buildathon
 
+October 23 source update: the Mezo DEX extension adds captured reserves and fees, Pool/Router quote agreement, exact comparison with Hyperliquid, and offline-reproducible ZIP evidence. It is pending publication/deployment; historical payments and the deployed preview retain their original scope. [Implementation and verification instructions](../mezo-integration.md). The [rechecked official deadline](2026-10-23-event-facts.json) is October 26 at **15:00 UTC**; internal target 11:00 UTC, code freeze 08:00 UTC.
+
+
 **Spend test MUSD on market reports you can independently verify.**
 
 Liqvera provides public BTC market-depth reports, downloadable evidence and offline recalculation. Its Mezo Testnet integration demonstrates an MUSD payment use case for digital information. Public attribution: [Dimkox](https://github.com/Dimkox).

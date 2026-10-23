@@ -6,6 +6,40 @@ Understand BTC market depth before you act. Liqvera turns public order-book snap
 
 [Open the demo](https://liqvera.site) · [Watch the demo](docs/competition/pitch.mp4) · [Documentation](docs/README.md) · [Commit history](https://github.com/Dimkox/liqvera/commits/main/)
 
+## Mezo integration
+
+[![Verify Liqvera](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml/badge.svg)](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml)
+
+**Mezo Testnet · chain 31611.** MUSD purchases are deployed. The new DEX comparison and offline evidence extension are implemented in this source branch and await publication/deployment; the public preview retains its original report until rollout.
+
+| Contract | Testnet address | Use |
+| --- | --- | --- |
+| MUSD | [0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503](https://explorer.test.mezo.org/address/0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503) | Pay: 0.01 test MUSD per report |
+| Permit2 | [0x000000000022D473030F116dDEE9F6B43aC78BA3](https://explorer.test.mezo.org/address/0x000000000022D473030F116dDEE9F6B43aC78BA3) | Wallet authorization |
+| x402 exact proxy | [0x402085c248EeA27D92E8b30b2C58ed07f9E20001](https://explorer.test.mezo.org/address/0x402085c248EeA27D92E8b30b2C58ed07f9E20001) | MUSD settlement |
+| DEX Router | [0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9](https://explorer.test.mezo.org/address/0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9) | Read: fixed-block quotes |
+| PoolFactory | [0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A](https://explorer.test.mezo.org/address/0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A) | Read: captured pool fee |
+| MUSD/BTC pool | [0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9](https://explorer.test.mezo.org/address/0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9) | Read: reserves and quote cross-check |
+| BTC token | [0x7b7C000000000000000000000000000000000000](https://explorer.test.mezo.org/address/0x7b7C000000000000000000000000000000000000) | Read: pool identity and decimals |
+
+Payment: browser → Permit2/EIP-2612 signature → facilitator → exact proxy → MUSD Transfer to the configured merchant → gateway checks canonical receipt and confirmations → report delivery. See the [browser](apps/mezo-web/src/x402.ts) and [gateway](apps/mezo-gateway/src/adapters/x402.ts) adapters. The public merchant is [0xd7F52d1Ddb5dC8678191f14E439Fc5DB67541535](https://explorer.test.mezo.org/address/0xd7F52d1Ddb5dC8678191f14E439Fc5DB67541535), supplied through `LIQVERA_PAY_TO`, with no built-in payment default.
+
+| Historical successful 0.01 MUSD payment | UTC |
+| --- | --- |
+| [0x53808fff…117c](https://explorer.test.mezo.org/tx/0x53808fffb9f83d7946fcc0494d1c90491e8d83813d2795bb9ceb0957ed61117c) | 2026-10-13 13:13:09 |
+| [0x4a04dc72…8455](https://explorer.test.mezo.org/tx/0x4a04dc72c9f4b9051262b5c14db18369b9140d3012f7b02c3c8d3c6952778455) | 2026-10-01 01:37:33 |
+| [0xc5344f48…cb6f](https://explorer.test.mezo.org/tx/0xc5344f48b973d10f5925912e8c5f0b8c69ecdfe4e01ee15209f81771b0cccb6f) | 2026-10-01 00:12:04 |
+
+**One-minute inspection:**
+
+1. Open [liqvera.site](https://liqvera.site) and its wallet-free preview.
+2. Inspect a [retained Mezo SELL capture](evidence/mezo-testnet/2026-10-23-dex-sell-native.json); its raw calls identify the exact block. The browser comparison appears on reports built with the extension enabled.
+3. Open a payment above and inspect the MUSD Transfer: `10000000000000000` atomic units, or 0.01 MUSD.
+4. Download the preview evidence ZIP, [install the local packages](docs/mezo-integration.md#reproduce-from-source), then run `liqvera-evidence-verify evidence.zip` → `INTEGRITY_REPRODUCED`.
+5. Check the [protocol evidence and limitations](docs/mezo-integration.md). Trove reports are the next step; no registry contract is deployed.
+
+Mezo quotes use exact arithmetic, the captured on-chain fee and no gas. Hyperliquid is a perpetual market; Mezo is spot. Testnet liquidity is not representative of executable Mainnet prices. [ABI and source provenance](packages/mezo-protocol/README.md#testnet-analytics-provenance-2026-10-23).
+
 ## From an order size to a clear answer
 
 A headline price tells you where the market is. Liqvera shows how a hypothetical buy or sell would fill against the available liquidity: the average price, filled quantity, worst price and price impact.
@@ -39,8 +73,6 @@ View the timestamped sample report without connecting a wallet. To request your 
 The public demo runs on **Mezo Testnet (31611)**. Each report costs **0.01 test MUSD**. WalletConnect supports mobile pairing and QR connections; you can manage or disconnect your session from the app.
 
 Reports describe a hypothetical sweep of the captured order book. Liqvera is a read-only analytics product: calculations cover the available snapshot depth and exclude fees and funding.
-
-The Mezo Testnet analytics extension is in development. Its [protocol provenance](packages/mezo-protocol/README.md#testnet-analytics-provenance-2026-10-23) records verified ABIs and fixed-block read-only observations; the public demo described above retains its deployed report behavior.
 
 ## Built for verifiable delivery
 

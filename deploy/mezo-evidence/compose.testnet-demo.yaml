@@ -22,6 +22,9 @@ services:
         target: postgres_password
       - source: report_token_live
         target: report_service_token
+  report-live:
+    environment:
+      LIQVERA_MEZO_DEX_ENABLED: "true"
   web-live:
     build:
       args:

@@ -14,7 +14,7 @@ export class Contracts {
   static async load(root: URL): Promise<Contracts> {
     const states = JSON.parse(await readFile(new URL('states.json',root),'utf8')) as { machines: Machine[] };
     const result = new Contracts(new StateMachines(states.machines));
-    for (const file of ['primitives','reasons','quote-request','report','resources','error']) {
+    for (const file of ['primitives','reasons','quote-request','mezo-dex','report','resources','error']) {
       result.ajv.addSchema(JSON.parse(await readFile(new URL(`${file}.schema.json`,root),'utf8')));
     }
     return result;

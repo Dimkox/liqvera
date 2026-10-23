@@ -29,3 +29,6 @@ packages = ["src/liqvera_evidence_report"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "../../schemas/mezo-evidence/v1" = "liqvera_evidence_report/resources/schemas"
+"../mezo-protocol/vendor/Pool.testnet.json" = "liqvera_evidence_report/resources/mezo/Pool.testnet.json"
+"../mezo-protocol/vendor/Router.testnet.json" = "liqvera_evidence_report/resources/mezo/Router.testnet.json"
+"../mezo-protocol/vendor/PoolFactory.testnet.json" = "liqvera_evidence_report/resources/mezo/PoolFactory.testnet.json"

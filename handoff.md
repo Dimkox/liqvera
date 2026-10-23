@@ -485,3 +485,14 @@ Validation: Mezo protocol TypeScript build, browser `npm run typecheck`, 11 focu
 browser report/transaction tests, and `git diff --check` passed. Tests did not sign or
 send any live transaction. Real wallet confirmation and chain inclusion remain
 unverified.
+
+## 2026-10-23 — pinned Mezo Router swap metadata
+
+Extended the narrow Router ABI with the verified Testnet
+`swapExactTokensForTokens` and directional `getReserves` fragments, plus a limited
+ERC-20 allowance/approval/balance ABI for the BTC sale flow. The original full
+Router artifact and explorer source-lock remain the provenance records; no contract
+or source artifact was replaced.
+
+Validation: Mezo protocol TypeScript build and Router signature assertion passed.
+No approval or swap was submitted.

@@ -1,5 +1,9 @@
 # Liqvera handoff
 
+## 2026-10-23 — separate Trove product implementation started
+
+The DEX source is isolated in draft PR 17. Trove work starts from its `322b34c` successor in a separate worktree/branch and follows the [bounded capture and product integration plan](docs/superpowers/plans/2026-10-23-trove-risk.md). The verified ABI/source fixes the draft's debt/collateral tuple ordering, view price getter and redemption skip rules. Owner enumeration plus bounded batched reads is proposed to meet the latency target without claiming owner-array order as redemption order. Lists above the bound must report an honest unknown/limit rather than an unproven rank. No Trove implementation, paid acceptance or deployment is claimed by this planning step. Documentation links passed for 68 documents.
+
 ## 2026-10-23 — available gateway Node LTS pin restores clean rebuilds
 
 The first PR 17 product job passed **1020 Python tests, two live deselections and 85 subtests**, Node builds/tests and documentation, then failed a clean gateway build: Alpine v3.24 now offers `nodejs=24.22.1-r0` instead of the retired `24.18.1-r0` pin. A fresh disposable Alpine install reproduced the old-pin failure; a cached local build alone would have hidden it. [Official Node release notes](https://nodejs.org/en/blog/release/v24.22.1) identify 24.22.1 as an LTS security release within the application's declared engine range.

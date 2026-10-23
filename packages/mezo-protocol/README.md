@@ -36,7 +36,7 @@ contract inspection at `@liqvera/mezo-protocol/vendor/MUSD.matsnet.json`.
 
 `MEZO_TESTNET_DEX` pins the basic-pool Router, PoolFactory, MUSD/BTC pool and
 BTC token. Narrow exported Pool/Router/Factory ABIs contain only read methods.
-The full verified ABIs are in `vendor/*.testnet.json`; the existing MUSD
+The full verified ABIs are in `vendor/*.testnet.json`; the BTC token ABI and source response are also hash-pinned for exact approval metadata. The existing MUSD
 artifact remains byte-identical. `source-lock.json` records explorer URLs,
 retrieval timestamps, ABI SHA-256 and retrieved source hashes. Explorer API
 uses `api.explorer.test.mezo.org`, separately from the browser explorer host.
@@ -62,7 +62,7 @@ inclusion, paid delivery, deployed analytics or historical archive support.
 
 `MEZO_TESTNET_TROVES` includes the documented Testnet BorrowerOperations and
 HintHelpers proxies. `MEZO_TESTNET_BORROWER_OPERATIONS_ABI` is limited to the
-user actions `addColl` and `repayMUSD`; `MEZO_TESTNET_HINT_HELPERS_ABI` exposes
+user actions `addColl`, `repayMUSD` and the live `minNetDebt` guard; `MEZO_TESTNET_HINT_HELPERS_ABI` exposes
 only nominal-ratio and approximate-hint reads. The SortedTroves read ABI includes
 `findInsertPosition` for exact neighboring hints.
 

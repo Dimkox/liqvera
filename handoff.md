@@ -523,3 +523,19 @@ Validation: `node --test test/mezo-trade-execution.test.mjs` and the Trove walle
 submission guards passed. Tests verify quote agreement, route encoding, exact
 approval size, slippage bound and network guard with an in-memory EIP-1193 provider;
 no transaction was sent to Mezo.
+
+## 2026-10-23 — report actions, business model and source status
+
+Mounted Trove protection controls in paid Trove reports and the split planner in
+matching Mezo DEX reports. Wallet state changes rerender the controls; removed or
+changed wallet contexts cannot submit, and accepted Trove submissions disable both
+actions until the report is refreshed. Sale settings are visibly labeled separately
+for the per-part impact cap and minOut tolerance. Added the competition application's
+business-model line: 0.01 MUSD/report, X MUSD/day monitoring and B2B API for agents
+and protocols, aimed at MUSD borrowers and bots. Product/spec docs explicitly state
+that these source changes are not deployed or live-wallet accepted.
+
+Final verification: browser `npm test` passed 145 tests; `npm run build` passed;
+Mezo protocol TypeScript build passed; `scripts/check-docs.py` passed for 76 documents;
+`git diff --check` passed. All transaction preparation tests use in-memory providers;
+no approval, swap, Trove update, payment or deployment was sent.

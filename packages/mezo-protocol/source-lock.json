@@ -309,6 +309,24 @@
           },
           "explorer_is_proxy": "false",
           "compiler_version": "v0.8.24+commit.e11b9ed9"
+        },
+        {
+          "name": "BTC",
+          "address": "0x7b7C000000000000000000000000000000000000",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0x7b7C000000000000000000000000000000000000",
+          "retrieved_at": "2026-10-23T22:57:58.177483+00:00",
+          "local_path": "vendor/BTC.testnet.json",
+          "sha256": "e36427a58fb5b2fd34b516f8af31d2c3dc893bca20f783bfd619b95cc79ca599",
+          "contract_name": "BTCCaller",
+          "source_sha256": "a9aad4922172a6592913f7e8e272b1c94f83e0ac954cfd9aaa8dd4869fc82b16",
+          "source_response": {
+            "local_path": "vendor/explorer/BTC.source.testnet.json",
+            "sha256": "8bbe1bd4c40f4c8aab695b10bce88f5bf16c170da9e5cd90767dde36333a55ab",
+            "retrieved_at": "2026-10-23T22:57:58.177688+00:00"
+          },
+          "explorer_is_proxy": "false",
+          "compiler_version": "v0.8.24+commit.e11b9ed9"
         }
       ]
     }

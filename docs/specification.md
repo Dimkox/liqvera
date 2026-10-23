@@ -47,3 +47,12 @@ request. Both services gate new creation; disabling it keeps existing delivery a
 payment recovery. The 0.01 MUSD settlement guards remain shared. Historical examples
 are pinned by full report and ZIP hashes. Source readiness, hosted CI, paid acceptance
 and deployment are separate claims. No new Mainnet behavior is part of this extension.
+
+The browser source adds self-custody Testnet actions alongside a delivered Trove
+report: deposit BTC or repay MUSD through BorrowerOperations after current-state
+reads, fresh HintHelpers/SortedTroves hints and `eth_call` simulation. A matching DEX
+report can plan a BTC sale with automatic slices capped at an editable 1% estimated
+impact each and editable 1% default `minOut` slippage. Each slice is re-quoted through
+the Router, uses an exact approval when needed, and requires a separate wallet action.
+No private keys enter Liqvera. These changes are source-only, have not been deployed
+or live-wallet accepted, and do not change the report API, payment, or recovery guards.

@@ -78,7 +78,7 @@ collateral, pending principal and pending interest. The first three values
 already include pending rewards. `fetchPrice()` is view; `lastGoodPrice()`
 reverts. The redemption walk starts at `getLast()` and follows `getPrev()`,
 skipping ICR below MCR. A list index alone is not a proven redemption position.
-Trove report delivery remains a subsequent implementation step.
+Trove transaction controls are documented below and remain wallet-signed Testnet source functionality.
 
 ## Published public preview (October 23)
 
@@ -97,3 +97,23 @@ The browser requests both preview assets from `/demo/snapshots/<report-sha256>/`
 so a CDN cannot combine a newly deployed JSON with a cached ZIP from an older
 release. The mutable `latest-live` directory remains a compatibility alias;
 verification and download links use the immutable snapshot path.
+
+
+## User signed Mezo actions (source branch)
+
+The current source adds a Trove report action panel for an active connected borrower:
+BTC deposits and MUSD repayments use the verified BorrowerOperations Testnet proxy.
+Preparation pins current debt/collateral, status, balances and minimum net debt to
+one block; it fetches fresh HintHelpers and SortedTroves insertion hints, then
+simulates the exact
+call. Only the connected wallet can submit after a final chain/account check. The
+report's liquidation price remains a captured snapshot, not a safety guarantee.
+
+A matching Mezo DEX report can produce a live BTC-to-MUSD sale plan. The default
+per-part price impact cap is 1%, and default editable `minOut` slippage tolerance is
+1%. The planner applies the captured volatile pool fee with integer truncation,
+rechecks fresh reserves/fee/Router and pool quotes before each slice, and requests
+exact BTC approval only when needed. Approval and each swap are separate wallet
+actions; each swap waits for a successful receipt before the next part. Splitting
+can add gas and does not promise lower aggregate impact. These source changes have
+not been deployed or live wallet-tested.

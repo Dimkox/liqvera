@@ -90,3 +90,8 @@ its ZIP SHA-256 is
 These digests are pinned by the browser before rendering. The previous preview
 remains byte-for-byte in `apps/mezo-web/public/demo/archive/0ebf36b89bda183b/`.
 This source candidate does not establish deployment or a fresh paid purchase.
+
+The browser requests both preview assets from `/demo/snapshots/<report-sha256>/`,
+so a CDN cannot combine a newly deployed JSON with a cached ZIP from an older
+release. The mutable `latest-live` directory remains a compatibility alias;
+verification and download links use the immutable snapshot path.

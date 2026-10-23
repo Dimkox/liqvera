@@ -509,3 +509,17 @@ closed.
 Validation: `node --test test/mezo-trade-plan.test.mjs` in `apps/mezo-web` passed 5
 cases for exact parsing, fee arithmetic, default/editable splitting, independent
 slippage minimum, and edge boundaries. No live pool mutation occurred.
+
+## 2026-10-23 — wallet execution for individual sale parts
+
+Added fresh per-part Router and pool quotes, directional reserves, fee and BTC token
+balance checks, route identity validation, exact allowance inspection, exact-input
+approval, `minOut` calculation and call simulation. `approve` and each swap submit
+through separate explicit wallet interactions; successful receipt is required before
+that part advances. An uncertain pending receipt locks that action to prevent an
+unintentional duplicate retry.
+
+Validation: `node --test test/mezo-trade-execution.test.mjs` and the Trove wallet
+submission guards passed. Tests verify quote agreement, route encoding, exact
+approval size, slippage bound and network guard with an in-memory EIP-1193 provider;
+no transaction was sent to Mezo.

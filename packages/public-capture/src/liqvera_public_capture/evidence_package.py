@@ -130,7 +130,7 @@ def capture_members(capture_id: UUID, source_mode: str,
 
 
 def capture_package(root: Path, capture_id: UUID, *, source_mode: str = "fixture",
-                    mezo_request: dict | None = None) -> Path:
+                    mezo_request: dict | None = None, trove_request: dict | None = None) -> Path:
     """Publish only a new server-generated capture directory under an owned root."""
     root = Path(root)
     if not root.is_absolute() or root.is_symlink() or not root.is_dir():
@@ -144,6 +144,20 @@ def capture_package(root: Path, capture_id: UUID, *, source_mode: str = "fixture
     try:
         if os.path.lexists(target):
             raise FileExistsError("capture already exists")
+        trove_members = None
+        if trove_request is not None:
+            from liqvera_public_capture.evidence_capture import CaptureRejected
+            from liqvera_public_capture.public_adapters.mezo_troves import capture_live_trove
+            if (source_mode != "live-public" or mezo_request is not None
+                    or type(trove_request) is not dict or set(trove_request) != {"borrower"}):
+                raise CaptureRejected("INVALID_INPUT")
+            try:
+                raw = canonical_json_bytes(capture_live_trove(trove_request["borrower"]))
+            except (ValueError, TypeError, KeyError) as error:
+                raise CaptureRejected("MEZO_SOURCE_UNAVAILABLE") from error
+            trove_members = {"trove-capture.json": raw, "manifest.json": canonical_json_bytes({
+                "schema": "liqvera-trove-capture-package/v1", "capture_id": str(capture_id),
+                "source_mode": source_mode, "capture_sha256": sha256_bytes(raw), "capture_length": len(raw)})}
         mezo_capture = None
         if mezo_request is not None:
             from liqvera_public_capture.evidence_capture import CaptureRejected
@@ -156,8 +170,8 @@ def capture_package(root: Path, capture_id: UUID, *, source_mode: str = "fixture
             except (ValueError, TypeError) as error:
                 raise CaptureRejected("MEZO_SOURCE_UNAVAILABLE") from error
         # Capture Mezo first to keep the Hyperliquid snapshot fresh at report build.
-        members = capture_members(capture_id, source_mode, capture_responses(source_mode),
-                                  mezo_capture=mezo_capture)
+        members = trove_members if trove_members is not None else capture_members(
+            capture_id, source_mode, capture_responses(source_mode), mezo_capture=mezo_capture)
         staging = Path(tempfile.mkdtemp(prefix=f".{capture_id}.", dir=root))
         staging.chmod(0o750)
         for name, raw in members.items():

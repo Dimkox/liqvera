@@ -14,3 +14,10 @@
 
 .mezo-dex-comparison{overflow-wrap:anywhere}
 .mezo-dex-comparison a{display:inline-block;margin-inline-end:12px}
+
+.product-selector { margin: 1rem 0; gap: .5rem; }
+.product-selector button { flex: 1; }
+.product-selector button[aria-pressed="true"] { border-color: var(--accent, #c1e87e); }
+.trove-risk { overflow-wrap: anywhere; }
+.trove-risk .data-field { display: grid; gap: .3rem; }
+.trove-risk .field-name { font-size: .8rem; opacity: .7; }

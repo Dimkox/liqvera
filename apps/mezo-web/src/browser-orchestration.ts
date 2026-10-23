@@ -1,13 +1,5 @@
-export interface BrowserFlowState {
-  readonly version: 1;
-  readonly side: "BUY" | "SELL";
-  readonly quantity: string;
-  readonly payer: string;
-  readonly idempotencyKey: string;
-  readonly requestId?: string;
-  readonly quoteId?: string;
-  readonly paymentGuard: "clear" | "started" | "uncertain";
-}
+import type { BrowserFlowState, CreateInput } from "./flow-types.ts";
+export type { BrowserFlowState } from "./flow-types.ts";
 
 function beginPayment<T extends BrowserFlowState>(flow: T): T {
   if (flow.paymentGuard !== "clear") throw new Error("Payment is already guarded.");
@@ -24,7 +16,7 @@ interface RequestLike { state: string; quote_id?: string }
 export interface RecoveryDependencies<Q extends QuoteLike, R extends RequestLike, D> {
   getQuote(id: string): Promise<Q>;
   getRequest(id: string): Promise<R>;
-  createQuote(input: { side: "BUY" | "SELL"; quantity: string; payer: string; idempotencyKey: string }): Promise<Q | R>;
+  createQuote(input: CreateInput): Promise<Q | R>;
   getPaidDelivery(id: string): Promise<D | null>;
   onQuote(quote: Q): void;
   onRequest(request: R): void;
@@ -66,8 +58,9 @@ export async function executeRecovery<Q extends QuoteLike, R extends RequestLike
     }
     return { kind: "request", request };
   }
-  const created = await dependencies.createQuote({ side: flow.side, quantity: flow.quantity, payer: flow.payer,
-    idempotencyKey: flow.idempotencyKey });
+  const created = await dependencies.createQuote(flow.version === 2 ?
+    { product_id: flow.product_id, borrower: flow.borrower, payer: flow.payer, idempotencyKey: flow.idempotencyKey } :
+    { side: flow.side, quantity: flow.quantity, payer: flow.payer, idempotencyKey: flow.idempotencyKey });
   if (isQuote(created)) {
     dependencies.onQuote(created);
     return { kind: "quote", quote: created };

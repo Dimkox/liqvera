@@ -144,7 +144,7 @@
       ],
       "runtime_status": "NOT_RUN",
       "input": {
-        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"٠.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"\u0660.15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
       },
       "expected": {
         "http_status": 422,
@@ -812,7 +812,7 @@
       ],
       "runtime_status": "NOT_RUN",
       "input": {
-        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"０.１５\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
+        "request_json": "{\"instrument_id\":\"hyperliquid:BTC:perpetual\",\"side\":\"BUY\",\"quantity_base\":\"\uff10.\uff11\uff15\",\"expected_payer\":\"0xabababababababababababababababababababab\"}"
       },
       "expected": {
         "http_status": 422,
@@ -4569,6 +4569,150 @@
       "future_assertions": [
         "report_provenance_required"
       ]
+    }
+  ],
+  "mezo_readonly": [
+    {
+      "case_id": "A31",
+      "bundle_path": "apps/mezo-web/public/demo/latest-live/evidence.zip",
+      "report_sha256": "d58728bd3df4b79c43bb2e742225e5b8f879eb0ec292213ffd3941f0f8778753",
+      "bundle_sha256": "0c20f41f845bd39c88286b52a64d1dad53713fd215507f611fab51d29896f51f",
+      "block_number": "16321216",
+      "block_hash": "0x99119ef2717e136ca643a95165662a9b488d791200da98c8cc50e46bcfc64317",
+      "raw_calls": [
+        {
+          "block": "0xf90ac0",
+          "data": "0x0dfe1681",
+          "response": {
+            "id": 4,
+            "jsonrpc": "2.0",
+            "result": "0x000000000000000000000000118917a40faf1cd7a13db0ef56c86de7973ac503"
+          },
+          "to": "0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9"
+        },
+        {
+          "block": "0xf90ac0",
+          "data": "0xd21220a7",
+          "response": {
+            "id": 5,
+            "jsonrpc": "2.0",
+            "result": "0x0000000000000000000000007b7c000000000000000000000000000000000000"
+          },
+          "to": "0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9"
+        },
+        {
+          "block": "0xf90ac0",
+          "data": "0x22be3de1",
+          "response": {
+            "id": 6,
+            "jsonrpc": "2.0",
+            "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "to": "0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9"
+        },
+        {
+          "block": "0xf90ac0",
+          "data": "0x0902f1ac",
+          "response": {
+            "id": 7,
+            "jsonrpc": "2.0",
+            "result": "0x00000000000000000000000000000000000000000054d64b3e0ea0abf8c2f68c000000000000000000000000000000000000000000000046a812936cf0e55b03000000000000000000000000000000000000000000000000000000006adb6644"
+          },
+          "to": "0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9"
+        },
+        {
+          "block": "0xf90ac0",
+          "data": "0x313ce567",
+          "response": {
+            "id": 8,
+            "jsonrpc": "2.0",
+            "result": "0x0000000000000000000000000000000000000000000000000000000000000012"
+          },
+          "to": "0x7b7C000000000000000000000000000000000000"
+        },
+        {
+          "block": "0xf90ac0",
+          "data": "0xcc56b2c5000000000000000000000000d16a5df82120ed8d626a1a15232bfce2366d6aa90000000000000000000000000000000000000000000000000000000000000000",
+          "response": {
+            "id": 9,
+            "jsonrpc": "2.0",
+            "result": "0x0000000000000000000000000000000000000000000000000000000000000004"
+          },
+          "to": "0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A"
+        },
+        {
+          "block": "0xf90ac0",
+          "data": "0xf140a35a0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000007b7c000000000000000000000000000000000000",
+          "response": {
+            "id": 10,
+            "jsonrpc": "2.0",
+            "result": "0x0000000000000000000000000000000000000000000010a4c2313c918253fe96"
+          },
+          "to": "0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9"
+        },
+        {
+          "block": "0xf90ac0",
+          "data": "0x5509a1ac0000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000007b7c000000000000000000000000000000000000000000000000000000000000118917a40faf1cd7a13db0ef56c86de7973ac50300000000000000000000000000000000000000000000000000000000000000000000000000000000000000004947243cc818b627a5d06d14c4ece7398a23ce1a",
+          "response": {
+            "id": 11,
+            "jsonrpc": "2.0",
+            "result": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000010a4c2313c918253fe96"
+          },
+          "to": "0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9"
+        }
+      ],
+      "report_fragment_sha256": "47b105fcba1c0d6f4877e037f93a24a1a6fe830720927a046ecb572f9bb0371f"
+    },
+    {
+      "case_id": "A32",
+      "bundle_path": "evidence/mezo-testnet/2026-10-23-trove-risk-preview/evidence.zip",
+      "report_sha256": "22dfc0db8355bc126f89af07914aa2601b42fd84eafc923e319b84bc2b7b60f1",
+      "bundle_sha256": "94c0a93520eb91382c45f4690f176e655ccc372e67b9594653ef651cfd419b10",
+      "block_number": "16323457",
+      "block_hash": "0x3005372a8a059499aa907b1eb2939383209ad06f2c28b1865ba3f87fa765ddcc",
+      "raw_calls": [
+        {
+          "block": "0xf91381",
+          "data": "0x0fdb11cf",
+          "response": {
+            "id": 4,
+            "jsonrpc": "2.0",
+            "result": "0x000000000000000000000000000000000000000000001142260fc07f54614000"
+          },
+          "to": "0x86bCF0841622a5dAC14A313a15f96A95421b9366"
+        },
+        {
+          "block": "0xf91381",
+          "data": "0xb91af97c000000000000000000000000da04759e54728b6636fe48f7c9795c7b609baaaa",
+          "response": {
+            "id": 316,
+            "jsonrpc": "2.0",
+            "result": "0x000000000000000000000000000000000000000000000000006a5c73cf4920000000000000000000000000000000000000000000000000775ebff54313f460000000000000000000000000000000000000000000000000008df115e3d86d1870000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "to": "0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0"
+        },
+        {
+          "block": "0xf91381",
+          "data": "0x21e37801000000000000000000000000da04759e54728b6636fe48f7c9795c7b609baaaa",
+          "response": {
+            "id": 317,
+            "jsonrpc": "2.0",
+            "result": "0x0000000000000000000000000000000000000000000000000000000000000001"
+          },
+          "to": "0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0"
+        },
+        {
+          "block": "0xf91381",
+          "data": "0xd293c710000000000000000000000000da04759e54728b6636fe48f7c9795c7b609baaaa000000000000000000000000000000000000000000001142260fc07f54614000",
+          "response": {
+            "id": 318,
+            "jsonrpc": "2.0",
+            "result": "0x0000000000000000000000000000000000000000000000000f4e7515996cd54f"
+          },
+          "to": "0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0"
+        }
+      ],
+      "report_fragment_sha256": "afead3f64a59fa327b8b99c34c442618150cf31476229a7d2e0d857fc4ad6200"
     }
   ]
 }

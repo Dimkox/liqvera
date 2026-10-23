@@ -17,7 +17,12 @@ export async function buildOne(gateway:Gateway):Promise<boolean> {
     const artifact=await gateway.reports.build(request.report_id,request.canonical_body,signal);
     const [reportBytes]=await Promise.all([gateway.artifacts.read(artifact,'report'),gateway.artifacts.read(artifact,'bundle')]);
     const report=JSON.parse(reportBytes.toString('utf8'));gateway.contracts.assert('report',report);
-    if(artifact.report_id!==request.report_id||report.report_id!==request.report_id||report.request.side!==request.canonical_body.side||
+    const trove=request.canonical_body.product_id==='trove_risk';
+    if(artifact.report_id!==request.report_id||report.report_id!==request.report_id)throw new PublicError('IDENTITY_MISMATCH',422);
+    if(trove) {
+      if(report.schema!=='liqvera-trove-risk-report/v1'||report.request.product_id!=='trove_risk'||
+         report.request.borrower!==request.canonical_body.borrower)throw new PublicError('IDENTITY_MISMATCH',422);
+    } else if(report.schema!=='liqvera-evidence-report/v1'||report.request.side!==request.canonical_body.side||
       report.request.quantity_base!==request.canonical_body.quantity_base||report.identity.instrument_id!==INSTRUMENT)
       throw new PublicError('IDENTITY_MISMATCH',422);
     if(report.quality.snapshot_status==='REJECTED') {
@@ -35,9 +40,12 @@ export async function buildOne(gateway:Gateway):Promise<boolean> {
     gateway.contracts.states.next('report_request','PREPARING','artifact_verified',{semantic_report_valid:true,live_source:true,
       immutable_publish_complete:true,report_and_bundle_readback_verified:true});
     const expires=new Date(Date.now()+120000);
-    await gateway.ledger.publish(request,artifact,gateway.config.payTo,expires,{instrument_id:INSTRUMENT,side:request.canonical_body.side,
-      quantity_base:request.canonical_body.quantity_base,snapshot_at:artifact.snapshot_at,snapshot_status:'VALID_FOR_SNAPSHOT_CALCULATION',
-      limitations:artifact.limitations,price_musd:'0.01',expires_at:expires.toISOString()});
+    const common={snapshot_at:artifact.snapshot_at,snapshot_status:'VALID_FOR_SNAPSHOT_CALCULATION' as const,
+      limitations:artifact.limitations,price_musd:'0.01' as const,expires_at:expires.toISOString()};
+    const preview=request.canonical_body.product_id==='trove_risk'?
+      {...common,product_id:'trove_risk' as const,borrower:request.canonical_body.borrower,trove_status:report.trove_risk.status}:
+      {instrument_id:INSTRUMENT,side:request.canonical_body.side,quantity_base:request.canonical_body.quantity_base,...common};
+    await gateway.ledger.publish(request,artifact,gateway.config.payTo,expires,preview);
     metrics.increment('build_complete');
   } catch(error) {
     const reason=error instanceof PublicError?error.code:'SOURCE_UNAVAILABLE';const rejected=rejectedReasons.includes(reason);

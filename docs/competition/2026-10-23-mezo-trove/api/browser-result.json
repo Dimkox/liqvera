@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "scope": "Local built browser with stubbed capabilities; real sealed native Trove preview, no wallet or payment; not production acceptance",
+  "views": [
+    {
+      "width": 320,
+      "clientWidth": 320,
+      "scrollWidth": 320,
+      "heading": "Mezo Trove risk",
+      "links": [
+        "https://explorer.test.mezo.org/address/0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0",
+        "https://explorer.test.mezo.org/address/0x722E4D24FD6Ff8b0AC679450F3D91294607268fA",
+        "https://explorer.test.mezo.org/address/0x86bCF0841622a5dAC14A313a15f96A95421b9366",
+        "https://explorer.test.mezo.org/block/16323457"
+      ]
+    },
+    {
+      "width": 1280,
+      "clientWidth": 1265,
+      "scrollWidth": 1265,
+      "heading": "Mezo Trove risk",
+      "links": [
+        "https://explorer.test.mezo.org/address/0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0",
+        "https://explorer.test.mezo.org/address/0x722E4D24FD6Ff8b0AC679450F3D91294607268fA",
+        "https://explorer.test.mezo.org/address/0x86bCF0841622a5dAC14A313a15f96A95421b9366",
+        "https://explorer.test.mezo.org/block/16323457"
+      ]
+    }
+  ],
+  "runtime_exceptions": []
+}

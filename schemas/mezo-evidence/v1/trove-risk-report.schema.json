@@ -161,33 +161,53 @@
           "minLength": 1
         },
         "icr": {
-          "type": [
-            "string",
-            "null"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "liquidation_price_musd": {
-          "type": [
-            "string",
-            "null"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "buffer_pct": {
-          "type": [
-            "string",
-            "null"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "debt_ahead_musd": {
-          "type": [
-            "string",
-            "null"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "redeemable_debt_ahead_musd": {
-          "type": [
-            "string",
-            "null"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "contract_status": {
@@ -224,9 +244,13 @@
                 "minLength": 1
               },
               "icr": {
-                "type": [
-                  "string",
-                  "null"
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
                 ]
               },
               "status": {
@@ -237,11 +261,15 @@
           }
         },
         "redemption_position": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "minimum": 1
+          "minimum": 1,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "sorted_troves_size": {
           "type": "integer",

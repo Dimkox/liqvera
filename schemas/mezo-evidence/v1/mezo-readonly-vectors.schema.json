@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/mezo-readonly-vectors.schema.json",
+  "type": "array",
+  "minItems": 2,
+  "maxItems": 2,
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "report_sha256",
+      "bundle_sha256",
+      "report_fragment_sha256",
+      "case_id",
+      "bundle_path",
+      "block_number",
+      "block_hash",
+      "raw_calls"
+    ],
+    "properties": {
+      "report_sha256": {
+        "$ref": "primitives.schema.json#/$defs/sha256"
+      },
+      "bundle_sha256": {
+        "$ref": "primitives.schema.json#/$defs/sha256"
+      },
+      "report_fragment_sha256": {
+        "$ref": "primitives.schema.json#/$defs/sha256"
+      },
+      "case_id": {
+        "enum": [
+          "A31",
+          "A32"
+        ]
+      },
+      "bundle_path": {
+        "type": "string",
+        "minLength": 1
+      },
+      "block_number": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]*(?![\\s\\S])"
+      },
+      "block_hash": {
+        "type": "string",
+        "pattern": "^0x[0-9a-f]{64}(?![\\s\\S])"
+      },
+      "raw_calls": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 8,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "to",
+            "data",
+            "block",
+            "response"
+          ],
+          "properties": {
+            "to": {
+              "$ref": "primitives.schema.json#/$defs/address_input"
+            },
+            "data": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]*(?![\\s\\S])"
+            },
+            "block": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]*(?![\\s\\S])"
+            },
+            "response": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "jsonrpc",
+                "result"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "jsonrpc": {
+                  "const": "2.0"
+                },
+                "result": {
+                  "type": "string",
+                  "pattern": "^0x[0-9a-fA-F]*(?![\\s\\S])"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

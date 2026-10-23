@@ -1,0 +1,4 @@
+{
+  "source_commit": "268078c8ad86a4891ad13e7532287a1d629841ee",
+  "scope": "Native Testnet read-only transport and raw-call replay; no wallet/payment/deployment. Elapsed time is a local observation, not an authenticated timing proof."
+}

@@ -53,6 +53,7 @@ target-version = "py311"
 include = [
   "packages/**/*.py",
   "tests/contracts/**/*.py",
+  "tests/artifact/**/*.py",
   "tests/public_capture/**/*.py",
   "tests/readonly_analyzer/**/*.py",
   "tests/conformance/**/*.py",
@@ -60,6 +61,10 @@ include = [
   "tools/mezo_acceptance/**/*.py",
   "scripts/build-liqvera-python-distributions.py",
   "scripts/run-mezo-acceptance.py",
+  "scripts/verify-mezo-acceptance.py",
+  "scripts/check-docs.py",
+  "scripts/test-offline.py",
+  "scripts/smoke-mezo-readonly.py",
   "tools/conformance/**/*.py",
 ]
 

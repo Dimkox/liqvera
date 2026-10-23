@@ -3,7 +3,7 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "Liqvera verifiable report API",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Proposed testnet-only HTTP contract. F4 and F5 must implement and verify it; this document does not describe a deployed service."
   },
   "x-liqvera-capability": {
@@ -16,6 +16,8 @@
   "x-liqvera-idempotency": {
     "namespace": "access_scope",
     "canonical_body_fields": ["instrument_id", "side", "quantity_base", "expected_payer"],
+    "trove_canonical_body_fields": ["product_id", "borrower", "expected_payer"],
+    "trove_product": "trove_risk is Testnet-only and feature-gated. Borrower must be a nonzero EIP-55 address. Product and borrower are immutable request identity; historical delivery never recaptures.",
     "same_key_same_body": "Return the same logical request or quote; a PREPARING repeat returns 202 and the same status Location.",
     "same_key_different_body": "409 without another capture or settlement",
     "other_scope": "Independent namespace; never grants access to the first scope's object.",

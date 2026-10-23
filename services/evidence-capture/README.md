@@ -39,3 +39,9 @@ of sealed input is performed; the gateway retention/recovery policy owns it.
 Published directories use mode 0750 and files 0640. Capture, report, and gateway
 containers must share an artifact-reader group or runtime UID; volumes remain
 unpublished and each reader receives only its specified read-only mount.
+
+The Testnet extensions allow one additional closed request field: `mezo_dex` for a
+market comparison or `trove_risk: {borrower: "<address>"}` for a standalone Trove
+capture. These fields cannot be combined or null. Trove capture requires live mode,
+uses only fixed-block Testnet calls and publishes its separate two-file sealed
+package; Hyperliquid is not requested for this product. Failures never use fixtures.

@@ -1,12 +1,17 @@
+import type { CreateInput } from "./flow-types.ts";
+import { validateTroveReport } from "./trove-report.ts";
 import {
   AMOUNT_ATOMIC, ASSET, ASSET_DECIMALS, CHAIN_ID, INSTRUMENT, NETWORK, PRICE_MUSD,
   isAddress, isSha256, isUuid,
-  type ApiErrorBody, type Capabilities, type Delivery, type Quote, type RequestStatus, type Side,
-} from "./contracts";
+  type ApiErrorBody, type Capabilities, type Delivery, type Quote, type RequestStatus,
+} from "./contracts.ts";
 
 export class ApiFailure extends Error {
-  constructor(readonly status: number, readonly code: string, message: string, readonly requestId?: string) {
-    super(message);
+  readonly status: number;
+  readonly code: string;
+  readonly requestId?: string;
+  constructor(status: number, code: string, message: string, requestId?: string) {
+    super(message); this.status=status; this.code=code; this.requestId=requestId;
   }
 }
 
@@ -32,6 +37,9 @@ function validateCapabilities(value: unknown): Capabilities {
       data.price_musd !== PRICE_MUSD || data.amount_atomic !== AMOUNT_ATOMIC ||
       (data.source_mode !== "live-public" && data.source_mode !== "fixture") ||
       typeof data.payment_ready !== "boolean") throw new Error("Gateway capability terms do not match the selected payment network.");
+  if(data.products !== undefined && (!Array.isArray(data.products) || data.products.length<1 || data.products.length>2 ||
+    data.products.some(item=>item!=="market_depth"&&item!=="trove_risk") || new Set(data.products).size!==data.products.length))
+    throw new Error("Invalid capability product declaration.");
   strings(data.limitations);
   strings(data.blockers);
   return data as unknown as Capabilities;
@@ -46,7 +54,11 @@ function validateQuote(value: unknown): Quote {
       !isUuid(string(data.report_request_id)) || !isUuid(string(data.report_id)) ||
       !isSha256(string(data.report_sha256)) || !isSha256(string(data.bundle_sha256)) ||
       !["READY", "PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "PAID", "EXPIRED", "MANUAL_REVIEW"].includes(string(data.state)) ||
-      preview.instrument_id !== INSTRUMENT || !["BUY", "SELL"].includes(string(preview.side)) ||
+      (preview.product_id === "trove_risk" ? CHAIN_ID !== 31611 || !isAddress(string(preview.borrower)) ||
+        !["ACTIVE","NOT_ACTIVE"].includes(string(preview.trove_status)) ||
+        ["instrument_id","side","quantity_base"].some(key=>key in preview) :
+        preview.product_id !== undefined || preview.borrower !== undefined || preview.trove_status !== undefined ||
+        preview.instrument_id !== INSTRUMENT || !["BUY", "SELL"].includes(string(preview.side))) ||
       preview.snapshot_status !== "VALID_FOR_SNAPSHOT_CALCULATION" ||
       preview.price_musd !== PRICE_MUSD ||
       terms.version !== "liqvera-evidence-terms/v1" || terms.network !== NETWORK ||
@@ -60,7 +72,7 @@ function validateQuote(value: unknown): Quote {
       retention.authorization_validity_floor !== true || retention.deletion_must_not_enable_replay !== true) {
     throw new Error("Quote terms failed local contract checks. No payment is available.");
   }
-  string(preview.quantity_base);
+  if(preview.product_id !== "trove_risk") string(preview.quantity_base);
   string(preview.snapshot_at);
   string(preview.expires_at);
   strings(preview.limitations);
@@ -83,17 +95,19 @@ export function validateDelivery(value: unknown, reportId: string): Delivery {
   const data = record(value);
   const report = record(data.report);
   const receipt = record(data.receipt);
-  const identity = record(report.identity);
+  const trove=report.schema === "liqvera-trove-risk-report/v1";
+  if(trove) validateTroveReport(report);
+  const identity = trove ? {} : record(report.identity);
   const requestBody = record(report.request);
   const source = record(report.source);
-  const calculation = record(report.calculation);
-  const display = record(calculation.display);
+  const calculation = trove ? {} : record(report.calculation);
+  const display = trove ? {} : record(calculation.display);
   const quality = record(report.quality);
   const boundaries = record(report.boundaries);
-  if (data.schema !== "liqvera-evidence-delivery/v1" || report.schema !== "liqvera-evidence-report/v1" ||
+  if (data.schema !== "liqvera-evidence-delivery/v1" || (!trove && report.schema !== "liqvera-evidence-report/v1") ||
       report.report_id !== reportId || receipt.report_id !== reportId ||
       receipt.schema !== "liqvera-evidence-receipt/v1" ||
-      identity.instrument_id !== INSTRUMENT || identity.product_kind !== "perpetual" ||
+      (!trove && (identity.instrument_id !== INSTRUMENT || identity.product_kind !== "perpetual")) ||
       !isUuid(string(receipt.quote_id)) || !isSha256(string(receipt.report_sha256)) ||
       receipt.network !== NETWORK || receipt.chain_id !== CHAIN_ID || receipt.asset !== ASSET ||
       receipt.amount_atomic !== AMOUNT_ATOMIC ||
@@ -113,19 +127,21 @@ export function validateDelivery(value: unknown, reportId: string): Delivery {
       !Number.isSafeInteger(receipt.block_number) || !Number.isSafeInteger(receipt.log_index) ||
       !Number.isFinite(Date.parse(string(receipt.confirmed_at))) ||
       !string(receipt.finality_policy_version) ||
-      !["BUY", "SELL"].includes(string(requestBody.side)) ||
-      !/^(0|[1-9][0-9]*)(\.[0-9]{0,7}[1-9])?$/.test(string(requestBody.quantity_base)) ||
+      (!trove && (!["BUY", "SELL"].includes(string(requestBody.side)) ||
+      !/^(0|[1-9][0-9]*)(\.[0-9]{0,7}[1-9])?$/.test(string(requestBody.quantity_base)))) ||
       source.source_mode !== "live-public" ||
       !Number.isFinite(Date.parse(string(source.source_at))) ||
-      !Number.isSafeInteger(source.available_bid_levels) || !Number.isSafeInteger(source.available_ask_levels) ||
-      !Number.isSafeInteger(calculation.consumed_levels) ||
+      (!trove && (!Number.isSafeInteger(source.available_bid_levels) || !Number.isSafeInteger(source.available_ask_levels) ||
+      !Number.isSafeInteger(calculation.consumed_levels))) ||
       quality.snapshot_status !== "VALID_FOR_SNAPSHOT_CALCULATION" ||
       boundaries.execution_authority !== "NONE" || boundaries.execution_promise !== false ||
-      boundaries.calculation_label !== "hypothetical snapshot sweep") throw new Error("Paid response failed local integrity checks.");
-  string(display.notional_quote);
-  string(display.vwap);
-  string(display.worst_price);
-  string(display.price_impact_bps);
+      (!trove && boundaries.calculation_label !== "hypothetical snapshot sweep")) throw new Error("Paid response failed local integrity checks.");
+  if(!trove) {
+    string(display.notional_quote);
+    string(display.vwap);
+    string(display.worst_price);
+    string(display.price_impact_bps);
+  }
   strings(quality.limitations);
   strings(quality.reason_codes);
   return data as unknown as Delivery;
@@ -161,11 +177,13 @@ export async function getCapabilities(): Promise<Capabilities> {
   return validateCapabilities(await response.json());
 }
 
-export async function createQuote(capability: string, input: { side: Side; quantity: string; payer: string; idempotencyKey: string }): Promise<Quote | RequestStatus> {
+export async function createQuote(capability: string, input: CreateInput): Promise<Quote | RequestStatus> {
   const response = await request("/v1/report-quotes", capability, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Idempotency-Key": input.idempotencyKey },
-    body: JSON.stringify({ instrument_id: INSTRUMENT, side: input.side, quantity_base: input.quantity, expected_payer: input.payer }),
+    body: JSON.stringify(input.product_id === "trove_risk" ?
+      { product_id: input.product_id, borrower: input.borrower, expected_payer: input.payer } :
+      { instrument_id: INSTRUMENT, side: input.side, quantity_base: input.quantity, expected_payer: input.payer }),
   });
   if (response.status === 201) return validateQuote(await response.json());
   if (response.status === 202) return validateRequest(await response.json());

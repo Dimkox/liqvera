@@ -1,0 +1,10 @@
+{
+  "counts": {
+    "gateway": 98,
+    "python": 1101,
+    "python_subtests": 85,
+    "web": 130
+  },
+  "schema": "liqvera-offline-test-counts/v1",
+  "source_commit": "268078c8ad86a4891ad13e7532287a1d629841ee"
+}

@@ -19,15 +19,18 @@ export type Reason = typeof REASONS[number];
 export type RequestState = 'PREPARING' | 'READY' | 'REJECTED' | 'BUILD_FAILED';
 export type QuoteState = 'READY' | 'PAYMENT_PENDING' | 'PAYMENT_UNCERTAIN' | 'PAID' | 'EXPIRED' | 'MANUAL_REVIEW';
 export type AttemptState = 'RECEIVED' | 'VERIFIED' | 'SUBMITTING' | 'CONFIRMED' | 'REJECTED' | 'UNKNOWN' | 'MANUAL_REVIEW';
-export interface QuoteInput { instrument_id: typeof INSTRUMENT; side: 'BUY' | 'SELL'; quantity_base: string; expected_payer: string }
+export interface MarketQuoteInput { product_id?:never; borrower?:never; instrument_id:typeof INSTRUMENT; side:'BUY'|'SELL'; quantity_base:string; expected_payer:string }
+export interface TroveQuoteInput { product_id:'trove_risk'; borrower:string; expected_payer:string; instrument_id?:never; side?:never; quantity_base?:never }
+export type QuoteInput=MarketQuoteInput|TroveQuoteInput;
 export interface ReportRequest { id: string; scope_hash: string; canonical_body: QuoteInput; body_hash: string;
   state: RequestState; report_id: string; quote_id: string | null; reason: Reason | null; created_at: Date }
 export interface Terms { version: 'liqvera-evidence-terms/v1'; network: typeof NETWORK; chain_id: typeof CHAIN_ID;
   asset: typeof ASSET; decimals: 18; amount_atomic: typeof AMOUNT; price_musd: '0.01'; pay_to: string;
   expected_payer: string; expires_at: string }
-export interface Preview { instrument_id: typeof INSTRUMENT; side: 'BUY' | 'SELL'; quantity_base: string;
-  snapshot_at: string; snapshot_status: 'VALID_FOR_SNAPSHOT_CALCULATION'; limitations: string[];
-  price_musd: '0.01'; expires_at: string }
+export interface PreviewBase { snapshot_at:string; snapshot_status:'VALID_FOR_SNAPSHOT_CALCULATION'; limitations:string[]; price_musd:'0.01'; expires_at:string }
+export interface MarketPreview extends PreviewBase { product_id?:never; borrower?:never; trove_status?:never; instrument_id:typeof INSTRUMENT; side:'BUY'|'SELL'; quantity_base:string }
+export interface TrovePreview extends PreviewBase { product_id:'trove_risk'; borrower:string; trove_status:'ACTIVE'|'NOT_ACTIVE'; instrument_id?:never; side?:never; quantity_base?:never }
+export type Preview=MarketPreview|TrovePreview;
 export interface Artifact { report_id: string; report_sha256: string; bundle_sha256: string;
   report_size_bytes: number; bundle_size_bytes: number; snapshot_at: string;
   snapshot_status: string; source_mode: 'live-public' | 'fixture'; limitations: string[] }

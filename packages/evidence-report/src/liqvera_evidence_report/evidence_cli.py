@@ -36,8 +36,9 @@ def verify_main(argv: list[str] | None = None) -> int:
                                              + shlex.quote(payload) + " https://rpc.test.mezo.org",
                    "online_recheck_executed": False}
     if "mezo-troves/capture.json" in built.extra_members:
-        from liqvera_public_capture.public_adapters.mezo_troves import PRICE_FEED
         import shlex
+
+        from liqvera_public_capture.public_adapters.mezo_troves import PRICE_FEED
         number = built.document["trove_risk"]["block_number"]
         payload = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_call",
             "params": [{"to": PRICE_FEED, "data": "0x0fdb11cf"}, hex(int(number))]}, separators=(",", ":"))

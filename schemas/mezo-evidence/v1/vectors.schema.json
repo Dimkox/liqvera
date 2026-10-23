@@ -236,6 +236,7 @@
     "vectors"
   ],
   "properties": {
+    "mezo_readonly": {"$ref": "mezo-readonly-vectors.schema.json"},
     "schema": {
       "const": "liqvera-evidence-vectors/v1"
     },

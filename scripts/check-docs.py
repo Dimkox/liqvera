@@ -21,11 +21,13 @@ def check_mezo_readme(readme: str, protocol: str) -> list[str]:
         explorer = re.search(r'explorerUrl: "([^"]+)"', chain)[1]
         musd = re.search(r"export const MUSD_TESTNET = \{(.*?)\} as const;", protocol, re.S)[1]
         dex = re.search(r"export const MEZO_TESTNET_DEX = \{(.*?)\} as const;", protocol, re.S)[1]
+        troves = re.search(r"export const MEZO_TESTNET_TROVES = \{(.*?)\} as const;", protocol, re.S)[1]
         expected = {
             re.search(r'address: "(0x[0-9a-fA-F]{40})"', musd)[1],
             re.search(r'permit2Address: "(0x[0-9a-fA-F]{40})"', protocol)[1],
             re.search(r'exactProxyAddress: "(0x[0-9a-fA-F]{40})"', protocol)[1],
             *re.findall(r'"(0x[0-9a-fA-F]{40})"', dex),
+            *re.findall(r'"(0x[0-9a-fA-F]{40})"', troves),
         }
         links = re.findall(r'\[(0x[0-9a-fA-F]{40})\]\(([^)]+)\)', table)
         addresses = [url for _, url in links]

@@ -4,6 +4,16 @@ Start from a clean checkout of the intended branch. Record `git rev-parse HEAD`,
 
 ## Local checks
 
+After installing the pinned Python and Node dependencies, prepare the test inputs
+once with `make test-prepare` (this step downloads locked wheels and a digest-pinned
+test database image). Then run **`make test`**. The test step uses `PIP_NO_INDEX=1`,
+local wheels and `docker --pull=never`; it accepts no external database URL, creates
+a new loopback-only PostgreSQL container and removes only that invocation's returned
+container ID. No application database, wallet or deployment is used. CI runs this
+same command, including the PostgreSQL tests, build/typecheck, lint and docs checks.
+
+The individual commands remain available for diagnosis:
+
 ```sh
 make verify PYTHON=.venv/bin/python
 make liqvera-gateway liqvera-web
@@ -28,3 +38,20 @@ Run the non-root CPython and BusyBox regressions in `deploy/security` on the res
 ## Mezo DEX extension
 
 Default tests remain offline. Run `.venv/bin/python -m pytest tests/public_capture/test_mezo_dex.py tests/evidence_report/test_mezo_amm.py tests/evidence_report/test_mezo_bundle.py -q` for raw-call, rounding, overflow, reorg and tamper checks. Explicit `-m live` on the capture test file performs native read-only Testnet BUY/SELL captures. A timeout is a failed live run, not fixture fallback or offline success. [Protocol captures and exact scope](mezo-integration.md) distinguish retained successful observations from deployment and paid acceptance.
+
+The gate records actual totals in `dist/test-results/latest.json` and fails if they
+differ from the README's documented counts. Host tests use prepared offline inputs;
+this does not claim operating-system network isolation. An interrupted Docker create
+with a lost response deliberately avoids guessed-name cleanup, so an owned test
+container may need later inspection. No automatic prune is performed.
+
+Explicit native read-only smoke (not part of CI):
+
+```sh
+.venv/bin/python scripts/smoke-mezo-readonly.py --live \
+  --borrower <public-Testnet-borrower> --output /absolute/new/evidence-directory
+```
+
+This captures and independently decodes DEX and Trove calls at each source's fixed
+block, retains raw JSON and reports failures without fallback. It never signs or
+submits a payment. The two independently captured blocks may differ.

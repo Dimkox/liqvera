@@ -74,3 +74,31 @@ including report and ZIP publication. Its [report, ZIP and timing observation](.
 are retained; both host and non-root network-disabled image verifiers reproduce
 the bundle. This is one observed run, not a general latency guarantee. It submits
 no payment and does not change the deployed web/API product.
+
+## Private API integration
+
+The additive API 1.1 contract accepts the closed request
+`{product_id: "trove_risk", borrower: "<EIP-55 address>", expected_payer: "<address>"}`.
+Gateway and report services both default `LIQVERA_MEZO_TROVES_ENABLED` to `false`;
+enabling requires live public Testnet sources. Existing hash-bound requests and
+artifacts remain readable when creation is disabled. No SQL migration is required.
+
+Capture seals a separate, atomic two-file package. The report service independently
+replays its raw calls, binds the borrower and rejects stale data before offering a
+quote. Trove previews identify the borrower and active/inactive status. The existing
+0.01 MUSD x402 terms, ledger and receipt checks apply unchanged. This source phase
+is not evidence of a paid Trove purchase or a production deployment.
+
+## Browser source phase
+
+The existing application now includes a Trove risk tab, a borrower field prefilled
+from the connected wallet, and a text-only risk panel. The public sealed example
+uses the retained native report at block 16323457; it checks both immutable asset
+hashes before displaying the historical snapshot. No payment was made for it.
+New paid creation remains controlled by the backend feature flags.
+
+Trove sessions use version 2 with product and borrower identity; existing version 1
+market sessions keep their original representation. Unknown payment outcomes stay
+in recovery. Both delivery paths verify the report subject against the quote before
+clearing the payment guard. Rollback after exposure must retain readers **and the
+new browser**; disabling creation must preserve existing report and payment recovery.

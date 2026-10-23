@@ -4,11 +4,60 @@
   "title": "Liqvera report quote request",
   "type": "object",
   "additionalProperties": false,
-  "required": ["instrument_id", "side", "quantity_base", "expected_payer"],
   "properties": {
-    "instrument_id": {"const": "hyperliquid:BTC:perpetual"},
-    "side": {"enum": ["BUY", "SELL"]},
-    "quantity_base": {"$ref": "primitives.schema.json#/$defs/quantity_input"},
-    "expected_payer": {"$ref": "primitives.schema.json#/$defs/address_input"}
-  }
+    "instrument_id": {
+      "const": "hyperliquid:BTC:perpetual"
+    },
+    "side": {
+      "enum": [
+        "BUY",
+        "SELL"
+      ]
+    },
+    "quantity_base": {
+      "$ref": "primitives.schema.json#/$defs/quantity_input"
+    },
+    "expected_payer": {
+      "$ref": "primitives.schema.json#/$defs/address_input"
+    },
+    "product_id": {
+      "const": "trove_risk"
+    },
+    "borrower": {
+      "type": "string",
+      "minLength": 42,
+      "maxLength": 42,
+      "pattern": "^0x[0-9a-fA-F]*[1-9a-fA-F][0-9a-fA-F]*(?![\\s\\S])"
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "instrument_id",
+        "side",
+        "quantity_base",
+        "expected_payer"
+      ],
+      "properties": {
+        "instrument_id": {},
+        "side": {},
+        "quantity_base": {},
+        "expected_payer": {}
+      },
+      "additionalProperties": false
+    },
+    {
+      "required": [
+        "product_id",
+        "borrower",
+        "expected_payer"
+      ],
+      "properties": {
+        "product_id": {},
+        "borrower": {},
+        "expected_payer": {}
+      },
+      "additionalProperties": false
+    }
+  ]
 }

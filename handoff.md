@@ -341,3 +341,79 @@ Audit-owned fixture containers, networks and volumes, disposable PostgreSQL, sta
 The requested source cleanup, migration, remediation and local verification are complete. Next work is a separately scoped public gateway recovery/deployment with existing-state and payment safeguards. Public deployment remains unchanged and its observed gateway failure is not fixed by these source changes.
 
 Reference plan: [current cleanup](https://github.com/Dimkox/liqvera/blob/51c14b1/docs/superpowers/plans/2026-10-12-standalone-current.md). Prior release evidence is retained in Git at v0.0.5 and the published assets.
+
+## 2026-10-23 — gated Trove private API source phase
+
+Added closed borrower-bound Testnet Trove requests, an independent atomic capture
+handoff, fresh-source report builds, preview contracts and worker product/borrower
+checks. Gateway and report flags default off; disabled creation preserves existing
+request replays and artifacts. Legacy four-field request serialization and market
+report shapes remain unchanged. No database migration, payment or deployment.
+Historical verified payment evidence remains the owner's selected submission proof.
+Validation: gateway build/typecheck and 97 Node cases completed (84 passed, 13 explicitly skipped without a disposable PostgreSQL database). Thirty focused Trove package/request/service/bundle tests passed, including historical native replay and precise clock-skew rejection; 142 resource/OpenAPI regressions passed. Independent read-only review passed the backend diff, 32 Python cases and 22 Trove gateway cases. A separate stub-finality delivery regression confirms exact historical bytes and no recapture/resettlement with creation disabled; it is not a native payment test. Ruff, 71-document link validation and whitespace checks pass. Full combined-product and real disposable-ledger gates follow browser integration.
+
+## 2026-10-23 — Trove browser source phase
+
+Added the Trove tab, checksummed borrower input, exact-string risk panel and pinned
+Testnet explorer links. Version 2 sessions bind product/borrower without changing
+legacy version 1 bodies. Both paid recovery paths compare delivered product and
+borrower with the quoted subject before clearing guards. Capability product lists
+are strictly validated; Trove delivery validation is Testnet-only. A wallet-free
+sealed example copies the retained native report/ZIP byte-for-byte to immutable
+hash paths and verifies both hashes before rendering. No fresh payment is claimed.
+
+All 130 browser tests pass, including after the preview busy guard; typecheck and
+production build pass. Independent read-only review passed the product/recovery
+changes and separately verified the native preview hashes and three preview tests.
+The preview busy guard prevents concurrent form submission or another preview. Local built Chrome at 320 and
+1280 pixels showed the native block, four pinned links, no horizontal overflow and
+no runtime exceptions, using stubbed capabilities; this is not deployment or paid
+acceptance. Full combined verification and disposable-ledger checks are in progress.
+
+## 2026-10-23 — unified offline and retained-proof acceptance source gate
+
+The pre-extension full Python run passed 1087 tests and 85 subtests with two live
+deselections. The disposable PostgreSQL run passed all 98 gateway tests without
+skips; browser suite passed 130. Added `make test-prepare` for explicit online input
+preparation and one `make test` gate using no-index local wheels and a cached pinned
+test database. Only the returned ID of its newly created loopback container can be
+removed. Four runner/count safety tests pass; documented counts are checked against
+completed output. CI now uses the same command and includes real database tests.
+
+A31/A32 use an explicitly separate retained-proof suite and sidecar evidence, leaving
+A01–A30 contracts intact. Formal vectors add optional native calldata/results and
+report-fragment digests; all 72 focused vector/extension cases passed before the
+last symlink regression. The verifier rejects symlinked result inputs without
+resolving them first. A native read-only smoke entrypoint retains decoded raw DEX
+and Trove captures without wallet/payment authority. The Testnet overlay enables
+both Trove creation flags; deployment remains separate. Final `make test` and
+independent extension review follow this coherent source checkpoint.
+
+Final source checkpoint: independent read-only extension/runner review passed all
+14 focused safety/acceptance/smoke tests without a blocker. The result-file CLI keeps
+its no-follow boundary; the README address checker now also verifies the three
+Trove proxy constants. Root Ruff includes the new runners and artifact tests, and
+passes. The gate enforces the 85-subtest count as well as all primary totals. Source
+collection confirms 1101 runnable Python tests (two live exclusions). Documentation
+links and whitespace checks pass. Native smoke, final full gate and hosted CI remain
+separate from these focused results.
+
+## 2026-10-23 — complete Trove product source gate passed
+
+At clean source `268078c8ad86a4891ad13e7532287a1d629841ee`, `make test` exited zero:
+1101 Python tests, 85 subtests, two explicitly excluded live tests, all 98 gateway
+cases with a new disposable PostgreSQL ledger, and all 130 browser cases. Full Ruff,
+both TypeScript builds and documentation validation passed. The runner's captured
+counts match README. The host test step uses prepared offline inputs, not network
+namespace isolation. [Raw log, hashes and review scope](docs/competition/2026-10-23-mezo-trove/api/verification.json)
+retain the evidence. Fresh local Chrome checks again passed at 320/1280 widths.
+
+A31/A32 result digest is `0ed176a344028f7f80b6753200fe61c4158aed76d0c92bfb526603f21a378d74`;
+independent sealed verification passed. A separate native read-only smoke captured
+DEX block 16324346 (8 calls) and Trove block 16324347 (1818 calls), replayed both, and
+retained raw evidence without fixtures, signatures or payment. Its elapsed value is
+only a local observation. A host-only private HTTP check could not bind an occupied
+port and did not start services; isolated installed-image HTTP validation remains
+part of candidate validation. No working database or unknown payment state changed.
+Hosted CI, exact image checks and publication are next; historical verified payment
+transactions remain the owner's chosen proof.

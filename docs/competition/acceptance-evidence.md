@@ -24,3 +24,30 @@ dedicated payment operator and human-held wallet remain separately gated.
 
 The result shape is [`acceptance-result.schema.json`](../../schemas/mezo-evidence/v1/acceptance-result.schema.json). It records all thirty cases, command and environment names, start/end times, exit codes, explicit omissions, evidence digests, commit SHA and Git tree. A result with any omitted case is `INCOMPLETE`; no partial result should be described as F7 acceptance. Do not edit results to change statuses. Repeat the run after code changes and retain the prior result as historical evidence.
 
+
+## Retained native Mezo extension: A31/A32
+
+The optional `mezo-readonly` suite is separate from the immutable A01–A30 contract.
+A31 reproduces the native DEX comparison and A32 reproduces the native Trove report
+from their retained ZIPs. Both are offline snapshot checks; PASS does not claim a
+fresh paid purchase, production deployment or overall live acceptance.
+
+```sh
+.venv/bin/python scripts/run-mezo-acceptance.py --suite mezo-readonly \
+  --mode offline --plan acceptance/mezo-readonly-plan.json --output /absolute/new/result.json
+.venv/bin/python scripts/verify-mezo-acceptance.py --suite mezo-readonly \
+  /absolute/new/result.json --sha256 <independently-recorded-result-digest>
+```
+
+Keep the adjacent `result.json.evidence` directory with the JSON. Verification checks
+its exact member set, pinned native bundle/report digests, raw-call reconstruction,
+block identity, call count and source engine. Existing core commands remain unchanged.
+
+The [October 23 source gate](2026-10-23-mezo-trove/api/verification.json) records a
+successful complete offline run and independent source review. Its adjacent
+[acceptance result](2026-10-23-mezo-trove/api/acceptance.json) pins A31/A32 and includes
+both native ZIPs. Its source is `268078c8ad86a4891ad13e7532287a1d629841ee`; use
+`--allow-detached-subject` when verifying that historical result from a later commit.
+The independent [native smoke](../../evidence/mezo-testnet/2026-10-23-live-smoke/result.json)
+records fresh Testnet raw-call observations at blocks 16324346 and 16324347. It is
+separate from the retained preview blocks and does not assert a paid purchase.

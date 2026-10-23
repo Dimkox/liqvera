@@ -61,16 +61,14 @@ jobs:
         with:
           node-version: "22"
       # Python acceptance tests invoke the built Node gateway and protocol package.
-      - name: Build and test gateway and browser
+      - name: Build gateway and browser
         run: |
           node deploy/security/check-node-tls-trust.cjs
           make liqvera-gateway liqvera-web
-          npm test --prefix apps/mezo-gateway
-          npm test --prefix apps/mezo-web
-      - name: Verify Python and documentation
-        run: |
-          make verify PYTHON=.venv/bin/python
-          .venv/bin/python scripts/check-docs.py
+      - name: Prepare offline wheel and disposable database inputs
+        run: make test-prepare
+      - name: Run offline product tests, typechecks, lint and documentation checks
+        run: make test
       - name: Verify gateway runtime TLS trust
         run: |
           docker build -f deploy/mezo-evidence/Dockerfile.gateway -t liqvera-gateway:ci .

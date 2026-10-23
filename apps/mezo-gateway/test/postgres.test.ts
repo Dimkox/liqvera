@@ -12,7 +12,7 @@ import test, { after, before } from 'node:test';
 import { Pool } from 'pg';
 import { HttpReportService } from '../src/adapters/report-service.js';
 import { Ledger } from '../src/adapters/postgres.js';
-import { PublicError, type QuoteInput } from '../src/domain/model.js';
+import { PublicError, type MarketQuoteInput } from '../src/domain/model.js';
 import type { Gateway } from '../src/application/gateway.js';
 import { retainAndRecover } from '../src/workers/retention.js';
 import type {LiveGrantAuthority} from '../src/security/live-grant.js';
@@ -27,7 +27,7 @@ const MIGRATION_003_SHA256 = 'bbedff6137a648166b77233c56a466e46247480b404b8829b6
 const MIGRATION_004_SHA256 = '96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a';
 const MIGRATION_005_SHA256 = 'e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11';
 const MIGRATION_006_SHA256 = '92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a';
-const BODY: QuoteInput = {
+const BODY: MarketQuoteInput = {
   instrument_id: 'hyperliquid:BTC:perpetual',
   side: 'BUY',
   quantity_base: '0.25',
@@ -449,4 +449,20 @@ test('merchant startup refuses absent nonce index or absent migration receipt', 
  try { await assert.rejects(ledger.assertNetwork(),/MERCHANT_MIGRATION_REQUIRED/); }
  finally { await pool.query('INSERT INTO gateway_migrations(name,sha256,applied_at) VALUES($1,$2,$3)',[receipt.name,receipt.sha256,receipt.applied_at]); }
  await ledger.assertNetwork();
+});
+
+test('Trove borrower and product stay bound across restart and idempotent ledger replay', {skip:skipReason},async()=>{
+ const {quoteInput}=await import('../src/security/input.js');
+ const body=quoteInput({product_id:'trove_risk',borrower:'0xDA04759E54728B6636Fe48F7c9795c7B609bAaAa',expected_payer:BODY.expected_payer});
+ assert.ok(body.product_id==='trove_risk');
+ const scope='5'.repeat(64),key='trove-bound-request';
+ const ledger=new Ledger(pool);
+ const first=await ledger.createRequest(scope,key,body);
+ assert.deepEqual(first.canonical_body,body);
+ const restart=new Ledger(pool);
+ assert.equal((await restart.createRequest(scope,key,body)).id,first.id);
+ for(const different of [BODY,{...body,borrower:'0x1111111111111111111111111111111111111111'}])
+  await assert.rejects(restart.createRequest(scope,key,different),
+   (error:unknown)=>error instanceof PublicError&&error.code==='IDEMPOTENCY_CONFLICT');
+ assert.equal((await pool.query('SELECT count(*)::int AS count FROM report_requests WHERE scope_hash=$1 AND idempotency_key=$2',[scope,key])).rows[0]!.count,1);
 });

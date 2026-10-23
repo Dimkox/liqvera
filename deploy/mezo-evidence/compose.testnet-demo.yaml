@@ -5,6 +5,7 @@ services:
     environment: !override
       SOURCE_MODE: live-public
       LIQVERA_NETWORK: testnet
+      LIQVERA_MEZO_TROVES_ENABLED: "true"
       LIQVERA_PAYMENT_MODE: merchant
       LIQVERA_DATABASE_HOST: 127.0.0.1
       LIQVERA_DATABASE_NAME: liqvera
@@ -25,6 +26,7 @@ services:
   report-live:
     environment:
       LIQVERA_MEZO_DEX_ENABLED: "true"
+      LIQVERA_MEZO_TROVES_ENABLED: "true"
   web-live:
     build:
       args:

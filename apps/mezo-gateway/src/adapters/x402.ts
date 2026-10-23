@@ -95,7 +95,7 @@ export class OfficialX402 implements PaymentPort {
     if(values.length!==1)throw new PublicError('PAYMENT_NOT_READY');
     const value=values[0]!;
     if(value.scheme!=='exact'||value.network!==NETWORK||value.asset.toLowerCase()!==ASSET.toLowerCase()||value.amount!==AMOUNT||value.payTo.toLowerCase()!==quote.terms.pay_to||value.extra?.assetTransferMethod!==X402_PERMIT2.assetTransferMethod||value.extra?.name!==MUSD_PERMIT.domainName||value.extra?.version!==MUSD_PERMIT.domainVersion)throw new PublicError('PAYMENT_NOT_READY');
-    const required=await this.server.createPaymentRequiredResponse(values,{url:new URL(`/v1/reports/${quote.report_id}`,this.publicBase).href,description:'Liqvera immutable BTC perpetual snapshot report',mimeType:'application/json'},undefined,declareEip2612GasSponsoringExtension());
+    const required=await this.server.createPaymentRequiredResponse(values,{url:new URL(`/v1/reports/${quote.report_id}`,this.publicBase).href,description:quote.preview?.product_id==='trove_risk'?'Liqvera immutable Mezo Trove risk report':'Liqvera immutable BTC perpetual snapshot report',mimeType:'application/json'},undefined,declareEip2612GasSponsoringExtension());
     return {value,header:encodePaymentRequiredHeader(required)};
   }
   async verify(header: string,quote: Quote) {

@@ -24,6 +24,7 @@ export interface Capabilities {
   source_mode: "fixture" | "live-public";
   limitations: string[];
   payment_ready: boolean;
+  products?: ("market_depth" | "trove_risk")[];
   blockers: string[];
 }
 
@@ -35,10 +36,8 @@ export interface Quote {
   report_sha256: string;
   bundle_sha256: string;
   state: QuoteState;
-  preview: {
-    instrument_id: typeof INSTRUMENT;
-    side: Side;
-    quantity_base: string;
+  preview: ({ product_id?: never; borrower?: never; trove_status?: never; instrument_id: typeof INSTRUMENT; side: Side; quantity_base: string } |
+    { product_id: "trove_risk"; borrower: string; trove_status: "ACTIVE" | "NOT_ACTIVE"; instrument_id?: never; side?: never; quantity_base?: never }) & {
     snapshot_at: string;
     snapshot_status: "VALID_FOR_SNAPSHOT_CALCULATION";
     limitations: string[];
@@ -112,7 +111,7 @@ export interface MezoDexReport {
   block_number: string; block_hash: string; caveats: string[];
   depth_ladder: {quantity_btc:string; price_impact_bps?:string; status?:string}[];
 }
-export interface Report {
+export interface MarketReport {
   mezo_dex?: MezoDexReport;
   venue_comparison?: {hyperliquid_avg_price:string; mezo_avg_price:string; spread_bps:string;
                      better_venue:string; caveats:string[]};
@@ -130,6 +129,24 @@ export interface Report {
   quality: { snapshot_status: string; reason_codes: string[]; limitations: string[]; stage_a?: { decision: string; reasons: string[] } };
   boundaries: { execution_authority: "NONE"; execution_promise: false; calculation_label: "hypothetical snapshot sweep" };
 }
+
+export interface TroveReport {
+  schema: "liqvera-trove-risk-report/v1"; report_id: string;
+  request: {product_id: "trove_risk"; borrower: string};
+  source: {source_mode: string; source_at: string; created_at: string};
+  trove_risk: {
+    borrower: string; status: "ACTIVE" | "NOT_ACTIVE"; debt_musd: string; collateral_btc: string;
+    price_musd: string; icr: string | null; mcr: string; ccr: string; tcr: string;
+    liquidation_price_musd: string | null; buffer_pct: string | null;
+    redemption_position: number | null; sorted_troves_size: number; queue_status: string;
+    debt_ahead_musd: string | null; block_number: string; block_hash: string; caveats: string[];
+    scenarios: {price_change_pct: string; price_musd: string; icr: string | null; status: string}[];
+  };
+  quality: {snapshot_status: string; reason_codes: string[]; limitations: string[]};
+  boundaries: {execution_authority: "NONE"; execution_promise: false};
+  mezo_dex?: never; venue_comparison?: never;
+}
+export type Report = MarketReport | TroveReport;
 
 export interface Delivery {
   schema: "liqvera-evidence-delivery/v1";
@@ -160,7 +177,7 @@ export function quoteIsPayable(quote: Quote, payer: string): boolean {
   const terms = quote.terms;
   return quote.state === "READY" &&
     quote.preview.snapshot_status === "VALID_FOR_SNAPSHOT_CALCULATION" &&
-    quote.preview.instrument_id === INSTRUMENT &&
+    (quote.preview.product_id === "trove_risk" ? CHAIN_ID === 31611 && isAddress(quote.preview.borrower) : quote.preview.instrument_id === INSTRUMENT) &&
     quote.preview.price_musd === PRICE_MUSD &&
     terms.version === "liqvera-evidence-terms/v1" &&
     terms.network === NETWORK && terms.chain_id === CHAIN_ID &&
@@ -184,4 +201,12 @@ export function receiptMatchesQuote(receipt: Receipt, quote: Quote): boolean {
     /^0x[0-9a-f]{64}$/.test(receipt.tx_hash) &&
     Number.isSafeInteger(receipt.block_number) && receipt.block_number >= 0 &&
     Number.isSafeInteger(receipt.log_index) && receipt.log_index >= 0;
+}
+
+export function reportMatchesQuote(report: Report, quote: Quote): boolean {
+  if(quote.preview.product_id === 'trove_risk')
+    return report.schema === 'liqvera-trove-risk-report/v1' && report.request.product_id === 'trove_risk' &&
+      report.request.borrower === quote.preview.borrower;
+  return report.schema === 'liqvera-evidence-report/v1' && report.identity.instrument_id === INSTRUMENT &&
+    report.request.side === quote.preview.side && report.request.quantity_base === quote.preview.quantity_base;
 }

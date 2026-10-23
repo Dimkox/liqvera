@@ -1,7 +1,7 @@
 # Mezo Testnet integration
 
 Liqvera keeps one web/API product. MUSD x402 purchases are deployed; the DEX
-extension described here is a source change pending publication and deployment.
+extension described here is merged into main in PR 17; deployment is pending.
 All new chain calls target Testnet 31611 at a captured block number. No swap,
 borrow, redemption or new payment is submitted by capture or verification.
 
@@ -78,3 +78,15 @@ already include pending rewards. `fetchPrice()` is view; `lastGoodPrice()`
 reverts. The redemption walk starts at `getLast()` and follows `getPrev()`,
 skipping ICR below MCR. A list index alone is not a proven redemption position.
 Trove report delivery remains a subsequent implementation step.
+
+## Public preview candidate (October 23)
+
+The source preview contains a real SELL 1 BTC comparison captured on October 23,
+with Mezo block 16321216 and engine commit
+`65ee000377028e3909a72402a5341ff4ddd56c1a`. Its report SHA-256 is
+`d58728bd3df4b79c43bb2e742225e5b8f879eb0ec292213ffd3941f0f8778753`;
+its ZIP SHA-256 is
+`0c20f41f845bd39c88286b52a64d1dad53713fd215507f611fab51d29896f51f`.
+These digests are pinned by the browser before rendering. The previous preview
+remains byte-for-byte in `apps/mezo-web/public/demo/archive/0ebf36b89bda183b/`.
+This source candidate does not establish deployment or a fresh paid purchase.

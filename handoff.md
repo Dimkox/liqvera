@@ -571,3 +571,17 @@ Final fee-disclosure verification: browser suite again passed 148 tests, the bro
 production build and protocol TypeScript build passed, documentation validation
 passed for 72 documents, and `git diff --check` passed. The app bundle remains
 500.89 kB minified; Vite reports its configured >500 kB chunk notice.
+
+## 2026-10-23 — restore Router artifact guard for user-signed swap ABI
+
+The first merged wallet-action PR failed the hosted product gate because the
+source-provenance compatibility test still allowed only Router reads. Updated the
+exact ABI allowlist to include `getReserves` and the explicitly requested
+`swapExactTokensForTokens`, asserting their `view` and `nonpayable` mutability and
+retaining vendored-item equality. This keeps the test strict while matching the
+narrow user-signed action surface.
+
+Validation: the focused provenance suite passed 37 tests and `git diff --check`
+passed. A local full `make test` was interrupted at 63% after more than ten minutes
+on the shared host; it is not reported as passing. Hosted PR CI is required before
+any site rollout. No wallet transaction or deployment occurred.

@@ -1,0 +1,9 @@
+# Mezo DEX deployment package refresh — 2026-10-23
+
+The October 23 pre-deployment scans found CVE-2026-107891 in the inherited musl packages. The [musl maintainer advisory](https://seclists.org/oss-sec/2026/q4/289) describes integer overflows while compiling untrusted regular expressions; [Alpine's release announcement](https://www.alpinelinux.org/posts/Alpine-3.21.9-3.22.7-3.23.7-3.24.3-released.html) identifies the distribution fix. The runtime recipes now pin `musl` and `musl-utils` to `1.2.5-r24` for Python/Alpine 3.23 and `1.2.6-r3` for gateway/web on Alpine 3.24. Pinned base digests and the existing CPython, BusyBox, OpenSSL and CA corrections remain in place.
+
+The web runtime also pins nginx `1.30.6-r0`, matching the [upstream security release](https://nginx.org/news.html). Unused nginx modules are removed before the upgrade because their old exact-version dependencies prevent package resolution. Runtime nginx version metadata is updated to match the installed binary. The static-server configuration, non-root identity and public WalletConnect configuration are retained.
+
+Candidate checks passed: all four Docker builds; existing Python/BusyBox and effective TLS trust regressions; offline report ZIP reproduction; nginx configuration validation; HTTP serving of both the current preview and byte-identical archived preview. Nine artifact/operations tests passed. These candidate checks precede the final source-labelled image scans and deployment record. Initial package-resolution failure remains recorded in private task logs; it was corrected by removing the unused modules before upgrading nginx.
+
+No production container, database, payment, grant or migration is changed by this source step. This is an incremental runtime refresh, not a new claim that the entire historical audit was rerun or every scanner returns zero.

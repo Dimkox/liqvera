@@ -102,8 +102,8 @@ def test_live_btc_identity_is_digest_bound_and_offline_reproducible(tmp_path: Pa
 def test_public_preview_matches_pins_and_reproduces_offline(tmp_path: Path) -> None:
     report = ROOT / "apps/mezo-web/public/demo/latest-live/report.json"
     bundle = ROOT / "apps/mezo-web/public/demo/latest-live/evidence.zip"
-    assert hashlib.sha256(report.read_bytes()).hexdigest() == "0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2"
-    assert hashlib.sha256(bundle.read_bytes()).hexdigest() == "3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0"
+    assert hashlib.sha256(report.read_bytes()).hexdigest() == "d58728bd3df4b79c43bb2e742225e5b8f879eb0ec292213ffd3941f0f8778753"
+    assert hashlib.sha256(bundle.read_bytes()).hexdigest() == "0c20f41f845bd39c88286b52a64d1dad53713fd215507f611fab51d29896f51f"
     reproduced = verify_bundle(bundle, expected_report_sha256=hashlib.sha256(report.read_bytes()).hexdigest())
     assert reproduced.report_bytes == report.read_bytes()
     changed = tmp_path / "changed.zip"
@@ -204,3 +204,10 @@ def test_failed_staged_verification_exposes_no_target(
 
     assert not (output / str(REPORT_ID)).exists()
     assert {path.name for path in output.iterdir()} == {f".{REPORT_ID}.lock"}
+
+
+def test_archived_preview_retains_original_bytes_and_reproduces():
+    archive = ROOT / "apps/mezo-web/public/demo/archive/0ebf36b89bda183b"
+    assert hashlib.sha256((archive / "report.json").read_bytes()).hexdigest() == "0ebf36b89bda183b99767cd7fedc3c956405ef4a3f195d9d73b911d2c146ccf2"
+    assert hashlib.sha256((archive / "evidence.zip").read_bytes()).hexdigest() == "3255a42c210c6fe6ad0020c34113988da3f1659c566a73b7729606ad65d083b0"
+    assert verify_bundle(archive / "evidence.zip").report_bytes == (archive / "report.json").read_bytes()

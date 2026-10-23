@@ -126,7 +126,7 @@ async function showHistoricalReport():Promise<void> {
     const bundleBytes=new Uint8Array(await bundleResponse.arrayBuffer());
     const report=await verifyHistoricalAssets(reportBytes,bundleBytes);
     const card=node("div","status-card");
-    card.append(node("p","eyebrow","HISTORICAL LIVE PUBLIC PREVIEW"),node("h3","","Sealed Hyperliquid BTC perpetual report"));
+    card.append(node("p","eyebrow","HISTORICAL LIVE PUBLIC PREVIEW"),node("h3","",report.mezo_dex ? "Sealed Mezo DEX and Hyperliquid report" : "Sealed Hyperliquid BTC perpetual report"));
     const grid=node("div","data-grid report-grid");
     appendField(grid,"Captured at",formatHistoricalDate(HISTORICAL_DEMO.sourceAt));
     appendField(grid,"Report ID",HISTORICAL_DEMO.reportId,"breakable span-all");
@@ -134,6 +134,7 @@ async function showHistoricalReport():Promise<void> {
     appendField(grid,"Bundle SHA-256",HISTORICAL_DEMO.bundleSha256,"breakable span-all");
     appendField(grid,"Snapshot calculation",`${report.request.side} ${report.request.quantity_base} BTC · VWAP ${report.calculation.display.vwap}`);
     card.append(grid,node("p","safety-note","Sealed historical capture; see its timestamp above. It is not fresh market data, an execution promise, or a new run. No payment transaction exists for this public preview."));
+    mountMezoDex(card, report);
     if(historicalDownloadUrl)URL.revokeObjectURL(historicalDownloadUrl);
     historicalDownloadUrl=URL.createObjectURL(new Blob([bundleBytes],{type:"application/zip"}));
     const download=document.createElement("a");download.className="secondary-button";download.href=historicalDownloadUrl;

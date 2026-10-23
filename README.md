@@ -10,7 +10,7 @@ Understand BTC market depth before you act. Liqvera turns public order-book snap
 
 [![Verify Liqvera](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml/badge.svg)](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml)
 
-**Mezo Testnet · chain 31611.** MUSD purchases are deployed. The new DEX comparison and offline evidence extension are implemented in this source branch and await publication/deployment; the public preview retains its original report until rollout.
+**Mezo Testnet · chain 31611.** MUSD purchases are deployed. The DEX comparison and offline evidence extension are merged into main ([PR 17](https://github.com/Dimkox/liqvera/pull/17)); deployment is pending. This source includes a new October 23 wallet-free preview with fixed-block Mezo evidence.
 
 | Contract | Testnet address | Use |
 | --- | --- | --- |
@@ -98,6 +98,7 @@ Development is tracked publicly in Git. Use the links below to inspect changes, 
 - **[Releases](https://github.com/Dimkox/liqvera/releases)** — published release notes and assets.
 - **[Version tags](https://github.com/Dimkox/liqvera/tags)** — named source versions.
 - **[Compare revisions](https://github.com/Dimkox/liqvera/compare)** — review differences between commits, branches or tags.
+- **[DEX deployment package refresh](docs/security/2026-10-23-runtime-package-refresh.md)** — pinned musl/nginx fixes and candidate validation.
 - **[Current validation evidence](docs/security/2026-10-21-getzilla-successor.md)** — passing Liqvera audit, failed tool self-check, exact deployment evidence and verification limits.
 
 [Product specification](docs/specification.md) · [Architecture](docs/architecture.md) · [Security policy](SECURITY.md) · [Buildathon presentation](docs/competition/README.md)

@@ -1,5 +1,19 @@
 # Liqvera handoff
 
+## 2026-10-23 — available musl/nginx security fixes before DEX rollout
+
+Demo PR 19 merged into main as `d2b88d91e6e4c7238ca98d5a341ac79fca10d4e0` after its exact-head CI passed. Fresh pre-deployment Trivy/Grype databases exposed the newly indexed musl advisory. Runtime recipes now pin the fixed musl packages and nginx 1.30.6, with the existing security backports retained. [Incremental package record](docs/security/2026-10-23-runtime-package-refresh.md) states the exact scope and primary sources.
+
+All four candidate Docker builds passed; Python/BusyBox/TLS regressions and offline ZIP reproduction passed. The upgraded non-root nginx passed configuration validation and served both new and archived preview bytes over HTTP. Nine artifact/operations tests passed. The first nginx upgrade attempt failed because old unused modules pinned its previous version; removing those modules first resolved the build. Production remains unchanged in this source step.
+
+Independent deployment review found that old readers cannot serve new DEX artifacts after public exposure. The rollout is being revised to preserve the new gateway/report readers during compatible recovery, disable DEX capture and retain all data, instead of restoring old readers over new paid entitlements. No deployment, payment, migration, grant renewal or database restore has occurred.
+
+## 2026-10-23 — publishable DEX preview with preserved historical bytes
+
+[PR 17](https://github.com/Dimkox/liqvera/pull/17) is merged as `65ee000377028e3909a72402a5341ff4ddd56c1a`; its exact-head and main verification runs passed. A fresh real SELL 1 BTC capture uses that exact engine commit and Mezo block 16321216. The new wallet-free preview pins its report/ZIP digests before rendering the Mezo comparison. The prior October 12 pair is preserved byte-for-byte in the public demo archive and remains offline-verifiable. README and competition script distinguish published source, deployment and paid acceptance.
+
+Verification: full `make verify PYTHON=.venv/bin/python` passed **1021 tests, two live deselections and 85 subtests** in 394.64 seconds; browser tests passed 106; documentation links passed 67 documents. The report runtime image reproduced the new ZIP with networking disabled, a read-only filesystem and a temporary scratch mount. Actual Chrome checks at mobile 320 and desktop 1280 widths found the comparison, block and three pinned explorer links, no horizontal overflow and no runtime exceptions. Independent read-only review approved the application/demo diff. Deployment preparation is separate; this commit submits no payment and changes no production container, database, grant or migration. Trove core remains draft PR 18, without paid API/UI integration.
+
 ## 2026-10-23 — Trove capture and arithmetic core verified
 
 The separate Trove branch now pins narrow read-only proxy/implementation ABI surfaces and implements exact risk/scenario arithmetic plus bounded fixed-block batched capture. Offline verification checks every consumed raw call, actual six-value return ordering, pending totals, ICR/TCR agreement, uint256 bounds, full owner/list completeness, reciprocal links, eligibility skips and liquidation-reserve subtraction. Over-limit queues report an explicit unknown position; no unproven rank is fabricated. Borrower spelling is preserved for future checksummed request binding.
@@ -9,7 +23,6 @@ Thirty-one focused tests and protocol TypeScript compilation pass; new files pas
 ## 2026-10-23 — separate Trove product implementation started
 
 The DEX source is isolated in draft PR 17. Trove work starts from its `322b34c` successor in a separate worktree/branch and follows the [bounded capture and product integration plan](docs/superpowers/plans/2026-10-23-trove-risk.md). The verified ABI/source fixes the draft's debt/collateral tuple ordering, view price getter and redemption skip rules. Owner enumeration plus bounded batched reads is proposed to meet the latency target without claiming owner-array order as redemption order. Lists above the bound must report an honest unknown/limit rather than an unproven rank. No Trove implementation, paid acceptance or deployment is claimed by this planning step. Documentation links passed for 68 documents.
-
 
 ## 2026-10-23 — preserve Mezo failure reasons through public polling
 

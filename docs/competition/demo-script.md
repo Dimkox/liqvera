@@ -3,7 +3,7 @@
 Use the current Testnet deployment and the [demo runbook](../runbooks/testnet-demo.md). The owner has authorized a 0.01 test-MUSD purchase; a real wallet signature is still needed. Show only actions actually completed.
 
 1. Open [liqvera.site](https://liqvera.site). Show Mezo Testnet and the public, read-only Hyperliquid BTC perpetual instrument.
-2. Open the wallet-free preview. Show its October 12 capture timestamp, quantity, hashes and evidence ZIP. It is a sealed historical capture, not a new payment.
+2. Open the wallet-free preview. After the October 23 preview rollout, show its capture timestamp, SELL 1 BTC comparison, Mezo block 16321216, pool/block explorer links and evidence ZIP. Check the displayed source date before recording: the deployed preview may still be the October 12 version. The preview is a sealed public-data capture, not a new payment.
 3. Connect a wallet holding test MUSD, request a fresh BUY/SELL report and review the capture time, limitations, recipient and 0.01 test-MUSD price.
 4. Confirm the limited wallet authorization. Wait for canonical confirmation; if the outcome is uncertain, use Check status instead of signing again.
 5. Show the actual receipt and transaction hash. Download the paid report JSON and ZIP, then run the offline verifier against the receipt's report digest. Reload and retrieve the same entitlement without another payment.

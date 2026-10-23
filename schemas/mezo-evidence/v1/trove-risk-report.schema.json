@@ -1,0 +1,386 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/trove-risk-report.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "report_id",
+    "request",
+    "source",
+    "trove_risk",
+    "quality",
+    "reproducibility",
+    "boundaries"
+  ],
+  "properties": {
+    "schema": {
+      "const": "liqvera-trove-risk-report/v1"
+    },
+    "report_id": {
+      "$ref": "primitives.schema.json#/$defs/id"
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "product_id",
+        "borrower"
+      ],
+      "properties": {
+        "product_id": {
+          "const": "trove_risk"
+        },
+        "borrower": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}(?![\\s\\S])"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_mode",
+        "source_at",
+        "created_at"
+      ],
+      "properties": {
+        "source_mode": {
+          "enum": [
+            "live-public",
+            "fixture"
+          ]
+        },
+        "source_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "trove_risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "debt_musd",
+        "collateral_btc",
+        "price_musd",
+        "icr_atomic",
+        "mcr",
+        "ccr",
+        "tcr",
+        "borrower",
+        "block_number",
+        "block_hash",
+        "queue_status",
+        "price_source",
+        "principal_musd",
+        "interest_musd",
+        "liquidation_reserve_musd",
+        "icr",
+        "liquidation_price_musd",
+        "buffer_pct",
+        "debt_ahead_musd",
+        "redeemable_debt_ahead_musd",
+        "contract_status",
+        "flags",
+        "scenarios",
+        "redemption_position",
+        "sorted_troves_size",
+        "explorer_links",
+        "caveats"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "debt_musd": {
+          "type": "string",
+          "minLength": 1
+        },
+        "collateral_btc": {
+          "type": "string",
+          "minLength": 1
+        },
+        "price_musd": {
+          "type": "string",
+          "minLength": 1
+        },
+        "icr_atomic": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mcr": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ccr": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tcr": {
+          "type": "string",
+          "minLength": 1
+        },
+        "borrower": {
+          "type": "string",
+          "minLength": 1
+        },
+        "block_number": {
+          "type": "string",
+          "minLength": 1
+        },
+        "block_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "queue_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "price_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "principal_musd": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interest_musd": {
+          "type": "string",
+          "minLength": 1
+        },
+        "liquidation_reserve_musd": {
+          "type": "string",
+          "minLength": 1
+        },
+        "icr": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "liquidation_price_musd": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "buffer_pct": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "debt_ahead_musd": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "redeemable_debt_ahead_musd": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contract_status": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "scenarios": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "price_change_pct",
+              "price_musd",
+              "icr",
+              "status"
+            ],
+            "properties": {
+              "price_change_pct": {
+                "type": "string",
+                "minLength": 1
+              },
+              "price_musd": {
+                "type": "string",
+                "minLength": 1
+              },
+              "icr": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "redemption_position": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "sorted_troves_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "explorer_links": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "block",
+            "trove_manager",
+            "sorted_troves",
+            "price_feed"
+          ],
+          "properties": {
+            "block": {
+              "type": "string",
+              "minLength": 1
+            },
+            "trove_manager": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sorted_troves": {
+              "type": "string",
+              "minLength": 1
+            },
+            "price_feed": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "caveats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot_status",
+        "limitations",
+        "reason_codes",
+        "checks"
+      ],
+      "properties": {
+        "snapshot_status": {
+          "enum": [
+            "SIMULATED",
+            "HISTORICAL_SNAPSHOT",
+            "VALID_FOR_SNAPSHOT_CALCULATION"
+          ]
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "reason_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "SIMULATED_SOURCE",
+              "STALE_SOURCE"
+            ]
+          }
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "result"
+            ],
+            "properties": {
+              "name": {
+                "enum": [
+                  "RAW_CALL_RECALCULATION",
+                  "CONTRACT_ICR_AGREEMENT",
+                  "QUEUE_EVIDENCE_POLICY"
+                ]
+              },
+              "result": {
+                "const": "PASS"
+              }
+            }
+          }
+        }
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm_sha256",
+        "dependency_lock_sha256",
+        "engine_commit"
+      ],
+      "properties": {
+        "algorithm_sha256": {
+          "$ref": "primitives.schema.json#/$defs/sha256"
+        },
+        "dependency_lock_sha256": {
+          "$ref": "primitives.schema.json#/$defs/sha256"
+        },
+        "engine_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])"
+        }
+      }
+    },
+    "boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_authority",
+        "execution_promise"
+      ],
+      "properties": {
+        "execution_authority": {
+          "const": "NONE"
+        },
+        "execution_promise": {
+          "const": false
+        }
+      }
+    }
+  }
+}

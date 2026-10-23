@@ -13,7 +13,7 @@ from liqvera_evidence_report.evidence_io import EvidenceRejected, strict_json
 SCHEMAS = (
     "primitives.schema.json", "quote-request.schema.json", "reasons.schema.json",
     "report.schema.json", "capture-evidence.schema.json", "bundle-manifest.schema.json",
-    "algorithm.schema.json", "mezo-dex.schema.json",
+    "algorithm.schema.json", "mezo-dex.schema.json", "trove-risk-report.schema.json",
 )
 
 

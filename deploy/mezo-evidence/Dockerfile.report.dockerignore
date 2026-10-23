@@ -36,3 +36,6 @@ packages/mezo-protocol/vendor/**
 !deploy/security/
 !deploy/security/busybox/
 !deploy/security/busybox/**
+!packages/mezo-protocol/vendor/TroveManager.implementation.testnet.json
+!packages/mezo-protocol/vendor/SortedTroves.implementation.testnet.json
+!packages/mezo-protocol/vendor/PriceFeed.implementation.testnet.json

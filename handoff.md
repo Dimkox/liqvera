@@ -600,3 +600,13 @@ The next hosted advisory refresh found six new vulnerabilities on the locked dev
 closure's `filelock==4.1.1`; the 4.2.x line fixes them. Updated the dev lock to
 `filelock==4.2.4`, the latest available release, and will rerun the complete audit and
 product gate before rollout.
+
+The same advisory refresh also identified Zod versions below 4.6.6 through Reown and
+x402 browser dependencies. Added a root npm override to 4.6.6 and regenerated the web
+lock. `npm audit` now reports zero vulnerabilities; `npm ci`, the web suite and
+production build pass. This remains part of the unmerged PR until hosted CI completes.
+
+The matching gateway audit found the same Zod advisory plus fixable `body-parser` and
+`fast-uri` ranges. Updated its lock and root Zod override. Both npm audits and both
+Python lock audits report zero known vulnerabilities. Gateway `npm ci`, typecheck and
+tests pass locally (84 passed, 14 PostgreSQL cases skipped without a local test DB).

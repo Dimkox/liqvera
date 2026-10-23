@@ -1,5 +1,11 @@
 # Liqvera handoff
 
+## 2026-10-23 — available gateway Node LTS pin restores clean rebuilds
+
+The first PR 17 product job passed **1020 Python tests, two live deselections and 85 subtests**, Node builds/tests and documentation, then failed a clean gateway build: Alpine v3.24 now offers `nodejs=24.22.1-r0` instead of the retired `24.18.1-r0` pin. A fresh disposable Alpine install reproduced the old-pin failure; a cached local build alone would have hidden it. [Official Node release notes](https://nodejs.org/en/blog/release/v24.22.1) identify 24.22.1 as an LTS security release within the application's declared engine range.
+
+The gateway runtime now pins available 24.22.1-r0. Pinned Alpine, system OpenSSL/CA versions, explicit system trust, non-root user and application/payment code remain unchanged. The full new gateway image build passes. Its network-disabled TLS guard reports Node v24.22.1, OpenSSL 3.5.9, 118 effective roots, zero compromised roots and required verification in both parent/child. Image-based unit replay passes 59 and deliberately skips the 13 database cases; all 72 passed earlier with a disposable database on the host. The initial image-test harness omitted a source file imported directly by an observability test; read-only source mounting corrected that harness without changing the product. Independent read-only review found no blocker in the runtime pin change. Hosted exact-head CI and deployment remain separate pending steps.
+
 ## 2026-10-23 — PR 17 published; report Docker ABI boundary repaired
 
 Source commits `f7f1a3891595eca5f32e618f49c1137a5b5b7540` and `e165c92dc72d3db23c4d4709557d7db36835b67e` are published in [draft PR 17](https://github.com/Dimkox/liqvera/pull/17). The first hosted run `39970101249` failed report-image wheel metadata because its Docker context did not include the three newly embedded ABI inputs; matrix fail-fast cancelled capture. Edge passed; this is not a green hosted run or a deployed change.

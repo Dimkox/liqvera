@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-23 — PR 17 published; report Docker ABI boundary repaired
+
+Source commits `f7f1a3891595eca5f32e618f49c1137a5b5b7540` and `e165c92dc72d3db23c4d4709557d7db36835b67e` are published in [draft PR 17](https://github.com/Dimkox/liqvera/pull/17). The first hosted run `39970101249` failed report-image wheel metadata because its Docker context did not include the three newly embedded ABI inputs; matrix fail-fast cancelled capture. Edge passed; this is not a green hosted run or a deployed change.
+
+The report Dockerfile now copies exactly Pool, Router and PoolFactory ABI JSON files, with only those paths/parents added to its restrictive dockerignore. The same wheel-stage build failed locally before the fix and passed afterward. A network-disabled read-only container verified all three embedded ABI resources against their source-lock SHA-256. Application/payment code, bases and TLS guards are unchanged. The independent reviewer found that directory negations broadened the build context; explicit descendant exclusions now keep the context to the three ABIs, verified with a synthetic export. The reviewer checked this narrow build fix separately. The new hosted exact-head run must pass before integration.
+
+Final local delta tests passed 43 cases with two live deselected; a separate failed native SELL smoke was retried read-only and passed in 2.88 seconds. The earlier timeout remains a failed run and no stability or paid-acceptance claim is inferred. Public deployment and immutable demo assets remain unchanged.
+
 ## 2026-10-23 — fixed-block DEX evidence and comparison implemented locally
 
 The new source extension captures Mezo Testnet reserves, token identity/decimals and the actual per-pool fee, cross-checks Pool/Router, rechecks the same block header, and seals raw calls with the Hyperliquid package. Optional report fields and five reserve-derived depth points rebuild offline; ZIP members include capture, calls and the verified DEX ABIs. Historical ZIPs and migrations are unchanged. The Testnet override enables the source requirement; fresh enabled builds fail closed without Mezo evidence, while existing report IDs retain their bytes. Gateway preserves the distinct failure code and the browser renders comparison text with pinned explorer links.

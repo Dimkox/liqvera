@@ -56,3 +56,18 @@ before the constant-product division. `fetchPrice()` is view in the observed
 PriceFeed implementation; `lastGoodPrice()` reverts. MCR and CCR are 110% and
 150%. These observations do not establish independently authenticated chain
 inclusion, paid delivery, deployed analytics or historical archive support.
+
+
+## Trove protection transaction metadata
+
+`MEZO_TESTNET_TROVES` includes the documented Testnet BorrowerOperations and
+HintHelpers proxies. `MEZO_TESTNET_BORROWER_OPERATIONS_ABI` is limited to the
+user actions `addColl` and `repayMUSD`; `MEZO_TESTNET_HINT_HELPERS_ABI` exposes
+only nominal-ratio and approximate-hint reads. The SortedTroves read ABI includes
+`findInsertPosition` for exact neighboring hints.
+
+Proxy shell ABIs, verified implementation ABIs and explorer source responses are
+retained independently under `vendor/` and bound by `source-lock.json` hashes.
+Applications call the proxy address using the pinned narrow implementation ABI.
+This metadata supports a browser-only, user-signed Testnet flow; it does not grant
+Liqvera custody of wallet keys or transaction authority.

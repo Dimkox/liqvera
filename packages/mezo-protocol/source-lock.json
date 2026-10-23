@@ -223,6 +223,92 @@
           },
           "explorer_is_proxy": "false",
           "compiler_version": "v0.8.24+commit.e11b9ed9"
+        },
+        {
+          "name": "BorrowerOperations",
+          "address": "0xCdF7028ceAB81fA0C6971208e83fa7872994beE5",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0xCdF7028ceAB81fA0C6971208e83fa7872994beE5",
+          "retrieved_at": "2026-10-23T22:48:29.709458+00:00",
+          "local_path": "vendor/BorrowerOperations.testnet.json",
+          "sha256": "1605e52e7d439f50d28fa95ae63171875c35e5901a28f1f848a1644249ff8776",
+          "contract_name": "TransparentUpgradeableProxy",
+          "source_sha256": "eca2efb275f85f4440db6d4dd2086be0700082e6caea8f5995b7da0446a622f6",
+          "implementation_metadata_url": "https://api.explorer.test.mezo.org/api/v2/smart-contracts/0xCdF7028ceAB81fA0C6971208e83fa7872994beE5",
+          "implementation_address": "0xc05Bf344BD5b58825784326dD3112fB6cC160dcC",
+          "source_response": {
+            "local_path": "vendor/explorer/BorrowerOperations.source.testnet.json",
+            "sha256": "e7ddef49a2d0cd904cc24f5b6b502191480aa1e8c3acacd543315d4e4920cc2b",
+            "retrieved_at": "2026-10-23T22:48:29.709458+00:00"
+          },
+          "explorer_is_proxy": "true",
+          "compiler_version": "v0.8.20+commit.a1b79de6",
+          "implementation_metadata": {
+            "local_path": "vendor/explorer/BorrowerOperations.proxy-metadata.testnet.json",
+            "sha256": "1dbb47e018067f64f8384b54e23cc28171a8408d933da810c7884c444b9c2aa4",
+            "retrieved_at": "2026-10-23T22:48:29.709487+00:00"
+          }
+        },
+        {
+          "name": "BorrowerOperationsImplementation",
+          "address": "0xc05Bf344BD5b58825784326dD3112fB6cC160dcC",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0xc05Bf344BD5b58825784326dD3112fB6cC160dcC",
+          "retrieved_at": "2026-10-23T22:48:29.709491+00:00",
+          "local_path": "vendor/BorrowerOperations.implementation.testnet.json",
+          "sha256": "e4b16a94717c94a404a51c7c75002d45185c61b255440ab10f211102a6b4af53",
+          "contract_name": "BorrowerOperations",
+          "source_sha256": "c027a42b7fb09511590f837ebc1260d755f7aa91fe9fd53dbfa25354a89a3bfc",
+          "source_response": {
+            "local_path": "vendor/explorer/BorrowerOperationsImplementation.source.testnet.json",
+            "sha256": "97f596a8fa8859a942cdde6d170bfa6edd485830e601ae7b439253c58bf92808",
+            "retrieved_at": "2026-10-23T22:48:29.709491+00:00"
+          },
+          "explorer_is_proxy": "false",
+          "compiler_version": "v0.8.24+commit.e11b9ed9"
+        },
+        {
+          "name": "HintHelpers",
+          "address": "0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6",
+          "retrieved_at": "2026-10-23T22:48:32.611641+00:00",
+          "local_path": "vendor/HintHelpers.testnet.json",
+          "sha256": "1605e52e7d439f50d28fa95ae63171875c35e5901a28f1f848a1644249ff8776",
+          "contract_name": "TransparentUpgradeableProxy",
+          "source_sha256": "eca2efb275f85f4440db6d4dd2086be0700082e6caea8f5995b7da0446a622f6",
+          "implementation_metadata_url": "https://api.explorer.test.mezo.org/api/v2/smart-contracts/0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6",
+          "implementation_address": "0x8adF3f35dBE4026112bCFc078872bcb967732Ea8",
+          "source_response": {
+            "local_path": "vendor/explorer/HintHelpers.source.testnet.json",
+            "sha256": "fcbc54251d1e3d729a74250787779c9465c945c22351114450f9602e9f953ed2",
+            "retrieved_at": "2026-10-23T22:48:32.611641+00:00"
+          },
+          "explorer_is_proxy": "true",
+          "compiler_version": "v0.8.20+commit.a1b79de6",
+          "implementation_metadata": {
+            "local_path": "vendor/explorer/HintHelpers.proxy-metadata.testnet.json",
+            "sha256": "6ea5d41b14de68626f2a560b7964966314dda335656fabf62cebdeb0b901d0b8",
+            "retrieved_at": "2026-10-23T22:48:32.611655+00:00"
+          }
+        },
+        {
+          "name": "HintHelpersImplementation",
+          "address": "0x8adF3f35dBE4026112bCFc078872bcb967732Ea8",
+          "chain_id": 31611,
+          "url": "https://api.explorer.test.mezo.org/api?module=contract&action=getsourcecode&address=0x8adF3f35dBE4026112bCFc078872bcb967732Ea8",
+          "retrieved_at": "2026-10-23T22:48:32.611658+00:00",
+          "local_path": "vendor/HintHelpers.implementation.testnet.json",
+          "sha256": "56200b8ddb6f8a97caa1ea993da0f917cf46e1fbccab7678a725104118e86136",
+          "contract_name": "HintHelpers",
+          "source_sha256": "ba38ad55c6ee237eafd8589db6f579f2ed1d521fc75f711034d8ddb7bf35d94c",
+          "source_response": {
+            "local_path": "vendor/explorer/HintHelpersImplementation.source.testnet.json",
+            "sha256": "3f7da44a268560272ce4cd5a48b832b603b5ffaca4b34f37b125bf0131ab6d96",
+            "retrieved_at": "2026-10-23T22:48:32.611658+00:00"
+          },
+          "explorer_is_proxy": "false",
+          "compiler_version": "v0.8.24+commit.e11b9ed9"
         }
       ]
     }

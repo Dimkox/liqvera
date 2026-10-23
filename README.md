@@ -22,6 +22,8 @@ Understand BTC liquidity and Mezo MUSD borrower risk. Liqvera turns public marke
 | MUSD/BTC pool | [0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9](https://explorer.test.mezo.org/address/0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9) | Read: reserves and quote cross-check |
 | BTC token | [0x7b7C000000000000000000000000000000000000](https://explorer.test.mezo.org/address/0x7b7C000000000000000000000000000000000000) | Read: pool identity and decimals |
 | TroveManager | [0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0](https://explorer.test.mezo.org/address/0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0) | Read: borrower debt, collateral and ratios |
+| BorrowerOperations | [0xCdF7028ceAB81fA0C6971208e83fa7872994beE5](https://explorer.test.mezo.org/address/0xCdF7028ceAB81fA0C6971208e83fa7872994beE5) | Wallet-signed BTC deposit and MUSD repayment |
+| HintHelpers | [0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6](https://explorer.test.mezo.org/address/0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6) | Read: fresh Trove insertion hints |
 | SortedTroves | [0x722E4D24FD6Ff8b0AC679450F3D91294607268fA](https://explorer.test.mezo.org/address/0x722E4D24FD6Ff8b0AC679450F3D91294607268fA) | Read: proven redemption ordering |
 | PriceFeed | [0x86bCF0841622a5dAC14A313a15f96A95421b9366](https://explorer.test.mezo.org/address/0x86bCF0841622a5dAC14A313a15f96A95421b9366) | Read: fixed-block BTC price |
 

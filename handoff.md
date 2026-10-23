@@ -454,3 +454,18 @@ port and did not start services; isolated installed-image HTTP validation remain
 part of candidate validation. No working database or unknown payment state changed.
 Hosted CI, exact image checks and publication are next; historical verified payment
 transactions remain the owner's chosen proof.
+
+
+## 2026-10-23 — Trove protection transaction metadata
+
+Pinned public Mezo Testnet proxy and verified implementation artifacts for
+BorrowerOperations (`0xCdF7028ceAB81fA0C6971208e83fa7872994beE5`) and HintHelpers
+(`0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6`). Source lock records both layers,
+explorer source responses, implementation observations and SHA-256 hashes. Narrow
+exports expose `addColl`, `repayMUSD`, `computeNominalCR`, `getApproxHint`, and
+SortedTroves `findInsertPosition`; existing TroveManager debt/status reads remain.
+
+Validation: `../../apps/mezo-web/node_modules/.bin/tsc -p tsconfig.json` from
+`packages/mezo-protocol` and `node --test test/trove-transactions.test.mjs` from
+`apps/mezo-web` passed (3 tests). Tests validate metadata and source hashes only;
+no wallet transaction was signed or sent.

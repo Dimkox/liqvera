@@ -10,3 +10,26 @@ Use the current Testnet deployment and the [demo runbook](../runbooks/testnet-de
 6. Close with the product's value: MUSD buys a portable analytical artifact that the recipient can independently check. Reports do not place trades or guarantee execution.
 
 Hide wallet signatures, bearer capabilities and private account views. A public wallet address or unsigned 402 response is not proof of payment. If payment is not completed, stop that segment and retain its pending status. The separate local fixture demonstration transfers no tokens and cannot replace the paid run.
+
+## Trove demonstration
+
+The same [Testnet application](https://liqvera.site) now includes **Trove risk**:
+borrower debt/collateral, exact ICR, theoretical MCR crossing, price scenarios and a
+proven redemption position. The borrower defaults to the connected wallet address.
+Open **Trove risk → Show sealed Trove example**. Show the captured timestamp, debt,
+collateral, ICR, MCR crossing, scenarios, redemption position and block links. Download
+its ZIP and show offline reproduction. For a fresh borrower, explain the existing
+0.01 MUSD x402 flow; do not imply a newly signed purchase was recorded.
+
+A public native request reached READY at block 16324977; unchanged replay, input and
+access boundaries, and the unpaid 402 response were verified. Its own operator-exported
+ZIP reproduces offline. No fresh wallet signature or paid Trove settlement is claimed.
+The owner selected the three already verified historical payment transactions.
+
+[Deployment and scoped evidence](../security/2026-10-23-mezo-trove-deployment.md) records
+main CI with 1101 Python tests + 85 subtests, 98 gateway tests without database skips
+and 130 browser tests. [Published mobile/desktop views](2026-10-23-mezo-trove/published/result.json)
+show the new panel without overflow. Mainnet, borrowing/redemption and a registry
+contract are outside this update. The October 13 video remains a dated preparation
+cut; the current screenshots and deck document the new features. This update does
+not assert a new Akindo account submission.

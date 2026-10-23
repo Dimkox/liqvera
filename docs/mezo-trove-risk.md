@@ -1,8 +1,9 @@
-# Mezo Trove risk preview
+# Mezo Trove risk
 
-This branch contains read-only capture, exact risk reports and portable Trove
-evidence ZIPs. The CLI is a free preview. Paid API delivery and the browser tab
-remain in progress; the public site does not expose this feature yet.
+The [Testnet product](https://liqvera.site) includes read-only borrower reports,
+portable evidence ZIPs and a Trove risk tab. A sealed native example is available
+without a wallet; fresh web reports use the existing 0.01 test MUSD x402 flow. The
+CLI remains free and does not grant web entitlements.
 
 The three sourced Testnet proxies and narrow ABIs are exported from
 `packages/mezo-protocol`. TroveManager's verified tuple is collateral, principal,
@@ -33,8 +34,8 @@ change liquidation eligibility. Price scenarios reduce the captured price by
 
 Native capture uses at most four concurrent 64-call batches under a shared
 12-second deadline. Transient connection/read failures may retry once with the
-same payload and block. Exhaustion fails `MEZO_TROVE_SOURCE_UNAVAILABLE`; no
-retained data or fixture replaces it. A first live attempt hit ConnectTimeout;
+same payload and block. The adapter reports `MEZO_TROVE_SOURCE_UNAVAILABLE`; the public build exposes
+`MEZO_SOURCE_UNAVAILABLE`. No retained data or fixture replaces a failed source. A first live attempt hit ConnectTimeout;
 a subsequent successful capture took 4,988 ms at block 16320987, with 1,812
 calls and 300 owners. The [native capture](../evidence/mezo-testnet/2026-10-23-trove-active-native.json)
 replays offline with exact ICR agreement and proven redemption position 1.
@@ -73,9 +74,9 @@ A committed-code native CLI run at block **16323457** completed in **11,242 ms**
 including report and ZIP publication. Its [report, ZIP and timing observation](../evidence/mezo-testnet/2026-10-23-trove-risk-preview/verification.json)
 are retained; both host and non-root network-disabled image verifiers reproduce
 the bundle. This is one observed run, not a general latency guarantee. It submits
-no payment and does not change the deployed web/API product.
+no payment or web entitlement; the CLI operates independently of web checkout.
 
-## Private API integration
+## API integration
 
 The additive API 1.1 contract accepts the closed request
 `{product_id: "trove_risk", borrower: "<EIP-55 address>", expected_payer: "<address>"}`.
@@ -86,10 +87,10 @@ artifacts remain readable when creation is disabled. No SQL migration is require
 Capture seals a separate, atomic two-file package. The report service independently
 replays its raw calls, binds the borrower and rejects stale data before offering a
 quote. Trove previews identify the borrower and active/inactive status. The existing
-0.01 MUSD x402 terms, ledger and receipt checks apply unchanged. This source phase
-is not evidence of a paid Trove purchase or a production deployment.
+0.01 MUSD x402 terms, ledger and receipt checks apply unchanged. Creation is enabled
+in the published Testnet overlay. No fresh signed Trove purchase is claimed.
 
-## Browser source phase
+## Browser and recovery
 
 The existing application now includes a Trove risk tab, a borrower field prefilled
 from the connected wallet, and a text-only risk panel. The public sealed example
@@ -102,3 +103,9 @@ market sessions keep their original representation. Unknown payment outcomes sta
 in recovery. Both delivery paths verify the report subject against the quote before
 clearing the payment guard. Rollback after exposure must retain readers **and the
 new browser**; disabling creation must preserve existing report and payment recovery.
+
+## Deployment evidence
+
+Public native preparation, scope/input boundaries and the unpaid x402 402 response
+are verified. Historical verified transfers remain the selected payment proof. [Deployment evidence](security/2026-10-23-mezo-trove-deployment.md)
+separates the native blocks, timing observations, image checks and operational limits.

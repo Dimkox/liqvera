@@ -1,0 +1,13 @@
+{
+  "source_commit": "ab15182dd14641ea613a47bab4d295e91046d67d",
+  "block_number": "16323457",
+  "report_sha256": "22dfc0db8355bc126f89af07914aa2601b42fd84eafc923e319b84bc2b7b60f1",
+  "bundle_sha256": "94c0a93520eb91382c45f4690f176e655ccc372e67b9594653ef651cfd419b10",
+  "timing_observation": {
+    "started_monotonic_ns": 2906212025366033,
+    "ended_monotonic_ns": 2906223268084905,
+    "elapsed_ms": 11242,
+    "exit_code": 0
+  },
+  "scope": "Native read-only Testnet CLI; no payment or application deployment."
+}

@@ -1,5 +1,11 @@
 # Liqvera handoff
 
+## 2026-10-23 — native Trove CLI preview and replay vector retained
+
+The clean-code repository wrapper at `ab15182dd14641ea613a47bab4d295e91046d67d` captured Testnet block 16323457 and published a free Trove risk report/ZIP in 11,242 ms. The original source-to-creation age was 14.883 seconds, within the recorded 30-second freshness policy; the proven redemption position was 1. Host and non-root network-disabled image verification reproduce the exact report and bundle. [Retained verification and timing](evidence/mezo-testnet/2026-10-23-trove-risk-preview/verification.json) binds the observed source revision and digests. Timing is a local observation, not authenticated chain evidence or a general performance guarantee.
+
+A new offline golden test checks the coupled digests, byte reconstruction, source/block identity and integer timing arithmetic. All 21 CLI/bundle tests pass. Independent read-only native-artifact review passed without RPC access. No wallet payment, loan, production database change or application deployment occurred. Paid API/UI integration continues in a separate dependent worktree; the user’s historical-payment-only instruction remains in force.
+
 ## 2026-10-23 — Trove CLI report and offline ZIP verified locally
 
 The free Trove CLI preview now creates an exact borrower report and deterministic ZIP containing fixed-block raw calls and three pinned implementation ABIs. The verifier dispatches by the report schema, decodes/recalculates the risk and queue proof, and rebuilds every archive byte. Manifest recomputation cannot hide altered calls, ABI resources or reported calculations. Historical snapshots and fixtures remain explicitly labelled; source clocks are bounded integers. The repository wrapper derives the real source revision and rejects dirty code/ABI/schema inputs. Paid API/UI integration remains a separate step; the public site still exposes the deployed DEX product only.

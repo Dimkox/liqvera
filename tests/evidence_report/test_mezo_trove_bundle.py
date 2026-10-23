@@ -155,3 +155,28 @@ def test_report_clock_is_a_bounded_integer(clock):
     capture, request = inputs()
     with pytest.raises(EvidenceRejected, match="INVALID_INPUT"):
         TroveReportRequest(request.report_id, request.borrower, request.engine_commit, clock)
+
+
+def test_retained_native_cli_report_matches_its_digest_and_rebuilds_offline():
+    import hashlib
+
+    from liqvera_evidence_report.evidence_bundle import verify_bundle
+
+    root = ROOT / "evidence/mezo-testnet/2026-10-23-trove-risk-preview"
+    expected = json.loads((root / "verification.json").read_text())
+    report = (root / "report.json").read_bytes()
+    assert hashlib.sha256(report).hexdigest() == expected["report_sha256"]
+    assert (
+        hashlib.sha256((root / "evidence.zip").read_bytes()).hexdigest()
+        == expected["bundle_sha256"]
+    )
+    built = verify_bundle(root / "evidence.zip", expected_report_sha256=expected["report_sha256"])
+    assert built.report_bytes == report
+    assert built.document["reproducibility"]["engine_commit"] == expected["source_commit"]
+    assert built.document["trove_risk"]["block_number"] == expected["block_number"]
+    timing = expected["timing_observation"]
+    assert (
+        timing["elapsed_ms"]
+        == (timing["ended_monotonic_ns"] - timing["started_monotonic_ns"]) // 1_000_000
+    )
+    assert timing["exit_code"] == 0 and timing["elapsed_ms"] < 15_000

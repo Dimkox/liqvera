@@ -68,3 +68,9 @@ The source block time is separate from report creation. A live-source snapshot
 older than 30 seconds is labelled `HISTORICAL_SNAPSHOT`; fixtures are `SIMULATED`.
 The quality checks cover recalculation, contract ICR and the bounded queue policy,
 not RPC authenticity. Report creation timestamps are bounded integer milliseconds.
+
+A committed-code native CLI run at block **16323457** completed in **11,242 ms**,
+including report and ZIP publication. Its [report, ZIP and timing observation](../evidence/mezo-testnet/2026-10-23-trove-risk-preview/verification.json)
+are retained; both host and non-root network-disabled image verifiers reproduce
+the bundle. This is one observed run, not a general latency guarantee. It submits
+no payment and does not change the deployed web/API product.

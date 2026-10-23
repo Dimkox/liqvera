@@ -33,3 +33,9 @@ See [the specification](specification.md), [security](../SECURITY.md) and [valid
 ## Optional fixed-block Mezo evidence
 
 The Testnet DEX extension keeps RPC reads in public capture. A request-bound optional sidecar seals chain metadata and raw calls in the capture manifest. The report process validates and recalculates it offline, includes ABI/call bytes in the bounded ZIP and adds optional Mezo/venue-comparison fields. Gateway delivery serves the hash-bound complete report; the browser uses text nodes and pinned Testnet explorer links. Existing reports and SQL migrations remain unchanged. The report setting `LIQVERA_MEZO_DEX_ENABLED=true` requires Mezo evidence on fresh live builds; missing data fails closed. See [Mezo integration](mezo-integration.md).
+
+The optional Trove product has a closed `trove_risk` request, a separate fixed-block
+capture package and the independently reproducible `liqvera-trove-risk-report/v1`
+body. Gateway binds product and borrower before publishing a quote; disabling new
+creation preserves immutable existing delivery. The additive report schema union
+continues to accept historical market reports. See [Trove evidence](mezo-trove-risk.md).

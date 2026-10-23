@@ -1,4 +1,4 @@
-import { AMOUNT, ASSET, INSTRUMENT, NETWORK, MEZO_CONFIG, RETENTION, type Quote, type Reason, type ReportRequest } from '../domain/model.js';
+import { AMOUNT, ASSET, INSTRUMENT, NETWORK, MEZO_CONFIG, RETENTION, CHAIN_ID, type Quote, type Reason, type ReportRequest } from '../domain/model.js';
 export function quoteResource(quote: Quote,requestId: string) {
   return {schema:'liqvera-evidence-quote/v1',request_id:requestId,report_request_id:quote.report_request_id,quote_id:quote.id,
     report_id:quote.report_id,report_sha256:quote.report_sha256,bundle_sha256:quote.bundle_sha256,state:quote.state,
@@ -22,8 +22,9 @@ const messages: Partial<Record<Reason,string>>={
   RATE_LIMITED:'Request budget exceeded. Try again after the stated delay.'
 };
 export const errorResource=(code: Reason,requestId: string)=>({schema:'liqvera-evidence-error/v1',request_id:requestId,code,message:messages[code]??'The request cannot be completed safely.'});
-export function capabilitiesResource(requestId: string,sourceMode: 'fixture'|'live-public',blockers: Reason[]) {
+export function capabilitiesResource(requestId: string,sourceMode: 'fixture'|'live-public',blockers: Reason[],troveRiskEnabled=false) {
   return {schema:'liqvera-evidence-capabilities/v1',request_id:requestId,instrument_id:INSTRUMENT,
+    ...(troveRiskEnabled&&CHAIN_ID===31611?{products:['market_depth','trove_risk']}:{}),
     instrument_label:'Hyperliquid BTC linear perpetual',network:NETWORK,asset:ASSET,decimals:18,price_musd:'0.01',amount_atomic:AMOUNT,
     source_mode:sourceMode,limitations:[`${MEZO_CONFIG.name==='mainnet'?'Mainnet':'Testnet'} only. Read-only analytics.`,
       'Calculation over the available snapshot depth; this is not a complete exchange book or guaranteed execution.',

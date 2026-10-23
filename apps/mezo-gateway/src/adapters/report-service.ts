@@ -14,7 +14,8 @@ export class HttpReportService implements ReportService {
   }
   async build(reportId: string, input: QuoteInput, signal: AbortSignal): Promise<Artifact> {
     const value=await boundedJson(new URL('/internal/v1/reports',this.base),{method:'POST',signal,headers:this.headers(),
-      body:JSON.stringify({report_id:reportId,instrument_id:INSTRUMENT,side:input.side,quantity_base:input.quantity_base})},65536,15000,[422,503]);
+      body:JSON.stringify(input.product_id==='trove_risk'?{report_id:reportId,product_id:'trove_risk',borrower:input.borrower}:
+        {report_id:reportId,instrument_id:INSTRUMENT,side:input.side,quantity_base:input.quantity_base})},65536,15000,[422,503]);
     if (!value || typeof value !== 'object') throw new PublicError('INVALID_DATASET',422);
     const raw=value as Record<string,unknown>;
     if (isReason(raw.code)) throw new PublicError(raw.code,raw.code==='MEZO_SOURCE_UNAVAILABLE'?503:422);

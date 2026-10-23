@@ -341,3 +341,13 @@ Audit-owned fixture containers, networks and volumes, disposable PostgreSQL, sta
 The requested source cleanup, migration, remediation and local verification are complete. Next work is a separately scoped public gateway recovery/deployment with existing-state and payment safeguards. Public deployment remains unchanged and its observed gateway failure is not fixed by these source changes.
 
 Reference plan: [current cleanup](https://github.com/Dimkox/liqvera/blob/51c14b1/docs/superpowers/plans/2026-10-12-standalone-current.md). Prior release evidence is retained in Git at v0.0.5 and the published assets.
+
+## 2026-10-23 — gated Trove private API source phase
+
+Added closed borrower-bound Testnet Trove requests, an independent atomic capture
+handoff, fresh-source report builds, preview contracts and worker product/borrower
+checks. Gateway and report flags default off; disabled creation preserves existing
+request replays and artifacts. Legacy four-field request serialization and market
+report shapes remain unchanged. No database migration, payment or deployment.
+Historical verified payment evidence remains the owner's selected submission proof.
+Validation: gateway build/typecheck and 97 Node cases completed (84 passed, 13 explicitly skipped without a disposable PostgreSQL database). Thirty focused Trove package/request/service/bundle tests passed, including historical native replay and precise clock-skew rejection; 142 resource/OpenAPI regressions passed. Independent read-only review passed the backend diff, 32 Python cases and 22 Trove gateway cases. A separate stub-finality delivery regression confirms exact historical bytes and no recapture/resettlement with creation disabled; it is not a native payment test. Ruff, 71-document link validation and whitespace checks pass. Full combined-product and real disposable-ledger gates follow browser integration.

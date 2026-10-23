@@ -12,7 +12,7 @@ import test, { after, before } from 'node:test';
 import { Pool } from 'pg';
 import { HttpReportService } from '../src/adapters/report-service.js';
 import { Ledger } from '../src/adapters/postgres.js';
-import { PublicError, type QuoteInput } from '../src/domain/model.js';
+import { PublicError, type MarketQuoteInput } from '../src/domain/model.js';
 import type { Gateway } from '../src/application/gateway.js';
 import { retainAndRecover } from '../src/workers/retention.js';
 import type {LiveGrantAuthority} from '../src/security/live-grant.js';
@@ -27,7 +27,7 @@ const MIGRATION_003_SHA256 = 'bbedff6137a648166b77233c56a466e46247480b404b8829b6
 const MIGRATION_004_SHA256 = '96bba00d344d81670a4c0f8741186004910e959f374ecd77ce78268d52fd465a';
 const MIGRATION_005_SHA256 = 'e99e5cffab60c08dfb1cd73d13caf2915f31aec542c26c87b016d0e125a23b11';
 const MIGRATION_006_SHA256 = '92e346b3fa49699b20d9edca9814d17bde4fb96046e71071c68b0c47326ef18a';
-const BODY: QuoteInput = {
+const BODY: MarketQuoteInput = {
   instrument_id: 'hyperliquid:BTC:perpetual',
   side: 'BUY',
   quantity_base: '0.25',

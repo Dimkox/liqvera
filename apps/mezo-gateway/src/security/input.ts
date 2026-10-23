@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
-import { address, INSTRUMENT, PublicError, type QuoteInput } from '../domain/model.js';
+import {getAddress} from 'viem';
+import { address, CHAIN_ID, INSTRUMENT, PublicError, type QuoteInput } from '../domain/model.js';
 export const digest = (bytes: string | Buffer): string => createHash('sha256').update(bytes).digest('hex');
 export function capability(header: string | undefined): string {
   const token = /^Bearer ([A-Za-z0-9_-]{43})$/.exec(header ?? '')?.[1];
@@ -15,6 +16,13 @@ export function idempotencyKey(value: string | undefined): string {
 export function quoteInput(input: unknown): QuoteInput {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new PublicError('INVALID_INPUT', 422);
   const body = input as Record<string, unknown>;
+  if(body.product_id==='trove_risk') {
+    const invalid=()=>new PublicError('INVALID_INPUT',400);
+    if(CHAIN_ID!==31611||Object.keys(body).sort().join(',')!=='borrower,expected_payer,product_id'||
+      typeof body.borrower!=='string'||!/^0x[0-9a-fA-F]{40}$/.test(body.borrower)||/^0x0{40}$/.test(body.borrower))throw invalid();
+    try {if(getAddress(body.borrower)!==body.borrower)throw invalid();}catch{throw invalid();}
+    return {product_id:'trove_risk',borrower:body.borrower,expected_payer:address(body.expected_payer)};
+  }
   if (Object.keys(body).sort().join(',') !== 'expected_payer,instrument_id,quantity_base,side') throw new PublicError('INVALID_INPUT', 422);
   if (body.instrument_id !== INSTRUMENT) throw new PublicError('UNSUPPORTED_INSTRUMENT', 422);
   if (body.side !== 'BUY' && body.side !== 'SELL') throw new PublicError('INVALID_INPUT', 422);
@@ -40,6 +48,6 @@ export function decodeQuoteBody(raw: Buffer): QuoteInput {
   if (raw.length > 16384) throw new PublicError('INVALID_INPUT', 422);
   const source = new TextDecoder('utf-8', { fatal: true }).decode(raw);
   const keys = [...source.matchAll(/"((?:\\.|[^"\\])*)"\s*:/g)].map(m => JSON.parse(`"${m[1]}"`) as string);
-  if (keys.length !== 4 || new Set(keys).size !== 4) throw new PublicError('INVALID_INPUT', 422);
+  if (![3,4].includes(keys.length) || new Set(keys).size !== keys.length) throw new PublicError('INVALID_INPUT', 422);
   return quoteInput(JSON.parse(source));
 }

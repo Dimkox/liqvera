@@ -9,7 +9,7 @@ import re
 import stat
 import threading
 import time
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -22,7 +22,10 @@ from liqvera_evidence_report.evidence_bundle import (
     read_published,
 )
 from liqvera_evidence_report.evidence_io import EvidenceRejected, identifier, strict_json
-from liqvera_evidence_report.report import build_report, parse_request
+from liqvera_evidence_report.product_request import parse_product_request, request_identity
+from liqvera_evidence_report.report import build_report
+from liqvera_evidence_report.trove_capture import read_trove_package
+from liqvera_evidence_report.trove_report import TroveReportRequest, build_trove_report
 
 PUBLIC_CODES = {"MEZO_SOURCE_UNAVAILABLE", "MEZO_DEX_INVALID_EVIDENCE", "INVALID_INPUT", "INVALID_DATASET", "SOURCE_UNAVAILABLE", "STALE_SOURCE",
                 "CLOCK_SKEW", "IDENTITY_UNVERIFIED", "IDENTITY_MISMATCH", "CROSSED_BOOK",
@@ -37,6 +40,14 @@ def require_mezo_source(built) -> None:
             or "mezo-dex/capture.json" not in built.extra_members
             or "mezo_dex" not in built.document):
         raise EvidenceRejected("MEZO_SOURCE_UNAVAILABLE")
+
+def build_trove_product(path: Path, request: TroveReportRequest, *, created_at_ms: int):
+    capture = read_trove_package(path, path.name)
+    built = build_trove_report(capture, replace(request, created_at_ms=created_at_ms))
+    if built.document["quality"]["snapshot_status"] != "VALID_FOR_SNAPSHOT_CALCULATION":
+        raise EvidenceRejected("STALE_SOURCE")
+    return built
+
 
 def _internal_token(path: str) -> str:
     """Load one narrowly scoped internal credential without logging its value."""
@@ -58,7 +69,7 @@ def _internal_token(path: str) -> str:
         raise ValueError("invalid internal authentication configuration") from None
 
 
-def _capture(origin: str, capture_id: str, timeout: float, *, mezo_request: dict | None = None) -> dict:
+def _capture(origin: str, capture_id: str, timeout: float, *, mezo_request: dict | None = None, trove_request: dict | None = None) -> dict:
     url = urlsplit(origin)
     if (url.scheme != "http" or url.hostname not in {"evidence-capture", "127.0.0.1", "localhost"}
             or url.path not in {"", "/"} or url.query or url.fragment or url.username or url.password
@@ -66,7 +77,7 @@ def _capture(origin: str, capture_id: str, timeout: float, *, mezo_request: dict
         raise EvidenceRejected("SOURCE_UNAVAILABLE")
     client = http.client.HTTPConnection(url.hostname, url.port or 8081, timeout=timeout)
     try:
-        client.request("POST", "/internal/v1/captures", body=canonical_json_bytes({"capture_id": capture_id, **({"mezo_dex": mezo_request} if mezo_request is not None else {})}),
+        client.request("POST", "/internal/v1/captures", body=canonical_json_bytes({"capture_id": capture_id, **({"mezo_dex": mezo_request} if mezo_request is not None else {}), **({"trove_risk": trove_request} if trove_request is not None else {})}),
                        headers={"Content-Type": "application/json", "Connection": "close"})
         response = client.getresponse()
         raw = response.read(16385)
@@ -106,6 +117,9 @@ def main() -> int:
     dex_enabled = os.environ.get("LIQVERA_MEZO_DEX_ENABLED", "false")
     if dex_enabled not in {"true", "false"} or (dex_enabled == "true" and mode != "live-public"):
         raise ValueError("invalid Mezo DEX source configuration")
+    troves_enabled = os.environ.get("LIQVERA_MEZO_TROVES_ENABLED", "false")
+    if troves_enabled not in {"true", "false"} or (troves_enabled == "true" and mode != "live-public"):
+        raise ValueError("invalid Mezo Trove source configuration")
     active: set[str] = set()
     active_lock = threading.Lock()
 
@@ -192,7 +206,8 @@ def main() -> int:
                 raw = self.rfile.read(int(lengths[0]))
                 if len(raw) != int(lengths[0]):
                     raise EvidenceRejected("INVALID_INPUT")
-                request = parse_request(strict_json(raw), engine_commit=engine_commit)
+                request = parse_product_request(strict_json(raw), engine_commit=engine_commit,
+                                                created_at_ms=time.time_ns() // 1_000_000)
                 report_id = str(request.report_id)
                 with active_lock:
                     if report_id in active:
@@ -205,14 +220,19 @@ def main() -> int:
                 # pre-extension reports. The requirement applies to fresh builds.
                 if os.path.lexists(artifact_root / report_id):
                     built, artifact = read_published(artifact_root, report_id)
-                    if built.document["request"] != {"side": request.side.value,
-                                                      "quantity_base": str(request.quantity_base)}:
+                    if built.document["request"] != request_identity(request):
                         raise EvidenceRejected("REPORT_ALREADY_EXISTS")
                     if built.document["source"]["source_mode"] != mode:
                         raise EvidenceRejected("INVALID_DATASET")
                 else:
                     capture_id = str(uuid4())
-                    if dex_enabled == "true":
+                    trove = type(request) is TroveReportRequest
+                    if trove:
+                        if troves_enabled != "true":
+                            raise EvidenceRejected("UNSUPPORTED_INSTRUMENT")
+                        capture = _capture(capture_url, capture_id, 12.5,
+                                           trove_request={"borrower": request.borrower})
+                    elif dex_enabled == "true":
                         from fractions import Fraction
                         quantity = Fraction(str(request.quantity_base)) * 10**18
                         capture = _capture(capture_url, capture_id, 12.5, mezo_request={
@@ -221,8 +241,10 @@ def main() -> int:
                         capture = _capture(capture_url, capture_id, 12.5)
                     if capture["source_mode"] != mode:
                         raise EvidenceRejected("INVALID_DATASET")
-                    built = build_report(capture_root / capture_id, request)
-                    if dex_enabled == "true":
+                    built = (build_trove_product(capture_root / capture_id, request,
+                                                 created_at_ms=time.time_ns() // 1_000_000)
+                             if trove else build_report(capture_root / capture_id, request))
+                    if not trove and dex_enabled == "true":
                         require_mezo_source(built)
                     if built.document["source"]["source_mode"] != mode:
                         raise EvidenceRejected("INVALID_DATASET")

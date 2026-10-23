@@ -3,23 +3,26 @@
   "$id": "https://schemas.liqvera.invalid/mezo-evidence/v1/report.schema.json",
   "title": "Immutable Liqvera snapshot report body",
   "description": "The canonical report body has no self-digest. Shape validity alone does not authorize a chargeable quote; F3 must verify provenance, arithmetic, timing, and status.",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["schema", "report_id", "identity", "request", "source", "calculation", "quality", "reproducibility", "boundaries"],
-  "properties": {
-    "schema": {"const": "liqvera-evidence-report/v1"},
-    "report_id": {"$ref": "primitives.schema.json#/$defs/id"},
-    "identity": {"$ref": "#/$defs/identity"},
-    "request": {"$ref": "#/$defs/request"},
-    "source": {"$ref": "#/$defs/source"},
-    "calculation": {"$ref": "#/$defs/calculation"},
-    "quality": {"$ref": "#/$defs/quality"},
-    "reproducibility": {"$ref": "#/$defs/reproducibility"},
-    "boundaries": {"$ref": "#/$defs/boundaries"},
-    "mezo_dex": {"$ref": "mezo-dex.schema.json#/$defs/report"},
-    "venue_comparison": {"$ref": "mezo-dex.schema.json#/$defs/comparison"}
-  },
+  "oneOf": [{"$ref": "#/$defs/market_report"}, {"$ref": "trove-risk-report.schema.json"}],
   "$defs": {
+    "market_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "report_id", "identity", "request", "source", "calculation", "quality", "reproducibility", "boundaries"],
+      "properties": {
+        "schema": {"const": "liqvera-evidence-report/v1"},
+        "report_id": {"$ref": "primitives.schema.json#/$defs/id"},
+        "identity": {"$ref": "#/$defs/identity"},
+        "request": {"$ref": "#/$defs/request"},
+        "source": {"$ref": "#/$defs/source"},
+        "calculation": {"$ref": "#/$defs/calculation"},
+        "quality": {"$ref": "#/$defs/quality"},
+        "reproducibility": {"$ref": "#/$defs/reproducibility"},
+        "boundaries": {"$ref": "#/$defs/boundaries"},
+        "mezo_dex": {"$ref": "mezo-dex.schema.json#/$defs/report"},
+        "venue_comparison": {"$ref": "mezo-dex.schema.json#/$defs/comparison"}
+      }
+    },
     "snapshot_status": {"type": "string", "enum": ["VALID_FOR_SNAPSHOT_CALCULATION", "REJECTED", "SIMULATED"]},
     "side": {"type": "string", "enum": ["BUY", "SELL"]},
     "safe_path": {"type": "string", "minLength": 1, "pattern": "^([A-Za-z0-9_-][A-Za-z0-9_.-]*|[.]+[A-Za-z0-9_-][A-Za-z0-9_.-]*|[.]{3,})(/([A-Za-z0-9_-][A-Za-z0-9_.-]*|[.]+[A-Za-z0-9_-][A-Za-z0-9_.-]*|[.]{3,}))*(?![\\s\\S])"},

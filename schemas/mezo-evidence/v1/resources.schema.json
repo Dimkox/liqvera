@@ -12,6 +12,65 @@
     "amount_atomic": {"const": "10000000000000000"},
     "price_musd": {"const": "0.01"},
     "preview": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/market_preview"
+        },
+        {
+          "$ref": "#/$defs/trove_preview"
+        }
+      ]
+    },
+    "trove_preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot_at",
+        "snapshot_status",
+        "limitations",
+        "price_musd",
+        "expires_at",
+        "product_id",
+        "borrower",
+        "trove_status"
+      ],
+      "properties": {
+        "snapshot_at": {
+          "$ref": "primitives.schema.json#/$defs/timestamp"
+        },
+        "snapshot_status": {
+          "const": "VALID_FOR_SNAPSHOT_CALCULATION"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "price_musd": {
+          "$ref": "#/$defs/price_musd"
+        },
+        "expires_at": {
+          "$ref": "primitives.schema.json#/$defs/timestamp"
+        },
+        "product_id": {
+          "const": "trove_risk"
+        },
+        "borrower": {
+          "$ref": "quote-request.schema.json#/properties/borrower"
+        },
+        "trove_status": {
+          "enum": [
+            "ACTIVE",
+            "NOT_ACTIVE"
+          ]
+        }
+      }
+    },
+    "market_preview": {
       "type": "object", "additionalProperties": false,
       "required": ["instrument_id", "side", "quantity_base", "snapshot_at", "snapshot_status", "limitations", "price_musd", "expires_at"],
       "properties": {
@@ -129,6 +188,7 @@
       "oneOf": [{"properties": {"payment_ready": {"const": false}, "blockers": {"minItems": 1}, "network": {"const": "eip155:31611"}, "asset": {"const": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"}}}, {"properties": {"payment_ready": {"const": false}, "blockers": {"minItems": 1}, "network": {"const": "eip155:31612"}, "asset": {"const": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"}}}, {"properties": {"payment_ready": {"const": true}, "source_mode": {"const": "live-public"}, "blockers": {"maxItems": 0}, "network": {"const": "eip155:31611"}, "asset": {"const": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"}}}, {"properties": {"payment_ready": {"const": true}, "source_mode": {"const": "live-public"}, "blockers": {"maxItems": 0}, "network": {"const": "eip155:31612"}, "asset": {"const": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"}}}],
       "required": ["schema", "request_id", "instrument_id", "instrument_label", "network", "asset", "decimals", "price_musd", "amount_atomic", "source_mode", "limitations", "payment_ready", "blockers"],
       "properties": {
+        "products": {"type": "array", "minItems": 1, "maxItems": 2, "uniqueItems": true, "items": {"enum": ["market_depth", "trove_risk"]}},
         "schema": {"const": "liqvera-evidence-capabilities/v1"},
         "request_id": {"$ref": "primitives.schema.json#/$defs/id"},
         "instrument_id": {"$ref": "quote-request.schema.json#/properties/instrument_id"},

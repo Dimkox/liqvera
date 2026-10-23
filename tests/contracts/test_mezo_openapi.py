@@ -68,7 +68,9 @@ def test_paid_body_is_only_the_entitled_report_response():
 def test_exact_operations_codes_auth_and_request_correlation():
     contract = api()
     assert contract["openapi"] == "3.1.0"
-    assert contract["info"]["version"] == "1.0.0"
+    assert contract["info"]["version"] == "1.1.0"
+    assert contract["x-liqvera-idempotency"]["trove_canonical_body_fields"] == [
+        "product_id", "borrower", "expected_payer"]
     assert contract["jsonSchemaDialect"] == "https://json-schema.org/draft/2020-12/schema"
     assert "servers" not in contract
     actual = {(path, method) for path, item in contract["paths"].items()

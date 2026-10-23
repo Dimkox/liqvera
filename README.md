@@ -10,7 +10,7 @@ Understand BTC market depth before you act. Liqvera turns public order-book snap
 
 [![Verify Liqvera](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml/badge.svg)](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml)
 
-**Mezo Testnet · chain 31611.** MUSD purchases are deployed. The DEX comparison and offline evidence extension are merged into main ([PR 17](https://github.com/Dimkox/liqvera/pull/17)); deployment is pending. This source includes a new October 23 wallet-free preview with fixed-block Mezo evidence.
+**Mezo Testnet · chain 31611.** MUSD purchases are deployed. The DEX comparison and offline evidence extension are merged into main ([PR 17](https://github.com/Dimkox/liqvera/pull/17)); deployment is pending. This source includes a new October 23 wallet-free preview with fixed-block Mezo evidence and immutable snapshot URLs for both JSON and ZIP.
 
 | Contract | Testnet address | Use |
 | --- | --- | --- |

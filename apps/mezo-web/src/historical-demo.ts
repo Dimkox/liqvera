@@ -2,7 +2,7 @@ export const HISTORICAL_DEMO = Object.freeze({
   reportId: "be727ceb-3e34-4963-963d-ee2fb98fb4f9", sourceAt: "2026-10-23T15:26:44.055Z",
   reportSha256: "d58728bd3df4b79c43bb2e742225e5b8f879eb0ec292213ffd3941f0f8778753",
   bundleSha256: "0c20f41f845bd39c88286b52a64d1dad53713fd215507f611fab51d29896f51f",
-  reportUrl: "/demo/latest-live/report.json", bundleUrl: "/demo/latest-live/evidence.zip",
+  reportUrl: "/demo/snapshots/d58728bd3df4b79c43bb2e742225e5b8f879eb0ec292213ffd3941f0f8778753/report.json", bundleUrl: "/demo/snapshots/d58728bd3df4b79c43bb2e742225e5b8f879eb0ec292213ffd3941f0f8778753/evidence.zip",
 });
 export function validateHistoricalReport(value:unknown):Record<string,any> {
   const report=value as Record<string,any>;

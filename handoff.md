@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-23 — prevent mixed CDN preview assets after a safely recovered rollout
+
+The first DEX rollout failed its public ZIP digest check and invoked the reviewed compatible recovery. All seven services returned healthy: the new gateway/report readers remain active, DEX capture is disabled, and original capture/web serve the preceding preview. PostgreSQL, edge, network carrier, ledger/evidence volumes and unknown payment states were retained; no database restore, migration, payment or grant renewal occurred. The validated coherent backup and all old/new containers remain private for recovery.
+
+Saved diagnostics establish the cause: the new report JSON was DYNAMIC while Cloudflare returned the exact old ZIP with HIT and a four-hour cache lifetime. Direct origin JSON and ZIP match the intended new digests. The failed direct external ZIP diagnostic timed out with a partial download and is not a successful verification. A reversible web-only diagnostic restored the original web afterward.
+
+Both browser preview URLs now identify an immutable directory by the report SHA-256. The new pair is copied byte-for-byte there; current and archived aliases remain intact. A regression first failed on the mutable URL, then checks the coupled hashes and equality with source assets. All 107 browser tests and the production build passed; nine canonical/offline Python tests and documentation links passed. Independent read-only review found no source or operations-delta blocker. This source fix does not yet claim a successful public rollout; the next attempt must verify the versioned public paths.
+
 ## 2026-10-23 — available musl/nginx security fixes before DEX rollout
 
 Demo PR 19 merged into main as `d2b88d91e6e4c7238ca98d5a341ac79fca10d4e0` after its exact-head CI passed. Fresh pre-deployment Trivy/Grype databases exposed the newly indexed musl advisory. Runtime recipes now pin the fixed musl packages and nginx 1.30.6, with the existing security backports retained. [Incremental package record](docs/security/2026-10-23-runtime-package-refresh.md) states the exact scope and primary sources.

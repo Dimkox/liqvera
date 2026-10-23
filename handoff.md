@@ -585,3 +585,8 @@ Validation: the focused provenance suite passed 37 tests and `git diff --check`
 passed. A local full `make test` was interrupted at 63% after more than ten minutes
 on the shared host; it is not reported as passing. Hosted PR CI is required before
 any site rollout. No wallet transaction or deployment occurred.
+
+Security documentation now distinguishes public read-only market-data capture from
+optional browser-built Mezo Testnet actions that are submitted only through user
+wallet signatures; no server signing or custody is added. `scripts/check-docs.py`
+passed for 72 documents.

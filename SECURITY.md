@@ -1,6 +1,6 @@
 # Liqvera security
 
-Liqvera consumes public market data and produces evidence. It has no authority to submit exchange orders, withdraw funds or use private venue credentials. Mezo report payments are a separate, explicitly bounded integration; they do not authorize trading.
+Liqvera consumes public market data and produces evidence. It has no exchange-account credentials, perpetual-order authority or custody. The browser can prepare Mezo Testnet spot swaps and Trove-protection transactions for explicit signature in the user’s connected wallet; the gateway and report services cannot sign or submit them. Mezo report payments remain a separate, explicitly bounded integration and do not authorize trading.
 
 ## Secrets and trust
 

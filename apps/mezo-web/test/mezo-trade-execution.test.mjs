@@ -18,11 +18,11 @@ const provider={request:async({method,params=[]})=>{
 }};
 test('sale requires exact token approval and subsequent explicit swap preparation',async()=>{
  allowance=0n;sent=[];const approval=await prepareNextSalePart(provider,owner,amount,100);assert.equal(approval.kind,'approve');assert.equal(token.parseTransaction({data:approval.data}).args[1],amount);assert.equal(sent.length,0);
- allowance=amount;const swap=await prepareNextSalePart(provider,owner,amount,100);assert.equal(swap.kind,'swap');const args=router.parseTransaction({data:swap.data}).args;assert.equal(args[0],amount);assert.equal(args[1],swap.minOut);assert.equal(args[2][0].from,p.MEZO_TESTNET_DEX.btcToken);assert.equal(args[2][0].to,p.MUSD_TESTNET.address);assert.equal(swap.minOut,swap.quoted*9900n/10000n);
+ allowance=amount;const swap=await prepareNextSalePart(provider,owner,amount,100);assert.equal(swap.kind,'swap');const args=router.parseTransaction({data:swap.data}).args;assert.equal(args[0],amount);assert.equal(args[1],swap.minOut);assert.equal(args[2][0].from,p.MEZO_TESTNET_DEX.btcToken);assert.equal(args[2][0].to,p.MUSD_TESTNET.address);assert.equal(swap.minOut,swap.quoted*9900n/10000n);assert.equal(swap.feeBps,4n);assert.equal(swap.feeBtc,amount*4n/10000n);
  await submitSaleAction(provider,swap);assert.equal(sent.length,1);assert.equal(sent[0].to,p.MEZO_TESTNET_DEX.router);
 });
 test('sale submission stops on changed chain or account before wallet request',async()=>{
- sent=[];await assert.rejects(()=>submitSaleAction({request:async({method})=>method==='eth_chainId'?'0x1':[]},{account:owner,kind:'swap',amount,quoted:1n,minOut:1n,data:'0x',to:p.MEZO_TESTNET_DEX.router,value:'0x0',impactBps:1}),/network changed/i);assert.equal(sent.length,0);
+ sent=[];await assert.rejects(()=>submitSaleAction({request:async({method})=>method==='eth_chainId'?'0x1':[]},{account:owner,kind:'swap',amount,quoted:1n,minOut:1n,feeBps:4n,feeBtc:1n,data:'0x',to:p.MEZO_TESTNET_DEX.router,value:'0x0',impactBps:1}),/network changed/i);assert.equal(sent.length,0);
 });
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
@@ -34,7 +34,7 @@ test('BTC token approval ABI is source-locked to the documented Mezo Testnet tok
 });
 
 test('sale send transport errors stay confirm-only and stale app context cannot prompt',async()=>{
- const action={account:owner,kind:'swap',amount,quoted:1n,minOut:1n,data:'0x',to:p.MEZO_TESTNET_DEX.router,value:'0x0',impactBps:1};
+ const action={account:owner,kind:'swap',amount,quoted:1n,minOut:1n,feeBps:4n,feeBtc:1n,data:'0x',to:p.MEZO_TESTNET_DEX.router,value:'0x0',impactBps:1};
  await assert.rejects(()=>submitSaleAction({...provider,request:async({method,params})=>method==='eth_sendTransaction'?Promise.reject(new Error('socket timeout')):provider.request({method,params})},action),/outcome is unknown/i);
  await assert.rejects(()=>submitSaleAction(provider,action,()=>false),/selected wallet changed/i);
  const rejected=Object.assign(new Error('User rejected the request'),{code:4001});await assert.rejects(()=>submitSaleAction({...provider,request:async({method,params})=>method==='eth_sendTransaction'?Promise.reject(rejected):provider.request({method,params})},action),error=>error===rejected);

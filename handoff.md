@@ -560,3 +560,14 @@ build and Mezo protocol TypeScript build passed; docs links passed for 72 docume
 whitespace validation passed. Build retains the existing bundler annotation notices
 and reports the app bundle slightly over 500 kB. All wallet outcomes were mocked; no
 transaction was signed or sent.
+
+
+The second independent review also requested fee visibility. The sale plan now exposes
+the live fee rate and exact truncated BTC fee per slice and in aggregate, separately
+from price impact; each approval/swap refresh shows its current fee before wallet
+submission.
+
+Final fee-disclosure verification: browser suite again passed 148 tests, the browser
+production build and protocol TypeScript build passed, documentation validation
+passed for 72 documents, and `git diff --check` passed. The app bundle remains
+500.89 kB minified; Vite reports its configured >500 kB chunk notice.

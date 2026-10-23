@@ -15,7 +15,7 @@ test('BTC sale amount parsing is exact and rejects invalid precision',()=>{asser
 test('pool quote uses fee truncation before constant-product division',()=>{const amount=10n**18n;const fee=amount*4n/10000n;assert.equal(quoteBtcToMusd(amount,state),state.reserveMusd*(amount-fee)/(state.reserveBtc+amount-fee));});
 test('auto split keeps every slice at or below editable 1% impact and computes independent slippage minimum',()=>{
  const plan=planBtcSale(300n*10n**18n,state,100,100);assert.equal(plan.executable,true);assert.ok(plan.slices.length>1);assert.ok(plan.slices.every(x=>x.impactBps<=100));assert.equal(plan.aggregateImpactBps,plan.aggregateImpactBps);
- assert.equal(minOutForQuote(10000n,100),9900n);assert.equal(plan.slippageBps,100);
+ assert.equal(minOutForQuote(10000n,100),9900n);assert.equal(plan.slippageBps,100);assert.equal(plan.feeBps,4n);assert.equal(plan.estimatedFeeBtc,plan.slices.reduce((sum,slice)=>sum+slice.feeBtc,0n));assert.ok(plan.slices.every(x=>x.feeBtc===x.amountIn*4n/10000n));
 });
 test('planner rejects bad pool and invalid tolerance while retaining tiny executable input',()=>{
  assert.equal(planBtcSale(10n,{...state,reserveBtc:0n}).executable,false);

@@ -112,8 +112,9 @@ report's liquidation price remains a captured snapshot, not a safety guarantee.
 A matching Mezo DEX report can produce a live BTC-to-MUSD sale plan. The default
 per-part price impact cap is 1%, and default editable `minOut` slippage tolerance is
 1%. The planner applies the captured volatile pool fee with integer truncation,
-rechecks fresh reserves/fee/Router and pool quotes before each slice, and requests
-exact BTC approval only when needed. Approval and each swap are separate wallet
+rechecks fresh reserves/fee/Router and pool quotes before each slice, displays live fee
+rate and BTC fee amount per part and in aggregate, and requests exact BTC approval
+only when needed. Approval and each swap are separate wallet
 actions; each swap waits for a successful receipt before the next part. Splitting
 can add gas and does not promise lower aggregate impact. These source changes have
 not been deployed or live wallet-tested.

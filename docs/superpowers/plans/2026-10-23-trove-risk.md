@@ -35,8 +35,8 @@
 - [x] Pin narrow read-only Trove protocol exports and add exact ABI/provenance tests.
 - [x] Add failing risk arithmetic tests, implement formulas/scenarios and integer ICR agreement.
 - [x] Build a bounded batched capture and offline raw-call decoder. To meet latency at 298 troves, discover active owner addresses from the manager's verified read getters, then fetch neighbors/risk fields in bounded parallel batches. The verifier follows actual links, not owner-array ordering.
-- [ ] Record real fixed-block active/inactive observations and measured latency. Batch limits must be observed, not assumed.
-- [ ] Add Trove ZIP/report schema and offline reconstruction with exact member allowlists and ABI resources.
+- [x] Record a real fixed-block active observation and measured latency; inactive vectors are covered offline. Batch limits must be observed, not assumed.
+- [x] Add Trove ZIP/report schema and offline reconstruction with exact member allowlists and ABI resources.
 - [ ] Extend request parsing, gateway presentation and source service product dispatch without touching settlement logic. Borrower API input must equal viem's EIP-55 canonical result; invalid borrower returns 400.
 - [ ] Add browser product tab, wallet-address prefill, clear read-only/not-financial-advice copy and retained report rendering.
 - [ ] Add integration/negative tests, independent actual-diff review, docs/handoff and a separate dependent PR. Hosted CI and deployment claims remain separate.

@@ -16,6 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
+liqvera-trove-risk = "liqvera_evidence_report.trove_cli:main"
 liqvera-evidence-build = "liqvera_evidence_report.evidence_cli:build_main"
 liqvera-evidence-verify = "liqvera_evidence_report.evidence_cli:verify_main"
 liqvera-evidence-report-service = "liqvera_evidence_report.service:main"
@@ -32,3 +33,6 @@ packages = ["src/liqvera_evidence_report"]
 "../mezo-protocol/vendor/Pool.testnet.json" = "liqvera_evidence_report/resources/mezo/Pool.testnet.json"
 "../mezo-protocol/vendor/Router.testnet.json" = "liqvera_evidence_report/resources/mezo/Router.testnet.json"
 "../mezo-protocol/vendor/PoolFactory.testnet.json" = "liqvera_evidence_report/resources/mezo/PoolFactory.testnet.json"
+"../mezo-protocol/vendor/TroveManager.implementation.testnet.json" = "liqvera_evidence_report/resources/mezo/TroveManager.implementation.testnet.json"
+"../mezo-protocol/vendor/SortedTroves.implementation.testnet.json" = "liqvera_evidence_report/resources/mezo/SortedTroves.implementation.testnet.json"
+"../mezo-protocol/vendor/PriceFeed.implementation.testnet.json" = "liqvera_evidence_report/resources/mezo/PriceFeed.implementation.testnet.json"

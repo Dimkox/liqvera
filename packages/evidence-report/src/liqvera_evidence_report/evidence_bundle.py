@@ -32,13 +32,14 @@ from liqvera_evidence_report.evidence_io import (
 from liqvera_evidence_report.report import BuiltReport, ReportRequest, build_inspected_report
 from liqvera_evidence_report.schema_validation import validate
 from liqvera_evidence_report.sealed_input import BASE_MEMBERS, inspect_members
+from liqvera_evidence_report.trove_report import TROVE_NAMES, rebuild_trove_members
 
 STAMP = (1980, 1, 1, 0, 0, 0)
 MODE = (stat.S_IFREG | 0o644) << 16
 OUTER_NAMES = {"manifest.json", "report.json", "algorithm.json", "runtime-dependencies.txt"}
 DEX_NAMES = {"mezo-dex/capture.json", "mezo-dex/calls.json", "mezo-dex/Pool.testnet.json",
              "mezo-dex/Router.testnet.json", "mezo-dex/PoolFactory.testnet.json"}
-ALLOWED_NAMES = DEX_NAMES | OUTER_NAMES | {f"sealed-input/{name}" for name in BASE_MEMBERS} | {
+ALLOWED_NAMES = TROVE_NAMES | DEX_NAMES | OUTER_NAMES | {f"sealed-input/{name}" for name in BASE_MEMBERS} | {
     "sealed-input/source/mapping-evidence.json", "sealed-input/source/mezo-dex.json"}
 
 
@@ -152,12 +153,22 @@ def verify_bundle_bytes(raw: bytes, *, expected_report_sha256: str | None = None
             if len(content) != item["length"] or digest(content) != item["sha256"]:
                 raise EvidenceRejected("INVALID_DATASET")
         report = strict_json(members["report.json"])
-        validate("report.schema.json", report)
+        if type(report) is not dict:
+            raise EvidenceRejected("INVALID_DATASET")
         report_hash = digest(members["report.json"])
         if (manifest["report_sha256"] != report_hash
                 or (expected_report_sha256 is not None and expected_report_sha256 != report_hash)
                 or canonical_json_bytes(report) != members["report.json"]):
             raise EvidenceRejected("INVALID_DATASET")
+        if report.get("schema") == "liqvera-trove-risk-report/v1":
+            rebuilt = rebuild_trove_members(members)
+            if (rebuilt.report_bytes != members["report.json"]
+                    or rebuilt.algorithm_bytes != members["algorithm.json"]
+                    or rebuilt.dependency_bytes != members["runtime-dependencies.txt"]
+                    or build_bundle(rebuilt) != raw):
+                raise EvidenceRejected("INVALID_DATASET")
+            return rebuilt
+        validate("report.schema.json", report)
         validate("algorithm.schema.json", strict_json(members["algorithm.json"]))
         inputs = {name.removeprefix("sealed-input/"): content for name, content in members.items()
                   if name.startswith("sealed-input/")}

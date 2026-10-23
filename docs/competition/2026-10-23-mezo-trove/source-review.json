@@ -1,0 +1,41 @@
+{
+  "schema": "liqvera-independent-source-review/v1",
+  "reviewed_at": "2026-10-23T17:19:10.158518+00:00",
+  "base_commit": "2fa7530e0ed8aa2ce49cd63a37d0b26e003e6aa9",
+  "scope": "Trove standalone report, deterministic ZIP dispatch/offline rebuild, free CLI, schema, ABI packaging and documentation; paid API/UI excluded.",
+  "status": "PASS_SOURCE_REVIEW_PENDING_FINAL_CHECKS",
+  "blockers": [],
+  "checks": {
+    "focused_python_tests": {
+      "passed": 33,
+      "command": "/home/pall/projects/liqvera/.getzilla/runtime/mezo-integration/.venv/bin/python -m pytest tests/evidence_report/test_mezo_trove_bundle.py tests/evidence_report/test_mezo_trove_cli.py tests/evidence_report/test_canonical_f3.py tests/evidence_report/test_mezo_bundle.py -q"
+    },
+    "synthetic_docker_context_exact_six_abi_allowlist": "PASS",
+    "legacy_report_dex_bundle_reproduction": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "notes": [
+    "Initial system-Python collection failed because referencing/pytest-asyncio were absent; qualified environment run passed.",
+    "No full-suite or final installed-image pass claimed by this reviewer; final frozen checks remain required.",
+    "Future paid integration must add discriminated product/borrower binding, API EIP-55/400 handling, current freshness and cross-product authorization replay coverage.",
+    "Current CLI output is explicitly non-chargeable; historical and fixture report labels remain distinct.",
+    "No application code edits, secrets reads or production mutation by reviewer."
+  ],
+  "sha256": {
+    "README.md": "4b89b39adb62c1830f9f1c2fddd0546370d90329dab4abf7708954edbf63c48e",
+    "deploy/mezo-evidence/Dockerfile.report": "408420ff18769d2c0f965d1a1468fc20c4805749f6c4c82dfc1050c314d7905c",
+    "deploy/mezo-evidence/Dockerfile.report.dockerignore": "9eb21e2530480a509aa655c2be971f111b6b1897341450100746006960eaaefb",
+    "docs/mezo-trove-risk.md": "45f09809ec2e358469262c43ac8104136ac14d9507a36a42ce81096084f3918c",
+    "docs/superpowers/plans/2026-10-23-trove-risk.md": "7da27bd3be255b6393fbb44aa15581223aaa603c8b96e4db4e86f68b71fe34bf",
+    "packages/evidence-report/pyproject.toml": "85082de929cd772dbf8e6da2e480162958d626e7977cf70e9c30bf2f2c475d54",
+    "packages/evidence-report/src/liqvera_evidence_report/evidence_bundle.py": "de967096affd9710043c6f5ae4adf32d119a6139c7a5648dee5d823b6d6b6ab5",
+    "packages/evidence-report/src/liqvera_evidence_report/evidence_cli.py": "e0a340946b02c3cd0b0b905710ce5f2c29280d596450a8302ce5e84cd4daec2a",
+    "packages/evidence-report/src/liqvera_evidence_report/schema_validation.py": "44f00cc760923ee439d9e64ab3d63af6262723b1b47ff4363456ff5334a4920c",
+    "packages/evidence-report/src/liqvera_evidence_report/trove_cli.py": "27977d26506e07c0ed4a61d9a176d77396f08a2ce0190da2b5ab392c1bdb013a",
+    "packages/evidence-report/src/liqvera_evidence_report/trove_report.py": "2acaac38f0b0fca9d09231cbf69b9916b5f3d6a4a5e2914e56cd0379caa623fd",
+    "schemas/mezo-evidence/v1/trove-risk-report.schema.json": "48cea7e6e7ccd48cc324a7efed9feee4564eaee38444effb577d184c83fd116d",
+    "scripts/mezo-trove-risk.py": "a6902881b38a8d74d37c6ad9ecd0a57ce62466ee9a5f3bcaa0917db068820e87",
+    "tests/evidence_report/test_mezo_trove_bundle.py": "01069bc0e962f8b354d96de674d57f3dfd8074cecb55ae6e9f378b21f7be0cba",
+    "tests/evidence_report/test_mezo_trove_cli.py": "01d2d51eac747706c92c1fa4b6c26e161c17b5551f8c0f11e619feba0e5ff4f0"
+  }
+}

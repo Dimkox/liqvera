@@ -18,6 +18,7 @@ COPY packages/readonly-analyzer packages/readonly-analyzer
 COPY packages/evidence-report packages/evidence-report
 # The report wheel embeds the exact verified DEX ABIs used for offline replay.
 COPY packages/mezo-protocol/vendor/Pool.testnet.json packages/mezo-protocol/vendor/Router.testnet.json packages/mezo-protocol/vendor/PoolFactory.testnet.json packages/mezo-protocol/vendor/
+COPY packages/mezo-protocol/vendor/TroveManager.implementation.testnet.json packages/mezo-protocol/vendor/SortedTroves.implementation.testnet.json packages/mezo-protocol/vendor/PriceFeed.implementation.testnet.json packages/mezo-protocol/vendor/
 COPY schemas/mezo-evidence/v1 schemas/mezo-evidence/v1
 RUN python -m pip wheel --no-cache-dir --constraint requirements.lock --wheel-dir /wheels \
     ./packages/contracts ./packages/public-capture ./packages/readonly-analyzer ./packages/evidence-report

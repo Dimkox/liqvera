@@ -36,7 +36,7 @@ Payment: browser → Permit2/EIP-2612 signature → facilitator → exact proxy 
 2. Inspect a [retained Mezo SELL capture](evidence/mezo-testnet/2026-10-23-dex-sell-native.json); its raw calls identify the exact block. The browser comparison appears on reports built with the extension enabled.
 3. Open a payment above and inspect the MUSD Transfer: `10000000000000000` atomic units, or 0.01 MUSD.
 4. Download the [preview evidence ZIP](https://liqvera.site/demo/snapshots/d58728bd3df4b79c43bb2e742225e5b8f879eb0ec292213ffd3941f0f8778753/evidence.zip), [install the local packages](docs/mezo-integration.md#reproduce-from-source), then run `liqvera-evidence-verify evidence.zip` → `INTEGRITY_REPRODUCED`.
-5. Check the [protocol evidence and limitations](docs/mezo-integration.md). The [Trove capture/risk core](docs/mezo-trove-risk.md) is under development; paid Trove delivery and its UI are not implemented yet. No registry contract is deployed.
+5. Check the [protocol evidence and limitations](docs/mezo-integration.md). The [Trove risk CLI preview](docs/mezo-trove-risk.md) adds borrower reports and offline ZIP verification in this branch; paid Trove delivery and its UI remain in progress. No registry contract is deployed.
 
 Mezo quotes use exact arithmetic, the captured on-chain fee and no gas. Hyperliquid is a perpetual market; Mezo is spot. Testnet liquidity is not representative of executable Mainnet prices. [ABI and source provenance](packages/mezo-protocol/README.md#testnet-analytics-provenance-2026-10-23).
 

@@ -1,8 +1,8 @@
-# Mezo Trove risk core
+# Mezo Trove risk preview
 
-This branch contains read-only capture, offline raw-call verification and exact
-risk arithmetic. The paid product, browser tab and Trove evidence ZIP integration
-are still in progress. The public site does not expose this feature yet.
+This branch contains read-only capture, exact risk reports and portable Trove
+evidence ZIPs. The CLI is a free preview. Paid API delivery and the browser tab
+remain in progress; the public site does not expose this feature yet.
 
 The three sourced Testnet proxies and narrow ABIs are exported from
 `packages/mezo-protocol`. TroveManager's verified tuple is collateral, principal,
@@ -42,3 +42,29 @@ replays offline with exact ICR agreement and proven redemption position 1.
 Read-only snapshot analysis; not financial advice. Hashes and raw RPC observations
 support internal reproducibility, not independent proof of canonical chain
 inclusion or a guarantee of liquidation/redemption timing.
+
+## CLI and offline verification
+
+From a clean source checkout with the local packages installed, run:
+
+```sh
+python scripts/mezo-trove-risk.py <borrower> --output-root /absolute/path/to/new-artifacts
+liqvera-evidence-verify /absolute/path/to/new-artifacts/<report-id>/evidence.zip --report-sha256 <reported-sha256>
+```
+
+The repository wrapper derives the actual Git revision and rejects changed code,
+ABI or schema inputs. It never accepts an engine-revision override. The installed
+`liqvera-trove-risk` command instead requires `--engine-commit` explicitly.
+`--capture <raw-capture.json>` builds without network; `--fixture` additionally
+labels output simulated and requires that file. Neither path pays or grants access.
+
+The archive includes `mezo-troves/capture.json`, `calls.json` and the three pinned
+implementation ABIs. The offline verifier replays the raw risk/queue proof and
+rebuilds every report and ZIP byte; recomputing manifest hashes cannot hide altered
+calls, ABIs or calculations. It prints an optional fixed-block `fetchPrice()` curl
+command without running it. A trusted independent report digest still matters.
+
+The source block time is separate from report creation. A live-source snapshot
+older than 30 seconds is labelled `HISTORICAL_SNAPSHOT`; fixtures are `SIMULATED`.
+The quality checks cover recalculation, contract ICR and the bounded queue policy,
+not RPC authenticity. Report creation timestamps are bounded integer milliseconds.

@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-23 — Trove CLI report and offline ZIP verified locally
+
+The free Trove CLI preview now creates an exact borrower report and deterministic ZIP containing fixed-block raw calls and three pinned implementation ABIs. The verifier dispatches by the report schema, decodes/recalculates the risk and queue proof, and rebuilds every archive byte. Manifest recomputation cannot hide altered calls, ABI resources or reported calculations. Historical snapshots and fixtures remain explicitly labelled; source clocks are bounded integers. The repository wrapper derives the real source revision and rejects dirty code/ABI/schema inputs. Paid API/UI integration remains a separate step; the public site still exposes the deployed DEX product only.
+
+Verification: the final unchanged `make verify PYTHON=.venv/bin/python` passed **1072 tests and 85 subtests**, with two live deselections, in 464.86 seconds. The first development run was interrupted after two missing-local-runtime failures; a dedicated pinned worktree environment fixed those and both targeted regressions passed. The first frozen run retained one A07 gateway-build subprocess timeout at the unchanged 30-second budget (1071 passes); the adapter fixture did not start. Its targeted retry and the final full run passed after competing image builds finished. No assertion or timeout was weakened.
+
+Selected capture/report/protocol checks passed 113 cases with two live deselected. Independent read-only review passed 33 legacy/DEX/Trove cases and the exact six-ABI Docker context boundary. The installed non-root container CLI produced and verified its fixture ZIP with networking disabled and read-only root, confirming six packaged ABI resources and no checkout fallback. This installed fixture check is not live acceptance. Ruff and documentation checks pass. [Scoped source review](docs/competition/2026-10-23-mezo-trove/source-review.json) records its earlier pending-final-checks state; the checks above completed afterward. No payment, deployment, grant renewal, database mutation or registry action was performed in this source step.
+
 ## 2026-10-23 — DEX comparison published and verified on the live Testnet site
 
 Source `e80474ea5121532cde2c470a4db399d4e1427baf` is deployed after exact-head CI and independent binding review passed. Four application images were replaced; PostgreSQL, edge and namespace carrier remain the same. The fresh coherent backup, previous containers, ledger states, migrations, sealed evidence and WalletConnect configuration are retained. No payment, grant renewal, database restore or migration was performed.

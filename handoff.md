@@ -496,3 +496,16 @@ or source artifact was replaced.
 
 Validation: Mezo protocol TypeScript build and Router signature assertion passed.
 No approval or swap was submitted.
+
+## 2026-10-23 — bounded BTC sale planner
+
+Added exact BigInt BTC-to-MUSD quotes with the captured pool fee truncation, sequential
+reserve updates and automatic part sizing under an editable 1% default price-impact
+cap. Each part's impact is shown separately from editable 1% default `minOut` slippage;
+the plan also reports aggregate impact and does not promise that splitting improves it.
+Invalid pool state, zero output, invalid tolerances and excessive part counts fail
+closed.
+
+Validation: `node --test test/mezo-trade-plan.test.mjs` in `apps/mezo-web` passed 5
+cases for exact parsing, fee arithmetic, default/editable splitting, independent
+slippage minimum, and edge boundaries. No live pool mutation occurred.

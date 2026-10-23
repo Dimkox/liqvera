@@ -103,11 +103,11 @@ Prepare dependencies as described in [validation](docs/validation.md), then:
 make test
 ```
 
-**1101 Python tests + 85 subtests, 98 gateway tests and 130 browser tests.**
+**1111 Python tests + 85 subtests, 98 gateway tests and 148 browser tests.**
 The command checks these totals against its completed results, including a new
 disposable PostgreSQL ledger. Native RPC tests remain opt-in; no wallet payment is
 part of this gate.
-<!-- liqvera-test-counts: {"python":1101,"python_subtests":85,"gateway":98,"web":130} -->
+<!-- liqvera-test-counts: {"python":1111,"python_subtests":85,"gateway":98,"web":148} -->
 
 [Published Trove verification](docs/security/2026-10-23-mezo-trove-deployment.md) includes native preparation, the unpaid x402 boundary, independent review and exact image/CI bindings.
 

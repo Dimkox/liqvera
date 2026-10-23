@@ -590,3 +590,8 @@ Security documentation now distinguishes public read-only market-data capture fr
 optional browser-built Mezo Testnet actions that are submitted only through user
 wallet signatures; no server signing or custody is added. `scripts/check-docs.py`
 passed for 72 documents.
+
+The hosted full product gate then exposed stale README test counts after the
+wallet-action suite expanded. Updated the machine-checked gate totals to 1,111 Python
+tests plus 85 subtests, 98 gateway tests and 148 browser tests. No deployment has
+occurred; the site remains on its previous web image pending a green rerun.

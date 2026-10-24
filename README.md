@@ -10,7 +10,7 @@ Understand BTC liquidity and Mezo MUSD borrower risk. Liqvera turns public marke
 
 [![Verify Liqvera](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml/badge.svg)](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml)
 
-**Mezo Testnet · chain 31611.** MUSD access, the DEX comparison, Trove risk and wallet-signed Trove/DEX actions are deployed on [liqvera.site](https://liqvera.site). Wallet-free examples include fixed-block native calls and offline-reproducible evidence. [Current deployment and verification](docs/security/2026-10-24-wallet-actions-deployment.md). Transactions are prepared from fresh on-chain state and submitted only when the connected user signs in their wallet; Liqvera never accesses signing keys. No live Trove or DEX transaction has been signed or verified yet.
+**Mezo Testnet · chain 31611.** MUSD access, Trove risk and wallet-signed Trove protection are deployed on [liqvera.site](https://liqvera.site). This source adds an explicit Mezo DEX report option and a separate wallet sale planner; those UI entry points require a new web/gateway/report rollout and are not claimed live here. Wallet-free examples include fixed-block native calls and offline-reproducible evidence. [Current deployment and verification](docs/security/2026-10-24-wallet-actions-deployment.md). Transactions are prepared from fresh on-chain state and submitted only when the connected user signs in their wallet; Liqvera never accesses signing keys. No live Trove or DEX transaction has been signed or verified yet.
 
 | Contract | Testnet address | Use |
 | --- | --- | --- |
@@ -38,7 +38,7 @@ Payment: browser → Permit2/EIP-2612 signature → facilitator → exact proxy 
 **One-minute inspection:**
 
 1. Open [liqvera.site](https://liqvera.site) and its wallet-free preview.
-2. Open the DEX comparison, then the **Trove risk** tab → **Show sealed Trove example**. Follow the captured block and contract links in the explorer.
+2. Use **Trove risk** → **Show sealed Trove example**. Follow the captured block and contract links in the explorer. The DEX report selector and sale planner become available after their rollout.
 3. Open a payment above and inspect the MUSD Transfer: `10000000000000000` atomic units, or 0.01 MUSD.
 4. Download the [preview evidence ZIP](https://liqvera.site/demo/snapshots/d58728bd3df4b79c43bb2e742225e5b8f879eb0ec292213ffd3941f0f8778753/evidence.zip), [install the local packages](docs/mezo-integration.md#reproduce-from-source), then run `liqvera-evidence-verify evidence.zip` → `INTEGRITY_REPRODUCED`.
 5. Inspect the [Trove risk report and free CLI](docs/mezo-trove-risk.md): borrower debt, collateral, ICR, MCR crossing and proven redemption position. Fresh web preparation and the x402 paywall are verified; historical transfers remain the payment proof. No registry contract is deployed.
@@ -103,11 +103,11 @@ Prepare dependencies as described in [validation](docs/validation.md), then:
 make test
 ```
 
-**1111 Python tests + 85 subtests, 98 gateway tests and 148 browser tests.**
+**1116 Python tests + 85 subtests, 106 gateway tests and 152 browser tests.**
 The command checks these totals against its completed results, including a new
 disposable PostgreSQL ledger. Native RPC tests remain opt-in; no wallet payment is
 part of this gate.
-<!-- liqvera-test-counts: {"python":1111,"python_subtests":85,"gateway":98,"web":148} -->
+<!-- liqvera-test-counts: {"python":1116,"python_subtests":85,"gateway":106,"web":152} -->
 
 [Published Trove verification](docs/security/2026-10-23-mezo-trove-deployment.md) includes native preparation, the unpaid x402 boundary, independent review and exact image/CI bindings.
 

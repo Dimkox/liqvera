@@ -50,9 +50,12 @@ and deployment are separate claims. No new Mainnet behavior is part of this exte
 
 The browser source adds self-custody Testnet actions alongside a delivered Trove
 report: deposit BTC or repay MUSD through BorrowerOperations after current-state
-reads, fresh HintHelpers/SortedTroves hints and `eth_call` simulation. A matching DEX
-report can plan a BTC sale with automatic slices capped at an editable 1% estimated
-impact each and editable 1% default `minOut` slippage. Each slice is re-quoted through
-the Router, uses an exact approval when needed, and requires a separate wallet action.
-No private keys enter Liqvera. These changes are source-only, have not been deployed
-or live-wallet accepted, and do not change the report API, payment, or recovery guards.
+reads, fresh HintHelpers/SortedTroves hints and `eth_call` simulation. Market depth
+requests can explicitly opt into a fixed-block Mezo DEX/Hyperliquid comparison when
+the Testnet gateway and report-service flags are enabled. The BTC sale planner is
+available independently of paid-report delivery, quotes fresh pool state, and plans
+automatic slices capped at an editable 1% estimated impact each with editable 1%
+default `minOut` slippage. Each slice is re-quoted through the Router, uses an exact
+approval when needed, and requires a separate wallet action. No private keys enter
+Liqvera. Live deployment and wallet acceptance remain separate checks; no live Trove
+or DEX action has been signed or verified.

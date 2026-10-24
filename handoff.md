@@ -19,15 +19,18 @@ incorrect MSK label, as corrected by the user; do not use that label to reject t
 transaction. The user has since supplied the quote ID and request ID, but production
 quote/attempt state is not available from this source workspace. No payment state,
 entitlement, or database row has been changed; no replacement payment or settlement
-is authorized. Exact-attempt reconciliation remains open until the production ledger
-confirms the stored authorization/receipt binding.
+is authorized. The user has supplied quote/request IDs for exact-attempt review, but
+the production ledger and a scoped read-only reconciliation path are unavailable in
+this source workspace. Exact-attempt reconciliation remains open until the stored
+authorization/receipt binding is confirmed.
 
 Full gate: gateway **106 passed** with disposable PostgreSQL; Python **1116 passed**,
 **85 subtests**; web **152 passed**; artifact checks and 75-document link check
 passed. The offline gate's final count guard first found stale README totals;
 corrected totals pass its checker. Independent read-only review found no blocking
 DEX binding, wallet-submission or UI-entry defect. Payment reconciliation was not
-changed by this source work. Documentation and deployment are pending.
+changed by this source work. Source changes are committed; deployment and production
+payment reconciliation remain pending.
 
 ## 2026-10-23 — Trove risk published; current state
 

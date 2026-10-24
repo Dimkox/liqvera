@@ -1,8 +1,10 @@
 # Mezo Testnet integration
 
-Liqvera keeps one web/API product. MUSD x402 purchases and the DEX extension are deployed on liqvera.site.
-The [October 23 deployment record](security/2026-10-23-mezo-dex-deployment.md)
-binds source, images, immutable preview URLs and verification scope.
+Liqvera keeps one web/API product. MUSD x402 purchases and Trove risk are deployed on liqvera.site.
+DEX capture and wallet-sale planning are implemented in source; live UI availability
+requires the selected Testnet overlay and both gateway/report DEX flags. The
+[October 23 deployment record](security/2026-10-23-mezo-dex-deployment.md)
+documents the earlier capture/report integration, not this added UI entry point.
 All new chain calls target Testnet 31611 at a captured block number. No swap,
 borrow, redemption or new payment is submitted by capture or verification.
 
@@ -12,9 +14,10 @@ The public capture service reads token identity, reserves, BTC decimals and
 `PoolFactory.getFee(pool,false)`, then cross-checks the requested quote through
 both Pool and Router. Capturing Mezo before Hyperliquid keeps the order-book
 snapshot fresh at report construction. The private report service has no RPC
-access. Enable new live builds with `LIQVERA_MEZO_DEX_ENABLED=true` on the report
-service; the Testnet deployment override selects it. Do not enable this setting
-for the fixture profile. Missing Mezo evidence fails with
+access. The Testnet overlay sets `LIQVERA_MEZO_DEX_ENABLED=true` on both gateway
+and report service. The gateway advertises the option only when its flag is enabled;
+the user must opt in on the Market depth form. The report service captures only such
+requests. Do not enable these settings for the fixture profile. Missing Mezo evidence fails with
 `MEZO_SOURCE_UNAVAILABLE`; no retained snapshot or fixture replaces a failure.
 Existing report IDs always retain their original immutable evidence.
 

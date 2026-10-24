@@ -10,19 +10,19 @@ Understand BTC liquidity and Mezo MUSD borrower risk. Liqvera turns public marke
 
 [![Verify Liqvera](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml/badge.svg)](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml)
 
-**Mezo Testnet · chain 31611.** MUSD access, the DEX comparison and Trove risk are deployed on [liqvera.site](https://liqvera.site). Wallet-free examples include fixed-block native calls and offline-reproducible evidence. [Current deployment and verification](docs/security/2026-10-23-mezo-trove-deployment.md). User-signed Trove and DEX actions below are source-branch changes and are not part of that deployment.
+**Mezo Testnet · chain 31611.** MUSD access, the DEX comparison, Trove risk and wallet-signed Trove/DEX actions are deployed on [liqvera.site](https://liqvera.site). Wallet-free examples include fixed-block native calls and offline-reproducible evidence. [Current deployment and verification](docs/security/2026-10-24-wallet-actions-deployment.md). Transactions are prepared from fresh on-chain state and submitted only when the connected user signs in their wallet; Liqvera never accesses signing keys. No live Trove or DEX transaction has been signed or verified yet.
 
 | Contract | Testnet address | Use |
 | --- | --- | --- |
 | MUSD | [0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503](https://explorer.test.mezo.org/address/0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503) | Pay: 0.01 test MUSD per report |
 | Permit2 | [0x000000000022D473030F116dDEE9F6B43aC78BA3](https://explorer.test.mezo.org/address/0x000000000022D473030F116dDEE9F6B43aC78BA3) | Wallet authorization |
 | x402 exact proxy | [0x402085c248EeA27D92E8b30b2C58ed07f9E20001](https://explorer.test.mezo.org/address/0x402085c248EeA27D92E8b30b2C58ed07f9E20001) | MUSD settlement |
-| DEX Router | [0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9](https://explorer.test.mezo.org/address/0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9) | Quotes; source branch prepares user-signed spot swaps |
+| DEX Router | [0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9](https://explorer.test.mezo.org/address/0x9a1ff7FE3a0F69959A3fBa1F1e5ee18e1A9CD7E9) | Quotes and user-signed spot swaps |
 | PoolFactory | [0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A](https://explorer.test.mezo.org/address/0x4947243CC818b627A5D06d14C4eCe7398A23Ce1A) | Read: captured pool fee |
 | MUSD/BTC pool | [0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9](https://explorer.test.mezo.org/address/0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9) | Read: reserves and quote cross-check |
-| BTC token | [0x7b7C000000000000000000000000000000000000](https://explorer.test.mezo.org/address/0x7b7C000000000000000000000000000000000000) | Pool identity; source-branch exact approvals |
+| BTC token | [0x7b7C000000000000000000000000000000000000](https://explorer.test.mezo.org/address/0x7b7C000000000000000000000000000000000000) | Pool identity; exact user-signed approvals |
 | TroveManager | [0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0](https://explorer.test.mezo.org/address/0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0) | Read: borrower debt, collateral and ratios |
-| BorrowerOperations | [0xCdF7028ceAB81fA0C6971208e83fa7872994beE5](https://explorer.test.mezo.org/address/0xCdF7028ceAB81fA0C6971208e83fa7872994beE5) | Source branch: wallet-signed BTC deposit and MUSD repayment |
+| BorrowerOperations | [0xCdF7028ceAB81fA0C6971208e83fa7872994beE5](https://explorer.test.mezo.org/address/0xCdF7028ceAB81fA0C6971208e83fa7872994beE5) | Wallet-signed BTC deposit and MUSD repayment |
 | HintHelpers | [0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6](https://explorer.test.mezo.org/address/0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6) | Read: fresh Trove insertion hints |
 | SortedTroves | [0x722E4D24FD6Ff8b0AC679450F3D91294607268fA](https://explorer.test.mezo.org/address/0x722E4D24FD6Ff8b0AC679450F3D91294607268fA) | Read: fresh insertion hints and redemption ordering |
 | PriceFeed | [0x86bCF0841622a5dAC14A313a15f96A95421b9366](https://explorer.test.mezo.org/address/0x86bCF0841622a5dAC14A313a15f96A95421b9366) | Read: fixed-block BTC price |

@@ -616,3 +616,14 @@ removed optional peer entries required by the pinned Node 22/npm 10 image. Regen
 both JavaScript locks with that exact pinned image. A fresh production web build now
 passes `npm ci`, protocol typecheck and Vite build; its image-bound scans remain Trivy
 0 and Grype 4, unchanged from the current deployed web image.
+
+## 2026-10-24 — wallet actions deployed
+
+Merged PR #26 (`573f1c3`) and deployed only the static web image
+`sha256:82fb7a75dc3631838054d84e2579dae690c5835aa120c4117863fe2d23f6779e`.
+PR and exact-tree post-merge CI passed. All seven services are healthy; the public
+index now loads the bundle with Trove and DEX action labels. No wallet was connected,
+no transaction was signed, and no payment or database state was changed. Trivy reports
+0 findings; Grype retains the same 4 raw findings as the previous web image, with the
+existing BusyBox backport and inactive curl dispositions. Recovery and exact limits
+are recorded in [deployment evidence](docs/security/2026-10-24-wallet-actions-deployment.md).

@@ -107,10 +107,12 @@ new browser**; disabling creation must preserve existing report and payment reco
 ## Deployment evidence
 
 Public native preparation, scope/input boundaries and the unpaid x402 402 response
-are verified. Historical verified transfers remain the selected payment proof. [Deployment evidence](security/2026-10-23-mezo-trove-deployment.md)
-separates the native blocks, timing observations, image checks and operational limits.
+are verified. Historical verified transfers remain the selected payment proof. The
+[October 23 deployment evidence](security/2026-10-23-mezo-trove-deployment.md) records
+API and report checks; the [October 24 wallet-action deployment](security/2026-10-24-wallet-actions-deployment.md)
+records the browser update and its acceptance limits.
 
-## Wallet-signed protection actions (source branch)
+## Wallet-signed protection actions
 
 For an active Trove with the connected borrower wallet, the risk report offers
 **Deposit BTC** and **Repay X MUSD**. The browser pins current Trove reads to one block, obtains a new HintHelpers
@@ -121,6 +123,5 @@ never accesses signing keys. A wallet/account/network change blocks the submissi
 
 The report's liquidation price remains a captured snapshot. It can change with
 price, interest and protocol state, and does not guarantee safety or prevent
-liquidation. These controls are Testnet source changes and are not part of the
-currently linked deployment. No live transaction has been signed or verified for
-this implementation.
+liquidation. These controls are deployed on Testnet. Deployment checks did not
+sign or verify a live transaction.

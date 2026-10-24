@@ -15,7 +15,7 @@ export function validateHistoricalReport(value:unknown):Record<string,any> {
 }
 export function formatHistoricalDate(value:string):string {
   const date=new Date(value);
-  return Number.isFinite(date.getTime())?date.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"medium",timeZone:"UTC"}):value;
+  return Number.isFinite(date.getTime())?`${date.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"medium",timeZone:"UTC"})} UTC`:value;
 }
 async function sha256(bytes:Uint8Array,subtle:SubtleCrypto):Promise<string> {
   const digest=await subtle.digest("SHA-256",bytes as BufferSource);

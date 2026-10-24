@@ -9,6 +9,7 @@ test("historical live report validates exact immutable identity", async () => {
   assert.equal(validateHistoricalReport(report).report_id,HISTORICAL_DEMO.reportId);
   assert.throws(()=>validateHistoricalReport({...report,report_id:crypto.randomUUID()}),/failed validation/);
   assert.match(formatHistoricalDate(HISTORICAL_DEMO.sourceAt),/2026/);
+  assert.match(formatHistoricalDate(HISTORICAL_DEMO.sourceAt),/ UTC$/);
   const bundle=await readFile(new URL("../public/demo/latest-live/evidence.zip",import.meta.url));
   assert.equal((await verifyHistoricalAssets(reportBytes,bundle)).report_id,HISTORICAL_DEMO.reportId);
   const changed=Uint8Array.from(reportBytes);changed[changed.length-1]^=1;

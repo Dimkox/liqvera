@@ -14,23 +14,26 @@ Payment incident: public tx
 `0xa09b46ea31e2d44734f7c0ad7e33b74bfdf72cfaf93245b4b173c04fb0cdf482` transferred
 0.01 MUSD from `0xf63f…36bf6` to `0xd7f5…1535` and was successful with ample
 confirmations at the time of public inspection. This alone does not bind a receipt
-to the original authorization or report digest. The supplied expiry carried an
-incorrect MSK label, as corrected by the user; do not use that label to reject the
-transaction. The user has since supplied the quote ID and request ID, but production
-quote/attempt state is not available from this source workspace. No payment state,
-entitlement, or database row has been changed; no replacement payment or settlement
-is authorized. The user has supplied quote/request IDs for exact-attempt review, but
-the production ledger and a scoped read-only reconciliation path are unavailable in
-this source workspace. Exact-attempt reconciliation remains open until the stored
-authorization/receipt binding is confirmed.
+to the original authorization or report digest. The user corrected the UI timezone:
+the quote window was 00:40:35–00:42:36 UTC and the transaction was at 00:41:34 UTC,
+inside the window. The browser sends a signed x402 payload, not a transaction hash;
+the gateway gets the hash from facilitator `/settle` and stores it on the attempt. If
+that response is lost after broadcast, current confirm-only reconciliation cannot
+discover the hash. This is a plausible code-level failure mode, not a confirmed
+diagnosis of this attempt. Quote/request IDs are available, but production attempt
+state and a scoped read-only reconciliation path are not available from this source
+workspace. No payment state or entitlement has been changed, and no replacement
+payment or settlement is authorized. Inspect the attempt's stored `tx_hash` before
+choosing an operational repair. UI times now explicitly append `UTC`.
 
 Full gate: gateway **106 passed** with disposable PostgreSQL; Python **1116 passed**,
 **85 subtests**; web **152 passed**; artifact checks and 75-document link check
 passed. The offline gate's final count guard first found stale README totals;
 corrected totals pass its checker. Independent read-only review found no blocking
-DEX binding, wallet-submission or UI-entry defect. Payment reconciliation was not
-changed by this source work. Source changes are committed; deployment and production
-payment reconciliation remain pending.
+DEX binding, wallet-submission or UI-entry defect. The UI UTC label test and web
+build pass. Payment reconciliation was not changed by this source work. Source
+changes are committed; deployment and production payment reconciliation remain
+pending.
 
 ## 2026-10-23 — Trove risk published; current state
 

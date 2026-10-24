@@ -6,8 +6,9 @@ The Market depth API now has an explicit, closed `mezo_dex: true` request flag.
 The gateway advertises and accepts it only when `LIQVERA_MEZO_DEX_ENABLED=true`
 on live Testnet, passes it to the report service, and binds the resulting quote
 preview to a matching Mezo DEX report. The Testnet overlay configures the flag on
-both services. Browser selection and the standalone planner entry are in the next
-source step. Nothing from this work is deployed yet.
+both services. The browser shows the report opt-in only when advertised and mounts
+the BTC sale planner independently of report delivery. Nothing from this work is
+deployed yet.
 
 Payment incident: public tx
 `0xa09b46ea31e2d44734f7c0ad7e33b74bfdf72cfaf93245b4b173c04fb0cdf482` transferred
@@ -23,11 +24,10 @@ confirms the stored authorization/receipt binding.
 
 Full gate: gateway **106 passed** with disposable PostgreSQL; Python **1116 passed**,
 **85 subtests**; web **152 passed**; artifact checks and 75-document link check
-passed. The offline
-gate's final count guard first found stale README totals; corrected totals pass its
-checker. Independent read-only review found no blocking DEX binding,
-wallet-submission or UI-entry defect. Payment reconciliation was not changed by this
-source work. Commits and deployment are pending.
+passed. The offline gate's final count guard first found stale README totals;
+corrected totals pass its checker. Independent read-only review found no blocking
+DEX binding, wallet-submission or UI-entry defect. Payment reconciliation was not
+changed by this source work. Documentation and deployment are pending.
 
 ## 2026-10-23 — Trove risk published; current state
 

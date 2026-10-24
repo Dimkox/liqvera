@@ -37,8 +37,8 @@ function validateCapabilities(value: unknown): Capabilities {
       data.price_musd !== PRICE_MUSD || data.amount_atomic !== AMOUNT_ATOMIC ||
       (data.source_mode !== "live-public" && data.source_mode !== "fixture") ||
       typeof data.payment_ready !== "boolean") throw new Error("Gateway capability terms do not match the selected payment network.");
-  if(data.products !== undefined && (!Array.isArray(data.products) || data.products.length<1 || data.products.length>2 ||
-    data.products.some(item=>item!=="market_depth"&&item!=="trove_risk") || new Set(data.products).size!==data.products.length))
+  if(data.products !== undefined && (!Array.isArray(data.products) || data.products.length<1 || data.products.length>3 ||
+    data.products.some(item=>item!=="market_depth"&&item!=="trove_risk"&&item!=="mezo_dex") || new Set(data.products).size!==data.products.length))
     throw new Error("Invalid capability product declaration.");
   strings(data.limitations);
   strings(data.blockers);
@@ -58,7 +58,8 @@ function validateQuote(value: unknown): Quote {
         !["ACTIVE","NOT_ACTIVE"].includes(string(preview.trove_status)) ||
         ["instrument_id","side","quantity_base"].some(key=>key in preview) :
         preview.product_id !== undefined || preview.borrower !== undefined || preview.trove_status !== undefined ||
-        preview.instrument_id !== INSTRUMENT || !["BUY", "SELL"].includes(string(preview.side))) ||
+        preview.instrument_id !== INSTRUMENT || !["BUY", "SELL"].includes(string(preview.side)) ||
+        (preview.mezo_dex !== undefined && preview.mezo_dex !== true)) ||
       preview.snapshot_status !== "VALID_FOR_SNAPSHOT_CALCULATION" ||
       preview.price_musd !== PRICE_MUSD ||
       terms.version !== "liqvera-evidence-terms/v1" || terms.network !== NETWORK ||
@@ -183,7 +184,8 @@ export async function createQuote(capability: string, input: CreateInput): Promi
     headers: { "Content-Type": "application/json", "Idempotency-Key": input.idempotencyKey },
     body: JSON.stringify(input.product_id === "trove_risk" ?
       { product_id: input.product_id, borrower: input.borrower, expected_payer: input.payer } :
-      { instrument_id: INSTRUMENT, side: input.side, quantity_base: input.quantity, expected_payer: input.payer }),
+      { instrument_id: INSTRUMENT, side: input.side, quantity_base: input.quantity, expected_payer: input.payer,
+        ...(input.mezo_dex===true?{mezo_dex:true}:{}) }),
   });
   if (response.status === 201) return validateQuote(await response.json());
   if (response.status === 202) return validateRequest(await response.json());

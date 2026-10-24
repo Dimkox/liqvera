@@ -24,7 +24,7 @@ export interface Capabilities {
   source_mode: "fixture" | "live-public";
   limitations: string[];
   payment_ready: boolean;
-  products?: ("market_depth" | "trove_risk")[];
+  products?: ("market_depth" | "trove_risk" | "mezo_dex")[];
   blockers: string[];
 }
 
@@ -36,7 +36,7 @@ export interface Quote {
   report_sha256: string;
   bundle_sha256: string;
   state: QuoteState;
-  preview: ({ product_id?: never; borrower?: never; trove_status?: never; instrument_id: typeof INSTRUMENT; side: Side; quantity_base: string } |
+  preview: ({ product_id?: never; borrower?: never; trove_status?: never; instrument_id: typeof INSTRUMENT; side: Side; quantity_base: string; mezo_dex?: true } |
     { product_id: "trove_risk"; borrower: string; trove_status: "ACTIVE" | "NOT_ACTIVE"; instrument_id?: never; side?: never; quantity_base?: never }) & {
     snapshot_at: string;
     snapshot_status: "VALID_FOR_SNAPSHOT_CALCULATION";
@@ -118,7 +118,7 @@ export interface MarketReport {
   schema: "liqvera-evidence-report/v1";
   report_id: string;
   identity: { venue: string; instrument_id: string; product_kind: string; payoff_kind: string; quantity_unit: string };
-  request: { side: Side; quantity_base: string };
+  request: { side: Side; quantity_base: string; mezo_dex?: true };
   source: { source_mode: string; source_at: string; observed_at: string; available_bid_levels: number; available_ask_levels: number };
   calculation: {
     requested_quantity: string;
@@ -208,5 +208,6 @@ export function reportMatchesQuote(report: Report, quote: Quote): boolean {
     return report.schema === 'liqvera-trove-risk-report/v1' && report.request.product_id === 'trove_risk' &&
       report.request.borrower === quote.preview.borrower;
   return report.schema === 'liqvera-evidence-report/v1' && report.identity.instrument_id === INSTRUMENT &&
-    report.request.side === quote.preview.side && report.request.quantity_base === quote.preview.quantity_base;
+    report.request.side === quote.preview.side && report.request.quantity_base === quote.preview.quantity_base &&
+    (quote.preview.mezo_dex !== true || report.request.mezo_dex === true && report.mezo_dex?.match === true);
 }

@@ -6,6 +6,7 @@ class Element {
   constructor(tag){this.tagName=tag;}
   append(...items){this.children.push(...items);}
   setAttribute(name,value){this.attrs[name]=value;}
+  addEventListener(){}
 }
 function text(element){return [element.textContent,...element.children.map(text)].join(' ');}
 function setup(){globalThis.document={createElement:tag=>new Element(tag)};return new Element('section');}
@@ -22,4 +23,11 @@ test('comparison renders captured block, exact prices and caveats without networ
   assert.match(text(host),/16319875/);
   assert.match(text(host),/78597\.12278611556119311/);
   assert.match(text(host),/Perpetual versus spot/);
+});
+
+test('BTC sale planner is available without a delivered report and still requires wallet context to quote',async()=>{
+ const {mountMezoSalePlanner}=await import('../src/mezo-sale-panel.ts');
+ const host=setup();mountMezoSalePlanner(host,()=>({provider:null,account:null,isCurrent:()=>true}));
+ assert.match(text(host),/Plan BTC sale on Mezo/);
+ assert.match(text(host),/Testnet reserves/);
 });

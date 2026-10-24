@@ -31,6 +31,16 @@ test('Trove session survives reload while legacy sessions keep their original re
  saveFlow(legacy);assert.deepEqual(loadFlow(),legacy);
  saveFlow({...flow,side:'SELL',quantity:'1'});assert.equal(loadFlow(),null);
 });
+
+test('opted-in DEX market session survives reload and recovery replays the same choice',async()=>{
+ const dexFlow={version:3,side:'SELL',quantity:'0.25',mezo_dex:true,payer:flow.payer,idempotencyKey:flow.idempotencyKey,paymentGuard:'clear'};
+ const values=new Map();globalThis.window={sessionStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)}};
+ saveFlow(dexFlow);assert.deepEqual(loadFlow(),dexFlow);
+ const {executeRecovery}=await import('../src/browser-orchestration.ts');let sent;
+ await executeRecovery(dexFlow,{createQuote:async input=>{sent=input;return {quote_id:flow.idempotencyKey,state:'READY'};},onQuote(){}});
+ assert.deepEqual(sent,{side:'SELL',quantity:'0.25',mezo_dex:true,payer:flow.payer,idempotencyKey:flow.idempotencyKey});
+ saveFlow({...dexFlow,mezo_dex:'true'});assert.equal(loadFlow(),null);
+});
 test('Trove ambiguous wallet outcome retains the same borrower and blocks another submission',async()=>{
  const saved=[];
  const next=await executePaymentAttempt(flow,quote,{

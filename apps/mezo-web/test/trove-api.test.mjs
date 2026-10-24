@@ -10,8 +10,10 @@ test('browser sends a closed Trove body while legacy body bytes remain unchanged
  const bodies=[];t.mock.method(globalThis,'fetch',async(_path,options)=>{bodies.push(options.body);return new Response(JSON.stringify(status),{status:202});});
  await createQuote('cap',{product_id:'trove_risk',borrower,payer,idempotencyKey:id});
  await createQuote('cap',{side:'SELL',quantity:'1',payer,idempotencyKey:id});
+ await createQuote('cap',{side:'SELL',quantity:'1',mezo_dex:true,payer,idempotencyKey:id});
  assert.equal(bodies[0],JSON.stringify({product_id:'trove_risk',borrower,expected_payer:payer}));
  assert.equal(bodies[1],JSON.stringify({instrument_id:'hyperliquid:BTC:perpetual',side:'SELL',quantity_base:'1',expected_payer:payer}));
+ assert.equal(bodies[2],JSON.stringify({instrument_id:'hyperliquid:BTC:perpetual',side:'SELL',quantity_base:'1',expected_payer:payer,mezo_dex:true}));
 });
 test('browser recognizes a borrower-bound Trove quote without allowing mixed market fields',async t=>{
  const expires=new Date(Date.now()+60_000).toISOString();
@@ -31,6 +33,25 @@ test('delivery subject must match the paid quote product and borrower',async()=>
  assert.equal(reportMatchesQuote(report,quote),true);
  assert.equal(reportMatchesQuote({...report,request:{...report.request,borrower:payer}},quote),false);
  assert.equal(reportMatchesQuote({schema:'liqvera-evidence-report/v1',request:{side:'SELL',quantity_base:'1'}},quote),false);
+});
+
+test('selected DEX quote requires the matching DEX report and evidence match',async()=>{
+ const {reportMatchesQuote}=await import('../src/contracts.ts');
+ const quote={preview:{side:'SELL',quantity_base:'1',mezo_dex:true}};
+ const report={schema:'liqvera-evidence-report/v1',identity:{instrument_id:'hyperliquid:BTC:perpetual'},request:{side:'SELL',quantity_base:'1',mezo_dex:true},
+  mezo_dex:{match:true}};
+ assert.equal(reportMatchesQuote(report,quote),true);
+ assert.equal(reportMatchesQuote({...report,mezo_dex:{match:false}},quote),false);
+ assert.equal(reportMatchesQuote({...report,request:{...report.request,mezo_dex:undefined}},quote),false);
+});
+
+test('browser accepts the optional Mezo DEX capability in a closed product declaration',async t=>{
+ const {getCapabilities}=await import('../src/api.ts');
+ t.mock.method(globalThis,'fetch',async()=>new Response(JSON.stringify({schema:'liqvera-evidence-capabilities/v1',
+  instrument_id:'hyperliquid:BTC:perpetual',instrument_label:'Hyperliquid BTC linear perpetual',network:NETWORK,asset:ASSET,
+  decimals:18,price_musd:'0.01',amount_atomic:'10000000000000000',source_mode:'live-public',payment_ready:true,
+  limitations:['read only'],blockers:[],products:['market_depth','trove_risk','mezo_dex']}),{status:200}));
+ assert.deepEqual((await getCapabilities()).products,['market_depth','trove_risk','mezo_dex']);
 });
 
 for(const products of ['trove_risk',{},['unknown'],['trove_risk','trove_risk']])

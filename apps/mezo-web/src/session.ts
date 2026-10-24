@@ -38,10 +38,12 @@ export function loadFlow(): SavedFlow | null {
     const data: unknown = JSON.parse(raw);
     if (!data || typeof data !== "object") return null;
     const flow = data as SavedFlow;
-    const productValid = flow.version === 1 ? flow.product_id === undefined && flow.borrower === undefined &&
+    const productValid = flow.version === 1 ? flow.product_id === undefined && flow.borrower === undefined && flow.mezo_dex === undefined &&
       ["BUY", "SELL"].includes(flow.side) && /^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,8})?$/.test(flow.quantity) :
       flow.version === 2 && flow.product_id === "trove_risk" && isAddress(flow.borrower) &&
-      flow.side === undefined && flow.quantity === undefined;
+      flow.side === undefined && flow.quantity === undefined ? true :
+      flow.version === 3 && flow.product_id === undefined && flow.borrower === undefined && flow.mezo_dex === true &&
+      ["BUY", "SELL"].includes(flow.side) && /^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,8})?$/.test(flow.quantity);
     if (!productValid ||
         !isAddress(flow.payer) || !isUuid(flow.idempotencyKey) ||
         (flow.requestId !== undefined && !isUuid(flow.requestId)) ||

@@ -32,7 +32,7 @@ export function recoveryRequest(flow: BrowserFlowState): RecoveryRequest {
   if (flow.requestId) return { kind: "request", method: "GET", path: `/v1/report-requests/${flow.requestId}` };
   return { kind: "create", method: "POST", path: "/v1/report-quotes", idempotencyKey: flow.idempotencyKey,
     body: flow.version === 2 ? { product_id: flow.product_id, borrower: flow.borrower, payer: flow.payer } :
-      { side: flow.side, quantity: flow.quantity, payer: flow.payer } };
+      { side: flow.side, quantity: flow.quantity, ...(flow.version===3?{mezo_dex:true as const}:{}), payer: flow.payer } };
 }
 
 export function canPay(input: {

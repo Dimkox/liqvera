@@ -60,7 +60,7 @@ export async function executeRecovery<Q extends QuoteLike, R extends RequestLike
   }
   const created = await dependencies.createQuote(flow.version === 2 ?
     { product_id: flow.product_id, borrower: flow.borrower, payer: flow.payer, idempotencyKey: flow.idempotencyKey } :
-    { side: flow.side, quantity: flow.quantity, payer: flow.payer, idempotencyKey: flow.idempotencyKey });
+    { side: flow.side, quantity: flow.quantity, ...(flow.version===3?{mezo_dex:true as const}:{}), payer: flow.payer, idempotencyKey: flow.idempotencyKey });
   if (isQuote(created)) {
     dependencies.onQuote(created);
     return { kind: "quote", quote: created };

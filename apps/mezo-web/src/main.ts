@@ -48,7 +48,8 @@ app.innerHTML = `
           <div id="market-instrument" class="instrument"><span class="instrument-icon" aria-hidden="true">₿</span><span><strong>BTC linear perpetual</strong><small>Hyperliquid public order book</small></span><span class="readonly-tag">READ ONLY</span></div>
           <form id="report-form" novalidate>
             <div id="market-fields"><fieldset><legend>Hypothetical side</legend><div class="segment"><label><input type="radio" name="side" value="BUY" checked /><span>BUY</span></label><label><input type="radio" name="side" value="SELL" /><span>SELL</span></label></div></fieldset>
-            <label class="field-label" for="quantity">Quantity <span>BTC</span></label><input id="quantity" name="quantity" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0.15" aria-describedby="quantity-hint" /><p id="quantity-hint" class="field-hint">A positive decimal string, up to 8 places. The report shows a hypothetical sweep.</p></div>
+            <label class="field-label" for="quantity">Quantity <span>BTC</span></label><input id="quantity" name="quantity" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0.15" aria-describedby="quantity-hint" /><p id="quantity-hint" class="field-hint">A positive decimal string, up to 8 places. The report shows a hypothetical sweep.</p>
+            <label id="dex-report-option" class="field-hint hidden"><input id="include-mezo-dex" type="checkbox" /><span>Include Mezo DEX spot comparison</span></label></div>
             <div id="trove-fields" class="hidden">
               <label class="field-label" for="borrower">Borrower address</label>
               <input id="borrower" type="text" autocomplete="off" spellcheck="false" placeholder="0x…" aria-describedby="trove-hint" />
@@ -80,6 +81,7 @@ app.innerHTML = `
           <div class="result-actions"><button id="refresh-button" class="secondary-button hidden" type="button">Check status</button><button id="new-button" class="text-button hidden" type="button">Start another report</button></div>
         </section>
       </div>
+      <section id="dex-sale-planner-host" class="panel hidden" aria-label="Mezo DEX BTC sale planner"></section>
       <section class="boundary-strip" aria-label="Important context"><div><span>NOTE 1</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>NOTE 2</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>NOTE 3</span><p><strong>User signed actions.</strong> Mezo spot swaps and Trove updates require your wallet; no perpetual orders or custody.</p></div></section>
     </main>
     <footer><span>Liqvera v0.0.5 · Market reports you can verify.</span><span>Built for MEZO ₿ · ${NETWORK_LABEL} · <a href="https://github.com/Dimkox/liqvera" target="_blank" rel="noopener noreferrer" aria-label="Liqvera project repository on GitHub">Project repository ↗</a> · <a href="https://github.com/Dimkox/liqvera/releases" target="_blank" rel="noopener noreferrer" aria-label="Liqvera releases on GitHub">Project releases ↗</a> · <a href="https://github.com/Dimkox/Getzilla" target="_blank" rel="noopener noreferrer" aria-label="Getzilla project repository on GitHub">Getzilla ↗</a></span></footer>
@@ -215,6 +217,11 @@ const fundingPanel = mountMezoFinance({
   network: { name: NETWORK_CONFIG.name, chainId: MEZO.chainId, asset: MUSD.address, decimals: MUSD.decimals },
   getContext: () => ({ provider, account, quote, paymentGuard: flow?.paymentGuard ?? "unavailable", busy: busy || polling, onMezo: onChain }),
 });
+mountMezoSalePlanner(el<HTMLElement>("#dex-sale-planner-host"),()=>{
+  const activeProvider=provider,activeAccount=account,activeOnChain=onChain;
+  return {provider:activeProvider,account:activeAccount,isCurrent:()=>provider===activeProvider&&
+    account?.toLowerCase()===activeAccount?.toLowerCase()&&onChain===activeOnChain&&activeOnChain};
+});
 window.addEventListener("pagehide", event => { if (!event.persisted) fundingPanel.dispose(); });
 
 function setBusy(value: boolean): void {
@@ -226,6 +233,7 @@ function updateControls(): void {
   fundingPanel.update();
   const ready = Boolean(cap?.payment_ready && cap.source_mode === "live-public");
   const productReady = product === "market_depth" || Boolean(cap?.products?.includes("trove_risk"));
+  const dexReady=Boolean(cap?.products?.includes("mezo_dex"));
   const canCreate = productReady && ready && x402Available() && Boolean(bearer && account && !flow) && !busy;
   el<HTMLButtonElement>("#create-button").disabled = !canCreate;
   el<HTMLButtonElement>("#trove-preview-button").disabled = Boolean(flow) || busy || polling;
@@ -233,6 +241,9 @@ function updateControls(): void {
   el<HTMLElement>("#market-instrument").classList.toggle("hidden", product !== "market_depth");
   el<HTMLElement>("#trove-fields").classList.toggle("hidden", product !== "trove_risk");
   el<HTMLElement>("#trove-availability").classList.toggle("hidden", product !== "trove_risk" || productReady);
+  el<HTMLElement>("#dex-report-option").classList.toggle("hidden",product!=="market_depth"||!dexReady);
+  el<HTMLInputElement>("#include-mezo-dex").disabled=Boolean(flow)||busy||polling||!dexReady;
+  el<HTMLElement>("#dex-sale-planner-host").classList.toggle("hidden",!dexReady);
   for(const [id,active] of [["market-tab",product === "market_depth"],["trove-tab",product === "trove_risk"]] as const) {
     el<HTMLButtonElement>(`#${id}`).setAttribute("aria-pressed",String(active));
     el<HTMLButtonElement>(`#${id}`).disabled = Boolean(flow) || busy || polling;
@@ -297,7 +308,7 @@ function renderQuote(): void {
     appendField(grid,"Borrower",q.preview.borrower,"breakable span-all");
     appendField(grid,"Trove status",q.preview.trove_status);
   } else {
-    appendField(grid, "Instrument", "Hyperliquid BTC linear perpetual", "span-all");
+    appendField(grid, "Instrument", q.preview.mezo_dex===true?"Hyperliquid BTC linear perpetual + Mezo DEX spot":"Hyperliquid BTC linear perpetual", "span-all");
     appendField(grid, "Hypothetical side", q.preview.side);
     appendField(grid, "Quantity", `${q.preview.quantity_base} BTC`);
   }
@@ -374,7 +385,6 @@ function renderDelivery(): void {
     appendField(grid, "Snapshot execution authority", report.boundaries.execution_authority);
     target.append(grid);
     mountMezoDex(target, report);
-    mountMezoSalePlanner(target,report,provider,account,walletContextCurrent);
   }
   const limitations = node("div", "limitations");
   limitations.append(node("strong", "", "Evidence and limits"));
@@ -453,7 +463,8 @@ function rememberQuote(next: Quote): void {
     return normalizedFraction ? `${normalizedWhole}.${normalizedFraction}` : normalizedWhole;
   };
   const subjectMatches = flow.version === 2 ? next.preview.product_id === "trove_risk" && next.preview.borrower === flow.borrower :
-    next.preview.product_id === undefined && next.preview.side === flow.side && canonicalQuantity(next.preview.quantity_base) === canonicalQuantity(flow.quantity);
+    next.preview.product_id === undefined && next.preview.side === flow.side && canonicalQuantity(next.preview.quantity_base) === canonicalQuantity(flow.quantity) &&
+    (flow.version !== 3 || next.preview.mezo_dex === true);
   if (!subjectMatches) {
     throw new Error("Quote subject differs from the saved request. Payment remains disabled.");
   }
@@ -726,7 +737,9 @@ el<HTMLFormElement>("#report-form").addEventListener("submit", async event => {
       return;
     }
     const side = el<HTMLInputElement>('input[name="side"]:checked').value as Side;
-    flow = { version: 1, side, quantity, payer: account, idempotencyKey: crypto.randomUUID(), paymentGuard: "clear" };
+    flow = el<HTMLInputElement>("#include-mezo-dex").checked&&cap.products?.includes("mezo_dex") ?
+      { version:3,side,quantity,mezo_dex:true,payer:account,idempotencyKey:crypto.randomUUID(),paymentGuard:"clear" } :
+      { version: 1, side, quantity, payer: account, idempotencyKey: crypto.randomUUID(), paymentGuard: "clear" };
   }
   saveFlow(flow);
   announcement("Request saved in this browser session. Preparing report…");
@@ -742,6 +755,7 @@ async function boot(): Promise<void> {
   } else if (flow) {
     el<HTMLInputElement>("#quantity").value = flow.quantity;
     el<HTMLInputElement>(`input[name="side"][value="${flow.side}"]`).checked = true;
+    if(flow.version===3)el<HTMLInputElement>("#include-mezo-dex").checked=true;
   }
   if (walletModal) {
     provider = null;

@@ -627,3 +627,5 @@ no transaction was signed, and no payment or database state was changed. Trivy r
 0 findings; Grype retains the same 4 raw findings as the previous web image, with the
 existing BusyBox backport and inactive curl dispositions. Recovery and exact limits
 are recorded in [deployment evidence](docs/security/2026-10-24-wallet-actions-deployment.md).
+The README now explicitly states that no live Trove or DEX transaction has been
+signed or verified.

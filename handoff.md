@@ -571,3 +571,48 @@ Final fee-disclosure verification: browser suite again passed 148 tests, the bro
 production build and protocol TypeScript build passed, documentation validation
 passed for 72 documents, and `git diff --check` passed. The app bundle remains
 500.89 kB minified; Vite reports its configured >500 kB chunk notice.
+
+## 2026-10-23 — restore Router artifact guard for user-signed swap ABI
+
+The first merged wallet-action PR failed the hosted product gate because the
+source-provenance compatibility test still allowed only Router reads. Updated the
+exact ABI allowlist to include `getReserves` and the explicitly requested
+`swapExactTokensForTokens`, asserting their `view` and `nonpayable` mutability and
+retaining vendored-item equality. This keeps the test strict while matching the
+narrow user-signed action surface.
+
+Validation: the focused provenance suite passed 37 tests and `git diff --check`
+passed. A local full `make test` was interrupted at 63% after more than ten minutes
+on the shared host; it is not reported as passing. Hosted PR CI is required before
+any site rollout. No wallet transaction or deployment occurred.
+
+Security documentation now distinguishes public read-only market-data capture from
+optional browser-built Mezo Testnet actions that are submitted only through user
+wallet signatures; no server signing or custody is added. `scripts/check-docs.py`
+passed for 72 documents.
+
+The hosted full product gate then exposed stale README test counts after the
+wallet-action suite expanded. Updated the machine-checked gate totals to 1,111 Python
+tests plus 85 subtests, 98 gateway tests and 148 browser tests. No deployment has
+occurred; the site remains on its previous web image pending a green rerun.
+
+The next hosted advisory refresh found six new vulnerabilities on the locked dev
+closure's `filelock==4.1.1`; the 4.2.x line fixes them. Updated the dev lock to
+`filelock==4.2.4`, the latest available release, and will rerun the complete audit and
+product gate before rollout.
+
+The same advisory refresh also identified Zod versions below 4.6.6 through Reown and
+x402 browser dependencies. Added a root npm override to 4.6.6 and regenerated the web
+lock. `npm audit` now reports zero vulnerabilities; `npm ci`, the web suite and
+production build pass. This remains part of the unmerged PR until hosted CI completes.
+
+The matching gateway audit found the same Zod advisory plus fixable `body-parser` and
+`fast-uri` ranges. Updated its lock and root Zod override. Both npm audits and both
+Python lock audits report zero known vulnerabilities. Gateway `npm ci`, typecheck and
+tests pass locally (84 passed, 14 PostgreSQL cases skipped without a local test DB).
+
+The first updated web image build caught a lockfile-version mismatch: local npm 12 had
+removed optional peer entries required by the pinned Node 22/npm 10 image. Regenerated
+both JavaScript locks with that exact pinned image. A fresh production web build now
+passes `npm ci`, protocol typecheck and Vite build; its image-bound scans remain Trivy
+0 and Grype 4, unchanged from the current deployed web image.

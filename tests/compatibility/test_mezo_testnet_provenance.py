@@ -84,7 +84,15 @@ def test_named_dex_addresses_and_exported_abis_match_vendor():
         exported_abi = json.loads(match[1])
         vendor = json.loads((ROOT / entry["local_path"]).read_bytes())
         expected = {"Pool": {"token0", "token1", "stable", "getReserves", "getAmountOut"},
-                    "Router": {"getAmountsOut"}, "PoolFactory": {"getFee"}}
+                    "Router": {"getAmountsOut", "getReserves", "swapExactTokensForTokens"},
+                    "PoolFactory": {"getFee"}}
         assert {item["name"] for item in exported_abi} == expected[name]
         assert all(item in vendor for item in exported_abi)
-        assert all(item["stateMutability"] == "view" for item in exported_abi)
+        if name == "Router":
+            assert {item["name"]: item["stateMutability"] for item in exported_abi} == {
+                "getAmountsOut": "view",
+                "getReserves": "view",
+                "swapExactTokensForTokens": "nonpayable",
+            }
+        else:
+            assert all(item["stateMutability"] == "view" for item in exported_abi)

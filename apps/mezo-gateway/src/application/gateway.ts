@@ -4,7 +4,7 @@ import { Ledger } from '../adapters/postgres.js';
 import { Contracts } from '../adapters/contracts.js';
 import { capabilitiesResource, errorResource, quoteResource, requestResource } from './presenters.js';
 import { metrics } from '../security/observability.js';
-export interface GatewayConfig { payTo: string|null; sourceMode:'fixture'|'live-public'; troveRiskEnabled?:boolean }
+export interface GatewayConfig { payTo: string|null; sourceMode:'fixture'|'live-public'; troveRiskEnabled?:boolean; mezoDexEnabled?:boolean }
 export interface ApiResult { status:number; body?:unknown; bytes?:Buffer; headers?:Record<string,string>; shape?:string }
 export class Gateway {
   constructor(readonly ledger:Ledger,readonly reports:ReportService,readonly artifacts:ArtifactStore,
@@ -38,7 +38,7 @@ export class Gateway {
     const blockers=await this.currentBlockers();
     if(!await this.ledger.healthy())blockers.push('STORAGE_UNAVAILABLE');
     else if(!await this.salesHealthy())blockers.push('ARTIFACT_INTEGRITY_FAILURE');
-    return {status:200,shape:'capabilities',body:capabilitiesResource(requestId,this.config.sourceMode,[...new Set(blockers)],this.config.troveRiskEnabled)};
+    return {status:200,shape:'capabilities',body:capabilitiesResource(requestId,this.config.sourceMode,[...new Set(blockers)],this.config.troveRiskEnabled,this.config.mezoDexEnabled)};
   }
   private async salesHealthy():Promise<boolean> {
     return !(await this.ledger.pool.query("SELECT 1 FROM artifacts WHERE storage_state='RECOVERY' LIMIT 1")).rowCount;
@@ -48,6 +48,7 @@ export class Gateway {
     const existing=(await this.ledger.pool.query<ReportRequest>('SELECT * FROM report_requests WHERE scope_hash=$1 AND idempotency_key=$2',[scope,key])).rows[0];
     if(!existing) {
       if(body.product_id==='trove_risk'&&!this.config.troveRiskEnabled)throw new PublicError('UNSUPPORTED_INSTRUMENT',422);
+      if(body.product_id!=='trove_risk'&&body.mezo_dex===true&&!this.config.mezoDexEnabled)throw new PublicError('UNSUPPORTED_INSTRUMENT',422);
       if(this.config.sourceMode==='fixture')throw new PublicError('SIMULATED_SOURCE',422);
       if((await this.currentBlockers()).length||!await this.salesHealthy())throw new PublicError('PAYMENT_NOT_READY');
       if(this.payment.expectedPayer&&body.expected_payer!==this.payment.expectedPayer)throw new PublicError('PAYMENT_NOT_READY');

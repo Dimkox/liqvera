@@ -20,6 +20,14 @@ test('legacy market request keeps its exact four-field canonical representation'
   assert.equal(Object.keys(legacy).length,4);
 });
 
+test('Mezo DEX is an explicit, closed opt-in on a Market depth request',()=>{
+  const selected={instrument_id:'hyperliquid:BTC:perpetual',side:'SELL',quantity_base:'0.25',expected_payer:payer,mezo_dex:true};
+  assert.deepEqual(quoteInput(selected),selected);
+  assert.deepEqual(decodeQuoteBody(Buffer.from(JSON.stringify(selected))),selected);
+  for(const value of [false,'true',1,null])
+    assert.throws(()=>quoteInput({...selected,mezo_dex:value}),PublicError);
+});
+
 for(const value of [borrower.toLowerCase(),borrower.toUpperCase(),'0x'+'0'.repeat(40),'invalid',null]){
   test('invalid or noncanonical Trove borrower returns API400 before capture: '+String(value),()=>{
     assert.throws(()=>quoteInput({...input,borrower:value}),(error:unknown)=>error instanceof PublicError&&error.code==='INVALID_INPUT'&&error.status===400);

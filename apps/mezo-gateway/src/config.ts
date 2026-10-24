@@ -29,6 +29,9 @@ export async function loadConfig(env:NodeJS.ProcessEnv=process.env):Promise<Runt
   const troveFlag=env.LIQVERA_MEZO_TROVES_ENABLED??'false';
   if(!['true','false'].includes(troveFlag)||(troveFlag==='true'&&(sourceMode!=='live-public'||MEZO_CONFIG.name!=='testnet')))throw new PublicError('INVALID_INPUT');
   const troveRiskEnabled=troveFlag==='true';
+  const dexFlag=env.LIQVERA_MEZO_DEX_ENABLED??'false';
+  if(!['true','false'].includes(dexFlag)||(dexFlag==='true'&&(sourceMode!=='live-public'||MEZO_CONFIG.name!=='testnet')))throw new PublicError('INVALID_INPUT');
+  const mezoDexEnabled=dexFlag==='true';
   const publicBase=new URL(env.PUBLIC_BASE_URL??'http://localhost:8080');
   if(publicBase.username||publicBase.password||publicBase.search||publicBase.hash||publicBase.pathname!=='/'||
     (publicBase.protocol!=='https:'&&!(publicBase.protocol==='http:'&&['localhost','127.0.0.1'].includes(publicBase.hostname))))throw new PublicError('INVALID_INPUT');
@@ -66,7 +69,7 @@ export async function loadConfig(env:NodeJS.ProcessEnv=process.env):Promise<Runt
   if(publicKeyHex!==undefined&&!/^[0-9a-f]{64}$/.test(publicKeyHex))throw new PublicError('INVALID_INPUT');
   const liveGrantPublicKey=publicKeyHex?Buffer.from(publicKeyHex,'hex'):undefined;
   if(allowAnyPayer&&!liveGrantPublicKey)throw new PublicError('INVALID_INPUT');
-  return {troveRiskEnabled,paymentMode,databaseUrl:await databaseUrl(env),sourceMode,payTo,publicBase,origins,port,liveGrantFile,liveContext,allowAnyPayer,liveGrantPublicKey,
+  return {troveRiskEnabled,mezoDexEnabled,paymentMode,databaseUrl:await databaseUrl(env),sourceMode,payTo,publicBase,origins,port,liveGrantFile,liveContext,allowAnyPayer,liveGrantPublicKey,
     host:env.HOST??'0.0.0.0',artifactRoot:env.ARTIFACT_ROOT??'/data/artifacts',reportToken,metricsHost,metricsPort,
     reportUrl:fixedInternalUrl(env.REPORT_SERVICE_URL??'http://report:8082')};
 }

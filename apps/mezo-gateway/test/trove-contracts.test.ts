@@ -27,3 +27,12 @@ test('capabilities advertise Trove only when enabled without changing legacy cap
  assert.deepEqual(enabled.products,['market_depth','trove_risk']);
  contracts.assert('capabilities',legacy);contracts.assert('capabilities',enabled);
 });
+
+test('capabilities advertise the optional DEX report only when enabled',async()=>{
+ const contracts=await Contracts.load(new URL('../../dist/contracts/',import.meta.url));
+ const legacy=capabilitiesResource('123e4567-e89b-42d3-a456-426614174050','live-public',[]);
+ const enabled=capabilitiesResource('123e4567-e89b-42d3-a456-426614174050','live-public',[],false,true);
+ assert.equal('products' in legacy,false);
+ assert.deepEqual(enabled.products,['market_depth','mezo_dex']);
+ contracts.assert('capabilities',legacy);contracts.assert('capabilities',enabled);
+});

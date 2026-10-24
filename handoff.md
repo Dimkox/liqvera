@@ -1,5 +1,34 @@
 # Liqvera handoff
 
+## 2026-10-24 — DEX request opt-in repair and payment incident
+
+The Market depth API now has an explicit, closed `mezo_dex: true` request flag.
+The gateway advertises and accepts it only when `LIQVERA_MEZO_DEX_ENABLED=true`
+on live Testnet, passes it to the report service, and binds the resulting quote
+preview to a matching Mezo DEX report. The Testnet overlay configures the flag on
+both services. Browser selection and the standalone planner entry are in the next
+source step. Nothing from this work is deployed yet.
+
+Payment incident: public tx
+`0xa09b46ea31e2d44734f7c0ad7e33b74bfdf72cfaf93245b4b173c04fb0cdf482` transferred
+0.01 MUSD from `0xf63f…36bf6` to `0xd7f5…1535` and was successful with ample
+confirmations at the time of public inspection. This alone does not bind a receipt
+to the original authorization or report digest. The supplied expiry carried an
+incorrect MSK label, as corrected by the user; do not use that label to reject the
+transaction. The user has since supplied the quote ID and request ID, but production
+quote/attempt state is not available from this source workspace. No payment state,
+entitlement, or database row has been changed; no replacement payment or settlement
+is authorized. Exact-attempt reconciliation remains open until the production ledger
+confirms the stored authorization/receipt binding.
+
+Full gate: gateway **106 passed** with disposable PostgreSQL; Python **1116 passed**,
+**85 subtests**; web **152 passed**; artifact checks and 75-document link check
+passed. The offline
+gate's final count guard first found stale README totals; corrected totals pass its
+checker. Independent read-only review found no blocking DEX binding,
+wallet-submission or UI-entry defect. Payment reconciliation was not changed by this
+source work. Commits and deployment are pending.
+
 ## 2026-10-23 — Trove risk published; current state
 
 The public Testnet site now runs source `d63860d7af70b5ad12145b039131ac11f0d4e729`,

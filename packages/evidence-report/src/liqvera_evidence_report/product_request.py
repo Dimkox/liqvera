@@ -18,4 +18,5 @@ def parse_product_request(body: object, *, engine_commit: str, created_at_ms: in
 def request_identity(request: ReportRequest | TroveReportRequest) -> dict:
     if type(request) is TroveReportRequest:
         return {'product_id': 'trove_risk', 'borrower': request.borrower}
-    return {'side': request.side.value, 'quantity_base': str(request.quantity_base)}
+    return {'side': request.side.value, 'quantity_base': str(request.quantity_base),
+            **({'mezo_dex': True} if request.include_mezo_dex else {})}

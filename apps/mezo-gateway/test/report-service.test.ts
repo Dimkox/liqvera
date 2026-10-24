@@ -114,3 +114,21 @@ test('Mezo source failure is preserved as a failed build without an artifact', a
       typeof error === 'object' && error !== null && 'code' in error && error.code === 'MEZO_SOURCE_UNAVAILABLE');
   });
 });
+
+test('explicit Mezo DEX selection is forwarded to the report service',async()=>{
+ const expected={report_id:REPORT_ID,instrument_id:'hyperliquid:BTC:perpetual',side:'SELL',quantity_base:'1',mezo_dex:true};
+ await withServer((request,response)=>{
+  assert.equal(request.method,'POST');assert.equal(request.url,'/internal/v1/reports');
+  let body='';request.setEncoding('utf8');request.on('data',chunk=>body+=chunk);request.on('end',()=>{
+   assert.deepEqual(JSON.parse(body),expected);
+   response.writeHead(200,{'content-type':'application/json'});
+   response.end(JSON.stringify({report_id:REPORT_ID,report_sha256:'a'.repeat(64),bundle_sha256:'b'.repeat(64),
+    report_size_bytes:100,bundle_size_bytes:200,snapshot_at:'2026-10-24T00:00:00Z',snapshot_status:'VALID_FOR_SNAPSHOT_CALCULATION',
+    source_mode:'live-public',limitations:['read only']}));
+  });
+ },async base=>{
+  const service=new HttpReportService(base);
+  const artifact=await service.build(REPORT_ID,{instrument_id:'hyperliquid:BTC:perpetual',side:'SELL',quantity_base:'1',expected_payer:'0x1111111111111111111111111111111111111111',mezo_dex:true},AbortSignal.timeout(1000));
+  assert.equal(artifact.report_id,REPORT_ID);
+ });
+});

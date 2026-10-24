@@ -23,7 +23,10 @@ export function quoteInput(input: unknown): QuoteInput {
     try {if(getAddress(body.borrower)!==body.borrower)throw invalid();}catch{throw invalid();}
     return {product_id:'trove_risk',borrower:body.borrower,expected_payer:address(body.expected_payer)};
   }
-  if (Object.keys(body).sort().join(',') !== 'expected_payer,instrument_id,quantity_base,side') throw new PublicError('INVALID_INPUT', 422);
+  const keys=Object.keys(body).sort().join(',');
+  if (keys !== 'expected_payer,instrument_id,quantity_base,side' &&
+      keys !== 'expected_payer,instrument_id,mezo_dex,quantity_base,side') throw new PublicError('INVALID_INPUT', 422);
+  if ('mezo_dex' in body && body.mezo_dex !== true) throw new PublicError('INVALID_INPUT',422);
   if (body.instrument_id !== INSTRUMENT) throw new PublicError('UNSUPPORTED_INSTRUMENT', 422);
   if (body.side !== 'BUY' && body.side !== 'SELL') throw new PublicError('INVALID_INPUT', 422);
   if (typeof body.quantity_base !== 'string' || body.quantity_base.length > 32 ||
@@ -33,7 +36,8 @@ export function quoteInput(input: unknown): QuoteInput {
   const decimal = fraction.replace(/0+$/, '');
   const quantity = decimal ? `${integer}.${decimal}` : integer;
   if (BigInt(integer + fraction.padEnd(8, '0')) <= 0n) throw new PublicError('INVALID_INPUT', 422);
-  return { instrument_id: INSTRUMENT, side: body.side, quantity_base: quantity, expected_payer: address(body.expected_payer) };
+  return { instrument_id: INSTRUMENT, side: body.side, quantity_base: quantity, expected_payer: address(body.expected_payer),
+    ...('mezo_dex' in body ? {mezo_dex:true as const} : {}) };
 }
 export function paymentHeader(value: string): string {
   if (value.length > 21848 || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value))
@@ -48,6 +52,6 @@ export function decodeQuoteBody(raw: Buffer): QuoteInput {
   if (raw.length > 16384) throw new PublicError('INVALID_INPUT', 422);
   const source = new TextDecoder('utf-8', { fatal: true }).decode(raw);
   const keys = [...source.matchAll(/"((?:\\.|[^"\\])*)"\s*:/g)].map(m => JSON.parse(`"${m[1]}"`) as string);
-  if (![3,4].includes(keys.length) || new Set(keys).size !== keys.length) throw new PublicError('INVALID_INPUT', 422);
+  if (![3,4,5].includes(keys.length) || new Set(keys).size !== keys.length) throw new PublicError('INVALID_INPUT', 422);
   return quoteInput(JSON.parse(source));
 }

@@ -34,6 +34,7 @@ class ReportRequest:
     quantity_base: ExactDecimal
     engine_commit: str
     created_at_ms: int | None = None
+    include_mezo_dex: bool = False
 
     def __post_init__(self) -> None:
         if type(self.report_id) is not UUID or type(self.side) is not Side:
@@ -43,6 +44,8 @@ class ReportRequest:
         if type(self.engine_commit) is not str or re.fullmatch(r"[0-9a-f]{40}", self.engine_commit) is None:
             raise EvidenceRejected("INVALID_INPUT")
         if self.created_at_ms is not None and (type(self.created_at_ms) is not int or self.created_at_ms < 0):
+            raise EvidenceRejected("INVALID_INPUT")
+        if type(self.include_mezo_dex) is not bool:
             raise EvidenceRejected("INVALID_INPUT")
 
 
@@ -58,7 +61,10 @@ class BuiltReport:
 
 
 def parse_request(body: object, *, engine_commit: str) -> ReportRequest:
-    if type(body) is not dict or set(body) != {"report_id", "instrument_id", "side", "quantity_base"}:
+    if type(body) is not dict or set(body) not in (
+        {"report_id", "instrument_id", "side", "quantity_base"},
+        {"report_id", "instrument_id", "side", "quantity_base", "mezo_dex"},
+    ) or ("mezo_dex" in body and body["mezo_dex"] is not True):
         raise EvidenceRejected("INVALID_INPUT")
     if body["instrument_id"] != "hyperliquid:BTC:perpetual":
         raise EvidenceRejected("UNSUPPORTED_INSTRUMENT")
@@ -67,7 +73,8 @@ def parse_request(body: object, *, engine_commit: str) -> ReportRequest:
         raise EvidenceRejected("INVALID_INPUT")
     try:
         return ReportRequest(UUID(identifier(body["report_id"])), Side(body["side"]),
-                             ExactDecimal.parse(quantity), engine_commit)
+                             ExactDecimal.parse(quantity), engine_commit,
+                             include_mezo_dex=body.get("mezo_dex", False))
     except (ValueError, TypeError) as error:
         raise EvidenceRejected("INVALID_INPUT") from error
 
@@ -129,7 +136,8 @@ def build_inspected_report(evidence: InspectedInput, request: ReportRequest, *, 
             "mapping_version": mapping.mapping_version,
             "evidence": [{"reference": mapping.evidence_reference, "sha256": mapping.evidence_sha256}],
         },
-        "request": {"side": request.side.value, "quantity_base": str(request.quantity_base)},
+        "request": {"side": request.side.value, "quantity_base": str(request.quantity_base),
+                    **({"mezo_dex": True} if request.include_mezo_dex else {})},
         "source": {
             "source_mode": mode, "started_at": _timestamp(evidence.capture["responses"][0]["started_at_ms"]),
             "observed_at": _timestamp(received), "source_at": _timestamp(source_at),

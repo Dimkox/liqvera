@@ -57,7 +57,8 @@
       "required": ["side", "quantity_base"],
       "properties": {
         "side": {"$ref": "quote-request.schema.json#/properties/side"},
-        "quantity_base": {"$ref": "primitives.schema.json#/$defs/quantity"}
+        "quantity_base": {"$ref": "primitives.schema.json#/$defs/quantity"},
+        "mezo_dex": {"const": true}
       }
     },
     "source": {

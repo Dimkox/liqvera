@@ -25,6 +25,8 @@ export async function buildOne(gateway:Gateway):Promise<boolean> {
     } else if(report.schema!=='liqvera-evidence-report/v1'||report.request.side!==request.canonical_body.side||
       report.request.quantity_base!==request.canonical_body.quantity_base||report.identity.instrument_id!==INSTRUMENT)
       throw new PublicError('IDENTITY_MISMATCH',422);
+    if(request.canonical_body.product_id!=='trove_risk'&&request.canonical_body.mezo_dex===true&&
+      (report.request.mezo_dex!==true||!report.mezo_dex||report.mezo_dex.match!==true))throw new PublicError('IDENTITY_MISMATCH',422);
     if(report.quality.snapshot_status==='REJECTED') {
       const reason=report.quality.reason_codes.find((r:Reason)=>rejectedReasons.includes(r))??'INVALID_DATASET';throw new PublicError(reason,422);
     }
@@ -44,7 +46,8 @@ export async function buildOne(gateway:Gateway):Promise<boolean> {
       limitations:artifact.limitations,price_musd:'0.01' as const,expires_at:expires.toISOString()};
     const preview=request.canonical_body.product_id==='trove_risk'?
       {...common,product_id:'trove_risk' as const,borrower:request.canonical_body.borrower,trove_status:report.trove_risk.status}:
-      {instrument_id:INSTRUMENT,side:request.canonical_body.side,quantity_base:request.canonical_body.quantity_base,...common};
+      {instrument_id:INSTRUMENT,side:request.canonical_body.side,quantity_base:request.canonical_body.quantity_base,
+        ...(request.canonical_body.mezo_dex===true?{mezo_dex:true as const}:{}),...common};
     await gateway.ledger.publish(request,artifact,gateway.config.payTo,expires,preview);
     metrics.increment('build_complete');
   } catch(error) {

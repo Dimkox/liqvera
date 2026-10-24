@@ -22,9 +22,9 @@ const messages: Partial<Record<Reason,string>>={
   RATE_LIMITED:'Request budget exceeded. Try again after the stated delay.'
 };
 export const errorResource=(code: Reason,requestId: string)=>({schema:'liqvera-evidence-error/v1',request_id:requestId,code,message:messages[code]??'The request cannot be completed safely.'});
-export function capabilitiesResource(requestId: string,sourceMode: 'fixture'|'live-public',blockers: Reason[],troveRiskEnabled=false) {
+export function capabilitiesResource(requestId: string,sourceMode: 'fixture'|'live-public',blockers: Reason[],troveRiskEnabled=false,mezoDexEnabled=false) {
   return {schema:'liqvera-evidence-capabilities/v1',request_id:requestId,instrument_id:INSTRUMENT,
-    ...(troveRiskEnabled&&CHAIN_ID===31611?{products:['market_depth','trove_risk']}:{}),
+    ...(CHAIN_ID===31611&&(troveRiskEnabled||mezoDexEnabled)?{products:['market_depth',...(troveRiskEnabled?['trove_risk']:[]),...(mezoDexEnabled?['mezo_dex']:[])]}:{}),
     instrument_label:'Hyperliquid BTC linear perpetual',network:NETWORK,asset:ASSET,decimals:18,price_musd:'0.01',amount_atomic:AMOUNT,
     source_mode:sourceMode,limitations:[`${MEZO_CONFIG.name==='mainnet'?'Mainnet':'Testnet'} only. Read-only analytics.`,
       'Calculation over the available snapshot depth; this is not a complete exchange book or guaranteed execution.',

@@ -36,11 +36,12 @@ def built_with_mezo(tmp_path):
                "side": "SELL", "quantity_wei": str(10**18), "probe": probe}
     return build_report(tmp_path, ReportRequest(
         UUID("123e4567-e89b-42d3-a456-426614174011"), Side.SELL,
-        ExactDecimal.parse("1"), "c" * 40), mezo_capture=capture)
+        ExactDecimal.parse("1"), "c" * 40, include_mezo_dex=True), mezo_capture=capture)
 
 
 def test_optional_mezo_report_reproduces_every_member_offline(tmp_path, monkeypatch):
     built = built_with_mezo(tmp_path)
+    assert built.document["request"]["mezo_dex"] is True
     assert built.document["mezo_dex"]["fee_bps"] == 4
     assert built.document["venue_comparison"]["better_venue"] == "hyperliquid"
     bundle = build_bundle(built)

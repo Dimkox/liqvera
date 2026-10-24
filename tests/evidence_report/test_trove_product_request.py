@@ -26,6 +26,23 @@ def test_legacy_request_stays_byte_compatible():
     assert request_identity(request) == {'side': 'SELL', 'quantity_base': '1'}
 
 
+def test_market_dex_opt_in_is_retained_in_canonical_request_identity():
+    request = parse_product_request({'report_id': REPORT_ID, 'instrument_id': 'hyperliquid:BTC:perpetual',
+                                     'side': 'SELL', 'quantity_base': '1', 'mezo_dex': True},
+                                    engine_commit='a'*40, created_at_ms=1234)
+    assert type(request) is ReportRequest
+    assert request.include_mezo_dex is True
+    assert request_identity(request) == {'side': 'SELL', 'quantity_base': '1', 'mezo_dex': True}
+
+
+@pytest.mark.parametrize('value', [False, 'true', 1, None])
+def test_market_dex_opt_in_requires_literal_true(value):
+    with pytest.raises(EvidenceRejected, match='INVALID_INPUT'):
+        parse_product_request({'report_id': REPORT_ID, 'instrument_id': 'hyperliquid:BTC:perpetual',
+                               'side': 'SELL', 'quantity_base': '1', 'mezo_dex': value},
+                              engine_commit='a'*40, created_at_ms=1234)
+
+
 @pytest.mark.parametrize('extra', [{'side': 'SELL'}, {'source_mode': 'fixture'}, {'created_at_ms': 1}])
 def test_trove_request_rejects_mixed_or_caller_context(extra):
     with pytest.raises(EvidenceRejected, match='INVALID_INPUT'):

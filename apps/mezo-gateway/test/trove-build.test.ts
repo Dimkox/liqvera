@@ -8,9 +8,9 @@ import type {Ledger} from '../src/adapters/postgres.js';
 import type {ArtifactStore,PaymentPort,ReportService} from '../src/ports/index.js';
 import type {ReportRequest,Reason} from '../src/domain/model.js';
 
-async function fixture(change?:(report:any,request:ReportRequest)=>void) {
+async function fixture(change?:(report:any,request:ReportRequest)=>void, reportFile='evidence/mezo-testnet/2026-10-23-trove-risk-preview/report.json') {
  const contracts=await Contracts.load(new URL('../../dist/contracts/',import.meta.url));
- const report=JSON.parse(await readFile(new URL('../../../../evidence/mezo-testnet/2026-10-23-trove-risk-preview/report.json',import.meta.url),'utf8'));
+ const report=JSON.parse(await readFile(new URL(`../../../../${reportFile.includes('/')?reportFile:`evidence/mezo-testnet/${reportFile}`}`,import.meta.url),'utf8'));
  report.source.source_at=new Date().toISOString();
  const request={id:'123e4567-e89b-42d3-a456-426614174050',report_id:report.report_id,
   canonical_body:{product_id:'trove_risk',borrower:report.request.borrower,expected_payer:'0x1111111111111111111111111111111111111111'},state:'PREPARING',quote_id:null,reason:null} as ReportRequest;
@@ -36,5 +36,28 @@ test('Trove worker rejects a substituted borrower before sale',async()=>{
 });
 test('Trove evidence cannot fulfill a market quote',async()=>{
  const result=await fixture((_report,request)=>{request.canonical_body={instrument_id:'hyperliquid:BTC:perpetual',side:'SELL',quantity_base:'1',expected_payer:'0x1111111111111111111111111111111111111111'};});
+ assert.equal(result.published,null);assert.equal(result.rejected,'IDENTITY_MISMATCH');
+});
+
+test('opted-in Market depth quote publishes only a matching Mezo DEX report',async()=>{
+ const result=await fixture((report,request)=>{
+  report.request.mezo_dex=true;
+  request.canonical_body={instrument_id:'hyperliquid:BTC:perpetual',side:'SELL',quantity_base:'1',expected_payer:'0x1111111111111111111111111111111111111111',mezo_dex:true};
+ },'apps/mezo-web/public/demo/latest-live/report.json');
+ assert.equal(result.rejected,null);assert.equal(result.published.mezo_dex,true);
+});
+
+test('opted-in Market depth quote rejects a report without a matching DEX result',async()=>{
+ const result=await fixture((report,request)=>{
+  report.mezo_dex=undefined;
+  request.canonical_body={instrument_id:'hyperliquid:BTC:perpetual',side:'SELL',quantity_base:'1',expected_payer:'0x1111111111111111111111111111111111111111',mezo_dex:true};
+ },'apps/mezo-web/public/demo/latest-live/report.json');
+ assert.equal(result.published,null);assert.equal(result.rejected,'IDENTITY_MISMATCH');
+});
+
+test('opted-in Market depth quote rejects DEX evidence not bound to its report request',async()=>{
+ const result=await fixture((_report,request)=>{
+  request.canonical_body={instrument_id:'hyperliquid:BTC:perpetual',side:'SELL',quantity_base:'1',expected_payer:'0x1111111111111111111111111111111111111111',mezo_dex:true};
+ },'apps/mezo-web/public/demo/latest-live/report.json');
  assert.equal(result.published,null);assert.equal(result.rejected,'IDENTITY_MISMATCH');
 });

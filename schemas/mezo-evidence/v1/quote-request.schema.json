@@ -17,6 +17,7 @@
     "quantity_base": {
       "$ref": "primitives.schema.json#/$defs/quantity_input"
     },
+    "mezo_dex": {"const": true},
     "expected_payer": {
       "$ref": "primitives.schema.json#/$defs/address_input"
     },
@@ -42,6 +43,7 @@
         "instrument_id": {},
         "side": {},
         "quantity_base": {},
+        "mezo_dex": {},
         "expected_payer": {}
       },
       "additionalProperties": false

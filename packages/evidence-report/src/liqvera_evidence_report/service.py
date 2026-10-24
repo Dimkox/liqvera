@@ -232,7 +232,9 @@ def main() -> int:
                             raise EvidenceRejected("UNSUPPORTED_INSTRUMENT")
                         capture = _capture(capture_url, capture_id, 12.5,
                                            trove_request={"borrower": request.borrower})
-                    elif dex_enabled == "true":
+                    elif request.include_mezo_dex:
+                        if dex_enabled != "true":
+                            raise EvidenceRejected("UNSUPPORTED_INSTRUMENT")
                         from fractions import Fraction
                         quantity = Fraction(str(request.quantity_base)) * 10**18
                         capture = _capture(capture_url, capture_id, 12.5, mezo_request={
@@ -244,7 +246,7 @@ def main() -> int:
                     built = (build_trove_product(capture_root / capture_id, request,
                                                  created_at_ms=time.time_ns() // 1_000_000)
                              if trove else build_report(capture_root / capture_id, request))
-                    if not trove and dex_enabled == "true":
+                    if not trove and request.include_mezo_dex:
                         require_mezo_source(built)
                     if built.document["source"]["source_mode"] != mode:
                         raise EvidenceRejected("INVALID_DATASET")

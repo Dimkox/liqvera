@@ -177,6 +177,7 @@ def verify_bundle_bytes(raw: bytes, *, expected_report_sha256: str | None = None
             UUID(identifier(report["report_id"])), Side(report["request"]["side"]),
             ExactDecimal.parse(report["request"]["quantity_base"]),
             report["reproducibility"]["engine_commit"], timestamp_ms(report["source"]["created_at"]),
+            include_mezo_dex=report["request"].get("mezo_dex", False),
         )
         extras = {name: content for name, content in members.items() if name in DEX_NAMES}
         if extras and set(extras) != DEX_NAMES:

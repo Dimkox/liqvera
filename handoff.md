@@ -629,3 +629,7 @@ existing BusyBox backport and inactive curl dispositions. Recovery and exact lim
 are recorded in [deployment evidence](docs/security/2026-10-24-wallet-actions-deployment.md).
 The README now explicitly states that no live Trove or DEX transaction has been
 signed or verified.
+
+## 2026-10-26 — Mezo Testnet submission evidence in README
+
+Added the owner-provided video, Trove opening, Trove-protection repayment and paid x402 Trove report links near the start of README. Updated the old statement that no live Trove transaction had been verified; current copy points to deployed wallet-signed actions (PR #25) and the supplied transaction evidence. Documentation only; payment logic, runtime data and deployments were not changed. All four supplied links return HTTP 200; README contains no “not deployed” wording, and `git diff --check` passes. No application tests apply to this documentation-only change.

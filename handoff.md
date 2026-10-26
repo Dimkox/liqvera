@@ -6,7 +6,7 @@ Implemented a capability-scoped, read-only recovery endpoint for existing in-fli
 
 Read-only RPC evidence for the supplied historical payment: `0xa09b46ea31e2d44734f7c0ad7e33b74bfdf72cfaf93245b4b173c04fb0cdf482`, block 16329223, timestamp 2026-10-24 00:41:34 UTC, 0.01 MUSD transfer to the quote recipient. This confirms public chain facts only; no production quote/capability or report delivery was accessed. The chat-exposed wallet seed was not used. No new payment, BTC swap, deployment, or publication occurred.
 
-Local verification: gateway 89 passed/14 skipped (PostgreSQL integration requires an explicitly disposable URL); gateway typecheck/build passed; web 150 passed and production build passed; OpenAPI contract tests 11 passed; `git diff --check` passed. Hosted CI and independent read-only review are still required. Deployment and the requested fresh BTC sale remain unverified; do not represent either as complete.
+Local verification: gateway 89 passed/14 skipped (PostgreSQL integration requires an explicitly disposable URL); gateway typecheck/build passed; web 150 passed and production build passed; OpenAPI contract tests 11 passed; `git diff --check` passed. The first hosted `product` job completed all tests (1111 Python + 85 subtests, 103 gateway, 150 web) and lint/docs, then failed because README's documented gateway/web totals were stale; those counts are now corrected for rerun. Independent read-only review is still required. Deployment and the requested fresh BTC sale remain unverified; do not represent either as complete.
 
 ## 2026-10-23 — Trove risk published; current state
 

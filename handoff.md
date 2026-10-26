@@ -740,3 +740,9 @@ typecheck and production build passed before the last review fixes, to be repeat
 Local actual Chrome rendering at 320/1280 pixels had no horizontal overflow using
 an in-memory provider; this is not live wallet acceptance. Complete product gate
 and final independent re-review remain in progress. No deployment or live tx yet.
+
+A final independent review reproduced a same-input response-order race: an older
+debounced preview could overwrite a newer explicit review. Explicit prepare and
+sign-refresh now advance the generation and cancel queued previews. The delayed-
+price regression failed before the fix and passes after it. All 177 browser tests
+pass, including monotonic dirty-record recovery and protocol fee/capacity cases.

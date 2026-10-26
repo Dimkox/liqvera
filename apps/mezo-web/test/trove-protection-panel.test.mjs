@@ -88,3 +88,27 @@ test('success persists even if refresh fails and a state-only refresh can recove
  assert.match(text(host),/State refresh failed/);
  assert.ok(find(host,'button','Refresh Trove state'));
 });
+test('a delayed same-input preview cannot overwrite a newer reviewed preparation',async()=>{
+ const {Interface}=await import('ethers');const protocol=await import('@liqvera/mezo-protocol');
+ const priceAbi=new Interface(protocol.MEZO_TESTNET_PRICE_FEED_ABI);
+ let release,held=false;const delayed=new Promise(resolve=>release=resolve);
+ const p=troveProvider({request:({method,params=[]})=>{
+  if(method==='eth_call'&&params[0].to===protocol.MEZO_TESTNET_TROVES.priceFeed&&!held){held=true;return delayed;}
+ }});
+ // Initial state load also reads price; let that finish before holding a preview.
+ release(priceAbi.encodeFunctionResult('fetchPrice',[79740n*10n**18n]));
+ const {host}=mount(p);await tick();await tick();
+ held=false;const previewWait=new Promise(resolve=>release=resolve);
+ // Replace the provider's request only for the next price call.
+ const request=p.request;p.request=async args=>{
+  if(args.method==='eth_call'&&args.params[0].to===protocol.MEZO_TESTNET_TROVES.priceFeed&&!held){held=true;return previewWait;}
+  return request(args);
+ };
+ const input=formInput(host,'BTC amount');input.value='0.0005';await input.dispatch('input');
+ await new Promise(resolve=>setTimeout(resolve,320));assert.equal(held,true);
+ p.state.price+=1000n*10n**18n;
+ const form=elements(host).find(e=>e.tagName==='form'&&elements(e).includes(input));await form.dispatch('submit');
+ const preview=elements(form).find(e=>e.className==='trove-action-preview');const reviewed=preview.textContent;
+ release(priceAbi.encodeFunctionResult('fetchPrice',[79740n*10n**18n]));await tick();await tick();
+ assert.equal(preview.textContent,reviewed);
+});

@@ -116,14 +116,14 @@ export function mountTroveProtection(host:HTMLElement,report:TroveReport,provide
   });
   form.addEventListener('submit',async event=>{
    event.preventDefault();if(busy||pending||guardError||!stateReady||!current())return;
-   const amount=input.value,version=revision;busy=true;prepared=null;sync();formStatus.textContent='Reading current Trove state and simulating…';
+   clearTimeout(timer);const amount=input.value,version=++revision;busy=true;prepared=null;sync();formStatus.textContent='Reading current Trove state and simulating…';
    try{const result=await prepareTroveAction(wallet,borrower,{kind,amount});checkCurrent();if(version!==revision)return;
     prepared=result;show(result);summary.textContent=`You will sign: ${result.summary}. ICR after: ${readable(result.after.icr)}.`;formStatus.textContent='Review the summary, then choose Sign in wallet.';
    }catch(error){formStatus.textContent=errorText(error);}finally{busy=false;sync();}
   });
   sign.addEventListener('click',async()=>{
    if(sign.disabled||!prepared)return;
-   const reviewed=prepared,version=revision;busy=true;sync();
+   clearTimeout(timer);const reviewed=prepared,version=++revision;busy=true;sync();
    try{
     checkCurrent();if(!navigator.locks)throw new Error('This browser cannot lock wallet actions safely. Use a browser with Web Locks support.');
     await navigator.locks.request(store.guardKey,{ifAvailable:true},async lock=>{

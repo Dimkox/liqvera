@@ -33,7 +33,7 @@ Understand BTC liquidity and Mezo MUSD borrower risk. Liqvera turns public marke
 | MUSD/BTC pool | [0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9](https://explorer.test.mezo.org/address/0xd16A5Df82120ED8D626a1a15232bFcE2366d6AA9) | Read: reserves and quote cross-check |
 | BTC token | [0x7b7C000000000000000000000000000000000000](https://explorer.test.mezo.org/address/0x7b7C000000000000000000000000000000000000) | Pool identity; exact user-signed approvals |
 | TroveManager | [0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0](https://explorer.test.mezo.org/address/0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0) | Read: borrower debt, collateral and ratios |
-| BorrowerOperations | [0xCdF7028ceAB81fA0C6971208e83fa7872994beE5](https://explorer.test.mezo.org/address/0xCdF7028ceAB81fA0C6971208e83fa7872994beE5) | Wallet-signed BTC deposit and MUSD repayment |
+| BorrowerOperations | [0xCdF7028ceAB81fA0C6971208e83fa7872994beE5](https://explorer.test.mezo.org/address/0xCdF7028ceAB81fA0C6971208e83fa7872994beE5) | Wallet-signed BTC deposit, MUSD repayment and guarded MUSD borrowing |
 | HintHelpers | [0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6](https://explorer.test.mezo.org/address/0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6) | Read: fresh Trove insertion hints |
 | SortedTroves | [0x722E4D24FD6Ff8b0AC679450F3D91294607268fA](https://explorer.test.mezo.org/address/0x722E4D24FD6Ff8b0AC679450F3D91294607268fA) | Read: fresh insertion hints and redemption ordering |
 | PriceFeed | [0x86bCF0841622a5dAC14A313a15f96A95421b9366](https://explorer.test.mezo.org/address/0x86bCF0841622a5dAC14A313a15f96A95421b9366) | Read: fixed-block BTC price |
@@ -138,3 +138,22 @@ Development is tracked publicly in Git. Use the links below to inspect changes, 
 [Product specification](docs/specification.md) · [Architecture](docs/architecture.md) · [Security policy](SECURITY.md) · [Buildathon presentation](docs/competition/README.md)
 
 Built by **[Dimkox](https://github.com/Dimkox)** for the [Mezo ecosystem](https://mezo.org/).
+
+## Trove report actions
+
+Trove actions are signed only by the borrower wallet. Liqvera reads fresh state and
+hints, simulates the call and shows ICR after the action before signing. No MUSD
+approval is needed: BorrowerOperations burns the repaid MUSD from the caller.
+
+The report panel supports BTC collateral deposits, bounded MUSD repayment and
+collapsed guarded borrowing. Rescue calculations target an editable ICR, default
+1.8. Borrowing must preserve both the safe borrower ratio and the protocol system
+ratio, and is disabled in Recovery Mode. Every action requires a separate **Sign
+in wallet** click after reviewing its preview.
+
+Pending actions survive reloads. Use **Check confirmation** for an unresolved
+transaction. Download separate browser action receipts from **Actions log**; they
+bind the original report SHA-256 without changing the signed report or evidence
+ZIP. Prepared before/after values are predictions. Receipt status and separately
+observed state describe subsequent chain observations. Browser records are local,
+not server-signed evidence. [Implementation design](docs/superpowers/specs/2026-10-26-trove-actions-design.md).

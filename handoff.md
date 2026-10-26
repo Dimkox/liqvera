@@ -706,3 +706,15 @@ Action exports retain prepared predictions and an optional separate observed sta
 Receipt polling validates Testnet, transaction identity, status and canonical block;
 timeouts remain pending. Three focused evidence tests and browser typecheck pass.
 No deployment or live transaction occurred.
+
+## 2026-10-26 — Trove report controls and action log
+
+Integrated rescue, deposit/repay Max, collapsed guarded borrowing, debounced live
+previews and a second explicit signing click. Changed material terms require
+another review; edits invalidate the prepared action. The panel restores unresolved
+intents, locks controls through the receipt, and supports receipt-only recovery.
+Successful evidence persists before state refresh; failed refresh has a read-only
+retry. main.ts supplies the original delivery report hash. Seven focused UI tests
+and all 170 browser tests pass. Six focused Python schema/provenance tests pass.
+Production build result and independent whole-diff review follow. No deployment or
+wallet demo is claimed yet.

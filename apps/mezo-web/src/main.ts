@@ -374,7 +374,7 @@ function renderDelivery(): void {
   target.append(node("h3", "result-heading", "Your snapshot report"));
   const renderedProvider=provider,renderedAccount=account;
   const walletContextCurrent=()=>provider===renderedProvider&&account?.toLowerCase()===renderedAccount?.toLowerCase()&&onChain;
-  if(report.schema === "liqvera-trove-risk-report/v1") { mountTroveRisk(target,report); mountTroveProtection(target,report,provider,account,walletContextCurrent); }
+  if(report.schema === "liqvera-trove-risk-report/v1") { mountTroveRisk(target,report); mountTroveProtection(target,report,provider,account,walletContextCurrent,receipt.report_sha256); }
   else {
     target.append(node("p", "supporting", "Hypothetical snapshot sweep over the available public order-book depth. No exchange trade occurred."));
     const grid = node("div", "data-grid report-grid");

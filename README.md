@@ -19,6 +19,8 @@ Understand BTC liquidity and Mezo MUSD borrower risk. Liqvera turns public marke
 
 **Mezo Testnet · chain 31611.** MUSD access, the DEX comparison, Trove risk and wallet-signed Trove/DEX actions are deployed on [liqvera.site](https://liqvera.site) (PR #25). Wallet-free examples include fixed-block native calls and offline-reproducible evidence. [Current deployment and verification](docs/security/2026-10-24-wallet-actions-deployment.md). Transactions are prepared from fresh on-chain state and submitted only when the connected user signs in their wallet; Liqvera never accesses signing keys. The transaction links above document a Trove opening, a MUSD repayment and a paid Trove report.
 
+### Mezo contracts used
+
 | Contract | Testnet address | Use |
 | --- | --- | --- |
 | MUSD | [0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503](https://explorer.test.mezo.org/address/0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503) | Pay: 0.01 test MUSD per report |

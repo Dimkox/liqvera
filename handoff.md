@@ -630,6 +630,10 @@ are recorded in [deployment evidence](docs/security/2026-10-24-wallet-actions-de
 The README now explicitly states that no live Trove or DEX transaction has been
 signed or verified.
 
+## 2026-10-26 — label the Mezo Testnet contract list
+
+Added the explicit `Mezo contracts used` heading above the README table. The requested TroveManager, SortedTroves, HintHelpers, BorrowerOperations, PriceFeed, DEX Router, MUSD and x402 exact proxy names and addresses were already present. Cross-checked against `MEZO_TESTNET_TROVES`, `MEZO_TESTNET_DEX`, `MUSD_TESTNET` and `X402_PERMIT2` in `packages/mezo-protocol/src/index.ts`; no new address was introduced. `git diff --check` passes; a presence check confirms all eight requested contract entries. No application tests apply to this documentation-only change.
+
 ## 2026-10-26 — web footer version from package metadata
 
 The browser footer now uses the version read from `apps/mezo-web/package.json` at Vite build time, replacing the stale hard-coded `v0.0.5`. The current package version is `0.2.0`. The protocol TypeScript package and web production build pass; all 148 browser tests pass, including the updated footer source assertion. The built asset contains `Liqvera v0.2.0`. npm reports zero vulnerabilities; existing Rollup annotation and bundle-size notices remain. No deployment or payment behavior changed.

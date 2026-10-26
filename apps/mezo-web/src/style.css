@@ -30,3 +30,4 @@
 .sale-plan-form,.sale-plan-part{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:.7rem 0}
 .sale-plan-field{display:grid;gap:.35rem;min-width:140px;flex:1;font-size:.85rem}.sale-plan-field input{min-width:90px;width:100%}
 .sale-plan-part{justify-content:space-between;padding:.6rem 0;border-top:1px solid var(--border,#35414b)}
+.recovery-box{display:grid;gap:9px;margin-top:18px;padding:15px;border:1px solid #856e54;border-radius:8px;background:#152c33}.recovery-box .field-label{margin:4px 0 0}.recovery-box input{box-sizing:border-box;width:100%;min-width:0;border:1px solid #67807f;border-radius:6px;background:#0c2028;color:#e9f1ed;padding:11px;font:12px ui-monospace,monospace}.recovery-box input:focus{outline:2px solid #d5f27e;outline-offset:1px}

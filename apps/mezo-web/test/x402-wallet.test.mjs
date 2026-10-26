@@ -46,8 +46,8 @@ function transport(t, { paidResponse } = {}) {
   return calls;
 }
 
-function pay(provider) {
-  return requestPaidReport({ path: `/v1/reports/${reportId}`, bearerCapability: 'test-only-capability', quote, provider, payer });
+function pay(provider, onRecoveryInfo) {
+  return requestPaidReport({ path: `/v1/reports/${reportId}`, bearerCapability: 'test-only-capability', quote, provider, payer, onRecoveryInfo });
 }
 
 test('production adapter sends exact SDK integer values to the wallet before submission', async t => {
@@ -100,4 +100,12 @@ test('a transport error after signature submission remains confirm-only', async 
   const result = await pay({ request: async () => `0x${'A'.repeat(130)}` });
   assert.equal(calls.submissions, 1, 'The failure must happen after the payment payload was sent');
   assert.equal(result, 'recovering');
+});
+
+test('pending response persists the gateway attempt and facilitator transaction hash for recovery',async t=>{
+  const txHash=`0x${'a'.repeat(64)}`;const paymentAttemptId='33333333-3333-4333-8333-333333333333';const seen=[];
+  const calls=transport(t,{paidResponse:()=>Response.json({state:'PAYMENT_UNCERTAIN'},{status:202,headers:{'x-liqvera-payment-tx':txHash,'x-liqvera-payment-attempt':paymentAttemptId}})});
+  const result=await pay({request:async()=>`0x${'A'.repeat(130)}`},info=>seen.push(info));
+  assert.equal(result,'recovering');assert.equal(calls.submissions,1);
+  assert.deepEqual(seen,[{txHash,paymentAttemptId}]);
 });

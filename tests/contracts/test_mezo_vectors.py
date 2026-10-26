@@ -116,7 +116,7 @@ def test_final_review_vector_http_statuses_are_declared_by_their_endpoints(revie
 
 
 @pytest.mark.parametrize("authorization,status,code", [
-    ("same_scope", 410, "QUOTE_EXPIRED"), ("missing", 401, "UNAUTHORIZED"),
+    ("same_scope", 200, None), ("missing", 401, "UNAUTHORIZED"),
     ("other_scope", 404, "NOT_FOUND")])
 def test_final_review_expired_quote_preserves_scope_boundary(review_vectors, authorization, status, code):
     vector = copy.deepcopy(review_vectors["missing-quote"])
@@ -530,6 +530,8 @@ def check_access(vector):
         or source["chain_inconsistency"]
     ):
         status, code, paid = 202, "MANUAL_REVIEW", False
+    elif source["quote_state"] == "EXPIRED" and source["resource"] == "quote":
+        status, code, paid = 200, None, False
     elif source["quote_state"] == "EXPIRED":
         status, code, paid = 410, "QUOTE_EXPIRED", False
     elif source["resource"] == "quote":

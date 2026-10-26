@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { quoteInput, decodeQuoteBody } from '../src/security/input.js';
+import { quoteInput, decodeQuoteBody, decodeRecoveryBody } from '../src/security/input.js';
 import { PublicError } from '../src/domain/model.js';
 // Borrower returned by the retained SortedTroves native proof at block16320987.
 const borrower='0xDA04759E54728B6636Fe48F7c9795c7B609bAaAa';
@@ -35,4 +35,14 @@ for(const mixed of [{side:'BUY'},{instrument_id:'hyperliquid:BTC:perpetual'},{qu
 test('duplicate Trove JSON field names cannot change the hash-bound borrower',()=>{
   const raw=`{"product_id":"trove_risk","borrower":"${borrower}","borrower":"0x2222222222222222222222222222222222222222","expected_payer":"${payer}"}`;
   assert.throws(()=>decodeQuoteBody(Buffer.from(raw)),PublicError);
+});
+
+test('transaction recovery body accepts only one exact hash and safe block number',()=>{
+  const tx=`0x${'a'.repeat(64)}`;
+  assert.deepEqual(decodeRecoveryBody(Buffer.from(JSON.stringify({tx_hash:tx,block_number:'16329223'}))),{tx_hash:tx,block_number:16329223});
+  for(const raw of [
+    `{"tx_hash":"${tx}","tx_hash":"${tx}","block_number":16329223}`,
+    JSON.stringify({tx_hash:tx,block_number:1.5}),JSON.stringify({tx_hash:'0x1234',block_number:16329223}),
+    JSON.stringify({tx_hash:tx,block_number:Number.MAX_SAFE_INTEGER+1}),JSON.stringify({tx_hash:tx,block_number:16329223,extra:true}),
+  ]) assert.throws(()=>decodeRecoveryBody(Buffer.from(raw)),(error:unknown)=>error instanceof PublicError&&error.code==='INVALID_INPUT');
 });

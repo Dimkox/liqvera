@@ -2,7 +2,7 @@ import express, { type ErrorRequestHandler, type Request, type RequestHandler, t
 import { Gateway, type ApiResult } from '../application/gateway.js';
 import { errorResource } from '../application/presenters.js';
 import { PublicError, uuidPattern } from '../domain/model.js';
-import { capability, decodeQuoteBody, idempotencyKey } from '../security/input.js';
+import { capability, decodeQuoteBody, decodeRecoveryBody, idempotencyKey } from '../security/input.js';
 import { securityHeaders } from '../security/middleware.js';
 import { metrics } from '../security/observability.js';
 export function createApp(gateway:Gateway,origins:ReadonlySet<string>) {
@@ -44,6 +44,11 @@ export function createApp(gateway:Gateway,origins:ReadonlySet<string>) {
   }));
   app.get('/v1/report-requests/:report_request_id',scoped,readBudget,route(async(request,response)=>gateway.status(response.locals.scope,id(request,'report_request_id'),response.locals.requestId)));
   app.get('/v1/report-quotes/:quote_id',scoped,readBudget,route(async(request,response)=>gateway.quote(response.locals.scope,id(request,'quote_id'),response.locals.requestId)));
+  app.post('/v1/report-quotes/:quote_id/recover',scoped,readBudget,express.raw({type:'application/json',limit:1024,inflate:false}),route(async(request,response)=>{
+    if(!Buffer.isBuffer(request.body))throw new PublicError('INVALID_INPUT',422);
+    const input=decodeRecoveryBody(request.body);
+    return gateway.recover(response.locals.scope,id(request,'quote_id'),input.tx_hash,input.block_number,response.locals.requestId);
+  }));
   app.get('/v1/reports/:report_id',scoped,readBudget,route(async(request,response)=>gateway.read(response.locals.scope,id(request,'report_id'),'report',request.get('payment-signature'),response.locals.requestId)));
   app.get('/v1/reports/:report_id/evidence',scoped,readBudget,route(async(request,response)=>gateway.read(response.locals.scope,id(request,'report_id'),'bundle',undefined,response.locals.requestId)));
   app.use((_request,_response,next)=>next(new PublicError('NOT_FOUND',404)));
@@ -52,6 +57,7 @@ export function createApp(gateway:Gateway,origins:ReadonlySet<string>) {
     const failure=error instanceof PublicError?error: new PublicError(
       error?.type==='entity.too.large'||error?.type==='encoding.unsupported'?'INVALID_INPUT':'STORAGE_UNAVAILABLE',
       error?.type==='entity.too.large'||error?.type==='encoding.unsupported'?422:503);
+    for(const [name,value] of Object.entries(failure.headers??{}))response.setHeader(name,value);
     if(failure.code==='RATE_LIMITED')response.setHeader('Retry-After','60');
     if(failure.code==='ARTIFACT_INTEGRITY_FAILURE')metrics.increment('artifact_integrity_failure');
     if(failure.code==='AUTHORIZATION_REUSED')metrics.increment('authorization_duplicate');

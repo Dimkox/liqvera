@@ -94,6 +94,11 @@ export class Ledger {
     const row = (await this.pool.query(`${QUOTE_SELECT} WHERE q.id=$1`,[attempt.quote_id])).rows[0];
     if (!row) throw new PublicError('NOT_FOUND',404); return toQuote(row);
   }
+  async recoverableAttempt(scope:string,quoteId:string):Promise<Attempt|null> {
+    const row=(await this.pool.query<Attempt>(`SELECT a.* FROM payment_attempts a JOIN quotes q ON q.id=a.quote_id
+      WHERE q.id=$1 AND q.scope_hash=$2 AND a.state IN ('SUBMITTING','UNKNOWN') ORDER BY a.submitted_at DESC NULLS LAST LIMIT 1`,[quoteId,scope])).rows[0];
+    return row??null;
+  }
   async claimBuild(): Promise<ReportRequest | null> {
     return this.transaction(async db => {
       // Global transaction advisory lock serializes slot claims across replicas.

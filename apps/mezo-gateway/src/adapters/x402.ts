@@ -134,12 +134,12 @@ export class OfficialX402 implements PaymentPort {
     const tx=settlementTransaction(result);
     return {tx_hash:tx};
   }
-  async confirm(quote: Quote,attempt: Attempt) {
-    const receipt=await this.reader.confirmation(quote,attempt); if(!receipt)return null;
+  async confirm(quote: Quote,attempt: Attempt,fallbackBlockNumber?:number) {
+    const receipt=await this.reader.confirmation(quote,attempt,fallbackBlockNumber); if(!receipt)return null;
     return {receipt,response_header:encodePaymentResponseHeader({success:true,transaction:receipt.tx_hash,network:NETWORK,payer:receipt.payer})};
   }
-  async revalidate(quote: Quote,attempt: Attempt,receipt: Receipt): Promise<boolean> {
-    const current=await this.reader.confirmation(quote,attempt);
+  async revalidate(quote: Quote,attempt: Attempt,receipt: Receipt,fallbackBlockNumber?:number): Promise<boolean> {
+    const current=await this.reader.confirmation(quote,attempt,fallbackBlockNumber);
     // A temporarily incomplete RPC observation is not evidence of a reorg.
     // Keep the durable PAID entitlement and ask the caller to retry read-only.
     if(!current)throw new PublicError('PAYMENT_UNCERTAIN',202);

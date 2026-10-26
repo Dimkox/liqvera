@@ -19,7 +19,9 @@ OPERATIONS = {
     ("/v1/report-requests/{report_request_id}", "get"): (
         "getReportRequest", {"200", "202", "401", "404", "429", "503"}),
     ("/v1/report-quotes/{quote_id}", "get"): (
-        "getReportQuote", {"200", "202", "401", "404", "410", "429", "503"}),
+        "getReportQuote", {"200", "202", "401", "404", "429", "503"}),
+    ("/v1/report-quotes/{quote_id}/recover", "post"): (
+        "recoverReportByTransaction", {"200", "202", "401", "404", "409", "422", "429", "503"}),
     ("/v1/reports/{report_id}", "get"): (
         "getReport", {"200", "202", "401", "402", "404", "409", "410", "429", "503"}),
     ("/v1/reports/{report_id}/evidence", "get"): (

@@ -88,7 +88,7 @@ function receipt(q: Quote, attempt: Attempt): Receipt {
     amount_atomic: AMOUNT,
     payer,
     pay_to: receiver,
-    tx_hash: `0x${'3'.repeat(64)}`,
+    tx_hash: attempt.tx_hash ?? `0x${'3'.repeat(64)}`,
     block_hash: `0x${'4'.repeat(64)}`,
     block_number: 1,
     log_index: 0,
@@ -137,6 +137,7 @@ class ScriptedPayment implements PaymentPort {
   }
   async confirm(q: Quote, attempt: Attempt) {
     this.confirmCalls += 1;
+    if(attempt.tx_hash===`0x${'5'.repeat(64)}`)return null;
     return this.confirmation === undefined ? { receipt: receipt(q, attempt), response_header: 'paid' } : this.confirmation;
   }
   async revalidate() { this.revalidateCalls += 1; return this.current; }
@@ -166,6 +167,14 @@ class MemoryLedger {
     const item = this.quotes.get(id);
     if (!item) throw new PublicError('NOT_FOUND', 404);
     return item;
+  }
+  async recoverableAttempt(_scope: string, quoteId: string) {
+    return [...this.attempts.values()].find(item => item.quote_id === quoteId && item.state === 'UNKNOWN') ?? null;
+  }
+  async bindTransactionHash(attempt: Attempt, txHash: string) {
+    if (attempt.state !== 'UNKNOWN' || (attempt.tx_hash !== null && attempt.tx_hash !== txHash)) throw new PublicError('INVALID_STATE', 409);
+    attempt.tx_hash = txHash;
+    return attempt;
   }
   async beginAttempt(q: Quote, identity: AuthorizationIdentity) {
     this.trace.push('attempt:begin');
@@ -273,6 +282,15 @@ async function fixture(options: { settle?: 'hash' | 'throw'; rejectBinding?: boo
 async function expectPublicError(code: string, operation: () => Promise<unknown>) {
   await assert.rejects(operation, (error: unknown) => error instanceof PublicError && error.code === code);
 }
+
+test('quote status exposes an expired quote as a resource after the unsubmitted quote expires', async t => {
+  const f = await fixture();
+  t.after(f.cleanup);
+  f.q.expires_at = new Date('2026-09-28T00:00:00Z');
+  const result = await f.gateway.quote('scope', f.q.id, 'request-expired');
+  assert.equal(result.status, 200);
+  assert.equal((result.body as { state: string }).state, 'EXPIRED');
+});
 
 test('direct receipt-binding rejection immediately enters manual review without entitlement or delivery', async t => {
   const f = await fixture({ rejectBinding: true });
@@ -423,6 +441,42 @@ test('post-submit lost response stays unknown and replay cannot resettle', async
   assert.equal(f.q.state, 'PAYMENT_UNCERTAIN');
   assert.equal([...f.ledger.attempts.values()][0]!.state, 'UNKNOWN');
   assert.equal(f.ledger.entitlements.size, 0);
+});
+
+test('recovery binds the exact Permit2 transaction to an expired in-flight quote without resettling', async t => {
+  const f = await fixture({ settle: 'throw' });
+  t.after(f.cleanup);
+  await expectPublicError('PAYMENT_UNCERTAIN', () => f.gateway.read('scope', f.q.id, 'report', 'signature', 'request-1'));
+  f.q.expires_at = new Date('2026-09-28T00:00:00Z');
+  const result = await f.gateway.recover('scope', f.q.id, `0x${'4'.repeat(64)}`, 16329223, 'recover-1');
+  const attempt = [...f.ledger.attempts.values()][0]!;
+  assert.equal(result.status, 200);
+  assert.equal(attempt.tx_hash, `0x${'4'.repeat(64)}`);
+  assert.equal(attempt.state, 'CONFIRMED');
+  assert.equal(f.q.state, 'PAID');
+  assert.equal(f.payment.settleCalls, 1);
+  assert.equal(f.ledger.entitlements.size, 1);
+});
+
+test('recovery refuses a transaction that does not match the saved Permit2 authorization', async t => {
+  const f = await fixture({ settle: 'throw' });
+  t.after(f.cleanup);
+  await expectPublicError('PAYMENT_UNCERTAIN', () => f.gateway.read('scope', f.q.id, 'report', 'signature', 'request-1'));
+  await expectPublicError('PAYMENT_UNCERTAIN', () => f.gateway.recover('scope', f.q.id, `0x${'5'.repeat(64)}`, 16329223, 'recover-2'));
+  const attempt = [...f.ledger.attempts.values()][0]!;
+  assert.equal(attempt.tx_hash, null);
+  assert.equal(f.payment.settleCalls, 1);
+  assert.equal(f.ledger.entitlements.size, 0);
+});
+
+test('uncertain settlement returns public attempt and transaction recovery headers',async t=>{
+  const f=await fixture();t.after(f.cleanup);f.payment.confirmation=null;
+  await assert.rejects(()=>f.gateway.read('scope',f.q.id,'report','signature','request-1'),(error:unknown)=>{
+    assert.ok(error instanceof PublicError);assert.equal(error.code,'PAYMENT_UNCERTAIN');
+    assert.equal(error.headers?.['X-Liqvera-Payment-Attempt'],[...f.ledger.attempts.values()][0]?.id);
+    assert.equal(error.headers?.['X-Liqvera-Payment-Tx'],`0x${'3'.repeat(64)}`);return true;
+  });
+  assert.equal(f.payment.settleCalls,1);
 });
 
 test('canonical authorization identity cannot be reused by another quote', async t => {

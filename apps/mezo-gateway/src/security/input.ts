@@ -51,3 +51,16 @@ export function decodeQuoteBody(raw: Buffer): QuoteInput {
   if (![3,4].includes(keys.length) || new Set(keys).size !== keys.length) throw new PublicError('INVALID_INPUT', 422);
   return quoteInput(JSON.parse(source));
 }
+export function decodeRecoveryBody(raw:Buffer):{tx_hash:string;block_number:number} {
+  if(raw.length>1024)throw new PublicError('INVALID_INPUT',422);
+  try {
+    const source=new TextDecoder('utf-8',{fatal:true}).decode(raw);
+    const keys=[...source.matchAll(/"((?:\\.|[^"\\])*)"\s*:/g)].map(m=>JSON.parse(`"${m[1]}"`) as string);
+    if(keys.length!==2||new Set(keys).size!==2||keys.sort().join(',')!=='block_number,tx_hash')throw new Error('fields');
+    const body=JSON.parse(source) as Record<string,unknown>;
+    if(typeof body.tx_hash!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(body.tx_hash))throw new Error('hash');
+    const block=typeof body.block_number==='string'&&/^[1-9][0-9]*$/.test(body.block_number)?Number(body.block_number):body.block_number;
+    if(typeof block!=='number'||!Number.isSafeInteger(block)||block<1)throw new Error('block');
+    return {tx_hash:body.tx_hash.toLowerCase(),block_number:block};
+  } catch {throw new PublicError('INVALID_INPUT',422);}
+}

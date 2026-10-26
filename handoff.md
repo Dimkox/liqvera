@@ -746,3 +746,22 @@ debounced preview could overwrite a newer explicit review. Explicit prepare and
 sign-refresh now advance the generation and cancel queued previews. The delayed-
 price regression failed before the fix and passes after it. All 177 browser tests
 pass, including monotonic dirty-record recovery and protocol fee/capacity cases.
+
+## 2026-10-26 — guarded Trove actions merged and web deployed
+
+PR #39 merged as 9615fb3 after every PR CI job passed. The merge tree exactly matches
+reviewed b6b77d1. Final local make test passed 1116 Python tests + 85 subtests,
+104 disposable-ledger gateway tests and 177 browser tests. Independent review found
+no remaining blockers. Live read-only preparation/simulation passed for 0.0005 BTC
+addColl and 0.5 MUSD repayMUSD at blocks 0xfa1371/0xfa1372; no signing occurred.
+
+Deployed only web-live as image 8988073cadbf48c803d472ac073efa4692e1e9f66a4d5d814fe3ae5278808ec7.
+All seven services are healthy; the public index serves index-C8aE9WEU.js. Both prior
+and new image scans report Trivy 0 and Grype 3 Medium retained BusyBox matches, no
+new finding. Previous image 045466a remains available. Post-merge CI is running on
+the identical tree. See docs/security/2026-10-26-trove-actions-deployment.md.
+
+The user authorized live Testnet demo actions, but this session has no usable
+MetaMask control or connected borrower signer. No new action/payment transaction
+was sent; no fabricated hash was added. The site is ready for the borrower-wallet
+signature demo. Databases, payment state, sealed evidence and Akindo were preserved.

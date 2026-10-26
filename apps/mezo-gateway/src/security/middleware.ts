@@ -28,7 +28,7 @@ export function securityHeaders(origins:ReadonlySet<string>):RequestHandler {
       response.setHeader('Access-Control-Allow-Origin',origin);
       response.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');
       response.setHeader('Access-Control-Allow-Headers','Authorization, Content-Type, Idempotency-Key, PAYMENT-SIGNATURE');
-      response.setHeader('Access-Control-Expose-Headers','X-Request-ID, Location, Retry-After, PAYMENT-REQUIRED, PAYMENT-RESPONSE');
+      response.setHeader('Access-Control-Expose-Headers','X-Request-ID, Location, Retry-After, PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-Liqvera-Payment-Tx, X-Liqvera-Payment-Attempt');
     }
     if(request.method==='OPTIONS'){response.status(204).end();return;}
     next();

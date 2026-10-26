@@ -4,6 +4,8 @@ import test from "node:test";
 import {
   beginPayment,
   canPay,
+  canStartNewReport,
+  expiredQuoteFlow,
   paymentFailure,
   paymentNotice,
   readWallet,
@@ -56,6 +58,20 @@ test("typed pre-submit cancellation clears only with a fresh READY quote", () =>
   assert.equal(paymentFailure(started, "cancelled-before-submission", "READY").paymentGuard, "clear");
   assert.equal(paymentFailure(started, "cancelled-before-submission", null).paymentGuard, "uncertain");
   assert.equal(paymentFailure(started, "ambiguous", "READY").paymentGuard, "uncertain");
+});
+
+test("an expired quote clears the guard only when no payment transaction hash is known", () => {
+  const expired = flow({ quoteId, paymentGuard: "uncertain" });
+  const reset = expiredQuoteFlow(expired);
+  assert.equal(reset.paymentGuard, "clear");
+  assert.equal(canStartNewReport(reset, "EXPIRED"), true);
+  const txKnown = flow({ quoteId, paymentGuard: "uncertain", paymentTxHash: `0x${"a".repeat(64)}` });
+  assert.equal(expiredQuoteFlow(txKnown).paymentGuard, "uncertain");
+  assert.equal(canStartNewReport(expiredQuoteFlow(txKnown), "EXPIRED"), false);
+  assert.equal(canStartNewReport({ ...txKnown, paymentGuard: "clear" }, "EXPIRED"), false);
+  assert.equal(expiredQuoteFlow(flow({ quoteId, paymentGuard: "uncertain" }), "PAYMENT_UNCERTAIN").paymentGuard, "uncertain");
+  for (const state of ["PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "MANUAL_REVIEW"])
+    assert.equal(canStartNewReport(flow({ quoteId, paymentGuard: "clear" }), state), false);
 });
 
 test("reload recovery uses only the saved identity and exact create replay", () => {

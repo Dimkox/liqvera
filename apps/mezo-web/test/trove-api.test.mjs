@@ -47,7 +47,7 @@ test('paid Trove parser retains full receipt finality and sponsored-gas guards',
  const {validateDelivery}=await import('../src/api.ts');
  const report=JSON.parse(await readFile(new URL('../../../evidence/mezo-testnet/2026-10-23-trove-risk-preview/report.json',import.meta.url),'utf8'));
  const hash='0x'+'a'.repeat(64);
- const receipt={schema:'liqvera-evidence-receipt/v1',quote_id:id,report_id:report.report_id,report_sha256:'b'.repeat(64),network:NETWORK,chain_id:CHAIN_ID,
+ const receipt={schema:'liqvera-evidence-receipt/v1',quote_id:id,report_id:report.report_id,payment_attempt_id:'55555555-5555-4555-8555-555555555555',report_sha256:'b'.repeat(64),network:NETWORK,chain_id:CHAIN_ID,
   asset:ASSET,amount_atomic:'10000000000000000',payer,pay_to:payer,tx_hash:hash,block_hash:hash,transaction_from:borrower,
   buyer_native_balance_before:'1000',buyer_native_balance_after:'1000',buyer_native_gas_spent:'0',observation_before_block_number:1,
   observation_before_block_hash:hash,observation_after_block_number:2,observation_after_block_hash:hash,authorization_identity:'c'.repeat(64),

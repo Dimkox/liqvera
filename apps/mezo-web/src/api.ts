@@ -105,7 +105,7 @@ export function validateDelivery(value: unknown, reportId: string): Delivery {
   const quality = record(report.quality);
   const boundaries = record(report.boundaries);
   if (data.schema !== "liqvera-evidence-delivery/v1" || (!trove && report.schema !== "liqvera-evidence-report/v1") ||
-      report.report_id !== reportId || receipt.report_id !== reportId ||
+      report.report_id !== reportId || receipt.report_id !== reportId || !isUuid(string(receipt.payment_attempt_id)) ||
       receipt.schema !== "liqvera-evidence-receipt/v1" ||
       (!trove && (identity.instrument_id !== INSTRUMENT || identity.product_kind !== "perpetual")) ||
       !isUuid(string(receipt.quote_id)) || !isSha256(string(receipt.report_sha256)) ||
@@ -211,6 +211,17 @@ export async function getReport(capability: string, id: string): Promise<Deliver
   if (response.status === 202) return "recovering";
   if (response.status !== 200) throw await errorFor(response);
   return validateDelivery(await response.json(), id);
+}
+
+export async function recoverReport(capability:string,quoteId:string,reportId:string,txHash:string,blockNumber:number):Promise<Delivery|"recovering"> {
+  if(!isUuid(quoteId)||!isUuid(reportId)||!/^0x[0-9a-fA-F]{64}$/.test(txHash)||!Number.isSafeInteger(blockNumber)||blockNumber<1)
+    throw new Error("Recovery details are invalid.");
+  const response=await request(`/v1/report-quotes/${quoteId}/recover`,capability,{
+    method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({tx_hash:txHash.toLowerCase(),block_number:blockNumber}),
+  });
+  if(response.status===202)return "recovering";
+  if(response.status!==200)throw await errorFor(response);
+  return validateDelivery(await response.json(),reportId);
 }
 
 export async function getEvidence(capability: string, id: string): Promise<Blob> {

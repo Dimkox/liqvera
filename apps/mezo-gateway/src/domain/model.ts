@@ -52,7 +52,8 @@ export interface Receipt { schema: 'liqvera-evidence-receipt/v1'; quote_id: stri
   confirmations:number; authorization_identity:string; transfer_identity:string }
 export interface Confirmation { receipt: Receipt; response_header: string }
 export class PublicError extends Error {
-  constructor(public readonly code: Reason, public readonly status: number = 503) { super(code); }
+  constructor(public readonly code: Reason, public readonly status: number = 503,
+    public readonly headers?: Readonly<Record<string,string>>) { super(code); }
 }
 export const isReason = (value: unknown): value is Reason => typeof value === 'string' && REASONS.includes(value as Reason);
 export const shaPattern = /^[0-9a-f]{64}(?![\s\S])/;

@@ -46,6 +46,9 @@ export function loadFlow(): SavedFlow | null {
         !isAddress(flow.payer) || !isUuid(flow.idempotencyKey) ||
         (flow.requestId !== undefined && !isUuid(flow.requestId)) ||
         (flow.quoteId !== undefined && !isUuid(flow.quoteId)) ||
+        (flow.paymentAttemptId !== undefined && !isUuid(flow.paymentAttemptId)) ||
+        (flow.paymentTxHash !== undefined && !/^0x[0-9a-f]{64}$/.test(flow.paymentTxHash)) ||
+        (flow.paymentBlockNumber !== undefined && (!Number.isSafeInteger(flow.paymentBlockNumber)||flow.paymentBlockNumber<1)) ||
         !["clear", "started", "uncertain"].includes(flow.paymentGuard)) return null;
     return flow;
   } catch {

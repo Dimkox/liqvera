@@ -1,5 +1,21 @@
 # Liqvera handoff
 
+## 2026-10-26 — expired quote recovery and restart flow
+
+Root cause: the quote-status GET returned HTTP 410 `QUOTE_EXPIRED` instead of the quote resource, so the web client retained an older READY quote and uncertain payment guard after polling. It now marks a READY quote EXPIRED in the ledger and returns that state resource; the web clears its guard only for EXPIRED when no tx hash is known, and exposes `Start new report` under that same condition. A known tx keeps recovery and blocks a new report. Pending, uncertain, and manual-review states remain guarded.
+
+Added gateway and browser regressions. Local results: gateway 90 passed/14 PostgreSQL-only skips; web 151 passed; gateway typecheck and web production build passed; OpenAPI contract tests 11 passed. README count metadata now reflects the full expected gate (104 gateway tests with disposable PostgreSQL, 151 web, 1111 Python + 85 subtests). The latest hosted product run passed app tests but failed one API vector still expecting 410 for same-scope expired quote; the vector now expects 200 expired quote while preserving 401/404 scope behavior. The affected four focused vector tests pass locally; hosted rerun and independent review remain pending. No deployment or payment occurred.
+
+The newly reported payment was checked through the public Testnet RPC only: successful facilitator-sent proxy transaction, exact 0.01 MUSD Transfer from the quoted payer to the configured payee, block timestamp inside the stated quote window. This does not prove its production quote or report entitlement; those require the existing capability-scoped gateway ledger. The tab was not accessed or changed.
+
+## 2026-10-26 — Market depth payment recovery source work
+
+Implemented a capability-scoped, read-only recovery endpoint for existing in-flight x402 attempts. It confirms only the saved attempt and Permit2 authorization identity, exact MUSD transfer, canonical block and finality; no facilitator resubmission is performed. A canonical full-block/log fallback covers the observed Mezo RPC behavior where block/log queries expose the transaction but hash-indexed receipt/transaction lookup intermittently returns null. The web client persists gateway attempt/hash and lets the user enter a transaction hash and block to recover the already-quoted report. No schema migration was added.
+
+Read-only RPC evidence for the supplied historical payment: `0xa09b46ea31e2d44734f7c0ad7e33b74bfdf72cfaf93245b4b173c04fb0cdf482`, block 16329223, timestamp 2026-10-24 00:41:34 UTC, 0.01 MUSD transfer to the quote recipient. This confirms public chain facts only; no production quote/capability or report delivery was accessed. The chat-exposed wallet seed was not used. No new payment, BTC swap, deployment, or publication occurred.
+
+Local verification: gateway 89 passed/14 skipped (PostgreSQL integration requires an explicitly disposable URL); gateway typecheck/build passed; web 150 passed and production build passed; OpenAPI contract tests 11 passed; `git diff --check` passed. The first hosted `product` job completed all tests (1111 Python + 85 subtests, 103 gateway, 150 web) and lint/docs, then failed because README's documented gateway/web totals were stale; those counts are now corrected for rerun. Independent read-only review is still required. Deployment and the requested fresh BTC sale remain unverified; do not represent either as complete.
+
 ## 2026-10-23 — Trove risk published; current state
 
 The public Testnet site now runs source `d63860d7af70b5ad12145b039131ac11f0d4e729`,

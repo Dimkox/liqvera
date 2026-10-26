@@ -10,12 +10,12 @@ Liqvera produces verifiable public-market reports for Hyperliquid BTC linear per
 2. The full browser flow discovers a wallet and scopes a fresh quote to its payer. Preparing evidence and a quote does not require the wallet to switch networks. Payment requires the configured Mezo chain (31611 Testnet or 31612 Mainnet), with account and network revalidated before signing. Account/network changes invalidate unsafe in-flight browser state.
 3. The gateway creates a report request. Public source failure yields SOURCE_UNAVAILABLE, without fixture fallback.
 4. Completed immutable artifacts determine the quote. Explicit merchant mode permits an exact 0.01 MUSD x402 purchase with sponsored gas only after the buyer authorizes it in their wallet. Default grant mode also requires bounded operator authority.
-5. Confirmed entitlement allows repeated delivery of the same JSON and evidence ZIP without resettlement. Reload and recovery use existing request/quote identity.
+5. Confirmed entitlement allows repeated delivery of the same JSON and evidence ZIP without resettlement. Reload preserves the request/quote identity. If the facilitator response is lost, a scoped, confirm-only recovery can verify a transaction hash and canonical block against the original saved Permit2 authorization; it never submits another payment.
 6. The recipient can verify an exported canonical ZIP offline and optionally compare an independently trusted report digest.
 
 ## Public API
 
-The machine-readable contract is [OpenAPI](../schemas/mezo-evidence/v1/openapi.json). Health is `/healthz`; readiness is `/readyz`; capabilities are `/v1/capabilities`. Quote creation is `POST /v1/report-quotes`; request and quote polling use their UUID paths. Report JSON is `GET /v1/reports/{report_id}` and its ZIP is `/evidence` beneath that path. Input sizes, decimal syntax, payer scope, origin, rate and authorization checks are enforced before application work.
+The machine-readable contract is [OpenAPI](../schemas/mezo-evidence/v1/openapi.json). Health is `/healthz`; readiness is `/readyz`; capabilities are `/v1/capabilities`. Quote creation is `POST /v1/report-quotes`; request and quote polling use their UUID paths. Report JSON is `GET /v1/reports/{report_id}` and its ZIP is `/evidence` beneath that path. `POST /v1/report-quotes/{quote_id}/recover` accepts a transaction hash and block for an existing uncertain attempt. Input sizes, decimal syntax, payer scope, origin, rate and authorization checks are enforced before application work.
 
 Internal services use separate endpoints and network boundaries. [Capture service](../services/evidence-capture/README.md) and [report service](../services/evidence-report/README.md) document their configuration.
 

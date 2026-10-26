@@ -675,3 +675,14 @@ Root-cause investigation traced the refreshed web-image findings to `curl` inher
 ## 2026-10-26 — vulnerable web image packages removed in production
 
 Merged PR #33 after green PR and exact-tree post-merge CI. Deployed only `web-live` from source `8a5af5c` as image `sha256:eb40e136088cf45f680821dd87837dc3e0f2e77cd34f9ca3f0f896ba00bcdb9e`. The live image has no curl, libcurl or brotli-libs; Trivy reports 0 findings and Grype reports only 3 Medium findings for the BusyBox backport, with no Critical or High. All seven services are healthy; the public site/API and BusyBox healthcheck pass. The prior web image remains available. No payment or database state changed. [Deployment and scan evidence](docs/security/2026-10-26-web-image-curl-brotli-remediation.md).
+
+## 2026-10-26 — Trove actions design and implementation plan
+
+Accepted the report action specification with BMAD adversarial/edge-case amendments:
+exact system TCR inputs, fixed-block previews, explicit re-review on changed terms,
+conservative gas Max, persistent pending guards and delivery-hash-bound evidence.
+Borrowing ships collapsed with ICR/TCR guards; server storage and collateral
+withdrawal remain excluded. Plan and design live under docs/superpowers. Work starts
+from main 9cdc759 in isolated feat/trove-actions. User authorized completion through
+PR merge, separate web deployment and Mezo Testnet wallet demo. No runtime change,
+transaction or deployment occurred in this planning step.

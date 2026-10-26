@@ -765,3 +765,10 @@ The user authorized live Testnet demo actions, but this session has no usable
 MetaMask control or connected borrower signer. No new action/payment transaction
 was sent; no fabricated hash was added. The site is ready for the borrower-wallet
 signature demo. Databases, payment state, sealed evidence and Akindo were preserved.
+
+Published bundle SHA-256 matches the candidate exactly. Actual public Chrome checks
+at 320/1280 pixels passed with no runtime exceptions or overflow; the Trove form is
+visible. The browser has no injected wallet provider, confirming why this session
+cannot perform the requested signature demo. README now links the current rollout
+record. Disposable candidate container and local Vite check server were removed;
+the live web container and rollback image remain intact.

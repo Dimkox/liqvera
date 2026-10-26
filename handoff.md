@@ -4,7 +4,9 @@
 
 Root cause: the quote-status GET returned HTTP 410 `QUOTE_EXPIRED` instead of the quote resource, so the web client retained an older READY quote and uncertain payment guard after polling. It now marks a READY quote EXPIRED in the ledger and returns that state resource; the web clears its guard only for EXPIRED when no tx hash is known, and exposes `Start new report` under that same condition. A known tx keeps recovery and blocks a new report. Pending, uncertain, and manual-review states remain guarded.
 
-Added gateway and browser regressions. Local results: gateway 90 passed/14 PostgreSQL-only skips; web 151 passed; gateway typecheck and web production build passed; OpenAPI contract tests 11 passed. README count metadata now reflects the full expected gate (104 gateway tests with disposable PostgreSQL, 151 web, 1111 Python + 85 subtests). PR #35's prior head had all hosted CI checks green; this follow-up needs its own CI run and review. No deployment or payment occurred.
+Added gateway and browser regressions. Local results: gateway 90 passed/14 PostgreSQL-only skips; web 151 passed; gateway typecheck and web production build passed; OpenAPI contract tests 11 passed. README count metadata now reflects the full expected gate (104 gateway tests with disposable PostgreSQL, 151 web, 1111 Python + 85 subtests). The latest hosted product run passed app tests but failed one API vector still expecting 410 for same-scope expired quote; the vector now expects 200 expired quote while preserving 401/404 scope behavior. The affected four focused vector tests pass locally; hosted rerun and independent review remain pending. No deployment or payment occurred.
+
+The newly reported payment was checked through the public Testnet RPC only: successful facilitator-sent proxy transaction, exact 0.01 MUSD Transfer from the quoted payer to the configured payee, block timestamp inside the stated quote window. This does not prove its production quote or report entitlement; those require the existing capability-scoped gateway ledger. The tab was not accessed or changed.
 
 ## 2026-10-26 — Market depth payment recovery source work
 

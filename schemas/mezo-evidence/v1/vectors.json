@@ -63,8 +63,8 @@
         "chain_inconsistency": false
       },
       "expected": {
-        "http_status": 410,
-        "code": "QUOTE_EXPIRED",
+        "http_status": 200,
+        "code": null,
         "paid_body": false,
         "settlement_calls": 0
       },

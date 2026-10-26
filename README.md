@@ -130,7 +130,7 @@ Development is tracked publicly in Git. Use the links below to inspect changes, 
 - **[Compare revisions](https://github.com/Dimkox/liqvera/compare)** — review differences between commits, branches or tags.
 - **[Earlier DEX deployment](docs/security/2026-10-23-mezo-dex-deployment.md)** — source e80474e: 1021 Python tests + 85 subtests, 107 browser tests; gateway 74 local passes (13 database tests skipped in hosted CI).
 - **[DEX deployment package refresh](docs/security/2026-10-23-runtime-package-refresh.md)** — pinned musl/nginx fixes and candidate validation.
-- **[Current validation evidence](docs/security/2026-10-26-getzilla-audit.md)** — Getzilla 2.3.1 source audit of main: every selected check passes; one root-only test artifact explained.
+- **[Current validation evidence](docs/security/2026-10-26-getzilla-audit.md)** — Getzilla 2.3.1 source audit of main: selected checks pass, production `packages/` linted separately, one Low Bandit configuration gap.
 - **[Earlier validation evidence](docs/security/2026-10-21-getzilla-successor.md)** — passing Liqvera audit, failed tool self-check, exact deployment evidence and verification limits.
 
 [Product specification](docs/specification.md) · [Architecture](docs/architecture.md) · [Security policy](SECURITY.md) · [Buildathon presentation](docs/competition/README.md)

@@ -3,7 +3,7 @@ import {MEZO_TESTNET} from '@liqvera/mezo-protocol';
 import type {TroveReport} from './contracts.ts';
 import type {Eip1193Provider} from './wallet.ts';
 import {prepareTroveAction,submitTroveAction,readTroveContext,computeLimits,computeRescue,maxTroveAction,
- sameTroveTerms,snapshot} from './trove-transactions.ts';
+ sameTroveTerms,snapshot,displayTroveSnapshot} from './trove-transactions.ts';
 import type {TroveAction,PreparedTroveAction} from './trove-transactions.ts';
 import {WAD,safeRatio} from './trove-math.ts';
 import {TroveActionStore,waitTroveReceipt} from './trove-action-receipts.ts';
@@ -11,7 +11,7 @@ import type {ActionReceipt} from './trove-action-receipts.ts';
 import {WalletSubmissionUnknown} from './wallet-submission.ts';
 const units=(value:string|bigint)=>formatUnits(value,18);
 function readable(value:string,places=5){const [whole,decimal='']=units(value).split('.');return `${whole}.${decimal.slice(0,places)}`;}
-function node<K extends keyof HTMLElementTagNameMap>(tag:K,text=''):HTMLElementTagNameMap[K]{const e=document.createElement(tag);e.textContent=text;return e;}
+function node<K extends keyof HTMLElementTagNameMap>(tag:K,text=''):HTMLElementTagNameMap[K]{const e=document.createElement(tag);e.textContent=text;if(tag==='button')e.className='secondary-button';return e;}
 const errorText=(error:unknown)=>{
  if(error&&typeof error==='object'&&'code' in error&&(error.code===4001||error.code==='4001'||error.code==='ACTION_REJECTED'))return 'You rejected the request in your wallet.';
  return error instanceof Error?error.message:'Trove action failed.';
@@ -32,7 +32,7 @@ export function mountTroveProtection(host:HTMLElement,report:TroveReport,provide
  const status=node('p');status.className='form-note';status.setAttribute('role','status');
  const warning=node('p');warning.className='safety-note';
  const recovery=node('div');
- section.append(node('p','Fresh Testnet state and hints are simulated before signing. Previews are predictions; confirmation records first canonical inclusion.'),status,warning,recovery);
+ section.append(node('p','Fresh Testnet state and hints are simulated before signing. Previews are predictions; confirmation records first canonical inclusion. Preview debt rounds up to 0.001 MUSD; ICR rounds down to 0.00001; liquidation price rounds up to 0.01 MUSD.'),status,warning,recovery);
  function current(){return section.isConnected&&isCurrent();}
  function checkCurrent(){if(!current())throw new Error('Wallet context changed. Prepare the Trove action again.');}
  function register<T extends HTMLButtonElement|HTMLInputElement>(element:T,allowed:()=>boolean=()=>true):T{controls.push({element,allowed});return element;}
@@ -99,7 +99,8 @@ export function mountTroveProtection(host:HTMLElement,report:TroveReport,provide
   function invalidate(){revision++;prepared=null;summary.textContent='';formStatus.textContent='';
    submit.textContent=input.value?`${kind==='deposit'?'Add':kind==='repay'?'Repay':'Borrow'} ${input.value} ${kind==='deposit'?'BTC':'MUSD'}`:label;sync();}
   function show(p:PreparedTroveAction){
-   preview.textContent=`ICR now: ${readable(p.before.icr)} → after: ${readable(p.after.icr)}. Debt: ${units(p.before.debt)} → ${units(p.after.debt)} MUSD. Collateral: ${units(p.before.coll)} → ${units(p.after.coll)} BTC. Liquidation price: ${readable(p.before.liquidationPrice)} → ${readable(p.after.liquidationPrice)} MUSD.${kind==='borrow'?` Borrowing fee: ${units(p.fee)} MUSD.`:''}`;
+   const before=displayTroveSnapshot(p.before),after=displayTroveSnapshot(p.after);
+   preview.textContent=`ICR now: ${before.icr} → after: ${after.icr}. Debt: ${before.debt} → ${after.debt} MUSD. Collateral: ${before.coll} → ${after.coll} BTC. Liquidation price: ${before.liquidationPrice} → ${after.liquidationPrice} MUSD.${kind==='borrow'?` Borrowing fee: ${units(p.fee)} MUSD.`:''}`;
   }
   async function updatePreview(){
    const version=revision,amount=input.value;if(!amount||!current())return;

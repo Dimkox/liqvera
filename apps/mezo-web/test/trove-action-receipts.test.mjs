@@ -42,3 +42,30 @@ test('polling requires same chain, matching hash, canonical block and valid stat
  await assert.rejects(()=>receipts.waitTroveReceipt(troveProvider({request:({method})=>method==='eth_chainId'?'0x1':undefined}),hash,{attempts:1,intervalMs:0}),/Mezo Testnet/);
  await assert.rejects(()=>receipts.waitTroveReceipt(troveProvider({request:({method})=>method==='eth_getTransactionReceipt'?null:undefined}),hash,{attempts:1,intervalMs:0}),/pending/i);
 });
+test('another tab sees newer confirmed evidence instead of its cached pending record',async()=>{
+ const disk=storage(),p=troveProvider(),a=new receipts.TroveActionStore(disk,report,borrower);
+ const r=a.begin(await prepareTroveAction(p,borrower,{kind:'repay',amount:'0.5'}));
+ a.update({...r,tx_hash:hash,state:'pending'});
+ const b=new receipts.TroveActionStore(disk,report,borrower);assert.equal(b.records()[0].state,'pending');
+ a.update({...r,tx_hash:hash,state:'confirmed',receipt_block:'0x1234',receipt_status:'0x1'});
+ assert.equal(b.records()[0].state,'confirmed');
+ assert.equal(JSON.parse(b.exportJson())[0].receipt_status,'0x1');
+});
+test('failed hash persistence retains receipt-only recovery from memory without dropping the guard',async()=>{
+ const disk=storage(),store=new receipts.TroveActionStore(disk,report,borrower);
+ const r=store.begin(await prepareTroveAction(troveProvider(),borrower,{kind:'repay',amount:'0.5'}));
+ disk.setItem=()=>{throw Error('Quota exceeded');};
+ store.update({...r,tx_hash:hash,state:'pending'});
+ assert.equal(store.unresolved().tx_hash,hash);
+ assert.match(store.warning,/storage/);
+ assert.equal(JSON.parse(store.exportJson())[0].tx_hash,hash);
+});
+test('terminal evidence from another tab outranks dirty unsaved pending evidence',async()=>{
+ const disk=storage(),a=new receipts.TroveActionStore(disk,report,borrower),write=disk.setItem;
+ const r=a.begin(await prepareTroveAction(troveProvider(),borrower,{kind:'repay',amount:'0.5'}));
+ disk.setItem=(k,v)=>{if(k===a.reportKey)throw Error('Quota exceeded');write(k,v);};
+ a.update({...r,tx_hash:hash,state:'pending'});disk.setItem=write;
+ const b=new receipts.TroveActionStore(disk,report,borrower);
+ b.update({...b.unresolved(),state:'confirmed',receipt_status:'0x1',receipt_block:'0x1234'});
+ assert.equal(a.records()[0].state,'confirmed');
+});

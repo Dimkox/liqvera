@@ -2,7 +2,7 @@ import {Interface, getAddress, parseUnits, formatUnits} from 'ethers';
 import {
  MEZO_TESTNET, MEZO_TESTNET_HINT_HELPERS_ABI, MEZO_TESTNET_SORTED_TROVES_ABI,
  MEZO_TESTNET_TROVE_MANAGER_ABI, MEZO_TESTNET_TROVES, MEZO_TESTNET_BORROWER_OPERATIONS_ABI,
- MEZO_TESTNET_PRICE_FEED_ABI, MUSD_TESTNET, MUSD_ABI,
+ MEZO_TESTNET_PRICE_FEED_ABI, MEZO_TESTNET_GOVERNABLE_VARIABLES_ABI, MUSD_TESTNET, MUSD_ABI,
 } from '@liqvera/mezo-protocol';
 import type {Eip1193Provider} from './wallet.ts';
 import {sendWalletTransaction} from './wallet-submission.ts';
@@ -17,6 +17,7 @@ export type PreparedTroveAction={kind:TroveAction['kind'];account:string;chainId
 const bo=new Interface(MEZO_TESTNET_BORROWER_OPERATIONS_ABI),manager=new Interface(MEZO_TESTNET_TROVE_MANAGER_ABI);
 const hints=new Interface(MEZO_TESTNET_HINT_HELPERS_ABI),sorted=new Interface(MEZO_TESTNET_SORTED_TROVES_ABI);
 const musd=new Interface(MUSD_ABI),priceFeed=new Interface(MEZO_TESTNET_PRICE_FEED_ABI);
+const governance=new Interface(MEZO_TESTNET_GOVERNABLE_VARIABLES_ABI);
 const rpc=(provider:Eip1193Provider,method:string,params:unknown[]=[])=>provider.request({method,params});
 const hex=(v:bigint)=>`0x${v.toString(16)}`;
 async function read(provider:Eip1193Provider,to:string,abi:Interface,name:string,args:unknown[],blockTag:string){
@@ -35,13 +36,14 @@ export async function readTroveState(provider:Eip1193Provider,account:string,blo
  const tm=(name:string,args:unknown[]=[])=>read(provider,MEZO_TESTNET_TROVES.troveManager,manager,name,args,blockTag);
  const op=(name:string)=>read(provider,MEZO_TESTNET_TROVES.borrowerOperations,bo,name,[],blockTag);
  if(Number((await tm('getTroveStatus',[borrower]))[0])!==1)throw new Error('This wallet does not have an active Trove.');
- const [values,price,minimum,gasCompensation,rate,mcr,ccr,systemColl,systemDebt]=await Promise.all([
+ const [values,price,minimum,gasCompensation,rate,mcr,ccr,systemColl,systemDebt,capacity,governable]=await Promise.all([
  tm('getEntireDebtAndColl',[borrower]),read(provider,MEZO_TESTNET_TROVES.priceFeed,priceFeed,'fetchPrice',[],blockTag),
- op('minNetDebt'),tm('MUSD_GAS_COMPENSATION'),op('borrowingRate'),tm('MCR'),tm('CCR'),op('getEntireSystemColl'),op('getEntireSystemDebt')]);
+ op('minNetDebt'),tm('MUSD_GAS_COMPENSATION'),op('borrowingRate'),tm('MCR'),tm('CCR'),op('getEntireSystemColl'),op('getEntireSystemDebt'),tm('getTroveMaxBorrowingCapacity',[borrower]),op('governableVariables')]);
+ const feeExempt=Boolean((await read(provider,getAddress(String(governable[0])),governance,'isAccountFeeExempt',[borrower],blockTag))[0]);
  // Aggregate values already include pending redistribution; never count its breakdown twice.
  const state={coll:BigInt(values[0]),principal:BigInt(values[1]),interest:BigInt(values[2]),price:BigInt(price[0]),
  minimum:BigInt(minimum[0]),gasCompensation:BigInt(gasCompensation[0]),rate:BigInt(rate[0]),mcr:BigInt(mcr[0]),ccr:BigInt(ccr[0]),
- systemColl:BigInt(systemColl[0]),systemDebt:BigInt(systemDebt[0])};
+ systemColl:BigInt(systemColl[0]),systemDebt:BigInt(systemDebt[0]),capacity:BigInt(capacity[0]),feeExempt};
  validateState(state);return state;
 }
 export async function readTroveContext(provider:Eip1193Provider,account:string,minimumBlock?:string){
@@ -77,8 +79,9 @@ export async function prepareTroveAction(provider:Eip1193Provider,account:string
   debt-=amount;principal-=amount>s.interest?amount-s.interest:0n;
  }else{
   if(s.systemColl*s.price/s.systemDebt<s.ccr)throw new Error('Borrowing is disabled in Recovery Mode.');
-  fee=BigInt((await read(provider,MEZO_TESTNET_TROVES.borrowerOperations,bo,'getBorrowingFee',[amount],blockNumber))[0]);
+  fee=s.feeExempt?0n:BigInt((await read(provider,MEZO_TESTNET_TROVES.borrowerOperations,bo,'getBorrowingFee',[amount],blockNumber))[0]);
   debt+=amount+fee;principal+=amount+fee;
+  if(debt>s.capacity!)throw new Error('This would exceed the Trove borrowing capacity.');
   if(ratio(coll,debt,s.price)<safeRatio(s))throw new Error(`This would lower ICR below ${formatUnits(safeRatio(s),18)}.`);
   if(s.systemColl*s.price/(s.systemDebt+amount+fee)<s.ccr)throw new Error('This would lower the system collateral ratio below CCR.');
  }
@@ -112,10 +115,18 @@ export async function maxTroveAction(provider:Eip1193Provider,account:string,kin
  }
  throw new Error('Max could not be simulated. Refresh the Trove state and try again.');
 }
+/** Human review uses declared conservative display bounds; exact state remains in evidence. */
+export function displayTroveSnapshot(s:TroveSnapshot){
+ const rounded=(raw:string,places:number,up=false)=>{
+  const factor=10n**BigInt(18-places),n=BigInt(raw);
+  return formatUnits((up?(n+factor-1n)/factor:n/factor)*factor,18);
+ };
+ return {coll:formatUnits(s.coll,18),debt:rounded(s.debt,3,true),icr:rounded(s.icr,5),liquidationPrice:rounded(s.liquidationPrice,2,true)};
+}
 export function sameTroveTerms(a:PreparedTroveAction,b:PreparedTroveAction):boolean{
- // Hints may legitimately change; material amounts, risk, value and gas exposure may not.
- return JSON.stringify([a.kind,a.account,a.amount,a.fee,a.value,a.before,a.after,a.gas,a.maxFeePerGas,a.maxPriorityFeePerGas])===
- JSON.stringify([b.kind,b.account,b.amount,b.fee,b.value,b.before,b.after,b.gas,b.maxFeePerGas,b.maxPriorityFeePerGas]);
+ // Hints and sub-display interest accrual may change. Every exact safety guard is rechecked.
+ return JSON.stringify([a.kind,a.account,a.amount,a.fee,a.value,displayTroveSnapshot(a.before),displayTroveSnapshot(a.after),a.gas,a.maxFeePerGas,a.maxPriorityFeePerGas])===
+ JSON.stringify([b.kind,b.account,b.amount,b.fee,b.value,displayTroveSnapshot(b.before),displayTroveSnapshot(b.after),b.gas,b.maxFeePerGas,b.maxPriorityFeePerGas]);
 }
 export async function submitTroveAction(provider:Eip1193Provider,prepared:PreparedTroveAction,isCurrent:()=>boolean=()=>true):Promise<string>{
  if(BigInt(String(await rpc(provider,'eth_chainId')))!==BigInt(prepared.chainId))throw new Error('Wallet network changed. Prepare the Trove action again.');

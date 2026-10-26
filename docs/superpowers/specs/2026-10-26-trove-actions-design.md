@@ -19,11 +19,12 @@ upward-rounded buffer. Max amounts round downward. Validate targets against MCR 
 0.05. Already-satisfied targets return zero. Repayment recommendations compare the
 buffered amount to the live wallet/protocol limit.
 
-Read all protocol parameters, system collateral/debt, price, balances, and hints at
+Read all protocol parameters, system collateral/debt, per-Trove borrowing capacity,
+fee exemption through the verified governance interface, price, balances, and hints at
 one block. Validate price/debt and decoded values. Add only ABI fragments matching
 retained verified implementation artifacts, including borrowingRate,
 getBorrowingFee, withdrawMUSD and system-total reads. Do not rewrite artifacts.
-Borrowing requires normal mode, after ICR >= max(1.8, CCR + 0.1), and after system
+Borrowing requires remaining per-Trove capacity, normal mode, after ICR >= max(1.8, CCR + 0.1), and after system
 TCR >= CCR, using exact getBorrowingFee. Limits include both ICR and TCR bounds.
 
 Reserve gas for every action. Estimate the exact deposit-Max candidate with a
@@ -33,8 +34,11 @@ fee caps used for the reserve travel in the submitted transaction when available
 
 Each debounced preview has a revision and wallet context. Input/context changes
 invalidate confirmations. First submit prepares and shows an immutable summary.
-Second click refreshes preparation; changed transaction terms or preview require
-another review click. No signing occurs on preview, Max or rescue-fill clicks.
+Second click refreshes preparation; changed transaction terms or displayed preview require
+another review click. Review precision is explicit: debt rounds upward to 0.001
+MUSD, ICR downward to 0.00001, liquidation price upward to 0.01 MUSD. Sub-display
+interest accrual does not force another click; every exact safety bound is still
+rechecked. Exact atomic state stays in receipts. No signing occurs on preview, Max or rescue-fill clicks.
 
 Persist an unresolved intent before opening the wallet, then the hash immediately
 on return. One unresolved action per chain/borrower, including across reports,

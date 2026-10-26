@@ -718,3 +718,25 @@ retry. main.ts supplies the original delivery report hash. Seven focused UI test
 and all 170 browser tests pass. Six focused Python schema/provenance tests pass.
 Production build result and independent whole-diff review follow. No deployment or
 wallet demo is claimed yet.
+
+## 2026-10-26 — independent Trove review corrections
+
+Independent read-only review found and reproduced cross-tab evidence regression,
+missing per-Trove borrowing capacity, fee-exempt borrower predictions and loss of
+receipt-only recovery after a hash-storage failure. Fixed each with a failing-then-
+passing regression. Evidence now merges monotonically, retaining terminal outcomes
+and richer observed state across tabs even after a failed local write. A known
+in-memory hash enriches its persisted same-intent guard without enabling signing.
+
+Capacity and governance exemption are read at the preparation block. Added ABI
+fragments match retained implementation/interface sources; provenance test checks
+all BorrowerOperations exports and the embedded governance interface. Human review
+uses declared conservative precision (debt up to 0.001 MUSD, ICR down to 0.00001,
+liquidation price up to 0.01 MUSD) so sub-display interest accrual does not cause an
+endless confirmation loop. Exact limits and simulation still run before signing.
+
+All 176 browser tests and six focused Python schema/provenance tests pass; browser
+typecheck and production build passed before the last review fixes, to be repeated.
+Local actual Chrome rendering at 320/1280 pixels had no horizontal overflow using
+an in-memory provider; this is not live wallet acceptance. Complete product gate
+and final independent re-review remain in progress. No deployment or live tx yet.

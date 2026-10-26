@@ -43,3 +43,10 @@ test('rescue checks buffer against limits and validates target/state',()=>{
  const boundary={...state,principal:2200n*W,interest:0n,coll:5n*W/100n,price:79740n*W};
  assert.equal(math.computeRescue(boundary,2n*W).repayAvailable,false);
 });
+test('borrowing limit includes per-Trove capacity and account fee exemption',()=>{
+ const s={...state,coll:W/10n,capacity:2002n*W,feeExempt:false};
+ const cap=math.computeLimits(s,balances).borrow;
+ assert.ok(cap+cap*s.rate/W<=104n*W/100n);
+ assert.ok(cap+1n+(cap+1n)*s.rate/W>104n*W/100n);
+ assert.equal(math.computeLimits({...s,feeExempt:true},balances).borrow,104n*W/100n);
+});

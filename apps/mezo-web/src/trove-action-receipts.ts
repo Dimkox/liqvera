@@ -10,6 +10,14 @@ export type ActionReceipt={schema:'liqvera-trove-action/v1';id:string;report_id:
 export type ActionReport={report_id:string;report_sha256:string};
 const address=/^0x[0-9a-fA-F]{40}$/,hash=/^0x[0-9a-fA-F]{64}$/,quantity=/^(0|[1-9][0-9]*)$/,block=/^0x[0-9a-fA-F]+$/;
 const unresolved=(r:ActionReceipt)=>!['confirmed','reverted'].includes(r.state);
+function advancedRecord(a:ActionReceipt|undefined,b:ActionReceipt):ActionReceipt{
+ if(!a)return b;
+ if(!unresolved(a)&&unresolved(b))return a;
+ if(unresolved(a)&&!unresolved(b))return b;
+ if(a.observed&&(!b.observed||BigInt(a.observed.block)>BigInt(b.observed.block)))return a;
+ if(a.tx_hash&&!b.tx_hash)return a;
+ return b;
+}
 const validSnapshot=(v:unknown):v is TroveSnapshot=>{
  if(!v||typeof v!=='object')return false;const s=v as TroveSnapshot;
  return [s.coll,s.debt,s.icr,s.liquidationPrice].every(x=>typeof x==='string'&&quantity.test(x));
@@ -33,6 +41,7 @@ export function validActionReceipt(value:unknown):value is ActionReceipt{
 /** Persistent intent is separate from report records and shared across reports/tabs. */
 export class TroveActionStore{
  private memory:ActionReceipt[]=[];
+ private dirty=new Set<string>();
  warning='';
  readonly reportKey:string;readonly guardKey:string;
  constructor(privateStorage:Storage|null,report:ActionReport,borrower:string){
@@ -51,7 +60,8 @@ export class TroveActionStore{
    const data=this.read(this.reportKey);
    if(data!==null&&(!Array.isArray(data)||!data.every(r=>this.validForBorrower(r)&&r.report_id===this.report.report_id&&r.report_sha256===this.report.report_sha256)))throw new Error('Invalid action records');
    const merged=new Map<string,ActionReceipt>();
-   for(const r of [...(data??[]) as ActionReceipt[],...this.memory])merged.set(r.id,r);
+   for(const r of [...this.memory,...(data??[]) as ActionReceipt[]])merged.set(r.id,advancedRecord(merged.get(r.id),r));
+   for(const r of this.memory)if(this.dirty.has(r.id))merged.set(r.id,advancedRecord(merged.get(r.id),r));
    this.memory=[...merged.values()];
   }catch{this.warning='Browser action storage could not be read. Keep the downloaded action receipts.';}
   return this.memory.slice();
@@ -61,6 +71,8 @@ export class TroveActionStore{
    const guard=this.read(this.guardKey);
    if(guard===null)return null;
    if(!this.validForBorrower(guard))throw new Error('Invalid unresolved record');
+   const local=this.memory.find(r=>r.id===guard.id);
+   if(unresolved(guard)&&guard.tx_hash===null&&local?.tx_hash)return {...guard,tx_hash:local.tx_hash,state:'pending'};
    return unresolved(guard)?guard:null;
   }catch{throw new Error('Unresolved action storage is unavailable or contains an invalid record. New signing is disabled.');}
  }
@@ -77,10 +89,12 @@ export class TroveActionStore{
  }
  update(r:ActionReceipt):ActionReceipt{
   if(!this.validForBorrower(r))throw new Error('Invalid action receipt.');
-  const previous=this.records();this.memory=[...previous.filter(item=>item.id!==r.id),r];
+  const previous=this.records();r=advancedRecord(previous.find(item=>item.id===r.id),r);
+  this.memory=[...previous.filter(item=>item.id!==r.id),r];this.dirty.add(r.id);
   try{
    if(unresolved(r))this.storage!.setItem(this.guardKey,JSON.stringify(r));
    this.storage!.setItem(this.reportKey,JSON.stringify(this.memory));
+   this.dirty.clear();
    if(!unresolved(r)){
     const guard=this.read(this.guardKey) as ActionReceipt|null;
     if(guard?.id===r.id)this.storage!.removeItem(this.guardKey);

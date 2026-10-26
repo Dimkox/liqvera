@@ -7,14 +7,14 @@ export function troveProvider(overrides={}){
  const calls=[],simulations=[],nominal=[];
  const s={coll:4n*W/100n,principal:2000n*W,interest:96n*W/100n,price:79740n*W,
  minimum:1800n*W,gasCompensation:200n*W,rate:W/1000n,mcr:11n*W/10n,ccr:15n*W/10n,
- systemColl:10n*W,systemDebt:100000n*W,btc:W,musd:1000n*W,...overrides};
+ systemColl:10n*W,systemDebt:100000n*W,capacity:1000000n*W,feeExempt:false,btc:W,musd:1000n*W,...overrides};
  const entries=[
  [p.MEZO_TESTNET_TROVES.troveManager,new Interface(p.MEZO_TESTNET_TROVE_MANAGER_ABI)],
  [p.MEZO_TESTNET_TROVES.borrowerOperations,new Interface(p.MEZO_TESTNET_BORROWER_OPERATIONS_ABI)],
  [p.MEZO_TESTNET_TROVES.priceFeed,new Interface(p.MEZO_TESTNET_PRICE_FEED_ABI)],
  [p.MEZO_TESTNET_TROVES.hintHelpers,new Interface(p.MEZO_TESTNET_HINT_HELPERS_ABI)],
  [p.MEZO_TESTNET_TROVES.sortedTroves,new Interface(p.MEZO_TESTNET_SORTED_TROVES_ABI)],
- [p.MUSD_TESTNET.address,new Interface(p.MUSD_ABI)]];
+ [p.MUSD_TESTNET.address,new Interface(p.MUSD_ABI)],['0x4444444444444444444444444444444444444444',new Interface(p.MEZO_TESTNET_GOVERNABLE_VARIABLES_ABI)]];
  const provider={calls,simulations,nominal,state:s,request:async({method,params=[]})=>{
  calls.push({method,params});
  if(overrides.request){const r=await overrides.request({method,params});if(r!==undefined)return r;}
@@ -33,7 +33,7 @@ export function troveProvider(overrides={}){
  const values={getTroveStatus:[1],getEntireDebtAndColl:[s.coll,s.principal,s.interest,0,0,0],
  MUSD_GAS_COMPENSATION:[s.gasCompensation],minNetDebt:[s.minimum],borrowingRate:[s.rate],
  MCR:[s.mcr],CCR:[s.ccr],getTCR:[s.systemColl*s.price/s.systemDebt],fetchPrice:[s.price],
- getEntireSystemColl:[s.systemColl],getEntireSystemDebt:[s.systemDebt],balanceOf:[s.musd],
+ governableVariables:['0x4444444444444444444444444444444444444444'],isAccountFeeExempt:[s.feeExempt],getTroveMaxBorrowingCapacity:[s.capacity],getEntireSystemColl:[s.systemColl],getEntireSystemDebt:[s.systemDebt],balanceOf:[s.musd],
  getApproxHint:[upper,0,123],findInsertPosition:[upper,lower]};
  if(fn.name==='computeNominalCR'){nominal.push([...fn.args]);return iface.encodeFunctionResult(fn.name,[fn.args[0]*W/fn.args[1]]);}
  if(fn.name==='getBorrowingFee')return iface.encodeFunctionResult(fn.name,[fn.args[0]*s.rate/W]);

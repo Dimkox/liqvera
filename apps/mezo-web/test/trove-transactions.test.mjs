@@ -125,3 +125,21 @@ test('gas funding is checked for every action and exact deposit reserve is retur
  const p=troveProvider();const prepared=await prepareTroveAction(p,borrower,{kind:'deposit',amount:'0.1'});
  assert.ok(BigInt(prepared.gas)>200000n);assert.ok(BigInt(prepared.maxFeePerGas)>0n);
 });
+test('borrow respects account borrowing capacity and exempts protocol fee-exempt borrowers',async()=>{
+ const capped=troveProvider({coll:W/10n,capacity:2002n*W});
+ await assert.rejects(()=>prepareTroveAction(capped,borrower,{kind:'borrow',amount:'2'}),/borrowing capacity/i);
+ const exempt=troveProvider({coll:W/10n,feeExempt:true});
+ const p=await prepareTroveAction(exempt,borrower,{kind:'borrow',amount:'1'});
+ assert.equal(p.fee,'0');assert.equal(p.after.debt,String(200196n*W/100n));
+ assert.deepEqual(exempt.nominal[0],[W/10n,2001n*W]);
+});
+test('display-bound review tolerates sub-display accrual but requires review of visible changes',async()=>{
+ const p=troveProvider({interest:96n*W/100n+123n});
+ const first=await prepareTroveAction(p,borrower,{kind:'deposit',amount:'0.0005'});
+ p.state.interest+=1n;
+ const next=await prepareTroveAction(p,borrower,{kind:'deposit',amount:'0.0005'});
+ const {sameTroveTerms}=await import('../src/trove-transactions.ts');
+ assert.equal(sameTroveTerms(first,next),true);
+ p.state.interest+=W/100n;
+ assert.equal(sameTroveTerms(first,await prepareTroveAction(p,borrower,{kind:'deposit',amount:'0.0005'})),false);
+});

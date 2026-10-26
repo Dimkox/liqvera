@@ -495,6 +495,7 @@ export const MEZO_TESTNET_TROVES = {
 } as const;
 
 export const MEZO_TESTNET_BORROWER_OPERATIONS_ABI = [
+  {"inputs":[],"name":"governableVariables","outputs":[{"internalType":"contract IGovernableVariables","name":"","type":"address"}],"stateMutability":"view","type":"function"},
   {"inputs":[],"name":"borrowingRate","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[{"internalType":"uint256","name":"_debt","type":"uint256"}],"name":"getBorrowingFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[],"name":"getEntireSystemColl","outputs":[{"internalType":"uint256","name":"entireSystemColl","type":"uint256"}],"stateMutability":"view","type":"function"},
@@ -617,6 +618,7 @@ export const MEZO_TESTNET_HINT_HELPERS_ABI = [
 ] as const;
 
 export const MEZO_TESTNET_TROVE_MANAGER_ABI = [
+  {"inputs":[{"internalType":"address","name":"_borrower","type":"address"}],"name":"getTroveMaxBorrowingCapacity","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {
     "inputs": [],
     "name": "CCR",
@@ -982,4 +984,9 @@ export const MEZO_TESTNET_PRICE_FEED_ABI = [
     "stateMutability": "view",
     "type": "function"
   }
+] as const;
+
+/** IGovernableVariables interface retained in BorrowerOperationsImplementation.source.testnet.json AdditionalSources. */
+export const MEZO_TESTNET_GOVERNABLE_VARIABLES_ABI = [
+ {"type":"function","name":"isAccountFeeExempt","inputs":[{"name":"_account","type":"address"}],"outputs":[{"name":"","type":"bool"}],"stateMutability":"view"}
 ] as const;

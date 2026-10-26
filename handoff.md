@@ -1,5 +1,13 @@
 # Liqvera handoff
 
+## 2026-10-26 — Market depth payment recovery source work
+
+Implemented a capability-scoped, read-only recovery endpoint for existing in-flight x402 attempts. It confirms only the saved attempt and Permit2 authorization identity, exact MUSD transfer, canonical block and finality; no facilitator resubmission is performed. A canonical full-block/log fallback covers the observed Mezo RPC behavior where block/log queries expose the transaction but hash-indexed receipt/transaction lookup intermittently returns null. The web client persists gateway attempt/hash and lets the user enter a transaction hash and block to recover the already-quoted report. No schema migration was added.
+
+Read-only RPC evidence for the supplied historical payment: `0xa09b46ea31e2d44734f7c0ad7e33b74bfdf72cfaf93245b4b173c04fb0cdf482`, block 16329223, timestamp 2026-10-24 00:41:34 UTC, 0.01 MUSD transfer to the quote recipient. This confirms public chain facts only; no production quote/capability or report delivery was accessed. The chat-exposed wallet seed was not used. No new payment, BTC swap, deployment, or publication occurred.
+
+Local verification: gateway 89 passed/14 skipped (PostgreSQL integration requires an explicitly disposable URL); gateway typecheck/build passed; web 150 passed and production build passed; OpenAPI contract tests 11 passed; `git diff --check` passed. Hosted CI and independent read-only review are still required. Deployment and the requested fresh BTC sale remain unverified; do not represent either as complete.
+
 ## 2026-10-23 — Trove risk published; current state
 
 The public Testnet site now runs source `d63860d7af70b5ad12145b039131ac11f0d4e729`,

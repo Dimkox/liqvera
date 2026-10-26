@@ -10,7 +10,7 @@ const facilitator='0x3333333333333333333333333333333333333333';
 const txHash=`0x${'4'.repeat(64)}`;
 const blockHash=`0x${'5'.repeat(64)}`;
 const topic=(address:string)=>`0x${'0'.repeat(24)}${address.slice(2)}`;
-const quote={id:'00000000-0000-4000-8000-000000000001',report_id:'00000000-0000-4000-8000-000000000002',report_sha256:'a'.repeat(64),terms:{expected_payer:buyer,pay_to:payTo}} as Quote;
+const quote={id:'00000000-0000-4000-8000-000000000001',report_id:'00000000-0000-4000-8000-000000000002',report_sha256:'a'.repeat(64),expires_at:new Date('2099-01-01T00:00:00Z'),terms:{expected_payer:buyer,pay_to:payTo}} as Quote;
 const attempt={id:'00000000-0000-4000-8000-000000000003',quote_id:quote.id,state:'UNKNOWN',authorization_identity:'b'.repeat(64),identity_version:'test',authorization_valid_until:new Date('2026-09-29T00:05:00Z'),correlation:{buyer_native_balance_before:'1000',buyer_native_balance_before_block_number:'99',buyer_native_balance_before_block_hash:`0x${'6'.repeat(64)}`},tx_hash:txHash,submitted_at:new Date('2026-09-29T00:00:00Z'),reconciliation_count:1} as Attempt;
 
 function rpc(change:Record<string,unknown>={}) {
@@ -74,4 +74,26 @@ test('wrong token, payee, or value cannot bind the payment',async()=>{
     const reader=new MezoReceiptReader(rpc(change) as never,identity as never,finality as never);
     assert.equal(await reader.confirmation(quote,attempt),null);
   }
+});
+
+test('finality recovery can bind a tx from block and canonical MUSD logs when RPC hash indexes return null',async()=>{
+  const transaction={hash:txHash,from:facilitator,to:'0x402085c248eea27d92e8b30b2c58ed07f9e20001',input:'0x12345678'};
+  const log={address:ASSET,topics:[MUSD_TRANSFER_EVENT.topic0,topic(buyer),topic(payTo)],
+    data:`0x${BigInt(AMOUNT).toString(16).padStart(64,'0')}`,transactionHash:txHash,blockHash,blockNumber:'0x64',logIndex:'0x0'};
+  const fallbackRpc={call:async(method:string,params:unknown[])=>{
+    if(method==='eth_chainId')return '0x7b7b';
+    if(method==='eth_getTransactionReceipt')return null;
+    if(method==='eth_getBlockByNumber')return params[0]==='latest'?{number:'0x6f',hash:blockHash}:
+      params[1]===true?{number:'0x64',hash:blockHash,timestamp:'0x6abaff80',transactions:[transaction]}:{number:'0x64',hash:blockHash};
+    if(method==='eth_getLogs')return [log];
+    if(method==='eth_getTransactionByHash')return null;
+    if(method==='eth_getBalance')return '0x3e8';
+    throw new Error(method);
+  }};
+  const reader=new MezoReceiptReader(fallbackRpc as never,identity as never,finality as never);
+  const confirmation=await Reflect.apply(reader.confirmation,reader,[quote,attempt,100]);
+  assert.equal(confirmation?.tx_hash,txHash);
+  assert.equal(confirmation?.payer,buyer);
+  assert.equal(confirmation?.pay_to,payTo);
+  assert.equal(confirmation?.block_number,100);
 });

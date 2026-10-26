@@ -7,7 +7,7 @@ import { mountMezoDex } from "./mezo-dex-panel";
 import {mountMezoSalePlanner} from "./mezo-sale-panel";
 import { MEZO, MUSD, NETWORK_CONFIG, NETWORK_LABEL, TOKEN_LABEL } from "./network.ts";
 import { mountMezoFinance } from "./mezo-finance-panel";
-import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest } from "./api";
+import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest, recoverReport } from "./api";
 import { canPay, paymentNotice, walletStatus } from "./browser-flow";
 import { executePaymentAttempt, executeRecovery } from "./browser-orchestration";
 import { quoteIsPayable, receiptMatchesQuote, reportMatchesQuote, type Capabilities, type Delivery, type Quote, type RequestStatus, type Side } from "./contracts";
@@ -80,6 +80,12 @@ app.innerHTML = `
           <div id="capability-status" class="capability-status"></div>
           <div id="result-content" class="result-content"><div class="empty-state"><div class="empty-graphic" aria-hidden="true"><span></span><span></span><span></span><span></span></div><h3>Waiting for a question</h3><p>Connect your wallet and ask for a fresh paid report, or inspect the sealed historical live example.</p><button id="historical-button" class="secondary-button" type="button">Show latest live report</button></div></div>
           <div class="result-actions"><button id="refresh-button" class="secondary-button hidden" type="button">Check status</button><button id="new-button" class="text-button hidden" type="button">Start another report</button></div>
+          <section id="payment-recovery" class="recovery-box hidden" aria-label="Recover a submitted payment">
+            <p class="supporting">If your wallet payment was confirmed but the report is still locked, enter the Mezo Testnet transaction and block. Recovery checks the saved quote and wallet authorization; it never submits another payment.</p>
+            <label class="field-label" for="recovery-tx-hash">Transaction hash</label><input id="recovery-tx-hash" type="text" autocomplete="off" spellcheck="false" placeholder="0x…" />
+            <label class="field-label" for="recovery-block-number">Block number <span>from explorer</span></label><input id="recovery-block-number" type="text" inputmode="numeric" autocomplete="off" placeholder="16329223" />
+            <button id="recover-payment" class="secondary-button" type="button">Recover report</button>
+          </section>
         </section>
       </div>
       <section class="boundary-strip" aria-label="Important context"><div><span>NOTE 1</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>NOTE 2</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>NOTE 3</span><p><strong>User signed actions.</strong> Mezo spot swaps and Trove updates require your wallet; no perpetual orders or custody.</p></div></section>
@@ -242,6 +248,13 @@ function updateControls(): void {
   el<HTMLButtonElement>("#connect-button").textContent = walletModal && account ? "Manage wallet" : "Connect wallet";
   el<HTMLButtonElement>("#refresh-button").classList.toggle("hidden", !flow);
   el<HTMLButtonElement>("#refresh-button").disabled = busy || polling;
+  const canRecover=Boolean(flow?.quoteId&&flow.paymentGuard!=="clear"&&quote&&["PAYMENT_PENDING","PAYMENT_UNCERTAIN","EXPIRED","PAID"].includes(quote.state));
+  el<HTMLElement>("#payment-recovery").classList.toggle("hidden",!canRecover);
+  const recoveryHash=el<HTMLInputElement>("#recovery-tx-hash");
+  const recoveryBlock=el<HTMLInputElement>("#recovery-block-number");
+  if(flow?.paymentTxHash&&!recoveryHash.value)recoveryHash.value=flow.paymentTxHash;
+  if(flow?.paymentBlockNumber&&!recoveryBlock.value)recoveryBlock.value=String(flow.paymentBlockNumber);
+  el<HTMLButtonElement>("#recover-payment").disabled=busy||polling||!flow?.quoteId;
   const lock = flow?.paymentGuard !== "clear" || (quote && ["PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "MANUAL_REVIEW"].includes(quote.state));
   el<HTMLButtonElement>("#new-button").classList.toggle("hidden", !flow || Boolean(lock));
   el<HTMLButtonElement>("#new-button").disabled = busy || polling;
@@ -323,7 +336,7 @@ function renderQuote(): void {
   appendField(termsGrid, "Token", q.terms.asset, "breakable span-all");
   appendField(termsGrid, "Recipient", q.terms.pay_to, "breakable span-all");
   appendField(termsGrid, "Expected payer", q.terms.expected_payer, "breakable span-all");
-  appendField(termsGrid, "Quote expires", formatHistoricalDate(q.terms.expires_at), "span-all");
+  appendField(termsGrid, "Quote expires (UTC)", formatHistoricalDate(q.terms.expires_at), "span-all");
   appendField(termsGrid, "Paid report retention", `At least ${q.retention.paid_days} days`);
   appendField(termsGrid, "Unpaid cleanup grace", `At least ${q.retention.unpaid_grace_seconds} seconds`);
   appendField(termsGrid, "Ledger retention", `At least ${q.retention.ledger_days} days`);
@@ -610,7 +623,13 @@ async function submitPayment(): Promise<void> {
         }
       },
       requestPaidReport: async () => (await requestPaidReport({ path: `/v1/reports/${activeQuote.report_id}`,
-        bearerCapability: bearer!, quote: activeQuote, provider: provider!, payer: account! })) === "recovering" ? "recovering" : "submitted",
+        bearerCapability: bearer!, quote: activeQuote, provider: provider!, payer: account!,
+        onRecoveryInfo: info=>{
+          if(!flow)return;
+          if(info.paymentAttemptId)flow.paymentAttemptId=info.paymentAttemptId;
+          if(info.txHash)flow.paymentTxHash=info.txHash;
+          saveFlow(flow);updateControls();
+        } })) === "recovering" ? "recovering" : "submitted",
       refreshQuote: async () => {
         const latest = await getQuote(bearer!, activeQuote.quote_id);
         rememberQuote(latest);
@@ -622,6 +641,30 @@ async function submitPayment(): Promise<void> {
       notice: message => announcement(message, "warning"),
     });
   } finally { setBusy(false); if (delivery) renderDelivery(); else renderQuote(); }
+}
+
+async function recoverPayment():Promise<void> {
+  if(!flow?.quoteId||!quote||!bearer||busy||polling)return;
+  const txHash=el<HTMLInputElement>("#recovery-tx-hash").value.trim().toLowerCase();
+  const blockText=el<HTMLInputElement>("#recovery-block-number").value.trim();
+  const blockNumber=/^[1-9][0-9]*$/.test(blockText)?Number(blockText):NaN;
+  if(!/^0x[0-9a-f]{64}$/.test(txHash)||!Number.isSafeInteger(blockNumber)){
+    announcement("Enter the full transaction hash and block number from the Mezo Testnet explorer.","error");return;
+  }
+  flow.paymentTxHash=txHash;flow.paymentBlockNumber=blockNumber;saveFlow(flow);
+  setBusy(true);
+  try {
+    const result=await recoverReport(bearer,flow.quoteId,quote.report_id,txHash,blockNumber);
+    if(result==="recovering"){
+      setBusy(false);announcement("The transaction is being checked against the saved quote. Do not pay again.","warning");await pollQuote();return;
+    }
+    if(!receiptMatchesQuote(result.receipt,quote)||!reportMatchesQuote(result.report,quote)||result.report.report_id!==quote.report_id)
+      throw new Error("Receipt does not match the quoted report. Delivery is withheld.");
+    delivery=result;
+    flow.paymentAttemptId=result.receipt.payment_attempt_id;flow.paymentTxHash=result.receipt.tx_hash;flow.paymentGuard="clear";saveFlow(flow);
+    renderDelivery();announcement("Paid report recovered and verified. No new payment was submitted.");
+  }catch(error){announcement(readableError(error),"error");}
+  finally{setBusy(false);updateControls();}
 }
 
 async function connectWallet(): Promise<void> {
@@ -697,6 +740,7 @@ for(const [id,next] of [["market-tab","market_depth"],["trove-tab","trove_risk"]
   el<HTMLButtonElement>(`#${id}`).addEventListener("click",()=>{if(flow||busy||polling)return;product=next;updateControls();});
 }
 el<HTMLButtonElement>("#refresh-button").addEventListener("click", () => { void resumeFlow(); });
+el<HTMLButtonElement>("#recover-payment").addEventListener("click",()=>{void recoverPayment();});
 el<HTMLButtonElement>("#trove-preview-button").addEventListener("click",()=>{void showTrovePreview();});
 el<HTMLButtonElement>("#historical-button").addEventListener("click", () => { void showHistoricalReport(); });
 el<HTMLButtonElement>("#new-button").addEventListener("click", () => {
@@ -705,6 +749,7 @@ el<HTMLButtonElement>("#new-button").addEventListener("click", () => {
   if (!window.confirm("Start a new report? This browser session will forget the current report link and its capability-scoped recovery record.")) return;
   clearFlow();
   flow = null; quote = null; delivery = null;
+  el<HTMLInputElement>("#recovery-tx-hash").value="";el<HTMLInputElement>("#recovery-block-number").value="";
   el<HTMLDivElement>("#result-content").replaceChildren(node("p", "empty-state", "Ready for another snapshot question."));
   announcement("New report form ready. No payment was submitted.");
   updateControls();

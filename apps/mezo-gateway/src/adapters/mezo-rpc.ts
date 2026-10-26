@@ -39,21 +39,52 @@ export class MezoReceiptReader {
     if(typeof value!=='string'||!HEX.test(value))throw new PublicError('PAYMENT_UNCERTAIN',202);
     return {balance:BigInt(value).toString(),block_number:BigInt(block.number).toString(),block_hash:block.hash};
   }
-  async confirmation(quote: Quote,attempt: Attempt): Promise<Receipt|null> {
+  async confirmation(quote: Quote,attempt: Attempt,fallbackBlockNumber?:number): Promise<Receipt|null> {
     if (!this.identity.reviewed || !this.finality.reviewed || !attempt.tx_hash || !HASH.test(attempt.tx_hash)) return null;
     try { if(safeInteger(await this.rpc.call('eth_chainId',[]))!==CHAIN_ID)throw new Error('CHAIN_MISMATCH'); }
     catch { throw new PublicError('MANUAL_REVIEW',202); }
-    const raw=await this.rpc.call('eth_getTransactionReceipt',[attempt.tx_hash]); if(raw===null)return null;
-    const receipt=object(raw);
+    let fullBlock:Record<string,unknown>|undefined;
+    let transactionValue:unknown;
+    if(fallbackBlockNumber!==undefined) {
+      if(!Number.isSafeInteger(fallbackBlockNumber)||fallbackBlockNumber<1)throw new PublicError('INVALID_INPUT',422);
+      fullBlock=object(await this.rpc.call('eth_getBlockByNumber',[`0x${fallbackBlockNumber.toString(16)}`,true]));
+      if(typeof fullBlock.number!=='string'||safeInteger(fullBlock.number)!==fallbackBlockNumber||typeof fullBlock.hash!=='string'||!HASH.test(fullBlock.hash)||!Array.isArray(fullBlock.transactions))
+        throw new PublicError('PAYMENT_UNCERTAIN',202);
+      const quoteExpiry=quote.expires_at.getTime(),authorizationExpiry=attempt.authorization_valid_until.getTime();
+      if(typeof fullBlock.timestamp!=='string'||!HEX.test(fullBlock.timestamp)||!Number.isFinite(quoteExpiry)||!Number.isFinite(authorizationExpiry)||
+        BigInt(fullBlock.timestamp)*1000n>BigInt(quoteExpiry)||BigInt(fullBlock.timestamp)*1000n>BigInt(authorizationExpiry))
+        throw new PublicError('PAYMENT_REJECTED',409);
+      const transactions=(fullBlock.transactions as unknown[]).map(object).filter(item=>item.hash===attempt.tx_hash);
+      if(transactions.length!==1)return null;
+      transactionValue=transactions[0];
+    }
+    const raw=await this.rpc.call('eth_getTransactionReceipt',[attempt.tx_hash]);
+    let receipt:Record<string,unknown>;
+    if(raw!==null) receipt=object(raw);
+    else {
+      if(!fullBlock||!transactionValue)return null;
+      const logsValue=await this.rpc.call('eth_getLogs',[{fromBlock:fullBlock.number,toBlock:fullBlock.number,address:ASSET}]);
+      if(!Array.isArray(logsValue))throw new PublicError('PAYMENT_UNCERTAIN',202);
+      const logs=logsValue.map(object).filter(log=>log.transactionHash===attempt.tx_hash);
+      // A canonical event log is emitted only by a successful transaction; this
+      // fallback covers RPCs that index blocks/logs but omit receipt lookups.
+      receipt={status:'0x1',transactionHash:attempt.tx_hash,blockHash:fullBlock.hash,blockNumber:fullBlock.number,logs};
+    }
     if (receipt.status!=='0x1' || receipt.transactionHash!==attempt.tx_hash || typeof receipt.blockHash!=='string' || !HASH.test(receipt.blockHash) || !Array.isArray(receipt.logs)) throw new PublicError('MANUAL_REVIEW',202);
+    if(fallbackBlockNumber!==undefined&&safeInteger(receipt.blockNumber)!==fallbackBlockNumber)throw new PublicError('MANUAL_REVIEW',202);
     const block=object(await this.rpc.call('eth_getBlockByNumber',[receipt.blockNumber,false]));
     if (block.hash!==receipt.blockHash) throw new PublicError('MANUAL_REVIEW',202);
+    if(fullBlock&&fullBlock.hash!==receipt.blockHash)throw new PublicError('MANUAL_REVIEW',202);
     if (!await this.finality.isFinal(receipt,block,this.rpc)) return null;
     const latest=object(await this.rpc.call('eth_getBlockByNumber',['latest',false]));
     if(typeof latest.number!=='string'||!HEX.test(latest.number))throw new PublicError('MANUAL_REVIEW',202);
     const confirmations=BigInt(latest.number)-BigInt(String(receipt.blockNumber))+1n;
     if(confirmations<12n||confirmations>BigInt(Number.MAX_SAFE_INTEGER))throw new PublicError('MANUAL_REVIEW',202);
-    const transaction=object(await this.rpc.call('eth_getTransactionByHash',[attempt.tx_hash]));
+    let transaction:Record<string,unknown>;
+    const indexedTransaction=await this.rpc.call('eth_getTransactionByHash',[attempt.tx_hash]);
+    if(indexedTransaction!==null)transaction=object(indexedTransaction);
+    else if(transactionValue)transaction=object(transactionValue);
+    else return null;
     const before=attempt.correlation.buyer_native_balance_before;
     let after:string;
     try {

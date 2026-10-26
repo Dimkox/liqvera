@@ -3,6 +3,9 @@ interface FlowBase {
   readonly idempotencyKey: string;
   readonly requestId?: string;
   readonly quoteId?: string;
+  readonly paymentAttemptId?: string;
+  readonly paymentTxHash?: string;
+  readonly paymentBlockNumber?: number;
   readonly paymentGuard: "clear" | "started" | "uncertain";
 }
 export type BrowserFlowState = FlowBase & (

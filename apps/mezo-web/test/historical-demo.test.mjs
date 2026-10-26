@@ -43,7 +43,7 @@ test("fresh quote render uses the standards-safe shared UTC formatter", async ()
   assert.doesNotMatch(source,/function dateTime\(/);
   assert.doesNotMatch(source,/dateStyle[\s\S]{0,160}timeStyle[\s\S]{0,160}timeZoneName/);
   assert.match(source,/"Snapshot time", formatHistoricalDate\(q\.preview\.snapshot_at\)/);
-  assert.match(source,/"Quote expires", formatHistoricalDate\(q\.terms\.expires_at\)/);
+  assert.match(source,/"Quote expires \(UTC\)", formatHistoricalDate\(q\.terms\.expires_at\)/);
 });
 
 test("preview URLs identify an immutable report and coupled bundle across CDN caches", async () => {

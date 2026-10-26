@@ -78,6 +78,7 @@ export interface Receipt {
   schema: "liqvera-evidence-receipt/v1";
   quote_id: string;
   report_id: string;
+  payment_attempt_id: string;
   report_sha256: string;
   network: typeof NETWORK;
   chain_id: typeof CHAIN_ID;

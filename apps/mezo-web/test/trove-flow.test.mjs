@@ -31,6 +31,12 @@ test('Trove session survives reload while legacy sessions keep their original re
  saveFlow(legacy);assert.deepEqual(loadFlow(),legacy);
  saveFlow({...flow,side:'SELL',quantity:'1'});assert.equal(loadFlow(),null);
 });
+test('unknown payment recovery hash, block and attempt id survive a reload',()=>{
+ const recovered={...flow,quoteId:quote.quote_id,paymentGuard:'uncertain',paymentAttemptId:'55555555-5555-4555-8555-555555555555',
+  paymentTxHash:`0x${'a'.repeat(64)}`,paymentBlockNumber:16329223};
+ saveFlow(recovered);assert.deepEqual(loadFlow(),recovered);
+ saveFlow({...recovered,paymentTxHash:'0x1234'});assert.equal(loadFlow(),null);
+});
 test('Trove ambiguous wallet outcome retains the same borrower and blocks another submission',async()=>{
  const saved=[];
  const next=await executePaymentAttempt(flow,quote,{

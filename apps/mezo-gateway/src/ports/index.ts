@@ -20,8 +20,8 @@ export interface PaymentPort {
   requirements(quote: Quote): Promise<{ header: string; value: PaymentRequirements }>;
   verify(header: string, quote: Quote): Promise<{ payload: PaymentPayload; requirements: PaymentRequirements; identity: AuthorizationIdentity }>;
   settle(payload: PaymentPayload, requirements: PaymentRequirements): Promise<{ tx_hash: string | null }>;
-  confirm(quote: Quote, attempt: Attempt): Promise<Confirmation | null>;
-  revalidate(quote: Quote, attempt: Attempt, receipt: Receipt): Promise<boolean>;
+  confirm(quote: Quote, attempt: Attempt, fallbackBlockNumber?: number): Promise<Confirmation | null>;
+  revalidate(quote: Quote, attempt: Attempt, receipt: Receipt, fallbackBlockNumber?: number): Promise<boolean>;
 }
 export interface AuthorizationPolicy {
   readonly reviewed: boolean;
@@ -34,4 +34,4 @@ export interface FinalityPolicy {
   readonly version: string;
   isFinal(receipt: unknown, canonicalBlock: unknown, rpc: ReadonlyRpc): Promise<boolean>;
 }
-export interface ReadonlyRpc { call(method: 'eth_chainId' | 'eth_getTransactionReceipt' | 'eth_getTransactionByHash' | 'eth_getBlockByHash' | 'eth_getBlockByNumber' | 'eth_getBalance', params: unknown[]): Promise<unknown> }
+export interface ReadonlyRpc { call(method: 'eth_chainId' | 'eth_getTransactionReceipt' | 'eth_getTransactionByHash' | 'eth_getBlockByHash' | 'eth_getBlockByNumber' | 'eth_getBalance' | 'eth_getLogs', params: unknown[]): Promise<unknown> }

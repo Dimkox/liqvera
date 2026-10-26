@@ -1,6 +1,6 @@
 import { MUSD_PERMIT, X402_PERMIT2 } from "@liqvera/mezo-protocol";
 import { MEZO, MUSD } from "./network.ts";
-import type { Delivery, Quote } from "./contracts";
+import { isUuid, type Delivery, type Quote } from "./contracts";
 import type { Eip1193Provider } from "./wallet";
 import type { ClientEvmSigner } from "@x402/evm";
 import { getTypesForEIP712Domain, serializeTypedData } from "viem";
@@ -25,6 +25,7 @@ export interface OfficialX402BrowserAdapter {
     permitMetadata: typeof MUSD_PERMIT;
     provider: Eip1193Provider;
     payer: string;
+    onRecoveryInfo?: (info:{paymentAttemptId?:string;txHash?:string})=>void;
   }): Promise<Delivery | "recovering">;
 }
 
@@ -83,10 +84,18 @@ class ProductionX402BrowserAdapter implements OfficialX402BrowserAdapter {
       requireSponsoredPayment(payment,permit);
       const paidRead=await boundedFetchJson(fetch,input.path,{headers:{...headers,...protocol.encodePaymentSignatureHeader(payment)}},10_000_000);
       const paid=paidRead.response;
+      const txHash=paid.headers.get("x-liqvera-payment-tx");
+      const attemptId=paid.headers.get("x-liqvera-payment-attempt");
+      input.onRecoveryInfo?.({
+        ...(txHash&&/^0x[0-9a-fA-F]{64}$/.test(txHash)?{txHash:txHash.toLowerCase()}:{}),
+        ...(attemptId&&isUuid(attemptId)?{paymentAttemptId:attemptId}:{}),
+      });
       if(paid.status===202)return "recovering";
       if(!paid.ok)throw new Error("Payment outcome requires reconciliation.");
       await protocol.processPaymentResult(payment,(name:string)=>paid.headers.get(name),paid.status);
-      return validateDelivery(paidRead.body,input.quote.report_id);
+      const delivery=validateDelivery(paidRead.body,input.quote.report_id);
+      input.onRecoveryInfo?.({paymentAttemptId:delivery.receipt.payment_attempt_id,txHash:delivery.receipt.tx_hash});
+      return delivery;
     } catch(error) {
       if(error instanceof X402CancelledBeforeSubmission)throw error;
       return "recovering";

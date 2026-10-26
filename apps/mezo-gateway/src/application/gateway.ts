@@ -1,4 +1,4 @@
-import { PublicError, type Quote, type QuoteInput, type Reason, type ReportRequest } from '../domain/model.js';
+import { PublicError, type Attempt, type Confirmation, type Quote, type QuoteInput, type Reason, type ReportRequest } from '../domain/model.js';
 import type { ArtifactStore, PaymentPort, ReportService } from '../ports/index.js';
 import { Ledger } from '../adapters/postgres.js';
 import { Contracts } from '../adapters/contracts.js';
@@ -119,7 +119,8 @@ export class Gateway {
         await this.ledger.unknown(attempt,txHash);
         if(error instanceof PublicError&&(error.code==='MANUAL_REVIEW'||
           (confirmationObserved&&error.code==='PAYMENT_REJECTED')))await this.ledger.manualReview(quote,attempt);
-        throw new PublicError('PAYMENT_UNCERTAIN',202);
+        throw new PublicError('PAYMENT_UNCERTAIN',202,{'X-Liqvera-Payment-Attempt':attempt.id,
+          ...(txHash?{'X-Liqvera-Payment-Tx':txHash}:{})});
       }
       quote=await this.ledger.quote(scope,reportId,true);
     }
@@ -128,7 +129,7 @@ export class Gateway {
     if(!entitlement||entitlement.attempt.state!=='CONFIRMED')throw new PublicError('PAYMENT_UNCERTAIN',202);
     if(entitlement.retain_until.getTime()<=Date.now())throw new PublicError('RETENTION_EXPIRED',410);
     let current=false;
-    try {current=await this.payment.revalidate(quote,entitlement.attempt,entitlement.confirmation.receipt);}
+    try {current=await this.payment.revalidate(quote,entitlement.attempt,entitlement.confirmation.receipt,entitlement.confirmation.receipt.block_number);}
     catch(error) {
       if(error instanceof PublicError&&error.code==='MANUAL_REVIEW')await this.ledger.manualReview(quote,entitlement.attempt);
       throw new PublicError('PAYMENT_UNCERTAIN',202);
@@ -152,5 +153,28 @@ export class Gateway {
     const prefix=JSON.stringify({schema:body.schema,request_id:requestId}).slice(0,-1)+',"report":';
     const envelope=Buffer.concat([Buffer.from(prefix),bytes,Buffer.from(',"receipt":'+JSON.stringify(body.receipt)+'}')]);
     return {status:200,shape:'paid_report',headers:{...headers,'Content-Type':'application/json; charset=utf-8'},body,bytes:envelope};
+  }
+  async recover(scope:string,quoteId:string,txHash:string,blockNumber:number,requestId:string):Promise<ApiResult> {
+    if(!/^0x[0-9a-f]{64}$/.test(txHash)||!Number.isSafeInteger(blockNumber)||blockNumber<1)throw new PublicError('INVALID_INPUT',422);
+    const quote=await this.ledger.quote(scope,quoteId);
+    if(quote.state==='PAID')return this.read(scope,quote.report_id,'report',undefined,requestId);
+    const headersFor=(attempt:Attempt)=>({'X-Liqvera-Payment-Attempt':attempt.id,'X-Liqvera-Payment-Tx':txHash});
+    if(!['PAYMENT_PENDING','PAYMENT_UNCERTAIN','EXPIRED'].includes(quote.state))throw new PublicError('INVALID_STATE',409);
+    const attempt=await this.ledger.recoverableAttempt(scope,quoteId);
+    if(!attempt)throw new PublicError('PAYMENT_UNCERTAIN',202);
+    if(attempt.tx_hash&&attempt.tx_hash!==txHash)throw new PublicError('PAYMENT_REJECTED',409);
+    let confirmation:Confirmation|null;
+    try {confirmation=await this.payment.confirm(quote,{...attempt,tx_hash:txHash},blockNumber);}
+    catch(error) {
+      if(error instanceof PublicError&&error.code==='MANUAL_REVIEW')await this.ledger.manualReview(quote,attempt);
+      throw new PublicError('PAYMENT_UNCERTAIN',202,headersFor(attempt));
+    }
+    if(!confirmation)throw new PublicError('PAYMENT_UNCERTAIN',202,headersFor(attempt));
+    this.contracts.assert('receipt',confirmation.receipt);
+    // Persist the verified transaction identity before committing the entitlement.
+    // This transition is confirm-only and never invokes the facilitator.
+    await this.ledger.unknown(attempt,txHash);
+    await this.ledger.confirm(quote,attempt,confirmation);
+    return this.read(scope,quote.report_id,'report',undefined,requestId);
   }
 }

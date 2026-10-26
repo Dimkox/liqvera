@@ -1,0 +1,315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://liqvera.site/schemas/liqvera-trove-action-v1.schema.json",
+  "title": "Liqvera Trove action receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "report_id",
+    "report_sha256",
+    "borrower",
+    "chain_id",
+    "kind",
+    "to",
+    "calldata",
+    "value_wei",
+    "amount",
+    "fee",
+    "upper_hint",
+    "lower_hint",
+    "prepared_block",
+    "before",
+    "after",
+    "tx_hash",
+    "receipt_block",
+    "receipt_status",
+    "created_at",
+    "state"
+  ],
+  "properties": {
+    "schema": {
+      "const": "liqvera-trove-action/v1"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "report_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "borrower": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "chain_id": {
+      "const": 31611
+    },
+    "kind": {
+      "enum": [
+        "addColl",
+        "repayMUSD",
+        "withdrawMUSD"
+      ]
+    },
+    "to": {
+      "const": "0xCdF7028ceAB81fA0C6971208e83fa7872994beE5"
+    },
+    "calldata": {
+      "type": "string",
+      "pattern": "^0x(?:[0-9a-fA-F]{2})+$"
+    },
+    "value_wei": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "Unsigned integer in atomic units (1e18 scale)."
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "Unsigned integer in atomic units (1e18 scale)."
+    },
+    "fee": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "Unsigned integer in atomic units (1e18 scale)."
+    },
+    "upper_hint": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "lower_hint": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$"
+    },
+    "prepared_block": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]+$"
+    },
+    "before": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coll",
+        "debt",
+        "icr",
+        "liquidationPrice"
+      ],
+      "properties": {
+        "coll": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "description": "Unsigned integer in atomic units (1e18 scale)."
+        },
+        "debt": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "description": "Unsigned integer in atomic units (1e18 scale)."
+        },
+        "icr": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "description": "Unsigned integer in atomic units (1e18 scale)."
+        },
+        "liquidationPrice": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "description": "Unsigned integer in atomic units (1e18 scale)."
+        }
+      },
+      "description": "Prepared prediction, not proof of executed post-state. All values are WAD-scaled integer strings."
+    },
+    "after": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coll",
+        "debt",
+        "icr",
+        "liquidationPrice"
+      ],
+      "properties": {
+        "coll": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "description": "Unsigned integer in atomic units (1e18 scale)."
+        },
+        "debt": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "description": "Unsigned integer in atomic units (1e18 scale)."
+        },
+        "icr": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "description": "Unsigned integer in atomic units (1e18 scale)."
+        },
+        "liquidationPrice": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "description": "Unsigned integer in atomic units (1e18 scale)."
+        }
+      },
+      "description": "Prepared prediction, not proof of executed post-state. All values are WAD-scaled integer strings."
+    },
+    "tx_hash": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        }
+      ]
+    },
+    "receipt_block": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]+$"
+        }
+      ]
+    },
+    "receipt_status": {
+      "enum": [
+        null,
+        "0x0",
+        "0x1"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "state": {
+      "enum": [
+        "awaiting_wallet",
+        "pending",
+        "unknown",
+        "confirmed",
+        "reverted"
+      ]
+    },
+    "observed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block",
+        "snapshot"
+      ],
+      "properties": {
+        "block": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]+$"
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "coll",
+            "debt",
+            "icr",
+            "liquidationPrice"
+          ],
+          "properties": {
+            "coll": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)$",
+              "description": "Unsigned integer in atomic units (1e18 scale)."
+            },
+            "debt": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)$",
+              "description": "Unsigned integer in atomic units (1e18 scale)."
+            },
+            "icr": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)$",
+              "description": "Unsigned integer in atomic units (1e18 scale)."
+            },
+            "liquidationPrice": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)$",
+              "description": "Unsigned integer in atomic units (1e18 scale)."
+            }
+          },
+          "description": "Prepared prediction, not proof of executed post-state. All values are WAD-scaled integer strings."
+        }
+      },
+      "description": "Separately read state at or after the confirmed receipt block."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "confirmed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "tx_hash": {
+            "type": "string"
+          },
+          "receipt_block": {
+            "type": "string"
+          },
+          "receipt_status": {
+            "const": "0x1"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "reverted"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "tx_hash": {
+            "type": "string"
+          },
+          "receipt_block": {
+            "type": "string"
+          },
+          "receipt_status": {
+            "const": "0x0"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "pending"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "tx_hash": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}

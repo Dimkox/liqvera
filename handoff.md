@@ -696,3 +696,13 @@ block. Gas estimation and conservative native reserves cover every action; prepa
 fee/gas caps accompany wallet submission. Max validates the exact candidate.
 Focused arithmetic/preparation suite: 17 passed. Browser typecheck passed. No live
 transaction or deployment occurred. UI and durable action evidence follow.
+
+## 2026-10-26 — durable Trove action evidence
+
+Added liqvera-trove-action/v1 schema and browser action store. An unresolved intent
+precedes wallet submission, hashes persist before polling, and the guard is shared
+by chain/borrower across reports. Missing/corrupt guard storage disables signing.
+Action exports retain prepared predictions and an optional separate observed state.
+Receipt polling validates Testnet, transaction identity, status and canonical block;
+timeouts remain pending. Three focused evidence tests and browser typecheck pass.
+No deployment or live transaction occurred.

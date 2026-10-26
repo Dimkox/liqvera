@@ -641,3 +641,7 @@ The browser footer now uses the version read from `apps/mezo-web/package.json` a
 ## 2026-10-26 — Mezo Testnet submission evidence in README
 
 Added the owner-provided video, Trove opening, Trove-protection repayment and paid x402 Trove report links near the start of README. Updated the old statement that no live Trove transaction had been verified; current copy points to deployed wallet-signed actions (PR #25) and the supplied transaction evidence. Documentation only; payment logic, runtime data and deployments were not changed. All four supplied links return HTTP 200; README contains no “not deployed” wording, and `git diff --check` passes. No application tests apply to this documentation-only change.
+
+## 2026-10-26 — web footer version deployed
+
+Merged PR #30 and deployed only `web-live` from source `783e8a3` as image `sha256:9d9a434a54c7aed89a4c8a8a80372330f028babb2e32c385f392f19b78697e15`. All seven services are healthy; the public site and API return HTTP 200, and the published bundle shows `v0.2.0` with WalletConnect, Trove protection and BTC sale planning intact. The old web image remains available. No database or payment state changed. Refreshed Trivy and Grype databases found no additional image findings compared with the previous deployed web image. [Deployment evidence](docs/security/2026-10-26-footer-version-deployment.md).

@@ -1,0 +1,487 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-26T13:53:25+00:00",
+  "mode": "pr",
+  "profiles": [
+    "base"
+  ],
+  "route_id": null,
+  "tree_fingerprint": "d70c8e4e1540e61856427ff0b81104372b4116b5508d61d93213637d05aa7df9",
+  "changed_files": [],
+  "changed_file_inventory": {
+    "mode": "range-union",
+    "bases": [
+      {
+        "kind": "pr-target",
+        "source": "refs/remotes/origin/main",
+        "base": "065a58fd822d6ab351c8f44841de185b44080bef",
+        "target": "065a58fd822d6ab351c8f44841de185b44080bef",
+        "count": 0
+      }
+    ],
+    "worktree_count": 0,
+    "union_count": 0,
+    "selection_findings": []
+  },
+  "checks": [
+    {
+      "name": "architecture-inputs",
+      "status": "skip",
+      "summary": "architecture authority inputs are absent; not executed",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "git-diff-check",
+      "status": "pass",
+      "summary": "3/3 commands clean; 0 findings disposed; 0 unresolved; bases=pr-target:065a58fd822d6ab351c8f44841de185b44080bef",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": [
+        {
+          "severity": "info",
+          "code": "checked-range",
+          "path": "refs/remotes/origin/main",
+          "message": "checked 065a58fd822d6ab351c8f44841de185b44080bef..HEAD",
+          "kind": "pr-target",
+          "base": "065a58fd822d6ab351c8f44841de185b44080bef",
+          "target": "065a58fd822d6ab351c8f44841de185b44080bef"
+        },
+        {
+          "severity": "info",
+          "code": "diff-check-command",
+          "path": "worktree",
+          "message": "exit=0: git diff --check",
+          "command": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "severity": "info",
+          "code": "diff-check-command",
+          "path": "index",
+          "message": "exit=0: git diff --cached --check",
+          "command": [
+            "git",
+            "diff",
+            "--cached",
+            "--check"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "severity": "info",
+          "code": "diff-check-command",
+          "path": "pr-target",
+          "message": "exit=0: git diff --check 065a58fd822d6ab351c8f44841de185b44080bef..HEAD",
+          "command": [
+            "git",
+            "diff",
+            "--check",
+            "065a58fd822d6ab351c8f44841de185b44080bef..HEAD"
+          ],
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "severity": "info",
+          "code": "disposition-summary",
+          "path": "engineering/verification-dispositions.json",
+          "message": "Raw findings remain visible; effective outcomes include reviewed dispositions.",
+          "config_sha256": "e0395a8b681958936fa97f552f517d77cecb49744eb33b902a3ee5c6569ef141",
+          "configured": 3,
+          "observed": 0,
+          "disposed": 0,
+          "unresolved": 0
+        }
+      ]
+    },
+    {
+      "name": "docs-state-scope",
+      "status": "pass",
+      "summary": "profile=full-pr-suite; evidence=verification:full-pr-suite; reason=operator-override; paths=0; skipped=none",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": [
+        {
+          "severity": "info",
+          "code": "operator-override",
+          "path": "",
+          "message": "full PR suite is required: GETZILLA_VERIFY_FORCE_FULL forces the full PR suite"
+        }
+      ]
+    },
+    {
+      "name": "change-spec",
+      "status": "pass",
+      "summary": "0 specs checked; exempt=False",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "architecture",
+      "status": "skip",
+      "summary": "architecture is not configured",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "governance",
+      "status": "skip",
+      "summary": "governance is not configured",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "workflow-artifacts",
+      "status": "skip",
+      "summary": "no active change",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "diff-risk",
+      "status": "pass",
+      "summary": "diff risk low; exact-source review plan 55489f0c1481",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "cost-guard",
+      "status": "pass",
+      "summary": "no paid or unbounded operation in the prompt or the diff",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "eu-ai-act",
+      "status": "skip",
+      "summary": "EU AI Act component not installed",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "hook-health",
+      "status": "pass",
+      "summary": "no hook failed open during this route",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "workflow-baseline",
+      "status": "skip",
+      "summary": "not an installed Getzilla project (no .getzilla/AGBP_SYNC.json): the baseline is checked where Getzilla was installed",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "secret-scan",
+      "status": "pass",
+      "summary": "0 potential secrets; 0 disposed; 0 unresolved",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": [
+        {
+          "severity": "info",
+          "code": "disposition-summary",
+          "path": "engineering/verification-dispositions.json",
+          "message": "Raw findings remain visible; effective outcomes include reviewed dispositions.",
+          "config_sha256": "e0395a8b681958936fa97f552f517d77cecb49744eb33b902a3ee5c6569ef141",
+          "configured": 3,
+          "observed": 0,
+          "disposed": 0,
+          "unresolved": 0
+        }
+      ]
+    },
+    {
+      "name": "contract-structure",
+      "status": "pass",
+      "summary": "0 contracts checked",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "sql-safety",
+      "status": "pass",
+      "summary": "0 unsafe SQL findings",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "known-vulnerabilities",
+      "status": "pass",
+      "summary": "no known vulnerabilities in 482 pinned dependencies (offline OSV mirror /root/.getzilla/osv)",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "opengrep",
+      "status": "pass",
+      "summary": "no taint findings from Getzilla OpenGrep rules",
+      "command": [
+        "/root/.getzilla/bin/opengrep",
+        "scan",
+        "--config",
+        ".getzilla/sast/rules",
+        "--taint-intrafile",
+        "--json",
+        "--quiet",
+        "--disable-version-check",
+        "--timeout",
+        "30",
+        "--exclude",
+        ".getzilla/sast",
+        "--exclude",
+        "tests",
+        "--exclude",
+        "**/fixtures/**",
+        "--exclude",
+        "node_modules",
+        "--exclude",
+        "vendor",
+        "--exclude",
+        ".getzilla/runtime",
+        "."
+      ],
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "ruff",
+      "status": "pass",
+      "summary": "exit=0",
+      "command": [
+        "ruff",
+        "check",
+        ".getzilla/getzilla",
+        "scripts",
+        "tests",
+        ".grok/hooks"
+      ],
+      "stdout": "All checks passed!\n",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "bandit",
+      "status": "pass",
+      "summary": "exit=0",
+      "command": [
+        "bandit",
+        "-c",
+        "bandit.yaml",
+        "-q",
+        "-r",
+        ".getzilla/getzilla",
+        "scripts",
+        ".grok/hooks"
+      ],
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "pytest",
+      "status": "fail",
+      "summary": "exit=1",
+      "command": [
+        "pytest",
+        "-q"
+      ],
+      "stdout": "........................................................................ [  6%]\n........................................................................ [ 13%]\n..............................................F....................... [ 20%]\n.............................................................. [ 26%]\n........................................................................ [ 32%]\n........................................................................ [ 39%]\n........................................................................ [ 46%]\n........................................................................ [ 53%]\n........................................................................ [ 60%]\n....................................................................... [ 66%]\n........................................................................ [ 73%]\n........................................................................ [ 80%]\n........................................................................ [ 87%]\n........................................................................ [ 93%]\n................................................................         [100%]\n=================================== FAILURES ===================================\n________ test_sealed_tree_blocks_unlink_and_has_nonwritable_directories ________\n\ntmp_path = PosixPath('/tmp/pytest-of-root/pytest-70/test_sealed_tree_blocks_unlink0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fe75fa4b8c0>\n\n    def test_sealed_tree_blocks_unlink_and_has_nonwritable_directories(\n        tmp_path: Path, monkeypatch: pytest.MonkeyPatch\n    ) -> None:\n        _generated_result(tmp_path, monkeypatch)\n        root = tmp_path / \"run\"\n        assert root.stat().st_mode & 0o222 == 0\n        assert (root / \"evidence\").stat().st_mode & 0o222 == 0\n>       with pytest.raises(PermissionError):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE PermissionError\n\ntests/contracts/test_acceptance_result.py:544: Failed\n----------------------------- Captured stdout call -----------------------------\nINCOMPLETE: /tmp/pytest-of-root/pytest-70/test_sealed_tree_blocks_unlink0/run/acceptance.json\n=========================== short test summary info ============================\nFAILED tests/contracts/test_acceptance_result.py::test_sealed_tree_blocks_unlink_and_has_nonwritable_directories\n1 failed, 1058 passed, 2 deselected, 85 subtests passed in 298.20s (0:04:58)\n",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "coverage",
+      "status": "skip",
+      "summary": "pytest runner owns tests; measure unittest trees only",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "source-stability",
+      "status": "pass",
+      "summary": "repository fingerprint remained stable",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    },
+    {
+      "name": "quality-gate",
+      "status": "pass",
+      "summary": "QG-01 admission checks passed",
+      "command": null,
+      "stdout": "",
+      "stderr": "",
+      "duration_hint": null,
+      "details": []
+    }
+  ],
+  "spec": {
+    "exempt": false,
+    "specs": [],
+    "historical_migrations": []
+  },
+  "architecture": {
+    "configured": false,
+    "status": "not_configured"
+  },
+  "governance": {
+    "configured": false,
+    "status": "not_configured"
+  },
+  "workflow_artifacts": {
+    "configured": false,
+    "status": "not_configured"
+  },
+  "status": "fail",
+  "terminal_state": "completed",
+  "evidence_status": "not_recorded",
+  "docs_state_scope": {
+    "eligible": false,
+    "profile": "full-pr-suite",
+    "mode": "pr",
+    "reason": "GETZILLA_VERIFY_FORCE_FULL forces the full PR suite",
+    "reason_code": "operator-override",
+    "documentation_files": [],
+    "state_files": [],
+    "artifact_files": [],
+    "changed_lockstep_tests": [],
+    "focused_tests": [],
+    "rejected_files": [],
+    "skipped_checks": [],
+    "changed_paths_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "evidence_kind": "verification:full-pr-suite",
+    "rejection": null
+  },
+  "diff_risk": {
+    "schema_version": 1,
+    "status": "computed",
+    "bases": [
+      "065a58fd822d6ab351c8f44841de185b44080bef"
+    ],
+    "head": "065a58fd822d6ab351c8f44841de185b44080bef",
+    "tree": "43539998bdd62d4d14400a0f953cbfe357f7f0db",
+    "tree_fingerprint": "d70c8e4e1540e61856427ff0b81104372b4116b5508d61d93213637d05aa7df9",
+    "risk": "low",
+    "rules_digest": "a70208b186ab44ce39fba1de110635b293888888b5176ec80be37bd022b3cc10",
+    "reasons": [],
+    "gaps": [],
+    "categories": [],
+    "profile_candidate": "standard",
+    "effective_risk": "low",
+    "diff_risk": "low",
+    "route_risk": null,
+    "review_plan_digest": "55489f0c14815a4f438dc9aab9eb8db37d562f761bdb0b2ef52e31cea93d93fb",
+    "added_reviewers": [
+      "code_reviewer"
+    ],
+    "added_evidence": [
+      "verification",
+      "code_review"
+    ],
+    "waived_evidence": []
+  },
+  "cost_guard": {
+    "status": "pass",
+    "summary": "no paid or unbounded operation in the prompt or the diff",
+    "signal": false,
+    "findings": [],
+    "finding_count": 0,
+    "problems": []
+  },
+  "eu_ai_act": {
+    "status": "not_installed"
+  },
+  "hook_health": {
+    "degraded_events": 0,
+    "by_hook": {},
+    "last": []
+  },
+  "workflow_baseline": {
+    "status": "not_run",
+    "reason": "source"
+  },
+  "stacks": {
+    "detected": [
+      "python",
+      "node"
+    ],
+    "checked": [],
+    "builtin": [
+      "python",
+      "node"
+    ],
+    "not_verified": [],
+    "untouched": [],
+    "details": {}
+  },
+  "check_status": "fail",
+  "git_head": "065a58fd822d6ab351c8f44841de185b44080bef",
+  "ci_run_id": null
+}

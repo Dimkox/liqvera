@@ -629,3 +629,7 @@ existing BusyBox backport and inactive curl dispositions. Recovery and exact lim
 are recorded in [deployment evidence](docs/security/2026-10-24-wallet-actions-deployment.md).
 The README now explicitly states that no live Trove or DEX transaction has been
 signed or verified.
+
+## 2026-10-26 — web footer version from package metadata
+
+The browser footer now uses the version read from `apps/mezo-web/package.json` at Vite build time, replacing the stale hard-coded `v0.0.5`. The current package version is `0.2.0`. The protocol TypeScript package and web production build pass; all 148 browser tests pass, including the updated footer source assertion. The built asset contains `Liqvera v0.2.0`. npm reports zero vulnerabilities; existing Rollup annotation and bundle-size notices remain. No deployment or payment behavior changed.

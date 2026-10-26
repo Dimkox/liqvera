@@ -675,3 +675,74 @@ Root-cause investigation traced the refreshed web-image findings to `curl` inher
 ## 2026-10-26 — vulnerable web image packages removed in production
 
 Merged PR #33 after green PR and exact-tree post-merge CI. Deployed only `web-live` from source `8a5af5c` as image `sha256:eb40e136088cf45f680821dd87837dc3e0f2e77cd34f9ca3f0f896ba00bcdb9e`. The live image has no curl, libcurl or brotli-libs; Trivy reports 0 findings and Grype reports only 3 Medium findings for the BusyBox backport, with no Critical or High. All seven services are healthy; the public site/API and BusyBox healthcheck pass. The prior web image remains available. No payment or database state changed. [Deployment and scan evidence](docs/security/2026-10-26-web-image-curl-brotli-remediation.md).
+
+## 2026-10-26 — Trove actions design and implementation plan
+
+Accepted the report action specification with BMAD adversarial/edge-case amendments:
+exact system TCR inputs, fixed-block previews, explicit re-review on changed terms,
+conservative gas Max, persistent pending guards and delivery-hash-bound evidence.
+Borrowing ships collapsed with ICR/TCR guards; server storage and collateral
+withdrawal remain excluded. Plan and design live under docs/superpowers. Work starts
+from main 9cdc759 in isolated feat/trove-actions. User authorized completion through
+PR merge, separate web deployment and Mezo Testnet wallet demo. No runtime change,
+transaction or deployment occurred in this planning step.
+
+## 2026-10-26 — exact Trove preparation and guarded borrowing
+
+Added fixed-block protocol/balance reads, exact WAD rescue/limits, system TCR-bound
+borrowing and verified ABI fragments sourced from retained implementation artifacts.
+All three actions obtain post-action principal hints and simulate at the preview
+block. Gas estimation and conservative native reserves cover every action; prepared
+fee/gas caps accompany wallet submission. Max validates the exact candidate.
+Focused arithmetic/preparation suite: 17 passed. Browser typecheck passed. No live
+transaction or deployment occurred. UI and durable action evidence follow.
+
+## 2026-10-26 — durable Trove action evidence
+
+Added liqvera-trove-action/v1 schema and browser action store. An unresolved intent
+precedes wallet submission, hashes persist before polling, and the guard is shared
+by chain/borrower across reports. Missing/corrupt guard storage disables signing.
+Action exports retain prepared predictions and an optional separate observed state.
+Receipt polling validates Testnet, transaction identity, status and canonical block;
+timeouts remain pending. Three focused evidence tests and browser typecheck pass.
+No deployment or live transaction occurred.
+
+## 2026-10-26 — Trove report controls and action log
+
+Integrated rescue, deposit/repay Max, collapsed guarded borrowing, debounced live
+previews and a second explicit signing click. Changed material terms require
+another review; edits invalidate the prepared action. The panel restores unresolved
+intents, locks controls through the receipt, and supports receipt-only recovery.
+Successful evidence persists before state refresh; failed refresh has a read-only
+retry. main.ts supplies the original delivery report hash. Seven focused UI tests
+and all 170 browser tests pass. Six focused Python schema/provenance tests pass.
+Production build result and independent whole-diff review follow. No deployment or
+wallet demo is claimed yet.
+
+## 2026-10-26 — independent Trove review corrections
+
+Independent read-only review found and reproduced cross-tab evidence regression,
+missing per-Trove borrowing capacity, fee-exempt borrower predictions and loss of
+receipt-only recovery after a hash-storage failure. Fixed each with a failing-then-
+passing regression. Evidence now merges monotonically, retaining terminal outcomes
+and richer observed state across tabs even after a failed local write. A known
+in-memory hash enriches its persisted same-intent guard without enabling signing.
+
+Capacity and governance exemption are read at the preparation block. Added ABI
+fragments match retained implementation/interface sources; provenance test checks
+all BorrowerOperations exports and the embedded governance interface. Human review
+uses declared conservative precision (debt up to 0.001 MUSD, ICR down to 0.00001,
+liquidation price up to 0.01 MUSD) so sub-display interest accrual does not cause an
+endless confirmation loop. Exact limits and simulation still run before signing.
+
+All 176 browser tests and six focused Python schema/provenance tests pass; browser
+typecheck and production build passed before the last review fixes, to be repeated.
+Local actual Chrome rendering at 320/1280 pixels had no horizontal overflow using
+an in-memory provider; this is not live wallet acceptance. Complete product gate
+and final independent re-review remain in progress. No deployment or live tx yet.
+
+A final independent review reproduced a same-input response-order race: an older
+debounced preview could overwrite a newer explicit review. Explicit prepare and
+sign-refresh now advance the generation and cancel queued previews. The delayed-
+price regression failed before the fix and passes after it. All 177 browser tests
+pass, including monotonic dirty-record recovery and protocol fee/capacity cases.

@@ -73,35 +73,73 @@ test('Trove submission rechecks chain and account before asking wallet to sign',
  await assert.rejects(()=>submitTroveAction(p,prepared),/account changed/i);assert.equal(sent,false);
 });
 
-test('Trove deposit obtains fresh hints, simulates BorrowerOperations, then returns exact wallet payload',async()=>{
- const manager=new Interface(protocol.MEZO_TESTNET_TROVE_MANAGER_ABI),hh=new Interface(protocol.MEZO_TESTNET_HINT_HELPERS_ABI),sorted=new Interface(protocol.MEZO_TESTNET_SORTED_TROVES_ABI),bo=new Interface(protocol.MEZO_TESTNET_BORROWER_OPERATIONS_ABI);
- const borrower='0x1111111111111111111111111111111111111111',upper='0x2222222222222222222222222222222222222222',lower='0x3333333333333333333333333333333333333333';const order=[];let nominalArgs;
- const provider={request:async({method,params=[]})=>{
-  if(method==='eth_chainId')return '0x7b7b';if(method==='eth_blockNumber')return '0x1234';if(method==='eth_getBalance')return `0x${(10n**21n).toString(16)}`;
-  if(method!=='eth_call')throw Error(method);const tx=params[0];if(tx.to===protocol.MEZO_TESTNET_TROVES.troveManager){const x=manager.parseTransaction({data:tx.data});order.push(x.name);if(x.name==='getTroveStatus')return manager.encodeFunctionResult(x.name,[1]);if(x.name==='getEntireDebtAndColl')return manager.encodeFunctionResult(x.name,[25n*10n**17n,1050n*10n**18n,15n*10n**18n,5n*10n**17n,50n*10n**18n,5n*10n**18n]);}
-  if(tx.to===protocol.MEZO_TESTNET_TROVES.hintHelpers){const x=hh.parseTransaction({data:tx.data});order.push(x.name);if(x.name==='computeNominalCR'){nominalArgs=[...x.args];return hh.encodeFunctionResult(x.name,[2n*10n**15n]);}if(x.name==='getApproxHint')return hh.encodeFunctionResult(x.name,[upper,0,123]);}
-  if(tx.to===protocol.MEZO_TESTNET_TROVES.sortedTroves){const x=sorted.parseTransaction({data:tx.data});order.push(x.name);return sorted.encodeFunctionResult(x.name,[upper,lower]);}
-  if(tx.to===protocol.MEZO_TESTNET_TROVES.borrowerOperations){const x=bo.parseTransaction({data:tx.data});if(x.name==='addColl'){order.push('simulate');return '0x';}}
-  throw Error(`unexpected ${tx.to}`);
- }};
- const prepared=await prepareTroveAction(provider,borrower,{kind:'deposit',amount:'0.25'});assert.equal(prepared.value,`0x${(25n*10n**16n).toString(16)}`);assert.equal(prepared.to,protocol.MEZO_TESTNET_TROVES.borrowerOperations);const encoded=bo.parseTransaction({data:prepared.data});assert.equal(encoded.name,'addColl');assert.deepEqual([...encoded.args],[upper,lower]);assert.deepEqual(nominalArgs,[275n*10n**16n,1050n*10n**18n]);assert.deepEqual(order,['getTroveStatus','getEntireDebtAndColl','computeNominalCR','getApproxHint','findInsertPosition','simulate']);
-});
-test('Trove repayment enforces live debt guards, obtains new hints and simulates exact MUSD call',async()=>{
- const manager=new Interface(protocol.MEZO_TESTNET_TROVE_MANAGER_ABI),hh=new Interface(protocol.MEZO_TESTNET_HINT_HELPERS_ABI),sorted=new Interface(protocol.MEZO_TESTNET_SORTED_TROVES_ABI),bo=new Interface(protocol.MEZO_TESTNET_BORROWER_OPERATIONS_ABI),musd=new Interface(protocol.MUSD_ABI);
- const borrower='0x1111111111111111111111111111111111111111',hint='0x2222222222222222222222222222222222222222',sequence=[];let nominalArgs;
- const provider={request:async({method,params=[]})=>{if(method==='eth_chainId')return '0x7b7b';if(method==='eth_blockNumber')return '0x1234';if(method==='eth_call'){const tx=params[0];if(tx.to===protocol.MEZO_TESTNET_TROVES.troveManager){const x=manager.parseTransaction({data:tx.data});if(x.name==='getTroveStatus')return manager.encodeFunctionResult(x.name,[1]);if(x.name==='getEntireDebtAndColl')return manager.encodeFunctionResult(x.name,[2n*10n**18n,3000n*10n**18n,50n*10n**18n,0,50n*10n**18n,5n*10n**18n]);if(x.name==='MUSD_GAS_COMPENSATION')return manager.encodeFunctionResult(x.name,[200n*10n**18n]);}
- if(tx.to===protocol.MEZO_TESTNET_TROVES.borrowerOperations){const x=bo.parseTransaction({data:tx.data});if(x.name==='minNetDebt')return bo.encodeFunctionResult(x.name,[1800n*10n**18n]);if(x.name==='repayMUSD'){sequence.push('simulate');return '0x';}}
- if(tx.to===protocol.MUSD_TESTNET.address)return musd.encodeFunctionResult('balanceOf',[2000n*10n**18n]);
- if(tx.to===protocol.MEZO_TESTNET_TROVES.hintHelpers){const x=hh.parseTransaction({data:tx.data});sequence.push(x.name);if(x.name==='computeNominalCR'){nominalArgs=[...x.args];return hh.encodeFunctionResult(x.name,[7n*10n**14n]);}if(x.name==='getApproxHint')return hh.encodeFunctionResult(x.name,[hint,0,456]);}
- if(tx.to===protocol.MEZO_TESTNET_TROVES.sortedTroves)return sorted.encodeFunctionResult('findInsertPosition',[hint,hint]);}
- throw Error(`unexpected ${method}`);}};
- const prepared=await prepareTroveAction(provider,borrower,{kind:'repay',amount:'100'});assert.equal(prepared.value,'0x0');const fn=bo.parseTransaction({data:prepared.data});assert.equal(fn.name,'repayMUSD');assert.equal(fn.args[0],100n*10n**18n);assert.deepEqual(nominalArgs,[2n*10n**18n,2950n*10n**18n]);assert.deepEqual(sequence,['computeNominalCR','getApproxHint','simulate']);
-});
-
 test('Trove stale app context blocks submission and ambiguous wallet send is confirm-only',async()=>{
  const prepared={kind:'deposit',account:'0x1111111111111111111111111111111111111111',chainId:31611,to:protocol.MEZO_TESTNET_TROVES.borrowerOperations,data:'0x',value:'0x1',summary:'deposit'};
  let sent=false;const p=wallet({'eth_chainId':'0x7b7b','eth_accounts':[prepared.account],'eth_sendTransaction':()=>{sent=true;throw new Error('socket timeout');}});
  await assert.rejects(()=>submitTroveAction(p,prepared,()=>false),/Selected wallet changed/i);assert.equal(sent,false);
  await assert.rejects(()=>submitTroveAction(p,prepared),/outcome is unknown/i);assert.equal(sent,true);
  const rejected=Object.assign(new Error('User rejected request'),{code:4001});await assert.rejects(()=>submitTroveAction(wallet({'eth_chainId':'0x7b7b','eth_accounts':[prepared.account],'eth_sendTransaction':rejected}),prepared),error=>error===rejected);
+});
+
+import {troveProvider,W,borrower,upper,lower} from './helpers/trove-provider.mjs';
+for(const [kind,method,amount] of [['deposit','addColl','0.0005'],['repay','repayMUSD','0.5'],['borrow','withdrawMUSD','1']]){
+ test(`${kind} prepares exact payload, post-action hints and a same-block preview`,async()=>{
+  const p=troveProvider(kind==='borrow'?{coll:W/10n}:{});
+  const prepared=await prepareTroveAction(p,borrower,{kind,amount});
+  const fn=new Interface(protocol.MEZO_TESTNET_BORROWER_OPERATIONS_ABI).parseTransaction({data:prepared.data});
+  assert.equal(fn.name,method); assert.deepEqual([...fn.args].slice(-2),[upper,lower]);
+  assert.equal(prepared.value,kind==='deposit'?'0x'+(W/2000n).toString(16):'0x0');
+  assert.equal(prepared.blockNumber,'0x1234');
+  assert.equal(prepared.before.debt,String(200096n*W/100n));
+  assert.equal(prepared.after.debt,String(kind==='repay'?200046n*W/100n:kind==='borrow'?2001961n*W/1000n:200096n*W/100n));
+  assert.deepEqual(p.nominal[0],[kind==='deposit'?405n*W/10000n:p.state.coll,kind==='borrow'?2001001n*W/1000n:2000n*W]);
+  assert.equal(p.simulations[0].block,'0x1234');
+  assert.ok(p.calls.filter(x=>x.method==='eth_call').every(x=>x.params[1]==='0x1234'));
+  assert.ok(p.calls.some(x=>x.method==='eth_estimateGas'));
+  assert.equal(p.calls.some(x=>x.method==='eth_sendTransaction'),false);
+  assert.equal(p.calls.some(x=>x.method==='eth_call'&&x.params[0].data.startsWith('0x095ea7b3')),false);
+ });
+}
+test('repayment above protocol limit rejects before simulation and reports maximum',async()=>{
+ const p=troveProvider();
+ await assert.rejects(()=>prepareTroveAction(p,borrower,{kind:'repay',amount:'1'}),/minimum net debt.*0.96/s);
+ assert.equal(p.simulations.length,0);
+});
+test('repayment hints subtract principal only after paying interest',async()=>{
+ const p=troveProvider({principal:3000n*W,interest:50n*W});
+ await prepareTroveAction(p,borrower,{kind:'repay',amount:'100'});
+ assert.deepEqual(p.nominal[0],[p.state.coll,2950n*W]);
+});
+test('borrow rejects unsafe ICR, Recovery Mode and unsafe system TCR before simulation',async()=>{
+ for(const [state,message] of [[{},/below 1.8/],[{coll:W,systemDebt:600000n*W},/Recovery Mode/],[{coll:W,systemColl:W,systemDebt:53159n*W},/system collateral ratio/i]]){
+  const p=troveProvider(state);
+  await assert.rejects(()=>prepareTroveAction(p,borrower,{kind:'borrow',amount:'100'}),message);
+  assert.equal(p.simulations.length,0);
+ }
+});
+test('gas funding is checked for every action and exact deposit reserve is returned',async()=>{
+ for(const kind of ['deposit','repay','borrow']){
+  const p=troveProvider({btc:kind==='deposit'?W/2000n:0n,coll:W/10n});
+  await assert.rejects(()=>prepareTroveAction(p,borrower,{kind,amount:kind==='deposit'?'0.0005':'0.5'}),/BTC balance|gas/i);
+ }
+ const p=troveProvider();const prepared=await prepareTroveAction(p,borrower,{kind:'deposit',amount:'0.1'});
+ assert.ok(BigInt(prepared.gas)>200000n);assert.ok(BigInt(prepared.maxFeePerGas)>0n);
+});
+test('borrow respects account borrowing capacity and exempts protocol fee-exempt borrowers',async()=>{
+ const capped=troveProvider({coll:W/10n,capacity:2002n*W});
+ await assert.rejects(()=>prepareTroveAction(capped,borrower,{kind:'borrow',amount:'2'}),/borrowing capacity/i);
+ const exempt=troveProvider({coll:W/10n,feeExempt:true});
+ const p=await prepareTroveAction(exempt,borrower,{kind:'borrow',amount:'1'});
+ assert.equal(p.fee,'0');assert.equal(p.after.debt,String(200196n*W/100n));
+ assert.deepEqual(exempt.nominal[0],[W/10n,2001n*W]);
+});
+test('display-bound review tolerates sub-display accrual but requires review of visible changes',async()=>{
+ const p=troveProvider({interest:96n*W/100n+123n});
+ const first=await prepareTroveAction(p,borrower,{kind:'deposit',amount:'0.0005'});
+ p.state.interest+=1n;
+ const next=await prepareTroveAction(p,borrower,{kind:'deposit',amount:'0.0005'});
+ const {sameTroveTerms}=await import('../src/trove-transactions.ts');
+ assert.equal(sameTroveTerms(first,next),true);
+ p.state.interest+=W/100n;
+ assert.equal(sameTroveTerms(first,await prepareTroveAction(p,borrower,{kind:'deposit',amount:'0.0005'})),false);
 });

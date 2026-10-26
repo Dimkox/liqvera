@@ -23,7 +23,15 @@
 .trove-risk .field-name { font-size: .8rem; opacity: .7; }
 
 .trove-actions{margin-top:1.25rem;padding:1rem;border:1px solid var(--border,#35414b);border-radius:12px}
-.trove-action-form{display:flex;gap:.65rem;align-items:center;margin:.7rem 0}
+.trove-action-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.65rem;align-items:center;margin:1rem 0;padding:1rem 0;border-top:1px solid #35414b}
+.trove-action-form h4,.trove-action-form p,.trove-action-form .primary-button,.trove-action-form button[type=submit]{grid-column:1/-1;margin:.2rem 0}
+.trove-actions{overflow-wrap:anywhere;line-height:1.6}
+.trove-actions input{min-width:0;max-width:100%;border:1px solid #456068;border-radius:7px;background:#0b1b23;color:#eff8f4;padding:.7rem}
+.trove-actions button{max-width:100%;white-space:normal;border-radius:6px;padding:.65rem}
+.trove-rescue{display:grid;gap:.5rem;padding:1rem 0}
+.trove-rescue label{display:grid;gap:.4rem}
+.trove-actions summary{cursor:pointer}
+.trove-action-preview{font-size:.85rem;color:#cde2d8}
 .trove-action-form input{min-width:0;flex:1}
 
 .mezo-sale-planner{margin-top:1.25rem;padding:1rem;border:1px solid var(--border,#35414b);border-radius:12px}
@@ -31,3 +39,5 @@
 .sale-plan-field{display:grid;gap:.35rem;min-width:140px;flex:1;font-size:.85rem}.sale-plan-field input{min-width:90px;width:100%}
 .sale-plan-part{justify-content:space-between;padding:.6rem 0;border-top:1px solid var(--border,#35414b)}
 .recovery-box{display:grid;gap:9px;margin-top:18px;padding:15px;border:1px solid #856e54;border-radius:8px;background:#152c33}.recovery-box .field-label{margin:4px 0 0}.recovery-box input{box-sizing:border-box;width:100%;min-width:0;border:1px solid #67807f;border-radius:6px;background:#0c2028;color:#e9f1ed;padding:11px;font:12px ui-monospace,monospace}.recovery-box input:focus{outline:2px solid #d5f27e;outline-offset:1px}
+
+.trove-actions .safety-note:empty,.trove-actions .form-note:empty{display:none}

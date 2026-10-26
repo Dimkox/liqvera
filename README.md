@@ -19,7 +19,7 @@ Understand BTC liquidity and Mezo MUSD borrower risk. Liqvera turns public marke
 
 [![Verify Liqvera](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml/badge.svg)](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml)
 
-**Mezo Testnet · chain 31611.** MUSD access, the DEX comparison, Trove risk and wallet-signed Trove/DEX actions are deployed on [liqvera.site](https://liqvera.site) (PR #25). Wallet-free examples include fixed-block native calls and offline-reproducible evidence. [Current deployment and verification](docs/security/2026-10-24-wallet-actions-deployment.md). Transactions are prepared from fresh on-chain state and submitted only when the connected user signs in their wallet; Liqvera never accesses signing keys. The transaction links above document a Trove opening, a MUSD repayment and a paid Trove report.
+**Mezo Testnet · chain 31611.** MUSD access, the DEX comparison, Trove risk and wallet-signed Trove/DEX actions are deployed on [liqvera.site](https://liqvera.site) (PR #25). Wallet-free examples include fixed-block native calls and offline-reproducible evidence. [Current deployment and verification](docs/security/2026-10-26-trove-actions-deployment.md). Transactions are prepared from fresh on-chain state and submitted only when the connected user signs in their wallet; Liqvera never accesses signing keys. The transaction links above document a Trove opening, a MUSD repayment and a paid Trove report.
 
 ### Mezo contracts used
 

@@ -1,7 +1,11 @@
 import { defineConfig, loadEnv } from "vite";
+import { readFileSync } from "node:fs";
+
+const appVersion: string = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")).version;
 
 export default defineConfig(({mode}) => ({
   define: {
+    __LIQVERA_APP_VERSION__: JSON.stringify(appVersion),
     __LIQVERA_NETWORK__: JSON.stringify(loadEnv(mode, ".", "").LIQVERA_NETWORK ?? "testnet"),
     __LIQVERA_WALLETCONNECT_PROJECT_ID__: JSON.stringify(loadEnv(mode, ".", "").LIQVERA_WALLETCONNECT_PROJECT_ID ?? ""),
   },

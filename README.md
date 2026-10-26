@@ -6,11 +6,18 @@ Understand BTC liquidity and Mezo MUSD borrower risk. Liqvera turns public marke
 
 [Open the demo](https://liqvera.site) · [Watch the demo](docs/competition/pitch.mp4) · [Documentation](docs/README.md) · [Commit history](https://github.com/Dimkox/liqvera/commits/main/)
 
+## Live on Mezo testnet
+
+- **Demo video (2:00):** [Watch on YouTube](https://www.youtube.com/watch?v=-j9XZwQ1YxU)
+- **openTrove:** [Mezo Testnet transaction](https://explorer.test.mezo.org/tx/0xb8217e58722274bb45c2bcdfcd7e94850078c6c0c576b24cb3203e469993bb78)
+- **repayMUSD (Trove protection):** [Mezo Testnet transaction](https://explorer.test.mezo.org/tx/0x1393a6706bc51d5ca16aa054b3fbf60adb5a8cb4911180ff50aae4d03e66180b)
+- **Paid Trove report (x402, MUSD):** [Mezo Testnet transaction](https://explorer.test.mezo.org/tx/0x30e9a3a6c73fa85d33d8204d5e2106fcc23eb0d74ce8e58528676ac3a775a0d5)
+
 ## Mezo integration
 
 [![Verify Liqvera](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml/badge.svg)](https://github.com/Dimkox/liqvera/actions/workflows/verify.yml)
 
-**Mezo Testnet · chain 31611.** MUSD access, the DEX comparison, Trove risk and wallet-signed Trove/DEX actions are deployed on [liqvera.site](https://liqvera.site). Wallet-free examples include fixed-block native calls and offline-reproducible evidence. [Current deployment and verification](docs/security/2026-10-24-wallet-actions-deployment.md). Transactions are prepared from fresh on-chain state and submitted only when the connected user signs in their wallet; Liqvera never accesses signing keys. No live Trove or DEX transaction has been signed or verified yet.
+**Mezo Testnet · chain 31611.** MUSD access, the DEX comparison, Trove risk and wallet-signed Trove/DEX actions are deployed on [liqvera.site](https://liqvera.site) (PR #25). Wallet-free examples include fixed-block native calls and offline-reproducible evidence. [Current deployment and verification](docs/security/2026-10-24-wallet-actions-deployment.md). Transactions are prepared from fresh on-chain state and submitted only when the connected user signs in their wallet; Liqvera never accesses signing keys. The transaction links above document a Trove opening, a MUSD repayment and a paid Trove report.
 
 ### Mezo contracts used
 

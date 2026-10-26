@@ -1,5 +1,11 @@
 # Liqvera handoff
 
+## 2026-10-26 — expired quote recovery and restart flow
+
+Root cause: the quote-status GET returned HTTP 410 `QUOTE_EXPIRED` instead of the quote resource, so the web client retained an older READY quote and uncertain payment guard after polling. It now marks a READY quote EXPIRED in the ledger and returns that state resource; the web clears its guard only for EXPIRED when no tx hash is known, and exposes `Start new report` under that same condition. A known tx keeps recovery and blocks a new report. Pending, uncertain, and manual-review states remain guarded.
+
+Added gateway and browser regressions. Local results: gateway 90 passed/14 PostgreSQL-only skips; web 151 passed; gateway typecheck and web production build passed; OpenAPI contract tests 11 passed. README count metadata now reflects the full expected gate (104 gateway tests with disposable PostgreSQL, 151 web, 1111 Python + 85 subtests). PR #35's prior head had all hosted CI checks green; this follow-up needs its own CI run and review. No deployment or payment occurred.
+
 ## 2026-10-26 — Market depth payment recovery source work
 
 Implemented a capability-scoped, read-only recovery endpoint for existing in-flight x402 attempts. It confirms only the saved attempt and Permit2 authorization identity, exact MUSD transfer, canonical block and finality; no facilitator resubmission is performed. A canonical full-block/log fallback covers the observed Mezo RPC behavior where block/log queries expose the transaction but hash-indexed receipt/transaction lookup intermittently returns null. The web client persists gateway attempt/hash and lets the user enter a transaction hash and block to recover the already-quoted report. No schema migration was added.

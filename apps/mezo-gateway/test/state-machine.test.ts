@@ -283,6 +283,15 @@ async function expectPublicError(code: string, operation: () => Promise<unknown>
   await assert.rejects(operation, (error: unknown) => error instanceof PublicError && error.code === code);
 }
 
+test('quote status exposes an expired quote as a resource after the unsubmitted quote expires', async t => {
+  const f = await fixture();
+  t.after(f.cleanup);
+  f.q.expires_at = new Date('2026-09-28T00:00:00Z');
+  const result = await f.gateway.quote('scope', f.q.id, 'request-expired');
+  assert.equal(result.status, 200);
+  assert.equal((result.body as { state: string }).state, 'EXPIRED');
+});
+
 test('direct receipt-binding rejection immediately enters manual review without entitlement or delivery', async t => {
   const f = await fixture({ rejectBinding: true });
   t.after(f.cleanup);

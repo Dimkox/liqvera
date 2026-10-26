@@ -8,7 +8,7 @@ import {mountMezoSalePlanner} from "./mezo-sale-panel";
 import { MEZO, MUSD, NETWORK_CONFIG, NETWORK_LABEL, TOKEN_LABEL } from "./network.ts";
 import { mountMezoFinance } from "./mezo-finance-panel";
 import { ApiFailure, createQuote, getCapabilities, getEvidence, getQuote, getReport, getRequest, recoverReport } from "./api";
-import { canPay, paymentNotice, walletStatus } from "./browser-flow";
+import { canPay, canStartNewReport, expiredQuoteFlow, paymentNotice, walletStatus } from "./browser-flow";
 import { executePaymentAttempt, executeRecovery } from "./browser-orchestration";
 import { quoteIsPayable, receiptMatchesQuote, reportMatchesQuote, type Capabilities, type Delivery, type Quote, type RequestStatus, type Side } from "./contracts";
 import { capability, clearFlow, loadFlow, saveFlow, type SavedFlow } from "./session";
@@ -79,7 +79,7 @@ app.innerHTML = `
           <div id="announcement" class="announcement" role="status" aria-live="polite">Checking capabilities and saved session…</div>
           <div id="capability-status" class="capability-status"></div>
           <div id="result-content" class="result-content"><div class="empty-state"><div class="empty-graphic" aria-hidden="true"><span></span><span></span><span></span><span></span></div><h3>Waiting for a question</h3><p>Connect your wallet and ask for a fresh paid report, or inspect the sealed historical live example.</p><button id="historical-button" class="secondary-button" type="button">Show latest live report</button></div></div>
-          <div class="result-actions"><button id="refresh-button" class="secondary-button hidden" type="button">Check status</button><button id="new-button" class="text-button hidden" type="button">Start another report</button></div>
+          <div class="result-actions"><button id="refresh-button" class="secondary-button hidden" type="button">Check status</button><button id="new-button" class="text-button hidden" type="button">Start new report</button></div>
           <section id="payment-recovery" class="recovery-box hidden" aria-label="Recover a submitted payment">
             <p class="supporting">If your wallet payment was confirmed but the report is still locked, enter the Mezo Testnet transaction and block. Recovery checks the saved quote and wallet authorization; it never submits another payment.</p>
             <label class="field-label" for="recovery-tx-hash">Transaction hash</label><input id="recovery-tx-hash" type="text" autocomplete="off" spellcheck="false" placeholder="0x…" />
@@ -255,8 +255,7 @@ function updateControls(): void {
   if(flow?.paymentTxHash&&!recoveryHash.value)recoveryHash.value=flow.paymentTxHash;
   if(flow?.paymentBlockNumber&&!recoveryBlock.value)recoveryBlock.value=String(flow.paymentBlockNumber);
   el<HTMLButtonElement>("#recover-payment").disabled=busy||polling||!flow?.quoteId;
-  const lock = flow?.paymentGuard !== "clear" || (quote && ["PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "MANUAL_REVIEW"].includes(quote.state));
-  el<HTMLButtonElement>("#new-button").classList.toggle("hidden", !flow || Boolean(lock));
+  el<HTMLButtonElement>("#new-button").classList.toggle("hidden", !canStartNewReport(flow,quote?.state??null));
   el<HTMLButtonElement>("#new-button").disabled = busy || polling;
   el<HTMLButtonElement>("#switch-button").classList.toggle("hidden", !provider || onChain);
   el<HTMLDetailsElement>("#network-help").classList.toggle("hidden", !account || onChain);
@@ -346,7 +345,9 @@ function renderQuote(): void {
   if (safetyNotice) {
     target.append(node("p", "safety-note", safetyNotice));
   } else if (q.state === "EXPIRED") {
-    target.append(node("p", "safety-note", "This quote expired. It cannot be paid. Start a new report only after the previous payment status is known."));
+    target.append(node("p", "safety-note", flow?.paymentGuard === "clear"
+      ? "This quote expired without a recorded payment transaction. Start a new report."
+      : "This quote expired, but a payment transaction is still unresolved. Recover it before starting another report."));
   } else if (q.state === "READY") {
     const paymentAllowed = canPay({ flow, quoteState: q.state, connectedAccount: account, onMezo: onChain,
       paymentReady: Boolean(cap?.payment_ready), adapterAvailable: x402Available() }) && quoteIsPayable(q, account ?? "");
@@ -475,6 +476,7 @@ function rememberQuote(next: Quote): void {
   if (flow.quoteId && flow.quoteId !== next.quote_id) throw new Error("Quote identity changed. Payment remains disabled.");
   flow.quoteId = next.quote_id;
   flow.requestId = next.report_request_id;
+  flow = expiredQuoteFlow(flow,next.state);
   saveFlow(flow);
   quote = next;
   updateControls();
@@ -744,8 +746,7 @@ el<HTMLButtonElement>("#recover-payment").addEventListener("click",()=>{void rec
 el<HTMLButtonElement>("#trove-preview-button").addEventListener("click",()=>{void showTrovePreview();});
 el<HTMLButtonElement>("#historical-button").addEventListener("click", () => { void showHistoricalReport(); });
 el<HTMLButtonElement>("#new-button").addEventListener("click", () => {
-  if (!flow || flow.paymentGuard !== "clear" || busy || polling ||
-      (quote && ["PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "MANUAL_REVIEW"].includes(quote.state))) return;
+  if (!canStartNewReport(flow,quote?.state??null) || busy || polling) return;
   if (!window.confirm("Start a new report? This browser session will forget the current report link and its capability-scoped recovery record.")) return;
   clearFlow();
   flow = null; quote = null; delivery = null;

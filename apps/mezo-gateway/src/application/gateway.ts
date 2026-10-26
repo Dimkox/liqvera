@@ -76,7 +76,11 @@ export class Gateway {
     }
   }
   async quote(scope:string,id:string,requestId:string):Promise<ApiResult> {
-    const quote=await this.ledger.quote(scope,id);await this.expiry(quote);
+    let quote=await this.ledger.quote(scope,id);
+    if(quote.state==='READY'&&quote.expires_at.getTime()<=Date.now()) {
+      await this.ledger.expire(quote);
+      quote=await this.ledger.quote(scope,id);
+    }
     return {status:['PAYMENT_PENDING','PAYMENT_UNCERTAIN','MANUAL_REVIEW'].includes(quote.state)?202:200,
       shape:'quote',body:quoteResource(quote,requestId)};
   }

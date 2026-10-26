@@ -75,3 +75,13 @@ export function paymentFailure<T extends BrowserFlowState>(
   const paymentGuard = kind === "cancelled-before-submission" && refreshedQuoteState === "READY" ? "clear" : "uncertain";
   return { ...flow, paymentGuard };
 }
+
+export function expiredQuoteFlow<T extends BrowserFlowState>(flow: T, quoteState = "EXPIRED"): T {
+  if (quoteState !== "EXPIRED" || flow.paymentGuard === "clear" || flow.paymentTxHash) return flow;
+  return { ...flow, paymentGuard: "clear" };
+}
+
+export function canStartNewReport(flow: BrowserFlowState | null, quoteState: string | null): boolean {
+  return Boolean(flow && flow.paymentGuard === "clear" && !(quoteState === "EXPIRED" && flow.paymentTxHash) &&
+    !["PAYMENT_PENDING", "PAYMENT_UNCERTAIN", "MANUAL_REVIEW"].includes(quoteState ?? ""));
+}

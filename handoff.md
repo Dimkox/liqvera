@@ -686,3 +686,13 @@ withdrawal remain excluded. Plan and design live under docs/superpowers. Work st
 from main 9cdc759 in isolated feat/trove-actions. User authorized completion through
 PR merge, separate web deployment and Mezo Testnet wallet demo. No runtime change,
 transaction or deployment occurred in this planning step.
+
+## 2026-10-26 — exact Trove preparation and guarded borrowing
+
+Added fixed-block protocol/balance reads, exact WAD rescue/limits, system TCR-bound
+borrowing and verified ABI fragments sourced from retained implementation artifacts.
+All three actions obtain post-action principal hints and simulate at the preview
+block. Gas estimation and conservative native reserves cover every action; prepared
+fee/gas caps accompany wallet submission. Max validates the exact candidate.
+Focused arithmetic/preparation suite: 17 passed. Browser typecheck passed. No live
+transaction or deployment occurred. UI and durable action evidence follow.

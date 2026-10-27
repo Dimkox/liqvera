@@ -81,6 +81,33 @@ jobs:
           .venv/bin/pip-audit -r requirements-dev.lock
           npm audit --prefix apps/mezo-gateway
           npm audit --prefix apps/mezo-web
+  guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@dba66c27052e63476d886f22216e119ba7e615bf # v1.9.2
+        with:
+          version: v1.8.6
+      - name: Build and unit-test LiqveraGuard (fork tests skip without MEZO_TESTNET_RPC)
+        working-directory: contracts/guard
+        run: |
+          forge fmt --check
+          forge build --sizes
+          forge test -vv
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "22"
+      - name: Test the guard keeper
+        working-directory: services/guard-keeper
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+          npm run typecheck
+          npm audit
   edge:
     runs-on: ubuntu-24.04
     timeout-minutes: 30

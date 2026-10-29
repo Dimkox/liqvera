@@ -417,6 +417,92 @@ contract LiqveraGuardTest is GuardBase {
         guard.protect(user, address(0), address(0));
     }
 
+    // ------------------------------------------- pending rewards (Codex P1)
+
+    /// @dev Codex review example. Price 100k. Entire (pending-inclusive) collateral is worth
+    /// 2315 MUSD and entire debt is 2200 MUSD; of these, 100 MUSD of collateral value and
+    /// 100 MUSD of principal are pending redistribution rewards. Repaying 100 MUSD gives
+    /// 2315 / 2100 = 110.24% >= MCR, so the rescue must be Ready and must execute. Counting the
+    /// pending values twice would project 2415 / 2200 = 109.77% and report StillBelowMCR.
+    function _setTroveWithPendingRewards() internal {
+        tm.setTrove(user, 1, 0.02215 ether, 2100e18, 0);
+        tm.setPending(user, 0.001 ether, 100e18, 0);
+        (uint256 c, uint256 p, uint256 i, uint256 pc, uint256 pp,) = tm.getEntireDebtAndColl(user);
+        assertEq(c, 0.02315 ether, "mock: coll includes pending");
+        assertEq(p + i, 2200e18, "mock: debt includes pending");
+        assertEq(pc, 0.001 ether);
+        assertEq(pp, 100e18);
+    }
+
+    function test_PendingRewards_NotCountedTwice_Repay() public {
+        _setTroveWithPendingRewards();
+        _armRepay(100e18, 0, 1.3e18);
+        (LiqveraGuard.Status s, uint256 icr) = guard.status(user);
+        assertEq(uint8(s), uint8(LiqveraGuard.Status.Ready), "rescue reaches 110.24%");
+        assertEq(icr, uint256(0.02315 ether) * 100_000e18 / 2200e18);
+        vm.prank(keeper);
+        guard.protect(user, address(0), address(0));
+        (uint256 c, uint256 p, uint256 i,,,) = tm.getEntireDebtAndColl(user);
+        assertEq(c, 0.02315 ether);
+        assertEq(p + i, 2100e18);
+        assertGe(tm.getCurrentICR(user, feed.price()), 1.1e18);
+        assertApproxEqAbs(tm.getCurrentICR(user, feed.price()), 1.1024e18, 1e14);
+    }
+
+    function test_PendingRewards_NotCountedTwice_MinNetDebt() public {
+        // Entire debt 2200 (100 pending). Net debt 2000. Repay 201 => 1799 < 1800.
+        // Double counting would see 2300 and wrongly accept the repay that Mezo rejects.
+        _setTroveWithPendingRewards();
+        vm.startPrank(user);
+        guard.depositMUSD(201e18);
+        vm.expectRevert(LiqveraGuard.BelowMinNetDebt.selector);
+        guard.arm(LiqveraGuard.Action.RepayMUSD, 1.3e18, 201e18, 0, uint64(block.timestamp + 1 days), "");
+        vm.stopPrank();
+        _armRepay(200e18, 0, 1.3e18); // exactly 1800 net debt is allowed
+        assertEq(guard.policyOf(user).amount, 200e18);
+    }
+
+    function test_PendingRewards_NotCountedTwice_AddColl() public {
+        // Entire coll 0.02315 BTC, entire debt 2200. Price 100k: ICR 105.2%.
+        // Adding 0.00105 BTC gives 2420 / 2200 = 110% exactly (Ready). Double counting would
+        // see 2520 / 2300 and hide the boundary; the projection must match Mezo.
+        _setTroveWithPendingRewards();
+        _armAddColl(0.00105 ether, 0, 1.3e18);
+        (LiqveraGuard.Status s,) = guard.status(user);
+        assertEq(uint8(s), uint8(LiqveraGuard.Status.Ready));
+        vm.prank(keeper);
+        guard.protect(user, address(0), address(0));
+        assertEq(tm.getCurrentICR(user, feed.price()), 1.1e18);
+
+        // One wei less of collateral would be StillBelowMCR under the correct projection.
+        _setTroveWithPendingRewards();
+        _armAddColl(0.00105 ether - 1, 0, 1.3e18);
+        (s,) = guard.status(user);
+        assertEq(uint8(s), uint8(LiqveraGuard.Status.StillBelowMCR));
+    }
+
+    function test_PendingRewards_NotCountedTwice_WithInterest() public {
+        // Same entire debt (2200) split across principal and interest, both stored and pending.
+        // Counting pending interest twice (2210) or dropping interest (2150) moves the
+        // minNetDebt boundary away from Mezo's: 201 must revert and 200 must pass.
+        tm.setTrove(user, 1, 0.02215 ether, 2060e18, 40e18);
+        tm.setPending(user, 0.001 ether, 90e18, 10e18);
+        (uint256 c, uint256 p, uint256 i,,, uint256 pi) = tm.getEntireDebtAndColl(user);
+        assertEq(c, 0.02315 ether);
+        assertEq(p, 2150e18);
+        assertEq(i, 50e18);
+        assertEq(pi, 10e18);
+        vm.startPrank(user);
+        guard.depositMUSD(201e18);
+        vm.expectRevert(LiqveraGuard.BelowMinNetDebt.selector);
+        guard.arm(LiqveraGuard.Action.RepayMUSD, 1.3e18, 201e18, 0, uint64(block.timestamp + 1 days), "");
+        vm.stopPrank();
+        _armRepay(200e18, 0, 1.3e18);
+        (LiqveraGuard.Status s, uint256 icr) = guard.status(user);
+        assertEq(uint8(s), uint8(LiqveraGuard.Status.Ready));
+        assertEq(icr, uint256(0.02315 ether) * 100_000e18 / 2200e18, "ICR uses Mezo entire debt");
+    }
+
     // ------------------------------------------------------ protect
 
     function test_Protect_RevertsWhenHealthy() public {

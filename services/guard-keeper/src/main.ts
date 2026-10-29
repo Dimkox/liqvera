@@ -4,7 +4,7 @@
 import { createPublicClient, createWalletClient, defineChain, http, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { guardAbi, hintHelpersAbi, sortedTrovesAbi, troveManagerAbi } from "./abi.js";
-import { type Address, type ArmLog, armedSet, isTerminal, logLine, nicr, projectedTrove, selectReady, STATUS } from "./logic.js";
+import { type Address, type ArmLog, isTerminal, logLine, nicr, PolicyTracker, pollStatuses, projectedTrove, selectReady, STATUS } from "./logic.js";
 
 const env = (k: string, d?: string): string => {
   const v = process.env[k] ?? d;
@@ -33,21 +33,24 @@ const wallet = account ? createWalletClient({ chain, account, transport: http(RP
 const log = (e: string, f: Record<string, unknown> = {}) => console.log(logLine(e, f));
 
 let scanned = FROM_BLOCK - 1n;
-const history: ArmLog[] = [];
+const policies = new PolicyTracker();
 
-async function syncLogs(): Promise<Set<Address>> {
+/** Apply new Guard logs up to the current head and return that head. */
+async function syncLogs(): Promise<bigint> {
   const head = await pub.getBlockNumber();
   while (scanned < head) {
     const from = scanned + 1n;
     const to = from + LOG_CHUNK - 1n < head ? from + LOG_CHUNK - 1n : head;
     const logs = await pub.getContractEvents({ address: GUARD, abi: guardAbi, fromBlock: from, toBlock: to });
+    const batch: ArmLog[] = [];
     for (const l of logs) {
       if (l.eventName !== "Armed" && l.eventName !== "Disarmed" && l.eventName !== "Protected") continue;
-      history.push({ kind: l.eventName, user: (l.args as { user: Address }).user, blockNumber: l.blockNumber, logIndex: l.logIndex });
+      batch.push({ kind: l.eventName, user: (l.args as { user: Address }).user, blockNumber: l.blockNumber, logIndex: l.logIndex });
     }
+    policies.apply(batch);
     scanned = to;
   }
-  return armedSet(history);
+  return scanned;
 }
 
 async function hintsFor(borrower: Address): Promise<[Address, Address]> {
@@ -61,13 +64,13 @@ async function hintsFor(borrower: Address): Promise<[Address, Address]> {
 }
 
 async function tick(): Promise<void> {
-  const armed = await syncLogs();
-  const reads = [];
-  for (const b of armed) {
-    const [s, icr] = await pub.readContract({ address: GUARD, abi: guardAbi, functionName: "status", args: [b] });
+  const head = await syncLogs();
+  const reads = await pollStatuses(policies, async (b) => {
+    // Read at the synced head so a terminal mark never predates an Armed event we have not seen.
+    const [s, icr] = await pub.readContract({ address: GUARD, abi: guardAbi, functionName: "status", args: [b], blockNumber: head });
     if (s !== 0) log("skip", { borrower: b, status: STATUS[s] ?? s, icr, terminal: isTerminal(s) });
-    reads.push({ borrower: b, status: s, icr });
-  }
+    return [s, icr] as const;
+  });
   for (const r of selectReady(reads)) {
     try {
       const [upper, lower] = await hintsFor(r.borrower);

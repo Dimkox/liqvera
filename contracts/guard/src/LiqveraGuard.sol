@@ -362,11 +362,14 @@ contract LiqveraGuard {
         return (Status.Ready, icr, price);
     }
 
+    /// @dev Mezo `getEntireDebtAndColl()` already adds pendingCollateral, pendingPrincipal and
+    /// pendingInterest into its first three return values (vendored TroveManager source). The last
+    /// three values are informational only; adding them again would count redistribution rewards
+    /// twice and corrupt the minNetDebt check and the projected ICR.
     function _entireCollAndDebt(address borrower) internal view returns (uint256 coll, uint256 debt) {
-        (uint256 c, uint256 principal, uint256 interest, uint256 pc, uint256 pp, uint256 pi) =
-            troveManager.getEntireDebtAndColl(borrower);
-        coll = c + pc;
-        debt = principal + interest + pp + pi;
+        (uint256 c, uint256 principal, uint256 interest,,,) = troveManager.getEntireDebtAndColl(borrower);
+        coll = c;
+        debt = principal + interest;
     }
 
     /// @dev Mezo rule: (debt - gas compensation) - repayment >= minNetDebt (risk R4).

@@ -772,3 +772,27 @@ visible. The browser has no injected wallet provider, confirming why this sessio
 cannot perform the requested signature demo. README now links the current rollout
 record. Disposable candidate container and local Vite check server were removed;
 the live web container and rollback image remain intact.
+
+## 2026-10-29 — Liqvera Guard implemented (PR #42) and Codex review fixed
+
+PR #42 merged Liqvera Guard into main as a4d2c5f (tree identical to d4001d2):
+contracts/guard (LiqveraGuard contract, mocks, unit and read-only fork tests),
+services/guard-keeper (TypeScript/viem keeper) and docs/guard.md. Guard targets
+Mezo Testnet only. Nothing has been deployed, no keeper wallet exists, no on-chain
+transaction was sent, and the contract has not been audited. Remaining deploy
+prerequisites are listed in docs/guard.md §8: owner approval, Slither, deploy and
+Blockscout verification, a funded separate keeper wallet, a frontend Guard panel
+and at least three recorded testnet protect() calls.
+
+Branch fix/guard-codex-review addresses all four Codex findings on PR #42.
+P1: Mezo getEntireDebtAndColl already includes pending redistribution rewards, so
+Guard no longer adds them a second time; three regression tests (repay, min net
+debt, addColl) failed before the fix and pass after it. P1: docs/guard.md is now
+English. P1: this entry. P2: the keeper tracks policies incrementally and stops
+polling a borrower after a terminal status (NoPolicy/Expired/StaleNonce) until a
+new Armed event; status reads are pinned to the synced head block.
+
+Validation: forge fmt --check and forge build --sizes pass; forge test reports 51
+passed and 9 fork tests skipped offline; the 9 fork tests also pass against a local
+fork of https://rpc.test.mezo.org (read-only, no broadcast). Keeper: 9/9 node tests,
+typecheck clean, npm audit 0 vulnerabilities. scripts/check-docs.py passes.

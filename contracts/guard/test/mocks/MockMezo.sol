@@ -67,13 +67,27 @@ contract MockTroveManager {
         uint256 interest;
     }
 
+    /// @dev Pending redistribution rewards not yet applied to the stored Trove.
+    struct Pending {
+        uint256 coll;
+        uint256 principal;
+        uint256 interest;
+    }
+
     uint256 public constant MCR = 1.1e18;
     uint256 public constant MUSD_GAS_COMPENSATION = 200e18;
     bool public recoveryMode;
     mapping(address => T) public troves;
+    mapping(address => Pending) public pending;
 
     function setTrove(address b, uint8 status, uint256 coll, uint256 principal, uint256 interest) external {
         troves[b] = T(status, coll, principal, interest);
+        delete pending[b];
+    }
+
+    /// @dev Test helper: give the Trove pending liquidation (redistribution) rewards.
+    function setPending(address b, uint256 coll, uint256 principal, uint256 interest) external {
+        pending[b] = Pending(coll, principal, interest);
     }
 
     function setRecoveryMode(bool on) external {
@@ -89,14 +103,28 @@ contract MockTroveManager {
         view
         returns (uint256, uint256, uint256, uint256, uint256, uint256)
     {
+        // Like Mezo: the first three values ALREADY include the pending rewards.
         T storage t = troves[b];
-        return (t.coll, t.principal, t.interest, 0, 0, 0);
+        Pending storage p = pending[b];
+        return (t.coll + p.coll, t.principal + p.principal, t.interest + p.interest, p.coll, p.principal, p.interest);
     }
 
+    /// @dev Like Mezo: ICR uses the entire (pending-inclusive) collateral and debt.
     function getCurrentICR(address b, uint256 price) public view returns (uint256) {
         T storage t = troves[b];
-        uint256 debt = t.principal + t.interest;
-        return debt == 0 ? type(uint256).max : t.coll * price / debt;
+        Pending storage p = pending[b];
+        uint256 debt = t.principal + t.interest + p.principal + p.interest;
+        return debt == 0 ? type(uint256).max : (t.coll + p.coll) * price / debt;
+    }
+
+    /// @dev Like Mezo `_applyPendingRewards`: move pending rewards into the stored Trove.
+    function _applyPending(address b) internal {
+        T storage t = troves[b];
+        Pending memory p = pending[b];
+        t.coll += p.coll;
+        t.principal += p.principal;
+        t.interest += p.interest;
+        delete pending[b];
     }
 
     function checkRecoveryMode(uint256) external view returns (bool) {
@@ -105,6 +133,7 @@ contract MockTroveManager {
 
     /// @dev Called by MockSignatures. Applies interest first, like Mezo.
     function applyRepay(address b, uint256 amount) external {
+        _applyPending(b);
         T storage t = troves[b];
         uint256 fromInterest = amount > t.interest ? t.interest : amount;
         t.interest -= fromInterest;
@@ -112,6 +141,7 @@ contract MockTroveManager {
     }
 
     function applyAddColl(address b, uint256 amount) external {
+        _applyPending(b);
         troves[b].coll += amount;
     }
 }

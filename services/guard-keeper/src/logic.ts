@@ -10,16 +10,59 @@ export type StatusName = (typeof STATUS)[number];
 
 export interface ArmLog { kind: "Armed" | "Disarmed" | "Protected"; user: Address; blockNumber: bigint; logIndex: number }
 
+const sortLogs = (logs: ArmLog[]): ArmLog[] =>
+  [...logs].sort((a, b) =>
+    a.blockNumber === b.blockNumber ? a.logIndex - b.logIndex : a.blockNumber < b.blockNumber ? -1 : 1);
+
 /** Replay Armed / Disarmed / Protected logs (any order) into the set of currently armed borrowers. */
 export function armedSet(logs: ArmLog[]): Set<Address> {
-  const sorted = [...logs].sort((a, b) =>
-    a.blockNumber === b.blockNumber ? a.logIndex - b.logIndex : a.blockNumber < b.blockNumber ? -1 : 1);
   const out = new Set<Address>();
-  for (const l of sorted) {
+  for (const l of sortLogs(logs)) {
     const u = l.user.toLowerCase() as Address;
     if (l.kind === "Armed") out.add(u); else out.delete(u);
   }
   return out;
+}
+
+/**
+ * Incremental view of Guard policies for the keeper.
+ *
+ * `apply()` consumes new Armed / Disarmed / Protected logs once (no full-history replay per tick).
+ * `markTerminal()` records that the borrower's CURRENT policy can never become Ready again
+ * (Expired, StaleNonce, NoPolicy). Terminal borrowers are excluded from `pollable()` until a
+ * newer Armed event arrives, so expired or nonce-invalidated policies stop costing RPC reads.
+ */
+export class PolicyTracker {
+  private readonly armed = new Map<Address, string>();
+  private readonly terminal = new Set<Address>();
+
+  apply(logs: ArmLog[]): void {
+    for (const l of sortLogs(logs)) {
+      const u = l.user.toLowerCase() as Address;
+      // A newer Armed event replaces the policy, so it also clears any terminal mark.
+      this.terminal.delete(u);
+      if (l.kind === "Armed") this.armed.set(u, `${l.blockNumber}:${l.logIndex}`);
+      else this.armed.delete(u);
+    }
+  }
+
+  /** Stop polling `borrower` until its next Armed event. No-op for borrowers that are not armed. */
+  markTerminal(borrower: Address): void {
+    const u = borrower.toLowerCase() as Address;
+    if (this.armed.has(u)) this.terminal.add(u);
+  }
+
+  isTerminal(borrower: Address): boolean {
+    return this.terminal.has(borrower.toLowerCase() as Address);
+  }
+
+  /** Armed borrowers whose current policy is not known to be terminal. */
+  pollable(): Address[] {
+    return [...this.armed.keys()].filter((u) => !this.terminal.has(u));
+  }
+
+  get armedCount(): number { return this.armed.size; }
+  get terminalCount(): number { return this.terminal.size; }
 }
 
 export interface StatusRead { borrower: Address; status: number; icr: bigint }
@@ -29,7 +72,7 @@ export function selectReady(reads: StatusRead[]): StatusRead[] {
   return reads.filter((r) => r.status === 0).sort((a, b) => (a.icr < b.icr ? -1 : a.icr > b.icr ? 1 : 0));
 }
 
-/** Statuses after which the borrower will never become Ready without a new arm(). The keeper stops polling them. */
+/** Statuses after which the borrower will never become Ready without a new arm(). See PolicyTracker. */
 export function isTerminal(status: number): boolean {
   const n = STATUS[status];
   return n === "NoPolicy" || n === "Expired" || n === "StaleNonce";

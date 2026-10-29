@@ -1,87 +1,98 @@
-# LiqveraGuard: автоматическая защита Trove (дизайн A2)
+# LiqveraGuard: automatic Trove protection (design A2)
 
-Статус: только Mezo Testnet (chain 31611). Контракт не задеплоен. Аудита нет.
-Этот документ написан в стиле ASD-STE100: короткие предложения, одно действие в шаге.
+Status: Mezo Testnet only (chain 31611). The contract is not deployed. It is not audited.
+This document follows the ASD-STE100 style: short sentences, one action per step.
 
-## 1. Назначение
+## 1. Purpose
 
-LiqveraGuard защищает Trove от ликвидации. Пользователь заранее подписывает одну операцию Mezo.
-Когда ICR падает до порога, keeper вызывает `protect()`. Guard выполняет подписанную операцию.
+LiqveraGuard protects a Trove from liquidation. The user signs one Mezo operation in advance.
+When the ICR falls to the trigger, a keeper calls `protect()`. The Guard executes the signed operation.
 
-Модель взята из DeFi Saver Liquity Repay и Summer.fi Stop-Loss: триггер по коэффициенту, исполняет бот.
-Функция `checker()` повторяет интерфейс Gelato/Chainlink. Код написан с нуля. Код из этих проектов не копировали.
+The model comes from DeFi Saver Liquity Repay and Summer.fi Stop-Loss: a ratio trigger, executed by a bot.
+The `checker()` function follows the Gelato/Chainlink interface. The code is written from scratch. No code was copied from these projects.
 
-## 2. Как это работает
+## 2. How it works
 
-1. Пользователь вносит MUSD (`depositMUSD`) или BTC (`depositBTC`) в эскроу Guard.
-2. Пользователь подписывает EIP-712 сообщение Mezo `RepayMUSD` или `AddColl`.
-   - Домен: `BorrowerOperationsSignatures`, версия `1`, chainId 31611, контракт `0xD757e3646AF370b15f32EB557F0F8380Df7D639e`.
-   - Подпись связывает `amount`, `borrower`, `nonce`, `deadline`.
-3. Пользователь вызывает `arm(action, triggerICR, amount, keeperReward, deadline, signature)`.
-   - Guard проверяет подпись on-chain по `getNonce(msg.sender)`.
-   - Guard проверяет: триггер в диапазоне (MCR, 1000%], срок подписи не больше 30 дней, Trove активен, эскроу хватает, для repay остаётся `minNetDebt`.
-4. Keeper опрашивает `checker(borrower)` каждые 30 секунд.
-5. Когда `canExec == true`, keeper вызывает `protect(borrower, upperHint, lowerHint)`.
-6. Guard удаляет политику, списывает эскроу, вызывает Mezo, проверяет рост ICR, платит награду keeper.
+1. The user deposits MUSD (`depositMUSD`) or BTC (`depositBTC`) into the Guard escrow.
+2. The user signs a Mezo `RepayMUSD` or `AddColl` EIP-712 message.
+   - Domain: `BorrowerOperationsSignatures`, version `1`, chainId 31611, contract `0xD757e3646AF370b15f32EB557F0F8380Df7D639e`.
+   - The signature binds `amount`, `borrower`, `nonce` and `deadline`.
+3. The user calls `arm(action, triggerICR, amount, keeperReward, deadline, signature)`.
+   - The Guard verifies the signature on-chain against `getNonce(msg.sender)`.
+   - The Guard checks: the trigger is in the range (MCR, 1000%], the signature deadline is at most 30 days away, the Trove is active, the escrow is sufficient, and for a repay the Trove keeps `minNetDebt`.
+4. The keeper polls `checker(borrower)` every 30 seconds.
+5. When `canExec == true`, the keeper calls `protect(borrower, upperHint, lowerHint)`.
+6. The Guard deletes the policy, debits the escrow, calls Mezo, checks that the ICR went up, and pays the keeper reward.
 
-Одна подпись даёт одно исполнение. После `protect()` пользователь должен снова вызвать `arm()`.
+One signature gives one execution. After `protect()`, the user must call `arm()` again.
 
-## 3. Ответы на открытые вопросы Q1–Q5
+### Collateral and debt values
 
-Все ответы проверены fork-тестом `contracts/guard/test/fork/GuardFork.t.sol` на RPC `https://rpc.test.mezo.org`.
+The Guard reads the Trove with Mezo `TroveManager.getEntireDebtAndColl()`. Its first three return values
+(`coll`, `principal`, `interest`) already include the pending redistribution rewards
+(`pendingCollateral`, `pendingPrincipal`, `pendingInterest`). The vendored source
+`packages/mezo-protocol/vendor/explorer/TroveManagerImplementation.source.testnet.json` adds them before it returns.
+The Guard therefore uses `coll` and `principal + interest` directly. It does not add the last three values again.
+Tests: `test_PendingRewards_NotCountedTwice_*` in `contracts/guard/test/LiqveraGuard.t.sol`.
 
-| Вопрос | Ответ | Тест |
+## 3. Answers to open questions Q1–Q5
+
+All answers are checked by the fork test `contracts/guard/test/fork/GuardFork.t.sol` against the RPC `https://rpc.test.mezo.org`.
+
+| Question | Answer | Test |
 |---|---|---|
-| Q1. Как читать nonce? | Маппинг `nonces` приватный. `nonces(address)` откатывается. Используйте `getNonce(address)`. Nonce последовательный, начинается с 0. | `test_Q1_NonceGetter` |
-| Q2. Нужен ли approve MUSD? | Нет. BorrowerOperations сжигает MUSD у `_caller` (Guard) напрямую. Allowance остаётся 0. | `test_Q2_RepayPath_NoApproveNeeded` |
-| Q3. Какой код задеплоен? | Прокси `0xD757…` — TransparentUpgradeableProxy. Реализация `0xEec635aB00463A4a803DE38C9d858A0FE3bdc235` верифицирована в Blockscout. Исходник совпадает с `BorrowerOperationsSignatures.sol` коммита `da7888a`. `BorrowerOperations.borrowerOperationsSignaturesAddress()` возвращает этот прокси. Codehash реализации: `0x9714ca105dccb830037cd8821974832a5e2a1e7822b2369654849617c6e73900`. | `test_Q3_DeployedImplementationAndDomain` |
-| Q4. Есть ли Gelato или Chainlink Automation на Mezo? | Нет. Gelato Web3 Functions закрыты 31.03.2026, Mezo не поддерживали. Chainlink Automation не поддерживает Mezo. Нужен свой keeper. | — |
-| Q5. Порядок полей `getEntireDebtAndColl`? | `(coll, principal, interest, pendingCollateral, pendingPrincipal, pendingInterest)`. | `test_Q5_GetEntireDebtAndCollOrder` |
+| Q1. How to read the nonce? | The `nonces` mapping is private. `nonces(address)` reverts. Use `getNonce(address)`. The nonce is sequential and starts at 0. | `test_Q1_NonceGetter` |
+| Q2. Is an MUSD approve needed? | No. BorrowerOperations burns MUSD from `_caller` (the Guard) directly. The allowance stays 0. | `test_Q2_RepayPath_NoApproveNeeded` |
+| Q3. Which code is deployed? | The proxy `0xD757…` is a TransparentUpgradeableProxy. The implementation `0xEec635aB00463A4a803DE38C9d858A0FE3bdc235` is verified in Blockscout. The source matches `BorrowerOperationsSignatures.sol` at commit `da7888a`. `BorrowerOperations.borrowerOperationsSignaturesAddress()` returns this proxy. Implementation codehash: `0x9714ca105dccb830037cd8821974832a5e2a1e7822b2369654849617c6e73900`. | `test_Q3_DeployedImplementationAndDomain` |
+| Q4. Is Gelato or Chainlink Automation available on Mezo? | No. Gelato Web3 Functions shut down on 2026-03-31 and did not support Mezo. Chainlink Automation does not support Mezo. A custom keeper is required. | — |
+| Q5. Field order of `getEntireDebtAndColl`? | `(coll, principal, interest, pendingCollateral, pendingPrincipal, pendingInterest)`. The first three values already include the pending values (see section 2). | `test_Q5_GetEntireDebtAndCollOrder` |
 
-## 4. Риски и меры
+## 4. Risks and mitigations
 
-| Риск | Мера |
+| Risk | Mitigation |
 |---|---|
-| Устаревший nonce. Любая другая подписанная операция пользователя увеличивает nonce. | `checker()` возвращает `StaleNonce`. `protect()` не выполняется. Пользователь должен снова вызвать `arm()`. Эскроу не меняется. Тест `test_FrontRun_StaleNonce`. |
-| Front-running подписи. Подпись видна в calldata `arm()`. | Mezo проверяет `msg.sender`-независимую подпись, но списывает MUSD/BTC у вызывающего. Чужой вызов только погасит долг пользователя за свой счёт и сделает nonce устаревшим. Средства эскроу не теряются. |
-| `minNetDebt` = 1800 MUSD. | `arm()` и `checker()` проверяют: `(debt − 200 газовой компенсации) − amount ≥ 1800`. Иначе статус `BelowMinNetDebt`. Тест `test_MinNetDebt_Enforced`. |
-| Recovery Mode. | В Recovery Mode Mezo запрещает только вывод залога и рост долга. Repay и addColl разрешены. Ликвидация в Mezo только ниже MCR в обоих режимах. Тест `test_RecoveryMode_RepayStillWorks`. |
-| MCR 110%. | Триггер должен быть выше MCR. `checker()` возвращает `StillBelowMCR`, если ICR после операции останется ниже MCR (Mezo откатит такой repay в Normal Mode). |
-| Только EOA. | Подпись проверяется через `ecrecover`. Смарт-кошельки (EIP-1271) не поддерживаются. |
-| Прокси Mezo обновляемый. | Mezo может изменить реализацию. Перед деплоем и периодически проверяйте codehash реализации (см. Q3). |
-| Оракул в fork-тестах. | PriceFeed читает прекомпайл `0x7b7c…0015`. Локальный fork его не исполняет. Fork-тест берёт цену через `eth_call` к узлу и фиксирует её `vm.mockCall`. |
-| Нет аудита. | Только testnet. Перед mainnet нужен аудит и Slither. |
+| Stale nonce. Any other signed operation of the user increments the nonce. | `checker()` returns `StaleNonce`. `protect()` does not execute. The user must call `arm()` again. The escrow does not change. Test `test_FrontRun_StaleNonce`. |
+| Signature front-running. The signature is visible in the `arm()` calldata. | Mezo verifies a signature that does not depend on `msg.sender`, but it takes the MUSD/BTC from the caller. A foreign call only repays the user's debt at the caller's own cost and makes the nonce stale. The escrow funds are not lost. |
+| `minNetDebt` = 1800 MUSD. | `arm()` and `checker()` check: `(debt − 200 gas compensation) − amount ≥ 1800`. Otherwise the status is `BelowMinNetDebt`. Test `test_MinNetDebt_Enforced`. |
+| Pending redistribution rewards. | `getEntireDebtAndColl()` already includes them. The Guard does not count them twice, so the `minNetDebt` check and the projected ICR match Mezo. Tests `test_PendingRewards_NotCountedTwice_*`. |
+| Recovery Mode. | In Recovery Mode, Mezo forbids only collateral withdrawal and debt increase. Repay and addColl are allowed. Mezo liquidates only below MCR in both modes. Test `test_RecoveryMode_RepayStillWorks`. |
+| MCR 110%. | The trigger must be above MCR. `checker()` returns `StillBelowMCR` if the ICR after the operation stays below MCR (Mezo reverts such a repay in Normal Mode). |
+| EOA only. | The signature is verified with `ecrecover`. Smart wallets (EIP-1271) are not supported. |
+| The Mezo proxy is upgradeable. | Mezo can change the implementation. Check the implementation codehash before deployment and periodically (see Q3). |
+| Oracle in fork tests. | The PriceFeed reads the precompile `0x7b7c…0015`. A local fork cannot execute it. The fork test reads the price from the node with `eth_call` and pins it with `vm.mockCall`. |
+| No audit. | Testnet only. An audit and Slither are required before mainnet. |
 
-## 5. Отклонение от плана
+## 5. Deviation from the plan
 
-План предполагал одну валюту награды. Реализация платит награду keeper в валюте операции: MUSD для `RepayMUSD`, BTC для `AddColl`. Причина: эскроу пользователя может содержать только один актив.
+The plan assumed one reward currency. The implementation pays the keeper reward in the currency of the operation: MUSD for `RepayMUSD`, BTC for `AddColl`. Reason: the user escrow for a policy can hold only one asset.
 
 ## 6. Keeper
 
-Код: `services/guard-keeper`.
+Code: `services/guard-keeper`.
 
-1. Читает события `Armed`, `Disarmed`, `Protected` и строит множество активных политик.
-2. Каждые 30 секунд вызывает `status(borrower)`.
-3. Для статуса `Ready` считает hints: `HintHelpers.getApproxHint` и `SortedTroves.findInsertPosition` по NICR после операции (`coll·1e20/principal`).
-4. Симулирует `protect()`. Отправляет транзакцию только после успешной симуляции.
-5. Пишет одну JSON-строку на событие.
+1. Reads the `Armed`, `Disarmed` and `Protected` events incrementally and builds the set of active policies.
+2. Every 30 seconds, calls `status(borrower)` for each active policy that is not terminal.
+3. Marks a policy as terminal when the status is `Expired`, `StaleNonce` or `NoPolicy`. The keeper stops polling it until a newer `Armed` event for that borrower arrives. This keeps expired or nonce-invalidated policies from delaying time-sensitive rescues.
+4. For the `Ready` status, computes hints: `HintHelpers.getApproxHint` and `SortedTroves.findInsertPosition` from the NICR after the operation (`coll·1e20/principal`).
+5. Simulates `protect()`. Sends the transaction only after a successful simulation.
+6. Writes one JSON line per event.
 
-Keeper хранит только свой ключ (`KEEPER_PRIVATE_KEY` из env). Ключи пользователей keeper не хранит. Режим `DRY_RUN=1` не отправляет транзакции.
+The keeper stores only its own key (`KEEPER_PRIVATE_KEY` from env). The keeper does not store user keys. `DRY_RUN=1` mode sends no transactions.
 
-## 7. Тесты
+## 7. Tests
 
 ```sh
 cd contracts/guard
 forge test                                              # unit, fuzz, invariant
-MEZO_TESTNET_RPC=https://rpc.test.mezo.org forge test   # плюс fork-тесты
+MEZO_TESTNET_RPC=https://rpc.test.mezo.org forge test   # plus fork tests
 cd ../../services/guard-keeper && npm ci && npm test
 ```
 
-## 8. Что сделать до деплоя в testnet
+## 8. Before a testnet deployment
 
-1. Получить одобрение владельца на деплой.
-2. Запустить Slither. Исправить находки.
-3. Выполнить `script/Deploy.s.sol` с `--broadcast --verify`. Проверить контракт в Blockscout.
-4. Создать и пополнить отдельный кошелёк keeper.
-5. Добавить панель Guard во frontend (deposit, подпись, arm, disarm, статус).
-6. Выполнить минимум 3 реальных `protect()` в testnet и записать их в журнал транзакций.
+1. Get the owner's approval for the deployment.
+2. Run Slither. Fix the findings.
+3. Run `script/Deploy.s.sol` with `--broadcast --verify`. Verify the contract in Blockscout.
+4. Create and fund a separate keeper wallet.
+5. Add a Guard panel to the frontend (deposit, signature, arm, disarm, status).
+6. Execute at least 3 real `protect()` calls on testnet and record them in the transaction ledger.

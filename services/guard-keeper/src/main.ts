@@ -4,7 +4,7 @@
 import { createPublicClient, createWalletClient, defineChain, http, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { guardAbi, hintHelpersAbi, sortedTrovesAbi, troveManagerAbi } from "./abi.js";
-import { type Address, type ArmLog, isTerminal, logLine, nicr, PolicyTracker, projectedTrove, selectReady, STATUS } from "./logic.js";
+import { type Address, type ArmLog, isTerminal, logLine, nicr, PolicyTracker, pollStatuses, projectedTrove, selectReady, STATUS } from "./logic.js";
 
 const env = (k: string, d?: string): string => {
   const v = process.env[k] ?? d;
@@ -65,15 +65,12 @@ async function hintsFor(borrower: Address): Promise<[Address, Address]> {
 
 async function tick(): Promise<void> {
   const head = await syncLogs();
-  const reads = [];
-  for (const b of policies.pollable()) {
+  const reads = await pollStatuses(policies, async (b) => {
     // Read at the synced head so a terminal mark never predates an Armed event we have not seen.
     const [s, icr] = await pub.readContract({ address: GUARD, abi: guardAbi, functionName: "status", args: [b], blockNumber: head });
-    const terminal = isTerminal(s);
-    if (terminal) policies.markTerminal(b);
-    if (s !== 0) log("skip", { borrower: b, status: STATUS[s] ?? s, icr, terminal });
-    reads.push({ borrower: b, status: s, icr });
-  }
+    if (s !== 0) log("skip", { borrower: b, status: STATUS[s] ?? s, icr, terminal: isTerminal(s) });
+    return [s, icr] as const;
+  });
   for (const r of selectReady(reads)) {
     try {
       const [upper, lower] = await hintsFor(r.borrower);

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { armedSet, isTerminal, logLine, nicr, PolicyTracker, projectedTrove, selectReady } from "../src/logic.js";
+import { type Address, armedSet, isTerminal, logLine, nicr, PolicyTracker, pollStatuses, projectedTrove, selectReady } from "../src/logic.js";
 
 const A = "0x00000000000000000000000000000000000000aa" as const;
 const B = "0x00000000000000000000000000000000000000bb" as const;
@@ -91,6 +91,36 @@ test("PolicyTracker applies a batch in chain order and matches armedSet", () => 
   t.apply(logs);
   assert.deepEqual(t.pollable(), [...armedSet(logs)]);
   assert.deepEqual(t.pollable(), [B]);
+});
+
+test("PolicyTracker treats addresses case-insensitively across events", () => {
+  const mixed: Address = "0x00000000000000000000000000000000000000Ab";
+  const t = new PolicyTracker();
+  t.apply([{ kind: "Armed", user: mixed, blockNumber: 1n, logIndex: 0 }]);
+  assert.deepEqual(t.pollable(), [mixed.toLowerCase()]);
+  t.apply([{ kind: "Disarmed", user: mixed.toLowerCase() as Address, blockNumber: 2n, logIndex: 0 }]);
+  assert.equal(t.armedCount, 0);
+});
+
+test("pollStatuses marks terminal borrowers so later ticks skip them", async () => {
+  const t = new PolicyTracker();
+  t.apply([
+    { kind: "Armed", user: A, blockNumber: 1n, logIndex: 0 },
+    { kind: "Armed", user: B, blockNumber: 1n, logIndex: 1 },
+  ]);
+  const statusOf: Record<string, number> = { [A]: 0, [B]: 2 }; // B: Expired (terminal)
+  const seen: string[] = [];
+  const read = async (b: Address) => { seen.push(b); return [statusOf[b] ?? 5, 105n] as const; };
+  const first = await pollStatuses(t, read);
+  assert.deepEqual(first.map((r) => [r.borrower, r.status]), [[A, 0], [B, 2]]);
+  assert.equal(t.isTerminal(B), true);
+  const second = await pollStatuses(t, read);
+  assert.deepEqual(second.map((r) => r.borrower), [A]);
+  assert.deepEqual(seen, [A, B, A]);
+  // A transient status (TroveNotActive) is never marked terminal.
+  statusOf[A] = 4;
+  await pollStatuses(t, read);
+  assert.equal(t.isTerminal(A), false);
 });
 
 test("nicr and projection follow Mezo rules", () => {

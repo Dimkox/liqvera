@@ -67,6 +67,24 @@ export class PolicyTracker {
 
 export interface StatusRead { borrower: Address; status: number; icr: bigint }
 
+/**
+ * Read the status of every pollable borrower and mark terminal ones in `tracker`.
+ * `read` must read at (or after) the block the tracker was synced to, so a terminal mark
+ * never predates an Armed event the tracker has not seen yet.
+ */
+export async function pollStatuses(
+  tracker: PolicyTracker,
+  read: (borrower: Address) => Promise<readonly [number, bigint]>,
+): Promise<StatusRead[]> {
+  const reads: StatusRead[] = [];
+  for (const borrower of tracker.pollable()) {
+    const [status, icr] = await read(borrower);
+    if (isTerminal(status)) tracker.markTerminal(borrower);
+    reads.push({ borrower, status, icr });
+  }
+  return reads;
+}
+
 /** Pick borrowers that the Guard reports Ready, lowest ICR first (most urgent first). */
 export function selectReady(reads: StatusRead[]): StatusRead[] {
   return reads.filter((r) => r.status === 0).sort((a, b) => (a.icr < b.icr ? -1 : a.icr > b.icr ? 1 : 0));

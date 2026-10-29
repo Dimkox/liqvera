@@ -792,7 +792,14 @@ English. P1: this entry. P2: the keeper tracks policies incrementally and stops
 polling a borrower after a terminal status (NoPolicy/Expired/StaleNonce) until a
 new Armed event; status reads are pinned to the synced head block.
 
-Validation: forge fmt --check and forge build --sizes pass; forge test reports 51
+Follow-up from a Getzilla 2.3.1 review (mutation probes): a fourth pending-rewards
+test now uses nonzero stored and pending interest, and the keeper gained a
+mixed-case address test and a pollStatuses() helper (moved out of main.ts) with a
+test that terminal statuses are marked and skipped on the next tick. The only
+surviving probe is the blockNumber pin in main.ts, which needs an RPC and has no
+unit test.
+
+Validation: forge fmt --check and forge build --sizes pass; forge test reports 52
 passed and 9 fork tests skipped offline; the 9 fork tests also pass against a local
-fork of https://rpc.test.mezo.org (read-only, no broadcast). Keeper: 9/9 node tests,
+fork of https://rpc.test.mezo.org (read-only, no broadcast). Keeper: 11/11 node tests,
 typecheck clean, npm audit 0 vulnerabilities. scripts/check-docs.py passes.

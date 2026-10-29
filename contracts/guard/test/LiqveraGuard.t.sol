@@ -481,6 +481,28 @@ contract LiqveraGuardTest is GuardBase {
         assertEq(uint8(s), uint8(LiqveraGuard.Status.StillBelowMCR));
     }
 
+    function test_PendingRewards_NotCountedTwice_WithInterest() public {
+        // Same entire debt (2200) split across principal and interest, both stored and pending.
+        // Counting pending interest twice (2210) or dropping interest (2150) moves the
+        // minNetDebt boundary away from Mezo's: 201 must revert and 200 must pass.
+        tm.setTrove(user, 1, 0.02215 ether, 2060e18, 40e18);
+        tm.setPending(user, 0.001 ether, 90e18, 10e18);
+        (uint256 c, uint256 p, uint256 i,,, uint256 pi) = tm.getEntireDebtAndColl(user);
+        assertEq(c, 0.02315 ether);
+        assertEq(p, 2150e18);
+        assertEq(i, 50e18);
+        assertEq(pi, 10e18);
+        vm.startPrank(user);
+        guard.depositMUSD(201e18);
+        vm.expectRevert(LiqveraGuard.BelowMinNetDebt.selector);
+        guard.arm(LiqveraGuard.Action.RepayMUSD, 1.3e18, 201e18, 0, uint64(block.timestamp + 1 days), "");
+        vm.stopPrank();
+        _armRepay(200e18, 0, 1.3e18);
+        (LiqveraGuard.Status s, uint256 icr) = guard.status(user);
+        assertEq(uint8(s), uint8(LiqveraGuard.Status.Ready));
+        assertEq(icr, uint256(0.02315 ether) * 100_000e18 / 2200e18, "ICR uses Mezo entire debt");
+    }
+
     // ------------------------------------------------------ protect
 
     function test_Protect_RevertsWhenHealthy() public {

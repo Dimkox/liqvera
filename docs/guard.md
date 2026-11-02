@@ -1,6 +1,20 @@
 # LiqveraGuard: automatic Trove protection (design A2)
 
-Status: Mezo Testnet only (chain 31611). The contract is not deployed. It is not audited.
+Status: deployed on Mezo Testnet only (chain 31611). It is not audited. Do not use it on mainnet.
+
+## Deployment (Mezo Testnet)
+
+| Item | Value |
+|---|---|
+| Contract | [`0x61e12BDDFa62adF0Ffa89544153954a2420cF37a`](https://explorer.test.mezo.org/address/0x61e12BDDFa62adF0Ffa89544153954a2420cF37a) (source verified in Blockscout) |
+| Deploy transaction | [`0x8fb90b1f369dae3041892f378c2b153533bfdd499a04ce439710ac569cf81175`](https://explorer.test.mezo.org/tx/0x8fb90b1f369dae3041892f378c2b153533bfdd499a04ce439710ac569cf81175) |
+| Block | 16524690 (2026-11-02 10:22:57 UTC) |
+| Deployer | `0xF63F28B90f7075a640BC0911467Fa3FDbc436bf6` (Liqvera test wallet) |
+| Source | commit `020ec53`, solc 0.8.24, optimizer 200 runs, evmVersion london |
+| Constructor | signatures `0xD757e3646AF370b15f32EB557F0F8380Df7D639e`, borrowerOperations `0xCdF7028ceAB81fA0C6971208e83fa7872994beE5`, troveManager `0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0`, priceFeed `0x86bCF0841622a5dAC14A313a15f96A95421b9366`, MUSD `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503` |
+
+The on-chain runtime code matches the compiled `deployedBytecode` of `script/Deploy.s.sol` byte for byte, except the immutable slots.
+The keeper is not running yet. No `protect()` call has been executed yet.
 This document follows the ASD-STE100 style: short sentences, one action per step.
 
 ## 1. Purpose
@@ -92,7 +106,7 @@ cd ../../services/guard-keeper && npm ci && npm test
 
 1. Get the owner's approval for the deployment.
 2. Run Slither. Fix the findings.
-3. Run `script/Deploy.s.sol` with `--broadcast --verify`. Verify the contract in Blockscout.
+3. Done (2026-11-02): deployed and verified in Blockscout. See "Deployment" above.
 4. Create and fund a separate keeper wallet.
 5. Add a Guard panel to the frontend (deposit, signature, arm, disarm, status).
 6. Execute at least 3 real `protect()` calls on testnet and record them in the transaction ledger.

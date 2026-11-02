@@ -7,6 +7,7 @@ export default defineConfig(({mode}) => ({
   define: {
     __LIQVERA_APP_VERSION__: JSON.stringify(appVersion),
     __LIQVERA_NETWORK__: JSON.stringify(loadEnv(mode, ".", "").LIQVERA_NETWORK ?? "testnet"),
+    __LIQVERA_GUARD_WATCH_API__: JSON.stringify(loadEnv(mode, ".", "").LIQVERA_GUARD_WATCH_API ?? ""),
     __LIQVERA_WALLETCONNECT_PROJECT_ID__: JSON.stringify(loadEnv(mode, ".", "").LIQVERA_WALLETCONNECT_PROJECT_ID ?? ""),
   },
   base: "/",

@@ -2,6 +2,18 @@
 
 Signed on 2026-10-26 (UTC) by the Liqvera test wallet `0xF63F28B90f7075a640BC0911467Fa3FDbc436bf6` through liqvera.site. All show Success on the Mezo Testnet explorer.
 
+
+## Team-owned test wallets
+
+All of the following are controlled by the Liqvera founder. They are derived accounts in one MetaMask. They are **not outside users**:
+
+- Account 1: `0xF63F28B90f7075a640BC0911467Fa3FDbc436bf6` (all transactions below so far)
+- Liqvera Test 2: `0x08F27Cd554F3CF57AD1317A4fc9b0fCaA9B176fe` (Guard protection scenario)
+- Liqvera Test 3: `0xFe4481d57670991e52141f6Be026B342Ef28E169` (sale scenario)
+- Liqvera Test 4: `0x06A252C33e07Ce05a03CfAE9333d02F1D1f57605` (Guard Watch subscription scenario)
+
+Outside wallets, if any, will be listed in a separate section.
+
 ## Trove actions (Protect this Trove panel)
 - addColl 0.0005 BTC: [0xe6c232d402…](https://explorer.test.mezo.org/tx/0xe6c232d4028d81047ef3b58df7ca0541f5fe87bdca18cd52f257a81ef0890232)
 - repayMUSD 0.5 MUSD: [0x58098bfddc…](https://explorer.test.mezo.org/tx/0x58098bfddc6b89e12085307e1ee633321ff1d1885e39842e1a4890ded29e5317)

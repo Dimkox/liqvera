@@ -1,3 +1,4 @@
+import { mountGuardPanel } from "./guard-panel.ts";
 import {TROVE_PREVIEW,verifyTrovePreview} from "./trove-preview";
 import {getAddress} from "viem";
 import {mountTroveRisk} from "./trove-panel";
@@ -87,6 +88,7 @@ app.innerHTML = `
             <button id="recover-payment" class="secondary-button" type="button">Recover report</button>
           </section>
         </section>
+        <section id="guard-panel" class="panel guard-panel" aria-label="LiqveraGuard Trove protection"></section>
       </div>
       <section class="boundary-strip" aria-label="Important context"><div><span>NOTE 1</span><p><strong>Snapshot, not a signal.</strong> Available levels support the arithmetic; they do not establish a trading opportunity.</p></div><div><span>NOTE 2</span><p><strong>Verifiable evidence.</strong> A downloadable bundle supports offline recalculation after entitlement.</p></div><div><span>NOTE 3</span><p><strong>User signed actions.</strong> Mezo spot swaps and Trove updates require your wallet; no perpetual orders or custody.</p></div></section>
     </main>
@@ -224,6 +226,12 @@ const fundingPanel = mountMezoFinance({
   getContext: () => ({ provider, account, quote, paymentGuard: flow?.paymentGuard ?? "unavailable", busy: busy || polling, onMezo: onChain }),
 });
 window.addEventListener("pagehide", event => { if (!event.persisted) fundingPanel.dispose(); });
+declare const __LIQVERA_GUARD_WATCH_API__: string;
+const guardPanel = mountGuardPanel({
+  host: el<HTMLElement>("#guard-panel"),
+  getContext: () => ({ provider, account, onMezo: onChain }),
+  watchApi: __LIQVERA_GUARD_WATCH_API__,
+});
 
 function setBusy(value: boolean): void {
   busy = value;
@@ -232,6 +240,7 @@ function setBusy(value: boolean): void {
 
 function updateControls(): void {
   fundingPanel.update();
+  guardPanel.update();
   const ready = Boolean(cap?.payment_ready && cap.source_mode === "live-public");
   const productReady = product === "market_depth" || Boolean(cap?.products?.includes("trove_risk"));
   const canCreate = productReady && ready && x402Available() && Boolean(bearer && account && !flow) && !busy;
@@ -715,7 +724,9 @@ async function refreshWallet(): Promise<void> {
 }
 
 function applyWalletState(state: WalletState): void {
+  const guardChanged = account !== state.account || onChain !== state.onMezo;
   account = state.account; onChain = state.onMezo;
+  if (guardChanged && account && onChain) void guardPanel.refresh();
   if(account && !el<HTMLInputElement>("#borrower").value) el<HTMLInputElement>("#borrower").value=getAddress(account.toLowerCase());
   if (flow && account && account.toLowerCase() !== flow.payer.toLowerCase()) announcement("Wallet changed. The saved quote remains bound to its original payer.", "warning");
   updateControls();

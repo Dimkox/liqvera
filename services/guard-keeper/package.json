@@ -13,6 +13,9 @@
     "start": "node dist/main.js"
   },
   "dependencies": {
+    "@x402/core": "2.16.0",
+    "@x402/evm": "2.16.0",
+    "@x402/extensions": "2.16.0",
     "viem": "2.48.11"
   },
   "devDependencies": {
@@ -20,6 +23,9 @@
     "typescript": "5.9.2"
   },
   "overrides": {
+    "@x402/core": "2.16.0",
+    "@x402/evm": "2.16.0",
+    "@x402/extensions": "2.16.0",
     "ws": "8.21.0",
     "zod": "4.6.6"
   }

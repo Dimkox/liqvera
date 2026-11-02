@@ -53,7 +53,7 @@ export async function readTroveContext(provider:Eip1193Provider,account:string,m
  const balances:TroveBalances={btc:BigInt(String(btc)),musd:BigInt(balance[0]),gasReserve:FALLBACK_GAS_RESERVE};
  return {state,balances,blockNumber};
 }
-async function freshHints(provider:Eip1193Provider,coll:bigint,principal:bigint,blockTag:string){
+export async function freshHints(provider:Eip1193Provider,coll:bigint,principal:bigint,blockTag:string){
  const nicr=BigInt((await read(provider,MEZO_TESTNET_TROVES.hintHelpers,hints,'computeNominalCR',[coll,principal],blockTag))[0]);
  const seed=BigInt(`0x${Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('')}`);
  const approx=(await read(provider,MEZO_TESTNET_TROVES.hintHelpers,hints,'getApproxHint',[nicr,15,seed],blockTag))[0];

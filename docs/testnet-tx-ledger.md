@@ -1,6 +1,18 @@
 # Mezo Testnet transaction ledger
 
-Signed on 2026-10-26 (UTC) by the Liqvera test wallet `0xF63F28B90f7075a640BC0911467Fa3FDbc436bf6` through liqvera.site. All show Success on the Mezo Testnet explorer.
+The sections up to the DEX sales were signed on 2026-10-26 (UTC) by the Liqvera test wallet `0xF63F28B90f7075a640BC0911467Fa3FDbc436bf6` through liqvera.site. The sections under "2026-11-02 live demos" were signed on 2026-11-02 by the team-owned wallets listed below. Every entry shows Success (receipt status 1) on the Mezo Testnet explorer (chain id 31611).
+
+
+## Team-owned test wallets
+
+All of the following are controlled by the Liqvera founder. They are derived accounts in one MetaMask. They are **not outside users**:
+
+- Account 1: `0xF63F28B90f7075a640BC0911467Fa3FDbc436bf6` (2026-10-26 transactions, funding, Guard demo)
+- Liqvera Test 2: `0x08F27Cd554F3CF57AD1317A4fc9b0fCaA9B176fe` (Guard protection scenario)
+- Liqvera Test 3: `0xFe4481d57670991e52141f6Be026B342Ef28E169` (sale scenario)
+- Liqvera Test 4: `0x06A252C33e07Ce05a03CfAE9333d02F1D1f57605` (Guard Watch subscription scenario)
+
+Outside wallets, if any, will be listed in a separate section.
 
 ## Trove actions (Protect this Trove panel)
 - addColl 0.0005 BTC: [0xe6c232d402…](https://explorer.test.mezo.org/tx/0xe6c232d4028d81047ef3b58df7ca0541f5fe87bdca18cd52f257a81ef0890232)
@@ -36,3 +48,35 @@ Signed on 2026-10-26 (UTC) by the Liqvera test wallet `0xF63F28B90f7075a640BC091
 - swapExactTokensForTokens: [0x58a770b087…](https://explorer.test.mezo.org/tx/0x58a770b08784ca760b66407a2a7bde36888f8724359dccf5f3cd4057c1ea0344)
 - approve: [0x0fd512ac69…](https://explorer.test.mezo.org/tx/0x0fd512ac694250a4a4aacb3402a80958f8601291c81e235b74bc1f1171f1bd8f)
 - swapExactTokensForTokens: [0xeb72180592…](https://explorer.test.mezo.org/tx/0xeb721805922cf467aa49c0658f95cc4e90d22dd01ea3039c2edec8daca95bb4b)
+
+## 2026-11-02 live demos (team-owned wallets only)
+
+Re-checked on chain on 2026-11-02: every receipt below has status 1.
+
+### Funding (Account 1 → team test wallets)
+
+- 0.0001 BTC → Test 2: [0x7cc41c9aba…](https://explorer.test.mezo.org/tx/0x7cc41c9aba1295e63e8b4e39cd84368c06693245ce1d0663442554a92bbf5f15)
+- 0.0002 BTC → Test 3: [0xe750d63a81…](https://explorer.test.mezo.org/tx/0xe750d63a814ce70f0603b6250eeaf08d4fbcc4195914cebb56f2c721cca0988c)
+- 0.0001 BTC → Test 4: [0x487d705e28…](https://explorer.test.mezo.org/tx/0x487d705e280e983c9a1c73883ed707910c0ed2b142b53b3ea05ca73890714b6c)
+- 0.01 MUSD → Test 3: [0x899c2fea54…](https://explorer.test.mezo.org/tx/0x899c2fea54ca7372278b2d868e49da010be9f3d15e525e3fac458ff0e0ddece6)
+- 2 MUSD → Test 4: [0x983b48f63a…](https://explorer.test.mezo.org/tx/0x983b48f63a05dd2f08bf957bb30a855581826f5b6ff5224aeeab4415b0483307)
+
+### LiqveraGuard on Account 1 (Guard panel, keeper in dry run)
+
+Guard contract: `0x61e12BDDFa62adF0Ffa89544153954a2420cF37a`. The Trove owner signed `protect()` from the Guard panel; the keeper only watched.
+
+- depositBTC (0.00254390625 BTC buffer): [0x31694609e2…](https://explorer.test.mezo.org/tx/0x31694609e28fd55807230c93d90561d2309d5024e35f81893b97539ec4f14f6b)
+- arm: [0x730b3ead91…](https://explorer.test.mezo.org/tx/0x730b3ead910b7455dff63452abed645c7c461a0a6546be1e13a6542890de149b)
+- protect (auto-sized top-up +0.00254391 BTC, ICR 157.85% → 167.64%): [0x400d975ffc…](https://explorer.test.mezo.org/tx/0x400d975ffca5bef7d658d74501ee1e36410ad1478e824a2592eba12ba0e546a4)
+
+### Test 3: paid report and BTC→MUSD sale
+
+- paid report via x402 (0.01 MUSD → merchant, settled by facilitator): [0xad030e11de…](https://explorer.test.mezo.org/tx/0xad030e11dea5cb75a7e80385ae10437aec754304bfed1a94874d4ea861d98598)
+- approve (bounded, BTC token): [0x9ce776cd73…](https://explorer.test.mezo.org/tx/0x9ce776cd73c6d89df31855f827e151d12493cd691807156240bb96bf767ee6b0)
+- swapExactTokensForTokens (0.0001 BTC → 7.8605 MUSD): [0x394808a6a8…](https://explorer.test.mezo.org/tx/0x394808a6a898d92849a33b9e19e350eaf9f1dadbd2a3cc0a4e6287884211f376)
+
+### Test 4: Guard Watch subscription (2 MUSD / Trove / month, proposal pricing)
+
+- Guard Watch settlement via x402 (2 MUSD Test 4 → merchant `0xd7f52d1ddb5dc8678191f14e439fc5db67541535`, settled by facilitator): [0x471f416902…](https://explorer.test.mezo.org/tx/0x471f4169021bc015e60cb03d72211f236b816fc919205da49e1e0ecdd8a67e68)
+
+This is the only MUSD Transfer from Test 4 to the merchant since block 16526400. The x402 settlement is submitted by the facilitator's signer, so the transaction's `from` is the facilitator, not Test 4; the payer shows in the Transfer log.

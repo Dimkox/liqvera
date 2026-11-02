@@ -15,6 +15,7 @@ Understand BTC liquidity and Mezo MUSD borrower risk. Liqvera turns public marke
 - **Paid Market depth report (x402, MUSD):** [Mezo Testnet transaction](https://explorer.test.mezo.org/tx/0xca22fd079b296ff7d373eacb01cfe0d4800869202b949f174b8ce0d7922d8497)
 - **BTC→MUSD sale via Mezo DEX Router (0.0001 BTC → 7.86 MUSD):** [Mezo Testnet transaction](https://explorer.test.mezo.org/tx/0x43ae48120e648f363b49283daab9a4293a9417380a249049373b4c20df56a5ce)
 - **Trove actions from the report (addColl 0.0005 BTC, repayMUSD 0.5):** [addColl](https://explorer.test.mezo.org/tx/0xe6c232d4028d81047ef3b58df7ca0541f5fe87bdca18cd52f257a81ef0890232), [repayMUSD](https://explorer.test.mezo.org/tx/0x58098bfddc6b89e12085307e1ee633321ff1d1885e39842e1a4890ded29e5317)
+- **LiqveraGuard (automatic Trove protection, testnet only, not audited):** [0x61e12BDDFa62adF0Ffa89544153954a2420cF37a](https://explorer.test.mezo.org/address/0x61e12BDDFa62adF0Ffa89544153954a2420cF37a), deploy tx [0x8fb90b1f36…](https://explorer.test.mezo.org/tx/0x8fb90b1f369dae3041892f378c2b153533bfdd499a04ce439710ac569cf81175), block 16524690. See [docs/guard.md](docs/guard.md).
 - **Full ledger:** 29 more signed testnet transactions (11 paid reports, 8 BTC sales with approvals, 2 Trove actions) in [docs/testnet-tx-ledger.md](docs/testnet-tx-ledger.md)
 
 ## Mezo integration

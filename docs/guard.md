@@ -149,6 +149,18 @@ In dry-run mode the keeper logs `dry_run_ready` with the hints it would use. To 
 
 Build-time setting: `LIQVERA_GUARD_WATCH_API=http://127.0.0.1:8795`. Without it, the panel says the keeper API is not configured, and `protect()` stays available.
 
+### Running the panel locally against the testnet gateway
+
+The report and sale flow call the frozen `/v1` gateway API through the Vite proxy. That proxy defaults to a local gateway on `127.0.0.1:8080`, and when nothing is listening there `/v1/capabilities` returns HTTP 500 and "Request a report" stays disabled. To use the deployed Mezo Testnet gateway and the local keeper together:
+
+```sh
+cd apps/mezo-web
+LIQVERA_GUARD_WATCH_API=http://127.0.0.1:8795 npm run build
+LIQVERA_API_PROXY=https://liqvera.site LIQVERA_GUARD_WATCH_API=http://127.0.0.1:8795 npx vite preview --host 127.0.0.1 --port 4173
+```
+
+The proxy removes `Origin`/`Referer` because the gateway rejects origins that are not on its allowlist. The browser itself stays same-origin. Guard Watch payments go from the browser to the keeper API, which verifies and settles them through the public facilitator `https://facilitator.vativ.io/` (no API key). A rejection returns the facilitator's reason, for example `permit2_insufficient_balance`.
+
 ## 6d. Team test wallets (disclosure)
 
 All testnet activity for the Guard demo comes from **team-owned test wallets**: derived accounts in one MetaMask controlled by the founder. They are **not users**.

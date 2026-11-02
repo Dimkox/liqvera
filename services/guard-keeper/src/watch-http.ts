@@ -88,7 +88,7 @@ export class GuardWatchCheckout {
       a.amount !== GUARD_WATCH_PRICE.toString() || a.payTo?.toLowerCase() !== value.payTo.toLowerCase() ||
       a.extra?.assetTransferMethod !== PERMIT2.assetTransferMethod) throw new HttpError(409, "PAYMENT_TERMS_MISMATCH");
     const verified = await this.server.verifyPayment(payload, value);
-    if (verified.isValid !== true) throw new HttpError(409, "PAYMENT_REJECTED");
+    if (verified.isValid !== true) throw new HttpError(409, "PAYMENT_REJECTED", reasonOf(verified.invalidReason));
     if (verified.payer?.toLowerCase() !== borrower.toLowerCase()) throw new HttpError(409, "PAYER_IS_NOT_BORROWER");
     const settled = await this.server.settlePayment(payload, value);
     const tx = typeof settled.transaction === "string" && /^0x[0-9a-fA-F]{64}$/.test(settled.transaction) ? settled.transaction.toLowerCase() : null;
@@ -97,7 +97,12 @@ export class GuardWatchCheckout {
   }
 }
 
-export class HttpError extends Error { constructor(readonly status: number, readonly code: string) { super(code); } }
+export class HttpError extends Error { constructor(readonly status: number, readonly code: string, readonly reason?: string) { super(code); } }
+
+/** The facilitator's machine-readable rejection reason (e.g. permit2_insufficient_balance), bounded and sanitized. */
+function reasonOf(value: unknown): string | undefined {
+  return typeof value === "string" && /^[A-Za-z0-9_.:-]{1,80}$/.test(value) ? value : undefined;
+}
 
 export function createWatchHandler(o: WatchHttpOptions, checkout: GuardWatchCheckout) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
@@ -124,7 +129,7 @@ export function createWatchHandler(o: WatchHttpOptions, checkout: GuardWatchChec
       return send(200, { borrower, tx: paid.tx, note: "Subscription activates once the keeper reads this MUSD transfer from chain logs." },
         { "PAYMENT-RESPONSE": paid.header, "x-liqvera-payment-tx": paid.tx });
     } catch (err) {
-      if (err instanceof HttpError) return send(err.status, { error: err.code });
+      if (err instanceof HttpError) return send(err.status, err.reason ? { error: err.code, reason: err.reason } : { error: err.code });
       return send(500, { error: "INTERNAL" });
     }
   };

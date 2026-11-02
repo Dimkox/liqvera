@@ -192,6 +192,20 @@ test("subscribe rejects a payload for a different amount without settling", asyn
   assert.deepEqual(calls, []);
 });
 
+test("a facilitator rejection returns its sanitized reason and never settles", async () => {
+  const { f, calls } = fakeFacilitator(A);
+  (f as { verify: unknown }).verify = async () => { calls.push("verify"); return { isValid: false, invalidReason: "permit2_insufficient_balance", payer: A }; };
+  const o = opts(f), checkout = new GuardWatchCheckout(o);
+  await checkout.initialize();
+  const handler = createWatchHandler(o, checkout);
+  const challenge = decodePaymentRequiredHeader((await call(handler, `/v1/guard-watch/troves/${A}/subscribe`)).headers["PAYMENT-REQUIRED"]!);
+  const header = encodePaymentSignatureHeader({ x402Version: 2, accepted: challenge.accepts[0]!, payload: { signature: "0x" }, resource: challenge.resource });
+  const r = await call(handler, `/v1/guard-watch/troves/${A}/subscribe`, { "payment-signature": header });
+  assert.equal(r.status, 409);
+  assert.deepEqual(r.json, { error: "PAYMENT_REJECTED", reason: "permit2_insufficient_balance" });
+  assert.deepEqual(calls, ["verify"]);
+});
+
 test("unknown routes and bad addresses are 404", async () => {
   const { f } = fakeFacilitator(A);
   const o = opts(f);

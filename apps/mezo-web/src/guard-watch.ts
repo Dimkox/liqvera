@@ -51,7 +51,8 @@ export async function subscribeWatch(api:string,provider:Eip1193Provider,payer:s
  checkWatchTerms(required.accepts[0],plan);
  const payment=await protocol.createPaymentPayload(required);
  requireSponsoredPayment(payment,permit);
- const paid=await boundedFetchJson(fetcher,path,{headers:{Accept:'application/json',...protocol.encodePaymentSignatureHeader(payment)}},65_536);
+ const paid=await boundedFetchJson(fetcher,path,{headers:{Accept:'application/json',...protocol.encodePaymentSignatureHeader(payment)}},65_536,90_000);
+ if(paid.response.status===409||paid.response.status===400){const b=paid.body as {error?:unknown,reason?:unknown}|null;const why=[b?.error,b?.reason].filter(x=>typeof x==='string'&&/^[A-Za-z0-9_.:-]{1,80}$/.test(x)).join(': ');throw new Error(`Guard Watch payment was rejected before settlement${why?` (${why})`:''}. Nothing was charged.`);}
  const tx=paid.response.headers.get('x-liqvera-payment-tx');
  if(!paid.response.ok||!tx||!/^0x[0-9a-fA-F]{64}$/.test(tx))throw new Error('Guard Watch payment outcome is unknown. Check the explorer before retrying.');
  return tx.toLowerCase();
